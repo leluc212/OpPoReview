@@ -1,0 +1,181 @@
+import { createGlobalStyle } from 'styled-components';
+
+export const GlobalStyles = createGlobalStyle`
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: ${props => props.theme.colors.background};
+    color: ${props => props.theme.colors.text};
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.2;
+    font-weight: 600;
+  }
+
+  button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    outline: none;
+  }
+
+  input, textarea, select {
+    font-family: inherit;
+    outline: none;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  ul {
+    list-style: none;
+  }
+
+  img {
+    max-width: 100%;
+    display: block;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: ${props => props.theme.colors.bgLight};
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: ${props => props.theme.colors.border};
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: ${props => props.theme.colors.textLight};
+  }
+`;
+
+export const theme = {
+  colors: {
+    // Primary colors
+    primary: '#6366F1',
+    primaryDark: '#4F46E5',
+    primaryLight: '#818CF8',
+    
+    // Secondary colors
+    secondary: '#A855F7',
+    secondaryDark: '#9333EA',
+    secondaryLight: '#C084FC',
+    
+    // Background
+    background: '#F8FAFC',
+    bgLight: '#FFFFFF',
+    bgDark: '#F1F5F9',
+    
+    // Text
+    text: '#1E293B',
+    textLight: '#64748B',
+    textDark: '#0F172A',
+    
+    // Borders
+    border: '#E2E8F0',
+    borderLight: '#F1F5F9',
+    
+    // Status
+    success: '#10B981',
+    warning: '#F59E0B',
+    error: '#EF4444',
+    info: '#3B82F6',
+    
+    // Status light backgrounds
+    successBg: '#D1FAE5',
+    warningBg: '#FEF3C7',
+    errorBg: '#FEE2E2',
+    infoBg: '#DBEAFE',
+    
+    // Gradients
+    gradientPrimary: 'linear-gradient(135deg, #6366F1 0%, #A855F7 100%)',
+    gradientSecondary: 'linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)',
+    gradientHero: 'linear-gradient(135deg, #667EEA 0%, #764BA2 100%)',
+    
+    // Overlay
+    overlay: 'rgba(15, 23, 42, 0.5)',
+  },
+  
+  spacing: {
+    xs: '4px',
+    sm: '8px',
+    md: '16px',
+    lg: '24px',
+    xl: '32px',
+    xxl: '48px',
+    xxxl: '64px',
+  },
+  
+  borderRadius: {
+    sm: '6px',
+    md: '12px',
+    lg: '16px',
+    xl: '24px',
+    full: '9999px',
+  },
+  
+  shadows: {
+    sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+    md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+    lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+    xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+    hover: '0 8px 24px rgba(99, 102, 241, 0.15)',
+    card: '0 2px 8px rgba(0, 0, 0, 0.08)',
+  },
+  
+  transitions: {
+    fast: '150ms cubic-bezier(0.4, 0, 0.2, 1)',
+    normal: '250ms cubic-bezier(0.4, 0, 0.2, 1)',
+    slow: '400ms cubic-bezier(0.4, 0, 0.2, 1)',
+  },
+  
+  breakpoints: {
+    mobile: '768px',
+    tablet: '1024px',
+    desktop: '1440px',
+  },
+  
+  fonts: {
+    sizes: {
+      xs: '12px',
+      sm: '14px',
+      base: '16px',
+      lg: '18px',
+      xl: '20px',
+      '2xl': '24px',
+      '3xl': '30px',
+      '4xl': '36px',
+      '5xl': '48px',
+      '6xl': '60px',
+    },
+    weights: {
+      light: 300,
+      normal: 400,
+      medium: 500,
+      semibold: 600,
+      bold: 700,
+      extrabold: 800,
+    },
+  },
+};
