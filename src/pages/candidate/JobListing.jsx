@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import JobCard from '../../components/JobCard';
-import { Filter, MapPin, Briefcase, DollarSign } from 'lucide-react';
+import { 
+  Filter, MapPin, Briefcase, DollarSign, ClipboardList, BadgeCheck, Activity, Clock3, BookmarkCheck, Building2, UserPlus 
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Input, Select, FormGroup, Label, Button } from '../../components/FormElements';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTranslations } from '../../locales/translations';
 
 const JobListingContainer = styled.div`
   display: grid;
@@ -83,6 +87,28 @@ const CheckboxLabel = styled.label`
 
 const MainContent = styled.div``;
 
+const Tabs = styled.div`
+  display: inline-flex;
+  background: ${props => props.theme.colors.bgLight};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  padding: 6px;
+  gap: 6px;
+  margin-bottom: 16px;
+`;
+
+const TabButton = styled.button`
+  padding: 10px 14px;
+  border-radius: ${props => props.theme.borderRadius.md};
+  border: none;
+  background: ${props => props.$active ? props.theme.colors.primary : 'transparent'};
+  color: ${props => props.$active ? '#fff' : props.theme.colors.text};
+  font-weight: 700;
+  cursor: pointer;
+  transition: all ${props => props.theme.transitions.fast};
+  box-shadow: ${props => props.$active ? '0 10px 30px rgba(99,102,241,0.25)' : 'none'};
+`;
+
 const ContentHeader = styled.div`
   margin-bottom: 24px;
   
@@ -103,18 +129,61 @@ const JobsGrid = styled.div`
   gap: 20px;
 `;
 
+const ActionsBar = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 12px;
+  background: ${props => props.theme.colors.bgLight};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.md};
+`;
+
+const ActionButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: ${props => props.theme.borderRadius.sm};
+  border: 1px solid ${props => props.theme.colors.border};
+  background: ${props => props.theme.colors.bgDark};
+  color: ${props => props.theme.colors.text};
+  cursor: pointer;
+  transition: all ${props => props.theme.transitions.fast};
+  font-weight: 600;
+
+  svg {
+    width: 18px;
+    height: 18px;
+    color: ${props => props.theme.colors.primary};
+  }
+
+  &:hover {
+    border-color: ${props => props.theme.colors.primary};
+    color: ${props => props.theme.colors.primary};
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  }
+`;
+
 const JobListing = () => {
   const navigate = useNavigate();
   const [savedJobs, setSavedJobs] = useState([]);
+  const [followedEmployers, setFollowedEmployers] = useState([]);
+  const [tab, setTab] = useState('standard');
+  const { language } = useLanguage();
+  const t = useTranslations(language);
 
   const jobs = [
     {
       id: 1,
       title: 'Senior React Developer',
       company: 'TechCorp',
+      employerId: 'techcorp',
       location: 'Remote',
       type: 'Full-time',
-      salary: '$120k - $150k',
+      category: 'standard',
+      salary: '120 - 150 triệu ',
       postedAt: '2 days ago',
       tags: ['React', 'TypeScript', 'Remote']
     },
@@ -122,9 +191,11 @@ const JobListing = () => {
       id: 2,
       title: 'Full Stack Engineer',
       company: 'StartupXYZ',
+      employerId: 'startupxyz',
       location: 'San Francisco, CA',
       type: 'Full-time',
-      salary: '$100k - $140k',
+      category: 'standard',
+      salary: '100 - 140 triệu ',
       postedAt: '1 week ago',
       tags: ['Node.js', 'React', 'AWS']
     },
@@ -132,9 +203,11 @@ const JobListing = () => {
       id: 3,
       title: 'Frontend Developer',
       company: 'Acme Inc.',
+      employerId: 'acme',
       location: 'New York, NY',
       type: 'Full-time',
-      salary: '$90k - $120k',
+      category: 'standard',
+      salary: '90 - 120 triệu ',
       postedAt: '3 days ago',
       tags: ['Vue.js', 'JavaScript', 'CSS']
     },
@@ -142,9 +215,11 @@ const JobListing = () => {
       id: 4,
       title: 'Backend Developer',
       company: 'Tech Solutions',
+      employerId: 'techsolutions',
       location: 'Austin, TX',
       type: 'Full-time',
-      salary: '$110k - $140k',
+      category: 'standard',
+      salary: '110 - 140 triệu ',
       postedAt: '5 days ago',
       tags: ['Python', 'Django', 'PostgreSQL']
     },
@@ -152,9 +227,11 @@ const JobListing = () => {
       id: 5,
       title: 'UI/UX Designer',
       company: 'Design Co.',
+      employerId: 'designco',
       location: 'Remote',
       type: 'Contract',
-      salary: '$80k - $100k',
+      category: 'standard',
+      salary: '80 - 100 triệu ',
       postedAt: '1 week ago',
       tags: ['Figma', 'UI Design', 'Prototyping']
     },
@@ -162,11 +239,37 @@ const JobListing = () => {
       id: 6,
       title: 'DevOps Engineer',
       company: 'Cloud Systems',
+      employerId: 'cloudsystems',
       location: 'Seattle, WA',
       type: 'Full-time',
-      salary: '$130k - $160k',
+      category: 'standard',
+      salary: '130 - 160 triệu ',
       postedAt: '4 days ago',
       tags: ['AWS', 'Docker', 'Kubernetes']
+    },
+    {
+      id: 7,
+      title: 'Shift Supervisor',
+      company: 'NightOwl Logistics',
+      employerId: 'nightowl',
+      location: 'Remote / Ca đêm',
+      type: 'Shift',
+      category: 'shift',
+      salary: '750k - 1 triệu/giờ',
+      postedAt: '1 day ago',
+      tags: ['Shift', 'Logistics', 'Night']
+    },
+    {
+      id: 8,
+      title: 'Ca sáng - Nhân viên kho',
+      company: 'FastMove',
+      employerId: 'fastmove',
+      location: 'Hà Nội',
+      type: 'Shift',
+      category: 'shift',
+      salary: '200k - 300k/ca',
+      postedAt: '3 days ago',
+      tags: ['Shift', 'Kho vận']
     }
   ];
 
@@ -178,51 +281,52 @@ const JobListing = () => {
     );
   };
 
+  const handleFollow = (employerId) => {
+    setFollowedEmployers(prev => prev.includes(employerId)
+      ? prev.filter(id => id !== employerId)
+      : [...prev, employerId]
+    );
+  };
+
+  const filteredJobs = useMemo(() => jobs.filter(j => j.category === tab), [jobs, tab]);
+
   return (
     <DashboardLayout role="candidate">
       <JobListingContainer>
         <FilterSidebar>
           <FilterHeader>
             <Filter />
-            <h2>Filters</h2>
+            <h2>{t.jobs.filterBy || 'Filters'}</h2>
           </FilterHeader>
 
           <FilterSection>
-            <FilterTitle>Job Type</FilterTitle>
+            <FilterTitle>{t.jobs.jobType}</FilterTitle>
             <CheckboxGroup>
               <CheckboxLabel>
                 <input type="checkbox" />
-                Full-time
+                {t.jobs.fullTime}
               </CheckboxLabel>
               <CheckboxLabel>
                 <input type="checkbox" />
-                Part-time
-              </CheckboxLabel>
-              <CheckboxLabel>
-                <input type="checkbox" />
-                Contract
-              </CheckboxLabel>
-              <CheckboxLabel>
-                <input type="checkbox" />
-                Freelance
+                {t.jobs.partTime}
               </CheckboxLabel>
             </CheckboxGroup>
           </FilterSection>
 
           <FilterSection>
-            <FilterTitle>Experience Level</FilterTitle>
+            <FilterTitle>{t.jobs.experience}</FilterTitle>
             <CheckboxGroup>
               <CheckboxLabel>
                 <input type="checkbox" />
-                Entry Level
+                {t.jobs.entry}
               </CheckboxLabel>
               <CheckboxLabel>
                 <input type="checkbox" />
-                Mid Level
+                {t.jobs.mid}
               </CheckboxLabel>
               <CheckboxLabel>
                 <input type="checkbox" />
-                Senior Level
+                {t.jobs.senior}
               </CheckboxLabel>
               <CheckboxLabel>
                 <input type="checkbox" />
@@ -232,47 +336,71 @@ const JobListing = () => {
           </FilterSection>
 
           <FilterSection>
-            <FilterTitle>Salary Range</FilterTitle>
+            <FilterTitle>{t.jobs.salary}</FilterTitle>
             <CheckboxGroup>
               <CheckboxLabel>
                 <input type="checkbox" />
-                $0 - $50k
+                0 - 50k
               </CheckboxLabel>
               <CheckboxLabel>
                 <input type="checkbox" />
-                $50k - $100k
+                50k - 100k
               </CheckboxLabel>
               <CheckboxLabel>
                 <input type="checkbox" />
-                $100k - $150k
+                100k - 150k
               </CheckboxLabel>
               <CheckboxLabel>
                 <input type="checkbox" />
-                $150k+
+                150k+
               </CheckboxLabel>
             </CheckboxGroup>
           </FilterSection>
 
           <Button $variant="primary" $fullWidth style={{ marginTop: '24px' }}>
-            Apply Filters
+            {t.jobs.filterBy || 'Apply Filters'}
           </Button>
         </FilterSidebar>
 
         <MainContent>
           <ContentHeader>
-            <h1>Find Your Dream Job</h1>
-            <p>Showing {jobs.length} available positions</p>
+            <h1>{t.jobs.posts}</h1>
+            <p>{`Đang hiển thị ${filteredJobs.length} bài đăng`}</p>
           </ContentHeader>
 
+          <Tabs>
+            <TabButton $active={tab === 'standard'} onClick={() => setTab('standard')}>
+              {t.jobs.standardJobs}
+            </TabButton>
+            <TabButton $active={tab === 'shift'} onClick={() => setTab('shift')}>
+              {t.jobs.shiftJobs}
+            </TabButton>
+          </Tabs>
+
           <JobsGrid>
-            {jobs.map(job => (
-              <JobCard
-                key={job.id}
-                job={job}
-                saved={savedJobs.includes(job.id)}
-                onClick={(id) => navigate(`/candidate/jobs/${id}`)}
-                onSave={handleSaveJob}
-              />
+            {filteredJobs.map(job => (
+              <div key={job.id}>
+                <JobCard
+                  job={job}
+                  saved={savedJobs.includes(job.id)}
+                  onClick={(id) => navigate(`/candidate/jobs/${id}`)}
+                  onSave={handleSaveJob}
+                />
+                <ActionsBar style={{ marginTop: '10px' }}>
+                  <ActionButton type="button" onClick={() => navigate(`/employer/profile/${job.employerId || job.company}`)}>
+                    <Building2 />
+                    <span>{t.jobs.viewEmployerProfile}</span>
+                  </ActionButton>
+                  <ActionButton type="button" onClick={() => handleFollow(job.employerId || job.company)}>
+                    <UserPlus />
+                    <span>{followedEmployers.includes(job.employerId || job.company) ? 'Đang theo dõi' : t.jobs.followEmployer}</span>
+                  </ActionButton>
+                  <ActionButton type="button" onClick={() => handleSaveJob(job.id)}>
+                    <BookmarkCheck />
+                    <span>{savedJobs.includes(job.id) ? t.jobs.saved : t.jobs.save}</span>
+                  </ActionButton>
+                </ActionsBar>
+              </div>
             ))}
           </JobsGrid>
         </MainContent>

@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import { Send, Search } from 'lucide-react';
 import { Input, Button } from '../../components/FormElements';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTranslations } from '../../locales/translations';
 
 const MessagesContainer = styled.div`
   display: grid;
@@ -123,16 +125,18 @@ const InputArea = styled.div`
 const CandidateMessages = () => {
   const [activeConv, setActiveConv] = useState(1);
   const [message, setMessage] = useState('');
+  const { language } = useLanguage();
+  const t = useTranslations(language);
 
   const conversations = [
-    { id: 1, company: 'TechCorp', lastMessage: 'Thanks for applying!', time: '10:30 AM', unread: true },
-    { id: 2, company: 'StartupXYZ', lastMessage: 'When can you start?', time: 'Yesterday', unread: false },
+    { id: 1, company: 'TechCorp', lastMessage: 'Cảm ơn bạn đã ứng tuyển!', time: '10:30', unread: true },
+    { id: 2, company: 'StartupXYZ', lastMessage: 'Bạn có thể bắt đầu khi nào?', time: 'Hôm qua', unread: false },
   ];
 
   const messages = [
-    { id: 1, text: 'Hello! We received your application', sent: false, time: '10:15 AM' },
-    { id: 2, text: 'Thank you! Looking forward to hearing from you', sent: true, time: '10:20 AM' },
-    { id: 3, text: 'We would like to schedule an interview', sent: false, time: '10:30 AM' },
+    { id: 1, text: 'Chúng tôi đã nhận được hồ sơ của bạn', sent: false, time: '10:15' },
+    { id: 2, text: 'Cảm ơn bạn! Rất mong được trao đổi thêm', sent: true, time: '10:20' },
+    { id: 3, text: 'Chúng tôi muốn sắp xếp một buổi phỏng vấn', sent: false, time: '10:30' },
   ];
 
   return (
@@ -140,7 +144,7 @@ const CandidateMessages = () => {
       <MessagesContainer>
         <ConversationList>
           <SearchBox>
-            <Input placeholder="Search messages..." />
+            <Input placeholder={t.messages.search} />
           </SearchBox>
           {conversations.map(conv => (
             <ConversationItem key={conv.id} $active={activeConv === conv.id} onClick={() => setActiveConv(conv.id)}>
@@ -156,7 +160,7 @@ const CandidateMessages = () => {
         <ChatArea>
           <ChatHeader>
             <h3>TechCorp</h3>
-            <p>Recruiter</p>
+            <p>Nhà tuyển dụng</p>
           </ChatHeader>
 
           <MessagesArea>
@@ -172,7 +176,7 @@ const CandidateMessages = () => {
 
           <InputArea>
             <Input
-              placeholder="Type a message..."
+              placeholder={t.messages.typeMessage}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
             />

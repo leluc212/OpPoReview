@@ -4,6 +4,8 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Button, Input, FormGroup, Label, ErrorText } from '../../components/FormElements';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTranslations } from '../../locales/translations';
 
 const LoginContainer = styled.div`
   min-height: 100vh;
@@ -76,14 +78,21 @@ const FormHeader = styled.div`
 `;
 
 const Logo = styled(Link)`
-  font-size: 28px;
-  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  font-size: 30px;
+  font-weight: 800;
   background: ${props => props.theme.colors.gradientPrimary};
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-bottom: 48px;
-  display: inline-block;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
 `;
 
 const Divider = styled.div`
@@ -140,6 +149,8 @@ const ForgotPassword = styled(Link)`
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { language } = useLanguage();
+  const t = useTranslations(language);
   const [role, setRole] = useState('candidate');
   const [formData, setFormData] = useState({
     email: '',
@@ -156,8 +167,8 @@ const LoginPage = () => {
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.email) newErrors.email = 'Email is required';
-    if (!formData.password) newErrors.password = 'Password is required';
+    if (!formData.email) newErrors.email = t.login.requiredEmail;
+    if (!formData.password) newErrors.password = t.login.requiredPassword;
     return newErrors;
   };
 
@@ -198,10 +209,8 @@ const LoginPage = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1>Welcome Back to JobMarket</h1>
-          <p>
-            Sign in to access your dashboard and continue your journey in finding the perfect job or hiring top talent.
-          </p>
+          <h1>{t.login.welcomeTitle}</h1>
+          <p>{t.login.welcomeSubtitle}</p>
         </HeroContent>
       </LoginLeft>
 
@@ -211,12 +220,15 @@ const LoginPage = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <Logo to="/">JobMarket</Logo>
+          <Logo to="/">
+            <img src="/images/logo.png" alt="Ốp Pờ" style={{ height: '36px', marginRight: '8px' }} />
+            Ốp Pờ
+          </Logo>
           
           <FormHeader>
-            <h2>Sign In</h2>
+            <h2>{t.login.signIn}</h2>
             <p>
-              New user? <Link to="/register">Create an account</Link>
+              {t.login.newUser} <Link to="/register">{t.login.createAccount}</Link>
             </p>
           </FormHeader>
 
@@ -226,32 +238,32 @@ const LoginPage = () => {
               $selected={role === 'candidate'}
               onClick={() => setRole('candidate')}
             >
-              Candidate
+              {t.login.roleCandidate}
             </RoleButton>
             <RoleButton
               type="button"
               $selected={role === 'employer'}
               onClick={() => setRole('employer')}
             >
-              Employer
+              {t.login.roleEmployer}
             </RoleButton>
             <RoleButton
               type="button"
               $selected={role === 'admin'}
               onClick={() => setRole('admin')}
             >
-              Admin
+              {t.login.roleAdmin}
             </RoleButton>
           </RoleSelector>
 
           <form onSubmit={handleSubmit}>
             <FormGroup>
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email">{t.login.email}</Label>
               <Input
                 id="email"
                 type="email"
                 name="email"
-                placeholder="your@email.com"
+                placeholder={t.login.placeholderEmail}
                 value={formData.email}
                 onChange={handleChange}
                 $error={errors.email}
@@ -260,7 +272,7 @@ const LoginPage = () => {
             </FormGroup>
 
             <FormGroup>
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t.login.password}</Label>
               <Input
                 id="password"
                 type="password"
@@ -271,18 +283,18 @@ const LoginPage = () => {
                 $error={errors.password}
               />
               {errors.password && <ErrorText>{errors.password}</ErrorText>}
-              <ForgotPassword to="/forgot-password">Forgot password?</ForgotPassword>
+              <ForgotPassword to="/forgot-password">{t.login.forgotPassword}</ForgotPassword>
             </FormGroup>
 
             <Button type="submit" $variant="primary" $fullWidth $size="large">
-              Sign In
+              {t.login.signIn}
             </Button>
           </form>
 
-          <Divider>or continue with</Divider>
+          <Divider>{t.login.continueWith}</Divider>
 
           <Button $variant="secondary" $fullWidth>
-            Continue as Guest
+            {t.login.continueAsGuest}
           </Button>
         </LoginForm>
       </LoginRight>

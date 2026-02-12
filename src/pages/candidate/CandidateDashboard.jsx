@@ -4,7 +4,9 @@ import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
 import JobCard from '../../components/JobCard';
 import { Briefcase, FileText, Eye, Star, TrendingUp } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTranslations } from '../../locales/translations';
 
 const DashboardContainer = styled.div``;
 
@@ -118,6 +120,8 @@ const ActivityStatus = styled.span`
 
 const CandidateDashboard = () => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const t = useTranslations(language);
 
   const recommendedJobs = [
     {
@@ -152,40 +156,40 @@ const CandidateDashboard = () => {
     <DashboardLayout role="candidate">
       <DashboardContainer>
         <PageHeader>
-          <h1>Welcome back, Candidate!</h1>
-          <p>Here's what's happening with your job search</p>
+          <h1>{t.dashboard.candidate.welcome}, Candidate!</h1>
+          <p>{language === 'vi' ? 'Đây là những gì đang diễn ra với tìm kiếm việc làm của bạn' : "Here's what's happening with your job search"}</p>
         </PageHeader>
 
         <StatsGrid>
           <StatsCard
-            title="Applications"
+            title={t.dashboard.candidate.stats.applications}
             value="24"
             change="+12%"
-            changeText="from last month"
+            changeText={language === 'vi' ? 'từ tháng trước' : 'from last month'}
             icon={FileText}
             color="linear-gradient(135deg, #667EEA 0%, #764BA2 100%)"
             positive
           />
           <StatsCard
-            title="Profile Views"
+            title={t.dashboard.candidate.stats.profileViews}
             value="156"
             change="+23%"
-            changeText="from last week"
+            changeText={language === 'vi' ? 'từ tuần trước' : 'from last week'}
             icon={Eye}
             color="linear-gradient(135deg, #F093FB 0%, #F5576C 100%)"
             positive
           />
           <StatsCard
-            title="Saved Jobs"
+            title={t.dashboard.candidate.stats.savedJobs}
             value="18"
             icon={Star}
             color="linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%)"
           />
           <StatsCard
-            title="Interview Requests"
+            title={t.dashboard.candidate.stats.interviews}
             value="5"
             change="+2"
-            changeText="this week"
+            changeText={language === 'vi' ? 'tuần này' : 'this week'}
             icon={TrendingUp}
             color="linear-gradient(135deg, #43E97B 0%, #38F9D7 100%)"
             positive
@@ -194,8 +198,8 @@ const CandidateDashboard = () => {
 
         <Section>
           <SectionHeader>
-            <h2>Recommended Jobs</h2>
-            <a href="/candidate/jobs">View all jobs →</a>
+            <h2>{t.dashboard.candidate.recommendedJobs}</h2>
+            <Link to="/candidate/jobs">{t.dashboard.candidate.viewAll} →</Link>
           </SectionHeader>
           <JobsGrid>
             {recommendedJobs.map(job => (
@@ -211,8 +215,8 @@ const CandidateDashboard = () => {
 
         <Section>
           <SectionHeader>
-            <h2>Recent Applications</h2>
-            <a href="/candidate/applications">View all →</a>
+            <h2>{t.dashboard.candidate.recentApplications}</h2>
+            <a href="/candidate/applications">{t.dashboard.candidate.viewAll} →</a>
           </SectionHeader>
           {recentApplications.map(app => (
             <ActivityCard key={app.id}>

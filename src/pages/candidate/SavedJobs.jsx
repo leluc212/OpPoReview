@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import JobCard from '../../components/JobCard';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTranslations } from '../../locales/translations';
 
 const SavedJobsContainer = styled.div``;
 
@@ -28,6 +30,8 @@ const JobsGrid = styled.div`
 
 const SavedJobs = () => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const t = useTranslations(language);
 
   const savedJobs = [
     {
@@ -35,9 +39,9 @@ const SavedJobs = () => {
       title: 'Senior React Developer',
       company: 'TechCorp',
       location: 'Remote',
-      type: 'Full-time',
-      salary: '$120k - $150k',
-      postedAt: '2 days ago',
+      type: 'Toàn thời gian',
+      salary: '120 - 150 triệu VND',
+      postedAt: '2 ngày trước',
       tags: ['React', 'TypeScript', 'Remote']
     },
     {
@@ -45,9 +49,9 @@ const SavedJobs = () => {
       title: 'Frontend Developer',
       company: 'Acme Inc.',
       location: 'New York, NY',
-      type: 'Full-time',
-      salary: '$90k - $120k',
-      postedAt: '3 days ago',
+      type: 'Toàn thời gian',
+      salary: '90 - 120 triệu VND',
+      postedAt: '3 ngày trước',
       tags: ['Vue.js', 'JavaScript', 'CSS']
     }
   ];
@@ -56,8 +60,8 @@ const SavedJobs = () => {
     <DashboardLayout role="candidate" showSearch={false}>
       <SavedJobsContainer>
         <PageHeader>
-          <h1>Saved Jobs</h1>
-          <p>Jobs you've bookmarked for later</p>
+          <h1>{t.jobs.savedJobsTitle}</h1>
+          <p>{t.jobs.savedJobsSubtitle}</p>
         </PageHeader>
 
         <JobsGrid>

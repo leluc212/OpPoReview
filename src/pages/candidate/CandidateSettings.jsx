@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
-import { Bell, Mail, MessageSquare } from 'lucide-react';
+import { Bell, Mail, MessageSquare, Globe } from 'lucide-react';
 import { Button, FormGroup, Label } from '../../components/FormElements';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTranslations } from '../../locales/translations';
 
 const SettingsContainer = styled.div`
   max-width: 900px;
@@ -96,19 +98,85 @@ const Toggle = styled.label`
   }
 `;
 
+const LanguageOptions = styled.div`
+  display: flex;
+  gap: 12px;
+`;
+
+const LanguageButton = styled.button`
+  padding: 8px 20px;
+  border-radius: ${props => props.theme.borderRadius.md};
+  border: 2px solid ${props => props.$active ? props.theme.colors.primary : props.theme.colors.border};
+  background: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.bgLight};
+  color: ${props => props.$active ? 'white' : props.theme.colors.text};
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  &:hover {
+    border-color: ${props => props.theme.colors.primary};
+    transform: translateY(-2px);
+  }
+  
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
 const CandidateSettings = () => {
+  const { language, changeLanguage } = useLanguage();
+  const t = useTranslations(language);
+  const [showSavedMessage, setShowSavedMessage] = useState(false);
+
+  const handleSaveSettings = () => {
+    setShowSavedMessage(true);
+    setTimeout(() => setShowSavedMessage(false), 3000);
+  };
+
   return (
     <DashboardLayout role="candidate" showSearch={false}>
       <SettingsContainer>
-        <h1 style={{ fontSize: '32px', fontWeight: '700', marginBottom: '32px' }}>Settings</h1>
+        <h1 style={{ fontSize: '32px', fontWeight: '700', marginBottom: '32px' }}>{t.settings.title}</h1>
 
         <SettingsCard>
-          <SectionTitle>Notifications</SectionTitle>
+          <SectionTitle>{t.settings.accountSettings}</SectionTitle>
           
           <SettingItem>
             <SettingInfo>
-              <h3>Email Notifications</h3>
-              <p>Receive job alerts and updates via email</p>
+              <h3>
+                <Globe style={{ display: 'inline', marginRight: '8px', width: '18px', height: '18px', verticalAlign: 'middle' }} />
+                {t.settings.language}
+              </h3>
+              <p>{t.settings.languageDescription}</p>
+            </SettingInfo>
+            <LanguageOptions>
+              <LanguageButton
+                $active={language === 'vi'}
+                onClick={() => changeLanguage('vi')}
+              >
+                {t.settings.vietnamese}
+              </LanguageButton>
+              <LanguageButton
+                $active={language === 'en'}
+                onClick={() => changeLanguage('en')}
+              >
+                {t.settings.english}
+              </LanguageButton>
+            </LanguageOptions>
+          </SettingItem>
+        </SettingsCard>
+
+        <SettingsCard>
+          <SectionTitle>{t.settings.notifications}</SectionTitle>
+          
+          <SettingItem>
+            <SettingInfo>
+              <h3>{t.settings.emailNotifications}</h3>
+              <p>{t.settings.emailNotificationsDesc}</p>
             </SettingInfo>
             <Toggle>
               <input type="checkbox" defaultChecked />
@@ -118,8 +186,8 @@ const CandidateSettings = () => {
 
           <SettingItem>
             <SettingInfo>
-              <h3>Application Updates</h3>
-              <p>Get notified when employers view your application</p>
+              <h3>{t.settings.applicationUpdates}</h3>
+              <p>{t.settings.applicationUpdatesDesc}</p>
             </SettingInfo>
             <Toggle>
               <input type="checkbox" defaultChecked />
@@ -129,8 +197,8 @@ const CandidateSettings = () => {
 
           <SettingItem>
             <SettingInfo>
-              <h3>New Job Matches</h3>
-              <p>Receive notifications for jobs matching your profile</p>
+              <h3>{t.settings.newMatches}</h3>
+              <p>{t.settings.newMatchesDesc}</p>
             </SettingInfo>
             <Toggle>
               <input type="checkbox" defaultChecked />
@@ -140,12 +208,12 @@ const CandidateSettings = () => {
         </SettingsCard>
 
         <SettingsCard>
-          <SectionTitle>Privacy</SectionTitle>
+          <SectionTitle>{t.settings.privacy}</SectionTitle>
           
           <SettingItem>
             <SettingInfo>
-              <h3>Profile Visibility</h3>
-              <p>Make your profile visible to employers</p>
+              <h3>{t.settings.profileVisibility}</h3>
+              <p>{t.settings.profileVisibilityDesc}</p>
             </SettingInfo>
             <Toggle>
               <input type="checkbox" defaultChecked />
@@ -155,8 +223,19 @@ const CandidateSettings = () => {
 
           <SettingItem>
             <SettingInfo>
-              <h3>Show Activity Status</h3>
-              <p>Let employers know when you're active</p>
+              <h3>{t.settings.showEmail}</h3>
+              <p>{t.settings.showEmailDesc}</p>
+            </SettingInfo>
+            <Toggle>
+              <input type="checkbox" />
+              <span></span>
+            </Toggle>
+          </SettingItem>
+          
+          <SettingItem>
+            <SettingInfo>
+              <h3>{t.settings.showPhone}</h3>
+              <p>{t.settings.showPhoneDesc}</p>
             </SettingInfo>
             <Toggle>
               <input type="checkbox" />
@@ -165,7 +244,30 @@ const CandidateSettings = () => {
           </SettingItem>
         </SettingsCard>
 
-        <Button $variant="danger">Delete Account</Button>
+        <SettingsCard>
+          <SectionTitle>{t.settings.dangerZone}</SectionTitle>
+          
+          <SettingItem>
+            <SettingInfo>
+              <h3>{t.settings.deleteAccount}</h3>
+              <p>{t.settings.deleteAccountDesc}</p>
+            </SettingInfo>
+            <Button $variant="danger">{t.settings.deleteButton}</Button>
+          </SettingItem>
+        </SettingsCard>
+        
+        {showSavedMessage && (
+          <div style={{ 
+            padding: '16px', 
+            background: '#10B981', 
+            color: 'white', 
+            borderRadius: '8px',
+            marginTop: '16px',
+            textAlign: 'center'
+          }}>
+            {t.settings.changesSaved}
+          </div>
+        )}
       </SettingsContainer>
     </DashboardLayout>
   );

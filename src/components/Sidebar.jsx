@@ -13,8 +13,16 @@ import {
   CreditCard,
   CheckCircle,
   BarChart3,
-  Package
+  Package,
+  MapPin,
+  ToggleLeft,
+  ShieldCheck,
+  HelpCircle,
+  Wallet,
+  LogOut
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+import { useTranslations } from '../locales/translations';
 
 const SidebarContainer = styled.aside`
   width: 260px;
@@ -31,14 +39,23 @@ const SidebarContainer = styled.aside`
 const Logo = styled.div`
   padding: 24px;
   border-bottom: 1px solid ${props => props.theme.colors.border};
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  margin: 12px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
   
   h1 {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
     background: ${props => props.theme.colors.gradientPrimary};
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    text-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
   }
 `;
 
@@ -86,49 +103,60 @@ const NavLink = styled(Link)`
 
 const Sidebar = ({ role }) => {
   const location = useLocation();
+  const { language } = useLanguage();
+  const t = useTranslations(language);
   
   const candidateLinks = [
-    { section: 'Main', items: [
-      { to: '/candidate/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-      { to: '/candidate/jobs', icon: Briefcase, label: 'Find Jobs' },
-      { to: '/candidate/saved-jobs', icon: Star, label: 'Saved Jobs' },
+    { section: t.sidebar.main, items: [
+      { to: '/candidate/dashboard', icon: LayoutDashboard, label: t.sidebar.dashboard },
+      { to: '/candidate/jobs', icon: Briefcase, label: t.sidebar.findJobs },
+      { to: '/candidate/saved-jobs', icon: Star, label: t.sidebar.savedJobs },
     ]},
-    { section: 'Communication', items: [
-      { to: '/candidate/messages', icon: MessageSquare, label: 'Messages' },
-      { to: '/candidate/notifications', icon: Bell, label: 'Notifications' },
+    { section: t.sidebar.communication, items: [
+      { to: '/candidate/messages', icon: MessageSquare, label: t.sidebar.messages },
+      { to: '/candidate/notifications', icon: Bell, label: t.sidebar.notifications },
     ]},
-    { section: 'Account', items: [
-      { to: '/candidate/profile', icon: Users, label: 'My Profile' },
-      { to: '/candidate/settings', icon: Settings, label: 'Settings' },
+    { section: t.sidebar.account, items: [
+      { to: '/candidate/profile', icon: Users, label: t.sidebar.myProfile },
+      { to: '/candidate/settings', icon: Settings, label: t.sidebar.settings },
+    ]},
+    { section: t.sidebar.utilities, items: [
+      { to: '#', icon: MapPin, label: t.sidebar.location },
+      { to: '#', icon: ToggleLeft, label: t.sidebar.availability },
+      { to: '#', icon: FileText, label: t.sidebar.policyTerms },
+      { to: '#', icon: ShieldCheck, label: t.sidebar.loginSecurity },
+      { to: '#', icon: Wallet, label: t.sidebar.digitalWallet },
+      { to: '#', icon: HelpCircle, label: t.sidebar.support },
+      { to: '#', icon: LogOut, label: t.sidebar.signOut },
     ]}
   ];
   
   const employerLinks = [
-    { section: 'Main', items: [
-      { to: '/employer/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-      { to: '/employer/jobs', icon: Briefcase, label: 'My Jobs' },
-      { to: '/employer/applications', icon: FileText, label: 'Applications' },
+    { section: t.sidebar.main, items: [
+      { to: '/employer/dashboard', icon: LayoutDashboard, label: t.sidebar.dashboard },
+      { to: '/employer/jobs', icon: Briefcase, label: t.sidebar.myJobs },
+      { to: '/employer/applications', icon: FileText, label: t.sidebar.applications },
     ]},
-    { section: 'Communication', items: [
-      { to: '/employer/messages', icon: MessageSquare, label: 'Messages' },
-      { to: '/employer/notifications', icon: Bell, label: 'Notifications' },
+    { section: t.sidebar.communication, items: [
+      { to: '/employer/messages', icon: MessageSquare, label: t.sidebar.messages },
+      { to: '/employer/notifications', icon: Bell, label: t.sidebar.notifications },
     ]},
-    { section: 'Account', items: [
-      { to: '/employer/profile', icon: Users, label: 'Company Profile' },
-      { to: '/employer/subscription', icon: CreditCard, label: 'Subscription' },
+    { section: t.sidebar.account, items: [
+      { to: '/employer/profile', icon: Users, label: t.sidebar.companyProfile },
+      { to: '/employer/subscription', icon: CreditCard, label: t.sidebar.subscription },
     ]}
   ];
   
   const adminLinks = [
-    { section: 'Main', items: [
-      { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-      { to: '/admin/users', icon: Users, label: 'User Management' },
-      { to: '/admin/employers', icon: CheckCircle, label: 'Employer Approval' },
+    { section: t.sidebar.main, items: [
+      { to: '/admin/dashboard', icon: LayoutDashboard, label: t.sidebar.dashboard },
+      { to: '/admin/users', icon: Users, label: t.sidebar.userManagement },
+      { to: '/admin/employers', icon: CheckCircle, label: t.sidebar.employerApproval },
     ]},
-    { section: 'Platform', items: [
-      { to: '/admin/packages', icon: Package, label: 'Packages' },
-      { to: '/admin/reports', icon: BarChart3, label: 'Reports' },
-      { to: '/admin/settings', icon: Settings, label: 'Settings' },
+    { section: t.sidebar.platform, items: [
+      { to: '/admin/packages', icon: Package, label: t.sidebar.packages },
+      { to: '/admin/reports', icon: BarChart3, label: t.sidebar.reports },
+      { to: '/admin/settings', icon: Settings, label: t.sidebar.settings },
     ]}
   ];
   
@@ -139,7 +167,8 @@ const Sidebar = ({ role }) => {
   return (
     <SidebarContainer>
       <Logo>
-        <h1>JobMarket</h1>
+        <img src="/images/logo.png" alt="Ốp Pờ" style={{ height: '32px', marginBottom: '4px' }} />
+        <h1>Ốp Pờ</h1>
       </Logo>
       
       <Nav>

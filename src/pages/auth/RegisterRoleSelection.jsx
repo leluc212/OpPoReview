@@ -20,14 +20,21 @@ const ContentWrapper = styled(motion.div)`
 `;
 
 const Logo = styled(Link)`
-  font-size: 28px;
-  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  font-size: 30px;
+  font-weight: 800;
   background: ${props => props.theme.colors.gradientPrimary};
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-bottom: 48px;
-  display: inline-block;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
 `;
 
 const Header = styled.div`
@@ -167,10 +174,13 @@ const RegisterRoleSelection = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <Logo to="/">JobMarket</Logo>
+        <Logo to="/">
+          <img src="/images/logo.png" alt="Ốp Pờ" style={{ height: '36px', marginRight: '8px' }} />
+          Ốp Pờ
+        </Logo>
         
         <Header>
-          <h1>Join JobMarket</h1>
+          <h1>Join Ốp Pờ</h1>
           <p>Choose your account type to get started</p>
         </Header>
 
