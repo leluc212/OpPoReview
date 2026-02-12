@@ -85,7 +85,7 @@ const JobManagement = () => {
   const jobs = [
     { id: 1, title: 'Senior React Developer', applicants: 45, status: 'active', posted: t.employerJobs.posted2d },
     { id: 2, title: 'Thu ngân', applicants: 32, status: 'active', posted: t.employerJobs.posted1w },
-    { id: 3, title: 'UI/UX Designer', applicants: 28, status: 'inactive', posted: t.employerJobs.posted2w },
+    { id: 3, title: 'Nhân viên pha chế', applicants: 28, status: 'inactive', posted: t.employerJobs.posted2w },
   ];
 
   return (

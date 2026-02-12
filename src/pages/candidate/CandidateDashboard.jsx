@@ -3,58 +3,93 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
 import JobCard from '../../components/JobCard';
-import { Briefcase, FileText, Eye, Star, TrendingUp } from 'lucide-react';
+import { Briefcase, FileText, Star, TrendingUp } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTranslations } from '../../locales/translations';
 
-const DashboardContainer = styled.div``;
+const DashboardContainer = styled.div`
+  animation: fadeIn 0.5s ease-in;
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
 
 const PageHeader = styled.div`
-  margin-bottom: 32px;
+  margin-bottom: 40px;
   
   h1 {
-    font-size: 32px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: ${props => props.theme.colors.text};
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    background: ${props => props.theme.colors.gradientPrimary};
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
   
   p {
     color: ${props => props.theme.colors.textLight};
-    font-size: 16px;
+    font-size: 17px;
+    font-weight: 500;
   }
 `;
 
 const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 24px;
   margin-bottom: 48px;
 `;
 
 const Section = styled.section`
-  margin-bottom: 48px;
+  margin-bottom: 56px;
 `;
 
 const SectionHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
   
   h2 {
-    font-size: 24px;
-    font-weight: 600;
+    font-size: 26px;
+    font-weight: 700;
     color: ${props => props.theme.colors.text};
+    position: relative;
+    padding-left: 16px;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 5px;
+      height: 28px;
+      background: ${props => props.theme.colors.gradientPrimary};
+      border-radius: 3px;
+    }
   }
   
   a {
     color: ${props => props.theme.colors.primary};
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all ${props => props.theme.transitions.fast};
     
     &:hover {
       text-decoration: underline;
+      transform: translateX(4px);
+      display: inline-block;
     }
   }
 `;
@@ -62,19 +97,45 @@ const SectionHeader = styled.div`
 const JobsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  gap: 28px;
+  
+  @media (max-width: 1200px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const ActivityCard = styled.div`
   background: ${props => props.theme.colors.bgLight};
-  border-radius: ${props => props.theme.borderRadius.md};
-  padding: 24px;
-  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  padding: 28px;
+  border: 2px solid ${props => props.theme.colors.border};
   margin-bottom: 16px;
-  transition: all ${props => props.theme.transitions.fast};
+  transition: all ${props => props.theme.transitions.normal};
+  box-shadow: ${props => props.theme.shadows.card};
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    background: ${props => props.theme.colors.gradientPrimary};
+    opacity: 0;
+    transition: opacity ${props => props.theme.transitions.normal};
+  }
   
   &:hover {
     border-color: ${props => props.theme.colors.primary};
+    transform: translateX(8px);
+    box-shadow: ${props => props.theme.shadows.hover};
+    
+    &::before {
+      opacity: 1;
+    }
   }
 `;
 
@@ -82,28 +143,36 @@ const ActivityHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: start;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 `;
 
 const ActivityTitle = styled.h3`
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
   color: ${props => props.theme.colors.text};
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 `;
 
 const ActivityMeta = styled.div`
   display: flex;
-  gap: 16px;
+  gap: 20px;
   font-size: 14px;
   color: ${props => props.theme.colors.textLight};
+  font-weight: 500;
+  
+  span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
 `;
 
 const ActivityStatus = styled.span`
-  padding: 4px 12px;
+  padding: 8px 18px;
   border-radius: ${props => props.theme.borderRadius.full};
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: capitalize;
   background: ${props => {
     if (props.$status === 'pending') return props.theme.colors.warningBg;
     if (props.$status === 'reviewed') return props.theme.colors.infoBg;
@@ -115,6 +184,18 @@ const ActivityStatus = styled.span`
     if (props.$status === 'reviewed') return props.theme.colors.info;
     if (props.$status === 'accepted') return props.theme.colors.success;
     return props.theme.colors.textLight;
+  }};
+  border: 2px solid ${props => {
+    if (props.$status === 'pending') return `${props.theme.colors.warning}40`;
+    if (props.$status === 'reviewed') return `${props.theme.colors.info}40`;
+    if (props.$status === 'accepted') return `${props.theme.colors.success}40`;
+    return props.theme.colors.border;
+  }};
+  box-shadow: 0 2px 8px ${props => {
+    if (props.$status === 'pending') return `${props.theme.colors.warning}20`;
+    if (props.$status === 'reviewed') return `${props.theme.colors.info}20`;
+    if (props.$status === 'accepted') return `${props.theme.colors.success}20`;
+    return 'transparent';
   }};
 `;
 
@@ -147,9 +228,9 @@ const CandidateDashboard = () => {
   ];
 
   const recentApplications = [
-    { id: 1, title: 'Frontend Developer', company: 'Acme Inc.', appliedDate: '2 days ago', status: 'pending' },
-    { id: 2, title: 'UI/UX Designer', company: 'Design Co.', appliedDate: '5 days ago', status: 'reviewed' },
-    { id: 3, title: 'Product Manager', company: 'Tech Solutions', appliedDate: '1 week ago', status: 'accepted' },
+    { id: 1, title: 'Nhân viên', company: 'Highlands', appliedDate: '2 days ago', status: 'pending' },
+    { id: 2, title: 'Nhân viên pha chế', company: 'Suncha', appliedDate: '5 days ago', status: 'reviewed' },
+    { id: 3, title: 'Product Manager', company: 'Le moments', appliedDate: '1 week ago', status: 'accepted' },
   ];
 
   return (
@@ -168,15 +249,6 @@ const CandidateDashboard = () => {
             changeText={language === 'vi' ? 'từ tháng trước' : 'from last month'}
             icon={FileText}
             color="linear-gradient(135deg, #0E3995 0%, #0055A5 100%)"
-            positive
-          />
-          <StatsCard
-            title={t.dashboard.candidate.stats.profileViews}
-            value="156"
-            change="+23%"
-            changeText={language === 'vi' ? 'từ tuần trước' : 'from last week'}
-            icon={Eye}
-            color="linear-gradient(135deg, #F093FB 0%, #F5576C 100%)"
             positive
           />
           <StatsCard

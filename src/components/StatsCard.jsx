@@ -5,15 +5,16 @@ import { TrendingUp, TrendingDown } from 'lucide-react';
 
 const CardWrapper = styled(motion.div)`
   background: ${props => props.theme.colors.bgLight};
-  border-radius: ${props => props.theme.borderRadius.md};
-  padding: 24px;
-  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  padding: 28px;
+  border: 2px solid ${props => props.theme.colors.border};
   box-shadow: ${props => props.theme.shadows.card};
   transition: all ${props => props.theme.transitions.normal};
   
   &:hover {
     transform: translateY(-4px);
     box-shadow: ${props => props.theme.shadows.hover};
+    border-color: ${props => props.theme.colors.primary};
   }
 `;
 
@@ -21,38 +22,40 @@ const CardHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 `;
 
 const CardTitle = styled.h3`
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
   color: ${props => props.theme.colors.textLight};
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
 `;
 
 const IconWrapper = styled.div`
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: ${props => props.theme.borderRadius.md};
   background: ${props => props.$color || props.theme.colors.gradientPrimary};
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
+  box-shadow: ${props => props.theme.shadows.md};
   
   svg {
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
   }
 `;
 
 const CardValue = styled.div`
-  font-size: 36px;
-  font-weight: 700;
+  font-size: 42px;
+  font-weight: 800;
   color: ${props => props.theme.colors.text};
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  line-height: 1;
 `;
 
 const CardFooter = styled.div`
@@ -67,7 +70,7 @@ const ChangeIndicator = styled.div`
   align-items: center;
   gap: 4px;
   color: ${props => props.$positive ? props.theme.colors.success : props.theme.colors.error};
-  font-weight: 500;
+  font-weight: 600;
   
   svg {
     width: 16px;
@@ -77,6 +80,7 @@ const ChangeIndicator = styled.div`
 
 const ChangeText = styled.span`
   color: ${props => props.theme.colors.textLight};
+  font-weight: 500;
 `;
 
 const StatsCard = ({ title, value, change, changeText, icon: Icon, color, positive = true }) => {

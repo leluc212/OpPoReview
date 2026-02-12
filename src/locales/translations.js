@@ -422,7 +422,7 @@ export const translations = {
       newMessageMessage: 'Bạn có tin nhắn mới từ Hồng Trà Ngô Gia',
       newMessageTime: '5 giờ trước',
       applicationAcceptedTitle: 'Hồ sơ được chấp nhận',
-      applicationAcceptedMessage: 'Hồ sơ Frontend Developer tại Acme Inc. của bạn đã được chấp nhận',
+      applicationAcceptedMessage: 'Hồ sơ Nhân viên tại Highlands của bạn đã được chấp nhận',
       applicationAcceptedTime: '1 ngày trước',
     },
 
@@ -854,7 +854,7 @@ export const translations = {
       newMessageMessage: 'You have a new message from Hồng Trà Ngô Gia',
       newMessageTime: '5 hours ago',
       applicationAcceptedTitle: 'Application Accepted',
-      applicationAcceptedMessage: 'Your application for Frontend Developer at Acme Inc. has been accepted',
+      applicationAcceptedMessage: 'Your application for Nhân viên at Highlands has been accepted',
       applicationAcceptedTime: '1 day ago',
     },
 

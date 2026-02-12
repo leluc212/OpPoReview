@@ -9,7 +9,8 @@ export const GlobalStyles = createGlobalStyle`
 
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-    background: ${props => props.theme.colors.background};
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+    background-attachment: fixed;
     color: ${props => props.theme.colors.text};
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
@@ -83,9 +84,10 @@ export const theme = {
     secondaryLight: '#0D3880',
     
     // Background
-    background: '#F8FAFC',
+    background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
     bgLight: '#FFFFFF',
     bgDark: '#F1F5F9',
+    bgGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     
     // Text
     text: '#1E293B',
@@ -108,13 +110,19 @@ export const theme = {
     errorBg: '#FEE2E2',
     infoBg: '#DBEAFE',
     
-    // Gradients
+    // Gradients - Rich and Modern
     gradientPrimary: 'linear-gradient(135deg, #0E3995 0%, #0055A5 100%)',
-    gradientSecondary: 'linear-gradient(135deg, #0D3880 0%, #0E3995 100%)',
+    gradientSecondary: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     gradientHero: 'linear-gradient(135deg, #0D3880 0%, #0055A5 100%)',
+    gradientSuccess: 'linear-gradient(135deg, #43E97B 0%, #38F9D7 100%)',
+    gradientWarning: 'linear-gradient(135deg, #FA709A 0%, #FEE140 100%)',
+    gradientInfo: 'linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%)',
+    gradientPurple: 'linear-gradient(135deg, #F093FB 0%, #F5576C 100%)',
+    gradientOrange: 'linear-gradient(135deg, #FA8BFF 0%, #2BD2FF 90%, #2BFF88 100%)',
     
     // Overlay
     overlay: 'rgba(15, 23, 42, 0.5)',
+    glassEffect: 'rgba(255, 255, 255, 0.1)',
   },
   
   spacing: {
@@ -140,8 +148,10 @@ export const theme = {
     md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
     lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
     xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-    hover: '0 8px 24px rgba(14, 57, 149, 0.18)',
-    card: '0 2px 8px rgba(0, 0, 0, 0.08)',
+    hover: '0 20px 40px rgba(14, 57, 149, 0.25)',
+    card: '0 4px 16px rgba(0, 0, 0, 0.08)',
+    glow: '0 0 30px rgba(14, 57, 149, 0.3)',
+    intense: '0 25px 50px -12px rgba(14, 57, 149, 0.35)',
   },
   
   transitions: {

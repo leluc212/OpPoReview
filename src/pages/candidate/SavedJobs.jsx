@@ -46,8 +46,8 @@ const SavedJobs = () => {
     },
     {
       id: 3,
-      title: 'Frontend Developer',
-      company: 'Acme Inc.',
+      title: 'Nhân viên',
+      company: 'Highlands',
       location: 'Phú Nhuận, TP.HCM',
       type: 'Toàn thời gian',
       salary: '90 - 120 triệu VND',

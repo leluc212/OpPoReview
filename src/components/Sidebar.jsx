@@ -25,8 +25,8 @@ import { useLanguage } from '../context/LanguageContext';
 import { useTranslations } from '../locales/translations';
 
 const SidebarContainer = styled.aside`
-  width: 260px;
-  background: ${props => props.theme.colors.bgLight};
+  width: 280px;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
   border-right: 1px solid ${props => props.theme.colors.border};
   height: 100vh;
   position: sticky;
@@ -34,70 +34,107 @@ const SidebarContainer = styled.aside`
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  box-shadow: ${props => props.theme.shadows.md};
 `;
 
 const Logo = styled.div`
-  padding: 24px;
+  padding: 28px 24px;
   border-bottom: 1px solid ${props => props.theme.colors.border};
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 16px;
-  margin: 12px;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+  gap: 12px;
+  background: ${props => props.theme.colors.bgLight};
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: ${props => props.theme.colors.gradientPrimary};
+    border-radius: 2px;
+  }
   
   h1 {
-    font-size: 22px;
-    font-weight: 700;
+    font-size: 26px;
+    font-weight: 800;
     background: ${props => props.theme.colors.gradientPrimary};
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+    letter-spacing: -0.5px;
   }
 `;
 
 const Nav = styled.nav`
   flex: 1;
-  padding: 16px;
+  padding: 20px 16px;
 `;
 
 const NavSection = styled.div`
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 `;
 
 const NavSectionTitle = styled.p`
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   color: ${props => props.theme.colors.textLight};
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 8px;
-  padding: 0 12px;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  padding: 0 16px;
 `;
 
 const NavLink = styled(Link)`
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
-  border-radius: ${props => props.theme.borderRadius.md};
-  color: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.textLight};
-  background: ${props => props.$active ? `${props.theme.colors.primary}10` : 'transparent'};
-  font-weight: ${props => props.$active ? 500 : 400};
-  transition: all ${props => props.theme.transitions.fast};
-  margin-bottom: 4px;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: ${props => props.theme.borderRadius.lg};
+  color: ${props => props.$active ? 'white' : props.theme.colors.textLight};
+  background: ${props => props.$active ? props.theme.colors.gradientPrimary : 'transparent'};
+  font-weight: ${props => props.$active ? 600 : 500};
+  transition: all ${props => props.theme.transitions.normal};
+  margin-bottom: 6px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: ${props => props.$active ? props.theme.shadows.md : 'none'};
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 0;
+    background: ${props => props.theme.colors.primary};
+    transition: height ${props => props.theme.transitions.normal};
+    border-radius: 0 2px 2px 0;
+  }
   
   svg {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
+    transition: transform ${props => props.theme.transitions.fast};
   }
   
   &:hover {
-    background: ${props => props.theme.colors.bgDark};
-    color: ${props => props.theme.colors.primary};
+    background: ${props => props.$active ? props.theme.colors.gradientPrimary : `${props.theme.colors.primary}08`};
+    color: ${props => props.$active ? 'white' : props.theme.colors.primary};
+    transform: translateX(4px);
+    
+    &::before {
+      height: ${props => props.$active ? '0' : '24px'};
+    }
+    
+    svg {
+      transform: scale(1.1);
+    }
   }
 `;
 

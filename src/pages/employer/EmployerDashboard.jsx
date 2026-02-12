@@ -7,23 +7,42 @@ import { Briefcase, Users, Eye, TrendingUp } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTranslations } from '../../locales/translations';
 
-const DashboardContainer = styled.div``;
+const DashboardContainer = styled.div`
+  animation: fadeIn 0.5s ease-in;
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
 
 const PageHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 32px;
+  margin-bottom: 40px;
   
   div {
     h1 {
-      font-size: 32px;
-      font-weight: 700;
-      margin-bottom: 8px;
+      font-size: 36px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      background: ${props => props.theme.colors.gradientPrimary};
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     
     p {
       color: ${props => props.theme.colors.textLight};
+      font-size: 17px;
+      font-weight: 500;
     }
   }
 `;
@@ -36,49 +55,88 @@ const StatsGrid = styled.div`
 `;
 
 const Section = styled.section`
-  margin-bottom: 48px;
+  margin-bottom: 56px;
 `;
 
 const SectionHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
   
   h2 {
-    font-size: 24px;
+    font-size: 26px;
+    font-weight: 700;
+    color: ${props => props.theme.colors.text};
+    position: relative;
+    padding-left: 16px;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 5px;
+      height: 28px;
+      background: ${props => props.theme.colors.gradientPrimary};
+      border-radius: 3px;
+    }
+  }
+  
+  a {
     font-weight: 600;
+    font-size: 15px;
+    transition: all ${props => props.theme.transitions.fast};
+    
+    &:hover {
+      text-decoration: underline;
+      transform: translateX(4px);
+      display: inline-block;
+    }
   }
 `;
 
 const Table = styled.table`
   width: 100%;
   background: ${props => props.theme.colors.bgLight};
-  border-radius: ${props => props.theme.borderRadius.md};
-  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  border: 2px solid ${props => props.theme.colors.border};
   border-collapse: collapse;
+  box-shadow: ${props => props.theme.shadows.card};
+  overflow: hidden;
   
   th {
     text-align: left;
-    padding: 16px;
+    padding: 18px 20px;
     background: ${props => props.theme.colors.bgDark};
-    font-weight: 600;
+    font-weight: 700;
     font-size: 14px;
-    color: ${props => props.theme.colors.textLight};
-    border-bottom: 1px solid ${props => props.theme.colors.border};
+    color: ${props => props.theme.colors.text};
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid ${props => props.theme.colors.border};
   }
   
   td {
-    padding: 16px;
+    padding: 18px 20px;
     border-bottom: 1px solid ${props => props.theme.colors.border};
+    font-size: 15px;
   }
   
-  tr:last-child td {
+  tbody tr:last-child td {
     border-bottom: none;
   }
   
-  tr:hover {
-    background: ${props => props.theme.colors.bgDark};
+  tbody tr {
+    transition: all ${props => props.theme.transitions.fast};
+    cursor: pointer;
+    
+    &:hover {
+      background: ${props => props.theme.colors.bgDark};
+      transform: scale(1.01);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
   }
 `;
 
@@ -89,7 +147,7 @@ const EmployerDashboard = () => {
   const recentApplications = [
     { candidate: 'Hiếu sàn', job: 'Senior React Developer', applied: t.employer.applied2h, status: 'pending' },
     { candidate: 'Duy sàn', job: 'Thu ngân', applied: t.employer.applied5h, status: 'reviewed' },
-    { candidate: 'Nheo', job: 'UI/UX Designer', applied: t.employer.applied1d, status: 'approved' },
+    { candidate: 'Nheo', job: 'Nhân viên pha chế', applied: t.employer.applied1d, status: 'approved' },
   ];
 
   return (

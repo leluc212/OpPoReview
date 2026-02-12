@@ -140,7 +140,7 @@ const EmployerRegister = () => {
                   id="companyName"
                   name="companyName"
                   type="text"
-                  placeholder="Acme Inc."
+                  placeholder="Highlands"
                   value={formData.companyName}
                   onChange={handleChange}
                   $error={errors.companyName}

@@ -201,8 +201,8 @@ const JobListing = () => {
     },
     {
       id: 3,
-      title: 'Frontend Developer',
-      company: 'Acme Inc.',
+      title: 'Nhân viên',
+      company: 'Highlands',
       employerId: 'acme',
       location: 'Phú Nhuận, TP.HCM',
       type: 'Full-time',
@@ -213,8 +213,8 @@ const JobListing = () => {
     },
     {
       id: 4,
-      title: 'Backend Developer',
-      company: 'Tech Solutions',
+      title: 'Nhân viên phục vụ',
+      company: 'Le moments',
       employerId: 'techsolutions',
       location: 'Thủ Đức, TP.HCM',
       type: 'Full-time',
@@ -225,8 +225,8 @@ const JobListing = () => {
     },
     {
       id: 5,
-      title: 'UI/UX Designer',
-      company: 'Design Co.',
+      title: 'Nhân viên pha chế',
+      company: 'Suncha',
       employerId: 'designco',
       location: 'Bình Thạnh, TP.HCM',
       type: 'Contract',
@@ -237,8 +237,8 @@ const JobListing = () => {
     },
     {
       id: 6,
-      title: 'DevOps Engineer',
-      company: 'Cloud Systems',
+      title: 'Nhân viên pha chế',
+      company: 'Trà Tam Hảo',
       employerId: 'cloudsystems',
       location: 'Quận 7, TP.HCM',
       type: 'Full-time',

@@ -76,9 +76,9 @@ const Applications = () => {
   const applications = [
     { candidate: 'Hiếu sàn', job: 'Senior React Developer', applied: t.employer.applied2h, status: 'pending' },
     { candidate: 'Duy sàn', job: 'Thu ngân', applied: t.employer.applied5h, status: 'pending' },
-    { candidate: 'Nheo', job: 'UI/UX Designer', applied: t.employer.applied1d, status: 'approved' },
+    { candidate: 'Nheo', job: 'Nhân viên pha chế', applied: t.employer.applied1d, status: 'approved' },
     { candidate: 'Gemmin', job: 'Senior React Developer', applied: t.employerJobs.posted2d || '2 days ago', status: 'rejected' },
-    { candidate: 'Zun', job: 'Backend Developer', applied: t.employerJobs.posted1w || t.employer.applied1d, status: 'pending' },
+    { candidate: 'Zun', job: 'Nhân viên phục vụ', applied: t.employerJobs.posted1w || t.employer.applied1d, status: 'pending' },
   ];
 
   return (
