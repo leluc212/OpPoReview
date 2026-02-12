@@ -178,24 +178,24 @@ const JobListing = () => {
     {
       id: 1,
       title: 'Senior React Developer',
-      company: 'TechCorp',
-      employerId: 'techcorp',
-      location: 'Remote',
+      company: 'FPT Software',
+      employerId: 'FPT Software',
+      location: 'Quận 1, TP.HCM',
       type: 'Full-time',
       category: 'standard',
-      salary: '120 - 150 triệu ',
+      salary: '120 - 150 triệu VND',
       postedAt: '2 days ago',
-      tags: ['React', 'TypeScript', 'Remote']
+      tags: ['React', 'TypeScript', 'Hybrid']
     },
     {
       id: 2,
-      title: 'Full Stack Engineer',
-      company: 'StartupXYZ',
-      employerId: 'startupxyz',
-      location: 'San Francisco, CA',
+      title: 'Thu ngân',
+      company: 'Hồng Trà Ngô Gia',
+      employerId: 'Hồng Trà Ngô Gia',
+      location: 'Quận 3, TP.HCM',
       type: 'Full-time',
       category: 'standard',
-      salary: '100 - 140 triệu ',
+      salary: '100 - 140 triệu VND',
       postedAt: '1 week ago',
       tags: ['Node.js', 'React', 'AWS']
     },
@@ -204,10 +204,10 @@ const JobListing = () => {
       title: 'Frontend Developer',
       company: 'Acme Inc.',
       employerId: 'acme',
-      location: 'New York, NY',
+      location: 'Phú Nhuận, TP.HCM',
       type: 'Full-time',
       category: 'standard',
-      salary: '90 - 120 triệu ',
+      salary: '90 - 120 triệu VND',
       postedAt: '3 days ago',
       tags: ['Vue.js', 'JavaScript', 'CSS']
     },
@@ -216,10 +216,10 @@ const JobListing = () => {
       title: 'Backend Developer',
       company: 'Tech Solutions',
       employerId: 'techsolutions',
-      location: 'Austin, TX',
+      location: 'Thủ Đức, TP.HCM',
       type: 'Full-time',
       category: 'standard',
-      salary: '110 - 140 triệu ',
+      salary: '110 - 140 triệu VND',
       postedAt: '5 days ago',
       tags: ['Python', 'Django', 'PostgreSQL']
     },
@@ -228,10 +228,10 @@ const JobListing = () => {
       title: 'UI/UX Designer',
       company: 'Design Co.',
       employerId: 'designco',
-      location: 'Remote',
+      location: 'Bình Thạnh, TP.HCM',
       type: 'Contract',
       category: 'standard',
-      salary: '80 - 100 triệu ',
+      salary: '80 - 100 triệu VND',
       postedAt: '1 week ago',
       tags: ['Figma', 'UI Design', 'Prototyping']
     },
@@ -240,10 +240,10 @@ const JobListing = () => {
       title: 'DevOps Engineer',
       company: 'Cloud Systems',
       employerId: 'cloudsystems',
-      location: 'Seattle, WA',
+      location: 'Quận 7, TP.HCM',
       type: 'Full-time',
       category: 'standard',
-      salary: '130 - 160 triệu ',
+      salary: '130 - 160 triệu VND',
       postedAt: '4 days ago',
       tags: ['AWS', 'Docker', 'Kubernetes']
     },
@@ -252,7 +252,7 @@ const JobListing = () => {
       title: 'Shift Supervisor',
       company: 'NightOwl Logistics',
       employerId: 'nightowl',
-      location: 'Remote / Ca đêm',
+      location: 'TP.HCM (Ca đêm)',
       type: 'Shift',
       category: 'shift',
       salary: '750k - 1 triệu/giờ',
@@ -264,7 +264,7 @@ const JobListing = () => {
       title: 'Ca sáng - Nhân viên kho',
       company: 'FastMove',
       employerId: 'fastmove',
-      location: 'Hà Nội',
+      location: 'Tân Bình, TP.HCM',
       type: 'Shift',
       category: 'shift',
       salary: '200k - 300k/ca',
@@ -288,7 +288,12 @@ const JobListing = () => {
     );
   };
 
-  const filteredJobs = useMemo(() => jobs.filter(j => j.category === tab), [jobs, tab]);
+  const filteredJobs = useMemo(() => {
+    if (tab === 'saved') {
+      return jobs.filter(j => savedJobs.includes(j.id));
+    }
+    return jobs.filter(j => j.category === tab);
+  }, [jobs, tab, savedJobs]);
 
   return (
     <DashboardLayout role="candidate">
@@ -365,7 +370,7 @@ const JobListing = () => {
         <MainContent>
           <ContentHeader>
             <h1>{t.jobs.posts}</h1>
-            <p>{`Đang hiển thị ${filteredJobs.length} bài đăng`}</p>
+            <p>{`${t.jobs.showing} ${filteredJobs.length} ${t.jobs.postsLabel}`}</p>
           </ContentHeader>
 
           <Tabs>
@@ -374,6 +379,9 @@ const JobListing = () => {
             </TabButton>
             <TabButton $active={tab === 'shift'} onClick={() => setTab('shift')}>
               {t.jobs.shiftJobs}
+            </TabButton>
+            <TabButton $active={tab === 'saved'} onClick={() => setTab('saved')}>
+              {t.jobs.savedTab}
             </TabButton>
           </Tabs>
 

@@ -4,6 +4,8 @@ import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
 import { Button } from '../../components/FormElements';
 import { Check, X } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTranslations } from '../../locales/translations';
 
 const EmployerApprovalContainer = styled.div``;
 
@@ -53,8 +55,11 @@ const ActionButtons = styled.div`
 `;
 
 const EmployerApproval = () => {
+  const { language } = useLanguage();
+  const t = useTranslations(language);
+
   const pendingEmployers = [
-    { company: 'TechCorp Inc.', email: 'hr@techcorp.com', industry: 'Technology', submitted: '2024-02-10', status: 'pending' },
+    { company: 'FPT Software Inc.', email: 'hr@FPT Software.com', industry: 'Technology', submitted: '2024-02-10', status: 'pending' },
     { company: 'Design Studio', email: 'info@designstudio.com', industry: 'Design', submitted: '2024-02-11', status: 'pending' },
     { company: 'Finance Group', email: 'contact@financegroup.com', industry: 'Finance', submitted: '2024-02-12', status: 'pending' },
   ];
@@ -63,19 +68,19 @@ const EmployerApproval = () => {
     <DashboardLayout role="admin">
       <EmployerApprovalContainer>
         <PageHeader>
-          <h1>Employer Approval</h1>
-          <p style={{ color: '#64748B' }}>Review and approve employer registrations</p>
+          <h1>{t.adminEmployerApproval.title}</h1>
+          <p style={{ color: '#64748B' }}>{t.adminEmployerApproval.subtitle}</p>
         </PageHeader>
 
         <Table>
           <thead>
             <tr>
-              <th>Company</th>
-              <th>Email</th>
-              <th>Industry</th>
-              <th>Submitted</th>
-              <th>Status</th>
-              <th>Actions</th>
+              <th>{t.adminEmployerApproval.company}</th>
+              <th>{t.adminEmployerApproval.email}</th>
+              <th>{t.adminEmployerApproval.industry}</th>
+              <th>{t.adminEmployerApproval.submitted}</th>
+              <th>{t.adminEmployerApproval.status}</th>
+              <th>{t.adminEmployerApproval.actions}</th>
             </tr>
           </thead>
           <tbody>
@@ -89,10 +94,10 @@ const EmployerApproval = () => {
                 <td>
                   <ActionButtons>
                     <Button $variant="primary" $size="small">
-                      <Check /> Approve
+                      <Check /> {t.adminEmployerApproval.approve}
                     </Button>
                     <Button $variant="danger" $size="small">
-                      <X /> Reject
+                      <X /> {t.adminEmployerApproval.reject}
                     </Button>
                   </ActionButtons>
                 </td>

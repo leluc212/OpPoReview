@@ -73,14 +73,14 @@ export const GlobalStyles = createGlobalStyle`
 export const theme = {
   colors: {
     // Primary colors
-    primary: '#6366F1',
-    primaryDark: '#4F46E5',
-    primaryLight: '#818CF8',
+    primary: '#0E3995',
+    primaryDark: '#0D3880',
+    primaryLight: '#0055A5',
     
     // Secondary colors
-    secondary: '#A855F7',
-    secondaryDark: '#9333EA',
-    secondaryLight: '#C084FC',
+    secondary: '#0055A5',
+    secondaryDark: '#0E3995',
+    secondaryLight: '#0D3880',
     
     // Background
     background: '#F8FAFC',
@@ -100,7 +100,7 @@ export const theme = {
     success: '#10B981',
     warning: '#F59E0B',
     error: '#EF4444',
-    info: '#3B82F6',
+    info: '#0055A5',
     
     // Status light backgrounds
     successBg: '#D1FAE5',
@@ -109,9 +109,9 @@ export const theme = {
     infoBg: '#DBEAFE',
     
     // Gradients
-    gradientPrimary: 'linear-gradient(135deg, #6366F1 0%, #A855F7 100%)',
-    gradientSecondary: 'linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)',
-    gradientHero: 'linear-gradient(135deg, #667EEA 0%, #764BA2 100%)',
+    gradientPrimary: 'linear-gradient(135deg, #0E3995 0%, #0055A5 100%)',
+    gradientSecondary: 'linear-gradient(135deg, #0D3880 0%, #0E3995 100%)',
+    gradientHero: 'linear-gradient(135deg, #0D3880 0%, #0055A5 100%)',
     
     // Overlay
     overlay: 'rgba(15, 23, 42, 0.5)',
@@ -140,7 +140,7 @@ export const theme = {
     md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
     lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
     xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-    hover: '0 8px 24px rgba(99, 102, 241, 0.15)',
+    hover: '0 8px 24px rgba(14, 57, 149, 0.18)',
     card: '0 2px 8px rgba(0, 0, 0, 0.08)',
   },
   

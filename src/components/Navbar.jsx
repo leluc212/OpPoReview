@@ -166,7 +166,7 @@ const Navbar = ({ showSearch = true }) => {
         {showSearch && (
           <SearchBar>
             <Search />
-            <input type="text" placeholder="Search jobs, companies..." />
+            <input type="text" placeholder="Tìm việc, công ty..." />
           </SearchBar>
         )}
       </NavLeft>

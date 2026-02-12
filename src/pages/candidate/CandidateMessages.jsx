@@ -129,8 +129,8 @@ const CandidateMessages = () => {
   const t = useTranslations(language);
 
   const conversations = [
-    { id: 1, company: 'TechCorp', lastMessage: 'Cảm ơn bạn đã ứng tuyển!', time: '10:30', unread: true },
-    { id: 2, company: 'StartupXYZ', lastMessage: 'Bạn có thể bắt đầu khi nào?', time: 'Hôm qua', unread: false },
+    { id: 1, company: 'FPT Software', lastMessage: 'Cảm ơn bạn đã ứng tuyển!', time: '10:30', unread: true },
+    { id: 2, company: 'Hồng Trà Ngô Gia', lastMessage: 'Bạn có thể bắt đầu khi nào?', time: 'Hôm qua', unread: false },
   ];
 
   const messages = [
@@ -159,7 +159,7 @@ const CandidateMessages = () => {
 
         <ChatArea>
           <ChatHeader>
-            <h3>TechCorp</h3>
+            <h3>FPT Software</h3>
             <p>Nhà tuyển dụng</p>
           </ChatHeader>
 

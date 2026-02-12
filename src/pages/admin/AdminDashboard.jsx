@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
 import { Users, Briefcase, Building2, DollarSign } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTranslations } from '../../locales/translations';
 
 const DashboardContainer = styled.div``;
 
@@ -72,53 +74,56 @@ const Table = styled.table`
 `;
 
 const AdminDashboard = () => {
+  const { language } = useLanguage();
+  const t = useTranslations(language);
+
   const recentActivity = [
-    { user: 'TechCorp', action: 'Registered as employer', time: '2 hours ago' },
-    { user: 'John Doe', action: 'Applied for Senior Developer', time: '3 hours ago' },
-    { user: 'Design Inc.', action: 'Posted new job', time: '5 hours ago' },
+    { user: 'FPT Software', action: t.adminDashboard.activityRegisteredEmployer, time: t.adminDashboard.time2h },
+    { user: 'John Doe', action: t.adminDashboard.activityApplied, time: t.adminDashboard.time3h },
+    { user: 'Design Inc.', action: t.adminDashboard.activityPostedJob, time: t.adminDashboard.time5h },
   ];
 
   return (
     <DashboardLayout role="admin">
       <DashboardContainer>
         <PageHeader>
-          <h1>Admin Dashboard</h1>
-          <p>Platform overview and analytics</p>
+          <h1>{t.adminDashboard.title}</h1>
+          <p>{t.adminDashboard.subtitle}</p>
         </PageHeader>
 
         <StatsGrid>
           <StatsCard
-            title="Total Users"
+            title={t.adminDashboard.statsTotalUsers}
             value="2,458"
             change="+12%"
-            changeText="from last month"
+            changeText={t.adminDashboard.changeFromLastMonth}
             icon={Users}
-            color="linear-gradient(135deg, #667EEA 0%, #764BA2 100%)"
+            color="linear-gradient(135deg, #0E3995 0%, #0055A5 100%)"
             positive
           />
           <StatsCard
-            title="Active Jobs"
+            title={t.adminDashboard.statsActiveJobs}
             value="345"
             change="+8%"
-            changeText="from last week"
+            changeText={t.adminDashboard.changeFromLastWeek}
             icon={Briefcase}
             color="linear-gradient(135deg, #F093FB 0%, #F5576C 100%)"
             positive
           />
           <StatsCard
-            title="Companies"
+            title={t.adminDashboard.statsCompanies}
             value="156"
             change="+15"
-            changeText="pending approval"
+            changeText={t.adminDashboard.changePendingApproval}
             icon={Building2}
             color="linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%)"
             positive
           />
           <StatsCard
-            title="Revenue"
-            value="$24.5K"
+            title={t.adminDashboard.statsRevenue}
+            value="24.5 tỷ VND"
             change="+23%"
-            changeText="from last month"
+            changeText={t.adminDashboard.changeFromLastMonth}
             icon={DollarSign}
             color="linear-gradient(135deg, #43E97B 0%, #38F9D7 100%)"
             positive
@@ -127,15 +132,15 @@ const AdminDashboard = () => {
 
         <Section>
           <SectionHeader>
-            <h2>Recent Activity</h2>
+            <h2>{t.adminDashboard.recentActivity}</h2>
           </SectionHeader>
           
           <Table>
             <thead>
               <tr>
-                <th>User</th>
-                <th>Action</th>
-                <th>Time</th>
+                <th>{t.adminDashboard.tableUser}</th>
+                <th>{t.adminDashboard.tableAction}</th>
+                <th>{t.adminDashboard.tableTime}</th>
               </tr>
             </thead>
             <tbody>

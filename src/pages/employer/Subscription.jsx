@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import { Button } from '../../components/FormElements';
 import { Check } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTranslations } from '../../locales/translations';
 
 const SubscriptionContainer = styled.div`
   max-width: 1200px;
@@ -97,25 +99,46 @@ const Features = styled.ul`
 `;
 
 const Subscription = () => {
+  const { language } = useLanguage();
+  const t = useTranslations(language);
+
   const plans = [
     {
-      name: 'Basic',
-      price: '$49',
-      period: '/month',
-      features: ['5 Job Postings', '50 Applications', 'Basic Support', 'Analytics Dashboard']
+      name: t.employerSubscription.plans.basic,
+      price: '1.2 triệu VND',
+      period: t.employerSubscription.priceMonth,
+      features: [
+        t.employerSubscription.features.jobPosting5,
+        t.employerSubscription.features.applications50,
+        t.employerSubscription.features.basicSupport,
+        t.employerSubscription.features.analytics,
+      ]
     },
     {
-      name: 'Professional',
-      price: '$99',
-      period: '/month',
-      features: ['20 Job Postings', 'Unlimited Applications', 'Priority Support', 'Advanced Analytics', 'Featured Listings'],
+      name: t.employerSubscription.plans.professional,
+      price: '2.3 triệu VND',
+      period: t.employerSubscription.priceMonth,
+      features: [
+        t.employerSubscription.features.jobPosting20,
+        t.employerSubscription.features.applicationsUnlimited,
+        t.employerSubscription.features.prioritySupport,
+        t.employerSubscription.features.advancedAnalytics,
+        t.employerSubscription.features.featuredListings,
+      ],
       featured: true
     },
     {
-      name: 'Enterprise',
-      price: '$199',
-      period: '/month',
-      features: ['Unlimited Jobs', 'Unlimited Applications', '24/7 Support', 'Custom Analytics', 'API Access', 'Dedicated Manager']
+      name: t.employerSubscription.plans.enterprise,
+      price: '4.5 triệu VND',
+      period: t.employerSubscription.priceMonth,
+      features: [
+        t.employerSubscription.features.jobPostingUnlimited,
+        t.employerSubscription.features.applicationsUnlimited,
+        t.employerSubscription.features.support247,
+        t.employerSubscription.features.customAnalytics,
+        t.employerSubscription.features.apiAccess,
+        t.employerSubscription.features.dedicatedManager,
+      ]
     }
   ];
 
@@ -123,14 +146,14 @@ const Subscription = () => {
     <DashboardLayout role="employer" showSearch={false}>
       <SubscriptionContainer>
         <PageHeader>
-          <h1>Choose Your Plan</h1>
-          <p>Select the perfect plan for your hiring needs</p>
+          <h1>{t.employerSubscription.title}</h1>
+          <p>{t.employerSubscription.subtitle}</p>
         </PageHeader>
 
         <PricingGrid>
           {plans.map((plan, index) => (
             <PricingCard key={index} $featured={plan.featured}>
-              {plan.featured && <Badge>Most Popular</Badge>}
+              {plan.featured && <Badge>{t.employerSubscription.mostPopular}</Badge>}
               <PlanName>{plan.name}</PlanName>
               <Price>
                 {plan.price}
@@ -145,7 +168,7 @@ const Subscription = () => {
                 ))}
               </Features>
               <Button $variant={plan.featured ? 'primary' : 'secondary'} $fullWidth>
-                {plan.featured ? 'Get Started' : 'Choose Plan'}
+                {plan.featured ? t.employerSubscription.getStarted : t.employerSubscription.choosePlan}
               </Button>
             </PricingCard>
           ))}

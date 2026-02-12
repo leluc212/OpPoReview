@@ -127,21 +127,21 @@ const CandidateDashboard = () => {
     {
       id: 1,
       title: 'Senior React Developer',
-      company: 'TechCorp',
-      location: 'Remote',
+      company: 'FPT Software',
+      location: 'Quận 1, TP.HCM',
       type: 'Full-time',
-      salary: '$120k - $150k',
-      postedAt: '2 days ago',
-      tags: ['React', 'TypeScript', 'Remote']
+      salary: '120 - 150 triệu VND',
+      postedAt: '2 ngày trước',
+      tags: ['React', 'TypeScript', 'Hybrid']
     },
     {
       id: 2,
-      title: 'Full Stack Engineer',
-      company: 'StartupXYZ',
-      location: 'San Francisco, CA',
+      title: 'Thu ngân',
+      company: 'Hồng Trà Ngô Gia',
+      location: 'Quận 3, TP.HCM',
       type: 'Full-time',
-      salary: '$100k - $140k',
-      postedAt: '1 week ago',
+      salary: '100 - 140 triệu VND',
+      postedAt: '1 tuần trước',
       tags: ['Node.js', 'React', 'AWS']
     }
   ];
@@ -167,7 +167,7 @@ const CandidateDashboard = () => {
             change="+12%"
             changeText={language === 'vi' ? 'từ tháng trước' : 'from last month'}
             icon={FileText}
-            color="linear-gradient(135deg, #667EEA 0%, #764BA2 100%)"
+            color="linear-gradient(135deg, #0E3995 0%, #0055A5 100%)"
             positive
           />
           <StatsCard

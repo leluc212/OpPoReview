@@ -110,7 +110,6 @@ const Sidebar = ({ role }) => {
     { section: t.sidebar.main, items: [
       { to: '/candidate/dashboard', icon: LayoutDashboard, label: t.sidebar.dashboard },
       { to: '/candidate/jobs', icon: Briefcase, label: t.sidebar.findJobs },
-      { to: '/candidate/saved-jobs', icon: Star, label: t.sidebar.savedJobs },
     ]},
     { section: t.sidebar.communication, items: [
       { to: '/candidate/messages', icon: MessageSquare, label: t.sidebar.messages },

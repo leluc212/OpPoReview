@@ -3,9 +3,9 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
 import StatusBadge from '../../components/StatusBadge';
-import { Briefcase, Users, Eye, TrendingUp, Plus } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '../../components/FormElements';
+import { Briefcase, Users, Eye, TrendingUp } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTranslations } from '../../locales/translations';
 
 const DashboardContainer = styled.div``;
 
@@ -83,12 +83,13 @@ const Table = styled.table`
 `;
 
 const EmployerDashboard = () => {
-  const navigate = useNavigate();
+  const { language } = useLanguage();
+  const t = useTranslations(language);
 
   const recentApplications = [
-    { candidate: 'John Smith', job: 'Senior React Developer', applied: '2 hours ago', status: 'pending' },
-    { candidate: 'Jane Doe', job: 'Full Stack Engineer', applied: '5 hours ago', status: 'reviewed' },
-    { candidate: 'Bob Johnson', job: 'UI/UX Designer', applied: '1 day ago', status: 'approved' },
+    { candidate: 'Hiếu sàn', job: 'Senior React Developer', applied: t.employer.applied2h, status: 'pending' },
+    { candidate: 'Duy sàn', job: 'Thu ngân', applied: t.employer.applied5h, status: 'reviewed' },
+    { candidate: 'Nheo', job: 'UI/UX Designer', applied: t.employer.applied1d, status: 'approved' },
   ];
 
   return (
@@ -96,47 +97,44 @@ const EmployerDashboard = () => {
       <DashboardContainer>
         <PageHeader>
           <div>
-            <h1>Employer Dashboard</h1>
-            <p>Manage your jobs and applications</p>
+            <h1>{t.employer.dashboardTitle}</h1>
+            <p>{t.employer.dashboardSubtitle}</p>
           </div>
-          <Button $variant="primary" $size="large" onClick={() => navigate('/employer/post-job')}>
-            <Plus /> Post New Job
-          </Button>
         </PageHeader>
 
         <StatsGrid>
           <StatsCard
-            title="Active Jobs"
+            title={t.employer.statsActiveJobs}
             value="12"
             change="+3"
-            changeText="from last month"
+            changeText={t.employer.changeFromLastMonth}
             icon={Briefcase}
-            color="linear-gradient(135deg, #667EEA 0%, #764BA2 100%)"
+            color="linear-gradient(135deg, #0E3995 0%, #0055A5 100%)"
             positive
           />
           <StatsCard
-            title="Total Applications"
+            title={t.employer.statsTotalApplications}
             value="248"
             change="+45%"
-            changeText="from last month"
+            changeText={t.employer.changeFromLastMonth}
             icon={Users}
             color="linear-gradient(135deg, #F093FB 0%, #F5576C 100%)"
             positive
           />
           <StatsCard
-            title="Profile Views"
+            title={t.employer.statsProfileViews}
             value="1,234"
             change="+12%"
-            changeText="from last week"
+            changeText={t.employer.changeFromLastWeek}
             icon={Eye}
             color="linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%)"
             positive
           />
           <StatsCard
-            title="Hired"
+            title={t.employer.statsHired}
             value="8"
             change="+2"
-            changeText="this month"
+            changeText={t.employer.changeThisMonth}
             icon={TrendingUp}
             color="linear-gradient(135deg, #43E97B 0%, #38F9D7 100%)"
             positive
@@ -145,17 +143,17 @@ const EmployerDashboard = () => {
 
         <Section>
           <SectionHeader>
-            <h2>Recent Applications</h2>
-            <a href="/employer/applications" style={{ color: '#6366F1', fontWeight: 500 }}>View all →</a>
+            <h2>{t.employer.recentApplications}</h2>
+            <a href="/employer/applications" style={{ color: '#0E3995', fontWeight: 500 }}>{t.employer.viewAll} →</a>
           </SectionHeader>
           
           <Table>
             <thead>
               <tr>
-                <th>Candidate</th>
-                <th>Position</th>
-                <th>Applied</th>
-                <th>Status</th>
+                <th>{t.employer.tableCandidate}</th>
+                <th>{t.employer.tablePosition}</th>
+                <th>{t.employer.tableApplied}</th>
+                <th>{t.employer.tableStatus}</th>
               </tr>
             </thead>
             <tbody>

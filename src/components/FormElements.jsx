@@ -16,15 +16,15 @@ export const Button = styled.button`
   justify-content: center;
   
   ${props => props.$variant === 'primary' && `
-    background: linear-gradient(135deg, #6366F1 0%, #A855F7 100%);
+    background: linear-gradient(135deg, #0E3995 0%, #0055A5 100%);
     color: white;
-    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 8px 24px rgba(14, 57, 149, 0.35);
     border: none;
     font-weight: 600;
     
     &:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(99, 102, 241, 0.5);
+      box-shadow: 0 12px 32px rgba(0, 85, 165, 0.45);
     }
     
     &:active:not(:disabled) {

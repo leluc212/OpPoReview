@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
 import { Bell, Briefcase, CheckCircle, MessageSquare } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTranslations } from '../../locales/translations';
 
 const NotificationsContainer = styled.div`
   max-width: 900px;
@@ -74,16 +76,19 @@ const NotificationContent = styled.div`
 `;
 
 const CandidateNotifications = () => {
+  const { language } = useLanguage();
+  const t = useTranslations(language);
+
   const notifications = [
     {
       id: 1,
       type: 'application',
       icon: Briefcase,
-      color: '#DBEAFE',
-      iconColor: '#3B82F6',
-      title: 'Application Viewed',
-      message: 'TechCorp viewed your application for Senior React Developer',
-      time: '2 hours ago',
+      color: '#E6ECFF',
+      iconColor: '#0055A5',
+      title: t.notifications.applicationViewedTitle,
+      message: t.notifications.applicationViewedMessage,
+      time: t.notifications.applicationViewedTime,
       unread: true
     },
     {
@@ -92,9 +97,9 @@ const CandidateNotifications = () => {
       icon: MessageSquare,
       color: '#FEF3C7',
       iconColor: '#F59E0B',
-      title: 'New Message',
-      message: 'You have a new message from StartupXYZ',
-      time: '5 hours ago',
+      title: t.notifications.newMessageTitle,
+      message: t.notifications.newMessageMessage,
+      time: t.notifications.newMessageTime,
       unread: true
     },
     {
@@ -103,9 +108,9 @@ const CandidateNotifications = () => {
       icon: CheckCircle,
       color: '#D1FAE5',
       iconColor: '#10B981',
-      title: 'Application Accepted',
-      message: 'Your application for Frontend Developer at Acme Inc. has been accepted',
-      time: '1 day ago',
+      title: t.notifications.applicationAcceptedTitle,
+      message: t.notifications.applicationAcceptedMessage,
+      time: t.notifications.applicationAcceptedTime,
       unread: false
     }
   ];
@@ -114,7 +119,7 @@ const CandidateNotifications = () => {
     <DashboardLayout role="candidate" showSearch={false}>
       <NotificationsContainer>
         <PageHeader>
-          <h1>Notifications</h1>
+          <h1>{t.notifications.title}</h1>
         </PageHeader>
 
         {notifications.map(notif => (

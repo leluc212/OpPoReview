@@ -4,6 +4,8 @@ import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
 import { Edit, Trash2 } from 'lucide-react';
 import { Button } from '../../components/FormElements';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTranslations } from '../../locales/translations';
 
 const JobManagementContainer = styled.div``;
 
@@ -77,28 +79,31 @@ const IconButton = styled.button`
 `;
 
 const JobManagement = () => {
+  const { language } = useLanguage();
+  const t = useTranslations(language);
+
   const jobs = [
-    { id: 1, title: 'Senior React Developer', applicants: 45, status: 'active', posted: '2 days ago' },
-    { id: 2, title: 'Full Stack Engineer', applicants: 32, status: 'active', posted: '1 week ago' },
-    { id: 3, title: 'UI/UX Designer', applicants: 28, status: 'inactive', posted: '2 weeks ago' },
+    { id: 1, title: 'Senior React Developer', applicants: 45, status: 'active', posted: t.employerJobs.posted2d },
+    { id: 2, title: 'Thu ngân', applicants: 32, status: 'active', posted: t.employerJobs.posted1w },
+    { id: 3, title: 'UI/UX Designer', applicants: 28, status: 'inactive', posted: t.employerJobs.posted2w },
   ];
 
   return (
     <DashboardLayout role="employer">
       <JobManagementContainer>
         <PageHeader>
-          <h1>Job Management</h1>
-          <Button $variant="primary">+ Post New Job</Button>
+          <h1>{t.employerJobs.title}</h1>
+          <Button $variant="primary">+ {t.employerJobs.postNewJob}</Button>
         </PageHeader>
 
         <Table>
           <thead>
             <tr>
-              <th>Job Title</th>
-              <th>Applicants</th>
-              <th>Status</th>
-              <th>Posted</th>
-              <th>Actions</th>
+              <th>{t.employerJobs.tableTitle}</th>
+              <th>{t.employerJobs.tableApplicants}</th>
+              <th>{t.employerJobs.tableStatus}</th>
+              <th>{t.employerJobs.tablePosted}</th>
+              <th>{t.employerJobs.tableActions}</th>
             </tr>
           </thead>
           <tbody>

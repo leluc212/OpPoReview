@@ -284,7 +284,7 @@ const EmployerRegister = () => {
           </form>
 
           <div style={{ textAlign: 'center', marginTop: '24px', color: '#64748B' }}>
-            Already have an account? <Link to="/login" style={{ color: '#6366F1', fontWeight: 500 }}>Sign in</Link>
+            Already have an account? <Link to="/login" style={{ color: '#0E3995', fontWeight: 500 }}>Sign in</Link>
           </div>
         </FormCard>
       </RegisterWrapper>

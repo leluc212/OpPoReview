@@ -21,7 +21,7 @@ const Header = styled(motion.header)`
   align-items: center;
   background: rgba(10, 10, 15, 0.8);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+  border-bottom: 1px solid rgba(14, 57, 149, 0.15);
   position: fixed;
   top: 0;
   left: 0;
@@ -37,11 +37,11 @@ const Logo = styled(Link)`
   padding: 10px 14px;
   font-size: 30px;
   font-weight: 800;
-  background: linear-gradient(135deg, #6366F1 0%, #A855F7 50%, #EC4899 100%);
+  background: linear-gradient(135deg, #0E3995 0%, #0055A5 50%, #0D3880 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-shadow: 0 0 30px rgba(99, 102, 241, 0.35), 0 10px 40px rgba(99, 102, 241, 0.25);
+  text-shadow: 0 0 30px rgba(14, 57, 149, 0.35), 0 10px 40px rgba(0, 85, 165, 0.3);
   letter-spacing: -0.5px;
   border-radius: 14px;
   background-color: rgba(255, 255, 255, 0.06);
@@ -63,7 +63,7 @@ const NavLinks = styled.div`
     
     &:hover {
       color: #fff;
-      text-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
+      text-shadow: 0 0 20px rgba(14, 57, 149, 0.6);
     }
     
     &::after {
@@ -73,7 +73,7 @@ const NavLinks = styled.div`
       left: 0;
       width: 0;
       height: 2px;
-      background: linear-gradient(90deg, #6366F1, #A855F7);
+      background: linear-gradient(90deg, #0E3995, #0055A5);
       transition: width 0.3s ease;
     }
     
@@ -99,7 +99,7 @@ const LanguageToggle = styled.button`
   
   &:hover {
     background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(99, 102, 241, 0.4);
+    border-color: rgba(14, 57, 149, 0.4);
     color: #fff;
   }
   
@@ -141,9 +141,9 @@ const AnimatedBackground = styled.div`
     width: 200%;
     height: 200%;
     background: 
-      radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.25) 0%, transparent 40%),
-      radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.25) 0%, transparent 40%),
-      radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.15) 0%, transparent 50%);
+      radial-gradient(circle at 20% 30%, rgba(14, 57, 149, 0.25) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(0, 85, 165, 0.22) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(13, 56, 128, 0.15) 0%, transparent 50%);
     animation: gradientShift 20s ease-in-out infinite;
   }
   
@@ -155,8 +155,8 @@ const AnimatedBackground = styled.div`
     right: 0;
     bottom: 0;
     background-image: 
-      linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+      linear-gradient(rgba(14, 57, 149, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(14, 57, 149, 0.04) 1px, transparent 1px);
     background-size: 50px 50px;
     animation: gridMove 30s linear infinite;
   }
@@ -457,15 +457,15 @@ const CategoryCard = styled(motion.div)`
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+    background: linear-gradient(135deg, rgba(14, 57, 149, 0.12), rgba(0, 85, 165, 0.12));
     opacity: 0;
     transition: opacity 0.4s ease;
   }
   
   &:hover {
     transform: translateY(-12px);
-    border-color: rgba(99, 102, 241, 0.4);
-    box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);
+    border-color: rgba(14, 57, 149, 0.4);
+    box-shadow: 0 20px 60px rgba(14, 57, 149, 0.25);
     
     &::before {
       opacity: 1;
@@ -477,13 +477,13 @@ const CategoryIcon = styled.div`
   width: 72px;
   height: 72px;
   margin: 0 auto 20px;
-  background: linear-gradient(135deg, #6366F1, #A855F7);
+  background: linear-gradient(135deg, #0E3995, #0055A5);
   border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 8px 24px rgba(14, 57, 149, 0.35);
   position: relative;
   z-index: 1;
   
@@ -516,7 +516,7 @@ const CTASection = styled.section`
 `;
 
 const CTACard = styled(motion.div)`
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+  background: linear-gradient(135deg, rgba(14, 57, 149, 0.12), rgba(0, 85, 165, 0.12));
   backdrop-filter: blur(20px);
   border: 1px solid rgba(99, 102, 241, 0.2);
   padding: 100px 80px;
@@ -930,7 +930,7 @@ const LandingPage = () => {
             $size="large" 
             style={{ 
               background: 'white', 
-              color: '#6366F1', 
+              color: '#0E3995', 
               position: 'relative',
               zIndex: 2,
               fontWeight: 700,

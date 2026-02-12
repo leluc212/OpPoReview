@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
 import { Button } from '../../components/FormElements';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTranslations } from '../../locales/translations';
 
 const UserManagementContainer = styled.div``;
 
@@ -47,30 +49,33 @@ const Table = styled.table`
 `;
 
 const UserManagement = () => {
+  const { language } = useLanguage();
+  const t = useTranslations(language);
+
   const users = [
     { name: 'John Doe', email: 'john@example.com', role: 'candidate', status: 'active', joined: '2024-01-15' },
     { name: 'Jane Smith', email: 'jane@example.com', role: 'candidate', status: 'active', joined: '2024-01-20' },
-    { name: 'TechCorp', email: 'hr@techcorp.com', role: 'employer', status: 'active', joined: '2024-01-10' },
-    { name: 'StartupXYZ', email: 'contact@startupxyz.com', role: 'employer', status: 'pending', joined: '2024-02-01' },
+    { name: 'FPT Software', email: 'hr@FPT Software.com', role: 'employer', status: 'active', joined: '2024-01-10' },
+    { name: 'Hồng Trà Ngô Gia', email: 'contact@Hồng Trà Ngô Gia.com', role: 'employer', status: 'pending', joined: '2024-02-01' },
   ];
 
   return (
     <DashboardLayout role="admin">
       <UserManagementContainer>
         <PageHeader>
-          <h1>User Management</h1>
-          <p style={{ color: '#64748B' }}>Manage all platform users</p>
+          <h1>{t.adminUsers.title}</h1>
+          <p style={{ color: '#64748B' }}>{t.adminUsers.subtitle}</p>
         </PageHeader>
 
         <Table>
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Joined</th>
-              <th>Actions</th>
+              <th>{t.adminUsers.name}</th>
+              <th>{t.adminUsers.email}</th>
+              <th>{t.adminUsers.role}</th>
+              <th>{t.adminUsers.status}</th>
+              <th>{t.adminUsers.joined}</th>
+              <th>{t.adminUsers.actions}</th>
             </tr>
           </thead>
           <tbody>
@@ -82,7 +87,7 @@ const UserManagement = () => {
                 <td><StatusBadge status={user.status} /></td>
                 <td style={{ color: '#64748B' }}>{user.joined}</td>
                 <td>
-                  <Button $variant="secondary" $size="small">View</Button>
+                  <Button $variant="secondary" $size="small">{t.adminUsers.view}</Button>
                 </td>
               </tr>
             ))}

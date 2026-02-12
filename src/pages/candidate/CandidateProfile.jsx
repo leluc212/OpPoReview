@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import { Button, Input, TextArea, FormGroup, Label } from '../../components/FormElements';
 import { Upload, Save } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTranslations } from '../../locales/translations';
 
 const ProfileContainer = styled.div`
   max-width: 900px;
@@ -54,16 +56,18 @@ const Avatar = styled.div`
 `;
 
 const CandidateProfile = () => {
+  const { language } = useLanguage();
+  const t = useTranslations(language);
   const [formData, setFormData] = useState({
-    fullName: 'John Doe',
-    email: 'john@example.com',
-    phone: '+1 (555) 123-4567',
-    location: 'San Francisco, CA',
+    fullName: 'Lực Thứ Hai',
+    email: 'lucthuhai@gmail.com',
+    phone: '+89 379784509',
+    location: 'Thủ Đức, TP.HCM',
     title: 'Senior React Developer',
-    bio: 'Experienced developer with 5+ years in web development',
-    linkedin: 'linkedin.com/in/johndoe',
-    github: 'github.com/johndoe',
-    website: 'johndoe.com'
+    bio: 'Kinh nghiệm 20 năm làm IT',
+    linkedin: 'linkedin.com/in/lucthuhai',
+    github: 'github.com/lucthuhai',
+    website: 'leluc.com'
   });
 
   const handleChange = (e) => {
@@ -72,82 +76,82 @@ const CandidateProfile = () => {
 
   const handleSave = () => {
     console.log('Saving profile:', formData);
-    alert('Profile updated successfully!');
+    alert(t.settings.changesSaved);
   };
 
   return (
     <DashboardLayout role="candidate" showSearch={false}>
       <ProfileContainer>
         <ProfileCard>
-          <SectionTitle>Personal Information</SectionTitle>
+          <SectionTitle>{t.profile.personalInfo}</SectionTitle>
           
           <AvatarSection>
             <Avatar>JD</Avatar>
             <div>
               <Button $variant="primary">
-                <Upload /> Upload Photo
+                <Upload /> {t.profile.uploadPhoto}
               </Button>
               <p style={{ fontSize: '14px', color: '#64748B', marginTop: '8px' }}>
-                JPG, PNG or GIF. Max size 2MB
+                {t.profile.uploadPhotoHelp}
               </p>
             </div>
           </AvatarSection>
 
           <FormGrid>
             <FormGroup>
-              <Label>Full Name</Label>
+              <Label>{t.profile.fullName}</Label>
               <Input name="fullName" value={formData.fullName} onChange={handleChange} />
             </FormGroup>
 
             <FormGroup>
-              <Label>Email</Label>
+              <Label>{t.profile.email}</Label>
               <Input name="email" type="email" value={formData.email} onChange={handleChange} />
             </FormGroup>
 
             <FormGroup>
-              <Label>Phone</Label>
+              <Label>{t.profile.phone}</Label>
               <Input name="phone" type="tel" value={formData.phone} onChange={handleChange} />
             </FormGroup>
 
             <FormGroup>
-              <Label>Location</Label>
+              <Label>{t.profile.location}</Label>
               <Input name="location" value={formData.location} onChange={handleChange} />
             </FormGroup>
 
             <FormGroup>
-              <Label>Professional Title</Label>
+              <Label>{t.profile.professionalTitle}</Label>
               <Input name="title" value={formData.title} onChange={handleChange} />
             </FormGroup>
 
             <FormGroup>
-              <Label>Bio</Label>
+              <Label>{t.profile.bio}</Label>
               <TextArea name="bio" value={formData.bio} onChange={handleChange} style={{ gridColumn: '1 / -1' }} />
             </FormGroup>
           </FormGrid>
         </ProfileCard>
 
         <ProfileCard>
-          <SectionTitle>Social Links</SectionTitle>
+          <SectionTitle>{t.profile.socialLinks}</SectionTitle>
           <FormGrid>
             <FormGroup>
-              <Label>LinkedIn</Label>
+              <Label>{t.profile.linkedin}</Label>
               <Input name="linkedin" value={formData.linkedin} onChange={handleChange} />
             </FormGroup>
 
             <FormGroup>
-              <Label>GitHub</Label>
+              <Label>{t.profile.github}</Label>
               <Input name="github" value={formData.github} onChange={handleChange} />
             </FormGroup>
 
             <FormGroup style={{ gridColumn: '1 / -1' }}>
-              <Label>Website</Label>
+              <Label>{t.profile.website}</Label>
               <Input name="website" value={formData.website} onChange={handleChange} />
             </FormGroup>
           </FormGrid>
         </ProfileCard>
 
         <Button $variant="primary" $size="large" onClick={handleSave}>
-          <Save /> Save Changes
+          <Save /> {t.profile.saveChanges}
         </Button>
       </ProfileContainer>
     </DashboardLayout>

@@ -85,8 +85,8 @@ WebStore/
 ## 🎨 Design System
 
 ### Colors
-- **Primary**: Blue-Purple Gradient (#6366F1 - #A855F7)
-- **Secondary**: Purple (#A855F7)
+- **Primary**: Deep Blue Gradient (#0E3995 - #0055A5)
+- **Secondary**: Navy (#0D3880)
 - **Background**: Light (#F8FAFC)
 - **Text**: Dark (#1E293B)
 - **Status Colors**: Success (Green), Warning (Yellow), Error (Red)

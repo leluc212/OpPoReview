@@ -2,7 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
-import { Eye, Download } from 'lucide-react';
+import { Eye } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTranslations } from '../../locales/translations';
 
 const ApplicationsContainer = styled.div``;
 
@@ -68,29 +70,33 @@ const ActionButton = styled.button`
 `;
 
 const Applications = () => {
+  const { language } = useLanguage();
+  const t = useTranslations(language);
+
   const applications = [
-    { candidate: 'John Smith', job: 'Senior React Developer', applied: '2 hours ago', status: 'pending' },
-    { candidate: 'Jane Doe', job: 'Full Stack Engineer', applied: '5 hours ago', status: 'pending' },
-    { candidate: 'Bob Johnson', job: 'UI/UX Designer', applied: '1 day ago', status: 'approved' },
-    { candidate: 'Alice Brown', job: 'Senior React Developer', applied: '2 days ago', status: 'rejected' },
+    { candidate: 'Hiếu sàn', job: 'Senior React Developer', applied: t.employer.applied2h, status: 'pending' },
+    { candidate: 'Duy sàn', job: 'Thu ngân', applied: t.employer.applied5h, status: 'pending' },
+    { candidate: 'Nheo', job: 'UI/UX Designer', applied: t.employer.applied1d, status: 'approved' },
+    { candidate: 'Gemmin', job: 'Senior React Developer', applied: t.employerJobs.posted2d || '2 days ago', status: 'rejected' },
+    { candidate: 'Zun', job: 'Backend Developer', applied: t.employerJobs.posted1w || t.employer.applied1d, status: 'pending' },
   ];
 
   return (
     <DashboardLayout role="employer">
       <ApplicationsContainer>
         <PageHeader>
-          <h1>Applications</h1>
-          <p style={{ color: '#64748B' }}>Review and manage candidate applications</p>
+          <h1>{t.employerApplications.title}</h1>
+          <p style={{ color: '#64748B' }}>{t.employerApplications.subtitle}</p>
         </PageHeader>
 
         <Table>
           <thead>
             <tr>
-              <th>Candidate</th>
-              <th>Position</th>
-              <th>Applied</th>
-              <th>Status</th>
-              <th>Actions</th>
+              <th>{t.employerApplications.tableCandidate}</th>
+              <th>{t.employerApplications.tablePosition}</th>
+              <th>{t.employerApplications.tableApplied}</th>
+              <th>{t.employerApplications.tableStatus}</th>
+              <th>{t.employerApplications.tableActions}</th>
             </tr>
           </thead>
           <tbody>
@@ -101,7 +107,7 @@ const Applications = () => {
                 <td style={{ color: '#64748B' }}>{app.applied}</td>
                 <td><StatusBadge status={app.status} /></td>
                 <td>
-                  <ActionButton><Eye /> View Profile</ActionButton>
+                  <ActionButton><Eye /> {t.employerApplications.viewProfile}</ActionButton>
                 </td>
               </tr>
             ))}
