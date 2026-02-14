@@ -124,8 +124,8 @@ const AdminDashboard = () => {
   const t = useTranslations(language);
 
   const recentActivity = [
-    { user: 'FPT Software', action: t.adminDashboard.activityRegisteredEmployer, time: t.adminDashboard.time2h },
-    { user: 'John Doe', action: t.adminDashboard.activityApplied, time: t.adminDashboard.time3h },
+    { user: 'Abc', action: t.adminDashboard.activityRegisteredEmployer, time: t.adminDashboard.time2h },
+    { user: 'xyz', action: t.adminDashboard.activityApplied, time: t.adminDashboard.time3h },
     { user: 'Design Inc.', action: t.adminDashboard.activityPostedJob, time: t.adminDashboard.time5h },
   ];
 
