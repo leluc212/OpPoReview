@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useRef, useEffect, useLayoutEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { 
   LayoutDashboard, 
@@ -19,7 +19,9 @@ import {
   ShieldCheck,
   HelpCircle,
   Wallet,
-  LogOut
+  LogOut,
+  UsersRound,
+  User
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTranslations } from '../locales/translations';
@@ -33,7 +35,6 @@ const SidebarContainer = styled.aside`
   top: 0;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
   box-shadow: ${props => props.theme.shadows.md};
 `;
 
@@ -73,6 +74,31 @@ const Logo = styled.div`
 const Nav = styled.nav`
   flex: 1;
   padding: 20px 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  
+  /* Optimize scrolling - prevent auto-scroll */
+  scroll-behavior: auto !important;
+  overscroll-behavior: contain;
+  scroll-snap-type: none;
+  
+  /* Custom scrollbar */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: ${props => props.theme.colors.border};
+    border-radius: 3px;
+    
+    &:hover {
+      background: ${props => props.theme.colors.primary};
+    }
+  }
 `;
 
 const NavSection = styled.div`
@@ -89,7 +115,7 @@ const NavSectionTitle = styled.p`
   padding: 0 16px;
 `;
 
-const NavLink = styled(Link)`
+const NavLink = styled.div`
   display: flex;
   align-items: center;
   gap: 14px;
@@ -103,6 +129,19 @@ const NavLink = styled(Link)`
   position: relative;
   overflow: hidden;
   box-shadow: ${props => props.$active ? props.theme.shadows.md : 'none'};
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  
+  /* Prevent focus scroll */
+  &:focus {
+    outline: none;
+  }
+  
+  &:focus-visible {
+    outline: 2px solid ${props => props.theme.colors.primary};
+    outline-offset: 2px;
+  }
   
   &::before {
     content: '';
@@ -140,8 +179,63 @@ const NavLink = styled(Link)`
 
 const Sidebar = ({ role }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { language } = useLanguage();
   const t = useTranslations(language);
+  const navRef = useRef(null);
+  const isNavigatingRef = useRef(false);
+  
+  // Save scroll position to sessionStorage whenever it changes
+  useEffect(() => {
+    const navElement = navRef.current;
+    if (!navElement) return;
+    
+    const handleScroll = () => {
+      if (!isNavigatingRef.current) {
+        sessionStorage.setItem('sidebarScrollPos', navElement.scrollTop.toString());
+      }
+    };
+    
+    navElement.addEventListener('scroll', handleScroll, { passive: true });
+    return () => navElement.removeEventListener('scroll', handleScroll);
+  }, []);
+  
+  // Restore scroll position from sessionStorage after navigation
+  useLayoutEffect(() => {
+    const savedScrollPos = sessionStorage.getItem('sidebarScrollPos');
+    
+    if (navRef.current && savedScrollPos !== null) {
+      const scrollPos = parseInt(savedScrollPos, 10);
+      
+      // Set scroll immediately
+      navRef.current.scrollTop = scrollPos;
+      
+      // Double check after a small delay
+      const timeoutId = setTimeout(() => {
+        if (navRef.current) {
+          navRef.current.scrollTop = scrollPos;
+        }
+        isNavigatingRef.current = false;
+      }, 10);
+      
+      return () => clearTimeout(timeoutId);
+    }
+    
+    isNavigatingRef.current = false;
+  }, [location.pathname]);
+  
+  const handleNavClick = (path) => {
+    if (path === '#') return;
+    
+    isNavigatingRef.current = true;
+    
+    // Save current scroll position before navigation
+    if (navRef.current) {
+      sessionStorage.setItem('sidebarScrollPos', navRef.current.scrollTop.toString());
+    }
+    
+    navigate(path);
+  };
   
   const candidateLinks = [
     { section: t.sidebar.main, items: [
@@ -158,11 +252,9 @@ const Sidebar = ({ role }) => {
     ]},
     { section: t.sidebar.utilities, items: [
       { to: '#', icon: MapPin, label: t.sidebar.location },
-      { to: '#', icon: ToggleLeft, label: t.sidebar.availability },
-      { to: '#', icon: FileText, label: t.sidebar.policyTerms },
-      { to: '#', icon: ShieldCheck, label: t.sidebar.loginSecurity },
-      { to: '#', icon: Wallet, label: t.sidebar.digitalWallet },
-      { to: '#', icon: HelpCircle, label: t.sidebar.support },
+      { to: '/candidate/availability', icon: ToggleLeft, label: t.sidebar.availability },
+      { to: '/candidate/wallet', icon: Wallet, label: t.sidebar.digitalWallet },
+      { to: '/candidate/support', icon: HelpCircle, label: t.sidebar.support },
       { to: '#', icon: LogOut, label: t.sidebar.signOut },
     ]}
   ];
@@ -172,6 +264,7 @@ const Sidebar = ({ role }) => {
       { to: '/employer/dashboard', icon: LayoutDashboard, label: t.sidebar.dashboard },
       { to: '/employer/jobs', icon: Briefcase, label: t.sidebar.myJobs },
       { to: '/employer/applications', icon: FileText, label: t.sidebar.applications },
+      { to: '/employer/hr-management', icon: UsersRound, label: 'Quản lý nhân sự' },
     ]},
     { section: t.sidebar.communication, items: [
       { to: '/employer/messages', icon: MessageSquare, label: t.sidebar.messages },
@@ -180,6 +273,13 @@ const Sidebar = ({ role }) => {
     { section: t.sidebar.account, items: [
       { to: '/employer/profile', icon: Users, label: t.sidebar.companyProfile },
       { to: '/employer/subscription', icon: CreditCard, label: t.sidebar.subscription },
+      { to: '/employer/settings', icon: Settings, label: t.sidebar.settings },
+    ]},
+    { section: t.sidebar.utilities, items: [
+      { to: '/employer/analytics', icon: BarChart3, label: 'Phân tích' },
+      { to: '/employer/wallet', icon: Wallet, label: t.sidebar.digitalWallet },
+      { to: '/employer/support', icon: HelpCircle, label: t.sidebar.support },
+      { to: '#', icon: LogOut, label: t.sidebar.signOut },
     ]}
   ];
   
@@ -189,9 +289,18 @@ const Sidebar = ({ role }) => {
       { to: '/admin/users', icon: Users, label: t.sidebar.userManagement },
       { to: '/admin/employers', icon: CheckCircle, label: t.sidebar.employerApproval },
     ]},
-    { section: t.sidebar.platform, items: [
+    { section: 'Quản Lý', items: [
+      { to: '/admin/posts', icon: FileText, label: 'Quản lý bài đăng' },
       { to: '/admin/packages', icon: Package, label: t.sidebar.packages },
+    ]},
+    { section: 'Phân Tích', items: [
+      { to: '/admin/analytics', icon: BarChart3, label: 'Phân tích dữ liệu' },
       { to: '/admin/reports', icon: BarChart3, label: t.sidebar.reports },
+    ]},
+    { section: 'Tiện Ích', items: [
+      { to: '/admin/wallet', icon: Wallet, label: 'Ví điện tử' },
+      { to: '/admin/notifications', icon: Bell, label: t.sidebar.notifications },
+      { to: '/admin/profile', icon: User, label: 'Hồ sơ' },
       { to: '/admin/settings', icon: Settings, label: t.sidebar.settings },
     ]}
   ];
@@ -207,7 +316,7 @@ const Sidebar = ({ role }) => {
         <h1>Ốp Pờ</h1>
       </Logo>
       
-      <Nav>
+      <Nav ref={navRef}>
         {links.map((section, idx) => (
           <NavSection key={idx}>
             <NavSectionTitle>{section.section}</NavSectionTitle>
@@ -216,8 +325,10 @@ const Sidebar = ({ role }) => {
               return (
                 <NavLink
                   key={linkIdx}
-                  to={link.to}
                   $active={location.pathname === link.to}
+                  onClick={() => handleNavClick(link.to)}
+                  onMouseDown={(e) => e.preventDefault()}
+                  tabIndex={0}
                 >
                   <Icon />
                   <span>{link.label}</span>

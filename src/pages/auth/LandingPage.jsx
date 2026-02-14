@@ -679,11 +679,13 @@ const LandingPage = () => {
         <NavLinks>
           <Link to="/candidate/jobs">{t.nav.findJobs}</Link>
           <Link to="/employer/dashboard">{t.nav.forEmployers}</Link>
-          <Link to="/login">{t.nav.login}</Link>
           <LanguageToggle onClick={toggleLanguage}>
             <Globe />
             {language === 'vi' ? 'VI' : 'EN'}
           </LanguageToggle>
+          <Button as={Link} to="/login" $variant="primary" $size="small">
+            {t.nav.login}
+          </Button>
           <Button as={Link} to="/register" $variant="primary" $size="small">
             {t.nav.signUp}
           </Button>

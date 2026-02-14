@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
-import { Bell, Mail, MessageSquare, Globe } from 'lucide-react';
-import { Button, FormGroup, Label } from '../../components/FormElements';
+import { Bell, Mail, MessageSquare, Globe, Moon, Sun, Lock, Shield, FileText, Trash2 } from 'lucide-react';
+import { Button, FormGroup, Label, Input } from '../../components/FormElements';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTranslations } from '../../locales/translations';
 
@@ -131,10 +131,35 @@ const CandidateSettings = () => {
   const { language, changeLanguage } = useLanguage();
   const t = useTranslations(language);
   const [showSavedMessage, setShowSavedMessage] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
 
   const handleSaveSettings = () => {
     setShowSavedMessage(true);
     setTimeout(() => setShowSavedMessage(false), 3000);
+  };
+
+  const handleDarkModeToggle = () => {
+    setDarkMode(!darkMode);
+    // In real app, this would update theme context
+    alert(darkMode ? 'Light mode enabled' : 'Dark mode enabled');
+  };
+
+  const handlePasswordChange = () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert('Passwords do not match!');
+      return;
+    }
+    if (passwordData.newPassword.length < 8) {
+      alert('Password must be at least 8 characters!');
+      return;
+    }
+    alert('Password changed successfully!');
+    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
   };
 
   return (
@@ -167,6 +192,28 @@ const CandidateSettings = () => {
                 {t.settings.english}
               </LanguageButton>
             </LanguageOptions>
+          </SettingItem>
+        </SettingsCard>
+
+        <SettingsCard>
+          <SectionTitle>{t.settings.appearance}</SectionTitle>
+          
+          <SettingItem>
+            <SettingInfo>
+              <h3>
+                {darkMode ? (
+                  <Moon style={{ display: 'inline', marginRight: '8px', width: '18px', height: '18px', verticalAlign: 'middle' }} />
+                ) : (
+                  <Sun style={{ display: 'inline', marginRight: '8px', width: '18px', height: '18px', verticalAlign: 'middle' }} />
+                )}
+                {t.settings.darkMode}
+              </h3>
+              <p>{t.settings.darkModeDesc}</p>
+            </SettingInfo>
+            <Toggle>
+              <input type="checkbox" checked={darkMode} onChange={handleDarkModeToggle} />
+              <span></span>
+            </Toggle>
           </SettingItem>
         </SettingsCard>
 
@@ -241,6 +288,99 @@ const CandidateSettings = () => {
               <input type="checkbox" />
               <span></span>
             </Toggle>
+          </SettingItem>
+        </SettingsCard>
+
+        <SettingsCard>
+          <SectionTitle>
+            <Lock style={{ display: 'inline', marginRight: '8px', width: '20px', height: '20px', verticalAlign: 'middle' }} />
+            {t.settings.security}
+          </SectionTitle>
+          
+          <SettingItem style={{ display: 'block', paddingBottom: '24px' }}>
+            <SettingInfo style={{ marginBottom: '16px' }}>
+              <h3>{t.settings.changePassword}</h3>
+              <p>{t.settings.changePasswordDesc}</p>
+            </SettingInfo>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '400px' }}>
+              <Input 
+                type="password" 
+                placeholder={t.settings.currentPassword}
+                value={passwordData.currentPassword}
+                onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+              />
+              <Input 
+                type="password" 
+                placeholder={t.settings.newPassword}
+                value={passwordData.newPassword}
+                onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+              />
+              <Input 
+                type="password" 
+                placeholder={t.settings.confirmPassword}
+                value={passwordData.confirmPassword}
+                onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+              />
+              <Button $variant="primary" onClick={handlePasswordChange}>
+                {t.settings.updatePassword}
+              </Button>
+            </div>
+          </SettingItem>
+
+          <SettingItem>
+            <SettingInfo>
+              <h3>{t.settings.twoFactorAuth}</h3>
+              <p>{t.settings.twoFactorAuthDesc}</p>
+            </SettingInfo>
+            <Button $variant="secondary">{t.settings.enable2FA}</Button>
+          </SettingItem>
+        </SettingsCard>
+
+        <SettingsCard>
+          <SectionTitle>
+            <Shield style={{ display: 'inline', marginRight: '8px', width: '20px', height: '20px', verticalAlign: 'middle' }} />
+            {t.settings.legalPrivacy}
+          </SectionTitle>
+          
+          <SettingItem>
+            <SettingInfo>
+              <h3>
+                <FileText style={{ display: 'inline', marginRight: '8px', width: '18px', height: '18px', verticalAlign: 'middle' }} />
+                {t.settings.termsOfService}
+              </h3>
+              <p>{t.settings.termsOfServiceDesc}</p>
+            </SettingInfo>
+            <Button $variant="ghost">{t.settings.viewTerms}</Button>
+          </SettingItem>
+
+          <SettingItem>
+            <SettingInfo>
+              <h3>
+                <Shield style={{ display: 'inline', marginRight: '8px', width: '18px', height: '18px', verticalAlign: 'middle' }} />
+                {t.settings.privacyPolicy}
+              </h3>
+              <p>{t.settings.privacyPolicyDesc}</p>
+            </SettingInfo>
+            <Button $variant="ghost">{t.settings.viewPolicy}</Button>
+          </SettingItem>
+
+          <SettingItem>
+            <SettingInfo>
+              <h3>
+                <FileText style={{ display: 'inline', marginRight: '8px', width: '18px', height: '18px', verticalAlign: 'middle' }} />
+                {t.settings.cookiePolicy}
+              </h3>
+              <p>{t.settings.cookiePolicyDesc}</p>
+            </SettingInfo>
+            <Button $variant="ghost">{t.settings.viewPolicy}</Button>
+          </SettingItem>
+
+          <SettingItem>
+            <SettingInfo>
+              <h3>{t.settings.dataDownload}</h3>
+              <p>{t.settings.dataDownloadDesc}</p>
+            </SettingInfo>
+            <Button $variant="secondary">{t.settings.downloadData}</Button>
           </SettingItem>
         </SettingsCard>
 

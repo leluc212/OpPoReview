@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import { Button, TextArea, FormGroup, Label } from '../../components/FormElements';
 import Modal from '../../components/Modal';
-import { MapPin, Briefcase, DollarSign, Clock, Building2, Users, Bookmark, ArrowLeft, Send } from 'lucide-react';
+import { MapPin, Briefcase, DollarSign, Clock, Building2, Users, Bookmark, ArrowLeft, Send, Share2, UserPlus, Eye, Star } from 'lucide-react';
 
 const JobDetailContainer = styled.div`
   max-width: 1200px;
@@ -203,6 +203,10 @@ const JobDetail = () => {
   const navigate = useNavigate();
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [coverLetter, setCoverLetter] = useState('');
+  const [isSaved, setIsSaved] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isBold, setIsBold] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   const job = {
     id: parseInt(id),
@@ -246,6 +250,36 @@ const JobDetail = () => {
     console.log('Applying with cover letter:', coverLetter);
     setIsApplyModalOpen(false);
     alert('Application submitted successfully!');
+  };
+
+  const handleSaveJob = () => {
+    setIsSaved(!isSaved);
+    alert(isSaved ? 'Job removed from saved' : 'Job saved successfully!');
+  };
+
+  const handleFollowEmployer = () => {
+    setIsFollowing(!isFollowing);
+    alert(isFollowing ? 'Unfollowed employer' : 'Following employer!');
+  };
+
+  const handleBoldJob = () => {
+    setIsBold(!isBold);
+    alert(isBold ? 'Job unmarked' : 'Job marked as important!');
+  };
+
+  const handleShareJob = () => {
+    setShareModalOpen(true);
+  };
+
+  const handleCopyLink = () => {
+    const link = window.location.href;
+    navigator.clipboard.writeText(link);
+    alert('Job link copied to clipboard!');
+    setShareModalOpen(false);
+  };
+
+  const handleViewEmployerProfile = () => {
+    navigate(`/candidate/employer/${job.company.toLowerCase().replace(/\s+/g, '-')}`);
   };
 
   return (
@@ -293,8 +327,22 @@ const JobDetail = () => {
               </HeaderContent>
             </div>
             <ActionButtons>
-              <Button $variant="ghost">
-                <Bookmark />
+              <Button 
+                $variant="ghost" 
+                onClick={handleBoldJob}
+                title={isBold ? 'Unmark job' : 'Mark as important'}
+              >
+                <Star style={{ fill: isBold ? '#FFD700' : 'none', color: isBold ? '#FFD700' : 'currentColor' }} />
+              </Button>
+              <Button 
+                $variant="ghost" 
+                onClick={handleSaveJob}
+                title={isSaved ? 'Unsave job' : 'Save job'}
+              >
+                <Bookmark style={{ fill: isSaved ? 'currentColor' : 'none' }} />
+              </Button>
+              <Button $variant="ghost" onClick={handleShareJob} title="Share job">
+                <Share2 />
               </Button>
               <Button $variant="primary" $size="large" onClick={() => setIsApplyModalOpen(true)}>
                 <Send />
@@ -360,6 +408,24 @@ const JobDetail = () => {
                 <InfoLabel>Founded</InfoLabel>
                 <InfoValue>{job.founded}</InfoValue>
               </CompanyInfo>
+              <div style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
+                <Button 
+                  $variant="secondary" 
+                  $fullWidth 
+                  onClick={handleViewEmployerProfile}
+                >
+                  <Eye style={{ width: '18px', height: '18px' }} />
+                  View Profile
+                </Button>
+                <Button 
+                  $variant={isFollowing ? 'ghost' : 'secondary'} 
+                  $fullWidth
+                  onClick={handleFollowEmployer}
+                >
+                  <UserPlus style={{ width: '18px', height: '18px' }} />
+                  {isFollowing ? 'Following' : 'Follow'}
+                </Button>
+              </div>
             </Card>
 
             <Card>
@@ -396,6 +462,31 @@ const JobDetail = () => {
           <p style={{ fontSize: '14px', color: '#64748B', marginTop: '16px' }}>
             Your resume and profile information will be automatically included with this application.
           </p>
+        </Modal>
+
+        <Modal
+          isOpen={shareModalOpen}
+          onClose={() => setShareModalOpen(false)}
+          title="Share this Job"
+          footer={
+            <Button $variant="primary" onClick={handleCopyLink}>
+              Copy Link
+            </Button>
+          }
+        >
+          <p style={{ marginBottom: '16px', color: '#64748B' }}>
+            Share this job opportunity with your network
+          </p>
+          <div style={{ 
+            padding: '12px', 
+            background: '#F1F5F9', 
+            borderRadius: '8px',
+            fontFamily: 'monospace',
+            fontSize: '14px',
+            wordBreak: 'break-all'
+          }}>
+            {window.location.href}
+          </div>
         </Modal>
       </JobDetailContainer>
     </DashboardLayout>

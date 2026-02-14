@@ -116,6 +116,22 @@ const Badge = styled.span`
   box-shadow: ${props => props.theme.shadows.md};
 `;
 
+const Avatar = styled.div`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: ${props => props.theme.colors.gradientPrimary};
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  text-transform: uppercase;
+  box-shadow: ${props => props.theme.shadows.sm};
+  transition: all ${props => props.theme.transitions.normal};
+`;
+
 const UserMenu = styled.div`
   display: flex;
   align-items: center;
@@ -139,21 +155,6 @@ const UserMenu = styled.div`
       box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
     }
   }
-`;
-
-const Avatar = styled.div`
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: ${props => props.theme.colors.gradientPrimary};
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 16px;
-  box-shadow: ${props => props.theme.shadows.md};
-  transition: all ${props => props.theme.transitions.normal};
 `;
 
 const UserInfo = styled.div`

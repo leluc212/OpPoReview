@@ -23,6 +23,10 @@ import CandidateProfile from './pages/candidate/CandidateProfile';
 import CandidateSettings from './pages/candidate/CandidateSettings';
 import CandidateNotifications from './pages/candidate/CandidateNotifications';
 import CandidateMessages from './pages/candidate/CandidateMessages';
+import EmployerProfileView from './pages/candidate/EmployerProfileView';
+import Support from './pages/candidate/Support';
+import Wallet from './pages/candidate/Wallet';
+import Availability from './pages/candidate/Availability';
 
 // Employer Pages
 import EmployerDashboard from './pages/employer/EmployerDashboard';
@@ -33,6 +37,11 @@ import EmployerProfile from './pages/employer/EmployerProfile';
 import EmployerMessages from './pages/employer/EmployerMessages';
 import EmployerNotifications from './pages/employer/EmployerNotifications';
 import Subscription from './pages/employer/Subscription';
+import HRManagement from './pages/employer/HRManagement';
+import EmployerSettings from './pages/employer/EmployerSettings';
+import Analytics from './pages/employer/Analytics';
+import EmployerSupport from './pages/employer/EmployerSupport';
+import EmployerWallet from './pages/employer/EmployerWallet';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -41,6 +50,12 @@ import EmployerApproval from './pages/admin/EmployerApproval';
 import PackagesManagement from './pages/admin/PackagesManagement';
 import Reports from './pages/admin/Reports';
 import AdminSettings from './pages/admin/AdminSettings';
+import DataAnalysis from './pages/admin/DataAnalysis';
+import AdminWallet from './pages/admin/AdminWallet';
+import PostsManagement from './pages/admin/PostsManagement';
+import AdminSupport from './pages/admin/AdminSupport';
+import AdminNotifications from './pages/admin/AdminNotifications';
+import AdminProfile from './pages/admin/AdminProfile';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -70,6 +85,7 @@ function AppRoutes() {
       <Route path="/pending-approval" element={<PendingApproval />} />
       
       {/* Candidate Routes */}
+      <Route path="/candidate" element={<Navigate to="/candidate/dashboard" replace />} />
       <Route path="/candidate/dashboard" element={
         <ProtectedRoute allowedRoles={['candidate']}>
           <CandidateDashboard />
@@ -108,6 +124,26 @@ function AppRoutes() {
       <Route path="/candidate/settings" element={
         <ProtectedRoute allowedRoles={['candidate']}>
           <CandidateSettings />
+        </ProtectedRoute>
+      } />
+      <Route path="/candidate/employer/:employerId" element={
+        <ProtectedRoute allowedRoles={['candidate']}>
+          <EmployerProfileView />
+        </ProtectedRoute>
+      } />
+      <Route path="/candidate/support" element={
+        <ProtectedRoute allowedRoles={['candidate']}>
+          <Support />
+        </ProtectedRoute>
+      } />
+      <Route path="/candidate/wallet" element={
+        <ProtectedRoute allowedRoles={['candidate']}>
+          <Wallet />
+        </ProtectedRoute>
+      } />
+      <Route path="/candidate/availability" element={
+        <ProtectedRoute allowedRoles={['candidate']}>
+          <Availability />
         </ProtectedRoute>
       } />
       
@@ -152,6 +188,31 @@ function AppRoutes() {
           <Subscription />
         </ProtectedRoute>
       } />
+      <Route path="/employer/hr-management" element={
+        <ProtectedRoute allowedRoles={['employer']}>
+          <HRManagement />
+        </ProtectedRoute>
+      } />
+      <Route path="/employer/settings" element={
+        <ProtectedRoute allowedRoles={['employer']}>
+          <EmployerSettings />
+        </ProtectedRoute>
+      } />
+      <Route path="/employer/analytics" element={
+        <ProtectedRoute allowedRoles={['employer']}>
+          <Analytics />
+        </ProtectedRoute>
+      } />
+      <Route path="/employer/support" element={
+        <ProtectedRoute allowedRoles={['employer']}>
+          <EmployerSupport />
+        </ProtectedRoute>
+      } />
+      <Route path="/employer/wallet" element={
+        <ProtectedRoute allowedRoles={['employer']}>
+          <EmployerWallet />
+        </ProtectedRoute>
+      } />
       
       {/* Admin Routes */}
       <Route path="/admin/dashboard" element={
@@ -182,6 +243,36 @@ function AppRoutes() {
       <Route path="/admin/settings" element={
         <ProtectedRoute allowedRoles={['admin']}>
           <AdminSettings />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/analytics" element={
+        <ProtectedRoute allowedRoles={['admin']}>
+          <DataAnalysis />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/wallet" element={
+        <ProtectedRoute allowedRoles={['admin']}>
+          <AdminWallet />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/posts" element={
+        <ProtectedRoute allowedRoles={['admin']}>
+          <PostsManagement />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/support" element={
+        <ProtectedRoute allowedRoles={['admin']}>
+          <AdminSupport />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/notifications" element={
+        <ProtectedRoute allowedRoles={['admin']}>
+          <AdminNotifications />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/profile" element={
+        <ProtectedRoute allowedRoles={['admin']}>
+          <AdminProfile />
         </ProtectedRoute>
       } />
     </Routes>

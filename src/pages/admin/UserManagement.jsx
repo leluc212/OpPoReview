@@ -53,8 +53,8 @@ const UserManagement = () => {
   const t = useTranslations(language);
 
   const users = [
-    { name: 'John Doe', email: 'john@example.com', role: 'candidate', status: 'active', joined: '2024-01-15' },
-    { name: 'Jane Smith', email: 'jane@example.com', role: 'candidate', status: 'active', joined: '2024-01-20' },
+    { name: 'ABC', email: 'abc@example.com', role: 'candidate', status: 'active', joined: '2024-01-15' },
+    { name: 'xyz', email: 'xyz@example.com', role: 'candidate', status: 'active', joined: '2024-01-20' },
     { name: 'FPT Software', email: 'hr@FPT Software.com', role: 'employer', status: 'active', joined: '2024-01-10' },
     { name: 'Hồng Trà Ngô Gia', email: 'contact@Hồng Trà Ngô Gia.com', role: 'employer', status: 'pending', joined: '2024-02-01' },
   ];
