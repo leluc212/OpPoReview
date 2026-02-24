@@ -3,8 +3,6 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
 import { Bell, Briefcase, CheckCircle, MessageSquare } from 'lucide-react';
-import { useLanguage } from '../../context/LanguageContext';
-import { useTranslations } from '../../locales/translations';
 
 const NotificationsContainer = styled.div`
   max-width: 900px;
@@ -76,9 +74,6 @@ const NotificationContent = styled.div`
 `;
 
 const CandidateNotifications = () => {
-  const { language } = useLanguage();
-  const t = useTranslations(language);
-
   const notifications = [
     {
       id: 1,
@@ -86,9 +81,9 @@ const CandidateNotifications = () => {
       icon: Briefcase,
       color: '#E6ECFF',
       iconColor: '#0055A5',
-      title: t.notifications.applicationViewedTitle,
-      message: t.notifications.applicationViewedMessage,
-      time: t.notifications.applicationViewedTime,
+      title: 'Hồ sơ đã được xem',
+      message: 'FPT Software đã xem hồ sơ ứng tuyển Senior React Developer của bạn',
+      time: '2 giờ trước',
       unread: true
     },
     {
@@ -97,9 +92,9 @@ const CandidateNotifications = () => {
       icon: MessageSquare,
       color: '#FEF3C7',
       iconColor: '#F59E0B',
-      title: t.notifications.newMessageTitle,
-      message: t.notifications.newMessageMessage,
-      time: t.notifications.newMessageTime,
+      title: 'Tin nhắn mới',
+      message: 'Bạn có tin nhắn mới từ Hồng Trà Ngô Gia',
+      time: '5 giờ trước',
       unread: true
     },
     {
@@ -108,9 +103,9 @@ const CandidateNotifications = () => {
       icon: CheckCircle,
       color: '#D1FAE5',
       iconColor: '#10B981',
-      title: t.notifications.applicationAcceptedTitle,
-      message: t.notifications.applicationAcceptedMessage,
-      time: t.notifications.applicationAcceptedTime,
+      title: 'Hồ sơ được chấp nhận',
+      message: 'Hồ sơ Nhân viên tại Highlands của bạn đã được chấp nhận',
+      time: '1 ngày trước',
       unread: false
     }
   ];
@@ -119,7 +114,7 @@ const CandidateNotifications = () => {
     <DashboardLayout role="candidate" showSearch={false}>
       <NotificationsContainer>
         <PageHeader>
-          <h1>{t.notifications.title}</h1>
+          <h1>Thông Báo</h1>
         </PageHeader>
 
         {notifications.map(notif => (

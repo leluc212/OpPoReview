@@ -3,8 +3,6 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
 import { Users, Briefcase, Building2, DollarSign } from 'lucide-react';
-import { useLanguage } from '../../context/LanguageContext';
-import { useTranslations } from '../../locales/translations';
 
 const DashboardContainer = styled.div`
   animation: fadeIn 0.5s ease-in;
@@ -28,10 +26,7 @@ const PageHeader = styled.div`
     font-size: 36px;
     font-weight: 800;
     margin-bottom: 12px;
-    background: ${props => props.theme.colors.gradientPrimary};
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: ${props => props.theme.colors.primary};
   }
   
   p {
@@ -120,56 +115,48 @@ const Table = styled.table`
 `;
 
 const AdminDashboard = () => {
-  const { language } = useLanguage();
-  const t = useTranslations(language);
-
   const recentActivity = [
-    { user: 'Abc', action: t.adminDashboard.activityRegisteredEmployer, time: t.adminDashboard.time2h },
-    { user: 'xyz', action: t.adminDashboard.activityApplied, time: t.adminDashboard.time3h },
-    { user: 'Design Inc.', action: t.adminDashboard.activityPostedJob, time: t.adminDashboard.time5h },
+    { user: 'Abc', action: 'Đăng ký nhà tuyển dụng', time: '2 giờ trước' },
+    { user: 'xyz', action: 'Ứng tuyển Senior Developer', time: '3 giờ trước' },
+    { user: 'Design Inc.', action: 'Đăng tin tuyển dụng mới', time: '5 giờ trước' },
   ];
 
   return (
     <DashboardLayout role="admin">
       <DashboardContainer>
-        <PageHeader>
-          <h1>{t.adminDashboard.title}</h1>
-          <p>{t.adminDashboard.subtitle}</p>
-        </PageHeader>
-
         <StatsGrid>
           <StatsCard
-            title={t.adminDashboard.statsTotalUsers}
+            title="Tổng Người Dùng"
             value="2,458"
             change="+12%"
-            changeText={t.adminDashboard.changeFromLastMonth}
+            changeText="so với tháng trước"
             icon={Users}
             color="linear-gradient(135deg, #0E3995 0%, #0055A5 100%)"
             positive
           />
           <StatsCard
-            title={t.adminDashboard.statsActiveJobs}
+            title="Tin Đang Tuyển"
             value="345"
             change="+8%"
-            changeText={t.adminDashboard.changeFromLastWeek}
+            changeText="so với tuần trước"
             icon={Briefcase}
             color="linear-gradient(135deg, #F093FB 0%, #F5576C 100%)"
             positive
           />
           <StatsCard
-            title={t.adminDashboard.statsCompanies}
+            title="Công Ty"
             value="156"
             change="+15"
-            changeText={t.adminDashboard.changePendingApproval}
+            changeText="đang chờ duyệt"
             icon={Building2}
             color="linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%)"
             positive
           />
           <StatsCard
-            title={t.adminDashboard.statsRevenue}
+            title="Doanh Thu"
             value="24.5 tỷ VND"
             change="+23%"
-            changeText={t.adminDashboard.changeFromLastMonth}
+            changeText="so với tháng trước"
             icon={DollarSign}
             color="linear-gradient(135deg, #43E97B 0%, #38F9D7 100%)"
             positive
@@ -178,15 +165,15 @@ const AdminDashboard = () => {
 
         <Section>
           <SectionHeader>
-            <h2>{t.adminDashboard.recentActivity}</h2>
+            <h2>Hoạt Động Gần Đây</h2>
           </SectionHeader>
           
           <Table>
             <thead>
               <tr>
-                <th>{t.adminDashboard.tableUser}</th>
-                <th>{t.adminDashboard.tableAction}</th>
-                <th>{t.adminDashboard.tableTime}</th>
+                <th>Người Dùng</th>
+                <th>Hành Động</th>
+                <th>Thời Gian</th>
               </tr>
             </thead>
             <tbody>

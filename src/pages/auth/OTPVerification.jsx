@@ -170,9 +170,9 @@ const OTPVerification = () => {
           <CheckCircle />
         </IconWrapper>
         
-        <Title>Verify Your Email</Title>
+        <Title>Xác Thực Email Của Bạn</Title>
         <Subtitle>
-          We've sent a 6-digit code to<br />
+          Chúng tôi đã gửi mã 6 chữ số đến<br />
           <strong>{email}</strong>
         </Subtitle>
 
@@ -192,7 +192,7 @@ const OTPVerification = () => {
         </OTPInputs>
 
         <ResendLink onClick={handleResend}>
-          Didn't receive the code? Resend
+          Không nhận được mã? Gửi lại
         </ResendLink>
 
         <Button
@@ -202,7 +202,7 @@ const OTPVerification = () => {
           onClick={handleVerify}
           disabled={!isComplete || isVerifying}
         >
-          {isVerifying ? 'Verifying...' : 'Verify Email'}
+          {isVerifying ? 'Đang xác thực...' : 'Xác Thực Email'}
         </Button>
       </OTPCard>
     </OTPContainer>

@@ -4,81 +4,83 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe } from 'lucide-react';
 import { Button } from '../../components/FormElements';
-import { useLanguage } from '../../context/LanguageContext';
-import { useTranslations } from '../../locales/translations';
 
 const LandingContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%);
+  background: linear-gradient(135deg, #E0F2FE 0%, #DBEAFE 15%, #FCE7F3 35%, #FDF2F8 50%, #F0F9FF 65%, #E0F2FE 85%, #FECDD3 100%);
+  background-size: 400% 400%;
+  animation: gradientFlow 20s ease infinite;
   position: relative;
   overflow-x: hidden;
+  
+  @keyframes gradientFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100vh;
+    background: radial-gradient(circle at 30% 20%, rgba(147, 197, 253, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 70% 60%, rgba(251, 207, 232, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(186, 230, 253, 0.2) 0%, transparent 50%);
+    pointer-events: none;
+  }
 `;
 
 const Header = styled(motion.header)`
-  padding: 24px 80px;
+  padding: 20px 80px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(10, 10, 15, 0.8);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(14, 57, 149, 0.15);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(219, 234, 254, 0.6);
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 24px rgba(147, 197, 253, 0.15), 0 2px 12px rgba(251, 207, 232, 0.1);
 `;
 
 const Logo = styled(Link)`
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  font-size: 30px;
-  font-weight: 800;
-  background: linear-gradient(135deg, #0E3995 0%, #0055A5 50%, #0D3880 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 0 30px rgba(14, 57, 149, 0.35), 0 10px 40px rgba(0, 85, 165, 0.3);
+  gap: 12px;
+  font-size: 28px;
+  font-weight: 900;
+  color: #000000;
+  text-decoration: none;
   letter-spacing: -0.5px;
-  border-radius: 14px;
-  background-color: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    transform: scale(1.05);
+    color: #0EA5E9;
+  }
 `;
 
 const NavLinks = styled.div`
   display: flex;
-  gap: 40px;
+  gap: 32px;
   align-items: center;
   
   a {
-    color: rgba(255, 255, 255, 0.8);
-    font-weight: 500;
+    color: #000000;
+    font-weight: 700;
     font-size: 15px;
-    transition: all 0.3s ease;
-    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     
     &:hover {
-      color: #fff;
-      text-shadow: 0 0 20px rgba(14, 57, 149, 0.6);
-    }
-    
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: -5px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: linear-gradient(90deg, #0E3995, #0055A5);
-      transition: width 0.3s ease;
-    }
-    
-    &:hover::after {
-      width: 100%;
+      color: #0EA5E9;
+      transform: translateY(-2px);
     }
   }
 `;
@@ -86,21 +88,25 @@ const NavLinks = styled.div`
 const LanguageToggle = styled.button`
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 500;
+  gap: 6px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(147, 197, 253, 0.4);
+  border-radius: 10px;
+  color: #000000;
+  font-weight: 700;
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 4px 16px rgba(147, 197, 253, 0.2);
   
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(14, 57, 149, 0.4);
-    color: #fff;
+    background: rgba(255, 255, 255, 1);
+    border-color: #0EA5E9;
+    color: #0EA5E9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.3);
   }
   
   svg {
@@ -110,13 +116,11 @@ const LanguageToggle = styled.button`
 `;
 
 const HeroSection = styled.section`
-  max-width: 1440px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 200px 80px 150px;
-  margin-top: 72px;
+  padding: 160px 80px 120px;
   text-align: center;
   position: relative;
-  overflow: hidden;
   min-height: 90vh;
   display: flex;
   align-items: center;
@@ -132,73 +136,117 @@ const AnimatedBackground = styled.div`
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: 
-      radial-gradient(circle at 20% 30%, rgba(14, 57, 149, 0.25) 0%, transparent 40%),
-      radial-gradient(circle at 80% 70%, rgba(0, 85, 165, 0.22) 0%, transparent 40%),
-      radial-gradient(circle at 50% 50%, rgba(13, 56, 128, 0.15) 0%, transparent 50%);
-    animation: gradientShift 20s ease-in-out infinite;
-  }
-  
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: 
-      linear-gradient(rgba(14, 57, 149, 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(14, 57, 149, 0.04) 1px, transparent 1px);
-    background-size: 50px 50px;
-    animation: gridMove 30s linear infinite;
-  }
+  background: linear-gradient(180deg, rgba(147, 197, 253, 0.15) 0%, rgba(251, 207, 232, 0.2) 50%, rgba(186, 230, 253, 0.15) 100%);
   
   @keyframes gradientShift {
     0%, 100% {
-      transform: translate(0, 0) rotate(0deg);
+      transform: translate(0, 0) scale(1);
+      opacity: 0.3;
     }
     50% {
-      transform: translate(-10%, -10%) rotate(180deg);
+      transform: translate(-5%, -5%) scale(1.05);
+      opacity: 0.25;
     }
   }
   
-  @keyframes gridMove {
-    0% {
+  @keyframes glowPulse {
+    0%, 100% {
+      opacity: 0.4;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.6;
+      transform: scale(1.1);
+    }
+  }
+  
+  @keyframes float {
+    0%, 100% {
       transform: translate(0, 0);
     }
-    100% {
-      transform: translate(50px, 50px);
+    50% {
+      transform: translate(20px, -20px);
     }
   }
 `;
 
+const GradientGlow = styled(motion.div)`
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(147, 197, 253, 0.25) 0%, rgba(251, 207, 232, 0.2) 30%, transparent 70%);
+  filter: blur(60px);
+  animation: glowPulse 8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+`;
+
+const GradientBlob = styled(motion.div)`
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  will-change: transform;
+`;
+
+const GridPattern = styled.div`
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(37, 99, 235, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.03) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at center, black 0%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 0%, transparent 75%);
+  opacity: 0.5;
+  z-index: 0;
+`;
+
+const GlassmorphismLayer = styled.div`
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    rgba(255, 255, 255, 0.05) 50%, 
+    rgba(255, 255, 255, 0.1) 100%);
+  backdrop-filter: blur(1px);
+  z-index: 3;
+  pointer-events: none;
+`;
+
+const NoiseTexture = styled.div`
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  z-index: 2;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='3.5' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
+`;
+
 const AuroraLayer = styled(motion.div)`
   position: absolute;
-  inset: -30%;
-  background: conic-gradient(from 120deg, rgba(99, 102, 241, 0.3), rgba(168, 85, 247, 0.16), rgba(236, 72, 153, 0.16), rgba(99, 102, 241, 0.32));
-  filter: blur(90px);
-  opacity: 0.28;
-  mix-blend-mode: screen;
-  animation: auroraDrift 32s ease-in-out infinite alternate;
-  will-change: transform, opacity;
+  inset: -20%;
+  background: 
+    radial-gradient(circle at 25% 25%, rgba(147, 197, 253, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(251, 207, 232, 0.25) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(253, 242, 248, 0.2) 0%, transparent 60%);
+  filter: blur(100px);
+  opacity: 0.7;
+  animation: auroraDrift 25s ease-in-out infinite alternate;
+  will-change: transform;
+  z-index: 0;
 
   @keyframes auroraDrift {
     0% {
-      transform: rotate(-6deg) scale(1);
-    }
-    50% {
-      transform: rotate(12deg) scale(1.05);
+      transform: rotate(-2deg) scale(1) translate(0, 0);
     }
     100% {
-      transform: rotate(-4deg) scale(1.02);
+      transform: rotate(2deg) scale(1.08) translate(-3%, -2%);
     }
   }
 `;
@@ -206,127 +254,85 @@ const AuroraLayer = styled(motion.div)`
 const StarLayer = styled.div`
   position: absolute;
   inset: 0;
-  background-image:
-    radial-gradient(1px 1px at 20% 30%, rgba(255, 255, 255, 0.5), transparent 50%),
-    radial-gradient(1px 1px at 60% 70%, rgba(255, 255, 255, 0.4), transparent 50%),
-    radial-gradient(2px 2px at 80% 20%, rgba(236, 72, 153, 0.4), transparent 60%),
-    radial-gradient(2px 2px at 35% 80%, rgba(99, 102, 241, 0.35), transparent 60%);
-  background-size: 260px 260px, 340px 340px, 420px 420px, 360px 360px;
-  opacity: 0.45;
-  mix-blend-mode: screen;
-  animation: starSlide 50s linear infinite;
-  will-change: transform, opacity;
-
-  @keyframes starSlide {
-    from {
-      transform: translate3d(0, 0, 0);
-    }
-    to {
-      transform: translate3d(-120px, -60px, 0);
-    }
-  }
-`;
-
-const NoiseLayer = styled.div`
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 35%),
-    radial-gradient(circle at 70% 10%, rgba(255, 255, 255, 0.06) 0%, transparent 32%),
-    radial-gradient(circle at 30% 60%, rgba(255, 255, 255, 0.05) 0%, transparent 30%);
-  background-size: 320px 320px, 420px 420px, 360px 360px;
-  mix-blend-mode: screen;
-  opacity: 0.18;
-  animation: sparklePulse 24s ease-in-out infinite alternate;
-  will-change: transform, opacity;
-
-  @keyframes sparklePulse {
-    0% {
-      transform: scale(1) translateY(0);
-      opacity: 0.18;
-    }
-    50% {
-      transform: scale(1.04) translateY(-6px);
-      opacity: 0.28;
-    }
-    100% {
-      transform: scale(1.02) translateY(4px);
-      opacity: 0.2;
-    }
-  }
+  opacity: 0;
+  pointer-events: none;
 `;
 
 const Particle = styled(motion.span)`
   position: absolute;
-  width: 10px;
-  height: 10px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 65%);
-  border-radius: 9999px;
-  box-shadow: 0 0 14px rgba(255, 255, 255, 0.45), 0 0 26px rgba(99, 102, 241, 0.25);
-  opacity: 0.7;
-  mix-blend-mode: screen;
-  will-change: transform, opacity;
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, rgba(37, 99, 235, 0.2) 50%, transparent 70%);
+  border-radius: 50%;
+  opacity: 0.8;
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
 `;
 
 const FloatingShape = styled(motion.div)`
   position: absolute;
-  background: ${props => props.gradient || props.theme.colors.gradientPrimary};
-  opacity: ${props => props.opacity || 0.1};
-  border-radius: ${props => props.rounded ? '50%' : props.theme.borderRadius.lg};
-  filter: blur(40px);
-  z-index: 0;
+  background: ${props => props.gradient || 'linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(37, 99, 235, 0.2))'};
+  opacity: ${props => props.opacity || 0.15};
+  border-radius: ${props => props.rounded ? '50%' : '40%'};
+  filter: blur(${props => props.blur || '80'}px);
+  z-index: 1;
   will-change: transform, opacity;
+  animation: ${props => props.float ? 'float 20s ease-in-out infinite' : 'none'};
 `;
 
 const HeroContent = styled.div`
   position: relative;
-  z-index: 1;
+  z-index: 10;
 `;
 
 const HeroTitle = styled(motion.h1)`
-  font-size: 96px;
+  font-size: 56px;
   font-weight: 900;
-  line-height: 1.05;
-  margin-bottom: 32px;
-  background: linear-gradient(135deg, #fff 0%, #E0E7FF 50%, #C7D2FE 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: -3px;
-  text-shadow: 0 0 80px rgba(99, 102, 241, 0.5);
+  line-height: 1.2;
+  margin-bottom: 24px;
+  color: #000000;
+  letter-spacing: -2px;
+  white-space: nowrap;
   
   @media (max-width: 1200px) {
-    font-size: 72px;
+    font-size: 48px;
+    white-space: normal;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 36px;
+    white-space: normal;
   }
 `;
 
 const HeroSubtitle = styled(motion.p)`
-  font-size: 22px;
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 64px;
-  max-width: 700px;
+  font-size: 20px;
+  color: #000000;
+  margin-bottom: 48px;
+  max-width: 600px;
   margin-left: auto;
   margin-right: auto;
-  line-height: 1.7;
-  font-weight: 400;
-  letter-spacing: 0.3px;
+  line-height: 1.6;
+  font-weight: 600;
+  opacity: 0.8;
 `;
 
 const SearchContainer = styled(motion.div)`
-  max-width: 900px;
-  margin: 0 auto 48px;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  max-width: 800px;
+  margin: 0 auto 40px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(30px);
+  border: 2px solid rgba(147, 197, 253, 0.4);
   padding: 12px;
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  box-shadow: 0 12px 48px rgba(147, 197, 253, 0.25), 0 4px 16px rgba(251, 207, 232, 0.2);
   display: flex;
   gap: 12px;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:hover {
-    box-shadow: 0 12px 48px rgba(99, 102, 241, 0.3), 0 0 0 1px rgba(99, 102, 241, 0.3) inset;
-    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 16px 64px rgba(147, 197, 253, 0.3), 0 8px 24px rgba(251, 207, 232, 0.25);
+    border-color: #0EA5E9;
+    transform: translateY(-3px);
   }
 `;
 
@@ -335,32 +341,35 @@ const SearchInput = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 20px;
-  background: rgba(255, 255, 255, 0.03);
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: all 0.3s ease;
+  border: 2px solid rgba(147, 197, 253, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:focus-within {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(99, 102, 241, 0.4);
+    background: rgba(255, 255, 255, 1);
+    border-color: #0EA5E9;
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15), 0 4px 12px rgba(14, 165, 233, 0.2);
   }
   
   svg {
     width: 20px;
     height: 20px;
-    color: rgba(255, 255, 255, 0.5);
+    color: #0EA5E9;
   }
   
   input {
     flex: 1;
     border: none;
     background: none;
-    font-size: 16px;
-    color: #fff;
+    font-size: 15px;
+    color: #0F172A;
+    font-weight: 500;
     
     &::placeholder {
-      color: rgba(255, 255, 255, 0.4);
+      color: #64748B;
+      font-weight: 500;
     }
     
     &:focus {
@@ -384,12 +393,12 @@ const CompaniesSection = styled.section`
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 13px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748B;
   text-transform: uppercase;
-  letter-spacing: 3px;
-  margin-bottom: 48px;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
 `;
 
 const LogosGrid = styled.div`
@@ -401,26 +410,25 @@ const LogosGrid = styled.div`
 `;
 
 const CompanyLogo = styled(motion.div)`
-  width: 140px;
-  height: 70px;
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  width: 120px;
+  height: 60px;
+  background: #FFFFFF;
+  border: 1px solid rgba(147, 197, 253, 0.2);
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.6);
-  transition: all 0.3s ease;
+  color: #64748B;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(147, 197, 253, 0.1);
   
   &:hover {
-    transform: translateY(-4px);
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(99, 102, 241, 0.3);
-    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
-    color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(147, 197, 253, 0.2), 0 2px 8px rgba(251, 207, 232, 0.15);
+    border-color: #0EA5E9;
+    color: #0EA5E9;
   }
 `;
 
@@ -439,74 +447,60 @@ const CategoriesGrid = styled.div`
 `;
 
 const CategoryCard = styled(motion.div)`
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  padding: 40px 32px;
+  background: #FFFFFF;
+  padding: 32px 24px;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   text-align: center;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(14, 57, 149, 0.12), rgba(0, 85, 165, 0.12));
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   
   &:hover {
-    transform: translateY(-12px);
-    border-color: rgba(14, 57, 149, 0.4);
-    box-shadow: 0 20px 60px rgba(14, 57, 149, 0.25);
-    
-    &::before {
-      opacity: 1;
-    }
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    border-color: rgba(37, 99, 235, 0.2);
   }
 `;
 
 const CategoryIcon = styled.div`
-  width: 72px;
-  height: 72px;
-  margin: 0 auto 20px;
-  background: linear-gradient(135deg, #0E3995, #0055A5);
-  border-radius: 16px;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+  background: linear-gradient(135deg, #2563EB, #1E40AF);
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  box-shadow: 0 8px 24px rgba(14, 57, 149, 0.35);
-  position: relative;
-  z-index: 1;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   svg {
-    width: 36px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
+  }
+  
+  ${CategoryCard}:hover & {
+    transform: scale(1.1);
   }
 `;
 
 const CategoryTitle = styled.h3`
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 600;
   margin-bottom: 8px;
-  color: #fff;
-  position: relative;
-  z-index: 1;
+  color: #0F172A;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  ${CategoryCard}:hover & {
+    color: #2563EB;
+  }
 `;
 
 const CategoryCount = styled.p`
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.5);
-  position: relative;
-  z-index: 1;
+  color: #64748B;
+  font-weight: 400;
 `;
 
 const CTASection = styled.section`
@@ -516,59 +510,34 @@ const CTASection = styled.section`
 `;
 
 const CTACard = styled(motion.div)`
-  background: linear-gradient(135deg, rgba(14, 57, 149, 0.12), rgba(0, 85, 165, 0.12));
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  padding: 100px 80px;
+  background: linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 100%);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 80px 60px;
   border-radius: 24px;
   text-align: center;
-  color: white;
   position: relative;
-  overflow: hidden;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
-    animation: pulse 15s ease-in-out infinite;
-  }
-  
-  @keyframes pulse {
-    0%, 100% {
-      transform: translate(0, 0) scale(1);
-    }
-    50% {
-      transform: translate(10%, 10%) scale(1.1);
-    }
-  }
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
 `;
 
 const CTATitle = styled.h2`
-  font-size: 56px;
-  font-weight: 800;
-  margin-bottom: 24px;
-  position: relative;
-  z-index: 1;
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #0F172A;
   letter-spacing: -1px;
 `;
 
 const CTAText = styled.p`
-  font-size: 20px;
-  opacity: 0.8;
-  margin-bottom: 40px;
-  position: relative;
-  z-index: 1;
+  font-size: 18px;
+  color: #64748B;
+  margin-bottom: 32px;
+  font-weight: 400;
 `;
 
 const Footer = styled.footer`
-  background: rgba(10, 10, 15, 0.6);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 80px 80px 40px;
+  background: #F8FAFC;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 64px 80px 32px;
   max-width: 1440px;
   margin: 0 auto;
 `;
@@ -582,76 +551,81 @@ const FooterGrid = styled.div`
 
 const FooterSection = styled.div`
   h3 {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 20px;
-    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #0F172A;
   }
   
   p {
-    color: rgba(255, 255, 255, 0.6);
+    color: #64748B;
     margin-bottom: 12px;
     line-height: 1.6;
+    font-size: 14px;
   }
   
   a {
     display: block;
-    color: rgba(255, 255, 255, 0.6);
+    color: #64748B;
     margin-bottom: 12px;
     transition: all 0.3s ease;
+    font-size: 14px;
     
     &:hover {
-      color: #fff;
-      transform: translateX(4px);
+      color: #2563EB;
     }
   }
 `;
 
 const Copyright = styled.div`
   text-align: center;
-  padding-top: 40px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.5);
+  padding-top: 32px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  color: #94A3B8;
   font-size: 14px;
 `;
 
 const SectionHeading = styled(motion.div)`
   text-align: center;
-  margin-bottom: 64px;
+  margin-bottom: 48px;
   
   h2 {
-    font-size: 56px;
-    font-weight: 800;
-    color: #fff;
-    margin-bottom: 16px;
-    letter-spacing: -2px;
-    line-height: 1.1;
+    font-size: 48px;
+    font-weight: 700;
+    color: #0F172A;
+    margin-bottom: 12px;
+    letter-spacing: -1px;
+    line-height: 1.2;
   }
   
   p {
-    font-size: 20px;
-    color: rgba(255, 255, 255, 0.6);
+    font-size: 18px;
+    color: #64748B;
+    font-weight: 400;
   }
 `;
 
 const particleConfigs = [
-  { top: '12%', left: '18%', size: 9, duration: 18, delay: 0 },
-  { top: '30%', left: '74%', size: 7, duration: 20, delay: 1 },
-  { top: '58%', left: '62%', size: 8, duration: 19, delay: 1.6 },
-  { top: '70%', left: '26%', size: 7, duration: 22, delay: 2.2 },
-  { top: '82%', left: '46%', size: 9, duration: 20, delay: 1.2 },
-  { top: '38%', left: '40%', size: 8, duration: 21, delay: 2.6 },
+  { top: '8%', left: '15%', duration: 16, delay: 0 },
+  { top: '22%', left: '78%', duration: 19, delay: 1.2 },
+  { top: '35%', left: '42%', duration: 18, delay: 0.8 },
+  { top: '48%', left: '68%', duration: 21, delay: 1.8 },
+  { top: '62%', left: '25%', duration: 17, delay: 2.4 },
+  { top: '75%', left: '55%', duration: 20, delay: 1.5 },
+  { top: '18%', left: '88%', duration: 22, delay: 0.5 },
+  { top: '85%', left: '12%', duration: 19, delay: 2.1 },
+  { top: '42%', left: '8%', duration: 18, delay: 1.1 },
+  { top: '68%', left: '82%', duration: 20, delay: 2.8 },
 ];
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const { language, changeLanguage } = useLanguage();
-  const t = useTranslations(language);
+  const [language, setLanguage] = useState('vi');
   const [searchTerm, setSearchTerm] = useState('');
   const [location, setLocation] = useState('');
 
   const toggleLanguage = () => {
-    changeLanguage(language === 'vi' ? 'en' : 'vi');
+    setLanguage(language === 'vi' ? 'en' : 'vi');
   };
 
   return (
@@ -671,37 +645,144 @@ const LandingPage = () => {
             {language === 'vi' ? 'VI' : 'EN'}
           </LanguageToggle>
           <Button as={Link} to="/login" $variant="primary" $size="small">
-            {t.nav.login}
+            Đăng Nhập
           </Button>
           <Button as={Link} to="/register" $variant="primary" $size="small">
-            {t.nav.signUp}
+            Đăng Ký
           </Button>
         </NavLinks>
       </Header>
 
       <HeroSection>
         <AnimatedBackground>
-          <AuroraLayer
-            initial={{ opacity: 0.25, scale: 1 }}
-            animate={{ opacity: 0.4, scale: 1.04, rotate: [0, 4, -2] }}
-            transition={{ duration: 18, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
+          {/* Aurora ambient light layer */}
+          <AuroraLayer />
+          
+          {/* Grid pattern */}
+          <GridPattern />
+          
+          {/* Noise texture for premium feel */}
+          <NoiseTexture />
+          
+          {/* Central gradient glow behind hero text */}
+          <GradientGlow
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
           />
-          <StarLayer />
-          <NoiseLayer />
+          
+          {/* Large gradient blobs - premium floating shapes */}
+          <GradientBlob
+            rounded
+            opacity={0.25}
+            blur={100}
+            animate={{
+              x: [0, 80, 0],
+              y: [0, -60, 0],
+              scale: [1, 1.15, 1],
+            }}
+            transition={{
+              duration: 22,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            style={{
+              width: '600px',
+              height: '600px',
+              top: '5%',
+              left: '-5%',
+              background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(59, 130, 246, 0.2))',
+            }}
+          />
+          
+          <GradientBlob
+            rounded
+            opacity={0.2}
+            blur={120}
+            animate={{
+              x: [0, -70, 0],
+              y: [0, 80, 0],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: 26,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            style={{
+              width: '700px',
+              height: '700px',
+              top: '40%',
+              right: '-10%',
+              background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.25), rgba(30, 64, 175, 0.15))',
+            }}
+          />
+          
+          <GradientBlob
+            rounded
+            opacity={0.18}
+            blur={90}
+            animate={{
+              x: [0, 50, 0],
+              y: [0, -50, 0],
+              scale: [1, 1.1, 1],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            style={{
+              width: '500px',
+              height: '500px',
+              bottom: '5%',
+              left: '25%',
+              background: 'linear-gradient(135deg, rgba(147, 197, 253, 0.3), rgba(96, 165, 250, 0.2))',
+            }}
+          />
+          
+          {/* Smaller accent blobs */}
+          <GradientBlob
+            rounded
+            opacity={0.22}
+            blur={70}
+            float
+            style={{
+              width: '350px',
+              height: '350px',
+              top: '15%',
+              right: '20%',
+              background: 'radial-gradient(circle, rgba(59, 130, 246, 0.3), rgba(37, 99, 235, 0.15))',
+            }}
+          />
+          
+          <GradientBlob
+            rounded
+            opacity={0.2}
+            blur={80}
+            float
+            style={{
+              width: '400px',
+              height: '400px',
+              bottom: '15%',
+              right: '35%',
+              background: 'radial-gradient(circle, rgba(96, 165, 250, 0.28), rgba(59, 130, 246, 0.12))',
+            }}
+          />
+          
+          {/* Floating particles */}
           {particleConfigs.map((particle, index) => (
             <Particle
               key={`particle-${index}`}
               style={{
                 top: particle.top,
                 left: particle.left,
-                width: `${particle.size}px`,
-                height: `${particle.size}px`,
               }}
               animate={{
-                y: [0, -14, 0],
-                x: [0, 10, -6],
-                opacity: [0.4, 0.95, 0.5],
-                scale: [1, 1.25, 1],
+                y: [0, -20, 0],
+                x: [0, 15, 0],
+                opacity: [0.3, 0.8, 0.4],
+                scale: [1, 1.4, 1],
               }}
               transition={{
                 duration: particle.duration,
@@ -711,86 +792,9 @@ const LandingPage = () => {
               }}
             />
           ))}
-          <FloatingShape
-            rounded
-            opacity={0.15}
-            animate={{
-              x: [0, 100, 0],
-              y: [0, -50, 0],
-              scale: [1, 1.2, 1],
-            }}
-            transition={{
-              duration: 20,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            style={{
-              width: '400px',
-              height: '400px',
-              top: '10%',
-              left: '5%',
-            }}
-          />
-          <FloatingShape
-            rounded
-            opacity={0.12}
-            animate={{
-              x: [0, -80, 0],
-              y: [0, 80, 0],
-              scale: [1, 1.3, 1],
-            }}
-            transition={{
-              duration: 25,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            style={{
-              width: '350px',
-              height: '350px',
-              top: '50%',
-              right: '5%',
-            }}
-          />
-          <FloatingShape
-            opacity={0.08}
-            animate={{
-              x: [0, 60, 0],
-              y: [0, -60, 0],
-              rotate: [0, 180, 360],
-            }}
-            transition={{
-              duration: 30,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            style={{
-              width: '250px',
-              height: '250px',
-              bottom: '10%',
-              left: '50%',
-            }}
-          />
-          <FloatingShape
-            rounded
-            gradient="linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%)"
-            opacity={0.1}
-            animate={{
-              x: [0, -40, 0],
-              y: [0, 40, 0],
-              scale: [1, 1.15, 1],
-            }}
-            transition={{
-              duration: 18,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            style={{
-              width: '300px',
-              height: '300px',
-              top: '30%',
-              right: '40%',
-            }}
-          />
+          
+          {/* Glassmorphism overlay */}
+          <GlassmorphismLayer />
         </AnimatedBackground>
         
         <HeroContent>
@@ -799,7 +803,7 @@ const LandingPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            {t.landing.hero.title}
+            Tìm việc & Tuyển Dụng Nhanh Hơn
           </HeroTitle>
           
           <HeroSubtitle
@@ -807,7 +811,7 @@ const LandingPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            {t.landing.hero.subtitle}
+            Kết nối Ứng viên với cơ hội. Nền tảng tuyển dụng hiện đại.
           </HeroSubtitle>
 
           <SearchContainer
@@ -819,7 +823,7 @@ const LandingPage = () => {
               <Search />
               <input
                 type="text"
-                placeholder={t.landing.hero.searchPlaceholder}
+                placeholder="Vị trí công việc hoặc từ khóa"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -829,28 +833,28 @@ const LandingPage = () => {
             <MapPin />
             <input
               type="text"
-              placeholder={t.landing.hero.locationPlaceholder}
+              placeholder="Địa điểm"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
           </SearchInput>
           
           <Button $variant="primary" onClick={() => navigate('/candidate/jobs')}>
-            {t.landing.hero.searchButton}
+            Tìm việc
           </Button>
         </SearchContainer>
 
-        <CTAButtons
+        <CTAButtons 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
         >
           <Button as={Link} to="/register/candidate" $variant="primary" $size="large">
-            {t.landing.hero.findJobs}
+            Tìm việc ngay
             <ArrowRight />
           </Button>
           <Button as={Link} to="/register/employer" $variant="outline" $size="large">
-            {t.landing.hero.postJob}
+            Đăng Tuyển
           </Button>
         </CTAButtons>
         </HeroContent>
@@ -863,9 +867,9 @@ const LandingPage = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <CTATitle>{t.landing.cta.title}</CTATitle>
+          <CTATitle>Sẵn Sàng Tuyển Ứng viên Hàng Đầu?</CTATitle>
           <CTAText>
-            {t.landing.cta.subtitle}
+            Đăng công việc và kết nối với ứng viên chất lượng ngay hôm nay
           </CTAText>
           <Button 
             as={Link} 
@@ -881,7 +885,7 @@ const LandingPage = () => {
               boxShadow: '0 8px 32px rgba(255, 255, 255, 0.2)'
             }}
           >
-            {t.landing.cta.button}
+            Bắt Đầu Miễn Phí
             <ArrowRight />
           </Button>
         </CTACard>
@@ -891,33 +895,24 @@ const LandingPage = () => {
         <FooterGrid>
           <FooterSection>
             <h3>Ốp Pờ</h3>
-            <p>{t.landing.footer.aboutDesc}</p>
+            <p>Ốp Pờ là nền tảng tuyển dụng hiện đại giúp kết nối nhà tuyển dụng với ứng viên tài năng.</p>
           </FooterSection>
           
           <FooterSection>
-            <h3>{t.landing.footer.forCandidates}</h3>
-            <Link to="/candidate/jobs">{t.landing.footer.browseJobs}</Link>
-            <Link to="/register/candidate">{t.landing.footer.profile}</Link>
-            <Link to="/candidate/saved-jobs">{t.landing.footer.savedJobs}</Link>
+            <h3>Dành Cho Ứng Viên</h3>
           </FooterSection>
           
           <FooterSection>
-            <h3>{t.landing.footer.forEmployers}</h3>
-            <Link to="/employer/post-job">{t.landing.footer.postJob}</Link>
-            <Link to="/register/employer">{t.landing.footer.manageJobs}</Link>
-            <Link to="/employer/subscription">{t.landing.footer.viewApplications}</Link>
+            <h3>Dành Cho Nhà Tuyển Dụng</h3>
           </FooterSection>
           
           <FooterSection>
-            <h3>{t.landing.footer.support}</h3>
-            <Link to="/">{t.landing.footer.helpCenter}</Link>
-            <Link to="/">{t.landing.footer.contact}</Link>
-            <Link to="/">{t.landing.footer.privacy}</Link>
+            <h3>Hỗ Trợ</h3>
           </FooterSection>
         </FooterGrid>
         
         <Copyright>
-          {t.landing.footer.copyright}
+          © 2026 Ốp Pờ. Tất cả quyền được bảo lưu.
         </Copyright>
       </Footer>
     </LandingContainer>

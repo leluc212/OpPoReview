@@ -1,17 +1,12 @@
 import React from 'react';
 import DashboardLayout from '../../components/DashboardLayout';
-import { useLanguage } from '../../context/LanguageContext';
-import { useTranslations } from '../../locales/translations';
 
 const Reports = () => {
-  const { language } = useLanguage();
-  const t = useTranslations(language);
-
   return (
     <DashboardLayout role="admin" showSearch={false}>
       <div>
-        <h1>{t.adminReports.title}</h1>
-        <p>{t.adminReports.subtitle}</p>
+        <h1>Báo Cáo</h1>
+        <p>Phân tích và báo cáo nền tảng</p>
       </div>
     </DashboardLayout>
   );

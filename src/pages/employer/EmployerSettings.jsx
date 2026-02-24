@@ -3,8 +3,6 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import { Input, Label, Button } from '../../components/FormElements';
 import { Moon, Sun, Lock, Bell, FileText, Palette, Globe, Trash2, Shield } from 'lucide-react';
-import { useLanguage } from '../../context/LanguageContext';
-import { useTranslations } from '../../locales/translations';
 
 const PageContainer = styled.div`
   animation: fadeIn 0.5s ease-in;
@@ -22,10 +20,7 @@ const PageHeader = styled.div`
     font-size: 32px;
     font-weight: 800;
     margin-bottom: 8px;
-    background: ${props => props.theme.colors.gradientPrimary};
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: ${props => props.theme.colors.primary};
   }
   
   p {
@@ -239,8 +234,9 @@ const ButtonGroup = styled.div`
 `;
 
 const EmployerSettings = () => {
-  const { language, changeLanguage } = useLanguage();
-  const t = useTranslations(language);
+  // Giả lập state language để UI hoạt động nhưng không thực sự thay đổi ngôn ngữ
+  const [language, setLanguage] = useState('vi');
+  const changeLanguage = (lang) => setLanguage(lang);
   
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState({

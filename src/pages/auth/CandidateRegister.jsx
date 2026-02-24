@@ -87,11 +87,11 @@ const CandidateRegister = () => {
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.email) newErrors.email = 'Email is required';
-    if (!formData.password) newErrors.password = 'Password is required';
-    if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
+    if (!formData.email) newErrors.email = 'Vui lòng nhập email';
+    if (!formData.password) newErrors.password = 'Vui lòng nhập mật khẩu';
+    if (formData.password.length < 6) newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = 'Mật khẩu không khớp';
     }
     return newErrors;
   };
@@ -114,7 +114,7 @@ const CandidateRegister = () => {
       <RegisterWrapper>
         <BackButton to="/register">
           <ArrowLeft />
-          Back to role selection
+          Quay lại chọn vai trò
         </BackButton>
 
         <FormCard
@@ -123,18 +123,18 @@ const CandidateRegister = () => {
           transition={{ duration: 0.6 }}
         >
           <FormHeader>
-            <h1>Create Candidate Account</h1>
-            <p>Create your account now, complete your profile later</p>
+            <h1>Tạo Tài Khoản Ứng Viên</h1>
+            <p>Tạo tài khoản ngay, hoàn thiện hồ sơ sau</p>
           </FormHeader>
 
           <form onSubmit={handleSubmit}>
             <FormGroup>
-              <Label htmlFor="email">Email Address *</Label>
+              <Label htmlFor="email">Địa Chỉ Email *</Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
-                placeholder="your.email@example.com"
+                placeholder="email.cua.ban@gmail.com"
                 value={formData.email}
                 onChange={handleChange}
                 $error={errors.email}
@@ -143,12 +143,12 @@ const CandidateRegister = () => {
             </FormGroup>
 
             <FormGroup>
-              <Label htmlFor="password">Password *</Label>
+              <Label htmlFor="password">Mật Khẩu *</Label>
               <Input
                 id="password"
                 name="password"
                 type="password"
-                placeholder="Minimum 6 characters"
+                placeholder="Tối thiểu 6 ký tự"
                 value={formData.password}
                 onChange={handleChange}
                 $error={errors.password}
@@ -157,12 +157,12 @@ const CandidateRegister = () => {
             </FormGroup>
 
             <FormGroup>
-              <Label htmlFor="confirmPassword">Confirm Password *</Label>
+              <Label htmlFor="confirmPassword">Xác Nhận Mật Khẩu *</Label>
               <Input
                 id="confirmPassword"
                 name="confirmPassword"
                 type="password"
-                placeholder="Re-enter your password"
+                placeholder="Nhập lại mật khẩu"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 $error={errors.confirmPassword}
@@ -171,12 +171,12 @@ const CandidateRegister = () => {
             </FormGroup>
 
             <Button type="submit" $variant="primary" $fullWidth $size="large" style={{ marginTop: '24px' }}>
-              Create Account
+              Tạo Tài Khoản
             </Button>
           </form>
 
           <div style={{ textAlign: 'center', marginTop: '24px', color: '#64748B' }}>
-            Already have an account? <Link to="/login" style={{ color: '#0E3995', fontWeight: 500 }}>Sign in</Link>
+            Đã có tài khoản? <Link to="/login" style={{ color: '#0E3995', fontWeight: 500 }}>Đăng nhập</Link>
           </div>
         </FormCard>
       </RegisterWrapper>

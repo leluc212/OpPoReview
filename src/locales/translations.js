@@ -55,7 +55,7 @@ export const translations = {
     landing: {
       hero: {
         title: 'Bài đăng & Tuyển Dụng Nhanh Hơn',
-        subtitle: 'Kết nối nhân tài với cơ hội. Nền tảng tuyển dụng hiện đại.',
+        subtitle: 'Kết nối Ứng viên với cơ hội. Nền tảng tuyển dụng hiện đại.',
         searchPlaceholder: 'Vị trí công việc hoặc từ khóa',
         locationPlaceholder: 'Địa điểm',
         searchButton: 'Bài đăng',
@@ -79,7 +79,7 @@ export const translations = {
         jobs: 'việc làm',
       },
       cta: {
-        title: 'Sẵn Sàng Tuyển Nhân Tài Hàng Đầu?',
+        title: 'Sẵn Sàng Tuyển Ứng viên Hàng Đầu?',
         subtitle: 'Đăng công việc và kết nối với ứng viên chất lượng ngay hôm nay',
         button: 'Bắt Đầu Miễn Phí',
       },
@@ -416,19 +416,10 @@ export const translations = {
       saveChanges: 'Lưu Thay Đổi',
     },
 
-    // Messages
-    messages: {
-      title: 'Tin Nhắn',
-      search: 'Tìm kiếm tin nhắn...',
-      typeMessage: 'Nhập tin nhắn...',
-      send: 'Gửi',
-      noMessages: 'Chưa có tin nhắn',
-    },
-
     // Auth - Login
     login: {
       welcomeTitle: 'Chào mừng bạn quay lại Ốp Pờ',
-      welcomeSubtitle: 'Đăng nhập để tiếp tục hành trình tìm việc mơ ước hoặc tuyển dụng nhân tài.',
+      welcomeSubtitle: 'Đăng nhập để tiếp tục hành trình tìm việc mơ ước hoặc tuyển dụng Ứng viên.',
       signIn: 'Đăng Nhập',
       newUser: 'Người dùng mới?',
       createAccount: 'Tạo tài khoản',

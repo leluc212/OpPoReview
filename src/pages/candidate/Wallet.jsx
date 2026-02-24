@@ -15,8 +15,6 @@ import {
   Filter
 } from 'lucide-react';
 import { Button, Input, FormGroup, Label } from '../../components/FormElements';
-import { useLanguage } from '../../context/LanguageContext';
-import { useTranslations } from '../../locales/translations';
 
 const WalletContainer = styled.div`
   max-width: 1400px;
@@ -309,8 +307,6 @@ const FilterBar = styled.div`
 `;
 
 const Wallet = () => {
-  const { language } = useLanguage();
-  const t = useTranslations(language);
   const [balance] = useState(15750000);
 
   const transactions = [

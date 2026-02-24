@@ -1,14 +1,25 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, { keyframes, css } from 'styled-components';
+
+const pulse = keyframes`
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+`;
 
 const BadgeWrapper = styled.span`
-  padding: 8px 18px;
+  padding: ${props => props.$size === 'sm' ? '4px 10px' : '8px 18px'};
   border-radius: ${props => props.theme.borderRadius.full};
-  font-size: 13px;
+  font-size: ${props => props.$size === 'sm' ? '11px' : '13px'};
   font-weight: 700;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: ${props => props.$size === 'sm' ? '5px' : '8px'};
   text-transform: capitalize;
   
   ${props => props.$status === 'pending' && `
@@ -58,21 +69,44 @@ const BadgeWrapper = styled.span`
     border: 2px solid #16a34a40;
     box-shadow: 0 2px 8px #16a34a20;
   `}
+  
+  ${props => props.$status === 'urgent' && `
+    background: #dcfce7;
+    color: #16a34a;
+    border: 2px solid #16a34a40;
+    box-shadow: 0 2px 8px #16a34a20;
+  `}
 `;
 
 const StatusDot = styled.span`
-  width: 8px;
-  height: 8px;
+  width: ${props => props.$size === 'sm' ? '6px' : '8px'};
+  height: ${props => props.$size === 'sm' ? '6px' : '8px'};
   border-radius: 50%;
   background: currentColor;
   box-shadow: 0 0 6px currentColor;
+  
+  ${props => props.$pulse && css`
+    animation: ${pulse} 1.5s ease-in-out infinite;
+  `}
 `;
 
-const StatusBadge = ({ status, showDot = true, children }) => {
+const StatusBadge = ({ status, showDot = true, children, size = 'md' }) => {
+  // Map status sang tiếng Việt
+  const statusText = {
+    'pending': 'Chờ duyệt',
+    'approved': 'Chấp nhận',
+    'rejected': 'Từ chối',
+    'reviewed': 'Đã xem',
+    'active': 'Hoạt động',
+    'inactive': 'Không hoạt động',
+    'completed': 'Hoàn thành',
+    'urgent': 'Tuyển gấp'
+  };
+  
   return (
-    <BadgeWrapper $status={status}>
-      {showDot && <StatusDot />}
-      {children || status.charAt(0).toUpperCase() + status.slice(1)}
+    <BadgeWrapper $status={status} $size={size}>
+      {showDot && <StatusDot $pulse={status === 'urgent'} $size={size} />}
+      {children || statusText[status] || status}
     </BadgeWrapper>
   );
 };

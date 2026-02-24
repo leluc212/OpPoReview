@@ -3,8 +3,6 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import { HelpCircle, MessageCircle, Book, Mail, Phone, Send, FileQuestion } from 'lucide-react';
 import { Button, Input, TextArea, FormGroup, Label } from '../../components/FormElements';
-import { useLanguage } from '../../context/LanguageContext';
-import { useTranslations } from '../../locales/translations';
 
 const SupportContainer = styled.div`
   max-width: 1200px;
@@ -177,8 +175,6 @@ const ContactInfo = styled.div`
 `;
 
 const Support = () => {
-  const { language } = useLanguage();
-  const t = useTranslations(language);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -229,16 +225,16 @@ const Support = () => {
             <div className="icon">
               <Book />
             </div>
-            <h3>{t.settings.helpCenter}</h3>
-            <p>{t.settings.helpCenterDesc}</p>
+            <h3>Trung Tâm Trợ Giúp</h3>
+            <p>Xem các bài viết hướng dẫn và FAQ</p>
           </SupportCard>
 
           <SupportCard>
             <div className="icon">
               <FileQuestion />
             </div>
-            <h3>{t.settings.reportProblem}</h3>
-            <p>{t.settings.reportProblemDesc}</p>
+            <h3>Báo Cáo Sự Cố</h3>
+            <p>Cho chúng tôi biết nếu bạn gặp vấn đề</p>
           </SupportCard>
         </SupportGrid>
 

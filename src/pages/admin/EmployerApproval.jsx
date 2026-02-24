@@ -5,8 +5,6 @@ import StatusBadge from '../../components/StatusBadge';
 import TableFilter from '../../components/TableFilter';
 import { Button } from '../../components/FormElements';
 import { Check, X } from 'lucide-react';
-import { useLanguage } from '../../context/LanguageContext';
-import { useTranslations } from '../../locales/translations';
 
 const EmployerApprovalContainer = styled.div``;
 
@@ -56,9 +54,6 @@ const ActionButtons = styled.div`
 `;
 
 const EmployerApproval = () => {
-  const { language } = useLanguage();
-  const t = useTranslations(language);
-
   const [searchTerm, setSearchTerm] = useState('');
   const [industryFilters, setIndustryFilters] = useState([]);
 
@@ -69,11 +64,11 @@ const EmployerApproval = () => {
   ]);
 
   const filterOptions = [
-    { value: 'Technology', label: 'Technology' },
-    { value: 'Design', label: 'Design' },
-    { value: 'Finance', label: 'Finance' },
-    { value: 'Healthcare', label: 'Healthcare' },
-    { value: 'Education', label: 'Education' },
+    { value: 'Technology', label: 'Công nghệ' },
+    { value: 'Design', label: 'Thiết kế' },
+    { value: 'Finance', label: 'Tài chính' },
+    { value: 'Healthcare', label: 'Y tế' },
+    { value: 'Education', label: 'Giáo dục' },
   ];
 
   const filteredEmployers = useMemo(() => {
@@ -101,8 +96,8 @@ const EmployerApproval = () => {
     <DashboardLayout role="admin">
       <EmployerApprovalContainer>
         <PageHeader>
-          <h1>{t.adminEmployerApproval.title}</h1>
-          <p style={{ color: '#64748B' }}>{t.adminEmployerApproval.subtitle}</p>
+          <h1>Duyệt Nhà Tuyển Dụng</h1>
+          <p style={{ color: '#64748B' }}>Xem xét và phê duyệt đăng ký nhà tuyển dụng</p>
         </PageHeader>
 
         <TableFilter 
@@ -111,18 +106,18 @@ const EmployerApproval = () => {
           filterOptions={filterOptions}
           activeFilters={industryFilters}
           onFilterToggle={handleFilterToggle}
-          searchPlaceholder="Search employers..."
+          searchPlaceholder="Tìm kiếm nhà tuyển dụng..."
         />
 
         <Table>
           <thead>
             <tr>
-              <th>{t.adminEmployerApproval.company}</th>
-              <th>{t.adminEmployerApproval.email}</th>
-              <th>{t.adminEmployerApproval.industry}</th>
-              <th>{t.adminEmployerApproval.submitted}</th>
-              <th>{t.adminEmployerApproval.status}</th>
-              <th>{t.adminEmployerApproval.actions}</th>
+              <th>Công Ty</th>
+              <th>Email</th>
+              <th>Lĩnh Vực</th>
+              <th>Ngày Gửi</th>
+              <th>Trạng Thái</th>
+              <th>Thao Tác</th>
             </tr>
           </thead>
           <tbody>
@@ -136,10 +131,10 @@ const EmployerApproval = () => {
                 <td>
                   <ActionButtons>
                     <Button $variant="primary" $size="small">
-                      <Check /> {t.adminEmployerApproval.approve}
+                      <Check /> Duyệt
                     </Button>
                     <Button $variant="danger" $size="small">
-                      <X /> {t.adminEmployerApproval.reject}
+                      <X /> Từ Chối
                     </Button>
                   </ActionButtons>
                 </td>

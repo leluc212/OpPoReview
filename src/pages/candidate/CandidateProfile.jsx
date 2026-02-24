@@ -3,8 +3,6 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import { Button, Input, TextArea, FormGroup, Label } from '../../components/FormElements';
 import { Upload, Save } from 'lucide-react';
-import { useLanguage } from '../../context/LanguageContext';
-import { useTranslations } from '../../locales/translations';
 
 const ProfileContainer = styled.div`
   max-width: 900px;
@@ -56,12 +54,10 @@ const Avatar = styled.div`
 `;
 
 const CandidateProfile = () => {
-  const { language } = useLanguage();
-  const t = useTranslations(language);
   const [formData, setFormData] = useState({
     fullName: 'Lực Thứ Hai',
     email: 'lucthuhai@gmail.com',
-    phone: '+89 379784509',
+    phone: '+84 379784509',
     location: 'Thủ Đức, TP.HCM',
     title: 'Senior React Developer',
     bio: 'Kinh nghiệm 20 năm làm IT',
@@ -76,82 +72,82 @@ const CandidateProfile = () => {
 
   const handleSave = () => {
     console.log('Saving profile:', formData);
-    alert(t.settings.changesSaved);
+    alert('Đã lưu thay đổi thành công!');
   };
 
   return (
     <DashboardLayout role="candidate" showSearch={false}>
       <ProfileContainer>
         <ProfileCard>
-          <SectionTitle>{t.profile.personalInfo}</SectionTitle>
+          <SectionTitle>Thông Tin Cá Nhân</SectionTitle>
           
           <AvatarSection>
             <Avatar>JD</Avatar>
             <div>
               <Button $variant="primary">
-                <Upload /> {t.profile.uploadPhoto}
+                <Upload /> Tải Ảnh
               </Button>
               <p style={{ fontSize: '14px', color: '#64748B', marginTop: '8px' }}>
-                {t.profile.uploadPhotoHelp}
+                JPG, PNG hoặc GIF. Tối đa 5MB
               </p>
             </div>
           </AvatarSection>
 
           <FormGrid>
             <FormGroup>
-              <Label>{t.profile.fullName}</Label>
+              <Label>Họ Và Tên</Label>
               <Input name="fullName" value={formData.fullName} onChange={handleChange} />
             </FormGroup>
 
             <FormGroup>
-              <Label>{t.profile.email}</Label>
+              <Label>Email</Label>
               <Input name="email" type="email" value={formData.email} onChange={handleChange} />
             </FormGroup>
 
             <FormGroup>
-              <Label>{t.profile.phone}</Label>
+              <Label>Số Điện Thoại</Label>
               <Input name="phone" type="tel" value={formData.phone} onChange={handleChange} />
             </FormGroup>
 
             <FormGroup>
-              <Label>{t.profile.location}</Label>
+              <Label>Địa Điểm</Label>
               <Input name="location" value={formData.location} onChange={handleChange} />
             </FormGroup>
 
             <FormGroup>
-              <Label>{t.profile.professionalTitle}</Label>
+              <Label>Chức Danh Nghề Nghiệp</Label>
               <Input name="title" value={formData.title} onChange={handleChange} />
             </FormGroup>
 
             <FormGroup>
-              <Label>{t.profile.bio}</Label>
+              <Label>Giới Thiệu</Label>
               <TextArea name="bio" value={formData.bio} onChange={handleChange} style={{ gridColumn: '1 / -1' }} />
             </FormGroup>
           </FormGrid>
         </ProfileCard>
 
         <ProfileCard>
-          <SectionTitle>{t.profile.socialLinks}</SectionTitle>
+          <SectionTitle>Liên Kết Mạng Xã Hội</SectionTitle>
           <FormGrid>
             <FormGroup>
-              <Label>{t.profile.linkedin}</Label>
+              <Label>LinkedIn</Label>
               <Input name="linkedin" value={formData.linkedin} onChange={handleChange} />
             </FormGroup>
 
             <FormGroup>
-              <Label>{t.profile.github}</Label>
+              <Label>GitHub</Label>
               <Input name="github" value={formData.github} onChange={handleChange} />
             </FormGroup>
 
             <FormGroup style={{ gridColumn: '1 / -1' }}>
-              <Label>{t.profile.website}</Label>
+              <Label>Website</Label>
               <Input name="website" value={formData.website} onChange={handleChange} />
             </FormGroup>
           </FormGrid>
         </ProfileCard>
 
         <Button $variant="primary" $size="large" onClick={handleSave}>
-          <Save /> {t.profile.saveChanges}
+          <Save /> Lưu Thay Đổi
         </Button>
       </ProfileContainer>
     </DashboardLayout>

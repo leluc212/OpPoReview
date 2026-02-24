@@ -169,46 +169,46 @@ const PendingApproval = () => {
           <Clock />
         </IconWrapper>
         
-        <Title>Account Under Review</Title>
+        <Title>Tài Khoản Đang Được Duyệt</Title>
         <Subtitle>
-          Thank you for registering! Your employer account is currently being reviewed by our team. 
-          This typically takes 24-48 hours.
+          Cảm ơn bạn đã đăng ký! Tài khoản nhà tuyển dụng của bạn hiện đang được đội ngũ của chúng tôi xem xét. 
+          Quá trình này thường mất 24-48 giờ.
         </Subtitle>
 
         <InfoBox>
           <InfoItem>
             <CheckCircle />
             <div>
-              <strong>Email Verified</strong>
-              <span>Your email has been successfully verified</span>
+              <strong>Email Đã Xác Thực</strong>
+              <span>Email của bạn đã được xác thực thành công</span>
             </div>
           </InfoItem>
           <InfoItem>
             <CheckCircle />
             <div>
-              <strong>Application Submitted</strong>
-              <span>Your company information has been received</span>
+              <strong>Đơn Đăng Ký Đã Gửi</strong>
+              <span>Thông tin công ty của bạn đã được nhận</span>
             </div>
           </InfoItem>
           <InfoItem>
             <Clock />
             <div>
-              <strong>Pending Admin Review</strong>
-              <span>Our team is verifying your company details</span>
+              <strong>Đang Chờ Quản Trị Viên Duyệt</strong>
+              <span>Đội ngũ của chúng tôi đang xác minh thông tin công ty của bạn</span>
             </div>
           </InfoItem>
         </InfoBox>
 
         <Timeline>
-          <TimelineTitle>What Happens Next?</TimelineTitle>
+          <TimelineTitle>Tiếp Theo Sẽ Diễn Ra Gì?</TimelineTitle>
           
           <TimelineItem>
             <TimelineIcon $completed>
               <CheckCircle />
             </TimelineIcon>
             <TimelineContent>
-              <h4>Verification Email Sent</h4>
-              <p>You'll receive a confirmation email shortly</p>
+              <h4>Email Xác Nhận Đã Gửi</h4>
+              <p>Bạn sẽ nhận được email xác nhận ngay lập tức</p>
             </TimelineContent>
           </TimelineItem>
 
@@ -217,8 +217,8 @@ const PendingApproval = () => {
               <Clock />
             </TimelineIcon>
             <TimelineContent>
-              <h4>Admin Review (24-48 hours)</h4>
-              <p>We'll verify your company information</p>
+              <h4>Quản Trị Viên Duyệt (24-48 giờ)</h4>
+              <p>Chúng tôi sẽ xác minh thông tin công ty của bạn</p>
             </TimelineContent>
           </TimelineItem>
 
@@ -227,18 +227,18 @@ const PendingApproval = () => {
               <Clock />
             </TimelineIcon>
             <TimelineContent>
-              <h4>Approval Notification</h4>
-              <p>You'll be notified when your account is approved</p>
+              <h4>Thông Báo Phê Duyệt</h4>
+              <p>Bạn sẽ được thông báo khi tài khoản được phê duyệt</p>
             </TimelineContent>
           </TimelineItem>
         </Timeline>
 
         <ButtonGroup>
           <Button as={Link} to="/" $variant="secondary" $fullWidth>
-            Back to Home
+            Về Trang Chủ
           </Button>
           <Button as={Link} to="/login" $variant="primary" $fullWidth>
-            Go to Login
+            Đăng Nhập
           </Button>
         </ButtonGroup>
       </ApprovalCard>

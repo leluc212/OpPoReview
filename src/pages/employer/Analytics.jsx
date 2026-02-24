@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import { TrendingUp, Users, Eye, DollarSign, Calendar, BarChart3, PieChart, Activity, Briefcase } from 'lucide-react';
-import { useLanguage } from '../../context/LanguageContext';
-import { useTranslations } from '../../locales/translations';
 
 const PageContainer = styled.div`
   animation: fadeIn 0.5s ease-in;
@@ -21,10 +19,7 @@ const PageHeader = styled.div`
     font-size: 32px;
     font-weight: 800;
     margin-bottom: 8px;
-    background: ${props => props.theme.colors.gradientPrimary};
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: ${props => props.theme.colors.primary};
   }
   
   p {
@@ -251,8 +246,6 @@ const Badge = styled.span`
 `;
 
 const Analytics = () => {
-  const { language } = useLanguage();
-  const t = useTranslations(language);
   const [timeFilter, setTimeFilter] = useState('month');
 
   const stats = [

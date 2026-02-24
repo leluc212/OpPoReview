@@ -4,8 +4,6 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Button, Input, FormGroup, Label, ErrorText } from '../../components/FormElements';
 import { useAuth } from '../../context/AuthContext';
-import { useLanguage } from '../../context/LanguageContext';
-import { useTranslations } from '../../locales/translations';
 
 const LoginContainer = styled.div`
   min-height: 100vh;
@@ -84,10 +82,7 @@ const Logo = styled(Link)`
   padding: 8px 12px;
   font-size: 30px;
   font-weight: 800;
-  background: ${props => props.theme.colors.gradientPrimary};
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: ${props => props.theme.colors.primary};
   margin-bottom: 48px;
   border-radius: 12px;
   background-color: rgba(255, 255, 255, 0.06);
@@ -149,8 +144,6 @@ const ForgotPassword = styled(Link)`
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const { language } = useLanguage();
-  const t = useTranslations(language);
   const [role, setRole] = useState('candidate');
   const [formData, setFormData] = useState({
     email: '',
@@ -167,8 +160,8 @@ const LoginPage = () => {
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.email) newErrors.email = t.login.requiredEmail;
-    if (!formData.password) newErrors.password = t.login.requiredPassword;
+    if (!formData.email) newErrors.email = 'Vui lòng nhập email';
+    if (!formData.password) newErrors.password = 'Vui lòng nhập mật khẩu';
     return newErrors;
   };
 
@@ -183,7 +176,7 @@ const LoginPage = () => {
 
     // Mock login - in real app, this would call an API
     const userData = {
-      name: role === 'admin' ? 'Admin User' : formData.email.split('@')[0],
+      name: role === 'admin' ? 'Quản Trị Viên' : formData.email.split('@')[0],
       email: formData.email,
       role: role,
       approved: true
@@ -209,8 +202,8 @@ const LoginPage = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1>{t.login.welcomeTitle}</h1>
-          <p>{t.login.welcomeSubtitle}</p>
+          <h1>Chào mừng bạn quay lại Ốp Pờ</h1>
+          <p>Đăng nhập để tiếp tục hành trình tìm việc mơ ước hoặc tuyển dụng Ứng viên.</p>
         </HeroContent>
       </LoginLeft>
 
@@ -226,9 +219,9 @@ const LoginPage = () => {
           </Logo>
           
           <FormHeader>
-            <h2>{t.login.signIn}</h2>
+            <h2>Đăng Nhập</h2>
             <p>
-              {t.login.newUser} <Link to="/register">{t.login.createAccount}</Link>
+              Người dùng mới? <Link to="/register">Tạo tài khoản</Link>
             </p>
           </FormHeader>
 
@@ -238,32 +231,32 @@ const LoginPage = () => {
               $selected={role === 'candidate'}
               onClick={() => setRole('candidate')}
             >
-              {t.login.roleCandidate}
+              Ứng Viên
             </RoleButton>
             <RoleButton
               type="button"
               $selected={role === 'employer'}
               onClick={() => setRole('employer')}
             >
-              {t.login.roleEmployer}
+              Nhà Tuyển Dụng
             </RoleButton>
             <RoleButton
               type="button"
               $selected={role === 'admin'}
               onClick={() => setRole('admin')}
             >
-              {t.login.roleAdmin}
+              Quản Trị
             </RoleButton>
           </RoleSelector>
 
           <form onSubmit={handleSubmit}>
             <FormGroup>
-              <Label htmlFor="email">{t.login.email}</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 name="email"
-                placeholder={t.login.placeholderEmail}
+                placeholder="email@tenmien.com"
                 value={formData.email}
                 onChange={handleChange}
                 $error={errors.email}
@@ -272,7 +265,7 @@ const LoginPage = () => {
             </FormGroup>
 
             <FormGroup>
-              <Label htmlFor="password">{t.login.password}</Label>
+              <Label htmlFor="password">Mật khẩu</Label>
               <Input
                 id="password"
                 type="password"
@@ -283,18 +276,18 @@ const LoginPage = () => {
                 $error={errors.password}
               />
               {errors.password && <ErrorText>{errors.password}</ErrorText>}
-              <ForgotPassword to="/forgot-password">{t.login.forgotPassword}</ForgotPassword>
+              <ForgotPassword to="/forgot-password">Quên mật khẩu?</ForgotPassword>
             </FormGroup>
 
             <Button type="submit" $variant="primary" $fullWidth $size="large">
-              {t.login.signIn}
+              Đăng Nhập
             </Button>
           </form>
 
-          <Divider>{t.login.continueWith}</Divider>
+          <Divider>hoặc tiếp tục với</Divider>
 
           <Button $variant="secondary" $fullWidth>
-            {t.login.continueAsGuest}
+            Tiếp tục với khách
           </Button>
         </LoginForm>
       </LoginRight>

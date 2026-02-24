@@ -5,7 +5,6 @@ import {
   LayoutDashboard, 
   Briefcase, 
   Users, 
-  MessageSquare, 
   Bell, 
   Settings,
   FileText,
@@ -23,30 +22,38 @@ import {
   UsersRound,
   User
 } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
-import { useTranslations } from '../locales/translations';
 
 const SidebarContainer = styled.aside`
-  width: 280px;
-  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+  width: 80px;
+  background: ${props => props.theme.colors.white};
   border-right: 1px solid ${props => props.theme.colors.border};
   height: 100vh;
   position: sticky;
   top: 0;
   display: flex;
   flex-direction: column;
-  box-shadow: ${props => props.theme.shadows.md};
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: visible;
+  z-index: 100;
+  
+  &:hover {
+    width: 260px;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08);
+  }
 `;
 
 const Logo = styled.div`
-  padding: 28px 24px;
+  padding: 24px 0;
   border-bottom: 1px solid ${props => props.theme.colors.border};
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  background: ${props => props.theme.colors.bgLight};
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, ${props => props.theme.colors.primary}05 0%, transparent 100%);
   position: relative;
+  min-height: 88px;
   
   &::after {
     content: '';
@@ -54,28 +61,56 @@ const Logo = styled.div`
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 60px;
+    width: 48px;
     height: 3px;
-    background: ${props => props.theme.colors.gradientPrimary};
-    border-radius: 2px;
+    background: linear-gradient(90deg, ${props => props.theme.colors.primary}, ${props => props.theme.colors.secondary});
+    border-radius: 3px 3px 0 0;
+    transition: all 0.3s ease;
+  }
+  
+  ${SidebarContainer}:hover &::after {
+    width: 120px;
+  }
+  
+  img {
+    height: 36px;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 2px 8px ${props => props.theme.colors.primary}20);
+  }
+  
+  ${SidebarContainer}:hover & img {
+    height: 40px;
   }
   
   h1 {
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 800;
-    background: ${props => props.theme.colors.gradientPrimary};
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: ${props => props.theme.colors.primary};
     letter-spacing: -0.5px;
+    white-space: nowrap;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(-10px);
+  }
+  
+  ${SidebarContainer}:hover & h1 {
+    opacity: 1;
+    max-height: 40px;
+    transform: translateY(0);
   }
 `;
 
 const Nav = styled.nav`
   flex: 1;
-  padding: 20px 16px;
+  padding: 16px 10px;
   overflow-y: auto;
   overflow-x: hidden;
+  
+  ${SidebarContainer}:hover & {
+    padding: 16px 12px;
+  }
   
   /* Optimize scrolling - prevent auto-scroll */
   scroll-behavior: auto !important;
@@ -84,7 +119,7 @@ const Nav = styled.nav`
   
   /* Custom scrollbar */
   &::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
   }
   
   &::-webkit-scrollbar-track {
@@ -93,7 +128,7 @@ const Nav = styled.nav`
   
   &::-webkit-scrollbar-thumb {
     background: ${props => props.theme.colors.border};
-    border-radius: 3px;
+    border-radius: 2px;
     
     &:hover {
       background: ${props => props.theme.colors.primary};
@@ -102,38 +137,101 @@ const Nav = styled.nav`
 `;
 
 const NavSection = styled.div`
-  margin-bottom: 32px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  
+  &:first-child {
+    margin-top: 4px;
+  }
+  
+  &:not(:last-child) {
+    border-bottom: 1px solid transparent;
+  }
+  
+  ${SidebarContainer}:hover &:not(:last-child) {
+    border-bottom: 1px solid ${props => props.theme.colors.border};
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+  }
 `;
 
 const NavSectionTitle = styled.p`
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   color: ${props => props.theme.colors.textLight};
   text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 12px;
-  padding: 0 16px;
+  letter-spacing: 1.2px;
+  margin-bottom: 8px;
+  padding: 0 12px;
+  white-space: nowrap;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(-10px);
+  
+  ${SidebarContainer}:hover & {
+    opacity: 0.6;
+    max-height: 24px;
+    margin-bottom: 12px;
+    transform: translateX(0);
+  }
 `;
 
 const NavLink = styled.div`
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px 16px;
+  gap: 12px;
+  padding: 12px;
   border-radius: ${props => props.theme.borderRadius.lg};
   color: ${props => props.$active ? 'white' : props.theme.colors.textLight};
-  background: ${props => props.$active ? props.theme.colors.gradientPrimary : 'transparent'};
+  background: ${props => props.$active ? `linear-gradient(135deg, ${props.theme.colors.primary}, ${props.theme.colors.secondary})` : 'transparent'};
   font-weight: ${props => props.$active ? 600 : 500};
-  transition: all ${props => props.theme.transitions.normal};
-  margin-bottom: 6px;
+  font-size: 14px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 4px;
   position: relative;
-  overflow: hidden;
-  box-shadow: ${props => props.$active ? props.theme.shadows.md : 'none'};
   cursor: pointer;
   user-select: none;
   outline: none;
+  justify-content: center;
   
-  /* Prevent focus scroll */
+  ${SidebarContainer}:hover & {
+    justify-content: flex-start;
+    padding: 12px 14px;
+    margin-bottom: 6px;
+  }
+  
+  /* Active indicator bar */
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: ${props => props.$active ? '60%' : '0'};
+    background: white;
+    transition: height 0.25s ease;
+    border-radius: 0 3px 3px 0;
+    opacity: ${props => props.$active ? 1 : 0};
+  }
+  
+  /* Hover indicator bar */
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0;
+    background: ${props => props.theme.colors.primary};
+    transition: height 0.25s ease;
+    border-radius: 0 3px 3px 0;
+    opacity: 0;
+  }
+  
   &:focus {
     outline: none;
   }
@@ -143,45 +241,52 @@ const NavLink = styled.div`
     outline-offset: 2px;
   }
   
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 4px;
-    height: 0;
-    background: ${props => props.theme.colors.primary};
-    transition: height ${props => props.theme.transitions.normal};
-    border-radius: 0 2px 2px 0;
-  }
-  
   svg {
     width: 22px;
     height: 22px;
-    transition: transform ${props => props.theme.transitions.fast};
+    min-width: 22px;
+    stroke-width: 2;
+    transition: all 0.25s ease;
+  }
+  
+  span {
+    white-space: nowrap;
+    opacity: 0;
+    max-width: 0;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  ${SidebarContainer}:hover & span {
+    opacity: 1;
+    max-width: 180px;
   }
   
   &:hover {
-    background: ${props => props.$active ? props.theme.colors.gradientPrimary : `${props.theme.colors.primary}08`};
+    background: ${props => props.$active 
+      ? `linear-gradient(135deg, ${props.theme.colors.primary}, ${props.theme.colors.secondary})` 
+      : `${props.theme.colors.primary}10`};
     color: ${props => props.$active ? 'white' : props.theme.colors.primary};
-    transform: translateX(4px);
+    transform: ${props => props.$active ? 'none' : 'translateX(2px)'};
     
-    &::before {
-      height: ${props => props.$active ? '0' : '24px'};
+    &::after {
+      height: ${props => props.$active ? '0' : '50%'};
+      opacity: ${props => props.$active ? 0 : 1};
     }
     
     svg {
-      transform: scale(1.1);
+      transform: ${props => props.$active ? 'scale(1.05)' : 'scale(1.1)'};
     }
+  }
+  
+  &:active {
+    transform: scale(0.98);
   }
 `;
 
 const Sidebar = ({ role }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { language } = useLanguage();
-  const t = useTranslations(language);
   const navRef = useRef(null);
   const isNavigatingRef = useRef(false);
   
@@ -238,70 +343,68 @@ const Sidebar = ({ role }) => {
   };
   
   const candidateLinks = [
-    { section: t.sidebar.main, items: [
-      { to: '/candidate/dashboard', icon: LayoutDashboard, label: t.sidebar.dashboard },
-      { to: '/candidate/jobs', icon: Briefcase, label: t.sidebar.findJobs },
+    { section: 'CHÍNH', items: [
+      { to: '/candidate/dashboard', icon: LayoutDashboard, label: 'Bảng Điều Khiển' },
+      { to: '/candidate/jobs', icon: Briefcase, label: 'Bài đăng' },
     ]},
-    { section: t.sidebar.communication, items: [
-      { to: '/candidate/messages', icon: MessageSquare, label: t.sidebar.messages },
-      { to: '/candidate/notifications', icon: Bell, label: t.sidebar.notifications },
+    { section: 'LIÊN LẠC', items: [
+      { to: '/candidate/notifications', icon: Bell, label: 'Thông Báo' },
     ]},
-    { section: t.sidebar.account, items: [
-      { to: '/candidate/profile', icon: Users, label: t.sidebar.myProfile },
-      { to: '/candidate/settings', icon: Settings, label: t.sidebar.settings },
+    { section: 'TÀI KHOẢN', items: [
+      { to: '/candidate/profile', icon: Users, label: 'Hồ Sơ Của Tôi' },
+      { to: '/candidate/settings', icon: Settings, label: 'Cài Đặt' },
     ]},
-    { section: t.sidebar.utilities, items: [
-      { to: '#', icon: MapPin, label: t.sidebar.location },
-      { to: '/candidate/availability', icon: ToggleLeft, label: t.sidebar.availability },
-      { to: '/candidate/wallet', icon: Wallet, label: t.sidebar.digitalWallet },
-      { to: '/candidate/support', icon: HelpCircle, label: t.sidebar.support },
-      { to: '#', icon: LogOut, label: t.sidebar.signOut },
+    { section: 'TIỆN ÍCH', items: [
+      { to: '#', icon: MapPin, label: 'Vị Trí' },
+      { to: '/candidate/availability', icon: ToggleLeft, label: 'Trạng Thái (Bật/Tắt)' },
+      { to: '/candidate/wallet', icon: Wallet, label: 'Ví Điện Tử' },
+      { to: '/candidate/support', icon: HelpCircle, label: 'Hỗ Trợ' },
+      { to: '#', icon: LogOut, label: 'Đăng Xuất' },
     ]}
   ];
   
   const employerLinks = [
-    { section: t.sidebar.main, items: [
-      { to: '/employer/dashboard', icon: LayoutDashboard, label: t.sidebar.dashboard },
-      { to: '/employer/jobs', icon: Briefcase, label: t.sidebar.myJobs },
-      { to: '/employer/applications', icon: FileText, label: t.sidebar.applications },
+    { section: 'CHÍNH', items: [
+      { to: '/employer/dashboard', icon: LayoutDashboard, label: 'Bảng Điều Khiển' },
+      { to: '/employer/jobs', icon: Briefcase, label: 'Việc Của Tôi' },
+      { to: '/employer/applications', icon: FileText, label: 'Hồ Sơ Ứng Tuyển' },
       { to: '/employer/hr-management', icon: UsersRound, label: 'Quản lý nhân sự' },
     ]},
-    { section: t.sidebar.communication, items: [
-      { to: '/employer/messages', icon: MessageSquare, label: t.sidebar.messages },
-      { to: '/employer/notifications', icon: Bell, label: t.sidebar.notifications },
+    { section: 'LIÊN LẠC', items: [
+      { to: '/employer/notifications', icon: Bell, label: 'Thông Báo' },
     ]},
-    { section: t.sidebar.account, items: [
-      { to: '/employer/profile', icon: Users, label: t.sidebar.companyProfile },
-      { to: '/employer/subscription', icon: CreditCard, label: t.sidebar.subscription },
-      { to: '/employer/settings', icon: Settings, label: t.sidebar.settings },
+    { section: 'TÀI KHOẢN', items: [
+      { to: '/employer/profile', icon: Users, label: 'Hồ Sơ Công Ty' },
+      { to: '/employer/subscription', icon: CreditCard, label: 'Gói Dịch Vụ' },
+      { to: '/employer/settings', icon: Settings, label: 'Cài Đặt' },
     ]},
-    { section: t.sidebar.utilities, items: [
+    { section: 'TIỆN ÍCH', items: [
       { to: '/employer/analytics', icon: BarChart3, label: 'Phân tích' },
-      { to: '/employer/wallet', icon: Wallet, label: t.sidebar.digitalWallet },
-      { to: '/employer/support', icon: HelpCircle, label: t.sidebar.support },
-      { to: '#', icon: LogOut, label: t.sidebar.signOut },
+      { to: '/employer/wallet', icon: Wallet, label: 'Ví Điện Tử' },
+      { to: '/employer/support', icon: HelpCircle, label: 'Hỗ Trợ' },
+      { to: '#', icon: LogOut, label: 'Đăng Xuất' },
     ]}
   ];
   
   const adminLinks = [
-    { section: t.sidebar.main, items: [
-      { to: '/admin/dashboard', icon: LayoutDashboard, label: t.sidebar.dashboard },
-      { to: '/admin/users', icon: Users, label: t.sidebar.userManagement },
-      { to: '/admin/employers', icon: CheckCircle, label: t.sidebar.employerApproval },
+    { section: 'CHÍNH', items: [
+      { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Bảng Điều Khiển' },
+      { to: '/admin/users', icon: Users, label: 'Quản Lý Người Dùng' },
+      { to: '/admin/employers', icon: CheckCircle, label: 'Duyệt Nhà Tuyển Dụng' },
     ]},
     { section: 'Quản Lý', items: [
       { to: '/admin/posts', icon: FileText, label: 'Quản lý bài đăng' },
-      { to: '/admin/packages', icon: Package, label: t.sidebar.packages },
+      { to: '/admin/packages', icon: Package, label: 'Gói Dịch Vụ' },
     ]},
     { section: 'Phân Tích', items: [
       { to: '/admin/analytics', icon: BarChart3, label: 'Phân tích dữ liệu' },
-      { to: '/admin/reports', icon: BarChart3, label: t.sidebar.reports },
+      { to: '/admin/reports', icon: BarChart3, label: 'Báo Cáo' },
     ]},
     { section: 'Tiện Ích', items: [
       { to: '/admin/wallet', icon: Wallet, label: 'Ví điện tử' },
-      { to: '/admin/notifications', icon: Bell, label: t.sidebar.notifications },
+      { to: '/admin/notifications', icon: Bell, label: 'Thông Báo' },
       { to: '/admin/profile', icon: User, label: 'Hồ sơ' },
-      { to: '/admin/settings', icon: Settings, label: t.sidebar.settings },
+      { to: '/admin/settings', icon: Settings, label: 'Cài Đặt' },
     ]}
   ];
   

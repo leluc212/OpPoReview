@@ -16,19 +16,21 @@ export const Button = styled.button`
   justify-content: center;
   
   ${props => props.$variant === 'primary' && `
-    background: linear-gradient(135deg, #0E3995 0%, #0055A5 100%);
+    background: #60A5FA;
     color: white;
-    box-shadow: 0 8px 24px rgba(14, 57, 149, 0.35);
+    box-shadow: 0 8px 24px rgba(96, 165, 250, 0.4);
     border: none;
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 16px;
     
     &:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(0, 85, 165, 0.45);
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 12px 36px rgba(96, 165, 250, 0.5);
+      background: #3B82F6;
     }
     
     &:active:not(:disabled) {
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
     }
   `}
   
@@ -44,16 +46,19 @@ export const Button = styled.button`
   `}
   
   ${props => props.$variant === 'outline' && `
-    background: transparent;
-    color: #fff;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 1);
+    color: #60A5FA;
+    border: 2px solid #60A5FA;
+    font-weight: 700;
     backdrop-filter: blur(10px);
+    box-shadow: 0 6px 20px rgba(96, 165, 250, 0.2);
     
     &:hover:not(:disabled) {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.5);
-      box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
+      background: #EFF6FF;
+      border-color: #3B82F6;
+      color: #3B82F6;
       transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(59, 130, 246, 0.25);
     }
   `}
   

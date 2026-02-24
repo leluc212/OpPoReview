@@ -4,8 +4,6 @@ import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
 import TableFilter from '../../components/TableFilter';
 import { Eye, CheckCircle, XCircle, MessageSquareOff, Star } from 'lucide-react';
-import { useLanguage } from '../../context/LanguageContext';
-import { useTranslations } from '../../locales/translations';
 
 const ApplicationsContainer = styled.div``;
 
@@ -98,26 +96,23 @@ const MarkedBadge = styled.span`
 `;
 
 const Applications = () => {
-  const { language } = useLanguage();
-  const t = useTranslations(language);
-  
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilters, setStatusFilters] = useState([]);
   
   const [applications, setApplications] = useState([
-    { id: 1, candidate: 'Hiếu sàn', job: 'Senior React Developer', applied: t.employer.applied2h, status: 'pending', completed: false, marked: false, messagesDeleted: false },
-    { id: 2, candidate: 'Duy sàn', job: 'Thu ngân', applied: t.employer.applied5h, status: 'pending', completed: false, marked: false, messagesDeleted: false },
-    { id: 3, candidate: 'Nheo', job: 'Nhân viên pha chế', applied: t.employer.applied1d, status: 'approved', completed: false, marked: false, messagesDeleted: false },
-    { id: 4, candidate: 'Gemmin', job: 'Senior React Developer', applied: t.employerJobs.posted2d || '2 days ago', status: 'rejected', completed: false, marked: false, messagesDeleted: false },
-    { id: 5, candidate: 'Zun', job: 'Nhân viên phục vụ', applied: t.employerJobs.posted1w || t.employer.applied1d, status: 'pending', completed: false, marked: false, messagesDeleted: false },
+    { id: 1, candidate: 'Hiếu sàn', job: 'Senior React Developer', applied: '2 giờ trước', status: 'pending', completed: false, marked: false, messagesDeleted: false },
+    { id: 2, candidate: 'Duy sàn', job: 'Thu ngân', applied: '5 giờ trước', status: 'pending', completed: false, marked: false, messagesDeleted: false },
+    { id: 3, candidate: 'Nheo', job: 'Nhân viên pha chế', applied: '1 ngày trước', status: 'approved', completed: false, marked: false, messagesDeleted: false },
+    { id: 4, candidate: 'Gemmin', job: 'Senior React Developer', applied: '2 ngày trước', status: 'rejected', completed: false, marked: false, messagesDeleted: false },
+    { id: 5, candidate: 'Zun', job: 'Nhân viên phục vụ', applied: '1 tuần trước', status: 'pending', completed: false, marked: false, messagesDeleted: false },
   ]);
 
   const filterOptions = [
-    { value: 'pending', label: 'Pending' },
-    { value: 'approved', label: 'Approved' },
-    { value: 'rejected', label: 'Rejected' },
-    { value: 'completed', label: 'Completed' },
-    { value: 'marked', label: 'Marked' },
+    { value: 'pending', label: 'Chờ duyệt' },
+    { value: 'approved', label: 'Chấp nhận' },
+    { value: 'rejected', label: 'Từ chối' },
+    { value: 'completed', label: 'Hoàn thành' },
+    { value: 'marked', label: 'Đã đánh dấu' },
   ];
 
   const filteredApplications = useMemo(() => {
@@ -161,8 +156,8 @@ const Applications = () => {
     <DashboardLayout role="employer">
       <ApplicationsContainer>
         <PageHeader>
-          <h1>{t.employerApplications.title}</h1>
-          <p style={{ color: '#64748B' }}>{t.employerApplications.subtitle}</p>
+          <h1>Hồ Sơ Ứng Tuyển</h1>
+          <p style={{ color: '#64748B' }}>Xem và quản lý hồ sơ ứng viên</p>
         </PageHeader>
 
         <TableFilter 
@@ -171,17 +166,17 @@ const Applications = () => {
           filterOptions={filterOptions}
           activeFilters={statusFilters}
           onFilterToggle={handleFilterToggle}
-          searchPlaceholder="Search by candidate or position..."
+          searchPlaceholder="Tìm kiếm theo ứng viên hoặc vị trí..."
         />
 
         <Table>
           <thead>
             <tr>
-              <th>{t.employerApplications.tableCandidate}</th>
-              <th>{t.employerApplications.tablePosition}</th>
-              <th>{t.employerApplications.tableApplied}</th>
-              <th>{t.employerApplications.tableStatus}</th>
-              <th>{t.employerApplications.tableActions}</th>
+              <th>Ứng Viên</th>
+              <th>Vị Trí</th>
+              <th>Thời Gian Ứng Tuyển</th>
+              <th>Trạng Thái</th>
+              <th>Thao Tác</th>
             </tr>
           </thead>
           <tbody>
@@ -201,7 +196,7 @@ const Applications = () => {
                   <StatusBadge status={app.completed ? 'completed' : app.status} />
                 </td>
                 <td>
-                  <ActionButton><Eye /> {t.employerApplications.viewProfile}</ActionButton>
+                  <ActionButton><Eye /> Xem Hồ Sơ</ActionButton>
                   
                   {!app.completed && app.status === 'approved' && (
                     <ActionButton 

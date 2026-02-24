@@ -9,7 +9,7 @@ export const GlobalStyles = createGlobalStyle`
 
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+    background: #f8fafc;
     background-attachment: fixed;
     color: ${props => props.theme.colors.text};
     line-height: 1.6;

@@ -16,8 +16,6 @@ import {
   Users
 } from 'lucide-react';
 import { Button } from '../../components/FormElements';
-import { useLanguage } from '../../context/LanguageContext';
-import { useTranslations } from '../../locales/translations';
 
 const PageContainer = styled.div`
   animation: fadeIn 0.5s ease-in;
@@ -35,10 +33,7 @@ const PageHeader = styled.div`
     font-size: 32px;
     font-weight: 800;
     margin-bottom: 8px;
-    background: ${props => props.theme.colors.gradientPrimary};
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: ${props => props.theme.colors.primary};
   }
   
   p {
@@ -347,8 +342,6 @@ const EmptyState = styled.div`
 `;
 
 const EmployerWallet = () => {
-  const { language } = useLanguage();
-  const t = useTranslations(language);
   const [balance] = useState(125500000); // 125,500,000 VNĐ
 
   const transactions = [

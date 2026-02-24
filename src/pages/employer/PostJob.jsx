@@ -91,84 +91,84 @@ const PostJob = () => {
 
         <FormCard>
           <FormHeader>
-            <h1>Post a New Job</h1>
-            <p>Fill in the details to create a job listing</p>
+            <h1>Đăng Tin Tuyển Dụng Mới</h1>
+            <p>Điền thông tin để tạo tin tuyển dụng</p>
           </FormHeader>
 
           <form onSubmit={handleSubmit}>
             <FormGrid>
               <FormGroup>
-                <Label>Job Title *</Label>
-                <Input name="title" placeholder="e.g. Senior React Developer" value={formData.title} onChange={handleChange} required />
+                <Label>Tiêu đề công việc *</Label>
+                <Input name="title" placeholder="Ví dụ: Lập trình viên React cấp cao" value={formData.title} onChange={handleChange} required />
               </FormGroup>
 
               <FormGroup>
-                <Label>Department</Label>
-                <Input name="department" placeholder="e.g. Engineering" value={formData.department} onChange={handleChange} />
+                <Label>Phòng ban</Label>
+                <Input name="department" placeholder="Ví dụ: Kỹ thuật" value={formData.department} onChange={handleChange} />
               </FormGroup>
 
               <FormGroup>
-                <Label>Location *</Label>
-                <Input name="location" placeholder="e.g. Remote, San Francisco" value={formData.location} onChange={handleChange} required />
+                <Label>Địa điểm *</Label>
+                <Input name="location" placeholder="Ví dụ: Từ xa, Hà Nội" value={formData.location} onChange={handleChange} required />
               </FormGroup>
 
               <FormGroup>
-                <Label>Job Type *</Label>
+                <Label>Loại hình công việc *</Label>
                 <Select name="jobType" value={formData.jobType} onChange={handleChange} required>
-                  <option value="">Select Type</option>
-                  <option value="full-time">Full-time</option>
-                  <option value="part-time">Part-time</option>
-                  <option value="contract">Contract</option>
-                  <option value="freelance">Freelance</option>
+                  <option value="">Chọn loại hình</option>
+                  <option value="full-time">Toàn thời gian</option>
+                  <option value="part-time">Bán thời gian</option>
+                  <option value="contract">Hợp đồng</option>
+                  <option value="freelance">Tự do</option>
                 </Select>
               </FormGroup>
 
               <FormGroup>
-                <Label>Experience Level *</Label>
+                <Label>Cấp độ kinh nghiệm *</Label>
                 <Select name="experienceLevel" value={formData.experienceLevel} onChange={handleChange} required>
-                  <option value="">Select Level</option>
-                  <option value="entry">Entry Level</option>
-                  <option value="mid">Mid Level</option>
-                  <option value="senior">Senior Level</option>
-                  <option value="lead">Lead/Manager</option>
+                  <option value="">Chọn cấp độ</option>
+                  <option value="entry">Mới vào nghề</option>
+                  <option value="mid">Trung cấp</option>
+                  <option value="senior">Cấp cao</option>
+                  <option value="lead">Trưởng phòng/Quản lý</option>
                 </Select>
               </FormGroup>
 
               <FormGroup>
-                <Label>Salary Range (Optional)</Label>
+                <Label>Mức lương (Không bắt buộc)</Label>
                 <div style={{ display: 'flex', gap: '12px' }}>
-                  <Input name="salaryMin" placeholder="Min" value={formData.salaryMin} onChange={handleChange} />
-                  <Input name="salaryMax" placeholder="Max" value={formData.salaryMax} onChange={handleChange} />
+                  <Input name="salaryMin" placeholder="Tối thiểu" value={formData.salaryMin} onChange={handleChange} />
+                  <Input name="salaryMax" placeholder="Tối đa" value={formData.salaryMax} onChange={handleChange} />
                 </div>
               </FormGroup>
             </FormGrid>
 
             <FormGroup style={{ marginTop: '24px' }}>
-              <Label>Job Description *</Label>
-              <TextArea name="description" placeholder="Describe the role..." value={formData.description} onChange={handleChange} required />
+              <Label>Mô tả công việc *</Label>
+              <TextArea name="description" placeholder="Mô tả vị trí công việc..." value={formData.description} onChange={handleChange} required />
             </FormGroup>
 
             <FormGroup>
-              <Label>Responsibilities</Label>
-              <TextArea name="responsibilities" placeholder="List key responsibilities..." value={formData.responsibilities} onChange={handleChange} />
+              <Label>Trách nhiệm</Label>
+              <TextArea name="responsibilities" placeholder="Liệt kê các trách nhiệm chính..." value={formData.responsibilities} onChange={handleChange} />
             </FormGroup>
 
             <FormGroup>
-              <Label>Requirements</Label>
-              <TextArea name="requirements" placeholder="List requirements and qualifications..." value={formData.requirements} onChange={handleChange} />
+              <Label>Yêu cầu</Label>
+              <TextArea name="requirements" placeholder="Liệt kê yêu cầu và trình độ..." value={formData.requirements} onChange={handleChange} />
             </FormGroup>
 
             <FormGroup>
-              <Label>Benefits</Label>
-              <TextArea name="benefits" placeholder="List benefits and perks..." value={formData.benefits} onChange={handleChange} />
+              <Label>Quyền lợi</Label>
+              <TextArea name="benefits" placeholder="Liệt kê quyền lợi và phúc lợi..." value={formData.benefits} onChange={handleChange} />
             </FormGroup>
 
             <div style={{ display: 'flex', gap: '12px', marginTop: '32px' }}>
               <Button type="button" $variant="secondary" onClick={() => navigate('/employer/dashboard')}>
-                Cancel
+                Hủy
               </Button>
               <Button type="submit" $variant="primary" $size="large">
-                <Save /> Post Job
+                <Save /> Đăng Tin
               </Button>
             </div>
           </form>

@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider } from 'styled-components';
 import { GlobalStyles, theme } from './styles/theme';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { LanguageProvider } from './context/LanguageContext';
 
 // Auth Pages
 import LandingPage from './pages/auth/LandingPage';
@@ -22,7 +21,6 @@ import SavedJobs from './pages/candidate/SavedJobs';
 import CandidateProfile from './pages/candidate/CandidateProfile';
 import CandidateSettings from './pages/candidate/CandidateSettings';
 import CandidateNotifications from './pages/candidate/CandidateNotifications';
-import CandidateMessages from './pages/candidate/CandidateMessages';
 import EmployerProfileView from './pages/candidate/EmployerProfileView';
 import Support from './pages/candidate/Support';
 import Wallet from './pages/candidate/Wallet';
@@ -34,7 +32,6 @@ import PostJob from './pages/employer/PostJob';
 import JobManagement from './pages/employer/JobManagement';
 import Applications from './pages/employer/Applications';
 import EmployerProfile from './pages/employer/EmployerProfile';
-import EmployerMessages from './pages/employer/EmployerMessages';
 import EmployerNotifications from './pages/employer/EmployerNotifications';
 import Subscription from './pages/employer/Subscription';
 import HRManagement from './pages/employer/HRManagement';
@@ -111,11 +108,6 @@ function AppRoutes() {
           <CandidateProfile />
         </ProtectedRoute>
       } />
-      <Route path="/candidate/messages" element={
-        <ProtectedRoute allowedRoles={['candidate']}>
-          <CandidateMessages />
-        </ProtectedRoute>
-      } />
       <Route path="/candidate/notifications" element={
         <ProtectedRoute allowedRoles={['candidate']}>
           <CandidateNotifications />
@@ -171,11 +163,6 @@ function AppRoutes() {
       <Route path="/employer/profile" element={
         <ProtectedRoute allowedRoles={['employer']}>
           <EmployerProfile />
-        </ProtectedRoute>
-      } />
-      <Route path="/employer/messages" element={
-        <ProtectedRoute allowedRoles={['employer']}>
-          <EmployerMessages />
         </ProtectedRoute>
       } />
       <Route path="/employer/notifications" element={
@@ -283,13 +270,11 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyles />
-      <LanguageProvider>
-        <AuthProvider>
-          <Router>
-            <AppRoutes />
-          </Router>
-        </AuthProvider>
-      </LanguageProvider>
+      <AuthProvider>
+        <Router>
+          <AppRoutes />
+        </Router>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

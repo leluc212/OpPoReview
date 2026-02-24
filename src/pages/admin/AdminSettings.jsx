@@ -3,8 +3,6 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import { Globe, Moon, Sun } from 'lucide-react';
 import { Button } from '../../components/FormElements';
-import { useLanguage } from '../../context/LanguageContext';
-import { useTranslations } from '../../locales/translations';
 
 const SettingsContainer = styled.div`
   max-width: 900px;
@@ -132,8 +130,9 @@ const Toggle = styled.label`
 `;
 
 const AdminSettings = () => {
-  const { language, changeLanguage } = useLanguage();
-  const t = useTranslations(language);
+  // Giả lập state language để UI hoạt động nhưng không thực sự thay đổi ngôn ngữ
+  const [language, setLanguage] = useState('vi');
+  const changeLanguage = (lang) => setLanguage(lang);
   const [darkMode, setDarkMode] = useState(false);
   
   const handleDarkModeToggle = (e) => {
@@ -144,31 +143,31 @@ const AdminSettings = () => {
   return (
     <DashboardLayout role="admin" showSearch={false}>
       <SettingsContainer>
-        <h1 style={{ fontSize: '32px', fontWeight: '700', marginBottom: '32px' }}>{t.settings.title}</h1>
+        <h1 style={{ fontSize: '32px', fontWeight: '700', marginBottom: '32px' }}>Cài Đặt</h1>
 
         <SettingsCard>
-          <SectionTitle>{t.settings.accountSettings}</SectionTitle>
+          <SectionTitle>Cài Đặt Tài Khoản</SectionTitle>
           
           <SettingItem>
             <SettingInfo>
               <h3>
                 <Globe size={18} style={{ marginRight: '8px', flexShrink: 0 }} />
-                <span>{t.settings.language}</span>
+                <span>Ngôn Ngữ</span>
               </h3>
-              <p>{t.settings.languageDescription}</p>
+              <p>Chọn ngôn ngữ hiển thị</p>
             </SettingInfo>
             <LanguageOptions>
               <LanguageButton
                 $active={language === 'vi'}
                 onClick={() => changeLanguage('vi')}
               >
-                {t.settings.vietnamese}
+                Tiếng Việt
               </LanguageButton>
               <LanguageButton
                 $active={language === 'en'}
                 onClick={() => changeLanguage('en')}
               >
-                {t.settings.english}
+                English
               </LanguageButton>
             </LanguageOptions>
           </SettingItem>
@@ -181,9 +180,9 @@ const AdminSettings = () => {
                 ) : (
                   <Sun size={18} style={{ marginRight: '8px', flexShrink: 0 }} />
                 )}
-                <span>{t.settings.darkMode}</span>
+                <span>Chế Độ Tối</span>
               </h3>
-              <p>{t.settings.darkModeDesc}</p>
+              <p>Chuyển đổi giữa giao diện sáng và tối</p>
             </SettingInfo>
             <Toggle>
               <input type="checkbox" checked={darkMode} onChange={handleDarkModeToggle} />

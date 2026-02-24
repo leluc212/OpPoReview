@@ -3,8 +3,6 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import { Input, TextArea, Label, Button } from '../../components/FormElements';
 import { HelpCircle, Mail, Phone, Clock, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
-import { useLanguage } from '../../context/LanguageContext';
-import { useTranslations } from '../../locales/translations';
 
 const PageContainer = styled.div`
   animation: fadeIn 0.5s ease-in;
@@ -22,10 +20,7 @@ const PageHeader = styled.div`
     font-size: 32px;
     font-weight: 800;
     margin-bottom: 8px;
-    background: ${props => props.theme.colors.gradientPrimary};
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: ${props => props.theme.colors.primary};
   }
   
   p {
@@ -205,9 +200,6 @@ const ContactItem = styled.div`
 `;
 
 const EmployerSupport = () => {
-  const { language } = useLanguage();
-  const t = useTranslations(language);
-  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
