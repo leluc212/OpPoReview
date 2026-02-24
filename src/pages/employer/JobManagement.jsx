@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
+import TableFilter from '../../components/TableFilter';
 import { Edit, Trash2 } from 'lucide-react';
 import { Button } from '../../components/FormElements';
 import { useLanguage } from '../../context/LanguageContext';
@@ -82,11 +83,39 @@ const JobManagement = () => {
   const { language } = useLanguage();
   const t = useTranslations(language);
 
-  const jobs = [
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilters, setStatusFilters] = useState([]);
+
+  const [jobs] = useState([
     { id: 1, title: 'Senior React Developer', applicants: 45, status: 'active', posted: t.employerJobs.posted2d },
     { id: 2, title: 'Thu ngân', applicants: 32, status: 'active', posted: t.employerJobs.posted1w },
     { id: 3, title: 'Nhân viên pha chế', applicants: 28, status: 'inactive', posted: t.employerJobs.posted2w },
+  ]);
+
+  const filterOptions = [
+    { value: 'active', label: 'Active' },
+    { value: 'inactive', label: 'Inactive' },
   ];
+
+  const filteredJobs = useMemo(() => {
+    return jobs.filter(job => {
+      const matchesSearch = searchTerm === '' || 
+        job.title.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesStatus = statusFilters.length === 0 || 
+        statusFilters.includes(job.status);
+      
+      return matchesSearch && matchesStatus;
+    });
+  }, [jobs, searchTerm, statusFilters]);
+
+  const handleFilterToggle = (filterValue) => {
+    setStatusFilters(prev => 
+      prev.includes(filterValue) 
+        ? prev.filter(f => f !== filterValue)
+        : [...prev, filterValue]
+    );
+  };
 
   return (
     <DashboardLayout role="employer">
@@ -95,6 +124,15 @@ const JobManagement = () => {
           <h1>{t.employerJobs.title}</h1>
           <Button $variant="primary">+ {t.employerJobs.postNewJob}</Button>
         </PageHeader>
+
+        <TableFilter 
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          filterOptions={filterOptions}
+          activeFilters={statusFilters}
+          onFilterToggle={handleFilterToggle}
+          searchPlaceholder="Search jobs..."
+        />
 
         <Table>
           <thead>
@@ -107,7 +145,7 @@ const JobManagement = () => {
             </tr>
           </thead>
           <tbody>
-            {jobs.map(job => (
+            {filteredJobs.map(job => (
               <tr key={job.id}>
                 <td style={{ fontWeight: 600 }}>{job.title}</td>
                 <td>{job.applicants}</td>

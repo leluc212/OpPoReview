@@ -135,6 +135,32 @@ const ToggleSwitch = styled.label`
   }
 `;
 
+const LanguageOptions = styled.div`
+  display: flex;
+  gap: 12px;
+`;
+
+const LanguageButton = styled.button`
+  padding: 8px 20px;
+  border-radius: ${props => props.theme.borderRadius.md};
+  border: 2px solid ${props => props.$active ? props.theme.colors.primary : props.theme.colors.border};
+  background: ${props => props.$active ? props.theme.colors.primary : 'white'};
+  color: ${props => props.$active ? 'white' : props.theme.colors.text};
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  
+  &:hover {
+    border-color: ${props => props.theme.colors.primary};
+    transform: translateY(-2px);
+    background: ${props => props.$active ? props.theme.colors.primaryDark : props.theme.colors.bgDark};
+  }
+`;
+
 const SettingRow = styled.div`
   display: flex;
   justify-content: space-between;
@@ -145,16 +171,22 @@ const SettingRow = styled.div`
     border-bottom: 1px solid ${props => props.theme.colors.borderLight};
   }
   
+  > div:first-child {
+    flex: 1;
+    margin-right: 20px;
+  }
+  
   .label {
     font-weight: 600;
     color: ${props => props.theme.colors.text};
     font-size: 15px;
+    margin-bottom: 4px;
   }
   
   .description {
     color: ${props => props.theme.colors.textLight};
     font-size: 13px;
-    margin-top: 4px;
+    line-height: 1.5;
   }
 `;
 
@@ -207,7 +239,7 @@ const ButtonGroup = styled.div`
 `;
 
 const EmployerSettings = () => {
-  const { language } = useLanguage();
+  const { language, changeLanguage } = useLanguage();
   const t = useTranslations(language);
   
   const [darkMode, setDarkMode] = useState(false);
@@ -217,7 +249,6 @@ const EmployerSettings = () => {
     system: false
   });
   const [selectedTheme, setSelectedTheme] = useState('default');
-  const [selectedLanguage, setSelectedLanguage] = useState('vi');
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -250,17 +281,38 @@ const EmployerSettings = () => {
         </PageHeader>
 
         <SettingsGrid>
-          {/* Appearance */}
+          {/* Appearance & Language */}
           <SettingCard>
             <SettingHeader>
               <div className="icon">
-                {darkMode ? <Moon /> : <Sun />}
+                <Globe />
               </div>
               <div className="info">
-                <h3>Giao diện</h3>
-                <p>Tùy chỉnh giao diện hiển thị</p>
+                <h3>Tùy chỉnh hiển thị</h3>
+                <p>Ngôn ngữ và giao diện</p>
               </div>
             </SettingHeader>
+
+            <SettingRow>
+              <div>
+                <div className="label">Ngôn ngữ</div>
+                <div className="description">Chọn ngôn ngữ hiển thị</div>
+              </div>
+              <LanguageOptions>
+                <LanguageButton
+                  $active={language === 'vi'}
+                  onClick={() => changeLanguage('vi')}
+                >
+                  Tiếng Việt
+                </LanguageButton>
+                <LanguageButton
+                  $active={language === 'en'}
+                  onClick={() => changeLanguage('en')}
+                >
+                  English
+                </LanguageButton>
+              </LanguageOptions>
+            </SettingRow>
 
             <SettingRow>
               <div>
@@ -297,27 +349,6 @@ const EmployerSettings = () => {
                 <option value="green">Xanh lá</option>
                 <option value="purple">Tím</option>
                 <option value="orange">Cam</option>
-              </Select>
-            </FormGroup>
-          </SettingCard>
-
-          {/* Language */}
-          <SettingCard>
-            <SettingHeader>
-              <div className="icon">
-                <Globe />
-              </div>
-              <div className="info">
-                <h3>Ngôn ngữ</h3>
-                <p>Chọn ngôn ngữ hiển thị</p>
-              </div>
-            </SettingHeader>
-
-            <FormGroup>
-              <Label>Ngôn ngữ</Label>
-              <Select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)}>
-                <option value="vi">Tiếng Việt</option>
-                <option value="en">English</option>
               </Select>
             </FormGroup>
           </SettingCard>

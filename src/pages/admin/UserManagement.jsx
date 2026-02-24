@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
+import TableFilter from '../../components/TableFilter';
 import { Button } from '../../components/FormElements';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTranslations } from '../../locales/translations';
@@ -52,12 +53,44 @@ const UserManagement = () => {
   const { language } = useLanguage();
   const t = useTranslations(language);
 
-  const users = [
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState([]);
+
+  const [users] = useState([
     { name: 'ABC', email: 'abc@example.com', role: 'candidate', status: 'active', joined: '2024-01-15' },
     { name: 'xyz', email: 'xyz@example.com', role: 'candidate', status: 'active', joined: '2024-01-20' },
     { name: 'FPT Software', email: 'hr@FPT Software.com', role: 'employer', status: 'active', joined: '2024-01-10' },
     { name: 'Hồng Trà Ngô Gia', email: 'contact@Hồng Trà Ngô Gia.com', role: 'employer', status: 'pending', joined: '2024-02-01' },
+  ]);
+
+  const filterOptions = [
+    { value: 'candidate', label: 'Candidate' },
+    { value: 'employer', label: 'Employer' },
+    { value: 'active', label: 'Active' },
+    { value: 'pending', label: 'Pending' },
   ];
+
+  const filteredUsers = useMemo(() => {
+    return users.filter(user => {
+      const matchesSearch = searchTerm === '' || 
+        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesFilters = filters.length === 0 || 
+        filters.includes(user.role) ||
+        filters.includes(user.status);
+      
+      return matchesSearch && matchesFilters;
+    });
+  }, [users, searchTerm, filters]);
+
+  const handleFilterToggle = (filterValue) => {
+    setFilters(prev => 
+      prev.includes(filterValue) 
+        ? prev.filter(f => f !== filterValue)
+        : [...prev, filterValue]
+    );
+  };
 
   return (
     <DashboardLayout role="admin">
@@ -66,6 +99,15 @@ const UserManagement = () => {
           <h1>{t.adminUsers.title}</h1>
           <p style={{ color: '#64748B' }}>{t.adminUsers.subtitle}</p>
         </PageHeader>
+
+        <TableFilter 
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          filterOptions={filterOptions}
+          activeFilters={filters}
+          onFilterToggle={handleFilterToggle}
+          searchPlaceholder="Search users..."
+        />
 
         <Table>
           <thead>
@@ -79,7 +121,7 @@ const UserManagement = () => {
             </tr>
           </thead>
           <tbody>
-            {users.map((user, index) => (
+            {filteredUsers.map((user, index) => (
               <tr key={index}>
                 <td style={{ fontWeight: 600 }}>{user.name}</td>
                 <td>{user.email}</td>

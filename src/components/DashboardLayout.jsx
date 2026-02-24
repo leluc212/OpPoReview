@@ -14,13 +14,11 @@ const MainContent = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
 `;
 
 const ContentArea = styled.main`
   flex: 1;
   padding: 40px;
-  overflow-y: auto;
   max-width: 1600px;
   width: 100%;
   margin: 0 auto;

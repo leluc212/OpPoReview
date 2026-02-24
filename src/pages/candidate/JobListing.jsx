@@ -14,6 +14,7 @@ const JobListingContainer = styled.div`
   display: grid;
   grid-template-columns: 280px 1fr;
   gap: 32px;
+  align-items: flex-start;
 `;
 
 const FilterSidebar = styled.aside`
@@ -21,9 +22,29 @@ const FilterSidebar = styled.aside`
   border-radius: ${props => props.theme.borderRadius.md};
   padding: 24px;
   border: 1px solid ${props => props.theme.colors.border};
-  height: fit-content;
   position: sticky;
-  top: 104px;
+  top: 100px;
+  height: fit-content;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  
+  /* Custom scrollbar */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: ${props => props.theme.colors.border};
+    border-radius: 3px;
+    
+    &:hover {
+      background: ${props => props.theme.colors.textLight};
+    }
+  }
 `;
 
 const FilterHeader = styled.div`
