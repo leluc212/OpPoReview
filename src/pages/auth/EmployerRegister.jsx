@@ -67,16 +67,9 @@ const FormGrid = styled.div`
 const EmployerRegister = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    companyName: '',
     companyEmail: '',
-    companyWebsite: '',
-    industry: '',
-    companySize: '',
-    contactPerson: '',
-    contactPhone: '',
     password: '',
     confirmPassword: '',
-    description: '',
   });
   const [errors, setErrors] = useState({});
 
@@ -90,11 +83,9 @@ const EmployerRegister = () => {
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.companyName) newErrors.companyName = 'Company name is required';
-    if (!formData.companyEmail) newErrors.companyEmail = 'Email is required';
-    if (!formData.contactPerson) newErrors.contactPerson = 'Contact person is required';
-    if (!formData.contactPhone) newErrors.contactPhone = 'Phone is required';
+    if (!formData.companyEmail) newErrors.companyEmail = 'Company email is required';
     if (!formData.password) newErrors.password = 'Password is required';
+    if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
@@ -129,153 +120,50 @@ const EmployerRegister = () => {
         >
           <FormHeader>
             <h1>Create Employer Account</h1>
-            <p>Register your company to start hiring</p>
+            <p>Create your account now, complete company details when posting jobs</p>
           </FormHeader>
 
           <form onSubmit={handleSubmit}>
-            <FormGrid>
-              <FormGroup>
-                <Label htmlFor="companyName">Company Name *</Label>
-                <Input
-                  id="companyName"
-                  name="companyName"
-                  type="text"
-                  placeholder="Highlands"
-                  value={formData.companyName}
-                  onChange={handleChange}
-                  $error={errors.companyName}
-                />
-                {errors.companyName && <ErrorText>{errors.companyName}</ErrorText>}
-              </FormGroup>
-
-              <FormGroup>
-                <Label htmlFor="companyEmail">Company Email *</Label>
-                <Input
-                  id="companyEmail"
-                  name="companyEmail"
-                  type="email"
-                  placeholder="hr@acme.com"
-                  value={formData.companyEmail}
-                  onChange={handleChange}
-                  $error={errors.companyEmail}
-                />
-                {errors.companyEmail && <ErrorText>{errors.companyEmail}</ErrorText>}
-              </FormGroup>
-
-              <FormGroup>
-                <Label htmlFor="companyWebsite">Company Website</Label>
-                <Input
-                  id="companyWebsite"
-                  name="companyWebsite"
-                  type="url"
-                  placeholder="https://acme.com"
-                  value={formData.companyWebsite}
-                  onChange={handleChange}
-                />
-              </FormGroup>
-
-              <FormGroup>
-                <Label htmlFor="industry">Industry</Label>
-                <Select
-                  id="industry"
-                  name="industry"
-                  value={formData.industry}
-                  onChange={handleChange}
-                >
-                  <option value="">Select Industry</option>
-                  <option value="technology">Technology</option>
-                  <option value="finance">Finance</option>
-                  <option value="healthcare">Healthcare</option>
-                  <option value="education">Education</option>
-                  <option value="retail">Retail</option>
-                  <option value="manufacturing">Manufacturing</option>
-                  <option value="other">Other</option>
-                </Select>
-              </FormGroup>
-
-              <FormGroup>
-                <Label htmlFor="companySize">Company Size</Label>
-                <Select
-                  id="companySize"
-                  name="companySize"
-                  value={formData.companySize}
-                  onChange={handleChange}
-                >
-                  <option value="">Select Size</option>
-                  <option value="1-10">1-10 employees</option>
-                  <option value="11-50">11-50 employees</option>
-                  <option value="51-200">51-200 employees</option>
-                  <option value="201-500">201-500 employees</option>
-                  <option value="501+">501+ employees</option>
-                </Select>
-              </FormGroup>
-
-              <FormGroup>
-                <Label htmlFor="contactPerson">Contact Person *</Label>
-                <Input
-                  id="contactPerson"
-                  name="contactPerson"
-                  type="text"
-                  placeholder="Jane Smith"
-                  value={formData.contactPerson}
-                  onChange={handleChange}
-                  $error={errors.contactPerson}
-                />
-                {errors.contactPerson && <ErrorText>{errors.contactPerson}</ErrorText>}
-              </FormGroup>
-
-              <FormGroup>
-                <Label htmlFor="contactPhone">Contact Phone *</Label>
-                <Input
-                  id="contactPhone"
-                  name="contactPhone"
-                  type="tel"
-                  placeholder="+1 (555) 000-0000"
-                  value={formData.contactPhone}
-                  onChange={handleChange}
-                  $error={errors.contactPhone}
-                />
-                {errors.contactPhone && <ErrorText>{errors.contactPhone}</ErrorText>}
-              </FormGroup>
-
-              <FormGroup>
-                <Label htmlFor="password">Password *</Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={handleChange}
-                  $error={errors.password}
-                />
-                {errors.password && <ErrorText>{errors.password}</ErrorText>}
-              </FormGroup>
-
-              <FormGroup>
-                <Label htmlFor="confirmPassword">Confirm Password *</Label>
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  $error={errors.confirmPassword}
-                />
-                {errors.confirmPassword && <ErrorText>{errors.confirmPassword}</ErrorText>}
-              </FormGroup>
-            </FormGrid>
-
-            <FormGroup style={{ marginTop: '20px' }}>
-              <Label htmlFor="description">Company Description</Label>
-              <TextArea
-                id="description"
-                name="description"
-                placeholder="Tell us about your company..."
-                value={formData.description}
+            <FormGroup>
+              <Label htmlFor="companyEmail">Company Email *</Label>
+              <Input
+                id="companyEmail"
+                name="companyEmail"
+                type="email"
+                placeholder="hr@yourcompany.com"
+                value={formData.companyEmail}
                 onChange={handleChange}
+                $error={errors.companyEmail}
               />
+              {errors.companyEmail && <ErrorText>{errors.companyEmail}</ErrorText>}
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="password">Password *</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Minimum 6 characters"
+                value={formData.password}
+                onChange={handleChange}
+                $error={errors.password}
+              />
+              {errors.password && <ErrorText>{errors.password}</ErrorText>}
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="confirmPassword">Confirm Password *</Label>
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                placeholder="Re-enter your password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                $error={errors.confirmPassword}
+              />
+              {errors.confirmPassword && <ErrorText>{errors.confirmPassword}</ErrorText>}
             </FormGroup>
 
             <Button type="submit" $variant="primary" $fullWidth $size="large" style={{ marginTop: '24px' }}>

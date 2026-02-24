@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
+import TableFilter from '../../components/TableFilter';
 import { Button } from '../../components/FormElements';
 import { Check, X } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
@@ -58,11 +59,43 @@ const EmployerApproval = () => {
   const { language } = useLanguage();
   const t = useTranslations(language);
 
-  const pendingEmployers = [
+  const [searchTerm, setSearchTerm] = useState('');
+  const [industryFilters, setIndustryFilters] = useState([]);
+
+  const [pendingEmployers] = useState([
     { company: 'FPT Software Inc.', email: 'hr@FPT Software.com', industry: 'Technology', submitted: '2024-02-10', status: 'pending' },
     { company: 'Design Studio', email: 'info@designstudio.com', industry: 'Design', submitted: '2024-02-11', status: 'pending' },
     { company: 'Finance Group', email: 'contact@financegroup.com', industry: 'Finance', submitted: '2024-02-12', status: 'pending' },
+  ]);
+
+  const filterOptions = [
+    { value: 'Technology', label: 'Technology' },
+    { value: 'Design', label: 'Design' },
+    { value: 'Finance', label: 'Finance' },
+    { value: 'Healthcare', label: 'Healthcare' },
+    { value: 'Education', label: 'Education' },
   ];
+
+  const filteredEmployers = useMemo(() => {
+    return pendingEmployers.filter(employer => {
+      const matchesSearch = searchTerm === '' || 
+        employer.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        employer.email.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesIndustry = industryFilters.length === 0 || 
+        industryFilters.includes(employer.industry);
+      
+      return matchesSearch && matchesIndustry;
+    });
+  }, [pendingEmployers, searchTerm, industryFilters]);
+
+  const handleFilterToggle = (filterValue) => {
+    setIndustryFilters(prev => 
+      prev.includes(filterValue) 
+        ? prev.filter(f => f !== filterValue)
+        : [...prev, filterValue]
+    );
+  };
 
   return (
     <DashboardLayout role="admin">
@@ -71,6 +104,15 @@ const EmployerApproval = () => {
           <h1>{t.adminEmployerApproval.title}</h1>
           <p style={{ color: '#64748B' }}>{t.adminEmployerApproval.subtitle}</p>
         </PageHeader>
+
+        <TableFilter 
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          filterOptions={filterOptions}
+          activeFilters={industryFilters}
+          onFilterToggle={handleFilterToggle}
+          searchPlaceholder="Search employers..."
+        />
 
         <Table>
           <thead>
@@ -84,7 +126,7 @@ const EmployerApproval = () => {
             </tr>
           </thead>
           <tbody>
-            {pendingEmployers.map((employer, index) => (
+            {filteredEmployers.map((employer, index) => (
               <tr key={index}>
                 <td style={{ fontWeight: 600 }}>{employer.company}</td>
                 <td>{employer.email}</td>

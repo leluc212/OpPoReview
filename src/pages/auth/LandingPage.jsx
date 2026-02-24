@@ -650,17 +650,6 @@ const LandingPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [location, setLocation] = useState('');
 
-  const categories = [
-    { icon: Briefcase, title: t.landing.categories.technology, count: `1,234 ${t.landing.categories.jobs}` },
-    { icon: Users, title: t.landing.categories.marketing, count: `856 ${t.landing.categories.jobs}` },
-    { icon: TrendingUp, title: t.landing.categories.finance, count: `642 ${t.landing.categories.jobs}` },
-    { icon: Building2, title: t.landing.categories.design, count: `428 ${t.landing.categories.jobs}` },
-    { icon: Sparkles, title: t.landing.categories.sales, count: `931 ${t.landing.categories.jobs}` },
-    { icon: Briefcase, title: t.landing.categories.healthcare, count: `765 ${t.landing.categories.jobs}` },
-    { icon: Users, title: t.landing.categories.education, count: `512 ${t.landing.categories.jobs}` },
-    { icon: Building2, title: t.landing.categories.engineering, count: `1,089 ${t.landing.categories.jobs}` },
-  ];
-
   const toggleLanguage = () => {
     changeLanguage(language === 'vi' ? 'en' : 'vi');
   };
@@ -677,8 +666,6 @@ const LandingPage = () => {
           Ốp Pờ
         </Logo>
         <NavLinks>
-          <Link to="/candidate/jobs">{t.nav.findJobs}</Link>
-          <Link to="/employer/dashboard">{t.nav.forEmployers}</Link>
           <LanguageToggle onClick={toggleLanguage}>
             <Globe />
             {language === 'vi' ? 'VI' : 'EN'}
@@ -868,51 +855,6 @@ const LandingPage = () => {
         </CTAButtons>
         </HeroContent>
       </HeroSection>
-
-      <CompaniesSection>
-        <SectionTitle>{t.landing.companies.title}</SectionTitle>
-        <LogosGrid>
-          {['Google', 'Microsoft', 'Apple', 'Amazon', 'Meta', 'Netflix'].map((company, index) => (
-            <CompanyLogo 
-              key={company}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-            >
-              {company}
-            </CompanyLogo>
-          ))}
-        </LogosGrid>
-      </CompaniesSection>
-
-      <CategoriesSection>
-        <SectionHeading
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <h2>{t.landing.categories.title}</h2>
-          <p>{t.landing.categories.subtitle}</p>
-        </SectionHeading>
-        
-        <CategoriesGrid>
-          {categories.map((category, index) => (
-            <CategoryCard
-              key={index}
-              whileHover={{ scale: 1.02 }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-            >
-              <CategoryIcon>
-                <category.icon />
-              </CategoryIcon>
-              <CategoryTitle>{category.title}</CategoryTitle>
-              <CategoryCount>{category.count}</CategoryCount>
-            </CategoryCard>
-          ))}
-        </CategoriesGrid>
-      </CategoriesSection>
 
       <CTASection>
         <CTACard

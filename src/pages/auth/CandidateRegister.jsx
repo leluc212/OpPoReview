@@ -71,13 +71,9 @@ const FormGrid = styled.div`
 const CandidateRegister = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    fullName: '',
     email: '',
-    phone: '',
     password: '',
     confirmPassword: '',
-    location: '',
-    resume: null,
   });
   const [errors, setErrors] = useState({});
 
@@ -91,10 +87,9 @@ const CandidateRegister = () => {
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.fullName) newErrors.fullName = 'Full name is required';
     if (!formData.email) newErrors.email = 'Email is required';
-    if (!formData.phone) newErrors.phone = 'Phone is required';
     if (!formData.password) newErrors.password = 'Password is required';
+    if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
@@ -129,104 +124,51 @@ const CandidateRegister = () => {
         >
           <FormHeader>
             <h1>Create Candidate Account</h1>
-            <p>Fill in your details to get started</p>
+            <p>Create your account now, complete your profile later</p>
           </FormHeader>
 
           <form onSubmit={handleSubmit}>
-            <FormGrid>
-              <FormGroup>
-                <Label htmlFor="fullName">Full Name *</Label>
-                <Input
-                  id="fullName"
-                  name="fullName"
-                  type="text"
-                  placeholder="John Doe"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  $error={errors.fullName}
-                />
-                {errors.fullName && <ErrorText>{errors.fullName}</ErrorText>}
-              </FormGroup>
+            <FormGroup>
+              <Label htmlFor="email">Email Address *</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="your.email@example.com"
+                value={formData.email}
+                onChange={handleChange}
+                $error={errors.email}
+              />
+              {errors.email && <ErrorText>{errors.email}</ErrorText>}
+            </FormGroup>
 
-              <FormGroup>
-                <Label htmlFor="email">Email Address *</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="john@example.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  $error={errors.email}
-                />
-                {errors.email && <ErrorText>{errors.email}</ErrorText>}
-              </FormGroup>
+            <FormGroup>
+              <Label htmlFor="password">Password *</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Minimum 6 characters"
+                value={formData.password}
+                onChange={handleChange}
+                $error={errors.password}
+              />
+              {errors.password && <ErrorText>{errors.password}</ErrorText>}
+            </FormGroup>
 
-              <FormGroup>
-                <Label htmlFor="phone">Phone Number *</Label>
-                <Input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  placeholder="+1 (555) 000-0000"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  $error={errors.phone}
-                />
-                {errors.phone && <ErrorText>{errors.phone}</ErrorText>}
-              </FormGroup>
-
-              <FormGroup>
-                <Label htmlFor="location">Location</Label>
-                <Input
-                  id="location"
-                  name="location"
-                  type="text"
-                  placeholder="City, Country"
-                  value={formData.location}
-                  onChange={handleChange}
-                />
-              </FormGroup>
-
-              <FormGroup>
-                <Label htmlFor="password">Password *</Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={handleChange}
-                  $error={errors.password}
-                />
-                {errors.password && <ErrorText>{errors.password}</ErrorText>}
-              </FormGroup>
-
-              <FormGroup>
-                <Label htmlFor="confirmPassword">Confirm Password *</Label>
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  $error={errors.confirmPassword}
-                />
-                {errors.confirmPassword && <ErrorText>{errors.confirmPassword}</ErrorText>}
-              </FormGroup>
-
-              <FormGroup>
-                <Label htmlFor="resume">Upload Resume (Optional)</Label>
-                <Input
-                  id="resume"
-                  name="resume"
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  onChange={handleChange}
-                />
-              </FormGroup>
-            </FormGrid>
+            <FormGroup>
+              <Label htmlFor="confirmPassword">Confirm Password *</Label>
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                placeholder="Re-enter your password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                $error={errors.confirmPassword}
+              />
+              {errors.confirmPassword && <ErrorText>{errors.confirmPassword}</ErrorText>}
+            </FormGroup>
 
             <Button type="submit" $variant="primary" $fullWidth $size="large" style={{ marginTop: '24px' }}>
               Create Account

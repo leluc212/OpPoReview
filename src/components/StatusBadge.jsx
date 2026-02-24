@@ -51,6 +51,13 @@ const BadgeWrapper = styled.span`
     color: ${props.theme.colors.textLight};
     border: 2px solid ${props.theme.colors.border};
   `}
+  
+  ${props => props.$status === 'completed' && `
+    background: #dcfce7;
+    color: #16a34a;
+    border: 2px solid #16a34a40;
+    box-shadow: 0 2px 8px #16a34a20;
+  `}
 `;
 
 const StatusDot = styled.span`

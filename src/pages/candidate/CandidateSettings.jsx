@@ -30,26 +30,33 @@ const SettingItem = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 16px 0;
-  border-bottom: 1px solid ${props => props.theme.colors.border};
   
-  &:last-child {
-    border-bottom: none;
+  &:not(:last-child) {
+    border-bottom: 1px solid ${props => props.theme.colors.border};
   }
 `;
 
 const SettingInfo = styled.div`
   flex: 1;
+  margin-right: 20px;
   
   h3 {
     font-size: 16px;
     font-weight: 500;
     color: ${props => props.theme.colors.text};
     margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    
+    span {
+      color: ${props => props.theme.colors.text};
+    }
   }
   
   p {
     font-size: 14px;
     color: ${props => props.theme.colors.textLight};
+    line-height: 1.5;
   }
 `;
 
@@ -107,7 +114,7 @@ const LanguageButton = styled.button`
   padding: 8px 20px;
   border-radius: ${props => props.theme.borderRadius.md};
   border: 2px solid ${props => props.$active ? props.theme.colors.primary : props.theme.colors.border};
-  background: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.bgLight};
+  background: ${props => props.$active ? props.theme.colors.primary : 'white'};
   color: ${props => props.$active ? 'white' : props.theme.colors.text};
   font-weight: 500;
   cursor: pointer;
@@ -115,10 +122,12 @@ const LanguageButton = styled.button`
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 14px;
   
   &:hover {
     border-color: ${props => props.theme.colors.primary};
     transform: translateY(-2px);
+    background: ${props => props.$active ? props.theme.colors.primaryDark : props.theme.colors.bgDark};
   }
   
   svg {
@@ -173,8 +182,8 @@ const CandidateSettings = () => {
           <SettingItem>
             <SettingInfo>
               <h3>
-                <Globe style={{ display: 'inline', marginRight: '8px', width: '18px', height: '18px', verticalAlign: 'middle' }} />
-                {t.settings.language}
+                <Globe size={18} style={{ marginRight: '8px', flexShrink: 0 }} />
+                <span>{t.settings.language}</span>
               </h3>
               <p>{t.settings.languageDescription}</p>
             </SettingInfo>
@@ -193,20 +202,16 @@ const CandidateSettings = () => {
               </LanguageButton>
             </LanguageOptions>
           </SettingItem>
-        </SettingsCard>
-
-        <SettingsCard>
-          <SectionTitle>{t.settings.appearance}</SectionTitle>
           
           <SettingItem>
             <SettingInfo>
               <h3>
                 {darkMode ? (
-                  <Moon style={{ display: 'inline', marginRight: '8px', width: '18px', height: '18px', verticalAlign: 'middle' }} />
+                  <Moon size={18} style={{ marginRight: '8px', flexShrink: 0 }} />
                 ) : (
-                  <Sun style={{ display: 'inline', marginRight: '8px', width: '18px', height: '18px', verticalAlign: 'middle' }} />
+                  <Sun size={18} style={{ marginRight: '8px', flexShrink: 0 }} />
                 )}
-                {t.settings.darkMode}
+                <span>{t.settings.darkMode}</span>
               </h3>
               <p>{t.settings.darkModeDesc}</p>
             </SettingInfo>
