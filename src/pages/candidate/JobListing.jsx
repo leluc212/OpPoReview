@@ -5,7 +5,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 import { 
   Search, MapPin, Briefcase, DollarSign, Clock, Star, TrendingUp, 
   ChevronDown, Building2, Bookmark, Eye, ArrowUpRight, Filter,
-  X, SlidersHorizontal, Grid, List, Sparkles, Zap, Award
+  X, SlidersHorizontal, Grid, List, Sparkles, Zap, Award, Navigation, Target
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import StatusBadge from '../../components/StatusBadge';
@@ -717,6 +717,570 @@ const JobPosted = styled.div`
   }
 `;
 
+// Calculate distance between two coordinates (Haversine formula)
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371; // Radius of the Earth in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const distance = R * c;
+  return distance;
+};
+
+// Jobs data - moved outside component to avoid re-creation on each render
+const JOBS_DATA = [
+  // Standard Jobs - Full-time
+  {
+    id: 1,
+    title: 'Nhân viên Kế toán Tổng hợp',
+    company: 'Vinamilk',
+    location: 'Quận 1, TP.HCM',
+    lat: 10.7769,
+    lng: 106.7009,
+    type: 'Full-time',
+    category: 'standard',
+    salary: '12 - 18 triệu VND',
+    postedAt: '2 ngày trước',
+    tags: ['Kế toán', 'Excel', 'MISA'],
+    featured: true,
+    urgent: false,
+    views: 245
+  },
+  {
+    id: 2,
+    title: 'Nhân viên Kinh doanh B2B',
+    company: 'Viettel',
+    location: 'Quận 7, TP.HCM',
+    lat: 10.7333,
+    lng: 106.7182,
+    type: 'Full-time',
+    category: 'standard',
+    salary: '15 - 25 triệu VND',
+    postedAt: '1 ngày trước',
+    tags: ['Kinh doanh', 'B2B', 'Hoa hồng cao'],
+    featured: true,
+    urgent: false,
+    views: 412
+  },
+  {
+    id: 3,
+    title: 'Nhân viên Marketing Online',
+    company: 'Lazada Vietnam',
+    location: 'Tân Bình, TP.HCM',
+    lat: 10.7992,
+    lng: 106.6550,
+    type: 'Full-time',
+    category: 'standard',
+    salary: '10 - 15 triệu VND',
+    postedAt: '3 ngày trước',
+    tags: ['Marketing', 'Facebook Ads', 'SEO'],
+    featured: false,
+    urgent: false,
+    views: 189
+  },
+  {
+    id: 4,
+    title: 'Nhân viên Hành chính Nhân sự',
+    company: 'Samsung Vietnam',
+    location: 'Quận 1, TP.HCM',
+    lat: 10.7825,
+    lng: 106.6958,
+    type: 'Full-time',
+    category: 'standard',
+    salary: '9 - 13 triệu VND',
+    postedAt: '5 ngày trước',
+    tags: ['Nhân sự', 'Hành chính', 'Office'],
+    featured: false,
+    urgent: false,
+    views: 321
+  },
+  {
+    id: 5,
+    title: 'Nhân viên pha chế - Part-time',
+    company: 'The Coffee House',
+    location: 'Quận 1, TP.HCM',
+    lat: 10.7756,
+    lng: 106.7004,
+    type: 'Part-time',
+    category: 'standard',
+    salary: '25 - 35 triệu VND',
+    postedAt: '2 ngày trước',
+    tags: ['Pha chế', 'Part-time', 'F&B'],
+    featured: false,
+    urgent: false,
+    views: 234
+  },
+  {
+    id: 12,
+    title: 'Thu ngân - Part-time',
+    company: 'Lotte Mart',
+    location: 'Quận 7, TP.HCM',
+    lat: 10.7295,
+    lng: 106.7195,
+    type: 'Part-time',
+    category: 'standard',
+    salary: '22 - 30 triệu VND',
+    postedAt: '3 ngày trước',
+    tags: ['Thu ngân', 'Part-time', 'Bán lẻ'],
+    featured: false,
+    urgent: true,
+    views: 189
+  },
+  {
+    id: 13,
+    title: 'Nhân viên phục vụ - Part-time',
+    company: 'Starbucks Vietnam',
+    location: 'Bình Thạnh, TP.HCM',
+    lat: 10.8065,
+    lng: 106.7147,
+    type: 'Part-time',
+    category: 'standard',
+    salary: '20 - 28 triệu VND',
+    postedAt: '1 ngày trước',
+    tags: ['Phục vụ', 'Part-time', 'Coffee'],
+    featured: false,
+    urgent: false,
+    views: 167
+  },
+  {
+    id: 14,
+    title: 'Pha chế trà sữa - Part-time',
+    company: 'Gong Cha',
+    location: 'Tân Bình, TP.HCM',
+    lat: 10.7985,
+    lng: 106.6635,
+    type: 'Part-time',
+    category: 'standard',
+    salary: '23 - 32 triệu VND',
+    postedAt: '4 ngày trước',
+    tags: ['Pha chế', 'Part-time', 'Trà sữa'],
+    featured: false,
+    urgent: false,
+    views: 198
+  },
+  {
+    id: 6,
+    title: 'Nhân viên Telesales',
+    company: 'VNPT',
+    location: 'Bình Thạnh, TP.HCM',
+    lat: 10.8100,
+    lng: 106.7089,
+    type: 'Full-time',
+    category: 'standard',
+    salary: '8 - 20 triệu VND',
+    postedAt: '4 ngày trước',
+    tags: ['Telesales', 'Gọi điện', 'Hoa hồng'],
+    featured: true,
+    urgent: false,
+    views: 278
+  },
+  {
+    id: 15,
+    title: 'Nhân viên Văn phòng',
+    company: 'Hòa Phát Group',
+    location: 'Quận 3, TP.HCM',
+    lat: 10.7866,
+    lng: 106.6906,
+    type: 'Full-time',
+    category: 'standard',
+    salary: '8 - 12 triệu VND',
+    postedAt: '2 ngày trước',
+    tags: ['Văn phòng', 'Word/Excel', 'Giao tiếp'],
+    featured: false,
+    urgent: true,
+    views: 312
+  },
+  {
+    id: 16,
+    title: 'Giáo viên Tiếng Anh',
+    company: 'ILA Vietnam',
+    location: 'Quận 10, TP.HCM',
+    lat: 10.7735,
+    lng: 106.6676,
+    type: 'Full-time',
+    category: 'standard',
+    salary: '12 - 18 triệu VND',
+    postedAt: '1 ngày trước',
+    tags: ['Giáo viên', 'Tiếng Anh', 'IELTS'],
+    featured: false,
+    urgent: false,
+    views: 256
+  },
+  {
+    id: 17,
+    title: 'Lễ tân - Receptionist',
+    company: 'Sheraton Saigon',
+    location: 'Quận 1, TP.HCM',
+    lat: 10.7801,
+    lng: 106.7002,
+    type: 'Full-time',
+    category: 'standard',
+    salary: '9 - 14 triệu VND',
+    postedAt: '3 ngày trước',
+    tags: ['Lễ tân', 'Tiếng Anh', 'Khách sạn'],
+    featured: false,
+    urgent: false,
+    views: 189
+  },
+  // Shift Jobs - Tuyển gấp
+  {
+    id: 7,
+    title: 'Ca Đêm - Nhân viên bảo vệ',
+    company: 'SecureGuard',
+    location: 'Quận 1, TP.HCM',
+    lat: 10.7730,
+    lng: 106.6985,
+    type: 'Ca đêm (22:00 - 06:00)',
+    category: 'shift',
+    salary: '200k - 250k/ca',
+    postedAt: '1 ngày trước',
+    tags: ['Ca đêm', 'Bảo vệ', 'An ninh'],
+    featured: false,
+    urgent: true,
+    views: 156
+  },
+  {
+    id: 8,
+    title: 'Ca Sáng - Nhân viên kho',
+    company: 'FastMove Logistics',
+    location: 'Tân Bình, TP.HCM',
+    lat: 10.7750,
+    lng: 106.7000,
+    type: 'Ca sáng (06:00 - 14:00)',
+    category: 'shift',
+    salary: '180k - 220k/ca',
+    postedAt: '2 ngày trước',
+    tags: ['Ca sáng', 'Kho vận', 'Logistics'],
+    featured: true,
+    urgent: true,
+    views: 234
+  },
+  {
+    id: 9,
+    title: 'Ca Chiều - Nhân viên phục vụ',
+    company: 'Highland Coffee',
+    location: 'Phú Nhuận, TP.HCM',
+    lat: 10.7700,
+    lng: 106.6970,
+    type: 'Ca chiều (14:00 - 22:00)',
+    category: 'shift',
+    salary: '150k - 180k/ca',
+    postedAt: '1 ngày trước',
+    tags: ['Ca chiều', 'F&B', 'Phục vụ'],
+    featured: false,
+    urgent: true,
+    views: 198
+  },
+  {
+    id: 10,
+    title: 'Shift Supervisor - Ca đêm',
+    company: 'NightOwl Logistics',
+    location: 'Quận 7, TP.HCM',
+    lat: 10.7690,
+    lng: 106.6990,
+    type: 'Ca đêm (20:00 - 04:00)',
+    category: 'shift',
+    salary: '250k - 300k/ca',
+    postedAt: '3 ngày trước',
+    tags: ['Ca đêm', 'Quản lý', 'Logistics'],
+    featured: true,
+    urgent: true,
+    views: 312
+  },
+  {
+    id: 11,
+    title: 'Ca Linh Động - Nhân viên giao hàng',
+    company: 'Grab Express',
+    location: 'Toàn TP.HCM',
+    lat: 10.7740,
+    lng: 106.6995,
+    type: 'Ca linh động',
+    category: 'shift',
+    salary: '50k - 80k/giờ',
+    postedAt: '1 ngày trước',
+    tags: ['Linh động', 'Giao hàng', 'Xe máy'],
+    featured: false,
+    urgent: true,
+    views: 445
+  },
+  {
+    id: 18,
+    title: 'Ca Sáng - Nhân viên bán hàng',
+    company: 'Circle K',
+    location: 'Quận 1, TP.HCM',
+    lat: 10.7715,
+    lng: 106.6975,
+    type: 'Ca sáng (06:00 - 14:00)',
+    category: 'shift',
+    salary: '160k - 200k/ca',
+    postedAt: '1 ngày trước',
+    tags: ['Ca sáng', 'Bán hàng', 'Cửa hàng'],
+    featured: false,
+    urgent: true,
+    views: 167
+  },
+  {
+    id: 19,
+    title: 'Ca Chiều - Nhân viên pha chế',
+    company: 'The Coffee House',
+    location: 'Quận 1, TP.HCM',
+    lat: 10.7735,
+    lng: 106.7005,
+    type: 'Ca chiều (14:00 - 22:00)',
+    category: 'shift',
+    salary: '170k - 210k/ca',
+    postedAt: '2 giờ trước',
+    tags: ['Ca chiều', 'Pha chế', 'F&B'],
+    featured: true,
+    urgent: true,
+    views: 223
+  },
+  {
+    id: 20,
+    title: 'Ca Tối - Thu ngân siêu thị',
+    company: 'Lotte Mart',
+    location: 'Quận 3, TP.HCM',
+    lat: 10.7760,
+    lng: 106.6960,
+    type: 'Ca tối (18:00 - 22:00)',
+    category: 'shift',
+    salary: '150k - 180k/ca',
+    postedAt: '3 giờ trước',
+    tags: ['Ca tối', 'Thu ngân', 'Siêu thị'],
+    featured: false,
+    urgent: true,
+    views: 189
+  },
+  {
+    id: 21,
+    title: 'Ca Sáng - Phục vụ nhà hàng',
+    company: 'KFC Việt Nam',
+    location: 'Quận 1, TP.HCM',
+    lat: 10.7710,
+    lng: 106.6965,
+    type: 'Ca sáng (07:00 - 15:00)',
+    category: 'shift',
+    salary: '155k - 190k/ca',
+    postedAt: '5 giờ trước',
+    tags: ['Ca sáng', 'Phục vụ', 'Nhà hàng'],
+    featured: false,
+    urgent: true,
+    views: 201
+  },
+  {
+    id: 22,
+    title: 'Ca Linh Động - Nhân viên kho',
+    company: 'Lazada Express',
+    location: 'Quận 1, TP.HCM',
+    lat: 10.7745,
+    lng: 106.6955,
+    type: 'Ca linh động',
+    category: 'shift',
+    salary: '60k - 90k/giờ',
+    postedAt: '1 ngày trước',
+    tags: ['Linh động', 'Kho vận', 'Part-time'],
+    featured: false,
+    urgent: true,
+    views: 156
+  },
+  {
+    id: 23,
+    title: 'Ca Chiều - Nhân viên bảo vệ',
+    company: 'G4S Security',
+    location: 'Quận 1, TP.HCM',
+    lat: 10.7720,
+    lng: 106.7010,
+    type: 'Ca chiều (14:00 - 22:00)',
+    category: 'shift',
+    salary: '180k - 220k/ca',
+    postedAt: '4 giờ trước',
+    tags: ['Ca chiều', 'Bảo vệ', 'An ninh'],
+    featured: false,
+    urgent: true,
+    views: 134
+  },
+  {
+    id: 24,
+    title: 'Ca Tối - Nhân viên Café',
+    company: 'Highlands Coffee - Làng ĐH',
+    location: 'Thủ Đức, TP.HCM',
+    lat: 10.8520,
+    lng: 106.8360,
+    type: 'Ca tối (18:00 - 23:00)',
+    category: 'shift',
+    salary: '165k - 200k/ca',
+    postedAt: '3 giờ trước',
+    tags: ['Ca tối', 'F&B', 'Pha chế'],
+    featured: false,
+    urgent: true,
+    views: 178
+  },
+  {
+    id: 25,
+    title: 'Ca Sáng - Phục vụ Quán ăn',
+    company: 'Cơm Tấm Sườn Bì Chả',
+    location: 'Thủ Đức, TP.HCM',
+    lat: 10.8490,
+    lng: 106.8380,
+    type: 'Ca sáng (06:00 - 12:00)',
+    category: 'shift',
+    salary: '140k - 170k/ca',
+    postedAt: '5 giờ trước',
+    tags: ['Ca sáng', 'Phục vụ', 'Quán ăn'],
+    featured: false,
+    urgent: true,
+    views: 145
+  },
+  {
+    id: 26,
+    title: 'Ca Chiều - Gia sư Toán Lý',
+    company: 'Trung tâm gia sư SmartEdu',
+    location: 'Thủ Đức, TP.HCM',
+    lat: 10.8530,
+    lng: 106.8350,
+    type: 'Ca chiều (14:00 - 20:00)',
+    category: 'shift',
+    salary: '200k - 300k/ca',
+    postedAt: '1 ngày trước',
+    tags: ['Ca chiều', 'Gia sư', 'Giảng dạy'],
+    featured: true,
+    urgent: true,
+    views: 267
+  },
+  {
+    id: 27,
+    title: 'Ca Đêm - Giao hàng đêm',
+    company: 'Now Food - Khu ĐH',
+    location: 'Thủ Đức, TP.HCM',
+    lat: 10.8480,
+    lng: 106.8390,
+    type: 'Ca đêm (20:00 - 02:00)',
+    category: 'shift',
+    salary: '180k - 250k/ca',
+    postedAt: '6 giờ trước',
+    tags: ['Ca đêm', 'Giao hàng', 'Xe máy'],
+    featured: false,
+    urgent: true,
+    views: 198
+  },
+  {
+    id: 28,
+    title: 'Ca Sáng - Nhân viên kho',
+    company: 'Shopee Warehouse',
+    location: 'Quận 9, TP.HCM',
+    lat: 10.8510,
+    lng: 106.8340,
+    type: 'Ca sáng (07:00 - 15:00)',
+    category: 'shift',
+    salary: '175k - 210k/ca',
+    postedAt: '2 ngày trước',
+    tags: ['Ca sáng', 'Kho vận', 'Logistics'],
+    featured: false,
+    urgent: true,
+    views: 223
+  },
+  {
+    id: 29,
+    title: 'Ca Chiều - Phục vụ Trà sữa',
+    company: 'Gong Cha - Thủ Đức',
+    location: 'Thủ Đức, TP.HCM',
+    lat: 10.8500,
+    lng: 106.8370,
+    type: 'Ca chiều (14:00 - 22:00)',
+    category: 'shift',
+    salary: '160k - 195k/ca',
+    postedAt: '4 giờ trước',
+    tags: ['Ca chiều', 'Phục vụ', 'Trà sữa'],
+    featured: false,
+    urgent: true,
+    views: 187
+  },
+  {
+    id: 30,
+    title: 'Ca Sáng - Thu ngân',
+    company: 'Circle K - Khu ĐH',
+    location: 'Thủ Đức, TP.HCM',
+    lat: 10.8540,
+    lng: 106.8330,
+    type: 'Ca sáng (06:00 - 14:00)',
+    category: 'shift',
+    salary: '155k - 185k/ca',
+    postedAt: '2 giờ trước',
+    tags: ['Ca sáng', 'Thu ngân', 'Cửa hàng'],
+    featured: true,
+    urgent: true,
+    views: 234
+  },
+  {
+    id: 31,
+    title: 'Ca Tối - Bartender',
+    company: 'Pub & Beer Garden',
+    location: 'Thủ Đức, TP.HCM',
+    lat: 10.8470,
+    lng: 106.8400,
+    type: 'Ca tối (18:00 - 01:00)',
+    category: 'shift',
+    salary: '190k - 250k/ca',
+    postedAt: '5 giờ trước',
+    tags: ['Ca tối', 'Bartender', 'Pha chế'],
+    featured: false,
+    urgent: true,
+    views: 156
+  },
+  {
+    id: 32,
+    title: 'Ca Linh Động - Shipper',
+    company: 'Grab Food',
+    location: 'Thủ Đức, TP.HCM',
+    lat: 10.8495,
+    lng: 106.8385,
+    type: 'Ca linh động',
+    category: 'shift',
+    salary: '60k - 100k/giờ',
+    postedAt: '1 ngày trước',
+    tags: ['Linh động', 'Giao hàng', 'Xe máy'],
+    featured: true,
+    urgent: true,
+    views: 412
+  },
+  {
+    id: 33,
+    title: 'Ca Chiều - Nhân viên KFC',
+    company: 'KFC - Đại học Quốc gia',
+    location: 'Thủ Đức, TP.HCM',
+    lat: 10.8515,
+    lng: 106.8365,
+    type: 'Ca chiều (15:00 - 23:00)',
+    category: 'shift',
+    salary: '170k - 210k/ca',
+    postedAt: '3 giờ trước',
+    tags: ['Ca chiều', 'Fast food', 'Phục vụ'],
+    featured: false,
+    urgent: true,
+    views: 289
+  },
+  {
+    id: 34,
+    title: 'Ca Sáng - Lễ tân Văn phòng',
+    company: 'CoWorking Space TD',
+    location: 'Thủ Đức, TP.HCM',
+    lat: 10.8485,
+    lng: 106.8355,
+    type: 'Ca sáng (08:00 - 16:00)',
+    category: 'shift',
+    salary: '175k - 220k/ca',
+    postedAt: '1 ngày trước',
+    tags: ['Ca sáng', 'Lễ tân', 'Văn phòng'],
+    featured: false,
+    urgent: true,
+    views: 167
+  }
+];
+
 const JobListing = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -740,6 +1304,12 @@ const JobListing = () => {
   const [selectedExperience, setSelectedExperience] = useState([]);
   const [selectedSalaryRanges, setSelectedSalaryRanges] = useState([]);
   const [selectedCompanies, setSelectedCompanies] = useState([]);
+  
+  // Location-based states
+  const [userLocation, setUserLocation] = useState(null);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [showNearbyJobs, setShowNearbyJobs] = useState(false);
+  const [nearbyRadius, setNearbyRadius] = useState(3); // km
 
   // Handle search from Navbar
   useEffect(() => {
@@ -776,164 +1346,47 @@ const JobListing = () => {
     }
   }, [selectedJobTypes, selectedExperience, selectedSalaryRanges, selectedCompanies]);
 
-  const jobs = [
-    // Standard Jobs
-    {
-      id: 1,
-      title: 'Senior React Developer',
-      company: 'FPT Software',
-      location: 'Quận 1, TP.HCM',
-      type: 'Full-time',
-      category: 'standard',
-      salary: '120 - 150 triệu VND',
-      postedAt: '2 ngày trước',
-      tags: ['React', 'TypeScript', 'Hybrid'],
-      featured: true,
-      urgent: false,
-      views: 245
-    },
-    {
-      id: 2,
-      title: 'Senior Full Stack Developer',
-      company: 'Grab Vietnam',
-      location: 'Quận 7, TP.HCM',
-      type: 'Full-time',
-      category: 'standard',
-      salary: '150 - 200 triệu VND',
-      postedAt: '1 ngày trước',
-      tags: ['Node.js', 'React', 'AWS'],
-      featured: true,
-      urgent: true,
-      views: 412
-    },
-    {
-      id: 3,
-      title: 'Frontend Developer (Vue.js)',
-      company: 'Tiki Corporation',
-      location: 'Tân Bình, TP.HCM',
-      type: 'Full-time',
-      category: 'standard',
-      salary: '90 - 120 triệu VND',
-      postedAt: '3 ngày trước',
-      tags: ['Vue.js', 'JavaScript', 'CSS'],
-      featured: false,
-      urgent: false,
-      views: 189
-    },
-    {
-      id: 4,
-      title: 'Backend Developer (Python)',
-      company: 'Shopee Vietnam',
-      location: 'Quận 1, TP.HCM',
-      type: 'Full-time',
-      category: 'standard',
-      salary: '110 - 140 triệu VND',
-      postedAt: '5 ngày trước',
-      tags: ['Python', 'Django', 'PostgreSQL'],
-      featured: false,
-      urgent: false,
-      views: 321
-    },
-    {
-      id: 5,
-      title: 'UI/UX Designer',
-      company: 'VNG Corporation',
-      location: 'Bình Thạnh, TP.HCM',
-      type: 'Contract',
-      category: 'standard',
-      salary: '80 - 100 triệu VND',
-      postedAt: '1 tuần trước',
-      tags: ['Figma', 'UI Design', 'Prototyping'],
-      featured: false,
-      urgent: false,
-      views: 156
-    },
-    {
-      id: 6,
-      title: 'DevOps Engineer',
-      company: 'Momo',
-      location: 'Quận 7, TP.HCM',
-      type: 'Full-time',
-      category: 'standard',
-      salary: '130 - 160 triệu VND',
-      postedAt: '4 ngày trước',
-      tags: ['AWS', 'Docker', 'Kubernetes'],
-      featured: true,
-      urgent: false,
-      views: 278
-    },
-    // Shift Jobs - Tuyển gấp
-    {
-      id: 7,
-      title: 'Ca Đêm - Nhân viên bảo vệ',
-      company: 'SecureGuard',
-      location: 'Quận 1, TP.HCM',
-      type: 'Ca đêm (22:00 - 06:00)',
-      category: 'shift',
-      salary: '200k - 250k/ca',
-      postedAt: '1 ngày trước',
-      tags: ['Ca đêm', 'Bảo vệ', 'An ninh'],
-      featured: false,
-      urgent: true,
-      views: 156
-    },
-    {
-      id: 8,
-      title: 'Ca Sáng - Nhân viên kho',
-      company: 'FastMove Logistics',
-      location: 'Tân Bình, TP.HCM',
-      type: 'Ca sáng (06:00 - 14:00)',
-      category: 'shift',
-      salary: '180k - 220k/ca',
-      postedAt: '2 ngày trước',
-      tags: ['Ca sáng', 'Kho vận', 'Logistics'],
-      featured: true,
-      urgent: true,
-      views: 234
-    },
-    {
-      id: 9,
-      title: 'Ca Chiều - Nhân viên phục vụ',
-      company: 'Highland Coffee',
-      location: 'Phú Nhuận, TP.HCM',
-      type: 'Ca chiều (14:00 - 22:00)',
-      category: 'shift',
-      salary: '150k - 180k/ca',
-      postedAt: '1 ngày trước',
-      tags: ['Ca chiều', 'F&B', 'Phục vụ'],
-      featured: false,
-      urgent: true,
-      views: 198
-    },
-    {
-      id: 10,
-      title: 'Shift Supervisor - Ca đêm',
-      company: 'NightOwl Logistics',
-      location: 'Quận 7, TP.HCM',
-      type: 'Ca đêm (20:00 - 04:00)',
-      category: 'shift',
-      salary: '250k - 300k/ca',
-      postedAt: '3 ngày trước',
-      tags: ['Ca đêm', 'Quản lý', 'Logistics'],
-      featured: true,
-      urgent: true,
-      views: 312
-    },
-    {
-      id: 11,
-      title: 'Ca Linh Động - Nhân viên giao hàng',
-      company: 'Grab Express',
-      location: 'Toàn TP.HCM',
-      type: 'Ca linh động',
-      category: 'shift',
-      salary: '50k - 80k/giờ',
-      postedAt: '1 ngày trước',
-      tags: ['Linh động', 'Giao hàng', 'Xe máy'],
-      featured: false,
-      urgent: true,
-      views: 445
+  // Reset nearby jobs when switching from shift to standard category
+  useEffect(() => {
+    if (jobCategory === 'standard') {
+      setShowNearbyJobs(false);
     }
-  ];
+  }, [jobCategory]);
+
+  // Get user's current location
+  const getUserLocation = () => {
+    setIsLoadingLocation(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+          setIsLoadingLocation(false);
+          setShowNearbyJobs(true);
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          // Fallback to a default location in Ho Chi Minh City (Ben Thanh Market)
+          setUserLocation({
+            lat: 10.7723,
+            lng: 106.6981
+          });
+          setIsLoadingLocation(false);
+          setShowNearbyJobs(true);
+        }
+      );
+    } else {
+      // Browser doesn't support geolocation, use default location
+      setUserLocation({
+        lat: 10.7723,
+        lng: 106.6981
+      });
+      setIsLoadingLocation(false);
+      setShowNearbyJobs(true);
+    }
+  };
 
   const handleSaveJob = (jobId, e) => {
     e?.stopPropagation();
@@ -1026,9 +1479,39 @@ const JobListing = () => {
     return 'mid';
   };
 
+  // Get nearby jobs
+  const nearbyJobs = useMemo(() => {
+    if (!userLocation) return [];
+    
+    return JOBS_DATA
+      .filter(job => job.category === jobCategory)
+      .map(job => ({
+        ...job,
+        distance: calculateDistance(userLocation.lat, userLocation.lng, job.lat, job.lng)
+      }))
+      .filter(job => job.distance <= nearbyRadius)
+      .sort((a, b) => a.distance - b.distance);
+  }, [userLocation, jobCategory, nearbyRadius]);
+
   // Advanced filtering with useMemo for performance
   const filteredJobs = useMemo(() => {
-    let result = jobs.filter(job => job.category === jobCategory);
+    // For shift jobs, only show nearby jobs when location is enabled
+    if (jobCategory === 'shift') {
+      if (!showNearbyJobs) {
+        return []; // Don't show any jobs until location is enabled
+      }
+      return nearbyJobs; // Show only nearby jobs within radius
+    }
+    
+    let result = JOBS_DATA.filter(job => job.category === jobCategory);
+    
+    // Add distance if user location is available
+    if (userLocation) {
+      result = result.map(job => ({
+        ...job,
+        distance: calculateDistance(userLocation.lat, userLocation.lng, job.lat, job.lng)
+      }));
+    }
 
     // Search by keyword
     if (searchKeyword.trim()) {
@@ -1097,11 +1580,11 @@ const JobListing = () => {
     });
 
     return result;
-  }, [jobs, jobCategory, searchKeyword, selectedLocation, selectedJobTypes, 
+  }, [jobCategory, searchKeyword, selectedLocation, selectedJobTypes, 
       selectedExperience, selectedSalaryRanges, selectedCompanies, 
-      quickFilter, savedJobs, sortBy]);
+      quickFilter, savedJobs, sortBy, userLocation, showNearbyJobs, nearbyJobs]);
 
-  const categoryJobs = jobs.filter(job => job.category === jobCategory);
+  const categoryJobs = JOBS_DATA.filter(job => job.category === jobCategory);
   const featuredJobs = categoryJobs.filter(job => job.featured);
 
   return (
@@ -1121,8 +1604,8 @@ const JobListing = () => {
             </HeroTitle>
             <HeroSubtitle>
               {jobCategory === 'standard'
-                ? `Hơn ${jobs.filter(j => j.category === 'standard').length} công việc tiêu chuẩn đang chờ bạn khám phá`
-                : `${jobs.filter(j => j.category === 'shift').length} công việc theo ca đang tuyển gấp, làm ngay hôm nay!`}
+                ? `Hơn ${JOBS_DATA.filter(j => j.category === 'standard').length} công việc tiêu chuẩn đang chờ bạn khám phá`
+                : `${JOBS_DATA.filter(j => j.category === 'shift').length} công việc theo ca đang tuyển gấp, làm ngay hôm nay!`}
             </HeroSubtitle>
             
             <SearchContainer>
@@ -1165,6 +1648,80 @@ const JobListing = () => {
                 Tìm kiếm
               </SearchButton>
             </SearchContainer>
+            
+            {/* Location-based search button - Only for shift jobs */}
+            {jobCategory === 'shift' && (
+              <motion.div
+                style={{ 
+                  marginTop: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px'
+                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={getUserLocation}
+                disabled={isLoadingLocation}
+                style={{
+                  padding: '12px 24px',
+                  background: showNearbyJobs 
+                    ? 'rgba(16, 185, 129, 0.2)' 
+                    : 'rgba(255, 255, 255, 0.15)',
+                  border: showNearbyJobs 
+                    ? '2px solid rgba(16, 185, 129, 0.5)'
+                    : '2px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '12px',
+                  color: 'white',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: isLoadingLocation ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  backdropFilter: 'blur(10px)',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                {isLoadingLocation ? (
+                  <>
+                    <div style={{ 
+                      width: '16px', 
+                      height: '16px', 
+                      border: '2px solid rgba(255,255,255,0.3)',
+                      borderTop: '2px solid white',
+                      borderRadius: '50%',
+                      animation: 'spin 0.8s linear infinite'
+                    }} />
+                    Đang lấy vị trí...
+                  </>
+                ) : (
+                  <>
+                    <Navigation size={16} />
+                    {showNearbyJobs ? 'Vị trí đã bật' : 'Tìm việc gần tôi'}
+                  </>
+                )}
+              </motion.button>
+              
+              {showNearbyJobs && (
+                <motion.span
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  style={{
+                    color: 'rgba(255,255,255,0.9)',
+                    fontSize: '13px',
+                    fontWeight: '500'
+                  }}
+                >
+                  Tìm thấy {nearbyJobs.length} việc làm trong bán kính {nearbyRadius}km
+                </motion.span>
+              )}
+              </motion.div>
+            )}
           </HeroContent>
         </HeroSection>
 
@@ -1183,7 +1740,7 @@ const JobListing = () => {
             <Briefcase />
             Công việc tiêu chuẩn
             <span style={{ marginLeft: 'auto', fontSize: '14px', opacity: 0.9 }}>
-              ({jobs.filter(j => j.category === 'standard').length})
+              ({JOBS_DATA.filter(j => j.category === 'standard').length})
             </span>
           </CategoryTab>
           
@@ -1200,10 +1757,12 @@ const JobListing = () => {
             <Zap />
             Công việc theo ca - Tuyển gấp
             <span style={{ marginLeft: 'auto', fontSize: '14px', opacity: 0.9 }}>
-              ({jobs.filter(j => j.category === 'shift').length})
+              ({JOBS_DATA.filter(j => j.category === 'shift').length})
             </span>
           </CategoryTab>
         </CategoryTabs>
+
+        {/* Nearby Jobs Section - Hidden now, jobs shown in main list */}
 
         {/* Featured Jobs Section */}
         {featuredJobs.length > 0 && quickFilter === 'all' && (
@@ -1267,17 +1826,17 @@ const JobListing = () => {
                           onChange={() => toggleJobType('full-time')}
                         />
                         <span>Toàn thời gian</span>
-                        <small>24</small>
+                        <small>28</small>
                       </FilterOption>
                       <FilterOption>
                         <input 
                           type="checkbox" 
                           id="parttime" 
-                          checked={selectedJobTypes.includes('contract')}
-                          onChange={() => toggleJobType('contract')}
+                          checked={selectedJobTypes.includes('part-time')}
+                          onChange={() => toggleJobType('part-time')}
                         />
                         <span>Bán thời gian</span>
-                        <small>8</small>
+                        <small>12</small>
                       </FilterOption>
                     </>
                   ) : (
@@ -1532,6 +2091,7 @@ const JobListing = () => {
                     onSave={handleSaveJob}
                     onClick={handleJobClick}
                     delay={index * 0.05}
+                    showDistance={jobCategory === 'shift' && showNearbyJobs}
                   />
                 ))
               ) : (
@@ -1541,13 +2101,30 @@ const JobListing = () => {
                   gridColumn: '1 / -1',
                   color: '#6b7280'
                 }}>
-                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
-                  <p style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
-                    Không tìm thấy công việc phù hợp
-                  </p>
-                  <p style={{ fontSize: '15px', color: '#6b7280' }}>
-                    Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn
-                  </p>
+                  {jobCategory === 'shift' && !showNearbyJobs ? (
+                    <>
+                      <div style={{ fontSize: '48px', marginBottom: '16px' }}>📍</div>
+                      <p style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
+                        Bật vị trí để tìm việc gần bạn
+                      </p>
+                      <p style={{ fontSize: '15px', color: '#6b7280', marginBottom: '20px' }}>
+                        Nhấn nút "Tìm việc gần tôi" ở phía trên để xem các công việc theo ca trong bán kính 3km
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
+                      <p style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
+                        Không tìm thấy công việc phù hợp
+                      </p>
+                      <p style={{ fontSize: '15px', color: '#6b7280' }}>
+                        {jobCategory === 'shift' 
+                          ? 'Không có công việc theo ca trong bán kính 3km. Thử mở rộng bán kính tìm kiếm.'
+                          : 'Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn'
+                        }
+                      </p>
+                    </>
+                  )}
                 </div>
               )}
             </JobsGrid>
@@ -1558,8 +2135,23 @@ const JobListing = () => {
   );
 };
 
+// Add keyframe animation for loading spinner
+const GlobalStyles = `
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
+// Inject global styles
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.textContent = GlobalStyles;
+  document.head.appendChild(styleSheet);
+}
+
 // Job Card Component
-const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0 }) => {
+const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0, showDistance = false }) => {
   const getCompanyInitial = (company) => {
     return company.charAt(0).toUpperCase();
   };
@@ -1591,6 +2183,14 @@ const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0 }) => {
               <MapPin />
               {job.location}
             </MetaItem>
+            {showDistance && job.distance !== undefined && (
+              <MetaItem style={{ color: '#10b981', fontWeight: '600' }}>
+                <Target size={16} />
+                {job.distance < 1 
+                  ? `${(job.distance * 1000).toFixed(0)}m` 
+                  : `${job.distance.toFixed(1)}km`}
+              </MetaItem>
+            )}
             <MetaItem>
               <Briefcase />
               {job.type}
