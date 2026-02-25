@@ -16,7 +16,6 @@ import PendingApproval from './pages/auth/PendingApproval';
 // Candidate Pages
 import CandidateDashboard from './pages/candidate/CandidateDashboard';
 import JobListing from './pages/candidate/JobListing';
-import JobDetail from './pages/candidate/JobDetail';
 import SavedJobs from './pages/candidate/SavedJobs';
 import CandidateProfile from './pages/candidate/CandidateProfile';
 import CandidateSettings from './pages/candidate/CandidateSettings';
@@ -91,11 +90,6 @@ function AppRoutes() {
       <Route path="/candidate/jobs" element={
         <ProtectedRoute allowedRoles={['candidate']}>
           <JobListing />
-        </ProtectedRoute>
-      } />
-      <Route path="/candidate/jobs/:id" element={
-        <ProtectedRoute allowedRoles={['candidate']}>
-          <JobDetail />
         </ProtectedRoute>
       } />
       <Route path="/candidate/saved-jobs" element={

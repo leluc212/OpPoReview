@@ -708,7 +708,6 @@ const CandidateDashboard = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 + index * 0.1 }}
                   whileHover={{ scale: 1.02 }}
-                  onClick={() => navigate(`/candidate/jobs/${job.id}`)}
                 >
                   <JobHeader>
                     <CompanyLogo>

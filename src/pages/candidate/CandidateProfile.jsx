@@ -1,26 +1,297 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import { Button, Input, TextArea, FormGroup, Label } from '../../components/FormElements';
-import { Upload, Save } from 'lucide-react';
+import { 
+  Upload, 
+  Save, 
+  User, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Briefcase, 
+  Link as LinkIcon, 
+  Github, 
+  Linkedin,
+  Globe,
+  Award,
+  Calendar,
+  Edit2,
+  Camera,
+  CheckCircle,
+  Settings,
+  FileText,
+  Star
+} from 'lucide-react';
 
 const ProfileContainer = styled.div`
-  max-width: 900px;
+  max-width: 1400px;
+  margin: 0 auto;
 `;
 
-const ProfileCard = styled.div`
-  background: ${props => props.theme.colors.bgLight};
+const ProfileHeader = styled(motion.div)`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: ${props => props.theme.borderRadius.xl};
+  padding: 48px;
+  margin-bottom: 32px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  
+  .header-content {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .header-actions {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    display: flex;
+    gap: 12px;
+    z-index: 1;
+  }
+`;
+
+const AvatarWrapper = styled.div`
+  position: relative;
+  flex-shrink: 0;
+`;
+
+const Avatar = styled.div`
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 56px;
+  font-weight: 700;
+  border: 5px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+`;
+
+const AvatarUpload = styled.label`
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s;
+  
+  svg {
+    width: 20px;
+    height: 20px;
+    color: ${props => props.theme.colors.primary};
+  }
+  
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  }
+  
+  input {
+    display: none;
+  }
+`;
+
+const HeaderInfo = styled.div`
+  flex: 1;
+  
+  h1 {
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+  
+  .title {
+    font-size: 18px;
+    opacity: 0.9;
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+  
+  .info-row {
+    display: flex;
+    gap: 32px;
+    margin-top: 20px;
+    
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      opacity: 0.95;
+      
+      svg {
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+`;
+
+const HeaderButton = styled(motion.button)`
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  padding: 10px 20px;
   border-radius: ${props => props.theme.borderRadius.lg};
-  padding: 40px;
-  margin-bottom: 24px;
-  border: 1px solid ${props => props.theme.colors.border};
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
 `;
 
-const SectionTitle = styled.h2`
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 24px;
-  color: ${props => props.theme.colors.text};
+const ProgressSection = styled.div`
+  margin-top: 24px;
+  
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    
+    .label {
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+    
+    .percentage {
+      font-size: 16px;
+      font-weight: 700;
+    }
+  }
+  
+  .progress-bar {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: ${props => props.theme.borderRadius.full};
+    overflow: hidden;
+    
+    .progress-fill {
+      height: 100%;
+      background: white;
+      border-radius: ${props => props.theme.borderRadius.full};
+      transition: width 0.5s ease;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+  }
+`;
+
+const ContentGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  
+  @media (max-width: 1200px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const MainContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+`;
+
+const Sidebar = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+`;
+
+const Card = styled(motion.div)`
+  background: ${props => props.theme.colors.bgLight};
+  border-radius: ${props => props.theme.borderRadius.xl};
+  padding: 32px;
+  border: 1px solid ${props => props.theme.colors.border};
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: ${props => props.theme.colors.text};
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      
+      svg {
+        width: 22px;
+        height: 22px;
+        color: ${props => props.theme.colors.primary};
+      }
+    }
+    
+    .edit-btn {
+      background: ${props => props.theme.colors.primary}10;
+      color: ${props => props.theme.colors.primary};
+      border: none;
+      padding: 8px 16px;
+      border-radius: ${props => props.theme.borderRadius.md};
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      
+      svg {
+        width: 14px;
+        height: 14px;
+      }
+      
+      &:hover {
+        background: ${props => props.theme.colors.primary}20;
+      }
+    }
+  }
 `;
 
 const FormGrid = styled.div`
@@ -28,43 +299,147 @@ const FormGrid = styled.div`
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   
-  & > div:last-child {
+  .full-width {
     grid-column: 1 / -1;
   }
 `;
 
-const AvatarSection = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  margin-bottom: 32px;
+const InfoCard = styled(motion.div)`
+  background: ${props => props.theme.colors.bgDark};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  padding: 20px;
+  border: 1px solid ${props => props.theme.colors.border};
+  transition: all 0.3s;
+  
+  &:hover {
+    border-color: ${props => props.theme.colors.primary};
+    transform: translateY(-2px);
+    box-shadow: ${props => props.theme.shadows.md};
+  }
+  
+  .info-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    
+    .icon {
+      width: 40px;
+      height: 40px;
+      border-radius: ${props => props.theme.borderRadius.lg};
+      background: ${props => props.$color || props.theme.colors.primary}15;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      svg {
+        width: 20px;
+        height: 20px;
+        color: ${props => props.$color || props.theme.colors.primary};
+      }
+    }
+    
+    .label {
+      font-size: 13px;
+      color: ${props => props.theme.colors.textLight};
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+  
+  .value {
+    font-size: 16px;
+    font-weight: 600;
+    color: ${props => props.theme.colors.text};
+    padding-left: 52px;
+  }
 `;
 
-const Avatar = styled.div`
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: ${props => props.theme.colors.gradientPrimary};
-  display: flex;
+const SkillTag = styled(motion.div)`
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 48px;
+  gap: 6px;
+  padding: 10px 16px;
+  background: ${props => props.theme.colors.primary}15;
+  color: ${props => props.theme.colors.primary};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  font-size: 14px;
   font-weight: 600;
+  border: 1px solid ${props => props.theme.colors.primary}30;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: ${props => props.theme.colors.primary}25;
+    transform: translateY(-2px);
+  }
+  
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
+const SkillsGrid = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+`;
+
+const StatItem = styled.div`
+  text-align: center;
+  padding: 16px;
+  background: ${props => props.theme.colors.bgDark};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  
+  .stat-value {
+    font-size: 28px;
+    font-weight: 800;
+    color: ${props => props.$color || props.theme.colors.primary};
+    margin-bottom: 4px;
+  }
+  
+  .stat-label {
+    font-size: 13px;
+    color: ${props => props.theme.colors.textLight};
+    font-weight: 600;
+  }
+`;
+
+const StatsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
 `;
 
 const CandidateProfile = () => {
+  const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     fullName: 'Lực Thứ Hai',
     email: 'lucthuhai@gmail.com',
     phone: '+84 379784509',
     location: 'Thủ Đức, TP.HCM',
     title: 'Senior React Developer',
-    bio: 'Kinh nghiệm 20 năm làm IT',
+    bio: 'Passionate developer with 5+ years of experience in building modern web applications. Specialized in React, Node.js, and cloud technologies.',
     linkedin: 'linkedin.com/in/lucthuhai',
     github: 'github.com/lucthuhai',
     website: 'leluc.com'
   });
+
+  const profileCompletion = 85;
+
+  const skills = [
+    'React', 'Node.js', 'TypeScript', 'JavaScript', 'HTML/CSS',
+    'MongoDB', 'PostgreSQL', 'AWS', 'Docker', 'Git'
+  ];
+
+  const stats = [
+    { label: 'Công việc hoàn thành', value: '23', color: '#10B981' },
+    { label: 'Đánh giá', value: '4.8', color: '#F59E0B' },
+    { label: 'Tỷ lệ thành công', value: '95%', color: '#667eea' },
+    { label: 'Khách hàng', value: '18', color: '#EF4444' }
+  ];
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -72,83 +447,385 @@ const CandidateProfile = () => {
 
   const handleSave = () => {
     console.log('Saving profile:', formData);
+    setIsEditing(false);
     alert('Đã lưu thay đổi thành công!');
   };
 
   return (
     <DashboardLayout role="candidate" showSearch={false}>
       <ProfileContainer>
-        <ProfileCard>
-          <SectionTitle>Thông Tin Cá Nhân</SectionTitle>
-          
-          <AvatarSection>
-            <Avatar>JD</Avatar>
-            <div>
-              <Button $variant="primary">
-                <Upload /> Tải Ảnh
-              </Button>
-              <p style={{ fontSize: '14px', color: '#64748B', marginTop: '8px' }}>
-                JPG, PNG hoặc GIF. Tối đa 5MB
-              </p>
-            </div>
-          </AvatarSection>
+        <ProfileHeader
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="header-actions">
+            <HeaderButton
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsEditing(!isEditing)}
+            >
+              <Edit2 />
+              {isEditing ? 'Hủy' : 'Chỉnh Sửa'}
+            </HeaderButton>
+            <HeaderButton
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Settings />
+              Cài Đặt
+            </HeaderButton>
+          </div>
 
-          <FormGrid>
-            <FormGroup>
-              <Label>Họ Và Tên</Label>
-              <Input name="fullName" value={formData.fullName} onChange={handleChange} />
-            </FormGroup>
+          <div className="header-content">
+            <AvatarWrapper>
+              <Avatar>JD</Avatar>
+              <AvatarUpload>
+                <Camera />
+                <input type="file" accept="image/*" />
+              </AvatarUpload>
+            </AvatarWrapper>
 
-            <FormGroup>
-              <Label>Email</Label>
-              <Input name="email" type="email" value={formData.email} onChange={handleChange} />
-            </FormGroup>
+            <HeaderInfo>
+              <h1>{formData.fullName}</h1>
+              <div className="title">{formData.title}</div>
+              
+              <div className="info-row">
+                <div className="info-item">
+                  <Mail />
+                  {formData.email}
+                </div>
+                <div className="info-item">
+                  <Phone />
+                  {formData.phone}
+                </div>
+                <div className="info-item">
+                  <MapPin />
+                  {formData.location}
+                </div>
+              </div>
 
-            <FormGroup>
-              <Label>Số Điện Thoại</Label>
-              <Input name="phone" type="tel" value={formData.phone} onChange={handleChange} />
-            </FormGroup>
+              <ProgressSection>
+                <div className="progress-header">
+                  <div className="label">Hoàn thiện hồ sơ</div>
+                  <div className="percentage">{profileCompletion}%</div>
+                </div>
+                <div className="progress-bar">
+                  <motion.div 
+                    className="progress-fill" 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${profileCompletion}%` }}
+                    transition={{ duration: 1, delay: 0.5 }}
+                  />
+                </div>
+              </ProgressSection>
+            </HeaderInfo>
+          </div>
+        </ProfileHeader>
 
-            <FormGroup>
-              <Label>Địa Điểm</Label>
-              <Input name="location" value={formData.location} onChange={handleChange} />
-            </FormGroup>
+        <ContentGrid>
+          <MainContent>
+            <Card
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="card-header">
+                <h2>
+                  <User />
+                  Thông Tin Cá Nhân
+                </h2>
+              </div>
 
-            <FormGroup>
-              <Label>Chức Danh Nghề Nghiệp</Label>
-              <Input name="title" value={formData.title} onChange={handleChange} />
-            </FormGroup>
+              {isEditing ? (
+                <FormGrid>
+                  <FormGroup>
+                    <Label>Họ Và Tên</Label>
+                    <Input name="fullName" value={formData.fullName} onChange={handleChange} />
+                  </FormGroup>
 
-            <FormGroup>
-              <Label>Giới Thiệu</Label>
-              <TextArea name="bio" value={formData.bio} onChange={handleChange} style={{ gridColumn: '1 / -1' }} />
-            </FormGroup>
-          </FormGrid>
-        </ProfileCard>
+                  <FormGroup>
+                    <Label>Email</Label>
+                    <Input name="email" type="email" value={formData.email} onChange={handleChange} />
+                  </FormGroup>
 
-        <ProfileCard>
-          <SectionTitle>Liên Kết Mạng Xã Hội</SectionTitle>
-          <FormGrid>
-            <FormGroup>
-              <Label>LinkedIn</Label>
-              <Input name="linkedin" value={formData.linkedin} onChange={handleChange} />
-            </FormGroup>
+                  <FormGroup>
+                    <Label>Số Điện Thoại</Label>
+                    <Input name="phone" type="tel" value={formData.phone} onChange={handleChange} />
+                  </FormGroup>
 
-            <FormGroup>
-              <Label>GitHub</Label>
-              <Input name="github" value={formData.github} onChange={handleChange} />
-            </FormGroup>
+                  <FormGroup>
+                    <Label>Địa Điểm</Label>
+                    <Input name="location" value={formData.location} onChange={handleChange} />
+                  </FormGroup>
 
-            <FormGroup style={{ gridColumn: '1 / -1' }}>
-              <Label>Website</Label>
-              <Input name="website" value={formData.website} onChange={handleChange} />
-            </FormGroup>
-          </FormGrid>
-        </ProfileCard>
+                  <FormGroup className="full-width">
+                    <Label>Chức Danh Nghề Nghiệp</Label>
+                    <Input name="title" value={formData.title} onChange={handleChange} />
+                  </FormGroup>
 
-        <Button $variant="primary" $size="large" onClick={handleSave}>
-          <Save /> Lưu Thay Đổi
-        </Button>
+                  <FormGroup className="full-width">
+                    <Label>Giới Thiệu</Label>
+                    <TextArea name="bio" value={formData.bio} onChange={handleChange} rows={4} />
+                  </FormGroup>
+                </FormGrid>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <InfoCard
+                    $color="#667eea"
+                    whileHover={{ scale: 1.01 }}
+                  >
+                    <div className="info-header">
+                      <div className="icon">
+                        <User />
+                      </div>
+                      <div className="label">Họ và Tên</div>
+                    </div>
+                    <div className="value">{formData.fullName}</div>
+                  </InfoCard>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                    <InfoCard
+                      $color="#10B981"
+                      whileHover={{ scale: 1.01 }}
+                    >
+                      <div className="info-header">
+                        <div className="icon">
+                          <Mail />
+                        </div>
+                        <div className="label">Email</div>
+                      </div>
+                      <div className="value" style={{ fontSize: '14px' }}>{formData.email}</div>
+                    </InfoCard>
+
+                    <InfoCard
+                      $color="#F59E0B"
+                      whileHover={{ scale: 1.01 }}
+                    >
+                      <div className="info-header">
+                        <div className="icon">
+                          <Phone />
+                        </div>
+                        <div className="label">Điện Thoại</div>
+                      </div>
+                      <div className="value">{formData.phone}</div>
+                    </InfoCard>
+                  </div>
+
+                  <InfoCard
+                    $color="#EF4444"
+                    whileHover={{ scale: 1.01 }}
+                  >
+                    <div className="info-header">
+                      <div className="icon">
+                        <MapPin />
+                      </div>
+                      <div className="label">Địa Điểm</div>
+                    </div>
+                    <div className="value">{formData.location}</div>
+                  </InfoCard>
+
+                  <InfoCard
+                    $color="#8B5CF6"
+                    whileHover={{ scale: 1.01 }}
+                  >
+                    <div className="info-header">
+                      <div className="icon">
+                        <Briefcase />
+                      </div>
+                      <div className="label">Chức Danh</div>
+                    </div>
+                    <div className="value">{formData.title}</div>
+                  </InfoCard>
+
+                  <InfoCard
+                    $color="#06B6D4"
+                    whileHover={{ scale: 1.01 }}
+                  >
+                    <div className="info-header">
+                      <div className="icon">
+                        <FileText />
+                      </div>
+                      <div className="label">Giới Thiệu</div>
+                    </div>
+                    <div className="value" style={{ lineHeight: '1.6' }}>{formData.bio}</div>
+                  </InfoCard>
+                </div>
+              )}
+            </Card>
+
+            <Card
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <div className="card-header">
+                <h2>
+                  <LinkIcon />
+                  Liên Kết Mạng Xã Hội
+                </h2>
+              </div>
+
+              {isEditing ? (
+                <FormGrid>
+                  <FormGroup>
+                    <Label>LinkedIn</Label>
+                    <Input name="linkedin" value={formData.linkedin} onChange={handleChange} />
+                  </FormGroup>
+
+                  <FormGroup>
+                    <Label>GitHub</Label>
+                    <Input name="github" value={formData.github} onChange={handleChange} />
+                  </FormGroup>
+
+                  <FormGroup className="full-width">
+                    <Label>Website</Label>
+                    <Input name="website" value={formData.website} onChange={handleChange} />
+                  </FormGroup>
+                </FormGrid>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <InfoCard $color="#0077B5" whileHover={{ scale: 1.01 }}>
+                    <div className="info-header">
+                      <div className="icon">
+                        <Linkedin />
+                      </div>
+                      <div className="label">LinkedIn</div>
+                    </div>
+                    <div className="value">{formData.linkedin}</div>
+                  </InfoCard>
+
+                  <InfoCard $color="#333" whileHover={{ scale: 1.01 }}>
+                    <div className="info-header">
+                      <div className="icon">
+                        <Github />
+                      </div>
+                      <div className="label">GitHub</div>
+                    </div>
+                    <div className="value">{formData.github}</div>
+                  </InfoCard>
+
+                  <InfoCard $color="#667eea" whileHover={{ scale: 1.01 }}>
+                    <div className="info-header">
+                      <div className="icon">
+                        <Globe />
+                      </div>
+                      <div className="label">Website</div>
+                    </div>
+                    <div className="value">{formData.website}</div>
+                  </InfoCard>
+                </div>
+              )}
+            </Card>
+          </MainContent>
+
+          <Sidebar>
+            <Card
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="card-header">
+                <h2>
+                  <Award />
+                  Thống Kê
+                </h2>
+              </div>
+
+              <StatsGrid>
+                {stats.map((stat, index) => (
+                  <StatItem key={index} $color={stat.color}>
+                    <div className="stat-value">{stat.value}</div>
+                    <div className="stat-label">{stat.label}</div>
+                  </StatItem>
+                ))}
+              </StatsGrid>
+            </Card>
+
+            <Card
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <div className="card-header">
+                <h2>
+                  <Star />
+                  Kỹ Năng
+                </h2>
+                <button className="edit-btn">
+                  <Edit2 />
+                  Chỉnh Sửa
+                </button>
+              </div>
+
+              <SkillsGrid>
+                {skills.map((skill, index) => (
+                  <SkillTag
+                    key={index}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.4 + index * 0.05 }}
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    <CheckCircle />
+                    {skill}
+                  </SkillTag>
+                ))}
+              </SkillsGrid>
+            </Card>
+
+            <Card
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <div className="card-header">
+                <h2>
+                  <Calendar />
+                  Hoạt Động Gần Đây
+                </h2>
+              </div>
+
+              <div style={{ fontSize: '14px', color: '#64748B', lineHeight: '1.8' }}>
+                <div style={{ padding: '12px 0', borderBottom: '1px solid #E2E8F0' }}>
+                  ✅ Hoàn thành dự án cho FPT Software
+                </div>
+                <div style={{ padding: '12px 0', borderBottom: '1px solid #E2E8F0' }}>
+                  📝 Cập nhật hồ sơ
+                </div>
+                <div style={{ padding: '12px 0' }}>
+                  ⭐ Nhận đánh giá 5 sao từ Viettel
+                </div>
+              </div>
+            </Card>
+          </Sidebar>
+        </ContentGrid>
+
+        {isEditing && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{ 
+              position: 'sticky', 
+              bottom: '24px', 
+              zIndex: 10,
+              display: 'flex',
+              justifyContent: 'center',
+              marginTop: '24px'
+            }}
+          >
+            <Button 
+              $variant="primary" 
+              $size="large" 
+              onClick={handleSave}
+              style={{ 
+                boxShadow: '0 10px 40px rgba(102, 126, 234, 0.3)',
+                minWidth: '200px'
+              }}
+            >
+              <Save /> Lưu Thay Đổi
+            </Button>
+          </motion.div>
+        )}
       </ProfileContainer>
     </DashboardLayout>
   );

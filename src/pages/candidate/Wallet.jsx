@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import { 
   Wallet as WalletIcon, 
   TrendingUp, 
+  TrendingDown,
   Download, 
   CreditCard,
   ArrowUpRight,
@@ -12,7 +14,13 @@ import {
   Receipt,
   DollarSign,
   Calendar,
-  Filter
+  Filter,
+  Clock,
+  BarChart3,
+  FileText,
+  Plus,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { Button, Input, FormGroup, Label } from '../../components/FormElements';
 
@@ -22,33 +30,61 @@ const WalletContainer = styled.div`
 `;
 
 const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 32px;
   
   h1 {
     font-size: 32px;
     font-weight: 700;
     color: ${props => props.theme.colors.text};
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    svg {
+      width: 36px;
+      height: 36px;
+      color: ${props => props.theme.colors.primary};
+    }
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: 12px;
   }
 `;
 
-const BalanceCard = styled.div`
-  background: linear-gradient(135deg, #0E3995 0%, #0055A5 100%);
-  border-radius: ${props => props.theme.borderRadius.lg};
-  padding: 40px;
+const BalanceCard = styled(motion.div)`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: ${props => props.theme.borderRadius.xl};
+  padding: 48px;
   margin-bottom: 32px;
   color: white;
   position: relative;
   overflow: hidden;
-  box-shadow: ${props => props.theme.shadows.intense};
+  box-shadow: 0 20px 60px -10px rgba(102, 126, 234, 0.4);
   
   &::before {
     content: '';
     position: absolute;
     top: -50%;
-    right: -20%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
     width: 300px;
     height: 300px;
-    background: rgba(255, 255, 255, 0.1);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
     border-radius: 50%;
   }
   
@@ -56,26 +92,73 @@ const BalanceCard = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: start;
-    margin-bottom: 24px;
+    margin-bottom: 32px;
     position: relative;
     z-index: 1;
     
-    h2 {
-      font-size: 16px;
-      font-weight: 500;
-      opacity: 0.9;
-      margin-bottom: 8px;
+    .balance-info {
+      flex: 1;
+      
+      .label {
+        font-size: 14px;
+        font-weight: 500;
+        opacity: 0.85;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      
+      .amount-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 12px;
+        
+        .amount {
+          font-size: 52px;
+          font-weight: 800;
+          letter-spacing: -1px;
+          line-height: 1;
+        }
+        
+        .toggle-balance {
+          background: rgba(255, 255, 255, 0.2);
+          border: none;
+          color: white;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s;
+          
+          &:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+          }
+        }
+      }
+      
+      .last-updated {
+        font-size: 13px;
+        opacity: 0.75;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        
+        svg {
+          width: 14px;
+          height: 14px;
+        }
+      }
     }
     
-    .amount {
-      font-size: 48px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    
-    .last-updated {
-      font-size: 14px;
-      opacity: 0.8;
+    .wallet-icon {
+      width: 80px;
+      height: 80px;
+      opacity: 0.15;
     }
   }
   
@@ -87,45 +170,72 @@ const BalanceCard = styled.div`
   }
 `;
 
-const ActionButton = styled(Button)`
+const ActionButton = styled(motion.button)`
   background: rgba(255, 255, 255, 0.2);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(10px);
+  padding: 12px 24px;
+  border-radius: ${props => props.theme.borderRadius.lg};
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  
+  svg {
+    width: 18px;
+    height: 18px;
+  }
   
   &:hover {
     background: rgba(255, 255, 255, 0.3);
     border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
   }
 `;
 
 const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
   margin-bottom: 32px;
 `;
 
-const StatCard = styled.div`
+const StatCard = styled(motion.div)`
   background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.lg};
-  padding: 24px;
+  padding: 20px 24px;
   border: 1px solid ${props => props.theme.colors.border};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s;
+  border-left: 3px solid ${props => props.$color || props.theme.colors.primary};
   
-  .stat-header {
+  &:hover {
+    border-color: ${props => props.$color || props.theme.colors.primary};
+    transform: translateX(4px);
+    box-shadow: ${props => props.theme.shadows.md};
+  }
+  
+  .stat-left {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    gap: 16px;
+    flex: 1;
     
     .icon {
       width: 48px;
       height: 48px;
-      border-radius: ${props => props.theme.borderRadius.md};
+      border-radius: ${props => props.theme.borderRadius.lg};
       background: ${props => props.$color || props.theme.colors.primary}15;
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
       
       svg {
         width: 24px;
@@ -133,170 +243,93 @@ const StatCard = styled.div`
         color: ${props => props.$color || props.theme.colors.primary};
       }
     }
+    
+    .stat-info {
+      flex: 1;
+      min-width: 0;
+      
+      .stat-label {
+        font-size: 13px;
+        color: ${props => props.theme.colors.textLight};
+        font-weight: 500;
+        margin-bottom: 6px;
+      }
+      
+      .stat-value {
+        font-size: 24px;
+        font-weight: 800;
+        color: ${props => props.theme.colors.text};
+        letter-spacing: -0.5px;
+      }
+    }
   }
   
-  .stat-value {
-    font-size: 28px;
-    font-weight: 700;
-    color: ${props => props.theme.colors.text};
-    margin-bottom: 4px;
-  }
-  
-  .stat-label {
-    font-size: 14px;
-    color: ${props => props.theme.colors.textLight};
-  }
-  
-  .stat-change {
-    font-size: 12px;
-    color: ${props => props.$positive ? '#10B981' : '#EF4444'};
-    font-weight: 600;
-    margin-top: 8px;
+  .stat-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    .stat-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: ${props => props.$positive ? '#10B981' : '#EF4444'};
+      background: ${props => props.$positive ? '#10B98115' : '#EF444415'};
+      padding: 6px 10px;
+      border-radius: ${props => props.theme.borderRadius.full};
+      font-weight: 600;
+      white-space: nowrap;
+      
+      svg {
+        width: 12px;
+        height: 12px;
+      }
+    }
   }
 `;
 
 const ContentSection = styled.div`
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 32px;
+  grid-template-columns: 1fr 400px;
+  gap: 24px;
+  
+  @media (max-width: 1200px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
-const Card = styled.div`
+const Card = styled(motion.div)`
   background: ${props => props.theme.colors.bgLight};
-  border-radius: ${props => props.theme.borderRadius.lg};
+  border-radius: ${props => props.theme.borderRadius.xl};
   padding: 32px;
   border: 1px solid ${props => props.theme.colors.border};
-  margin-bottom: 24px;
   
-  h2 {
-    font-size: 24px;
-    font-weight: 600;
-    margin-bottom: 24px;
-    color: ${props => props.theme.colors.text};
+  .card-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 12px;
+    margin-bottom: 28px;
     
-    svg {
-      width: 24px;
-      height: 24px;
-      color: ${props => props.theme.colors.primary};
-    }
-  }
-`;
-
-const TransactionList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-`;
-
-const TransactionItem = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  background: ${props => props.theme.colors.bgDark};
-  border-radius: ${props => props.theme.borderRadius.md};
-  transition: all ${props => props.theme.transitions.fast};
-  
-  &:hover {
-    transform: translateX(4px);
-    box-shadow: ${props => props.theme.shadows.sm};
-  }
-  
-  .transaction-info {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    
-    .icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: ${props => props.$type === 'income' ? '#10B98115' : '#EF444415'};
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: ${props => props.theme.colors.text};
       display: flex;
       align-items: center;
-      justify-content: center;
+      gap: 12px;
       
       svg {
-        width: 20px;
-        height: 20px;
-        color: ${props => props.$type === 'income' ? '#10B981' : '#EF4444'};
+        width: 24px;
+        height: 24px;
+        color: ${props => props.theme.colors.primary};
       }
     }
     
-    .details {
-      h4 {
-        font-size: 16px;
-        font-weight: 600;
-        color: ${props => props.theme.colors.text};
-        margin-bottom: 4px;
-      }
-      
-      p {
-        font-size: 14px;
-        color: ${props => props.theme.colors.textLight};
-      }
+    .header-action {
+      display: flex;
+      gap: 8px;
     }
-  }
-  
-  .transaction-amount {
-    text-align: right;
-    
-    .amount {
-      font-size: 18px;
-      font-weight: 700;
-      color: ${props => props.$type === 'income' ? '#10B981' : '#EF4444'};
-      margin-bottom: 4px;
-    }
-    
-    .date {
-      font-size: 12px;
-      color: ${props => props.theme.colors.textLight};
-    }
-  }
-`;
-
-const ReceiptCard = styled.div`
-  padding: 16px;
-  background: ${props => props.theme.colors.bgDark};
-  border-radius: ${props => props.theme.borderRadius.md};
-  border: 1px solid ${props => props.theme.colors.border};
-  margin-bottom: 12px;
-  
-  &:hover {
-    border-color: ${props => props.theme.colors.primary};
-    cursor: pointer;
-  }
-  
-  .receipt-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    
-    h4 {
-      font-size: 16px;
-      font-weight: 600;
-      color: ${props => props.theme.colors.text};
-    }
-    
-    .download-btn {
-      color: ${props => props.theme.colors.primary};
-      cursor: pointer;
-      
-      &:hover {
-        opacity: 0.7;
-      }
-    }
-  }
-  
-  .receipt-info {
-    display: flex;
-    justify-content: space-between;
-    font-size: 14px;
-    color: ${props => props.theme.colors.textLight};
   }
 `;
 
@@ -304,10 +337,290 @@ const FilterBar = styled.div`
   display: flex;
   gap: 12px;
   margin-bottom: 24px;
+  flex-wrap: wrap;
+  
+  .filter-group {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+  }
+`;
+
+const FilterButton = styled(motion.button)`
+  padding: 10px 20px;
+  border-radius: ${props => props.theme.borderRadius.lg};
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid ${props => props.theme.colors.border};
+  background: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.bgDark};
+  color: ${props => props.$active ? 'white' : props.theme.colors.text};
+  
+  &:hover {
+    border-color: ${props => props.theme.colors.primary};
+    transform: translateY(-2px);
+  }
+`;
+
+const TransactionList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 8px;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: ${props => props.theme.colors.bgDark};
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: ${props => props.theme.colors.border};
+    border-radius: 3px;
+    
+    &:hover {
+      background: ${props => props.theme.colors.primary};
+    }
+  }
+`;
+
+const TransactionItem = styled(motion.div)`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: ${props => props.theme.colors.bgDark};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  border: 1px solid ${props => props.theme.colors.border};
+  transition: all 0.3s;
+  cursor: pointer;
+  
+  &:hover {
+    border-color: ${props => props.$type === 'income' ? '#10B981' : '#EF4444'};
+    transform: translateX(8px);
+    box-shadow: ${props => props.theme.shadows.md};
+  }
+  
+  .transaction-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+    
+    .icon {
+      width: 52px;
+      height: 52px;
+      border-radius: ${props => props.theme.borderRadius.lg};
+      background: ${props => props.$type === 'income' ? '#10B98115' : '#EF444415'};
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      
+      svg {
+        width: 24px;
+        height: 24px;
+        color: ${props => props.$type === 'income' ? '#10B981' : '#EF4444'};
+      }
+    }
+    
+    .details {
+      flex: 1;
+      min-width: 0;
+      
+      h4 {
+        font-size: 16px;
+        font-weight: 700;
+        color: ${props => props.theme.colors.text};
+        margin-bottom: 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      
+      p {
+        font-size: 14px;
+        color: ${props => props.theme.colors.textLight};
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+    }
+  }
+  
+  .transaction-amount {
+    text-align: right;
+    flex-shrink: 0;
+    
+    .amount {
+      font-size: 20px;
+      font-weight: 800;
+      color: ${props => props.$type === 'income' ? '#10B981' : '#EF4444'};
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+    }
+    
+    .date {
+      font-size: 13px;
+      color: ${props => props.theme.colors.textLight};
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      justify-content: flex-end;
+      
+      svg {
+        width: 12px;
+        height: 12px;
+      }
+    }
+  }
+`;
+
+const ReceiptCard = styled(motion.div)`
+  padding: 20px;
+  background: ${props => props.theme.colors.bgDark};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  border: 1px solid ${props => props.theme.colors.border};
+  margin-bottom: 12px;
+  transition: all 0.3s;
+  
+  &:hover {
+    border-color: ${props => props.theme.colors.primary};
+    transform: translateY(-2px);
+    box-shadow: ${props => props.theme.shadows.sm};
+    cursor: pointer;
+  }
+  
+  .receipt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    
+    h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: ${props => props.theme.colors.text};
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      svg {
+        width: 18px;
+        height: 18px;
+        color: ${props => props.theme.colors.primary};
+      }
+    }
+    
+    .download-btn {
+      color: ${props => props.theme.colors.primary};
+      cursor: pointer;
+      padding: 8px;
+      border-radius: ${props => props.theme.borderRadius.md};
+      background: ${props => props.theme.colors.primary}10;
+      transition: all 0.2s;
+      
+      &:hover {
+        background: ${props => props.theme.colors.primary}20;
+        transform: scale(1.1);
+      }
+    }
+  }
+  
+  .receipt-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: ${props => props.theme.colors.textLight};
+    
+    .amount {
+      font-weight: 700;
+      color: ${props => props.theme.colors.text};
+      font-size: 15px;
+    }
+  }
+`;
+
+const EmptyState = styled.div`
+  text-align: center;
+  padding: 60px 20px;
+  
+  .empty-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+    background: ${props => props.theme.colors.bgDark};
+    border-radius: ${props => props.theme.borderRadius.lg};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    svg {
+      width: 40px;
+      height: 40px;
+      color: ${props => props.theme.colors.textLight};
+    }
+  }
+  
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: ${props => props.theme.colors.text};
+    margin-bottom: 8px;
+  }
+  
+  p {
+    font-size: 14px;
+    color: ${props => props.theme.colors.textLight};
+  }
 `;
 
 const Wallet = () => {
   const [balance] = useState(15750000);
+  const [showBalance, setShowBalance] = useState(true);
+  const [filterType, setFilterType] = useState('all');
+
+  const stats = [
+    {
+      label: 'Tổng Thu Nhập',
+      value: '12,300,000đ',
+      icon: TrendingUp,
+      color: '#10B981',
+      change: '+15.3%',
+      positive: true
+    },
+    {
+      label: 'Đã Rút',
+      value: '5,000,000đ',
+      icon: TrendingDown,
+      color: '#EF4444',
+      change: '-8.2%',
+      positive: false
+    },
+    {
+      label: 'Giao Dịch',
+      value: '23',
+      icon: BarChart3,
+      color: '#667eea',
+      change: '+12',
+      positive: true
+    },
+    {
+      label: 'Hóa Đơn',
+      value: '8',
+      icon: FileText,
+      color: '#F59E0B',
+      change: '+3',
+      positive: true
+    }
+  ];
 
   const transactions = [
     {
@@ -319,7 +632,7 @@ const Wallet = () => {
       date: '2026-02-13'
     },
     {
-      id: 3,
+      id: 2,
       type: 'income',
       title: 'Nhận tiền từ Viettel',
       description: 'Thanh toán cho công việc #12344',
@@ -327,80 +640,225 @@ const Wallet = () => {
       date: '2026-02-10'
     },
     {
-      id: 4,
+      id: 3,
       type: 'expense',
       title: 'Rút tiền về ngân hàng',
       description: 'Chuyển về tài khoản VCB',
       amount: -5000000,
       date: '2026-02-08'
+    },
+    {
+      id: 4,
+      type: 'income',
+      title: 'Nhận tiền từ VinGroup',
+      description: 'Thanh toán cho công việc #12343',
+      amount: 1800000,
+      date: '2026-02-05'
+    },
+    {
+      id: 5,
+      type: 'income',
+      title: 'Nhận tiền từ Bamboo Airways',
+      description: 'Thanh toán cho công việc #12342',
+      amount: 2200000,
+      date: '2026-02-01'
     }
   ];
 
   const receipts = [
     { id: 1, title: 'Hóa đơn #INV-2026-001', date: '13/02/2026', amount: '2,500,000đ' },
     { id: 2, title: 'Hóa đơn #INV-2026-002', date: '10/02/2026', amount: '3,000,000đ' },
-    { id: 3, title: 'Hóa đơn #INV-2026-003', date: '05/02/2026', amount: '1,800,000đ' }
+    { id: 3, title: 'Hóa đơn #INV-2026-003', date: '05/02/2026', amount: '1,800,000đ' },
+    { id: 4, title: 'Hóa đơn #INV-2026-004', date: '01/02/2026', amount: '2,200,000đ' }
   ];
+
+  const filteredTransactions = filterType === 'all' 
+    ? transactions 
+    : transactions.filter(t => t.type === filterType);
 
   return (
     <DashboardLayout role="candidate" showSearch={false}>
       <WalletContainer>
         <Header>
-          <h1>Ví Điện Tử</h1>
+          <h1>
+            <WalletIcon />
+            Ví Điện Tử
+          </h1>
+          <div className="header-actions">
+            <Button $variant="secondary" $size="small">
+              <Settings style={{ width: '18px', height: '18px' }} />
+              Cài Đặt
+            </Button>
+            <Button $variant="primary" $size="small">
+              <Download style={{ width: '18px', height: '18px' }} />
+              Xuất Báo Cáo
+            </Button>
+          </div>
         </Header>
 
-        <BalanceCard>
+        <BalanceCard
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <div className="balance-header">
-            <div>
-              <h2>Số Dư Khả Dụng</h2>
-              <div className="amount">{balance.toLocaleString('vi-VN')}đ</div>
-              <div className="last-updated">Cập nhật lần cuối: Hôm nay, 14:30</div>
+            <div className="balance-info">
+              <div className="label">Số Dư Khả Dụng</div>
+              <div className="amount-wrapper">
+                <div className="amount">
+                  {showBalance ? balance.toLocaleString('vi-VN') + 'đ' : '••••••••'}
+                </div>
+                <button 
+                  className="toggle-balance"
+                  onClick={() => setShowBalance(!showBalance)}
+                >
+                  {showBalance ? <Eye size={18} /> : <EyeOff size={18} />}
+                </button>
+              </div>
+              <div className="last-updated">
+                <Clock />
+                Cập nhật lần cuối: Hôm nay, 14:30
+              </div>
             </div>
-            <WalletIcon style={{ width: '64px', height: '64px', opacity: 0.2 }} />
+            <WalletIcon className="wallet-icon" />
           </div>
           <div className="balance-actions">
-            <ActionButton>
-              <ArrowUpRight style={{ width: '18px', height: '18px' }} />
+            <ActionButton
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <ArrowUpRight />
               Rút Tiền
             </ActionButton>
-            <ActionButton>
-              <CreditCard style={{ width: '18px', height: '18px' }} />
+            <ActionButton
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <CreditCard />
               Liên Kết Ngân Hàng
+            </ActionButton>
+            <ActionButton
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Plus />
+              Nạp Tiền
             </ActionButton>
           </div>
         </BalanceCard>
 
+        <StatsGrid>
+          {stats.map((stat, index) => (
+            <StatCard
+              key={index}
+              $color={stat.color}
+              $positive={stat.positive}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <div className="stat-left">
+                <div className="icon">
+                  <stat.icon />
+                </div>
+                <div className="stat-info">
+                  <div className="stat-label">{stat.label}</div>
+                  <div className="stat-value">{stat.value}</div>
+                </div>
+              </div>
+              <div className="stat-right">
+                <div className="stat-change">
+                  {stat.positive ? <TrendingUp /> : <TrendingDown />}
+                  {stat.change}
+                </div>
+              </div>
+            </StatCard>
+          ))}
+        </StatsGrid>
+
         <ContentSection>
           <div>
-            <Card>
-              <h2>
-                <Calendar />
-                Lịch Sử Giao Dịch
-              </h2>
+            <Card
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <div className="card-header">
+                <h2>
+                  <Calendar />
+                  Lịch Sử Giao Dịch
+                </h2>
+                <div className="header-action">
+                  <Button $variant="secondary" $size="small">
+                    <Download style={{ width: '16px', height: '16px' }} />
+                    Xuất
+                  </Button>
+                </div>
+              </div>
+              
               <FilterBar>
-                <Button $variant="secondary" $size="small">
-                  <Filter style={{ width: '16px', height: '16px' }} />
-                  Lọc
-                </Button>
-                <Input type="date" style={{ width: 'auto' }} />
+                <div className="filter-group">
+                  <FilterButton 
+                    $active={filterType === 'all'}
+                    onClick={() => setFilterType('all')}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Tất Cả
+                  </FilterButton>
+                  <FilterButton 
+                    $active={filterType === 'income'}
+                    onClick={() => setFilterType('income')}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Thu Nhập
+                  </FilterButton>
+                  <FilterButton 
+                    $active={filterType === 'expense'}
+                    onClick={() => setFilterType('expense')}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Chi Tiêu
+                  </FilterButton>
+                </div>
+                <Input 
+                  type="date" 
+                  style={{ width: 'auto', padding: '10px 16px' }} 
+                />
               </FilterBar>
+              
               <TransactionList>
-                {transactions.map(transaction => (
-                  <TransactionItem key={transaction.id} $type={transaction.type}>
+                {filteredTransactions.map((transaction, index) => (
+                  <TransactionItem 
+                    key={transaction.id} 
+                    $type={transaction.type}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    whileHover={{ scale: 1.02 }}
+                  >
                     <div className="transaction-info">
                       <div className="icon">
                         {transaction.type === 'income' ? <ArrowDownLeft /> : <ArrowUpRight />}
                       </div>
                       <div className="details">
                         <h4>{transaction.title}</h4>
-                        <p>{transaction.description}</p>
+                        <p>
+                          <Receipt style={{ width: '14px', height: '14px' }} />
+                          {transaction.description}
+                        </p>
                       </div>
                     </div>
                     <div className="transaction-amount">
                       <div className="amount">
                         {transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString('vi-VN')}đ
                       </div>
-                      <div className="date">{new Date(transaction.date).toLocaleDateString('vi-VN')}</div>
+                      <div className="date">
+                        <Calendar />
+                        {new Date(transaction.date).toLocaleDateString('vi-VN')}
+                      </div>
                     </div>
                   </TransactionItem>
                 ))}
@@ -409,25 +867,46 @@ const Wallet = () => {
           </div>
 
           <div>
-            <Card>
-              <h2>
-                <Receipt />
-                Hóa Đơn Điện Tử
-              </h2>
-              {receipts.map(receipt => (
-                <ReceiptCard key={receipt.id}>
+            <Card
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <div className="card-header">
+                <h2>
+                  <Receipt />
+                  Hóa Đơn Điện Tử
+                </h2>
+              </div>
+              
+              {receipts.map((receipt, index) => (
+                <ReceiptCard 
+                  key={receipt.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 + index * 0.05 }}
+                  whileHover={{ scale: 1.02 }}
+                >
                   <div className="receipt-header">
-                    <h4>{receipt.title}</h4>
+                    <h4>
+                      <FileText />
+                      {receipt.title}
+                    </h4>
                     <Download className="download-btn" style={{ width: '18px', height: '18px' }} />
                   </div>
                   <div className="receipt-info">
                     <span>{receipt.date}</span>
-                    <span>{receipt.amount}</span>
+                    <span className="amount">{receipt.amount}</span>
                   </div>
                 </ReceiptCard>
               ))}
-              <Button $variant="ghost" $fullWidth style={{ marginTop: '16px' }}>
-                Xem Tất Cả
+              
+              <Button 
+                $variant="ghost" 
+                $fullWidth 
+                style={{ marginTop: '16px' }}
+              >
+                Xem Tất Cả Hóa Đơn
               </Button>
             </Card>
           </div>

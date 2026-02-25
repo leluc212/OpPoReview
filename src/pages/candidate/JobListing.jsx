@@ -902,7 +902,7 @@ const JobListing = () => {
   };
 
   const handleJobClick = (jobId) => {
-    navigate(`/candidate/jobs/${jobId}`);
+    // Job detail page removed
   };
 
   const toggleFilter = (filterName) => {
@@ -1074,16 +1074,6 @@ const JobListing = () => {
                         <input type="checkbox" id="parttime" />
                         <span>Bán thời gian</span>
                         <small>8</small>
-                      </FilterOption>
-                      <FilterOption>
-                        <input type="checkbox" id="contract" />
-                        <span>Hợp đồng</span>
-                        <small>12</small>
-                      </FilterOption>
-                      <FilterOption>
-                        <input type="checkbox" id="freelance" />
-                        <span>Freelance</span>
-                        <small>6</small>
                       </FilterOption>
                     </>
                   ) : (

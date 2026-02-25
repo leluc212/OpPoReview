@@ -66,7 +66,6 @@ const SavedJobs = () => {
               key={job.id}
               job={job}
               saved={true}
-              onClick={(id) => navigate(`/candidate/jobs/${id}`)}
               onSave={(id) => console.log('Unsaved job:', id)}
             />
           ))}

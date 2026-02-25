@@ -1,63 +1,134 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
-import { HelpCircle, MessageCircle, Book, Mail, Phone, Send, FileQuestion } from 'lucide-react';
+import { 
+  HelpCircle, 
+  MessageCircle, 
+  Book, 
+  Mail, 
+  Phone, 
+  Send, 
+  FileQuestion,
+  Headphones,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  Search,
+  ExternalLink,
+  Video,
+  Shield,
+  Zap
+} from 'lucide-react';
 import { Button, Input, TextArea, FormGroup, Label } from '../../components/FormElements';
 
 const SupportContainer = styled.div`
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
 `;
 
-const Header = styled.div`
-  margin-bottom: 40px;
-  text-align: center;
+const PageHeader = styled(motion.div)`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: ${props => props.theme.borderRadius.xl};
+  padding: 48px;
+  margin-bottom: 32px;
+  color: white;
+  position: relative;
+  overflow: hidden;
   
-  h1 {
-    font-size: 36px;
-    font-weight: 700;
-    margin-bottom: 12px;
-    color: ${props => props.theme.colors.text};
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
   }
   
-  p {
-    font-size: 18px;
-    color: ${props => props.theme.colors.textLight};
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  
+  .header-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    
+    h1 {
+      font-size: 36px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      
+      svg {
+        width: 40px;
+        height: 40px;
+      }
+    }
+    
+    p {
+      font-size: 16px;
+      opacity: 0.9;
+      font-weight: 400;
+    }
   }
 `;
 
 const SupportGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-  margin-bottom: 48px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 32px;
+  
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
-const SupportCard = styled.div`
+const SupportCard = styled(motion.div)`
   background: ${props => props.theme.colors.bgLight};
-  border-radius: ${props => props.theme.borderRadius.lg};
-  padding: 32px;
+  border-radius: ${props => props.theme.borderRadius.xl};
+  padding: 28px;
   border: 1px solid ${props => props.theme.colors.border};
   text-align: center;
-  transition: all ${props => props.theme.transitions.normal};
   cursor: pointer;
+  transition: all 0.3s;
   
   &:hover {
     transform: translateY(-4px);
     box-shadow: ${props => props.theme.shadows.intense};
-    border-color: ${props => props.theme.colors.primary};
+    border-color: ${props => props.$color || props.theme.colors.primary};
   }
   
   .icon {
     width: 64px;
     height: 64px;
     margin: 0 auto 20px;
-    background: ${props => props.theme.colors.gradientPrimary};
-    border-radius: 50%;
+    background: ${props => props.$color || props.theme.colors.primary}15;
+    border-radius: ${props => props.theme.borderRadius.lg};
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: ${props => props.$color || props.theme.colors.primary};
     
     svg {
       width: 32px;
@@ -66,14 +137,14 @@ const SupportCard = styled.div`
   }
   
   h3 {
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 12px;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 8px;
     color: ${props => props.theme.colors.text};
   }
   
   p {
-    font-size: 14px;
+    font-size: 13px;
     color: ${props => props.theme.colors.textLight};
     line-height: 1.6;
   }
@@ -81,80 +152,189 @@ const SupportCard = styled.div`
 
 const ContentSection = styled.div`
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 32px;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  
+  @media (max-width: 1200px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
-const MainContent = styled.div``;
+const MainContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+`;
 
-const Sidebar = styled.div``;
+const Sidebar = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+`;
 
-const Card = styled.div`
+const Card = styled(motion.div)`
   background: ${props => props.theme.colors.bgLight};
-  border-radius: ${props => props.theme.borderRadius.lg};
+  border-radius: ${props => props.theme.borderRadius.xl};
   padding: 32px;
-  margin-bottom: 24px;
   border: 1px solid ${props => props.theme.colors.border};
   
-  h2 {
-    font-size: 24px;
-    font-weight: 600;
-    margin-bottom: 20px;
-    color: ${props => props.theme.colors.text};
-  }
-  
-  h3 {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 16px;
-    color: ${props => props.theme.colors.text};
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: ${props => props.theme.colors.text};
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      
+      svg {
+        width: 24px;
+        height: 24px;
+        color: ${props => props.theme.colors.primary};
+      }
+    }
   }
 `;
 
-const FAQItem = styled.div`
-  padding: 20px 0;
-  border-bottom: 1px solid ${props => props.theme.colors.border};
+const SearchBox = styled.div`
+  position: relative;
+  margin-bottom: 20px;
   
-  &:last-child {
-    border-bottom: none;
-  }
-  
-  h4 {
-    font-size: 16px;
-    font-weight: 600;
-    color: ${props => props.theme.colors.text};
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  input {
+    width: 100%;
+    padding: 14px 16px 14px 44px;
+    border-radius: ${props => props.theme.borderRadius.lg};
+    border: 1px solid ${props => props.theme.colors.border};
+    background: ${props => props.theme.colors.bgDark};
+    font-size: 14px;
+    transition: all 0.3s;
     
-    svg {
-      width: 18px;
-      height: 18px;
-      color: ${props => props.theme.colors.primary};
+    &:focus {
+      outline: none;
+      border-color: ${props => props.theme.colors.primary};
+      box-shadow: 0 0 0 3px ${props => props.theme.colors.primary}15;
+    }
+    
+    &::placeholder {
+      color: ${props => props.theme.colors.textLight};
     }
   }
   
-  p {
-    font-size: 14px;
+  svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
     color: ${props => props.theme.colors.textLight};
-    line-height: 1.6;
   }
 `;
 
-const ContactInfo = styled.div`
+const FAQItem = styled(motion.div)`
+  padding: 20px;
+  background: ${props => props.$expanded ? props.theme.colors.bgDark : 'transparent'};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  &:hover {
+    background: ${props => props.theme.colors.bgDark};
+    border-color: ${props => props.theme.colors.primary};
+  }
+  
+  .faq-question {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    
+    .question-text {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      
+      svg {
+        width: 20px;
+        height: 20px;
+        color: ${props => props.theme.colors.primary};
+        flex-shrink: 0;
+      }
+      
+      h4 {
+        font-size: 15px;
+        font-weight: 600;
+        color: ${props => props.theme.colors.text};
+      }
+    }
+    
+    .toggle-icon {
+      width: 24px;
+      height: 24px;
+      color: ${props => props.theme.colors.textLight};
+      flex-shrink: 0;
+    }
+  }
+  
+  .faq-answer {
+    margin-top: 12px;
+    padding-left: 32px;
+    
+    p {
+      font-size: 14px;
+      color: ${props => props.theme.colors.textLight};
+      line-height: 1.7;
+    }
+  }
+`;
+
+const ContactInfo = styled(motion.div)`
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px;
+  gap: 16px;
+  padding: 20px;
   background: ${props => props.theme.colors.bgDark};
-  border-radius: ${props => props.theme.borderRadius.md};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  border: 1px solid ${props => props.theme.colors.border};
   margin-bottom: 12px;
+  transition: all 0.3s;
   
-  svg {
-    width: 24px;
-    height: 24px;
-    color: ${props => props.theme.colors.primary};
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  &:hover {
+    border-color: ${props => props.$color || props.theme.colors.primary};
+    transform: translateX(4px);
+  }
+  
+  .icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: ${props => props.theme.borderRadius.lg};
+    background: ${props => props.$color || props.theme.colors.primary}15;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    
+    svg {
+      width: 24px;
+      height: 24px;
+      color: ${props => props.$color || props.theme.colors.primary};
+    }
   }
   
   .info {
@@ -164,44 +344,171 @@ const ContactInfo = styled.div`
       font-size: 12px;
       color: ${props => props.theme.colors.textLight};
       margin-bottom: 4px;
+      font-weight: 600;
     }
     
     .value {
-      font-size: 16px;
-      font-weight: 600;
+      font-size: 15px;
+      font-weight: 700;
       color: ${props => props.theme.colors.text};
     }
   }
 `;
 
-const Support = () => {
+const QuickStats = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+`;
+
+const StatItem = styled.div`
+  padding: 16px;
+  background: ${props => props.theme.colors.bgDark};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  border-left: 4px solid ${props => props.$color || props.theme.colors.primary};
+  
+  .stat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    
+    .stat-label {
+      font-size: 13px;
+      color: ${props => props.theme.colors.textLight};
+      font-weight: 600;
+    }
+    
+    svg {
+      width: 18px;
+      height: 18px;
+      color: ${props => props.$color || props.theme.colors.primary};
+    }
+  }
+  
+  .stat-value {
+    font-size: 24px;
+    font-weight: 800;
+    color: ${props => props.$color || props.theme.colors.primary};
+  }
+`;
+
+const InfoBox = styled(motion.div)`
+  background: ${props => {
+    if (props.$type === 'success') return 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%)';
+    if (props.$type === 'warning') return 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.1) 100%)';
+    return 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)';
+  }};
+  border-left: 4px solid ${props => {
+    if (props.$type === 'success') return '#10B981';
+    if (props.$type === 'warning') return '#F59E0B';
+    return props.theme.colors.primary;
+  }};
+  padding: 20px;
+  border-radius: ${props => props.theme.borderRadius.lg};
+  
+  .info-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    
+    svg {
+      width: 20px;
+      height: 20px;
+      color: ${props => {
+        if (props.$type === 'success') return '#10B981';
+        if (props.$type === 'warning') return '#F59E0B';
+        return props.theme.colors.primary;
+      }};
+    }
+    
+    h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: ${props => props.theme.colors.text};
+    }
+  }
+  
+  p {
+    font-size: 14px;
+    color: ${props => props.theme.colors.textLight};
+    line-height: 1.7;
+    margin-left: 32px;
+  }
+`;
+
+function Support() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     subject: '',
     message: ''
   });
+  
+  const [expandedFAQ, setExpandedFAQ] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const faqs = [
     {
       question: 'Làm thế nào để cập nhật hồ sơ của tôi?',
-      answer: 'Vào phần "Hồ Sơ Của Tôi" từ menu bên trái, sau đó chỉnh sửa thông tin và nhấn nút "Lưu Thay Đổi".'
+      answer: 'Vào phần "Hồ Sơ Của Tôi" từ menu bên trái, sau đó chỉnh sửa thông tin và nhấn nút "Lưu Thay Đổi". Bạn có thể cập nhật ảnh đại diện, thông tin liên hệ, kỹ năng và kinh nghiệm làm việc.'
     },
     {
       question: 'Tôi có thể ứng tuyển bao nhiêu công việc?',
-      answer: 'Bạn có thể ứng tuyển không giới hạn số lượng công việc. Tuy nhiên, chúng tôi khuyến nghị bạn chọn lọc và ứng tuyển các vị trí phù hợp nhất.'
+      answer: 'Bạn có thể ứng tuyển không giới hạn số lượng công việc. Tuy nhiên, chúng tôi khuyến nghị bạn chọn lọc và ứng tuyển các vị trí phù hợp nhất với kỹ năng và kinh nghiệm của bạn để tăng cơ hội được nhận.'
     },
     {
       question: 'Làm sao để theo dõi trạng thái đơn ứng tuyển?',
-      answer: 'Truy cập phần "Thông Báo" để xem cập nhật về đơn ứng tuyển của bạn. Bạn cũng sẽ nhận email thông báo khi có thay đổi.'
+      answer: 'Truy cập phần "Thông Báo" để xem cập nhật về đơn ứng tuyển của bạn. Bạn cũng sẽ nhận email thông báo khi có thay đổi về trạng thái hồ sơ, lời mời phỏng vấn hoặc kết quả tuyển dụng.'
     },
     {
       question: 'Tôi quên mật khẩu, phải làm sao?',
-      answer: 'Nhấn vào "Quên mật khẩu" ở trang đăng nhập, sau đó làm theo hướng dẫn để đặt lại mật khẩu qua email.'
+      answer: 'Nhấn vào "Quên mật khẩu" ở trang đăng nhập, sau đó làm theo hướng dẫn để đặt lại mật khẩu qua email. Liên kết đặt lại mật khẩu sẽ có hiệu lực trong 24 giờ.'
     },
     {
       question: 'Làm thế nào để xóa tài khoản?',
-      answer: 'Vào phần "Cài Đặt" > "Vùng Nguy Hiểm" và chọn "Xóa Tài Khoản". Lưu ý rằng hành động này không thể hoàn tác.'
+      answer: 'Vào phần "Cài Đặt" > "Vùng Nguy Hiểm" và chọn "Xóa Tài Khoản". Lưu ý rằng hành động này không thể hoàn tác và toàn bộ dữ liệu của bạn sẽ bị xóa vĩnh viễn.'
+    },
+    {
+      question: 'Tại sao tôi không nhận được thông báo email?',
+      answer: 'Kiểm tra phần "Cài Đặt" > "Thông Báo" để đảm bảo bạn đã bật nhận thông báo email. Cũng kiểm tra thư mục spam/junk trong email của bạn. Nếu vấn đề vẫn tiếp tục, vui lòng liên hệ bộ phận hỗ trợ.'
+    },
+    {
+      question: 'Làm thế nào để nâng cao khả năng được tuyển dụng?',
+      answer: 'Hoàn thiện hồ sơ 100%, cập nhật thường xuyên, thêm kỹ năng và chứng chỉ liên quan, viết mô tả bản thân chi tiết và chuyên nghiệp. Đồng thời, hãy ứng tuyển vào các vị trí phù hợp với năng lực của bạn.'
+    },
+    {
+      question: 'Tôi có thể thay đổi email đăng ký không?',
+      answer: 'Có, bạn có thể thay đổi email trong phần "Hồ Sơ Của Tôi". Sau khi thay đổi, bạn sẽ nhận email xác nhận tại địa chỉ email mới. Vui lòng xác nhận để hoàn tất quá trình.'
+    }
+  ];
+
+  const supportCategories = [
+    {
+      icon: Book,
+      title: 'Trung Tâm Trợ Giúp',
+      description: 'Xem hướng dẫn chi tiết và bài viết',
+      color: '#667eea'
+    },
+    {
+      icon: Video,
+      title: 'Video Hướng Dẫn',
+      description: 'Xem video hướng dẫn sử dụng',
+      color: '#10B981'
+    },
+    {
+      icon: FileQuestion,
+      title: 'Báo Cáo Sự Cố',
+      description: 'Báo cáo lỗi hoặc vấn đề kỹ thuật',
+      color: '#F59E0B'
+    },
+    {
+      icon: MessageCircle,
+      title: 'Chat Trực Tuyến',
+      description: 'Trò chuyện với đội ngũ hỗ trợ',
+      color: '#EF4444'
     }
   ];
 
@@ -212,49 +519,131 @@ const Support = () => {
     setFormData({ name: '', email: '', subject: '', message: '' });
   };
 
+  const filteredFAQs = faqs.filter(faq => 
+    faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <DashboardLayout role="candidate" showSearch={false}>
       <SupportContainer>
-        <Header>
-          <h1>Trung Tâm Hỗ Trợ</h1>
-          <p>Chúng tôi luôn sẵn sàng giúp đỡ bạn</p>
-        </Header>
+        <PageHeader
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="header-content">
+            <h1><Headphones />Trung Tâm Hỗ Trợ</h1>
+            <p>Chúng tôi luôn sẵn sàng giúp đỡ bạn 24/7</p>
+          </div>
+        </PageHeader>
 
         <SupportGrid>
-          <SupportCard>
-            <div className="icon">
-              <Book />
-            </div>
-            <h3>Trung Tâm Trợ Giúp</h3>
-            <p>Xem các bài viết hướng dẫn và FAQ</p>
-          </SupportCard>
-
-          <SupportCard>
-            <div className="icon">
-              <FileQuestion />
-            </div>
-            <h3>Báo Cáo Sự Cố</h3>
-            <p>Cho chúng tôi biết nếu bạn gặp vấn đề</p>
-          </SupportCard>
+          {supportCategories.map((category, index) => (
+            <SupportCard
+              key={index}
+              $color={category.color}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.1 + index * 0.1 }}
+              whileHover={{ scale: 1.02, y: -4 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className="icon">
+                <category.icon />
+              </div>
+              <h3>{category.title}</h3>
+              <p>{category.description}</p>
+            </SupportCard>
+          ))}
         </SupportGrid>
 
         <ContentSection>
           <MainContent>
-            <Card>
-              <h2>Câu Hỏi Thường Gặp (FAQ)</h2>
-              {faqs.map((faq, index) => (
-                <FAQItem key={index}>
-                  <h4>
-                    <HelpCircle />
-                    {faq.question}
-                  </h4>
-                  <p>{faq.answer}</p>
+            <Card
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <div className="card-header">
+                <h2><HelpCircle />Câu Hỏi Thường Gặp (FAQ)</h2>
+              </div>
+              
+              <SearchBox>
+                <Search />
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm câu hỏi..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </SearchBox>
+              
+              {filteredFAQs.map((faq, index) => (
+                <FAQItem
+                  key={index}
+                  $expanded={expandedFAQ === index}
+                  onClick={() => setExpandedFAQ(expandedFAQ === index ? null : index)}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  whileHover={{ scale: 1.01 }}
+                >
+                  <div className="faq-question">
+                    <div className="question-text">
+                      <HelpCircle />
+                      <h4>{faq.question}</h4>
+                    </div>
+                    {expandedFAQ === index ? (
+                      <ChevronUp className="toggle-icon" />
+                    ) : (
+                      <ChevronDown className="toggle-icon" />
+                    )}
+                  </div>
+                  <AnimatePresence>
+                    {expandedFAQ === index && (
+                      <motion.div
+                        className="faq-answer"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <p>{faq.answer}</p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </FAQItem>
               ))}
+              
+              {filteredFAQs.length === 0 && (
+                <InfoBox $type="warning" style={{ marginTop: '20px' }}>
+                  <div className="info-header">
+                    <AlertCircle />
+                    <h4>Không tìm thấy kết quả</h4>
+                  </div>
+                  <p>Không tìm thấy câu hỏi phù hợp. Vui lòng thử từ khóa khác hoặc liên hệ trực tiếp với chúng tôi.</p>
+                </InfoBox>
+              )}
             </Card>
 
-            <Card>
-              <h2>Gửi Yêu Cầu Hỗ Trợ</h2>
+            <Card
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <div className="card-header">
+                <h2><Send />Gửi Yêu Cầu Hỗ Trợ</h2>
+              </div>
+              
+              <InfoBox $type="info" style={{ marginBottom: '24px' }}>
+                <div className="info-header">
+                  <Clock />
+                  <h4>Thời gian phản hồi</h4>
+                </div>
+                <p>Chúng tôi sẽ phản hồi yêu cầu của bạn trong vòng 24 giờ làm việc.</p>
+              </InfoBox>
+              
               <form onSubmit={handleSubmit}>
                 <FormGroup>
                   <Label>Họ và Tên</Label>
@@ -301,7 +690,7 @@ const Support = () => {
                 </FormGroup>
 
                 <Button type="submit" $variant="primary" $fullWidth>
-                  <Send style={{ width: '18px', height: '18px' }} />
+                  <Send style={{ width: '18px', height: '18px', marginRight: '8px' }} />
                   Gửi Yêu Cầu
                 </Button>
               </form>
@@ -309,38 +698,106 @@ const Support = () => {
           </MainContent>
 
           <Sidebar>
-            <Card>
-              <h3>Liên Hệ Trực Tiếp</h3>
+            <Card
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <div className="card-header">
+                <h2><Zap />Thống kê</h2>
+              </div>
               
-              <ContactInfo>
-                <Mail />
+              <QuickStats>
+                <StatItem $color="#667eea">
+                  <div className="stat-header">
+                    <span className="stat-label">Thời gian phản hồi</span>
+                    <Clock />
+                  </div>
+                  <div className="stat-value">&lt; 24h</div>
+                </StatItem>
+                
+                <StatItem $color="#10B981">
+                  <div className="stat-header">
+                    <span className="stat-label">Độ hài lòng</span>
+                    <CheckCircle />
+                  </div>
+                  <div className="stat-value">98%</div>
+                </StatItem>
+                
+                <StatItem $color="#F59E0B">
+                  <div className="stat-header">
+                    <span className="stat-label">Yêu cầu đã giải quyết</span>
+                    <Shield />
+                  </div>
+                  <div className="stat-value">15,420</div>
+                </StatItem>
+              </QuickStats>
+            </Card>
+
+            <Card
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+            >
+              <div className="card-header">
+                <h2><Phone />Liên Hệ Trực Tiếp</h2>
+              </div>
+              
+              <ContactInfo 
+                $color="#667eea"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="icon-wrapper">
+                  <Mail />
+                </div>
                 <div className="info">
                   <div className="label">Email</div>
                   <div className="value">support@oppo.vn</div>
                 </div>
               </ContactInfo>
 
-              <ContactInfo>
-                <Phone />
+              <ContactInfo 
+                $color="#10B981"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="icon-wrapper">
+                  <Phone />
+                </div>
                 <div className="info">
                   <div className="label">Điện Thoại</div>
                   <div className="value">1900 xxxx</div>
                 </div>
               </ContactInfo>
 
-              <ContactInfo>
-                <MessageCircle />
+              <ContactInfo 
+                $color="#F59E0B"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="icon-wrapper">
+                  <Clock />
+                </div>
                 <div className="info">
                   <div className="label">Giờ Làm Việc</div>
-                  <div className="value">8:00 - 18:00 (T2-T6)</div>
+                  <div className="value">24/7 - Mọi lúc</div>
                 </div>
               </ContactInfo>
+              
+              <InfoBox $type="success" style={{ marginTop: '16px' }}>
+                <div className="info-header">
+                  <CheckCircle />
+                  <h4>Hỗ trợ nhanh chóng</h4>
+                </div>
+                <p>Đội ngũ hỗ trợ của chúng tôi luôn sẵn sàng giải đáp mọi thắc mắc của bạn.</p>
+              </InfoBox>
             </Card>
           </Sidebar>
         </ContentSection>
       </SupportContainer>
     </DashboardLayout>
   );
-};
+}
 
 export default Support;

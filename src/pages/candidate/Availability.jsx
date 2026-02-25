@@ -1,226 +1,329 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import Modal from '../../components/Modal';
-import { Power, Search, TrendingUp, MapPin, Clock, Bell, AlertCircle } from 'lucide-react';
+import { 
+  Power, 
+  Search, 
+  TrendingUp, 
+  MapPin, 
+  Clock, 
+  Bell, 
+  AlertCircle, 
+  Eye,
+  Briefcase,
+  CheckCircle,
+  XCircle,
+  Calendar,
+  Settings,
+  Target,
+  Zap,
+  Shield,
+  BarChart3
+} from 'lucide-react';
 import { Button } from '../../components/FormElements';
 
 const AvailabilityContainer = styled.div`
-  max-width: 1000px;
+  max-width: 1400px;
   margin: 0 auto;
 `;
 
-const Header = styled.div`
+const PageHeader = styled(motion.div)`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: ${props => props.theme.borderRadius.xl};
+  padding: 48px;
   margin-bottom: 32px;
-  
-  h1 {
-    font-size: 32px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: #0F172A;
-    letter-spacing: -0.5px;
-  }
-  
-  p {
-    font-size: 16px;
-    color: #64748B;
-    font-weight: 400;
-  }
-`;
-
-const StatusCard = styled.div`
-  background: ${props => props.$active 
-    ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%)'
-    : 'linear-gradient(135deg, rgba(100, 116, 139, 0.05) 0%, rgba(71, 85, 105, 0.05) 100%)'};
-  border: 1px solid ${props => props.$active ? 'rgba(37, 99, 235, 0.2)' : 'rgba(100, 116, 139, 0.2)'};
-  border-radius: 16px;
-  padding: 48px 40px;
-  margin-bottom: 32px;
+  color: white;
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(10px);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   
   &::before {
     content: '';
     position: absolute;
     top: -50%;
     right: -10%;
-    width: 250px;
-    height: 250px;
-    background: ${props => props.$active 
-      ? 'radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, transparent 70%)'
-      : 'radial-gradient(circle, rgba(100, 116, 139, 0.1) 0%, transparent 70%)'};
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
     border-radius: 50%;
-    filter: blur(40px);
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  
+  .header-content {
+    position: relative;
+    z-index: 1;
+    
+    h1 {
+      font-size: 36px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      
+      svg {
+        width: 40px;
+        height: 40px;
+      }
+    }
+    
+    p {
+      font-size: 16px;
+      opacity: 0.9;
+      font-weight: 400;
+    }
+  }
+`;
+
+const ContentGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 24px;
+  
+  @media (max-width: 1200px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const MainContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+`;
+
+const Sidebar = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+`;
+
+const StatusCard = styled(motion.div)`
+  background: ${props => props.$active 
+    ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
+    : 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)'};
+  border-radius: ${props => props.theme.borderRadius.xl};
+  padding: 48px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  box-shadow: ${props => props.$active 
+    ? '0 20px 60px -10px rgba(16, 185, 129, 0.4)'
+    : '0 20px 60px -10px rgba(100, 116, 139, 0.3)'};
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
   }
   
   .status-content {
     position: relative;
     z-index: 1;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 40px;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
+    gap: 32px;
     
     .status-info {
-      h2 {
-        font-size: 14px;
+      flex: 1;
+      
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 8px 16px;
+        border-radius: ${props => props.theme.borderRadius.full};
+        font-size: 13px;
         font-weight: 600;
-        color: #64748B;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        margin-bottom: 12px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        
+        svg {
+          width: 16px;
+          height: 16px;
+        }
       }
       
       .status-label {
-        font-size: 40px;
-        font-weight: 700;
-        margin-bottom: 12px;
-        color: ${props => props.$active ? '#2563EB' : '#64748B'};
+        font-size: 48px;
+        font-weight: 800;
+        margin-bottom: 16px;
         letter-spacing: -1px;
+        line-height: 1;
       }
       
       .status-desc {
-        font-size: 15px;
-        color: #64748B;
+        font-size: 16px;
+        opacity: 0.95;
         line-height: 1.6;
+        margin-bottom: 24px;
       }
     }
     
     .status-icon {
-      width: 100px;
-      height: 100px;
-      background: ${props => props.$active 
-        ? 'linear-gradient(135deg, #2563EB 0%, #1E40AF 100%)'
-        : 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)'};
-      border-radius: 20px;
+      width: 120px;
+      height: 120px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: ${props => props.$active 
-        ? '0 8px 24px rgba(37, 99, 235, 0.25)'
-        : '0 8px 24px rgba(100, 116, 139, 0.15)'};
+      backdrop-filter: blur(10px);
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      flex-shrink: 0;
       
       svg {
-        width: 48px;
-        height: 48px;
-        color: white;
+        width: 60px;
+        height: 60px;
       }
     }
   }
 `;
 
-const ToggleButton = styled.button`
-  background: ${props => props.$active 
-    ? '#2563EB'
-    : '#64748B'};
+const ToggleButton = styled(motion.button)`
+  background: rgba(255, 255, 255, 0.2);
   color: white;
-  border: none;
-  padding: 14px 28px;
-  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  padding: 14px 32px;
+  border-radius: ${props => props.theme.borderRadius.lg};
   font-size: 16px;
-  font-weight: 600;
-  margin-top: 20px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  box-shadow: 0 4px 12px ${props => props.$active 
-    ? 'rgba(37, 99, 235, 0.3)'
-    : 'rgba(100, 116, 139, 0.2)'};
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px ${props => props.$active 
-      ? 'rgba(37, 99, 235, 0.4)'
-      : 'rgba(100, 116, 139, 0.3)'};
-  }
-  
-  &:active {
-    transform: translateY(0);
-  }
+  gap: 10px;
+  transition: all 0.3s;
   
   svg {
     width: 20px;
     height: 20px;
   }
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: translateY(-2px);
+  }
 `;
 
-const SettingsCard = styled.div`
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 16px;
+const Card = styled(motion.div)`
+  background: ${props => props.theme.colors.bgLight};
+  border-radius: ${props => props.theme.borderRadius.xl};
   padding: 32px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid ${props => props.theme.colors.border};
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: ${props => props.theme.colors.text};
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      
+      svg {
+        width: 24px;
+        height: 24px;
+        color: ${props => props.theme.colors.primary};
+      }
+    }
+  }
 `;
 
-const SectionTitle = styled.h2`
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 24px;
-  color: #0F172A;
-  letter-spacing: -0.3px;
-`;
-
-const SettingItem = styled.div`
+const SettingItem = styled(motion.div)`
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  padding: 20px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  align-items: center;
+  padding: 24px;
+  background: ${props => props.theme.colors.bgDark};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  border: 1px solid ${props => props.theme.colors.border};
+  margin-bottom: 16px;
+  transition: all 0.3s;
   
   &:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-  }
-  
-  &:first-child {
-    padding-top: 0;
+    margin-bottom: 0;
   }
   
   &:hover {
-    padding-left: 8px;
+    border-color: ${props => props.$enabled ? props.theme.colors.primary : props.theme.colors.border};
+    transform: translateX(4px);
+    box-shadow: ${props => props.theme.shadows.sm};
   }
-`;
-
-const SettingInfo = styled.div`
-  flex: 1;
   
-  h3 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #0F172A;
-    margin-bottom: 6px;
+  .setting-left {
+    flex: 1;
     display: flex;
     align-items: center;
-    gap: 10px;
-    letter-spacing: -0.2px;
+    gap: 16px;
     
-    svg {
-      width: 20px;
-      height: 20px;
-      color: #2563EB;
+    .icon-wrapper {
+      width: 48px;
+      height: 48px;
+      border-radius: ${props => props.theme.borderRadius.lg};
+      background: ${props => props.$color || props.theme.colors.primary}15;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
+      
+      svg {
+        width: 24px;
+        height: 24px;
+        color: ${props => props.$color || props.theme.colors.primary};
+      }
     }
-  }
-  
-  p {
-    font-size: 14px;
-    color: #64748B;
-    line-height: 1.5;
-    padding-left: 30px;
+    
+    .setting-info {
+      flex: 1;
+      
+      h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: ${props => props.theme.colors.text};
+        margin-bottom: 6px;
+      }
+      
+      p {
+        font-size: 14px;
+        color: ${props => props.theme.colors.textLight};
+        line-height: 1.5;
+      }
+    }
   }
 `;
 
 const Toggle = styled.label`
   position: relative;
   display: inline-block;
-  width: 52px;
-  height: 30px;
+  width: 56px;
+  height: 32px;
   flex-shrink: 0;
   
   input {
@@ -229,17 +332,22 @@ const Toggle = styled.label`
     height: 0;
     
     &:checked + span {
-      background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
     
     &:checked + span:before {
-      transform: translateX(22px);
+      transform: translateX(24px);
     }
     
     &:disabled + span {
       opacity: 0.4;
       cursor: not-allowed;
+      background: #E2E8F0;
+    }
+    
+    &:disabled:checked + span {
+      opacity: 0.5;
     }
   }
   
@@ -250,80 +358,164 @@ const Toggle = styled.label`
     left: 0;
     right: 0;
     bottom: 0;
-    background: #E2E8F0;
-    border-radius: 30px;
+    background: #CBD5E1;
+    border-radius: 32px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     
     &:before {
       position: absolute;
       content: '';
-      height: 22px;
-      width: 22px;
+      height: 24px;
+      width: 24px;
       left: 4px;
       bottom: 4px;
       background: white;
       border-radius: 50%;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
   }
 `;
 
-const InfoBox = styled.div`
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
-  border-left: 3px solid #2563EB;
-  padding: 20px;
-  border-radius: 12px;
+const InfoBox = styled(motion.div)`
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  border-left: 4px solid ${props => props.theme.colors.primary};
+  padding: 24px;
+  border-radius: ${props => props.theme.borderRadius.lg};
   margin-top: 24px;
+  
+  .info-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    
+    svg {
+      width: 20px;
+      height: 20px;
+      color: ${props => props.theme.colors.primary};
+    }
+    
+    h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: ${props => props.theme.colors.text};
+    }
+  }
   
   p {
     font-size: 14px;
-    color: #475569;
+    color: ${props => props.theme.colors.textLight};
     line-height: 1.7;
-    
-    strong {
-      color: #0F172A;
-      font-weight: 600;
-    }
+    margin-left: 32px;
   }
 `;
 
 const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
 `;
 
-const StatCard = styled.div`
+const StatCard = styled(motion.div)`
   text-align: center;
   padding: 28px 20px;
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
-  border: 1px solid rgba(37, 99, 235, 0.1);
-  border-radius: 16px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: ${props => props.theme.colors.bgDark};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  transition: all 0.3s;
+  border-left: 3px solid ${props => props.$color || props.theme.colors.primary};
   
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.1);
-    border-color: rgba(37, 99, 235, 0.2);
+    box-shadow: ${props => props.theme.shadows.md};
+    border-color: ${props => props.$color || props.theme.colors.primary};
+  }
+  
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 16px;
+    border-radius: ${props => props.theme.borderRadius.lg};
+    background: ${props => props.$color || props.theme.colors.primary}15;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    svg {
+      width: 24px;
+      height: 24px;
+      color: ${props => props.$color || props.theme.colors.primary};
+    }
   }
   
   .stat-value {
     font-size: 36px;
-    font-weight: 700;
-    color: #2563EB;
+    font-weight: 800;
+    color: ${props => props.$color || props.theme.colors.primary};
     margin-bottom: 8px;
     line-height: 1;
+    letter-spacing: -1px;
   }
   
   .stat-label {
-    font-size: 14px;
-    color: #64748B;
-    font-weight: 500;
+    font-size: 13px;
+    color: ${props => props.theme.colors.textLight};
+    font-weight: 600;
+  }
+`;
+
+const ActivityItem = styled(motion.div)`
+  display: flex;
+  align-items: start;
+  gap: 16px;
+  padding: 16px;
+  background: ${props => props.theme.colors.bgDark};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  border: 1px solid ${props => props.theme.colors.border};
+  margin-bottom: 12px;
+  transition: all 0.3s;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  &:hover {
+    border-color: ${props => props.theme.colors.primary};
+    transform: translateX(4px);
+  }
+  
+  .icon {
+    width: 40px;
+    height: 40px;
+    border-radius: ${props => props.theme.borderRadius.md};
+    background: ${props => props.$color || props.theme.colors.primary}15;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    
+    svg {
+      width: 20px;
+      height: 20px;
+      color: ${props => props.$color || props.theme.colors.primary};
+    }
+  }
+  
+  .content {
+    flex: 1;
+    
+    h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: ${props => props.theme.colors.text};
+      margin-bottom: 4px;
+    }
+    
+    p {
+      font-size: 13px;
+      color: ${props => props.theme.colors.textLight};
+    }
   }
 `;
 
@@ -331,38 +523,40 @@ const ConfirmationContent = styled.div`
   padding: 24px;
   
   .icon-wrapper {
-    width: 64px;
-    height: 64px;
-    margin: 0 auto 20px;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 24px;
     background: ${props => props.$isActive 
       ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%)'
-      : 'linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(30, 64, 175, 0.1) 100%)'};
+      : 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%)'};
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 3px solid ${props => props.$isActive ? '#FEE2E2' : '#D1FAE5'};
     
     svg {
-      width: 32px;
-      height: 32px;
-      color: ${props => props.$isActive ? '#EF4444' : '#2563EB'};
+      width: 40px;
+      height: 40px;
+      color: ${props => props.$isActive ? '#EF4444' : '#10B981'};
     }
   }
   
   h3 {
-    font-size: 20px;
-    font-weight: 700;
-    color: #0F172A;
+    font-size: 24px;
+    font-weight: 800;
+    color: ${props => props.theme.colors.text};
     text-align: center;
     margin-bottom: 12px;
+    letter-spacing: -0.5px;
   }
   
   p {
     font-size: 15px;
-    color: #64748B;
+    color: ${props => props.theme.colors.textLight};
     text-align: center;
-    line-height: 1.6;
-    margin-bottom: 24px;
+    line-height: 1.7;
+    margin-bottom: 28px;
   }
   
   .button-group {
@@ -371,39 +565,38 @@ const ConfirmationContent = styled.div`
     
     button {
       flex: 1;
-      padding: 12px 24px;
-      border-radius: 12px;
+      padding: 14px 24px;
+      border-radius: ${props => props.theme.borderRadius.lg};
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.3s;
       
       &.confirm {
         background: ${props => props.$isActive 
           ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)'
-          : 'linear-gradient(135deg, #2563EB 0%, #1E40AF 100%)'};
+          : 'linear-gradient(135deg, #10B981 0%, #059669 100%)'};
         color: white;
         border: none;
-        box-shadow: 0 4px 12px ${props => props.$isActive 
-          ? 'rgba(239, 68, 68, 0.3)'
-          : 'rgba(37, 99, 235, 0.3)'};
+        box-shadow: ${props => props.$isActive 
+          ? '0 4px 12px rgba(239, 68, 68, 0.3)'
+          : '0 4px 12px rgba(16, 185, 129, 0.3)'};
         
         &:hover {
           transform: translateY(-2px);
-          box-shadow: 0 8px 20px ${props => props.$isActive 
-            ? 'rgba(239, 68, 68, 0.4)'
-            : 'rgba(37, 99, 235, 0.4)'};
+          box-shadow: ${props => props.$isActive 
+            ? '0 8px 20px rgba(239, 68, 68, 0.4)'
+            : '0 8px 20px rgba(16, 185, 129, 0.4)'};
         }
       }
       
       &.cancel {
-        background: #F1F5F9;
-        color: #475569;
-        border: 1px solid #E2E8F0;
+        background: ${props => props.theme.colors.bgDark};
+        color: ${props => props.theme.colors.text};
+        border: 1px solid ${props => props.theme.colors.border};
         
         &:hover {
-          background: #E2E8F0;
-          border-color: #CBD5E1;
+          background: ${props => props.theme.colors.border};
         }
       }
       
@@ -428,154 +621,282 @@ const Availability = () => {
   const confirmToggle = () => {
     setIsAvailable(!isAvailable);
     if (isAvailable) {
-      // Turning off - disable all features
       setEnableJobSearch(false);
       setEnableRecommendations(false);
     } else {
-      // Turning on - enable all features
       setEnableJobSearch(true);
       setEnableRecommendations(true);
     }
     setShowConfirmModal(false);
   };
 
+  const stats = [
+    { label: 'Lượt Xem Hồ Sơ', value: isAvailable ? '156' : '0', icon: Eye, color: '#667eea' },
+    { label: 'Gợi Ý Công Việc', value: isAvailable ? '23' : '0', icon: Briefcase, color: '#10B981' },
+    { label: 'Lời Mời', value: isAvailable ? '12' : '0', icon: Target, color: '#F59E0B' },
+    { label: 'Phỏng Vấn', value: isAvailable ? '8' : '0', icon: Calendar, color: '#EF4444' }
+  ];
+
+  const activities = [
+    { label: 'FPT Software xem hồ sơ', time: '2 giờ trước', icon: Eye, color: '#667eea' },
+    { label: 'Nhận gợi ý: Senior React Dev', time: '5 giờ trước', icon: Zap, color: '#10B981' },
+    { label: 'Viettel lời mời phỏng vấn', time: '1 ngày trước', icon: Calendar, color: '#F59E0B' }
+  ];
+
   return (
     <DashboardLayout role="candidate" showSearch={false}>
       <AvailabilityContainer>
-        <Header>
-          <h1>Trạng Thái Tìm Việc</h1>
-          <p>Quản lý trạng thái hiển thị và tìm kiếm công việc của bạn</p>
-        </Header>
-
-        <StatusCard $active={isAvailable}>
+        <StatusCard 
+          $active={isAvailable}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1 }}
+        >
           <div className="status-content">
             <div className="status-info">
-              <h2>Trạng Thái Hiện Tại</h2>
+              <div className="status-badge">
+                {isAvailable ? <CheckCircle /> : <XCircle />}
+                Trạng Thái Hiện Tại
+              </div>
               <div className="status-label">
                 {isAvailable ? 'ĐANG TÌM VIỆC' : 'TẠM DỪNG'}
               </div>
               <div className="status-desc">
                 {isAvailable 
-                  ? 'Hồ sơ của bạn đang hiển thị với nhà tuyển dụng'
-                  : 'Hồ sơ của bạn đã bị ẩn khỏi nhà tuyển dụng'}
+                  ? 'Hồ sơ của bạn đang hiển thị với nhà tuyển dụng và bạn đang nhận gợi ý công việc'
+                  : 'Hồ sơ của bạn đã bị ẩn khỏi nhà tuyển dụng và không nhận gợi ý công việc'}
               </div>
-              <ToggleButton onClick={handleToggleAvailability} $active={isAvailable}>
+              <ToggleButton 
+                onClick={handleToggleAvailability} 
+                $active={isAvailable}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
                 <Power />
                 {isAvailable ? 'Tắt Tìm Việc' : 'Bật Tìm Việc'}
               </ToggleButton>
             </div>
-            <div className="status-icon">
+            <motion.div 
+              className="status-icon"
+              animate={{ 
+                rotate: isAvailable ? 0 : 180,
+                scale: [1, 1.1, 1]
+              }}
+              transition={{ duration: 0.5 }}
+            >
               <Power />
-            </div>
+            </motion.div>
           </div>
         </StatusCard>
 
-        <SettingsCard>
-          <SectionTitle>Cài Đặt Tìm Kiếm</SectionTitle>
-          
-          <SettingItem>
-            <SettingInfo>
-              <h3>
-                <Search />
-                Cho Phép Tìm Kiếm Công Việc
-              </h3>
-              <p>Bật để tìm kiếm và ứng tuyển các công việc mới</p>
-            </SettingInfo>
-            <Toggle>
-              <input 
-                type="checkbox" 
-                checked={enableJobSearch} 
-                onChange={(e) => setEnableJobSearch(e.target.checked)}
-                disabled={!isAvailable}
-              />
-              <span></span>
-            </Toggle>
-          </SettingItem>
-
-          <SettingItem>
-            <SettingInfo>
-              <h3>
-                <TrendingUp />
-                Nhận Gợi Ý Công Việc
-              </h3>
-              <p>Nhận các gợi ý công việc phù hợp dựa trên hồ sơ của bạn</p>
-            </SettingInfo>
-            <Toggle>
-              <input 
-                type="checkbox" 
-                checked={enableRecommendations} 
-                onChange={(e) => setEnableRecommendations(e.target.checked)}
-                disabled={!isAvailable}
-              />
-              <span></span>
-            </Toggle>
-          </SettingItem>
-
-          <SettingItem>
-            <SettingInfo>
-              <h3>
-                <Bell />
-                Thông Báo Công Việc Mới
-              </h3>
-              <p>Nhận thông báo khi có công việc mới phù hợp</p>
-            </SettingInfo>
-            <Toggle>
-              <input 
-                type="checkbox" 
-                checked={enableNotifications} 
-                onChange={(e) => setEnableNotifications(e.target.checked)}
-                disabled={!isAvailable}
-              />
-              <span></span>
-            </Toggle>
-          </SettingItem>
-
-          <InfoBox>
-            <p>
-              <strong>Lưu ý:</strong> Khi bạn tắt trạng thái tìm việc, hồ sơ của bạn sẽ bị ẩn khỏi tất cả nhà tuyển dụng 
-              và bạn sẽ không nhận được bất kỳ gợi ý công việc nào. Các cài đặt tìm kiếm sẽ tự động bị vô hiệu hóa.
-            </p>
-          </InfoBox>
-        </SettingsCard>
-
-        <SettingsCard>
-          <SectionTitle>Thống Kê Hoạt Động</SectionTitle>
-          
-          <StatsGrid>
-            <StatCard>
-              <div className="stat-value">
-                {isAvailable ? '156' : '0'}
+        <ContentGrid>
+          <MainContent>
+            <Card
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="card-header">
+                <h2>
+                  <Settings />
+                  Cài Đặt Tìm Kiếm
+                </h2>
               </div>
-              <div className="stat-label">Lượt Xem Hồ Sơ</div>
-            </StatCard>
-            
-            <StatCard>
-              <div className="stat-value">
-                {isAvailable ? '23' : '0'}
+              
+              <SettingItem
+                $enabled={enableJobSearch && isAvailable}
+                $color="#667eea"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                whileHover={{ scale: 1.01 }}
+              >
+                <div className="setting-left">
+                  <div className="icon-wrapper">
+                    <Search />
+                  </div>
+                  <div className="setting-info">
+                    <h3>Cho Phép Tìm Kiếm Công Việc</h3>
+                    <p>Bật để tìm kiếm và ứng tuyển các công việc mới</p>
+                  </div>
+                </div>
+                <Toggle>
+                  <input 
+                    type="checkbox" 
+                    checked={enableJobSearch} 
+                    onChange={(e) => setEnableJobSearch(e.target.checked)}
+                    disabled={!isAvailable}
+                  />
+                  <span></span>
+                </Toggle>
+              </SettingItem>
+
+              <SettingItem
+                $enabled={enableRecommendations && isAvailable}
+                $color="#10B981"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35 }}
+                whileHover={{ scale: 1.01 }}
+              >
+                <div className="setting-left">
+                  <div className="icon-wrapper">
+                    <TrendingUp />
+                  </div>
+                  <div className="setting-info">
+                    <h3>Nhận Gợi Ý Công Việc</h3>
+                    <p>Nhận các gợi ý công việc phù hợp dựa trên hồ sơ của bạn</p>
+                  </div>
+                </div>
+                <Toggle>
+                  <input 
+                    type="checkbox" 
+                    checked={enableRecommendations} 
+                    onChange={(e) => setEnableRecommendations(e.target.checked)}
+                    disabled={!isAvailable}
+                  />
+                  <span></span>
+                </Toggle>
+              </SettingItem>
+
+              <SettingItem
+                $enabled={enableNotifications && isAvailable}
+                $color="#F59E0B"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                whileHover={{ scale: 1.01 }}
+              >
+                <div className="setting-left">
+                  <div className="icon-wrapper">
+                    <Bell />
+                  </div>
+                  <div className="setting-info">
+                    <h3>Thông Báo Công Việc Mới</h3>
+                    <p>Nhận thông báo khi có công việc mới phù hợp</p>
+                  </div>
+                </div>
+                <Toggle>
+                  <input 
+                    type="checkbox" 
+                    checked={enableNotifications} 
+                    onChange={(e) => setEnableNotifications(e.target.checked)}
+                    disabled={!isAvailable}
+                  />
+                  <span></span>
+                </Toggle>
+              </SettingItem>
+
+              <InfoBox
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                <div className="info-header">
+                  <Shield />
+                  <h4>Lưu Ý Quan Trọng</h4>
+                </div>
+                <p>
+                  Khi bạn tắt trạng thái tìm việc, hồ sơ của bạn sẽ bị ẩn khỏi tất cả nhà tuyển dụng 
+                  và bạn sẽ không nhận được bất kỳ gợi ý công việc nào. Các cài đặt tìm kiếm sẽ tự động bị vô hiệu hóa.
+                </p>
+              </InfoBox>
+            </Card>
+          </MainContent>
+
+          <Sidebar>
+            <Card
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <div className="card-header">
+                <h2>
+                  <BarChart3 />
+                  Thống Kê
+                </h2>
               </div>
-              <div className="stat-label">Gợi Ý Công Việc</div>
-            </StatCard>
-            
-            <StatCard>
-              <div className="stat-value">
-                {isAvailable ? '12' : '0'}
+
+              <StatsGrid>
+                {stats.map((stat, index) => (
+                  <StatCard
+                    key={index}
+                    $color={stat.color}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.4 + index * 0.05 }}
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    <div className="stat-icon">
+                      <stat.icon />
+                    </div>
+                    <div className="stat-value">{stat.value}</div>
+                    <div className="stat-label">{stat.label}</div>
+                  </StatCard>
+                ))}
+              </StatsGrid>
+            </Card>
+
+            <Card
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <div className="card-header">
+                <h2>
+                  <Clock />
+                  Hoạt Động Gần Đây
+                </h2>
               </div>
-              <div className="stat-label">Lời Mời Phỏng Vấn</div>
-            </StatCard>
-          </StatsGrid>
-        </SettingsCard>
+
+              {isAvailable ? (
+                activities.map((activity, index) => (
+                  <ActivityItem
+                    key={index}
+                    $color={activity.color}
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5 + index * 0.05 }}
+                  >
+                    <div className="icon">
+                      <activity.icon />
+                    </div>
+                    <div className="content">
+                      <h4>{activity.label}</h4>
+                      <p>{activity.time}</p>
+                    </div>
+                  </ActivityItem>
+                ))
+              ) : (
+                <div style={{ 
+                  textAlign: 'center', 
+                  padding: '40px 20px',
+                  color: '#94A3B8' 
+                }}>
+                  <XCircle style={{ width: '48px', height: '48px', margin: '0 auto 16px' }} />
+                  <p style={{ fontSize: '14px' }}>Không có hoạt động khi tắt tìm việc</p>
+                </div>
+              )}
+            </Card>
+          </Sidebar>
+        </ContentGrid>
       </AvailabilityContainer>
       
       <Modal
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
-        title={isAvailable ? 'Tắt Trạng Thái Tìm Việc?' : 'Bật Trạng Thái Tìm Việc?'}
+        title=""
       >
         <ConfirmationContent $isActive={isAvailable}>
-          <div className="icon-wrapper">
+          <motion.div 
+            className="icon-wrapper"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 200 }}
+          >
             <AlertCircle />
-          </div>
-          <h3>{isAvailable ? 'Xác nhận tắt tìm việc' : 'Xác nhận bật tìm việc'}</h3>
+          </motion.div>
+          <h3>{isAvailable ? 'Tắt Trạng Thái Tìm Việc?' : 'Bật Trạng Thái Tìm Việc?'}</h3>
           <p>
             {isAvailable 
               ? 'Khi tắt trạng thái tìm việc, hồ sơ của bạn sẽ bị ẩn khỏi nhà tuyển dụng và bạn sẽ không nhận được gợi ý công việc nào. Tất cả cài đặt tìm kiếm sẽ tự động bị vô hiệu hóa.'
@@ -584,7 +905,7 @@ const Availability = () => {
           </p>
           <div className="button-group">
             <button className="cancel" onClick={() => setShowConfirmModal(false)}>
-              Hủy
+              Hủy Bỏ
             </button>
             <button className="confirm" onClick={confirmToggle}>
               {isAvailable ? 'Tắt Ngay' : 'Bật Ngay'}
