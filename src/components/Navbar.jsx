@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Bell, MessageSquare, Search, LogOut, User } from 'lucide-react';
@@ -61,6 +61,13 @@ const SearchBar = styled.div`
     width: 20px;
     height: 20px;
     color: ${props => props.theme.colors.textLight};
+    cursor: pointer;
+    transition: all ${props => props.theme.transitions.normal};
+    
+    &:hover {
+      color: ${props => props.theme.colors.primary};
+      transform: translateY(-50%) scale(1.1);
+    }
   }
 `;
 
@@ -176,10 +183,23 @@ const UserInfo = styled.div`
 const Navbar = ({ showSearch = true }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [searchValue, setSearchValue] = useState('');
   
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+  
+  const handleSearch = () => {
+    if (searchValue.trim()) {
+      navigate('/candidate/jobs', { state: { searchKeyword: searchValue } });
+    }
+  };
+  
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
   
   return (
@@ -187,8 +207,14 @@ const Navbar = ({ showSearch = true }) => {
       <NavLeft>
         {showSearch && (
           <SearchBar>
-            <Search />
-            <input type="text" placeholder="Tìm việc, công ty..." />
+            <Search onClick={handleSearch} />
+            <input 
+              type="text" 
+              placeholder="Tìm việc, công ty..." 
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onKeyPress={handleKeyPress}
+            />
           </SearchBar>
         )}
       </NavLeft>

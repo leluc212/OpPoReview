@@ -66,7 +66,7 @@ const CloseButton = styled.button`
 `;
 
 const ModalBody = styled.div`
-  padding: 24px;
+  padding: ${props => props.$noPadding ? '0' : '24px'};
   overflow-y: auto;
   flex: 1;
 `;
@@ -79,7 +79,7 @@ const ModalFooter = styled.div`
   gap: 12px;
 `;
 
-const Modal = ({ isOpen, onClose, title, children, footer, size = 'medium' }) => {
+const Modal = ({ isOpen, onClose, title, children, footer, size = 'medium', noPadding = false }) => {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -97,14 +97,16 @@ const Modal = ({ isOpen, onClose, title, children, footer, size = 'medium' }) =>
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <ModalHeader>
-              <ModalTitle>{title}</ModalTitle>
-              <CloseButton onClick={onClose}>
-                <X />
-              </CloseButton>
-            </ModalHeader>
+            {title && (
+              <ModalHeader>
+                <ModalTitle>{title}</ModalTitle>
+                <CloseButton onClick={onClose}>
+                  <X />
+                </CloseButton>
+              </ModalHeader>
+            )}
             
-            <ModalBody>{children}</ModalBody>
+            <ModalBody $noPadding={noPadding}>{children}</ModalBody>
             
             {footer && <ModalFooter>{footer}</ModalFooter>}
           </ModalContainer>

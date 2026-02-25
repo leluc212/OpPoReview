@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -7,7 +7,7 @@ import {
   ChevronDown, Building2, Bookmark, Eye, ArrowUpRight, Filter,
   X, SlidersHorizontal, Grid, List, Sparkles, Zap, Award
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import StatusBadge from '../../components/StatusBadge';
 
 // Animations
@@ -719,6 +719,8 @@ const JobPosted = styled.div`
 
 const JobListing = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const resultsRef = useRef(null);
   const [savedJobs, setSavedJobs] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
@@ -732,6 +734,47 @@ const JobListing = () => {
     salary: true,
     company: true
   });
+
+  // Filter states
+  const [selectedJobTypes, setSelectedJobTypes] = useState([]);
+  const [selectedExperience, setSelectedExperience] = useState([]);
+  const [selectedSalaryRanges, setSelectedSalaryRanges] = useState([]);
+  const [selectedCompanies, setSelectedCompanies] = useState([]);
+
+  // Handle search from Navbar
+  useEffect(() => {
+    if (location.state?.searchKeyword) {
+      setSearchKeyword(location.state.searchKeyword);
+    }
+  }, [location.state]);
+
+  // Scroll to results function
+  const scrollToResults = () => {
+    if (resultsRef.current) {
+      resultsRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start'
+      });
+    }
+  };
+
+  // Auto scroll to results when searching
+  useEffect(() => {
+    if (searchKeyword || selectedLocation) {
+      const timer = setTimeout(() => {
+        scrollToResults();
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [searchKeyword, selectedLocation]);
+
+  // Auto scroll when filters change
+  useEffect(() => {
+    if (selectedJobTypes.length > 0 || selectedExperience.length > 0 || 
+        selectedSalaryRanges.length > 0 || selectedCompanies.length > 0) {
+      scrollToResults();
+    }
+  }, [selectedJobTypes, selectedExperience, selectedSalaryRanges, selectedCompanies]);
 
   const jobs = [
     // Standard Jobs
@@ -912,16 +955,154 @@ const JobListing = () => {
     }));
   };
 
-  // Filter by category first
+  // Toggle filter handlers
+  const toggleJobType = (type) => {
+    setSelectedJobTypes(prev => 
+      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+    );
+  };
+
+  const toggleExperience = (level) => {
+    setSelectedExperience(prev => 
+      prev.includes(level) ? prev.filter(l => l !== level) : [...prev, level]
+    );
+  };
+
+  const toggleSalaryRange = (range) => {
+    setSelectedSalaryRanges(prev => 
+      prev.includes(range) ? prev.filter(r => r !== range) : [...prev, range]
+    );
+  };
+
+  const toggleCompany = (company) => {
+    setSelectedCompanies(prev => 
+      prev.includes(company) ? prev.filter(c => c !== company) : [...prev, company]
+    );
+  };
+
+  const clearAllFilters = () => {
+    setSearchKeyword('');
+    setSelectedLocation('');
+    setSelectedJobTypes([]);
+    setSelectedExperience([]);
+    setSelectedSalaryRanges([]);
+    setSelectedCompanies([]);
+    setQuickFilter('all');
+  };
+
+  // Helper functions for filtering
+  const getSalaryValue = (salaryStr) => {
+    const match = salaryStr.match(/(\d+)/);
+    return match ? parseInt(match[0]) : 0;
+  };
+
+  const isInSalaryRange = (salary, range) => {
+    const value = getSalaryValue(salary);
+    
+    if (jobCategory === 'standard') {
+      switch(range) {
+        case '0-50': return value < 50;
+        case '50-100': return value >= 50 && value < 100;
+        case '100-150': return value >= 100 && value < 150;
+        case '150+': return value >= 150;
+        default: return true;
+      }
+    } else {
+      switch(range) {
+        case '0-150k': return value < 150;
+        case '150-200k': return value >= 150 && value < 200;
+        case '200-250k': return value >= 200 && value < 250;
+        case '250k+': return value >= 250;
+        default: return true;
+      }
+    }
+  };
+
+  const getExperienceLevel = (jobTitle) => {
+    const title = jobTitle.toLowerCase();
+    if (title.includes('intern') || title.includes('thực tập')) return 'intern';
+    if (title.includes('junior') || title.includes('fresher')) return 'junior';
+    if (title.includes('senior')) return 'senior';
+    return 'mid';
+  };
+
+  // Advanced filtering with useMemo for performance
+  const filteredJobs = useMemo(() => {
+    let result = jobs.filter(job => job.category === jobCategory);
+
+    // Search by keyword
+    if (searchKeyword.trim()) {
+      const keyword = searchKeyword.toLowerCase().trim();
+      result = result.filter(job => 
+        job.title.toLowerCase().includes(keyword) ||
+        job.company.toLowerCase().includes(keyword) ||
+        job.tags.some(tag => tag.toLowerCase().includes(keyword)) ||
+        job.location.toLowerCase().includes(keyword)
+      );
+    }
+
+    // Filter by location
+    if (selectedLocation.trim()) {
+      const location = selectedLocation.toLowerCase().trim();
+      result = result.filter(job => 
+        job.location.toLowerCase().includes(location)
+      );
+    }
+
+    // Filter by job type
+    if (selectedJobTypes.length > 0) {
+      result = result.filter(job => 
+        selectedJobTypes.some(type => job.type.toLowerCase().includes(type.toLowerCase()))
+      );
+    }
+
+    // Filter by experience (standard jobs only)
+    if (selectedExperience.length > 0 && jobCategory === 'standard') {
+      result = result.filter(job => 
+        selectedExperience.includes(getExperienceLevel(job.title))
+      );
+    }
+
+    // Filter by salary range
+    if (selectedSalaryRanges.length > 0) {
+      result = result.filter(job => 
+        selectedSalaryRanges.some(range => isInSalaryRange(job.salary, range))
+      );
+    }
+
+    // Filter by company
+    if (selectedCompanies.length > 0) {
+      result = result.filter(job => 
+        selectedCompanies.includes(job.company)
+      );
+    }
+
+    // Quick filters
+    if (quickFilter === 'urgent') result = result.filter(job => job.urgent);
+    if (quickFilter === 'featured') result = result.filter(job => job.featured);
+    if (quickFilter === 'saved') result = result.filter(job => savedJobs.includes(job.id));
+
+    // Sorting
+    result = [...result].sort((a, b) => {
+      switch(sortBy) {
+        case 'salary':
+          return getSalaryValue(b.salary) - getSalaryValue(a.salary);
+        case 'views':
+          return b.views - a.views;
+        case 'relevant':
+        case 'newest':
+        default:
+          return 0;
+      }
+    });
+
+    return result;
+  }, [jobs, jobCategory, searchKeyword, selectedLocation, selectedJobTypes, 
+      selectedExperience, selectedSalaryRanges, selectedCompanies, 
+      quickFilter, savedJobs, sortBy]);
+
   const categoryJobs = jobs.filter(job => job.category === jobCategory);
   const featuredJobs = categoryJobs.filter(job => job.featured);
-  
-  const filteredJobs = categoryJobs.filter(job => {
-    if (quickFilter === 'urgent') return job.urgent;
-    if (quickFilter === 'featured') return job.featured;
-    if (quickFilter === 'saved') return savedJobs.includes(job.id);
-    return true;
-  });
 
   return (
     <DashboardLayout role="candidate">
@@ -952,6 +1133,11 @@ const JobListing = () => {
                   placeholder="Tìm theo vị trí, công ty, kỹ năng..."
                   value={searchKeyword}
                   onChange={(e) => setSearchKeyword(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      scrollToResults();
+                    }
+                  }}
                 />
               </SearchInput>
               
@@ -962,12 +1148,18 @@ const JobListing = () => {
                   placeholder="Địa điểm"
                   value={selectedLocation}
                   onChange={(e) => setSelectedLocation(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      scrollToResults();
+                    }
+                  }}
                 />
               </SearchInput>
               
               <SearchButton
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={scrollToResults}
               >
                 <Search />
                 Tìm kiếm
@@ -983,6 +1175,7 @@ const JobListing = () => {
             onClick={() => {
               setJobCategory('standard');
               setQuickFilter('all');
+              setTimeout(() => scrollToResults(), 100);
             }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -999,6 +1192,7 @@ const JobListing = () => {
             onClick={() => {
               setJobCategory('shift');
               setQuickFilter('all');
+              setTimeout(() => scrollToResults(), 100);
             }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -1049,7 +1243,7 @@ const JobListing = () => {
                 <SlidersHorizontal />
                 Bộ lọc
               </h3>
-              <ClearButton onClick={() => {}}>Xóa</ClearButton>
+              <ClearButton onClick={clearAllFilters}>Xóa</ClearButton>
             </FilterHeader>
 
             <FilterSection>
@@ -1066,12 +1260,22 @@ const JobListing = () => {
                   {jobCategory === 'standard' ? (
                     <>
                       <FilterOption>
-                        <input type="checkbox" id="fulltime" />
+                        <input 
+                          type="checkbox" 
+                          id="fulltime" 
+                          checked={selectedJobTypes.includes('full-time')}
+                          onChange={() => toggleJobType('full-time')}
+                        />
                         <span>Toàn thời gian</span>
                         <small>24</small>
                       </FilterOption>
                       <FilterOption>
-                        <input type="checkbox" id="parttime" />
+                        <input 
+                          type="checkbox" 
+                          id="parttime" 
+                          checked={selectedJobTypes.includes('contract')}
+                          onChange={() => toggleJobType('contract')}
+                        />
                         <span>Bán thời gian</span>
                         <small>8</small>
                       </FilterOption>
@@ -1079,22 +1283,42 @@ const JobListing = () => {
                   ) : (
                     <>
                       <FilterOption>
-                        <input type="checkbox" id="morning" />
+                        <input 
+                          type="checkbox" 
+                          id="morning" 
+                          checked={selectedJobTypes.includes('sáng')}
+                          onChange={() => toggleJobType('sáng')}
+                        />
                         <span>Ca sáng (6h-14h)</span>
                         <small>8</small>
                       </FilterOption>
                       <FilterOption>
-                        <input type="checkbox" id="afternoon" />
+                        <input 
+                          type="checkbox" 
+                          id="afternoon" 
+                          checked={selectedJobTypes.includes('chiều')}
+                          onChange={() => toggleJobType('chiều')}
+                        />
                         <span>Ca chiều (14h-22h)</span>
                         <small>6</small>
                       </FilterOption>
                       <FilterOption>
-                        <input type="checkbox" id="night" />
+                        <input 
+                          type="checkbox" 
+                          id="night" 
+                          checked={selectedJobTypes.includes('đêm')}
+                          onChange={() => toggleJobType('đêm')}
+                        />
                         <span>Ca đêm (22h-6h)</span>
                         <small>5</small>
                       </FilterOption>
                       <FilterOption>
-                        <input type="checkbox" id="flexible" />
+                        <input 
+                          type="checkbox" 
+                          id="flexible" 
+                          checked={selectedJobTypes.includes('linh động')}
+                          onChange={() => toggleJobType('linh động')}
+                        />
                         <span>Ca linh động</span>
                         <small>4</small>
                       </FilterOption>
@@ -1117,22 +1341,42 @@ const JobListing = () => {
                     exit={{ height: 0 }}
                   >
                     <FilterOption>
-                      <input type="checkbox" id="intern" />
+                      <input 
+                        type="checkbox" 
+                        id="intern" 
+                        checked={selectedExperience.includes('intern')}
+                        onChange={() => toggleExperience('intern')}
+                      />
                       <span>Thực tập sinh</span>
                       <small>15</small>
                     </FilterOption>
                     <FilterOption>
-                      <input type="checkbox" id="junior" />
+                      <input 
+                        type="checkbox" 
+                        id="junior" 
+                        checked={selectedExperience.includes('junior')}
+                        onChange={() => toggleExperience('junior')}
+                      />
                       <span>Junior (0-2 năm)</span>
                       <small>28</small>
                     </FilterOption>
                     <FilterOption>
-                      <input type="checkbox" id="mid" />
+                      <input 
+                        type="checkbox" 
+                        id="mid" 
+                        checked={selectedExperience.includes('mid')}
+                        onChange={() => toggleExperience('mid')}
+                      />
                       <span>Middle (2-5 năm)</span>
                       <small>32</small>
                     </FilterOption>
                     <FilterOption>
-                      <input type="checkbox" id="senior" />
+                      <input 
+                        type="checkbox" 
+                        id="senior" 
+                        checked={selectedExperience.includes('senior')}
+                        onChange={() => toggleExperience('senior')}
+                      />
                       <span>Senior (5+ năm)</span>
                       <small>18</small>
                     </FilterOption>
@@ -1155,22 +1399,42 @@ const JobListing = () => {
                   {jobCategory === 'standard' ? (
                     <>
                       <FilterOption>
-                        <input type="checkbox" id="0-50" />
+                        <input 
+                          type="checkbox" 
+                          id="0-50" 
+                          checked={selectedSalaryRanges.includes('0-50')}
+                          onChange={() => toggleSalaryRange('0-50')}
+                        />
                         <span>Dưới 50 triệu</span>
                         <small>12</small>
                       </FilterOption>
                       <FilterOption>
-                        <input type="checkbox" id="50-100" />
+                        <input 
+                          type="checkbox" 
+                          id="50-100" 
+                          checked={selectedSalaryRanges.includes('50-100')}
+                          onChange={() => toggleSalaryRange('50-100')}
+                        />
                         <span>50 - 100 triệu</span>
                         <small>25</small>
                       </FilterOption>
                       <FilterOption>
-                        <input type="checkbox" id="100-150" />
+                        <input 
+                          type="checkbox" 
+                          id="100-150" 
+                          checked={selectedSalaryRanges.includes('100-150')}
+                          onChange={() => toggleSalaryRange('100-150')}
+                        />
                         <span>100 - 150 triệu</span>
                         <small>18</small>
                       </FilterOption>
                       <FilterOption>
-                        <input type="checkbox" id="150+" />
+                        <input 
+                          type="checkbox" 
+                          id="150+" 
+                          checked={selectedSalaryRanges.includes('150+')}
+                          onChange={() => toggleSalaryRange('150+')}
+                        />
                         <span>Trên 150 triệu</span>
                         <small>8</small>
                       </FilterOption>
@@ -1178,22 +1442,42 @@ const JobListing = () => {
                   ) : (
                     <>
                       <FilterOption>
-                        <input type="checkbox" id="0-150k" />
+                        <input 
+                          type="checkbox" 
+                          id="0-150k" 
+                          checked={selectedSalaryRanges.includes('0-150k')}
+                          onChange={() => toggleSalaryRange('0-150k')}
+                        />
                         <span>Dưới 150k/ca</span>
                         <small>5</small>
                       </FilterOption>
                       <FilterOption>
-                        <input type="checkbox" id="150-200k" />
+                        <input 
+                          type="checkbox" 
+                          id="150-200k" 
+                          checked={selectedSalaryRanges.includes('150-200k')}
+                          onChange={() => toggleSalaryRange('150-200k')}
+                        />
                         <span>150k - 200k/ca</span>
                         <small>8</small>
                       </FilterOption>
                       <FilterOption>
-                        <input type="checkbox" id="200-250k" />
+                        <input 
+                          type="checkbox" 
+                          id="200-250k" 
+                          checked={selectedSalaryRanges.includes('200-250k')}
+                          onChange={() => toggleSalaryRange('200-250k')}
+                        />
                         <span>200k - 250k/ca</span>
                         <small>6</small>
                       </FilterOption>
                       <FilterOption>
-                        <input type="checkbox" id="250k+" />
+                        <input 
+                          type="checkbox" 
+                          id="250k+" 
+                          checked={selectedSalaryRanges.includes('250k+')}
+                          onChange={() => toggleSalaryRange('250k+')}
+                        />
                         <span>Trên 250k/ca</span>
                         <small>4</small>
                       </FilterOption>
@@ -1205,7 +1489,7 @@ const JobListing = () => {
           </FilterSidebar>
 
           {/* Jobs List */}
-          <MainContent>
+          <MainContent ref={resultsRef}>
             <ContentHeader>
               <ResultsInfo>
                 <h2>
@@ -1239,16 +1523,33 @@ const JobListing = () => {
             </ContentHeader>
 
             <JobsGrid>
-              {filteredJobs.map((job, index) => (
-                <JobCardComponent 
-                  key={job.id} 
-                  job={job} 
-                  saved={savedJobs.includes(job.id)}
-                  onSave={handleSaveJob}
-                  onClick={handleJobClick}
-                  delay={index * 0.05}
-                />
-              ))}
+              {filteredJobs.length > 0 ? (
+                filteredJobs.map((job, index) => (
+                  <JobCardComponent 
+                    key={job.id} 
+                    job={job} 
+                    saved={savedJobs.includes(job.id)}
+                    onSave={handleSaveJob}
+                    onClick={handleJobClick}
+                    delay={index * 0.05}
+                  />
+                ))
+              ) : (
+                <div style={{ 
+                  textAlign: 'center', 
+                  padding: '80px 20px', 
+                  gridColumn: '1 / -1',
+                  color: '#6b7280'
+                }}>
+                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
+                  <p style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
+                    Không tìm thấy công việc phù hợp
+                  </p>
+                  <p style={{ fontSize: '15px', color: '#6b7280' }}>
+                    Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn
+                  </p>
+                </div>
+              )}
             </JobsGrid>
           </MainContent>
         </MainLayout>
