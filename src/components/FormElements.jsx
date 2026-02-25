@@ -2,11 +2,11 @@ import styled from 'styled-components';
 
 export const Button = styled.button`
   padding: ${props => {
-    if (props.$size === 'small') return '8px 16px';
-    if (props.$size === 'large') return '16px 32px';
-    return '12px 24px';
+    if (props.$size === 'small') return '6px 12px';
+    if (props.$size === 'large') return '12px 24px';
+    return '10px 20px';
   }};
-  font-size: ${props => props.$size === 'small' ? '14px' : '16px'};
+  font-size: ${props => props.$size === 'small' ? '13px' : '15px'};
   font-weight: 500;
   border-radius: ${props => props.theme.borderRadius.md};
   transition: all ${props => props.theme.transitions.normal};
@@ -93,8 +93,8 @@ export const Button = styled.button`
 `;
 
 export const Input = styled.input`
-  padding: 12px 16px;
-  font-size: 16px;
+  padding: 10px 14px;
+  font-size: 15px;
   border: 1px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.md};
   background: ${props => props.theme.colors.bgLight};
@@ -162,20 +162,20 @@ export const Select = styled.select`
 `;
 
 export const Label = styled.label`
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: ${props => props.theme.colors.text};
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   display: block;
 `;
 
 export const FormGroup = styled.div`
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 `;
 
 export const ErrorText = styled.span`
-  font-size: 14px;
+  font-size: 12px;
   color: ${props => props.theme.colors.error};
-  margin-top: 4px;
+  margin-top: 3px;
   display: block;
 `;

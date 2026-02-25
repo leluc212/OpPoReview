@@ -1,16 +1,25 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
-import { Input, Label, Button } from '../../components/FormElements';
-import { Moon, Sun, Lock, Bell, FileText, Palette, Globe, Trash2, Shield } from 'lucide-react';
+import { Input, Label, Button, FormGroup } from '../../components/FormElements';
+import { 
+  Settings as SettingsIcon,
+  Lock, 
+  Bell, 
+  FileText, 
+  Palette, 
+  Globe, 
+  Trash2, 
+  Shield,
+  AlertTriangle,
+  ChevronRight,
+  Check
+} from 'lucide-react';
 
-const PageContainer = styled.div`
-  animation: fadeIn 0.5s ease-in;
-  
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+const SettingsContainer = styled.div`
+  max-width: 1400px;
+  margin: 0 auto;
 `;
 
 const PageHeader = styled.div`
@@ -26,6 +35,15 @@ const PageHeader = styled.div`
   p {
     color: ${props => props.theme.colors.textLight};
     font-size: 16px;
+  }
+`;
+
+const PageContainer = styled.div`
+  animation: fadeIn 0.5s ease-in;
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 `;
 
@@ -85,24 +103,118 @@ const SettingHeader = styled.div`
   }
 `;
 
-const ToggleSwitch = styled.label`
+const ContentGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 32px;
+  
+  @media (max-width: 1200px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const MainContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+`;
+
+const Sidebar = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+`;
+
+const Card = styled(motion.div)`
+  background: ${props => props.theme.colors.bgLight};
+  border-radius: ${props => props.theme.borderRadius.xl};
+  padding: 32px;
+  border: 2px solid ${props => props.theme.colors.border};
+  box-shadow: ${props => props.theme.shadows.sm};
+  
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: ${props => props.theme.colors.text};
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    svg {
+      width: 24px;
+      height: 24px;
+      color: ${props => props.theme.colors.primary};
+    }
+  }
+`;
+
+const SettingItem = styled(motion.div)`
+  background: ${props => props.theme.colors.bgDark};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  padding: 20px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  cursor: ${props => props.clickable ? 'pointer' : 'default'};
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  &:hover {
+    border-color: ${props => props.theme.colors.border};
+    transform: translateX(4px);
+  }
+  
+  .icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: ${props => props.theme.borderRadius.lg};
+    background: ${props => props.$color ? `linear-gradient(135deg, ${props.$color}15, ${props.$color}25)` : props.theme.colors.gradientPrimary};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    
+    svg {
+      width: 24px;
+      height: 24px;
+      color: ${props => props.$color || props.theme.colors.primary};
+    }
+  }
+  
+  .setting-content {
+    flex: 1;
+    
+    h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: ${props => props.theme.colors.text};
+      margin-bottom: 4px;
+    }
+    
+    p {
+      font-size: 14px;
+      color: ${props => props.theme.colors.textLight};
+    }
+  }
+`;
+
+const Toggle = styled.label`
   position: relative;
   display: inline-block;
-  width: 56px;
-  height: 30px;
+  width: 52px;
+  height: 28px;
+  flex-shrink: 0;
   
   input {
     opacity: 0;
     width: 0;
     height: 0;
-    
-    &:checked + span {
-      background: ${props => props.theme.colors.primary};
-    }
-    
-    &:checked + span:before {
-      transform: translateX(26px);
-    }
   }
   
   span {
@@ -112,36 +224,49 @@ const ToggleSwitch = styled.label`
     left: 0;
     right: 0;
     bottom: 0;
-    background: #ccc;
-    transition: 0.3s;
-    border-radius: 30px;
+    background-color: ${props => props.theme.colors.gray200};
+    transition: all 0.3s ease;
+    border-radius: 28px;
     
     &:before {
       position: absolute;
       content: "";
       height: 22px;
       width: 22px;
-      left: 4px;
-      bottom: 4px;
-      background: white;
-      transition: 0.3s;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: all 0.3s ease;
       border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
   }
+  
+  input:checked + span {
+    background: linear-gradient(135deg, #10B981, #059669);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+  }
+  
+  input:checked + span:before {
+    transform: translateX(24px);
+  }
 `;
+
+const ToggleSwitch = Toggle;
 
 const LanguageOptions = styled.div`
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
 `;
 
-const LanguageButton = styled.button`
-  padding: 8px 20px;
-  border-radius: ${props => props.theme.borderRadius.md};
+const LanguageButton = styled(motion.button)`
+  padding: 14px 24px;
+  border-radius: ${props => props.theme.borderRadius.lg};
   border: 2px solid ${props => props.$active ? props.theme.colors.primary : props.theme.colors.border};
-  background: ${props => props.$active ? props.theme.colors.primary : 'white'};
-  color: ${props => props.$active ? 'white' : props.theme.colors.text};
-  font-weight: 500;
+  background: ${props => props.$active ? props.theme.colors.primaryLight : 'white'};
+  color: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.text};
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
@@ -151,8 +276,8 @@ const LanguageButton = styled.button`
   
   &:hover {
     border-color: ${props => props.theme.colors.primary};
+    background: ${props => props.theme.colors.primaryLight};
     transform: translateY(-2px);
-    background: ${props => props.$active ? props.theme.colors.primaryDark : props.theme.colors.bgDark};
   }
 `;
 
@@ -183,10 +308,6 @@ const SettingRow = styled.div`
     font-size: 13px;
     line-height: 1.5;
   }
-`;
-
-const FormGroup = styled.div`
-  margin-bottom: 20px;
 `;
 
 const Select = styled.select`

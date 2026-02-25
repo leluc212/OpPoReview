@@ -52,7 +52,7 @@ const LoginLeft = styled(motion.div)`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 80px;
+  padding: 40px;
   color: white;
   position: relative;
   z-index: 1;
@@ -67,7 +67,7 @@ const LoginRight = styled(motion.div)`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 60px 40px;
+  padding: 30px 20px;
   position: relative;
   z-index: 1;
   
@@ -78,37 +78,37 @@ const LoginRight = styled(motion.div)`
 `;
 
 const HeroContent = styled.div`
-  max-width: 550px;
+  max-width: 500px;
   
   h1 {
-    font-size: 52px;
+    font-size: 38px;
     font-weight: 800;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
     line-height: 1.2;
     letter-spacing: -1px;
   }
   
   p {
-    font-size: 18px;
+    font-size: 16px;
     opacity: 0.95;
-    line-height: 1.7;
-    margin-bottom: 32px;
+    line-height: 1.6;
+    margin-bottom: 20px;
   }
   
   .features {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     
     .feature-item {
       display: flex;
       align-items: center;
-      gap: 12px;
-      font-size: 16px;
+      gap: 10px;
+      font-size: 15px;
       
       svg {
-        width: 24px;
-        height: 24px;
+        width: 20px;
+        height: 20px;
         color: #10B981;
         flex-shrink: 0;
       }
@@ -120,28 +120,28 @@ const LoginForm = styled.div`
   width: 100%;
   max-width: 480px;
   background: white;
-  border-radius: 24px;
-  padding: 48px;
+  border-radius: 20px;
+  padding: 32px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 `;
 
 const FormHeader = styled.div`
-  margin-bottom: 32px;
+  margin-bottom: 20px;
   text-align: center;
   
   .logo-section {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    margin-bottom: 24px;
+    gap: 10px;
+    margin-bottom: 16px;
     
     img {
-      height: 40px;
+      height: 32px;
     }
     
     .logo-text {
-      font-size: 32px;
+      font-size: 26px;
       font-weight: 800;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       -webkit-background-clip: text;
@@ -151,15 +151,15 @@ const FormHeader = styled.div`
   }
   
   h2 {
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     color: ${props => props.theme.colors.text};
   }
   
   p {
     color: ${props => props.theme.colors.textLight};
-    font-size: 14px;
+    font-size: 13px;
     
     a {
       color: ${props => props.theme.colors.primary};
@@ -175,23 +175,23 @@ const FormHeader = styled.div`
 const SocialButtons = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 10px;
+  margin-bottom: 16px;
 `;
 
 const SocialButton = styled(motion.button)`
-  padding: 14px 20px;
-  border-radius: 12px;
+  padding: 10px 16px;
+  border-radius: 10px;
   border: 1px solid ${props => props.theme.colors.border};
   background: white;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.3s;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   color: ${props => props.theme.colors.text};
   
   &:hover {
@@ -215,10 +215,10 @@ const SocialButton = styled(motion.button)`
 const Divider = styled.div`
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin: 24px 0;
+  gap: 12px;
+  margin: 16px 0;
   color: ${props => props.theme.colors.textLight};
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   
   &::before,
@@ -233,21 +233,21 @@ const Divider = styled.div`
 const RoleSelector = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 24px;
-  padding: 6px;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 5px;
   background: ${props => props.theme.colors.bgDark};
-  border-radius: 12px;
+  border-radius: 10px;
 `;
 
 const RoleButton = styled(motion.button)`
-  padding: 10px;
-  border-radius: 8px;
+  padding: 8px;
+  border-radius: 7px;
   border: none;
   background: ${props => props.$selected ? 'white' : 'transparent'};
   color: ${props => props.$selected ? props.theme.colors.primary : props.theme.colors.textLight};
   font-weight: 600;
-  font-size: 13px;
+  font-size: 12px;
   transition: all 0.3s;
   cursor: pointer;
   box-shadow: ${props => props.$selected ? '0 2px 8px rgba(0, 0, 0, 0.1)' : 'none'};
@@ -316,8 +316,8 @@ const SubmitButton = styled(Button)`
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-top: 24px;
-  margin-bottom: 16px;
+  margin-top: 16px;
+  margin-bottom: 0;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   
   &:hover {
@@ -428,11 +428,11 @@ const LoginPage = () => {
             </div>
             <div className="feature-item">
               <CheckCircle />
-              <span>Tìm kiếm ứng viên chất lượng cao</span>
+              <span>Tìm kiếm công việc phù hợp với bạn</span>
             </div>
             <div className="feature-item">
               <CheckCircle />
-              <span>Quản lý hồ sơ dễ dàng và nhanh chóng</span>
+              <span>Tự động tạo CV và ứng tuyển nhanh chóng</span>
             </div>
           </div>
         </HeroContent>
