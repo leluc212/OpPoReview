@@ -1,8 +1,7 @@
-import React, { useRef, useEffect, useLayoutEffect, useState } from 'react';
+import React, { useRef, useEffect, useLayoutEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLanguage } from '../context/LanguageContext';
-import { useAuth } from '../context/AuthContext';
 import { 
   LayoutDashboard, 
   Briefcase, 
@@ -46,7 +45,7 @@ const SidebarContainer = styled.aside`
 `;
 
 const Logo = styled.div`
-  padding: 20px 0;
+  padding: 28px 0;
   border-bottom: 1px solid ${props => props.theme.colors.border};
   display: flex;
   flex-direction: column;
@@ -55,7 +54,7 @@ const Logo = styled.div`
   gap: 8px;
   background: linear-gradient(135deg, ${props => props.theme.colors.primary}05 0%, transparent 100%);
   position: relative;
-  min-height: 140px;
+  min-height: 88px;
   
   &::after {
     content: '';
@@ -73,88 +72,41 @@ const Logo = styled.div`
   ${SidebarContainer}:hover &::after {
     width: 120px;
   }
+  
+  img {
+    height: 36px;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 2px 8px ${props => props.theme.colors.primary}20);
+  }
+  
+  ${SidebarContainer}:hover & img {
+    height: 40px;
+  }
 `;
 
 const LogoText = styled.h1`
-  font-size: 20px;
-  font-weight: 800;
-  color: ${props => props.theme.colors.primary};
-  letter-spacing: -0.5px;
-  white-space: nowrap;
-  opacity: 0;
-  max-height: 0;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  transform: translateY(-10px);
-  margin-bottom: 8px;
-  
-  ${SidebarContainer}:hover & {
-    opacity: 1;
-    max-height: 32px;
-    transform: translateY(0);
-  }
-`;
-
-const UserAvatar = styled.div`
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, ${props => props.theme.colors.primary}, ${props => props.theme.colors.secondary});
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
+  font-size: 22px;
   font-weight: 700;
-  font-size: 18px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px ${props => props.theme.colors.primary}30;
-  transition: all 0.3s ease;
-  
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  ${SidebarContainer}:hover & {
-    width: 56px;
-    height: 56px;
-    font-size: 20px;
-  }
-`;
-
-const UserName = styled.p`
-  font-size: 13px;
-  font-weight: 600;
-  color: ${props => props.theme.colors.text};
+  font-family: 'Be Vietnam Pro', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: ${props => props.theme.colors.primary};
+  letter-spacing: -0.2px;
+  line-height: 1.4;
   white-space: nowrap;
   opacity: 0;
   max-height: 0;
-  overflow: hidden;
+  overflow: visible;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateY(-10px);
+  font-feature-settings: "kern" 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding-top: 2px;
   
   ${SidebarContainer}:hover & {
     opacity: 1;
-    max-height: 24px;
-    transform: translateY(0);
-  }
-`;
-
-const UserRole = styled.p`
-  font-size: 11px;
-  font-weight: 500;
-  color: ${props => props.theme.colors.textLight};
-  white-space: nowrap;
-  opacity: 0;
-  max-height: 0;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  transform: translateY(-10px);
-  
-  ${SidebarContainer}:hover & {
-    opacity: 1;
-    max-height: 20px;
+    max-height: 45px;
     transform: translateY(0);
   }
 `;
@@ -343,51 +295,10 @@ const NavLink = styled.div`
 
 const Sidebar = ({ role }) => {
   const { t } = useLanguage();
-  const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const navRef = useRef(null);
   const isNavigatingRef = useRef(false);
-  
-  const [profileImage, setProfileImage] = useState(() => {
-    if (role === 'candidate') return localStorage.getItem('profileImage');
-    if (role === 'employer') return localStorage.getItem('companyLogo');
-    if (role === 'admin') return localStorage.getItem('adminProfileImage');
-    return null;
-  });
-  
-  useEffect(() => {
-    const handleStorageChange = () => {
-      if (role === 'candidate') setProfileImage(localStorage.getItem('profileImage'));
-      if (role === 'employer') setProfileImage(localStorage.getItem('companyLogo'));
-      if (role === 'admin') setProfileImage(localStorage.getItem('adminProfileImage'));
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    const interval = setInterval(handleStorageChange, 1000);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
-    };
-  }, [role]);
-  
-  const getRoleLabel = () => {
-    if (role === 'candidate') return t.login.roleCandidate || 'Candidate';
-    if (role === 'employer') return t.login.roleEmployer || 'Employer';
-    if (role === 'admin') return t.login.roleAdmin || 'Admin';
-    return role;
-  };
-  
-  const getInitials = () => {
-    if (user?.name) {
-      return user.name.charAt(0).toUpperCase();
-    }
-    if (role === 'candidate') return 'C';
-    if (role === 'employer') return 'E';
-    if (role === 'admin') return 'A';
-    return 'U';
-  };
   
   // Save scroll position to sessionStorage whenever it changes
   useEffect(() => {
@@ -513,16 +424,8 @@ const Sidebar = ({ role }) => {
   return (
     <SidebarContainer>
       <Logo>
+        <img src="/images/logo.png" alt="Ốp Pờ" style={{ height: '60px' }} />
         <LogoText>Ốp Pờ</LogoText>
-        <UserAvatar>
-          {profileImage ? (
-            <img src={profileImage} alt="Profile" />
-          ) : (
-            getInitials()
-          )}
-        </UserAvatar>
-        <UserName>{user?.name || getRoleLabel()}</UserName>
-        <UserRole>{getRoleLabel()}</UserRole>
       </Logo>
       
       <Nav ref={navRef}>

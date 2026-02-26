@@ -573,7 +573,7 @@ const CandidateDashboard = () => {
       type: 'view',
       icon: Eye,
       color: '#0E3995',
-      title: '12 nhà tuyển dụng đã xem hồ sơ của bạn',
+      title: '12 nhà tuyển dụng đã xem CV của bạn',
       time: 'Hôm nay'
     },
     {
@@ -587,7 +587,7 @@ const CandidateDashboard = () => {
       type: 'message',
       icon: Bell,
       color: '#F59E0B',
-      title: 'Bạn có 3 tin nhắn mới từ nhà tuyển dụng',
+      title: 'Bạn có 3 phản hồi CV mới từ nhà tuyển dụng',
       time: '2 giờ trước'
     },
     {
@@ -619,8 +619,8 @@ const CandidateDashboard = () => {
           transition={{ duration: 0.5 }}
         >
           <WelcomeContent>
-            <h1>{getGreeting()}, {user?.name || (language === 'vi' ? 'Ứng Viên' : 'Candidate')}! 👋</h1>
-            <p>{language === 'vi' ? 'Bạn có 12 nhà tuyển dụng đã xem hồ sơ và 5 công việc mới phù hợp' : 'You have 12 employer views and 5 new matching jobs'}</p>
+            <h1>{getGreeting()}, Ứng Viên! 👋</h1>
+            <p>Bạn có 12 nhà tuyển dụng đã xem hồ sơ và 5 công việc mới phù hợp</p>
             <QuickActions>
               <ActionButton
                 as={motion.a}
