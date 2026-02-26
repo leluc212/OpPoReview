@@ -176,28 +176,28 @@ const AdminSupport = () => {
   const faqs = [
     {
       id: 1,
-      question: 'Làm sao để quản lý quyền truy cập của admin?',
-      answer: 'Bạn có thể quản lý quyền truy cập trong phần Cài Đặt > Phân Quyền. Tại đây, bạn có thể tạo các vai trò khác nhau và gán quyền cụ thể cho từng vai trò.'
+      question: language === 'vi' ? 'Làm sao để quản lý quyền truy cập của admin?' : 'How to manage admin access permissions?',
+      answer: language === 'vi' ? 'Bạn có thể quản lý quyền truy cập trong phần Cài Đặt > Phân Quyền. Tại đây, bạn có thể tạo các vai trò khác nhau và gán quyền cụ thể cho từng vai trò.' : 'You can manage access permissions in Settings > Permissions. Here you can create different roles and assign specific permissions to each role.'
     },
     {
       id: 2,
-      question: 'Cách xử lý khi phát hiện tài khoản vi phạm?',
-      answer: 'Khi phát hiện tài khoản vi phạm, bạn có thể: 1) Cảnh cáo người dùng, 2) Tạm khóa tài khoản, 3) Khóa vĩnh viễn. Nên lưu lại bằng chứng vi phạm trước khi thực hiện các hành động này.'
+      question: language === 'vi' ? 'Cách xử lý khi phát hiện tài khoản vi phạm?' : 'How to handle accounts that violate policies?',
+      answer: language === 'vi' ? 'Khi phát hiện tài khoản vi phạm, bạn có thể: 1) Cảnh cáo người dùng, 2) Tạm khóa tài khoản, 3) Khóa vĩnh viễn. Nên lưu lại bằng chứng vi phạm trước khi thực hiện các hành động này.' : 'When detecting a violation, you can: 1) Warn the user, 2) Temporarily suspend account, 3) Permanently ban. Save evidence of violations before taking these actions.'
     },
     {
       id: 3,
-      question: 'Làm thế nào để xuất báo cáo dữ liệu?',
-      answer: 'Vào phần Báo Cáo > Chọn loại báo cáo cần xuất > Chọn khoảng thời gian > Nhấn nút "Xuất báo cáo". Hệ thống hỗ trợ xuất dưới dạng Excel, PDF, và CSV.'
+      question: language === 'vi' ? 'Làm thế nào để xuất báo cáo dữ liệu?' : 'How to export data reports?',
+      answer: language === 'vi' ? 'Vào phần Báo Cáo > Chọn loại báo cáo cần xuất > Chọn khoảng thời gian > Nhấn nút "Xuất báo cáo". Hệ thống hỗ trợ xuất dưới dạng Excel, PDF, và CSV.' : 'Go to Reports > Select report type > Choose time period > Click "Export report". The system supports Excel, PDF, and CSV formats.'
     },
     {
       id: 4,
-      question: 'Quy trình phê duyệt nhà tuyển dụng mới?',
-      answer: 'Quy trình gồm 3 bước: 1) Kiểm tra thông tin công ty, 2) Xác minh giấy tờ pháp lý, 3) Phê duyệt hoặc từ chối. Mỗi bước đều cần ghi chú lý do rõ ràng.'
+      question: language === 'vi' ? 'Quy trình phê duyệt nhà tuyển dụng mới?' : 'What is the new employer approval process?',
+      answer: language === 'vi' ? 'Quy trình gồm 3 bước: 1) Kiểm tra thông tin công ty, 2) Xác minh giấy tờ pháp lý, 3) Phê duyệt hoặc từ chối. Mỗi bước đều cần ghi chú lý do rõ ràng.' : 'The process has 3 steps: 1) Verify company information, 2) Validate legal documents, 3) Approve or reject. Each step requires clear notes.'
     },
     {
       id: 5,
-      question: 'Cách xử lý sự cố kỹ thuật nghiêm trọng?',
-      answer: 'Trong trường hợp khẩn cấp, vui lòng liên hệ ngay với bộ phận kỹ thuật qua hotline: 0909 123 456 hoặc email: tech-support@oppo.vn. Mô tả chi tiết sự cố và các bước đã thực hiện.'
+      question: language === 'vi' ? 'Cách xử lý sự cố kỹ thuật nghiêm trọng?' : 'How to handle critical technical issues?',
+      answer: language === 'vi' ? 'Trong trường hợp khẩn cấp, vui lòng liên hệ ngay với bộ phận kỹ thuật qua hotline: 0909 123 456 hoặc email: tech-support@oppo.vn. Mô tả chi tiết sự cố và các bước đã thực hiện.' : 'In emergencies, please contact technical support immediately via hotline: 0909 123 456 or email: tech-support@oppo.vn. Describe the issue and steps taken in detail.'
     }
   ];
 

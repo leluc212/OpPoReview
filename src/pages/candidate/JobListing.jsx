@@ -5,7 +5,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 import { 
   Search, MapPin, Briefcase, DollarSign, Clock, Star, TrendingUp, 
   ChevronDown, Building2, Bookmark, Eye, ArrowUpRight, Filter,
-  X, SlidersHorizontal, Grid, List, Sparkles, Zap, Award, Navigation, Target
+  X, SlidersHorizontal, Grid, List, Sparkles, Zap, Navigation, Target
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import StatusBadge from '../../components/StatusBadge';
@@ -446,34 +446,6 @@ const ViewButton = styled.button`
   }
 `;
 
-// Featured Jobs Section
-const FeaturedSection = styled(motion.div)`
-  background: linear-gradient(135deg, ${props => props.theme.colors.primary}05 0%, ${props => props.theme.colors.secondary}05 100%);
-  border-radius: ${props => props.theme.borderRadius.xl};
-  padding: 16px;
-  margin-bottom: 20px;
-  border: 1px solid ${props => props.theme.colors.primary}20;
-`;
-
-const FeaturedHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 14px;
-  
-  svg {
-    width: 18px;
-    height: 18px;
-    color: ${props => props.theme.colors.warning};
-  }
-  
-  h3 {
-    font-size: 15px;
-    font-weight: 700;
-    color: ${props => props.theme.colors.text};
-  }
-`;
-
 // Job Cards
 const JobsGrid = styled.div`
   display: grid;
@@ -750,7 +722,144 @@ const translateLocation = (locationStr, language) => {
     .replace(/Hà Nội/g, 'Hanoi')
     .replace(/Đà Nẵng/g, 'Da Nang')
     .replace(/Tân Bình/g, 'Tan Binh')
-    .replace(/Phú Nhuận/g, 'Phu Nhuan');
+    .replace(/Phú Nhuận/g, 'Phu Nhuan')
+    .replace(/Bình Thạnh/g, 'Binh Thanh')
+    .replace(/Toàn/g, 'All');
+};
+
+// Translate time indicators
+const translateTimePosted = (timeStr, language) => {
+  if (language === 'vi') return timeStr;
+  return timeStr
+    .replace(/(\d+)\s*ngày trước/g, '$1 days ago')
+    .replace(/(\d+)\s*giờ trước/g, '$1 hours ago')
+    .replace(/1\s*days ago/g, '1 day ago')
+    .replace(/1\s*hours ago/g, '1 hour ago');
+};
+
+// Parse time posted to hours for sorting (newer = smaller number)
+const parseTimeToHours = (timeStr) => {
+  // Extract number from string
+  const match = timeStr.match(/(\d+)/);
+  if (!match) return 999999; // Unknown time goes to end
+  
+  const num = parseInt(match[1]);
+  
+  // Convert to hours
+  if (timeStr.includes('giờ') || timeStr.includes('hour')) {
+    return num;
+  } else if (timeStr.includes('ngày') || timeStr.includes('day')) {
+    return num * 24;
+  } else if (timeStr.includes('tuần') || timeStr.includes('week')) {
+    return num * 24 * 7;
+  } else if (timeStr.includes('tháng') || timeStr.includes('month')) {
+    return num * 24 * 30;
+  }
+  
+  return 999999; // Unknown format goes to end
+};
+
+// Translate job titles
+const translateJobTitle = (titleStr, language) => {
+  if (language === 'vi') return titleStr;
+  
+  const titleMap = {
+    'Nhân viên Kế toán Tổng hợp': 'General Accountant',
+    'Nhân viên Kinh doanh B2B': 'B2B Sales Executive',
+    'Nhân viên Marketing Online': 'Online Marketing Staff',
+    'Nhân viên Hành chính Nhân sự': 'HR & Admin Staff',
+    'Nhân viên pha chế - Part-time': 'Barista - Part-time',
+    'Thu ngân - Part-time': 'Cashier - Part-time',
+    'Nhân viên phục vụ - Part-time': 'Service Staff - Part-time',
+    'Pha chế trà sữa - Part-time': 'Bubble Tea Barista - Part-time',
+    'Nhân viên Telesales': 'Telesales Staff',
+    'Nhân viên Văn phòng': 'Office Staff',
+    'Giáo viên Tiếng Anh': 'English Teacher',
+    'Lễ tân - Receptionist': 'Receptionist',
+    'Ca Đêm - Nhân viên bảo vệ': 'Night Shift - Security Guard',
+    'Ca Sáng - Nhân viên kho': 'Morning Shift - Warehouse Staff',
+    'Ca Chiều - Nhân viên phục vụ': 'Afternoon Shift - Service Staff',
+    'Shift Supervisor - Ca đêm': 'Shift Supervisor - Night Shift',
+    'Ca Linh Động - Nhân viên giao hàng': 'Flexible Shift - Delivery Staff',
+    'Ca Sáng - Nhân viên bán hàng': 'Morning Shift - Sales Staff',
+    'Ca Chiều - Nhân viên pha chế': 'Afternoon Shift - Barista',
+    'Ca Tối - Thu ngân siêu thị': 'Evening Shift - Supermarket Cashier',
+    'Ca Sáng - Phục vụ nhà hàng': 'Morning Shift - Restaurant Server',
+    'Ca Linh Động - Nhân viên kho': 'Flexible Shift - Warehouse Staff'
+  };
+  
+  return titleMap[titleStr] || titleStr;
+};
+
+// Translate tags
+const translateTag = (tagStr, language) => {
+  if (language === 'vi') return tagStr;
+  
+  const tagMap = {
+    'Kế toán': 'Accounting',
+    'Excel': 'Excel',
+    'MISA': 'MISA',
+    'Kinh doanh': 'Sales',
+    'B2B': 'B2B',
+    'Hoa hồng cao': 'High Commission',
+    'Marketing': 'Marketing',
+    'Facebook Ads': 'Facebook Ads',
+    'SEO': 'SEO',
+    'Nhân sự': 'HR',
+    'Hành chính': 'Admin',
+    'Office': 'Office',
+    'Pha chế': 'Bartending',
+    'Part-time': 'Part-time',
+    'F&B': 'F&B',
+    'Thu ngân': 'Cashier',
+    'Bán lẻ': 'Retail',
+    'Phục vụ': 'Service',
+    'Coffee': 'Coffee',
+    'Trà sữa': 'Bubble Tea',
+    'Telesales': 'Telesales',
+    'Gọi điện': 'Cold Calling',
+    'Hoa hồng': 'Commission',
+    'Văn phòng': 'Office Work',
+    'Word/Excel': 'Word/Excel',
+    'Giao tiếp': 'Communication',
+    'Giáo viên': 'Teacher',
+    'Tiếng Anh': 'English',
+    'IELTS': 'IELTS',
+    'Lễ tân': 'Receptionist',
+    'Khách sạn': 'Hotel',
+    'Ca đêm': 'Night Shift',
+    'Bảo vệ': 'Security',
+    'An ninh': 'Security',
+    'Ca sáng': 'Morning Shift',
+    'Kho vận': 'Warehouse',
+    'Logistics': 'Logistics',
+    'Ca chiều': 'Afternoon Shift',
+    'Quản lý': 'Management',
+    'Linh động': 'Flexible',
+    'Giao hàng': 'Delivery',
+    'Xe máy': 'Motorbike',
+    'Bán hàng': 'Sales',
+    'Cửa hàng': 'Store',
+    'Nhà hàng': 'Restaurant',
+    'Ca tối': 'Evening Shift',
+    'Siêu thị': 'Supermarket'
+  };
+  
+  return tagMap[tagStr] || tagStr;
+};
+
+// Translate job type
+const translateJobType = (typeStr, language) => {
+  if (language === 'vi') return typeStr;
+  
+  return typeStr
+    .replace(/Ca đêm/g, 'Night Shift')
+    .replace(/Ca sáng/g, 'Morning Shift')
+    .replace(/Ca chiều/g, 'Afternoon Shift')
+    .replace(/Ca tối/g, 'Evening Shift')
+    .replace(/Ca linh động/g, 'Flexible Shift')
+    .replace(/Part-time/g, 'Part-time')
+    .replace(/Full-time/g, 'Full-time');
 };
 
 // Jobs data - moved outside component to avoid re-creation on each render
@@ -1605,8 +1714,10 @@ const JobListing = () => {
           return getSalaryValue(b.salary) - getSalaryValue(a.salary);
         case 'views':
           return b.views - a.views;
-        case 'relevant':
         case 'newest':
+          // Sort by posted time (newer jobs first - smaller hours value = more recent)
+          return parseTimeToHours(a.postedAt) - parseTimeToHours(b.postedAt);
+        case 'relevant':
         default:
           return 0;
       }
@@ -1618,7 +1729,6 @@ const JobListing = () => {
       quickFilter, savedJobs, sortBy, userLocation, showNearbyJobs, nearbyJobs]);
 
   const categoryJobs = JOBS_DATA.filter(job => job.category === jobCategory);
-  const featuredJobs = categoryJobs.filter(job => job.featured);
 
   return (
     <DashboardLayout role="candidate">
@@ -1804,32 +1914,6 @@ const JobListing = () => {
         </CategoryTabs>
 
         {/* Nearby Jobs Section - Hidden now, jobs shown in main list */}
-
-        {/* Featured Jobs Section */}
-        {featuredJobs.length > 0 && quickFilter === 'all' && (
-          <FeaturedSection
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <FeaturedHeader>
-              <Award />
-              <h3>{language === 'vi' ? 'Việc làm nổi bật' : 'Featured Jobs'}</h3>
-            </FeaturedHeader>
-            <JobsGrid>
-              {featuredJobs.slice(0, 2).map(job => (
-                <JobCardComponent 
-                  key={job.id} 
-                  job={job} 
-                  saved={savedJobs.includes(job.id)}
-                  onSave={handleSaveJob}
-                  onClick={handleJobClick}
-                  language={language}
-                />
-              ))}
-            </JobsGrid>
-          </FeaturedSection>
-        )}
 
         {/* Main Content with Filters */}
         <MainLayout>
@@ -2227,7 +2311,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0, showDistance
         </CompanyLogo>
         <JobInfo>
           <JobTitle>
-            {job.title}
+            {translateJobTitle(job.title, language)}
             {job.urgent && <StatusBadge status="urgent" size="sm">{language === 'vi' ? 'Tuyển gấp' : 'Urgent'}</StatusBadge>}
             {job.featured && <Star size={18} fill="#F59E0B" color="#F59E0B" />}
           </JobTitle>
@@ -2250,7 +2334,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0, showDistance
             )}
             <MetaItem>
               <Briefcase />
-              {job.type}
+              {translateJobType(job.type, language)}
             </MetaItem>
             <MetaItem>
               <Eye />
@@ -2263,7 +2347,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0, showDistance
       <JobCardBody>
         <JobTags>
           {job.tags.map((tag, idx) => (
-            <Tag key={idx}>{tag}</Tag>
+            <Tag key={idx}>{translateTag(tag, language)}</Tag>
           ))}
         </JobTags>
         
@@ -2276,7 +2360,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0, showDistance
       <JobCardFooter>
         <JobPosted>
           <Clock />
-          {job.postedAt}
+          {translateTimePosted(job.postedAt, language)}
         </JobPosted>
         
         <JobActions>

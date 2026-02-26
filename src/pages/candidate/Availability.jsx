@@ -633,16 +633,16 @@ const Availability = () => {
   };
 
   const stats = [
-    { label: 'Lượt Xem Hồ Sơ', value: isAvailable ? '156' : '0', icon: Eye, color: '#667eea' },
-    { label: 'Gợi Ý Công Việc', value: isAvailable ? '23' : '0', icon: Briefcase, color: '#10B981' },
-    { label: 'Lời Mời', value: isAvailable ? '12' : '0', icon: Target, color: '#F59E0B' },
-    { label: 'Phỏng Vấn', value: isAvailable ? '8' : '0', icon: Calendar, color: '#EF4444' }
+    { label: language === 'vi' ? 'Lượt Xem Hồ Sơ' : 'Profile Views', value: isAvailable ? '156' : '0', icon: Eye, color: '#667eea' },
+    { label: language === 'vi' ? 'Gợi Ý Công Việc' : 'Job Recommendations', value: isAvailable ? '23' : '0', icon: Briefcase, color: '#10B981' },
+    { label: language === 'vi' ? 'Lời Mời' : 'Invitations', value: isAvailable ? '12' : '0', icon: Target, color: '#F59E0B' },
+    { label: language === 'vi' ? 'Phỏng Vấn' : 'Interviews', value: isAvailable ? '8' : '0', icon: Calendar, color: '#EF4444' }
   ];
 
   const activities = [
-    { label: 'FPT Software xem hồ sơ', time: '2 giờ trước', icon: Eye, color: '#667eea' },
-    { label: 'Nhận gợi ý: Senior React Dev', time: '5 giờ trước', icon: Zap, color: '#10B981' },
-    { label: 'Viettel lời mời phỏng vấn', time: '1 ngày trước', icon: Calendar, color: '#F59E0B' }
+    { label: language === 'vi' ? 'FPT Software xem hồ sơ' : 'FPT Software viewed your profile', time: language === 'vi' ? '2 giờ trước' : '2 hours ago', icon: Eye, color: '#667eea' },
+    { label: language === 'vi' ? 'Nhận gợi ý: Senior React Dev' : 'Recommendation: Senior React Dev', time: language === 'vi' ? '5 giờ trước' : '5 hours ago', icon: Zap, color: '#10B981' },
+    { label: language === 'vi' ? 'Viettel lời mời phỏng vấn' : 'Viettel interview invitation', time: language === 'vi' ? '1 ngày trước' : '1 day ago', icon: Calendar, color: '#F59E0B' }
   ];
 
   return (
@@ -663,7 +663,7 @@ const Availability = () => {
               <div className="status-label">
                 {isAvailable 
                   ? (language === 'vi' ? 'ĐANG TÌM VIỆC' : 'ACTIVELY LOOKING')
-                  : (language === 'vi' ? 'TẠM DỬNG' : 'PAUSED')}
+                  : (language === 'vi' ? 'TẠM DỪNG' : 'PAUSED')}
               </div>
               <div className="status-desc">
                 {isAvailable 
@@ -804,11 +804,12 @@ const Availability = () => {
               >
                 <div className="info-header">
                   <Shield />
-                  <h4>Lưu Ý Quan Trọng</h4>
+                  <h4>{language === 'vi' ? 'Lưu Ý Quan Trọng' : 'Important Note'}</h4>
                 </div>
                 <p>
-                  Khi bạn tắt trạng thái tìm việc, hồ sơ của bạn sẽ bị ẩn khỏi tất cả nhà tuyển dụng 
-                  và bạn sẽ không nhận được bất kỳ gợi ý công việc nào. Các cài đặt tìm kiếm sẽ tự động bị vô hiệu hóa.
+                  {language === 'vi'
+                    ? 'Khi bạn tắt trạng thái tìm việc, hồ sơ của bạn sẽ bị ẩn khỏi tất cả nhà tuyển dụng và bạn sẽ không nhận được bất kỳ gợi ý công việc nào. Các cài đặt tìm kiếm sẽ tự động bị vô hiệu hóa.'
+                    : 'When you pause job search, your profile will be hidden from all employers and you will not receive any job suggestions. Search settings will be automatically disabled.'}
                 </p>
               </InfoBox>
             </Card>
@@ -823,7 +824,7 @@ const Availability = () => {
               <div className="card-header">
                 <h2>
                   <BarChart3 />
-                  Thống Kê
+                  {language === 'vi' ? 'Thống Kê' : 'Statistics'}
                 </h2>
               </div>
 
@@ -855,7 +856,7 @@ const Availability = () => {
               <div className="card-header">
                 <h2>
                   <Clock />
-                  Hoạt Động Gần Đây
+                  {language === 'vi' ? 'Hoạt Động Gần Đây' : 'Recent Activity'}
                 </h2>
               </div>
 
@@ -884,7 +885,9 @@ const Availability = () => {
                   color: '#94A3B8' 
                 }}>
                   <XCircle style={{ width: '48px', height: '48px', margin: '0 auto 16px' }} />
-                  <p style={{ fontSize: '14px' }}>Không có hoạt động khi tắt tìm việc</p>
+                  <p style={{ fontSize: '14px' }}>
+                    {language === 'vi' ? 'Không có hoạt động khi tắt tìm việc' : 'No activity when job search is off'}
+                  </p>
                 </div>
               )}
             </Card>
@@ -906,19 +909,27 @@ const Availability = () => {
           >
             <AlertCircle />
           </motion.div>
-          <h3>{isAvailable ? 'Tắt Trạng Thái Tìm Việc?' : 'Bật Trạng Thái Tìm Việc?'}</h3>
+          <h3>{isAvailable 
+            ? (language === 'vi' ? 'Tắt Trạng Thái Tìm Việc?' : 'Pause Job Search Status?')
+            : (language === 'vi' ? 'Bật Trạng Thái Tìm Việc?' : 'Activate Job Search Status?')}
+          </h3>
           <p>
             {isAvailable 
-              ? 'Khi tắt trạng thái tìm việc, hồ sơ của bạn sẽ bị ẩn khỏi nhà tuyển dụng và bạn sẽ không nhận được gợi ý công việc nào. Tất cả cài đặt tìm kiếm sẽ tự động bị vô hiệu hóa.'
-              : 'Khi bật trạng thái tìm việc, hồ sơ của bạn sẽ hiển thị với nhà tuyển dụng và bạn sẽ nhận được các gợi ý công việc phù hợp. Các tính năng tìm kiếm sẽ được kích hoạt.'
-            }
+              ? (language === 'vi'
+                  ? 'Khi tắt trạng thái tìm việc, hồ sơ của bạn sẽ bị ẩn khỏi nhà tuyển dụng và bạn sẽ không nhận được gợi ý công việc nào. Tất cả cài đặt tìm kiếm sẽ tự động bị vô hiệu hóa.'
+                  : 'When you pause job search, your profile will be hidden from employers and you will not receive any job suggestions. All search settings will be automatically disabled.')
+              : (language === 'vi'
+                  ? 'Khi bật trạng thái tìm việc, hồ sơ của bạn sẽ hiển thị với nhà tuyển dụng và bạn sẽ nhận được các gợi ý công việc phù hợp. Các tính năng tìm kiếm sẽ được kích hoạt.'
+                  : 'When you activate job search, your profile will be visible to employers and you will receive relevant job suggestions. Search features will be enabled.')}
           </p>
           <div className="button-group">
             <button className="cancel" onClick={() => setShowConfirmModal(false)}>
-              Hủy Bỏ
+              {language === 'vi' ? 'Hủy Bỏ' : 'Cancel'}
             </button>
             <button className="confirm" onClick={confirmToggle}>
-              {isAvailable ? 'Tắt Ngay' : 'Bật Ngay'}
+              {isAvailable 
+                ? (language === 'vi' ? 'Tắt Ngay' : 'Pause Now')
+                : (language === 'vi' ? 'Bật Ngay' : 'Activate Now')}
             </button>
           </div>
         </ConfirmationContent>

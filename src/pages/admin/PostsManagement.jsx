@@ -387,6 +387,7 @@ const PostsManagement = () => {
   const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState('pending');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [sortBy, setSortBy] = useState('newest');
 
   const mockPosts = [
     {
@@ -455,10 +456,30 @@ const PostsManagement = () => {
     rejected: 18
   };
 
-  const filteredPosts = mockPosts.filter(post => {
-    if (activeTab === 'all') return true;
-    return post.status === activeTab;
-  });
+  const filteredPosts = mockPosts
+    .filter(post => {
+      if (activeTab === 'all') return true;
+      return post.status === activeTab;
+    })
+    .sort((a, b) => {
+      switch(sortBy) {
+        case 'newest': {
+          // Parse DD/MM/YYYY and time HH:MM
+          const dateA = a.date.split('/').reverse().join('') + a.time.replace(':', '');
+          const dateB = b.date.split('/').reverse().join('') + b.time.replace(':', '');
+          return dateB.localeCompare(dateA); // Newer first
+        }
+        case 'oldest': {
+          const dateA = a.date.split('/').reverse().join('') + a.time.replace(':', '');
+          const dateB = b.date.split('/').reverse().join('') + b.time.replace(':', '');
+          return dateA.localeCompare(dateB); // Older first
+        }
+        case 'most-viewed':
+          return b.views - a.views; // Higher views first
+        default:
+          return 0;
+      }
+    });
 
   return (
     <DashboardLayout role="admin">
@@ -543,7 +564,7 @@ const PostsManagement = () => {
             <option value="fulltime">{language === 'vi' ? 'Việc làm toàn thời gian' : 'Full-time jobs'}</option>
             <option value="parttime">{language === 'vi' ? 'Việc làm ca' : 'Shift jobs'}</option>
           </Select>
-          <Select>
+          <Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
             <option value="newest">{language === 'vi' ? 'Mới nhất' : 'Newest'}</option>
             <option value="oldest">{language === 'vi' ? 'Cũ nhất' : 'Oldest'}</option>
             <option value="most-viewed">{language === 'vi' ? 'Nhiều lượt xem' : 'Most viewed'}</option>

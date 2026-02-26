@@ -514,6 +514,26 @@ const CandidateDashboard = () => {
   const recommendedJobs = [
     {
       id: 1,
+      title: 'General Accountant',
+      company: 'Vinamilk',
+      location: 'Quận 1, TP.HCM',
+      type: 'Full-time',
+      salary: '12-18 triệu',
+      postedAt: '2 ngày trước',
+      tags: ['Accounting', 'Excel', 'MBA']
+    },
+    {
+      id: 2,
+      title: 'B2B Sales Executive',
+      company: 'Viettel',  
+      location: 'Quận 7, TP.HCM',
+      type: 'Full-time',
+      salary: '15-25 triệu',
+      postedAt: '1 ngày trước',
+      tags: ['Sales', 'B2B', 'High Commission']
+    },
+    {
+      id: 3,
       title: 'Senior React Developer',
       company: 'FPT Software',
       location: 'Quận 1, TP.HCM',
@@ -521,26 +541,6 @@ const CandidateDashboard = () => {
       salary: '20-30 triệu',
       postedAt: '2 ngày trước',
       tags: ['React', 'TypeScript', 'Remote']
-    },
-    {
-      id: 2,
-      title: 'Frontend Developer',
-      company: 'VNG Corporation',  
-      location: 'Quận 7, TP.HCM',
-      type: 'Full-time',
-      salary: '15-25 triệu',
-      postedAt: '3 ngày trước',
-      tags: ['Vue.js', 'JavaScript']
-    },
-    {
-      id: 3,
-      title: 'UI/UX Designer',
-      company: 'Tiki',
-      location: 'Tân Bình, TP.HCM',
-      type: 'Full-time',
-      salary: '12-18 triệu',
-      postedAt: '1 tuần trước',
-      tags: ['Figma', 'Adobe XD']
     }
   ];
 
@@ -573,29 +573,29 @@ const CandidateDashboard = () => {
       type: 'view',
       icon: Eye,
       color: '#0E3995',
-      title: '12 nhà tuyển dụng đã xem CV của bạn',
-      time: 'Hôm nay'
+      title: language === 'vi' ? '12 nhà tuyển dụng đã xem CV của bạn' : '12 employers viewed your CV',
+      time: language === 'vi' ? 'Hôm nay' : 'Today'
     },
     {
       type: 'interview',
       icon: Calendar,
       color: '#10B981',
-      title: 'Lịch phỏng vấn với FPT Software',
-      time: 'Ngày mai, 10:00 AM'
+      title: language === 'vi' ? 'Lịch phỏng vấn với FPT Software' : 'Interview with FPT Software',
+      time: language === 'vi' ? 'Ngày mai, 10:00 AM' : 'Tomorrow, 10:00 AM'
     },
     {
       type: 'message',
       icon: Bell,
       color: '#F59E0B',
-      title: 'Bạn có 3 phản hồi CV mới từ nhà tuyển dụng',
-      time: '2 giờ trước'
+      title: language === 'vi' ? 'Bạn có 3 phản hồi CV mới từ nhà tuyển dụng' : 'You have 3 new CV responses from employers',
+      time: language === 'vi' ? '2 giờ trước' : '2 hours ago'
     },
     {
       type: 'match',
       icon: Target,
       color: '#8B5CF6',
-      title: '5 công việc mới phù hợp với bạn',
-      time: '4 giờ trước'
+      title: language === 'vi' ? '5 công việc mới phù hợp với bạn' : '5 new jobs match your profile',
+      time: language === 'vi' ? '4 giờ trước' : '4 hours ago'
     },
   ];
 
@@ -619,8 +619,8 @@ const CandidateDashboard = () => {
           transition={{ duration: 0.5 }}
         >
           <WelcomeContent>
-            <h1>{getGreeting()}, Ứng Viên! 👋</h1>
-            <p>Bạn có 12 nhà tuyển dụng đã xem hồ sơ và 5 công việc mới phù hợp</p>
+            <h1>{getGreeting()}, {language === 'vi' ? 'Ứng Viên' : 'Candidate'}! 👋</h1>
+            <p>{language === 'vi' ? 'Bạn có 12 nhà tuyển dụng đã xem hồ sơ và 5 công việc mới phù hợp' : 'You have 12 employers who viewed your profile and 5 new matching jobs'}</p>
             <QuickActions>
               <ActionButton
                 as={motion.a}

@@ -351,6 +351,7 @@ const ToggleSwitch = styled.label`
 const AdminNotifications = () => {
   const { language } = useLanguage();
   const [filterType, setFilterType] = useState('all');
+  const [sortBy, setSortBy] = useState('newest');
   const [notificationSettings, setNotificationSettings] = useState({
     users: true,
     employers: true,
@@ -427,6 +428,44 @@ const AdminNotifications = () => {
   const unreadCount = notifications.filter(n => n.unread).length;
   const actionRequiredCount = notifications.filter(n => n.actionRequired).length;
 
+  // Helper function to parse time string to hours
+  const parseTimeToHours = (timeStr) => {
+    const match = timeStr.match(/(\d+)/);
+    if (!match) return 999999;
+    
+    const num = parseInt(match[1]);
+    
+    if (timeStr.includes('giờ') || timeStr.includes('hour')) {
+      return num;
+    } else if (timeStr.includes('ngày') || timeStr.includes('day')) {
+      return num * 24;
+    } else if (timeStr.includes('tuần') || timeStr.includes('week')) {
+      return num * 24 * 7;
+    }
+    
+    return 999999;
+  };
+
+  // Filter and sort notifications
+  const displayNotifications = notifications
+    .filter(notification => filterType === 'all' || notification.type === filterType)
+    .sort((a, b) => {
+      switch(sortBy) {
+        case 'newest':
+          return parseTimeToHours(a.time) - parseTimeToHours(b.time);
+        case 'oldest':
+          return parseTimeToHours(b.time) - parseTimeToHours(a.time);
+        case 'unread':
+          // Unread first, then by newest
+          if (a.unread === b.unread) {
+            return parseTimeToHours(a.time) - parseTimeToHours(b.time);
+          }
+          return a.unread ? -1 : 1;
+        default:
+          return 0;
+      }
+    });
+
   return (
     <DashboardLayout role="admin">
       <PageContainer>
@@ -481,7 +520,7 @@ const AdminNotifications = () => {
                 <option value="payments">{language === 'vi' ? 'Thanh toán' : 'Payments'}</option>
                 <option value="system">{language === 'vi' ? 'Hệ thống' : 'System'}</option>
               </Select>
-              <Select>
+              <Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
                 <option value="newest">{language === 'vi' ? 'Mới nhất' : 'Newest'}</option>
                 <option value="oldest">{language === 'vi' ? 'Cũ nhất' : 'Oldest'}</option>
                 <option value="unread">{language === 'vi' ? 'Chưa đọc' : 'Unread'}</option>
@@ -489,7 +528,7 @@ const AdminNotifications = () => {
             </FilterBar>
 
             <NotificationList>
-              {notifications.map(notification => (
+              {displayNotifications.map(notification => (
                 <NotificationItem key={notification.id} $unread={notification.unread}>
                   <NotificationHeader>
                     <NotificationIcon $color={notification.color}>

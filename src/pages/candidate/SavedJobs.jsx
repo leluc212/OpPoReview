@@ -36,20 +36,20 @@ const SavedJobs = () => {
       id: 1,
       title: 'Senior React Developer',
       company: 'FPT Software',
-      location: 'Quận 1, TP.HCM',
-      type: 'Toàn thời gian',
-      salary: '120 - 150 triệu VND',
-      postedAt: '2 ngày trước',
+      location: language === 'vi' ? 'Quận 1, TP.HCM' : 'District 1, HCMC',
+      type: language === 'vi' ? 'Toàn thời gian' : 'Full-time',
+      salary: language === 'vi' ? '120 - 150 triệu VND' : '120 - 150 million VND',
+      postedAt: language === 'vi' ? '2 ngày trước' : '2 days ago',
       tags: ['React', 'TypeScript', 'Remote']
     },
     {
       id: 3,
-      title: 'Nhân viên',
+      title: language === 'vi' ? 'Nhân viên' : 'Staff',
       company: 'Highlands',
-      location: 'Phú Nhuận, TP.HCM',
-      type: 'Toàn thời gian',
-      salary: '90 - 120 triệu VND',
-      postedAt: '3 ngày trước',
+      location: language === 'vi' ? 'Phú Nhuận, TP.HCM' : 'Phu Nhuan, HCMC',
+      type: language === 'vi' ? 'Toàn thời gian' : 'Full-time',
+      salary: language === 'vi' ? '90 - 120 triệu VND' : '90 - 120 million VND',
+      postedAt: language === 'vi' ? '3 ngày trước' : '3 days ago',
       tags: ['Vue.js', 'JavaScript', 'CSS']
     }
   ];
