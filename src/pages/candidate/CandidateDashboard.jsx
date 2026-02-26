@@ -549,7 +549,7 @@ const CandidateDashboard = () => {
       type: 'view',
       icon: Eye,
       color: '#0E3995',
-      title: '12 nhà tuyển dụng đã xem hồ sơ của bạn',
+      title: '12 nhà tuyển dụng đã xem CV của bạn',
       time: 'Hôm nay'
     },
     {
@@ -563,7 +563,7 @@ const CandidateDashboard = () => {
       type: 'message',
       icon: Bell,
       color: '#F59E0B',
-      title: 'Bạn có 3 tin nhắn mới từ nhà tuyển dụng',
+      title: 'Bạn có 3 phản hồi CV mới từ nhà tuyển dụng',
       time: '2 giờ trước'
     },
     {
@@ -593,7 +593,7 @@ const CandidateDashboard = () => {
         >
           <WelcomeContent>
             <h1>{getGreeting()}, Ứng Viên! 👋</h1>
-            <p>Bạn có 12 nhà tuyển dụng đã xem hồ sơ và 5 công việc mới phù hợp</p>
+            <p>12 nhà tuyển dụng đã xem CV và 5 công việc mới phù hợp với bạn</p>
             <QuickActions>
               <ActionButton
                 as={Link}
