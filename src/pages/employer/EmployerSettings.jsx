@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTheme } from '../../context/ThemeContext';
 import { Input, Label, Button, FormGroup } from '../../components/FormElements';
 import { 
   Settings as SettingsIcon,
@@ -53,7 +55,7 @@ const SettingsGrid = styled.div`
 `;
 
 const SettingCard = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border: 1px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.lg};
   padding: 28px;
@@ -264,8 +266,8 @@ const LanguageButton = styled(motion.button)`
   padding: 14px 24px;
   border-radius: ${props => props.theme.borderRadius.lg};
   border: 2px solid ${props => props.$active ? props.theme.colors.primary : props.theme.colors.border};
-  background: ${props => props.$active ? props.theme.colors.primaryLight : 'white'};
-  color: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.text};
+  background: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.bgDark};
+  color: ${props => props.$active ? 'white' : props.theme.colors.text};
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -276,7 +278,6 @@ const LanguageButton = styled(motion.button)`
   
   &:hover {
     border-color: ${props => props.theme.colors.primary};
-    background: ${props => props.theme.colors.primaryLight};
     transform: translateY(-2px);
   }
 `;
@@ -317,7 +318,7 @@ const Select = styled.select`
   border-radius: ${props => props.theme.borderRadius.md};
   font-size: 15px;
   color: ${props => props.theme.colors.text};
-  background: white;
+  background: ${props => props.theme.colors.bgDark};
   transition: all ${props => props.theme.transitions.fast};
   cursor: pointer;
   
@@ -355,11 +356,8 @@ const ButtonGroup = styled.div`
 `;
 
 const EmployerSettings = () => {
-  // Giả lập state language để UI hoạt động nhưng không thực sự thay đổi ngôn ngữ
-  const [language, setLanguage] = useState('vi');
-  const changeLanguage = (lang) => setLanguage(lang);
-  
-  const [darkMode, setDarkMode] = useState(false);
+  const { language, changeLanguage, t } = useLanguage();
+  const { isDarkMode, toggleTheme } = useTheme();
   const [notifications, setNotifications] = useState({
     applications: true,
     messages: true,
@@ -378,13 +376,13 @@ const EmployerSettings = () => {
   };
 
   const handleDeleteAccount = () => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa tài khoản? Hành động này không thể hoàn tác!')) {
+    if (window.confirm(language === 'vi' ? 'Bạn có chắc chắn muốn xóa tài khoản? Hành động này không thể hoàn tác!' : 'Are you sure you want to delete your account? This action cannot be undone!')) {
       console.log('Delete account');
     }
   };
 
   const handleDeactivateAccount = () => {
-    if (window.confirm('Bạn có chắc chắn muốn vô hiệu hóa tài khoản?')) {
+    if (window.confirm(language === 'vi' ? 'Bạn có chắc chắn muốn vô hiệu hóa tài khoản?' : 'Are you sure you want to deactivate your account?')) {
       console.log('Deactivate account');
     }
   };
@@ -393,8 +391,8 @@ const EmployerSettings = () => {
     <DashboardLayout role="employer">
       <PageContainer>
         <PageHeader>
-          <h1>Cài đặt</h1>
-          <p>Quản lý cài đặt tài khoản và tùy chọn của bạn</p>
+          <h1>{t.settings.title}</h1>
+          <p>{language === 'vi' ? 'Quản lý cài đặt tài khoản và tùy chọn của bạn' : 'Manage your account settings and preferences'}</p>
         </PageHeader>
 
         <SettingsGrid>
@@ -405,42 +403,42 @@ const EmployerSettings = () => {
                 <Globe />
               </div>
               <div className="info">
-                <h3>Tùy chỉnh hiển thị</h3>
-                <p>Ngôn ngữ và giao diện</p>
+                <h3>{language === 'vi' ? 'Tùy chỉnh hiển thị' : 'Display Settings'}</h3>
+                <p>{language === 'vi' ? 'Ngôn ngữ và giao diện' : 'Language and appearance'}</p>
               </div>
             </SettingHeader>
 
             <SettingRow>
               <div>
-                <div className="label">Ngôn ngữ</div>
-                <div className="description">Chọn ngôn ngữ hiển thị</div>
+                <div className="label">{t.settings.language}</div>
+                <div className="description">{t.settings.languageDescription}</div>
               </div>
               <LanguageOptions>
                 <LanguageButton
                   $active={language === 'vi'}
                   onClick={() => changeLanguage('vi')}
                 >
-                  Tiếng Việt
+                  {t.settings.vietnamese}
                 </LanguageButton>
                 <LanguageButton
                   $active={language === 'en'}
                   onClick={() => changeLanguage('en')}
                 >
-                  English
+                  {t.settings.english}
                 </LanguageButton>
               </LanguageOptions>
             </SettingRow>
 
             <SettingRow>
               <div>
-                <div className="label">Chế độ tối</div>
-                <div className="description">Chuyển sang giao diện tối để dễ nhìn hơn</div>
+                <div className="label">{t.settings.darkMode}</div>
+                <div className="description">{t.settings.darkModeDesc}</div>
               </div>
               <ToggleSwitch>
                 <input
                   type="checkbox"
-                  checked={darkMode}
-                  onChange={(e) => setDarkMode(e.target.checked)}
+                  checked={isDarkMode}
+                  onChange={toggleTheme}
                 />
                 <span></span>
               </ToggleSwitch>
@@ -454,18 +452,18 @@ const EmployerSettings = () => {
                 <Palette />
               </div>
               <div className="info">
-                <h3>Chủ đề</h3>
-                <p>Chọn màu sắc chủ đạo</p>
+                <h3>{language === 'vi' ? 'Chủ đề' : 'Theme'}</h3>
+                <p>{language === 'vi' ? 'Chọn màu sắc chủ đạo' : 'Choose primary color scheme'}</p>
               </div>
             </SettingHeader>
 
             <FormGroup>
-              <Label>Chủ đề màu</Label>
+              <Label>{language === 'vi' ? 'Chủ đề màu' : 'Color Theme'}</Label>
               <Select value={selectedTheme} onChange={(e) => setSelectedTheme(e.target.value)}>
-                <option value="default">Mặc định (Xanh dương)</option>
-                <option value="green">Xanh lá</option>
-                <option value="purple">Tím</option>
-                <option value="orange">Cam</option>
+                <option value="default">{language === 'vi' ? 'Mặc định (Xanh dương)' : 'Default (Blue)'}</option>
+                <option value="green">{language === 'vi' ? 'Xanh lá' : 'Green'}</option>
+                <option value="purple">{language === 'vi' ? 'Tím' : 'Purple'}</option>
+                <option value="orange">{language === 'vi' ? 'Cam' : 'Orange'}</option>
               </Select>
             </FormGroup>
           </SettingCard>
@@ -477,45 +475,45 @@ const EmployerSettings = () => {
                 <Lock />
               </div>
               <div className="info">
-                <h3>Bảo mật</h3>
-                <p>Thay đổi mật khẩu và cài đặt bảo mật</p>
+                <h3>{language === 'vi' ? 'Bảo mật' : 'Security'}</h3>
+                <p>{language === 'vi' ? 'Thay đổi mật khẩu và cài đặt bảo mật' : 'Change password and security settings'}</p>
               </div>
             </SettingHeader>
 
             <form onSubmit={handlePasswordChange}>
               <FormGroup>
-                <Label>Mật khẩu hiện tại</Label>
+                <Label>{language === 'vi' ? 'Mật khẩu hiện tại' : 'Current Password'}</Label>
                 <Input
                   type="password"
                   value={passwordData.currentPassword}
                   onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                  placeholder="Nhập mật khẩu hiện tại"
+                  placeholder={language === 'vi' ? 'Nhập mật khẩu hiện tại' : 'Enter current password'}
                 />
               </FormGroup>
 
               <FormGroup>
-                <Label>Mật khẩu mới</Label>
+                <Label>{language === 'vi' ? 'Mật khẩu mới' : 'New Password'}</Label>
                 <Input
                   type="password"
                   value={passwordData.newPassword}
                   onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                  placeholder="Nhập mật khẩu mới"
+                  placeholder={language === 'vi' ? 'Nhập mật khẩu mới' : 'Enter new password'}
                 />
               </FormGroup>
 
               <FormGroup>
-                <Label>Xác nhận mật khẩu mới</Label>
+                <Label>{language === 'vi' ? 'Xác nhận mật khẩu mới' : 'Confirm New Password'}</Label>
                 <Input
                   type="password"
                   value={passwordData.confirmPassword}
                   onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                  placeholder="Nhập lại mật khẩu mới"
+                  placeholder={language === 'vi' ? 'Nhập lại mật khẩu mới' : 'Confirm new password'}
                 />
               </FormGroup>
 
               <Button type="submit" variant="primary">
                 <Lock size={18} />
-                Đổi mật khẩu
+                {language === 'vi' ? 'Đổi mật khẩu' : 'Change Password'}
               </Button>
             </form>
           </SettingCard>
@@ -527,15 +525,15 @@ const EmployerSettings = () => {
                 <Bell />
               </div>
               <div className="info">
-                <h3>Thông báo</h3>
-                <p>Quản lý thông báo nhận được</p>
+                <h3>{language === 'vi' ? 'Thông báo' : 'Notifications'}</h3>
+                <p>{language === 'vi' ? 'Quản lý thông báo nhận được' : 'Manage your notification preferences'}</p>
               </div>
             </SettingHeader>
 
             <SettingRow>
               <div>
-                <div className="label">Đơn ứng tuyển mới</div>
-                <div className="description">Nhận thông báo khi có ứng viên nộp đơn</div>
+                <div className="label">{language === 'vi' ? 'Đơn ứng tuyển mới' : 'New Applications'}</div>
+                <div className="description">{language === 'vi' ? 'Nhận thông báo khi có ứng viên nộp đơn' : 'Get notified when candidates apply'}</div>
               </div>
               <ToggleSwitch>
                 <input
@@ -549,8 +547,8 @@ const EmployerSettings = () => {
 
             <SettingRow>
               <div>
-                <div className="label">Tin nhắn</div>
-                <div className="description">Nhận thông báo tin nhắn mới</div>
+                <div className="label">{language === 'vi' ? 'Tin nhắn' : 'Messages'}</div>
+                <div className="description">{language === 'vi' ? 'Nhận thông báo tin nhắn mới' : 'Get notified of new messages'}</div>
               </div>
               <ToggleSwitch>
                 <input
@@ -564,8 +562,8 @@ const EmployerSettings = () => {
 
             <SettingRow>
               <div>
-                <div className="label">Thông báo hệ thống</div>
-                <div className="description">Nhận thông báo về cập nhật và bảo trì</div>
+                <div className="label">{language === 'vi' ? 'Thông báo hệ thống' : 'System Notifications'}</div>
+                <div className="description">{language === 'vi' ? 'Nhận thông báo về cập nhật và bảo trì' : 'Get updates and maintenance notices'}</div>
               </div>
               <ToggleSwitch>
                 <input
@@ -585,19 +583,19 @@ const EmployerSettings = () => {
                 <FileText />
               </div>
               <div className="info">
-                <h3>Chính sách & Điều khoản</h3>
-                <p>Xem các chính sách và điều khoản sử dụng</p>
+                <h3>{language === 'vi' ? 'Chính sách & Điều khoản' : 'Policy & Terms'}</h3>
+                <p>{language === 'vi' ? 'Xem các chính sách và điều khoản sử dụng' : 'View policies and terms of service'}</p>
               </div>
             </SettingHeader>
 
             <ButtonGroup>
               <Button variant="outline">
                 <FileText size={18} />
-                Điều khoản dịch vụ
+                {language === 'vi' ? 'Điều khoản dịch vụ' : 'Terms of Service'}
               </Button>
               <Button variant="outline">
                 <Shield size={18} />
-                Chính sách bảo mật
+                {language === 'vi' ? 'Chính sách bảo mật' : 'Privacy Policy'}
               </Button>
             </ButtonGroup>
           </SettingCard>
@@ -605,17 +603,17 @@ const EmployerSettings = () => {
           {/* Danger Zone */}
           <SettingCard>
             <DangerZone>
-              <h4>Vùng nguy hiểm</h4>
-              <p>Các hành động này không thể hoàn tác. Vui lòng cân nhắc kỹ trước khi thực hiện.</p>
+              <h4>{language === 'vi' ? 'Vùng nguy hiểm' : 'Danger Zone'}</h4>
+              <p>{language === 'vi' ? 'Các hành động này không thể hoàn tác. Vui lòng cân nhắc kỹ trước khi thực hiện.' : 'These actions cannot be undone. Please proceed with caution.'}</p>
               
               <ButtonGroup>
                 <Button variant="outline" onClick={handleDeactivateAccount}>
                   <Trash2 size={18} />
-                  Vô hiệu hóa tài khoản
+                  {language === 'vi' ? 'Vô hiệu hóa tài khoản' : 'Deactivate Account'}
                 </Button>
                 <Button variant="danger" onClick={handleDeleteAccount}>
                   <Trash2 size={18} />
-                  Xóa tài khoản vĩnh viễn
+                  {language === 'vi' ? 'Xóa tài khoản vĩnh viễn' : 'Delete Account Permanently'}
                 </Button>
               </ButtonGroup>
             </DangerZone>

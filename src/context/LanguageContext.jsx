@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { translations } from '../locales/translations';
 
 const LanguageContext = createContext();
 
@@ -25,11 +26,14 @@ export const LanguageProvider = ({ children }) => {
     setLanguage(lang);
   };
 
+  const t = translations[language] || translations.vi;
+
   const value = {
     language,
     changeLanguage,
     isVietnamese: language === 'vi',
     isEnglish: language === 'en',
+    t, // Add translations
   };
 
   return (

@@ -1,5 +1,6 @@
 import React from 'react';
 import styled, { keyframes, css } from 'styled-components';
+import { useLanguage } from '../context/LanguageContext';
 
 const pulse = keyframes`
   0%, 100% {
@@ -91,22 +92,36 @@ const StatusDot = styled.span`
 `;
 
 const StatusBadge = ({ status, showDot = true, children, size = 'md' }) => {
-  // Map status sang tiếng Việt
+  const { language } = useLanguage();
+  
+  // Map status sang tiếng Việt và tiếng Anh
   const statusText = {
-    'pending': 'Chờ duyệt',
-    'approved': 'Chấp nhận',
-    'rejected': 'Từ chối',
-    'reviewed': 'Đã xem',
-    'active': 'Hoạt động',
-    'inactive': 'Không hoạt động',
-    'completed': 'Hoàn thành',
-    'urgent': 'Tuyển gấp'
+    vi: {
+      'pending': 'Chờ duyệt',
+      'approved': 'Chấp nhận',
+      'rejected': 'Từ chối',
+      'reviewed': 'Đã xem',
+      'active': 'Hoạt động',
+      'inactive': 'Không hoạt động',
+      'completed': 'Hoàn thành',
+      'urgent': 'Tuyển gấp'
+    },
+    en: {
+      'pending': 'Pending',
+      'approved': 'Approved',
+      'rejected': 'Rejected',
+      'reviewed': 'Reviewed',
+      'active': 'Active',
+      'inactive': 'Inactive',
+      'completed': 'Completed',
+      'urgent': 'Urgent'
+    }
   };
   
   return (
     <BadgeWrapper $status={status} $size={size}>
       {showDot && <StatusDot $pulse={status === 'urgent'} $size={size} />}
-      {children || statusText[status] || status}
+      {children || statusText[language][status] || status}
     </BadgeWrapper>
   );
 };

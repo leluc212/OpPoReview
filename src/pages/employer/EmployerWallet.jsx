@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
+import { useLanguage } from '../../context/LanguageContext';
 import { 
   Wallet as WalletIcon, 
   TrendingUp, 
@@ -152,7 +153,7 @@ const Grid = styled.div`
 `;
 
 const Card = styled(motion.div)`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border: 2px solid ${props => props.theme.colors.border};
   border-radius: 20px;
   padding: 28px;
@@ -198,7 +199,7 @@ const TransactionItem = styled(motion.div)`
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:hover {
-    background: white;
+    background: ${props => props.theme.colors.bgDark};
     border-color: ${props => props.$type === 'income' ? '#10B981' : '#EF4444'};
     transform: translateX(6px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
@@ -303,7 +304,7 @@ const ReceiptItem = styled(motion.div)`
   padding: 18px;
   border: 2px solid ${props => props.theme.colors.border};
   border-radius: 16px;
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   transition: all 0.3s ease;
   
   &:hover {
@@ -394,73 +395,74 @@ const EmptyState = styled.div`
 `;
 
 const EmployerWallet = () => {
-  const [balance] = useState(125500000); // 125,500,000 VNĐ
+  const { language } = useLanguage();
+  const [balance] = useState(125500000); // 125,500,000 VND
 
   const transactions = [
     {
       id: 1,
       type: 'expense',
-      title: 'Thanh toán gói Premium',
+      title: language === 'vi' ? 'Thanh toán gói Premium' : 'Premium plan payment',
       date: '14/02/2026',
       amount: -5000000
     },
     {
       id: 2,
       type: 'expense',
-      title: 'Đăng tin tuyển dụng',
+      title: language === 'vi' ? 'Đăng tin tuyển dụng' : 'Job posting fee',
       date: '12/02/2026',
       amount: -2000000
     },
     {
       id: 3,
       type: 'income',
-      title: 'Nạp tiền vào ví',
+      title: language === 'vi' ? 'Nạp tiền vào ví' : 'Wallet deposit',
       date: '10/02/2026',
       amount: 50000000
     },
     {
       id: 4,
       type: 'expense',
-      title: 'Phí đăng tin urgent',
+      title: language === 'vi' ? 'Phí đăng tin urgent' : 'Urgent posting fee',
       date: '08/02/2026',
       amount: -3000000
     },
     {
       id: 5,
       type: 'income',
-      title: 'Hoàn tiền dịch vụ',
+      title: language === 'vi' ? 'Hoàn tiền dịch vụ' : 'Service refund',
       date: '05/02/2026',
       amount: 1500000
     }
   ];
 
   const receipts = [
-    { id: 1, title: 'Hóa đơn #2026021401', date: '14/02/2026' },
-    { id: 2, title: 'Hóa đơn #2026021201', date: '12/02/2026' },
-    { id: 3, title: 'Hóa đơn #2026021001', date: '10/02/2026' }
+    { id: 1, title: language === 'vi' ? 'Hóa đơn #2026021401' : 'Invoice #2026021401', date: '14/02/2026' },
+    { id: 2, title: language === 'vi' ? 'Hóa đơn #2026021201' : 'Invoice #2026021201', date: '12/02/2026' },
+    { id: 3, title: language === 'vi' ? 'Hóa đơn #2026021001' : 'Invoice #2026021001', date: '10/02/2026' }
   ];
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', {
+    return new Intl.NumberFormat(language === 'vi' ? 'vi-VN' : 'en-US', {
       style: 'currency',
       currency: 'VND'
     }).format(amount);
   };
 
   const handleDownloadReceipt = (receiptId) => {
-    alert(`Tải xuống hóa đơn #${receiptId}`);
+    alert(language === 'vi' ? `Tải xuống hóa đơn #${receiptId}` : `Download invoice #${receiptId}`);
   };
 
   const handleWithdraw = () => {
-    alert('Mở form rút tiền');
+    alert(language === 'vi' ? 'Mở form rút tiền' : 'Open withdrawal form');
   };
 
   const handleDeposit = () => {
-    alert('Mở form nạp tiền');
+    alert(language === 'vi' ? 'Mở form nạp tiền' : 'Open deposit form');
   };
 
   const handleLinkBank = () => {
-    alert('Liên kết ngân hàng');
+    alert(language === 'vi' ? 'Liên kết ngân hàng' : 'Link bank account');
   };
 
   // Calculate stats
@@ -476,8 +478,8 @@ const EmployerWallet = () => {
     <DashboardLayout role="employer">
       <PageContainer>
         <PageHeader>
-          <h1>Ví điện tử</h1>
-          <p>Quản lý tài chính và giao dịch của bạn</p>
+          <h1>{language === 'vi' ? 'Ví điện tử' : 'Wallet'}</h1>
+          <p>{language === 'vi' ? 'Quản lý tài chính và giao dịch của bạn' : 'Manage your finances and transactions'}</p>
         </PageHeader>
 
         <BalanceCard
@@ -488,7 +490,7 @@ const EmployerWallet = () => {
           <BalanceContent>
             <BalanceLabel>
               <WalletIcon />
-              Số dư khả dụng
+              {language === 'vi' ? 'Số dư khả dụng' : 'Available balance'}
             </BalanceLabel>
             <BalanceAmount>{formatCurrency(balance)}</BalanceAmount>
             <BalanceActions>
@@ -498,7 +500,7 @@ const EmployerWallet = () => {
                 whileTap={{ scale: 0.98 }}
               >
                 <Plus size={18} />
-                Nạp tiền
+                {language === 'vi' ? 'Nạp tiền' : 'Deposit'}
               </ActionButton>
               <ActionButton 
                 onClick={handleWithdraw}
@@ -506,7 +508,7 @@ const EmployerWallet = () => {
                 whileTap={{ scale: 0.98 }}
               >
                 <ArrowUpRight size={18} />
-                Rút tiền
+                {language === 'vi' ? 'Rút tiền' : 'Withdraw'}
               </ActionButton>
               <ActionButton 
                 onClick={handleLinkBank}
@@ -514,7 +516,7 @@ const EmployerWallet = () => {
                 whileTap={{ scale: 0.98 }}
               >
                 <Building2 size={18} />
-                Liên kết ngân hàng
+                {language === 'vi' ? 'Liên kết ngân hàng' : 'Link bank'}
               </ActionButton>
             </BalanceActions>
           </BalanceContent>
@@ -529,7 +531,7 @@ const EmployerWallet = () => {
           >
             <h3>
               <Calendar />
-              Lịch sử giao dịch
+              {language === 'vi' ? 'Lịch sử giao dịch' : 'Transaction History'}
             </h3>
             <TransactionList>
               {transactions.map((transaction, index) => (
@@ -570,7 +572,7 @@ const EmployerWallet = () => {
           >
             <h3>
               <TrendingUp />
-              Thống kê
+              {language === 'vi' ? 'Thống kê' : 'Statistics'}
             </h3>
             <StatsList>
               <StatItem 
@@ -580,7 +582,7 @@ const EmployerWallet = () => {
                 transition={{ duration: 0.3, delay: 0.3 }}
                 whileHover={{ scale: 1.02 }}
               >
-                <div className="label">Tổng tiền nạp</div>
+                <div className="label">{language === 'vi' ? 'Tổng tiền nạp' : 'Total Deposits'}</div>
                 <div className="value">{formatCurrency(totalIncome)}</div>
               </StatItem>
               <StatItem 
@@ -590,7 +592,7 @@ const EmployerWallet = () => {
                 transition={{ duration: 0.3, delay: 0.4 }}
                 whileHover={{ scale: 1.02 }}
               >
-                <div className="label">Tổng chi phí</div>
+                <div className="label">{language === 'vi' ? 'Tổng chi phí' : 'Total Expenses'}</div>
                 <div className="value">{formatCurrency(totalExpense)}</div>
               </StatItem>
               <StatItem 
@@ -600,7 +602,7 @@ const EmployerWallet = () => {
                 transition={{ duration: 0.3, delay: 0.5 }}
                 whileHover={{ scale: 1.02 }}
               >
-                <div className="label">Số dư ví</div>
+                <div className="label">{language === 'vi' ? 'Số dư ví' : 'Wallet Balance'}</div>
                 <div className="value">{formatCurrency(balance)}</div>
               </StatItem>
             </StatsList>
@@ -615,7 +617,7 @@ const EmployerWallet = () => {
         >
           <h3>
             <Receipt />
-            Hóa đơn & Biên lai
+            {language === 'vi' ? 'Hóa đơn & Biên lai' : 'Invoices & Receipts'}
           </h3>
           <ReceiptsList>
             {receipts.map((receipt, index) => (
@@ -641,7 +643,7 @@ const EmployerWallet = () => {
                   whileTap={{ scale: 0.98 }}
                 >
                   <Download />
-                  Tải xuống
+                  {language === 'vi' ? 'Tải xuống' : 'Download'}
                 </DownloadButton>
               </ReceiptItem>
             ))}

@@ -13,6 +13,7 @@ const SelectionContainer = styled.div`
   padding: 40px;
   position: relative;
   overflow: hidden;
+  color-scheme: light;
 
   @keyframes float {
     0%, 100% { transform: translate(0, 0) rotate(0deg); }

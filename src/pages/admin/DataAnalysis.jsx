@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
+import { useLanguage } from '../../context/LanguageContext';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -59,7 +60,7 @@ const Select = styled.select`
   padding: 0.5rem 1rem;
   border: 1px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.md};
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   color: ${props => props.theme.colors.text};
   font-size: 0.9rem;
   cursor: pointer;
@@ -103,7 +104,7 @@ const StatsGrid = styled.div`
 `;
 
 const StatCard = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   padding: 1.5rem;
   border-radius: ${props => props.theme.borderRadius.lg};
   box-shadow: ${props => props.theme.shadows.sm};
@@ -158,7 +159,7 @@ const ChartsGrid = styled.div`
 `;
 
 const ChartCard = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   padding: 1.5rem;
   border-radius: ${props => props.theme.borderRadius.lg};
   box-shadow: ${props => props.theme.shadows.sm};
@@ -190,7 +191,7 @@ const ChartPlaceholder = styled.div`
 `;
 
 const DataTable = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.lg};
   box-shadow: ${props => props.theme.shadows.sm};
   overflow: hidden;
@@ -252,16 +253,17 @@ const Badge = styled.span`
 `;
 
 const DataAnalysis = () => {
+  const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState('advertisement');
   const [timeRange, setTimeRange] = useState('30days');
 
   const tabs = [
-    { id: 'advertisement', label: 'Quảng Cáo', icon: TrendingUp },
-    { id: 'behavior', label: 'Hành Vi', icon: Activity },
-    { id: 'postStats', label: 'Thống Kê Bài Đăng', icon: FileText },
-    { id: 'userBehavior', label: 'Hành Vi User', icon: Users },
-    { id: 'shiftJob', label: 'Việc Làm Ca', icon: Clock },
-    { id: 'standardJob', label: 'Việc Làm Toàn Thời Gian', icon: Briefcase }
+    { id: 'advertisement', label: language === 'vi' ? 'Quảng Cáo' : 'Advertising', icon: TrendingUp },
+    { id: 'behavior', label: language === 'vi' ? 'Hành Vi' : 'Behavior', icon: Activity },
+    { id: 'postStats', label: language === 'vi' ? 'Thống Kê Bài Đăng' : 'Post Stats', icon: FileText },
+    { id: 'userBehavior', label: language === 'vi' ? 'Hành Vi User' : 'User Behavior', icon: Users },
+    { id: 'shiftJob', label: language === 'vi' ? 'Việc Làm Ca' : 'Shift Jobs', icon: Clock },
+    { id: 'standardJob', label: language === 'vi' ? 'Việc Làm Toàn Thời Gian' : 'Full-time Jobs', icon: Briefcase }
   ];
 
   const renderAdvertisementAnalysis = () => (
@@ -270,11 +272,11 @@ const DataAnalysis = () => {
         <StatCard $color="#6366f1">
           <StatHeader>
             <div>
-              <StatLabel>Tổng Chi Phí Quảng Cáo</StatLabel>
-              <StatValue>487,5 triệu</StatValue>
+              <StatLabel>{language === 'vi' ? 'Tổng Chi Phí Quảng Cáo' : 'Total Ad Spend'}</StatLabel>
+              <StatValue>{language === 'vi' ? '487,5 triệu' : '487.5 million'}</StatValue>
               <StatTrend $positive={true}>
                 <TrendingUp size={16} />
-                +23% so với tháng trước
+                {language === 'vi' ? '+23% so với tháng trước' : '+23% vs last month'}
               </StatTrend>
             </div>
             <StatIcon $color="#6366f1">
@@ -286,11 +288,11 @@ const DataAnalysis = () => {
         <StatCard $color="#10b981">
           <StatHeader>
             <div>
-              <StatLabel>Lượt Hiển Thị</StatLabel>
+              <StatLabel>{language === 'vi' ? 'Lượt Hiển Thị' : 'Impressions'}</StatLabel>
               <StatValue>2,4M</StatValue>
               <StatTrend $positive={true}>
                 <TrendingUp size={16} />
-                +18% so với tháng trước
+                {language === 'vi' ? '+18% so với tháng trước' : '+18% vs last month'}
               </StatTrend>
             </div>
             <StatIcon $color="#10b981">
@@ -302,11 +304,11 @@ const DataAnalysis = () => {
         <StatCard $color="#f59e0b">
           <StatHeader>
             <div>
-              <StatLabel>Lượt Nhấp Chuột</StatLabel>
+              <StatLabel>{language === 'vi' ? 'Lượt Nhấp Chuột' : 'Clicks'}</StatLabel>
               <StatValue>156K</StatValue>
               <StatTrend $positive={true}>
                 <TrendingUp size={16} />
-                +15% so với tháng trước
+                {language === 'vi' ? '+15% so với tháng trước' : '+15% vs last month'}
               </StatTrend>
             </div>
             <StatIcon $color="#f59e0b">
@@ -318,11 +320,11 @@ const DataAnalysis = () => {
         <StatCard $color="#8b5cf6">
           <StatHeader>
             <div>
-              <StatLabel>Tỷ Lệ Nhấp (CTR)</StatLabel>
+              <StatLabel>{language === 'vi' ? 'Tỷ Lệ Nhấp (CTR)' : 'Click-through Rate (CTR)'}</StatLabel>
               <StatValue>6.5%</StatValue>
               <StatTrend $positive={true}>
                 <TrendingUp size={16} />
-                +2.1% so với tháng trước
+                {language === 'vi' ? '+2.1% so với tháng trước' : '+2.1% vs last month'}
               </StatTrend>
             </div>
             <StatIcon $color="#8b5cf6">
@@ -335,80 +337,80 @@ const DataAnalysis = () => {
       <ChartsGrid>
         <ChartCard>
           <ChartHeader>
-            <ChartTitle>Chi Phí Quảng Cáo Theo Thời Gian</ChartTitle>
+            <ChartTitle>{language === 'vi' ? 'Chi Phí Quảng Cáo Theo Thời Gian' : 'Ad Spend Over Time'}</ChartTitle>
           </ChartHeader>
           <ChartPlaceholder>
             <BarChart3 size={48} />
-            <span>Biểu đồ chi phí quảng cáo</span>
+            <span>{language === 'vi' ? 'Biểu đồ chi phí quảng cáo' : 'Ad spend chart'}</span>
           </ChartPlaceholder>
         </ChartCard>
 
         <ChartCard>
           <ChartHeader>
-            <ChartTitle>Hiệu Suất Quảng Cáo</ChartTitle>
+            <ChartTitle>{language === 'vi' ? 'Hiệu Suất Quảng Cáo' : 'Ad Performance'}</ChartTitle>
           </ChartHeader>
           <ChartPlaceholder>
             <TrendingUp size={48} />
-            <span>Biểu đồ hiệu suất</span>
+            <span>{language === 'vi' ? 'Biểu đồ hiệu suất' : 'Performance chart'}</span>
           </ChartPlaceholder>
         </ChartCard>
       </ChartsGrid>
 
       <DataTable>
         <TableHeader>
-          <TableTitle>Top Chiến Dịch Quảng Cáo</TableTitle>
+          <TableTitle>{language === 'vi' ? 'Top Chiến Dịch Quảng Cáo' : 'Top Ad Campaigns'}</TableTitle>
         </TableHeader>
         <Table>
           <thead>
             <tr>
-              <Th>Tên Chiến Dịch</Th>
-              <Th>Chi Phí</Th>
-              <Th>Lượt Hiển Thị</Th>
-              <Th>Lượt Nhấp</Th>
+              <Th>{language === 'vi' ? 'Tên Chiến Dịch' : 'Campaign Name'}</Th>
+              <Th>{language === 'vi' ? 'Chi Phí' : 'Cost'}</Th>
+              <Th>{language === 'vi' ? 'Lượt Hiển Thị' : 'Impressions'}</Th>
+              <Th>{language === 'vi' ? 'Lượt Nhấp' : 'Clicks'}</Th>
               <Th>CTR</Th>
-              <Th>Trạng Thái</Th>
+              <Th>{language === 'vi' ? 'Trạng Thái' : 'Status'}</Th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <Td>Tuyển Dụng IT Hàng Đầu</Td>
+              <Td>{language === 'vi' ? 'Tuyển Dụng IT Hàng Đầu' : 'Top IT Hiring'}</Td>
               <Td>125,000,000đ</Td>
               <Td>850,000</Td>
               <Td>55,250</Td>
               <Td>6.5%</Td>
-              <Td><Badge $variant="success">Đang chạy</Badge></Td>
+              <Td><Badge $variant="success">{language === 'vi' ? 'Đang chạy' : 'Running'}</Badge></Td>
             </tr>
             <tr>
-              <Td>Việc Làm Bán Thời Gian</Td>
+              <Td>{language === 'vi' ? 'Việc Làm Bán Thời Gian' : 'Part-time Jobs'}</Td>
               <Td>78,500,000đ</Td>
               <Td>520,000</Td>
               <Td>31,200</Td>
               <Td>6.0%</Td>
-              <Td><Badge $variant="success">Đang chạy</Badge></Td>
+              <Td><Badge $variant="success">{language === 'vi' ? 'Đang chạy' : 'Running'}</Badge></Td>
             </tr>
             <tr>
-              <Td>Cơ Hội Nghề Nghiệp 2024</Td>
+              <Td>{language === 'vi' ? 'Cơ Hội Nghề Nghiệp 2024' : 'Career Opportunities 2024'}</Td>
               <Td>95,000,000đ</Td>
               <Td>680,000</Td>
               <Td>47,600</Td>
               <Td>7.0%</Td>
-              <Td><Badge $variant="success">Đang chạy</Badge></Td>
+              <Td><Badge $variant="success">{language === 'vi' ? 'Đang chạy' : 'Running'}</Badge></Td>
             </tr>
             <tr>
-              <Td>Tuyển Dụng Fresher</Td>
+              <Td>{language === 'vi' ? 'Tuyển Dụng Fresher' : 'Fresher Hiring'}</Td>
               <Td>62,000,000đ</Td>
               <Td>420,000</Td>
               <Td>23,520</Td>
               <Td>5.6%</Td>
-              <Td><Badge $variant="warning">Tạm dừng</Badge></Td>
+              <Td><Badge $variant="warning">{language === 'vi' ? 'Tạm dừng' : 'Paused'}</Badge></Td>
             </tr>
             <tr>
-              <Td>Nhân Viên Kinh Doanh</Td>
+              <Td>{language === 'vi' ? 'Nhân Viên Kinh Doanh' : 'Sales Staff'}</Td>
               <Td>127,000,000đ</Td>
               <Td>930,000</Td>
               <Td>65,100</Td>
               <Td>7.0%</Td>
-              <Td><Badge $variant="success">Đang chạy</Badge></Td>
+              <Td><Badge $variant="success">{language === 'vi' ? 'Đang chạy' : 'Running'}</Badge></Td>
             </tr>
           </tbody>
         </Table>
@@ -424,35 +426,35 @@ const DataAnalysis = () => {
         return (
           <ChartPlaceholder style={{ height: '400px', background: 'white', borderRadius: '12px' }}>
             <Activity size={64} />
-            <span style={{ fontSize: '1.1rem' }}>Phân tích hành vi người dùng</span>
+            <span style={{ fontSize: '1.1rem' }}>{language === 'vi' ? 'Phân tích hành vi người dùng' : 'User behavior analysis'}</span>
           </ChartPlaceholder>
         );
       case 'postStats':
         return (
           <ChartPlaceholder style={{ height: '400px', background: 'white', borderRadius: '12px' }}>
             <FileText size={64} />
-            <span style={{ fontSize: '1.1rem' }}>Thống kê bài đăng</span>
+            <span style={{ fontSize: '1.1rem' }}>{language === 'vi' ? 'Thống kê bài đăng' : 'Post statistics'}</span>
           </ChartPlaceholder>
         );
       case 'userBehavior':
         return (
           <ChartPlaceholder style={{ height: '400px', background: 'white', borderRadius: '12px' }}>
             <Users size={64} />
-            <span style={{ fontSize: '1.1rem' }}>Hành vi người dùng chi tiết</span>
+            <span style={{ fontSize: '1.1rem' }}>{language === 'vi' ? 'Hành vi người dùng chi tiết' : 'Detailed user behavior'}</span>
           </ChartPlaceholder>
         );
       case 'shiftJob':
         return (
           <ChartPlaceholder style={{ height: '400px', background: 'white', borderRadius: '12px' }}>
             <Clock size={64} />
-            <span style={{ fontSize: '1.1rem' }}>Phân tích việc làm ca</span>
+            <span style={{ fontSize: '1.1rem' }}>{language === 'vi' ? 'Phân tích việc làm ca' : 'Shift-job analysis'}</span>
           </ChartPlaceholder>
         );
       case 'standardJob':
         return (
           <ChartPlaceholder style={{ height: '400px', background: 'white', borderRadius: '12px' }}>
             <Briefcase size={64} />
-            <span style={{ fontSize: '1.1rem' }}>Phân tích việc làm toàn thời gian</span>
+            <span style={{ fontSize: '1.1rem' }}>{language === 'vi' ? 'Phân tích việc làm toàn thời gian' : 'Full-time job analysis'}</span>
           </ChartPlaceholder>
         );
       default:
@@ -464,19 +466,19 @@ const DataAnalysis = () => {
     <DashboardLayout role="admin">
       <PageContainer>
         <PageHeader>
-          <Title>Phân Tích Dữ Liệu</Title>
-          <Subtitle>Theo dõi và phân tích dữ liệu nền tảng</Subtitle>
+          <Title>{language === 'vi' ? 'Phân Tích Dữ Liệu' : 'Data Analysis'}</Title>
+          <Subtitle>{language === 'vi' ? 'Theo dõi và phân tích dữ liệu nền tảng' : 'Track and analyze platform data'}</Subtitle>
         </PageHeader>
 
         <FilterBar>
           <FilterGroup>
-            <FilterLabel>Khoảng thời gian:</FilterLabel>
+            <FilterLabel>{language === 'vi' ? 'Khoảng thời gian:' : 'Time range:'}</FilterLabel>
             <Select value={timeRange} onChange={(e) => setTimeRange(e.target.value)}>
-              <option value="7days">7 ngày qua</option>
-              <option value="30days">30 ngày qua</option>
-              <option value="3months">3 tháng qua</option>
-              <option value="year">Năm nay</option>
-              <option value="custom">Tùy chỉnh</option>
+              <option value="7days">{language === 'vi' ? '7 ngày qua' : 'Last 7 days'}</option>
+              <option value="30days">{language === 'vi' ? '30 ngày qua' : 'Last 30 days'}</option>
+              <option value="3months">{language === 'vi' ? '3 tháng qua' : 'Last 3 months'}</option>
+              <option value="year">{language === 'vi' ? 'Năm nay' : 'This year'}</option>
+              <option value="custom">{language === 'vi' ? 'Tùy chỉnh' : 'Custom'}</option>
             </Select>
           </FilterGroup>
         </FilterBar>

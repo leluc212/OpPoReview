@@ -1,107 +1,108 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
 import TableFilter from '../../components/TableFilter';
 import Modal from '../../components/Modal';
 import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
-// Mock data
-const INITIAL_APPLICATIONS = [
+// Mock data generator (language-aware)
+const getInitialApplications = (language) => [
   { 
     id: 1, 
-    candidate: 'Hiếu sàn', 
+    candidate: language === 'vi' ? 'Hiếu sàn' : 'Hieu san', 
     job: 'Senior React Developer', 
-    applied: '2 giờ trước', 
+    applied: language === 'vi' ? '2 giờ trước' : '2 hours ago', 
     status: 'pending', 
     completed: false, 
     marked: false, 
     messagesDeleted: false,
     email: 'hieuseu@example.com',
     phone: '0123 456 789',
-    location: 'Hà Nội',
-    experience: '5 năm',
-    education: 'Đại học Bách Khoa',
-    skills: ['React', 'Node.js', 'TypeScript', 'MongoDB', 'AWS'],
-    bio: 'Tôi là một Senior Developer với 5 năm kinh nghiệm trong phát triển web. Đam mê công nghệ và luôn học hỏi những điều mới.'
+    location: language === 'vi' ? 'Hà Nội' : 'Hanoi',
+    experience: language === 'vi' ? '5 năm' : '5 years',
+    education: language === 'vi' ? 'Đại học Bách Khoa' : 'Hanoi University of Science and Technology',
+    skills: language === 'vi' ? ['React', 'Node.js', 'TypeScript', 'MongoDB', 'AWS'] : ['React', 'Node.js', 'TypeScript', 'MongoDB', 'AWS'],
+    bio: language === 'vi' ? 'Tôi là một Senior Developer với 5 năm kinh nghiệm trong phát triển web. Đam mê công nghệ và luôn học hỏi những điều mới.' : 'I am a Senior Developer with 5 years of experience in web development. Passionate about technology and continuously learning.'
   },
   { 
     id: 2, 
-    candidate: 'Duy sàn', 
-    job: 'Thu ngân', 
-    applied: '5 giờ trước', 
+    candidate: language === 'vi' ? 'Duy sàn' : 'Duy san', 
+    job: language === 'vi' ? 'Thu ngân' : 'Cashier', 
+    applied: language === 'vi' ? '5 giờ trước' : '5 hours ago', 
     status: 'pending', 
     completed: false, 
     marked: false, 
     messagesDeleted: false,
     email: 'duuyseu@example.com',
     phone: '0987 654 321',
-    location: 'TP. Hồ Chí Minh',
-    experience: '2 năm',
-    education: 'Cao đẳng Kinh tế',
-    skills: ['Kế toán', 'Excel', 'Giao tiếp', 'Quản lý tiền mặt'],
-    bio: 'Có kinh nghiệm làm việc tại các cửa hàng bán lẻ và nhà hàng. Cẩn thận, chính xác và trung thực.'
+    location: language === 'vi' ? 'TP. Hồ Chí Minh' : 'HCMC',
+    experience: language === 'vi' ? '2 năm' : '2 years',
+    education: language === 'vi' ? 'Cao đẳng Kinh tế' : 'College of Economics',
+    skills: language === 'vi' ? ['Kế toán', 'Excel', 'Giao tiếp', 'Quản lý tiền mặt'] : ['Accounting', 'Excel', 'Communication', 'Cash handling'],
+    bio: language === 'vi' ? 'Có kinh nghiệm làm việc tại các cửa hàng bán lẻ và nhà hàng. Cẩn thận, chính xác và trung thực.' : 'Experienced in retail and restaurant roles. Detail-oriented, accurate and honest.'
   },
   { 
     id: 3, 
     candidate: 'Nheo', 
-    job: 'Nhân viên pha chế', 
-    applied: '1 ngày trước', 
+    job: language === 'vi' ? 'Nhân viên pha chế' : 'Barista', 
+    applied: language === 'vi' ? '1 ngày trước' : '1 day ago', 
     status: 'approved', 
     completed: false, 
     marked: false, 
     messagesDeleted: false,
     email: 'nheo@example.com',
     phone: '0909 123 456',
-    location: 'Đà Nẵng',
-    experience: '3 năm',
-    education: 'Trung cấp Ẩm thực',
-    skills: ['Pha chế cà phê', 'Trà sữa', 'Cocktail', 'Latte Art', 'Phục vụ khách hàng'],
-    bio: 'Đam mê nghệ thuật pha chế và tạo ra những ly đồ uống hoàn hảo. Có chứng chỉ Barista quốc tế.'
+    location: language === 'vi' ? 'Đà Nẵng' : 'Da Nang',
+    experience: language === 'vi' ? '3 năm' : '3 years',
+    education: language === 'vi' ? 'Trung cấp Ẩm thực' : 'Vocational Culinary School',
+    skills: language === 'vi' ? ['Pha chế cà phê', 'Trà sữa', 'Cocktail', 'Latte Art', 'Phục vụ khách hàng'] : ['Coffee brewing', 'Bubble tea', 'Cocktail', 'Latte Art', 'Customer service'],
+    bio: language === 'vi' ? 'Đam mê nghệ thuật pha chế và tạo ra những ly đồ uống hoàn hảo. Có chứng chỉ Barista quốc tế.' : 'Passionate about beverage crafting and creating perfect drinks. Holds an international Barista certificate.'
   },
   { 
     id: 4, 
     candidate: 'Gemmin', 
     job: 'Senior React Developer', 
-    applied: '2 ngày trước', 
+    applied: language === 'vi' ? '2 ngày trước' : '2 days ago', 
     status: 'rejected', 
     completed: false, 
     marked: false, 
     messagesDeleted: false,
     email: 'gemminseu@example.com',
     phone: '0901 234 567',
-    location: 'Hải Phòng',
-    experience: '4 năm',
-    education: 'Đại học FPT',
+    location: language === 'vi' ? 'Hải Phòng' : 'Hai Phong',
+    experience: language === 'vi' ? '4 năm' : '4 years',
+    education: language === 'vi' ? 'Đại học FPT' : 'FPT University',
     skills: ['React', 'Vue.js', 'JavaScript', 'CSS', 'REST API'],
-    bio: 'Full-stack Developer với kinh nghiệm phát triển nhiều dự án lớn. Làm việc nhóm tốt và có khả năng giải quyết vấn đề.'
+    bio: language === 'vi' ? 'Full-stack Developer với kinh nghiệm phát triển nhiều dự án lớn. Làm việc nhóm tốt và có khả năng giải quyết vấn đề.' : 'Full-stack Developer experienced in large projects. Strong teamwork and problem-solving skills.'
   },
   { 
     id: 5, 
     candidate: 'Zun', 
-    job: 'Nhân viên phục vụ', 
-    applied: '1 tuần trước', 
+    job: language === 'vi' ? 'Nhân viên phục vụ' : 'Waiter/Server', 
+    applied: language === 'vi' ? '1 tuần trước' : '1 week ago', 
     status: 'pending', 
     completed: false, 
     marked: false, 
     messagesDeleted: false,
     email: 'zunseu@example.com',
     phone: '0912 345 678',
-    location: 'Cần Thơ',
-    experience: '1 năm',
-    education: 'Trung học phổ thông',
-    skills: ['Phục vụ bàn', 'Giao tiếp', 'Nhanh nhẹn', 'Làm việc nhóm'],
-    bio: 'Nhiệt tình, vui vẻ và luôn sẵn sàng học hỏi. Có kinh nghiệm làm việc tại các nhà hàng buffet.'
+    location: language === 'vi' ? 'Cần Thơ' : 'Can Tho',
+    experience: language === 'vi' ? '1 năm' : '1 year',
+    education: language === 'vi' ? 'Trung học phổ thông' : 'High School',
+    skills: language === 'vi' ? ['Phục vụ bàn', 'Giao tiếp', 'Nhanh nhẹn', 'Làm việc nhóm'] : ['Table service', 'Communication', 'Fast-paced', 'Teamwork'],
+    bio: language === 'vi' ? 'Nhiệt tình, vui vẻ và luôn sẵn sàng học hỏi. Có kinh nghiệm làm việc tại các nhà hàng buffet.' : 'Enthusiastic, friendly and eager to learn. Experienced in buffet restaurant service.'
   },
 ];
 
-const FILTER_OPTIONS = [
-  { value: 'pending', label: 'Chờ duyệt' },
-  { value: 'approved', label: 'Chấp nhận' },
-  { value: 'rejected', label: 'Từ chối' },
-  { value: 'completed', label: 'Hoàn thành' },
-  { value: 'marked', label: 'Đã đánh dấu' },
-];
+const FILTER_OPTIONS = (language) => ([
+  { value: 'pending', label: language === 'vi' ? 'Chờ duyệt' : 'Pending' },
+  { value: 'approved', label: language === 'vi' ? 'Chấp nhận' : 'Approved' },
+  { value: 'rejected', label: language === 'vi' ? 'Từ chối' : 'Rejected' },
+  { value: 'completed', label: language === 'vi' ? 'Hoàn thành' : 'Completed' },
+  { value: 'marked', label: language === 'vi' ? 'Đã đánh dấu' : 'Marked' },
+]);
 
 const ApplicationsContainer = styled.div``;
 
@@ -293,178 +294,190 @@ const SkillTag = styled.span`
 `;
 
 // Profile Detail Modal Component
-const ProfileDetailModal = React.memo(({ candidate, onClose }) => (
-  <>
-    <ProfileHeader>
-      <h2>{candidate.candidate}</h2>
-      <p>Ứng tuyển vị trí: {candidate.job}</p>
-    </ProfileHeader>
+const ProfileDetailModal = React.memo(({ candidate, onClose }) => {
+  const { language } = useLanguage();
 
-    <ProfileContent>
-      <ProfileSection>
-        <h3><FileText /> Thông tin liên hệ</h3>
-        <InfoGrid>
-          <InfoItem>
-            <Mail />
-            <div>
-              <div className="label">Email</div>
-              <div className="value">{candidate.email}</div>
-            </div>
-          </InfoItem>
-          <InfoItem>
-            <Phone />
-            <div>
-              <div className="label">Điện thoại</div>
-              <div className="value">{candidate.phone}</div>
-            </div>
-          </InfoItem>
-          <InfoItem>
-            <MapPin />
-            <div>
-              <div className="label">Địa điểm</div>
-              <div className="value">{candidate.location}</div>
-            </div>
-          </InfoItem>
-          <InfoItem>
-            <Calendar />
-            <div>
-              <div className="label">Thời gian ứng tuyển</div>
-              <div className="value">{candidate.applied}</div>
-            </div>
-          </InfoItem>
-        </InfoGrid>
-      </ProfileSection>
+  return (
+    <>
+      <ProfileHeader>
+        <h2>{candidate.candidate}</h2>
+        <p>{language === 'vi' ? 'Ứng tuyển vị trí:' : 'Applied for:'} {candidate.job}</p>
+      </ProfileHeader>
 
-      <ProfileSection>
-        <h3><Award /> Học vấn & Kinh nghiệm</h3>
-        <InfoGrid>
-          <InfoItem>
-            <Award />
-            <div>
-              <div className="label">Trình độ học vấn</div>
-              <div className="value">{candidate.education}</div>
-            </div>
-          </InfoItem>
-          <InfoItem>
-            <Briefcase />
-            <div>
-              <div className="label">Kinh nghiệm</div>
-              <div className="value">{candidate.experience}</div>
-            </div>
-          </InfoItem>
-        </InfoGrid>
-      </ProfileSection>
+      <ProfileContent>
+        <ProfileSection>
+          <h3><FileText /> {language === 'vi' ? 'Thông tin liên hệ' : 'Contact Information'}</h3>
+          <InfoGrid>
+            <InfoItem>
+              <Mail />
+              <div>
+                <div className="label">{language === 'vi' ? 'Email' : 'Email'}</div>
+                <div className="value">{candidate.email}</div>
+              </div>
+            </InfoItem>
+            <InfoItem>
+              <Phone />
+              <div>
+                <div className="label">{language === 'vi' ? 'Điện thoại' : 'Phone'}</div>
+                <div className="value">{candidate.phone}</div>
+              </div>
+            </InfoItem>
+            <InfoItem>
+              <MapPin />
+              <div>
+                <div className="label">{language === 'vi' ? 'Địa điểm' : 'Location'}</div>
+                <div className="value">{candidate.location}</div>
+              </div>
+            </InfoItem>
+            <InfoItem>
+              <Calendar />
+              <div>
+                <div className="label">{language === 'vi' ? 'Thời gian ứng tuyển' : 'Applied'}</div>
+                <div className="value">{candidate.applied}</div>
+              </div>
+            </InfoItem>
+          </InfoGrid>
+        </ProfileSection>
 
-      <ProfileSection>
-        <h3><Briefcase /> Kỹ năng</h3>
-        <div>
-          {candidate.skills.map((skill, index) => (
-            <SkillTag key={index}>{skill}</SkillTag>
-          ))}
-        </div>
-      </ProfileSection>
+        <ProfileSection>
+          <h3><Award /> {language === 'vi' ? 'Học vấn & Kinh nghiệm' : 'Education & Experience'}</h3>
+          <InfoGrid>
+            <InfoItem>
+              <Award />
+              <div>
+                <div className="label">{language === 'vi' ? 'Trình độ học vấn' : 'Education'}</div>
+                <div className="value">{candidate.education}</div>
+              </div>
+            </InfoItem>
+            <InfoItem>
+              <Briefcase />
+              <div>
+                <div className="label">{language === 'vi' ? 'Kinh nghiệm' : 'Experience'}</div>
+                <div className="value">{candidate.experience}</div>
+              </div>
+            </InfoItem>
+          </InfoGrid>
+        </ProfileSection>
 
-      <ProfileSection>
-        <h3><FileText /> Giới thiệu bản thân</h3>
-        <p style={{ lineHeight: '1.6', color: '#64748B', fontSize: '14px', margin: 0 }}>
-          {candidate.bio}
-        </p>
-      </ProfileSection>
-    </ProfileContent>
-  </>
-));
+        <ProfileSection>
+          <h3><Briefcase /> {language === 'vi' ? 'Kỹ năng' : 'Skills'}</h3>
+          <div>
+            {candidate.skills.map((skill, index) => (
+              <SkillTag key={index}>{skill}</SkillTag>
+            ))}
+          </div>
+        </ProfileSection>
+
+        <ProfileSection>
+          <h3><FileText /> {language === 'vi' ? 'Giới thiệu bản thân' : 'About'}</h3>
+          <p style={{ lineHeight: '1.6', color: '#64748B', fontSize: '14px', margin: 0 }}>
+            {candidate.bio}
+          </p>
+        </ProfileSection>
+      </ProfileContent>
+    </>
+  );
+});
 
 ProfileDetailModal.displayName = 'ProfileDetailModal';
 
 // Application Row Component
+
 const ApplicationRow = React.memo(({ 
   app, 
   onViewProfile, 
   onCompleteJob, 
   onMarkCandidate 
-}) => (
-  <tr>
-    <td style={{ fontWeight: 600 }}>
-      {app.candidate}
-      {app.marked && (
-        <MarkedBadge style={{ marginLeft: '8px' }}>
-          <Star /> Đã đánh dấu
-        </MarkedBadge>
-      )}
-    </td>
-    <td>{app.job}</td>
-    <td style={{ color: '#64748B' }}>{app.applied}</td>
-    <td>
-      <StatusBadge status={app.completed ? 'completed' : app.status} />
-    </td>
-    <td>
-      <ActionButton onClick={() => onViewProfile(app)}>
-        <Eye /> Xem Hồ Sơ
-      </ActionButton>
-      
-      {!app.completed && app.status === 'approved' && (
-        <ActionButton 
-          $variant="success"
-          onClick={() => onCompleteJob(app.id)}
-        >
-          <CheckCircle /> Hoàn thành
+}) => {
+  const { language } = useLanguage();
+
+  return (
+    <tr>
+      <td style={{ fontWeight: 600 }}>
+        {app.candidate}
+        {app.marked && (
+          <MarkedBadge style={{ marginLeft: '8px' }}>
+            <Star /> {language === 'vi' ? 'Đã đánh dấu' : 'Marked'}
+          </MarkedBadge>
+        )}
+      </td>
+      <td>{app.job}</td>
+      <td style={{ color: '#64748B' }}>{app.applied}</td>
+      <td>
+        <StatusBadge status={app.completed ? 'completed' : app.status} />
+      </td>
+      <td>
+        <ActionButton onClick={() => onViewProfile(app)}>
+          <Eye /> {language === 'vi' ? 'Xem Hồ Sơ' : 'View Profile'}
         </ActionButton>
-      )}
-      
-      {app.completed && (
-        <ActionButton 
-          $variant="warning"
-          onClick={() => onMarkCandidate(app.id)}
-        >
-          <Star /> {app.marked ? 'Bỏ đánh dấu' : 'Đánh dấu'}
-        </ActionButton>
-      )}
-    </td>
-  </tr>
-));
+        
+        {!app.completed && app.status === 'approved' && (
+          <ActionButton 
+            $variant="success"
+            onClick={() => onCompleteJob(app.id)}
+          >
+            <CheckCircle /> {language === 'vi' ? 'Hoàn thành' : 'Complete'}
+          </ActionButton>
+        )}
+        
+        {app.completed && (
+          <ActionButton 
+            $variant="warning"
+            onClick={() => onMarkCandidate(app.id)}
+          >
+            <Star /> {app.marked ? (language === 'vi' ? 'Bỏ đánh dấu' : 'Unmark') : (language === 'vi' ? 'Đánh dấu' : 'Mark')}
+          </ActionButton>
+        )}
+      </td>
+    </tr>
+  );
+});
 
 ApplicationRow.displayName = 'ApplicationRow';
 
 const Applications = () => {
+  const { language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilters, setStatusFilters] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
-  const [applications, setApplications] = useState(INITIAL_APPLICATIONS);
+  const [applications, setApplications] = useState(() => getInitialApplications(language));
 
-  // Memoized filtered applications
+  useEffect(() => {
+    setApplications(getInitialApplications(language));
+  }, [language]);
+
   const filteredApplications = useMemo(() => {
     return applications.filter(app => {
-      const matchesSearch = !searchTerm || 
+      const matchesSearch = !searchTerm ||
         app.candidate.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.job.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesStatus = statusFilters.length === 0 || 
+
+      const matchesStatus = statusFilters.length === 0 ||
         statusFilters.includes(app.status) ||
         (statusFilters.includes('marked') && app.marked);
-      
+
       return matchesSearch && matchesStatus;
     });
   }, [applications, searchTerm, statusFilters]);
 
-  // Optimized handlers with useCallback
   const handleFilterToggle = useCallback((filterValue) => {
-    setStatusFilters(prev => 
-      prev.includes(filterValue) 
+    setStatusFilters(prev =>
+      prev.includes(filterValue)
         ? prev.filter(f => f !== filterValue)
         : [...prev, filterValue]
     );
   }, []);
 
   const handleCompleteJob = useCallback((id) => {
-    setApplications(prev => prev.map(app => 
-      app.id === id 
-        ? { ...app, completed: true, status: 'completed', messagesDeleted: true } 
+    setApplications(prev => prev.map(app =>
+      app.id === id
+        ? { ...app, completed: true, status: 'completed', messagesDeleted: true }
         : app
     ));
   }, []);
 
   const handleMarkCandidate = useCallback((id) => {
-    setApplications(prev => prev.map(app => 
+    setApplications(prev => prev.map(app =>
       app.id === id ? { ...app, marked: !app.marked } : app
     ));
   }, []);
@@ -481,27 +494,29 @@ const Applications = () => {
     <DashboardLayout role="employer">
       <ApplicationsContainer>
         <PageHeader>
-          <h1>Hồ Sơ Ứng Tuyển</h1>
-          <p style={{ color: '#64748B' }}>Xem và quản lý hồ sơ ứng viên</p>
+          <h1>{language === 'vi' ? 'Hồ Sơ Ứng Tuyển' : 'Applications'}</h1>
+          <p style={{ color: '#64748B' }}>
+            {language === 'vi' ? 'Xem và quản lý hồ sơ ứng viên' : 'View and manage candidate applications'}
+          </p>
         </PageHeader>
 
-        <TableFilter 
+        <TableFilter
           searchValue={searchTerm}
           onSearchChange={setSearchTerm}
-          filterOptions={FILTER_OPTIONS}
+          filterOptions={FILTER_OPTIONS(language)}
           activeFilters={statusFilters}
           onFilterToggle={handleFilterToggle}
-          searchPlaceholder="Tìm kiếm theo ứng viên hoặc vị trí..."
+          searchPlaceholder={language === 'vi' ? 'Tìm kiếm theo ứng viên hoặc vị trí...' : 'Search by candidate or position...'}
         />
 
         <Table>
           <thead>
             <tr>
-              <th>Ứng Viên</th>
-              <th>Vị Trí</th>
-              <th>Thời Gian Ứng Tuyển</th>
-              <th>Trạng Thái</th>
-              <th>Thao Tác</th>
+              <th>{language === 'vi' ? 'Ứng Viên' : 'Candidate'}</th>
+              <th>{language === 'vi' ? 'Vị Trí' : 'Position'}</th>
+              <th>{language === 'vi' ? 'Thời Gian Ứng Tuyển' : 'Applied'}</th>
+              <th>{language === 'vi' ? 'Trạng Thái' : 'Status'}</th>
+              <th>{language === 'vi' ? 'Thao Tác' : 'Actions'}</th>
             </tr>
           </thead>
           <tbody>
@@ -519,15 +534,15 @@ const Applications = () => {
       </ApplicationsContainer>
 
       {selectedCandidate && (
-        <Modal 
-          isOpen={true} 
+        <Modal
+          isOpen={true}
           onClose={handleCloseProfile}
           size="large"
           noPadding={true}
         >
-          <ProfileDetailModal 
-            candidate={selectedCandidate} 
-            onClose={handleCloseProfile} 
+          <ProfileDetailModal
+            candidate={selectedCandidate}
+            onClose={handleCloseProfile}
           />
         </Modal>
       )}

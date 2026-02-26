@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import StatusBadge from '../../components/StatusBadge';
+import { useLanguage } from '../../context/LanguageContext';
 
 // Animations
 const fadeIn = `
@@ -95,7 +96,7 @@ const SearchInput = styled.div`
   gap: 12px;
   padding: 12px 20px;
   border-radius: ${props => props.theme.borderRadius.lg};
-  background: ${props => props.theme.colors.bgLight};
+  background: ${props => props.theme.colors.bgDark};
   
   svg {
     width: 20px;
@@ -177,7 +178,7 @@ const CategoryTab = styled(motion.button)`
   padding: 20px 28px;
   background: ${props => props.$active 
     ? `linear-gradient(135deg, ${props.theme.colors.primary}, ${props.theme.colors.secondary})` 
-    : 'white'};
+    : props.theme.colors.bgLight};
   color: ${props => props.$active ? 'white' : props.theme.colors.text};
   border: 2px solid ${props => props.$active ? 'transparent' : props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.xl};
@@ -217,7 +218,7 @@ const MainLayout = styled.div`
 `;
 
 const FilterSidebar = styled(motion.aside)`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.xl};
   padding: 24px;
   border: 1px solid ${props => props.theme.colors.border};
@@ -398,7 +399,7 @@ const SortSelect = styled.select`
   padding: 10px 16px;
   border: 1px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.lg};
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   color: ${props => props.theme.colors.text};
   font-size: 14px;
   font-weight: 500;
@@ -485,7 +486,7 @@ const JobsGrid = styled.div`
 `;
 
 const JobCardWrapper = styled(motion.div)`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.lg};
   border: 1px solid ${props => props.theme.colors.border};
   padding: 14px;
@@ -682,7 +683,7 @@ const SaveButton = styled(motion.button)`
   height: 34px;
   border-radius: ${props => props.theme.borderRadius.md};
   border: 1px solid ${props => props.theme.colors.border};
-  background: ${props => props.$saved ? props.theme.colors.warning + '15' : 'white'};
+  background: ${props => props.$saved ? props.theme.colors.warning + '15' : props.theme.colors.bgLight};
   color: ${props => props.$saved ? props.theme.colors.warning : props.theme.colors.textLight};
   cursor: pointer;
   display: flex;
@@ -729,6 +730,27 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   const distance = R * c;
   return distance;
+};
+
+// Translate salary string based on language
+const translateSalary = (salaryStr, language) => {
+  if (language === 'vi') return salaryStr;
+  return salaryStr
+    .replace(/triệu VND/g, 'million VND')
+    .replace(/\/ca/g, '/shift')
+    .replace(/\/giờ/g, '/hour');
+};
+
+// Translate location string based on language
+const translateLocation = (locationStr, language) => {
+  if (language === 'vi') return locationStr;
+  return locationStr
+    .replace(/Quận/g, 'District')
+    .replace(/TP\.HCM/g, 'HCMC')
+    .replace(/Hà Nội/g, 'Hanoi')
+    .replace(/Đà Nẵng/g, 'Da Nang')
+    .replace(/Tân Bình/g, 'Tan Binh')
+    .replace(/Phú Nhuận/g, 'Phu Nhuan');
 };
 
 // Jobs data - moved outside component to avoid re-creation on each render
@@ -1282,6 +1304,7 @@ const JOBS_DATA = [
 ];
 
 const JobListing = () => {
+  const { language } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const resultsRef = useRef(null);
@@ -1516,20 +1539,30 @@ const JobListing = () => {
     // Search by keyword
     if (searchKeyword.trim()) {
       const keyword = searchKeyword.toLowerCase().trim();
-      result = result.filter(job => 
-        job.title.toLowerCase().includes(keyword) ||
-        job.company.toLowerCase().includes(keyword) ||
-        job.tags.some(tag => tag.toLowerCase().includes(keyword)) ||
-        job.location.toLowerCase().includes(keyword)
-      );
+      result = result.filter(job => {
+        const locationParts = job.location.toLowerCase().split(',').map(part => part.trim());
+        const locationMatch = locationParts.some(part => 
+          part === keyword || part.startsWith(keyword + ' ') || part.includes(keyword)
+        );
+        return (
+          job.title.toLowerCase().includes(keyword) ||
+          job.company.toLowerCase().includes(keyword) ||
+          job.tags.some(tag => tag.toLowerCase().includes(keyword)) ||
+          locationMatch
+        );
+      });
     }
 
     // Filter by location
     if (selectedLocation.trim()) {
       const location = selectedLocation.toLowerCase().trim();
-      result = result.filter(job => 
-        job.location.toLowerCase().includes(location)
-      );
+      result = result.filter(job => {
+        const locationParts = job.location.toLowerCase().split(',').map(part => part.trim());
+        // Exact match or starts with search term followed by space
+        return locationParts.some(part => {
+          return part === location || part.startsWith(location + ' ');
+        });
+      });
     }
 
     // Filter by job type
@@ -1599,13 +1632,17 @@ const JobListing = () => {
           <HeroContent>
             <HeroTitle>
               {jobCategory === 'standard' 
-                ? 'Tìm công việc mơ ước của bạn ' 
-                : 'Công việc theo ca - Tuyển gấp '}
+                ? (language === 'vi' ? 'Tìm công việc mơ ước của bạn ' : 'Find Your Dream Job ')
+                : (language === 'vi' ? 'Công việc theo ca - Tuyển gấp ' : 'Shift Jobs - Hiring Now ')}
             </HeroTitle>
             <HeroSubtitle>
               {jobCategory === 'standard'
-                ? `Hơn ${JOBS_DATA.filter(j => j.category === 'standard').length} công việc tiêu chuẩn đang chờ bạn khám phá`
-                : `${JOBS_DATA.filter(j => j.category === 'shift').length} công việc theo ca đang tuyển gấp, làm ngay hôm nay!`}
+                ? (language === 'vi' 
+                    ? `Hơn ${JOBS_DATA.filter(j => j.category === 'standard').length} công việc tiêu chuẩn đang chờ bạn khám phá` 
+                    : `Over ${JOBS_DATA.filter(j => j.category === 'standard').length} standard jobs waiting for you to explore`)
+                : (language === 'vi'
+                    ? `${JOBS_DATA.filter(j => j.category === 'shift').length} công việc theo ca đang tuyển gấp, làm ngay hôm nay!`
+                    : `${JOBS_DATA.filter(j => j.category === 'shift').length} shift jobs hiring urgently, start today!`)}
             </HeroSubtitle>
             
             <SearchContainer>
@@ -1613,7 +1650,7 @@ const JobListing = () => {
                 <Search />
                 <input 
                   type="text" 
-                  placeholder="Tìm theo vị trí, công ty, kỹ năng..."
+                  placeholder={language === 'vi' ? 'Tìm theo vị trí, công ty, kỹ năng...' : 'Search by position, company, skills...'}
                   value={searchKeyword}
                   onChange={(e) => setSearchKeyword(e.target.value)}
                   onKeyPress={(e) => {
@@ -1628,7 +1665,7 @@ const JobListing = () => {
                 <MapPin />
                 <input 
                   type="text" 
-                  placeholder="Địa điểm"
+                  placeholder={language === 'vi' ? 'Địa điểm' : 'Location'}
                   value={selectedLocation}
                   onChange={(e) => setSelectedLocation(e.target.value)}
                   onKeyPress={(e) => {
@@ -1645,7 +1682,7 @@ const JobListing = () => {
                 onClick={scrollToResults}
               >
                 <Search />
-                Tìm kiếm
+                {language === 'vi' ? 'Tìm kiếm' : 'Search'}
               </SearchButton>
             </SearchContainer>
             
@@ -1697,12 +1734,14 @@ const JobListing = () => {
                       borderRadius: '50%',
                       animation: 'spin 0.8s linear infinite'
                     }} />
-                    Đang lấy vị trí...
+                    {language === 'vi' ? 'Đang lấy vị trí...' : 'Getting location...'}
                   </>
                 ) : (
                   <>
                     <Navigation size={16} />
-                    {showNearbyJobs ? 'Vị trí đã bật' : 'Tìm việc gần tôi'}
+                    {showNearbyJobs 
+                      ? (language === 'vi' ? 'Vị trí đã bật' : 'Location Enabled') 
+                      : (language === 'vi' ? 'Tìm việc gần tôi' : 'Find Jobs Near Me')}
                   </>
                 )}
               </motion.button>
@@ -1717,7 +1756,9 @@ const JobListing = () => {
                     fontWeight: '500'
                   }}
                 >
-                  Tìm thấy {nearbyJobs.length} việc làm trong bán kính {nearbyRadius}km
+                  {language === 'vi' 
+                    ? `Tìm thấy ${nearbyJobs.length} việc làm trong bán kính ${nearbyRadius}km`
+                    : `Found ${nearbyJobs.length} jobs within ${nearbyRadius}km radius`}
                 </motion.span>
               )}
               </motion.div>
@@ -1738,7 +1779,7 @@ const JobListing = () => {
             whileTap={{ scale: 0.98 }}
           >
             <Briefcase />
-            Công việc tiêu chuẩn
+            {language === 'vi' ? 'Công việc tiêu chuẩn' : 'Standard Jobs'}
             <span style={{ marginLeft: 'auto', fontSize: '14px', opacity: 0.9 }}>
               ({JOBS_DATA.filter(j => j.category === 'standard').length})
             </span>
@@ -1755,7 +1796,7 @@ const JobListing = () => {
             whileTap={{ scale: 0.98 }}
           >
             <Zap />
-            Công việc theo ca - Tuyển gấp
+            {language === 'vi' ? 'Công việc theo ca - Tuyển gấp' : 'Shift Jobs - Hiring Now'}
             <span style={{ marginLeft: 'auto', fontSize: '14px', opacity: 0.9 }}>
               ({JOBS_DATA.filter(j => j.category === 'shift').length})
             </span>
@@ -1773,7 +1814,7 @@ const JobListing = () => {
           >
             <FeaturedHeader>
               <Award />
-              <h3>Việc làm nổi bật</h3>
+              <h3>{language === 'vi' ? 'Việc làm nổi bật' : 'Featured Jobs'}</h3>
             </FeaturedHeader>
             <JobsGrid>
               {featuredJobs.slice(0, 2).map(job => (
@@ -1783,6 +1824,7 @@ const JobListing = () => {
                   saved={savedJobs.includes(job.id)}
                   onSave={handleSaveJob}
                   onClick={handleJobClick}
+                  language={language}
                 />
               ))}
             </JobsGrid>
@@ -1800,14 +1842,16 @@ const JobListing = () => {
             <FilterHeader>
               <h3>
                 <SlidersHorizontal />
-                Bộ lọc
+                {language === 'vi' ? 'Bộ lọc' : 'Filters'}
               </h3>
-              <ClearButton onClick={clearAllFilters}>Xóa</ClearButton>
+              <ClearButton onClick={clearAllFilters}>{language === 'vi' ? 'Xóa' : 'Clear'}</ClearButton>
             </FilterHeader>
 
             <FilterSection>
               <FilterTitle onClick={() => toggleFilter('jobType')} $expanded={expandedFilters.jobType}>
-                <h4>{jobCategory === 'standard' ? 'Loại hình công việc' : 'Loại ca làm việc'}</h4>
+                <h4>{jobCategory === 'standard' 
+                  ? (language === 'vi' ? 'Loại hình công việc' : 'Job Type')
+                  : (language === 'vi' ? 'Loại ca làm việc' : 'Shift Type')}</h4>
                 <ChevronDown />
               </FilterTitle>
               {expandedFilters.jobType && (
@@ -1825,7 +1869,7 @@ const JobListing = () => {
                           checked={selectedJobTypes.includes('full-time')}
                           onChange={() => toggleJobType('full-time')}
                         />
-                        <span>Toàn thời gian</span>
+                        <span>{language === 'vi' ? 'Toàn thời gian' : 'Full-time'}</span>
                         <small>28</small>
                       </FilterOption>
                       <FilterOption>
@@ -1835,7 +1879,7 @@ const JobListing = () => {
                           checked={selectedJobTypes.includes('part-time')}
                           onChange={() => toggleJobType('part-time')}
                         />
-                        <span>Bán thời gian</span>
+                        <span>{language === 'vi' ? 'Bán thời gian' : 'Part-time'}</span>
                         <small>12</small>
                       </FilterOption>
                     </>
@@ -1848,7 +1892,7 @@ const JobListing = () => {
                           checked={selectedJobTypes.includes('sáng')}
                           onChange={() => toggleJobType('sáng')}
                         />
-                        <span>Ca sáng (6h-14h)</span>
+                        <span>{language === 'vi' ? 'Ca sáng (6h-14h)' : 'Morning Shift (6AM-2PM)'}</span>
                         <small>8</small>
                       </FilterOption>
                       <FilterOption>
@@ -1858,7 +1902,7 @@ const JobListing = () => {
                           checked={selectedJobTypes.includes('chiều')}
                           onChange={() => toggleJobType('chiều')}
                         />
-                        <span>Ca chiều (14h-22h)</span>
+                        <span>{language === 'vi' ? 'Ca chiều (14h-22h)' : 'Afternoon Shift (2PM-10PM)'}</span>
                         <small>6</small>
                       </FilterOption>
                       <FilterOption>
@@ -1868,7 +1912,7 @@ const JobListing = () => {
                           checked={selectedJobTypes.includes('đêm')}
                           onChange={() => toggleJobType('đêm')}
                         />
-                        <span>Ca đêm (22h-6h)</span>
+                        <span>{language === 'vi' ? 'Ca đêm (22h-6h)' : 'Night Shift (10PM-6AM)'}</span>
                         <small>5</small>
                       </FilterOption>
                       <FilterOption>
@@ -1878,7 +1922,7 @@ const JobListing = () => {
                           checked={selectedJobTypes.includes('linh động')}
                           onChange={() => toggleJobType('linh động')}
                         />
-                        <span>Ca linh động</span>
+                        <span>{language === 'vi' ? 'Ca linh động' : 'Flexible Shift'}</span>
                         <small>4</small>
                       </FilterOption>
                     </>
@@ -1890,7 +1934,7 @@ const JobListing = () => {
             {jobCategory === 'standard' && (
               <FilterSection>
                 <FilterTitle onClick={() => toggleFilter('experience')} $expanded={expandedFilters.experience}>
-                  <h4>Kinh nghiệm</h4>
+                  <h4>{language === 'vi' ? 'Kinh nghiệm' : 'Experience'}</h4>
                   <ChevronDown />
                 </FilterTitle>
                 {expandedFilters.experience && (
@@ -1906,7 +1950,7 @@ const JobListing = () => {
                         checked={selectedExperience.includes('intern')}
                         onChange={() => toggleExperience('intern')}
                       />
-                      <span>Thực tập sinh</span>
+                      <span>{language === 'vi' ? 'Thực tập sinh' : 'Intern'}</span>
                       <small>15</small>
                     </FilterOption>
                     <FilterOption>
@@ -1916,7 +1960,7 @@ const JobListing = () => {
                         checked={selectedExperience.includes('junior')}
                         onChange={() => toggleExperience('junior')}
                       />
-                      <span>Junior (0-2 năm)</span>
+                      <span>{language === 'vi' ? 'Junior (0-2 năm)' : 'Junior (0-2 years)'}</span>
                       <small>28</small>
                     </FilterOption>
                     <FilterOption>
@@ -1926,7 +1970,7 @@ const JobListing = () => {
                         checked={selectedExperience.includes('mid')}
                         onChange={() => toggleExperience('mid')}
                       />
-                      <span>Middle (2-5 năm)</span>
+                      <span>{language === 'vi' ? 'Middle (2-5 năm)' : 'Middle (2-5 years)'}</span>
                       <small>32</small>
                     </FilterOption>
                     <FilterOption>
@@ -1936,7 +1980,7 @@ const JobListing = () => {
                         checked={selectedExperience.includes('senior')}
                         onChange={() => toggleExperience('senior')}
                       />
-                      <span>Senior (5+ năm)</span>
+                      <span>{language === 'vi' ? 'Senior (5+ năm)' : 'Senior (5+ years)'}</span>
                       <small>18</small>
                     </FilterOption>
                   </FilterOptions>
@@ -1946,7 +1990,9 @@ const JobListing = () => {
 
             <FilterSection>
               <FilterTitle onClick={() => toggleFilter('salary')} $expanded={expandedFilters.salary}>
-                <h4>{jobCategory === 'standard' ? 'Mức lương' : 'Thu nhập/ca'}</h4>
+                <h4>{jobCategory === 'standard' 
+                  ? (language === 'vi' ? 'Mức lương' : 'Salary')
+                  : (language === 'vi' ? 'Thu nhập/ca' : 'Income/Shift')}</h4>
                 <ChevronDown />
               </FilterTitle>
               {expandedFilters.salary && (
@@ -1964,7 +2010,7 @@ const JobListing = () => {
                           checked={selectedSalaryRanges.includes('0-50')}
                           onChange={() => toggleSalaryRange('0-50')}
                         />
-                        <span>Dưới 50 triệu</span>
+                        <span>{language === 'vi' ? 'Dưới 50 triệu' : 'Under 50 million'}</span>
                         <small>12</small>
                       </FilterOption>
                       <FilterOption>
@@ -1974,7 +2020,7 @@ const JobListing = () => {
                           checked={selectedSalaryRanges.includes('50-100')}
                           onChange={() => toggleSalaryRange('50-100')}
                         />
-                        <span>50 - 100 triệu</span>
+                        <span>{language === 'vi' ? '50 - 100 triệu' : '50 - 100 million'}</span>
                         <small>25</small>
                       </FilterOption>
                       <FilterOption>
@@ -1984,7 +2030,7 @@ const JobListing = () => {
                           checked={selectedSalaryRanges.includes('100-150')}
                           onChange={() => toggleSalaryRange('100-150')}
                         />
-                        <span>100 - 150 triệu</span>
+                        <span>{language === 'vi' ? '100 - 150 triệu' : '100 - 150 million'}</span>
                         <small>18</small>
                       </FilterOption>
                       <FilterOption>
@@ -1994,7 +2040,7 @@ const JobListing = () => {
                           checked={selectedSalaryRanges.includes('150+')}
                           onChange={() => toggleSalaryRange('150+')}
                         />
-                        <span>Trên 150 triệu</span>
+                        <span>{language === 'vi' ? 'Trên 150 triệu' : 'Over 150 million'}</span>
                         <small>8</small>
                       </FilterOption>
                     </>
@@ -2007,7 +2053,7 @@ const JobListing = () => {
                           checked={selectedSalaryRanges.includes('0-150k')}
                           onChange={() => toggleSalaryRange('0-150k')}
                         />
-                        <span>Dưới 150k/ca</span>
+                        <span>{language === 'vi' ? 'Dưới 150k/ca' : 'Under 150k/shift'}</span>
                         <small>5</small>
                       </FilterOption>
                       <FilterOption>
@@ -2017,7 +2063,7 @@ const JobListing = () => {
                           checked={selectedSalaryRanges.includes('150-200k')}
                           onChange={() => toggleSalaryRange('150-200k')}
                         />
-                        <span>150k - 200k/ca</span>
+                        <span>{language === 'vi' ? '150k - 200k/ca' : '150k - 200k/shift'}</span>
                         <small>8</small>
                       </FilterOption>
                       <FilterOption>
@@ -2027,7 +2073,7 @@ const JobListing = () => {
                           checked={selectedSalaryRanges.includes('200-250k')}
                           onChange={() => toggleSalaryRange('200-250k')}
                         />
-                        <span>200k - 250k/ca</span>
+                        <span>{language === 'vi' ? '200k - 250k/ca' : '200k - 250k/shift'}</span>
                         <small>6</small>
                       </FilterOption>
                       <FilterOption>
@@ -2037,7 +2083,7 @@ const JobListing = () => {
                           checked={selectedSalaryRanges.includes('250k+')}
                           onChange={() => toggleSalaryRange('250k+')}
                         />
-                        <span>Trên 250k/ca</span>
+                        <span>{language === 'vi' ? 'Trên 250k/ca' : 'Over 250k/shift'}</span>
                         <small>4</small>
                       </FilterOption>
                     </>
@@ -2052,16 +2098,20 @@ const JobListing = () => {
             <ContentHeader>
               <ResultsInfo>
                 <h2>
-                  {jobCategory === 'standard' ? 'Công việc tiêu chuẩn' : 'Công việc theo ca'}
+                  {jobCategory === 'standard' 
+                    ? (language === 'vi' ? 'Công việc tiêu chuẩn' : 'Standard Jobs')
+                    : (language === 'vi' ? 'Công việc theo ca' : 'Shift Jobs')}
                 </h2>
-                <p>Tìm thấy {filteredJobs.length} công việc phù hợp</p>
+                <p>{language === 'vi' 
+                  ? `Tìm thấy ${filteredJobs.length} công việc phù hợp`
+                  : `Found ${filteredJobs.length} matching jobs`}</p>
               </ResultsInfo>
               
               <ViewControls>
                 <SortSelect value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                  <option value="newest">Mới nhất</option>
-                  <option value="salary">Lương cao nhất</option>
-                  <option value="relevant">Phù hợp nhất</option>
+                  <option value="newest">{language === 'vi' ? 'Mới nhất' : 'Newest'}</option>
+                  <option value="salary">{language === 'vi' ? 'Lương cao nhất' : 'Highest Salary'}</option>
+                  <option value="relevant">{language === 'vi' ? 'Phù hợp nhất' : 'Most Relevant'}</option>
                 </SortSelect>
                 
                 <ViewToggle>
@@ -2092,6 +2142,7 @@ const JobListing = () => {
                     onClick={handleJobClick}
                     delay={index * 0.05}
                     showDistance={jobCategory === 'shift' && showNearbyJobs}
+                    language={language}
                   />
                 ))
               ) : (
@@ -2105,22 +2156,28 @@ const JobListing = () => {
                     <>
                       <div style={{ fontSize: '48px', marginBottom: '16px' }}>📍</div>
                       <p style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
-                        Bật vị trí để tìm việc gần bạn
+                        {language === 'vi' ? 'Bật vị trí để tìm việc gần bạn' : 'Enable location to find jobs near you'}
                       </p>
                       <p style={{ fontSize: '15px', color: '#6b7280', marginBottom: '20px' }}>
-                        Nhấn nút "Tìm việc gần tôi" ở phía trên để xem các công việc theo ca trong bán kính 3km
+                        {language === 'vi' 
+                          ? 'Nhấn nút "Tìm việc gần tôi" ở phía trên để xem các công việc theo ca trong bán kính 3km'
+                          : 'Click "Find Jobs Near Me" button above to see shift jobs within 3km radius'}
                       </p>
                     </>
                   ) : (
                     <>
                       <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
                       <p style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
-                        Không tìm thấy công việc phù hợp
+                        {language === 'vi' ? 'Không tìm thấy công việc phù hợp' : 'No matching jobs found'}
                       </p>
                       <p style={{ fontSize: '15px', color: '#6b7280' }}>
                         {jobCategory === 'shift' 
-                          ? 'Không có công việc theo ca trong bán kính 3km. Thử mở rộng bán kính tìm kiếm.'
-                          : 'Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn'
+                          ? (language === 'vi' 
+                              ? 'Không có công việc theo ca trong bán kính 3km. Thử mở rộng bán kính tìm kiếm.'
+                              : 'No shift jobs within 3km radius. Try expanding the search radius.')
+                          : (language === 'vi'
+                              ? 'Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn'
+                              : 'Try adjusting your filters or search keywords')
                         }
                       </p>
                     </>
@@ -2151,7 +2208,7 @@ if (typeof document !== 'undefined') {
 }
 
 // Job Card Component
-const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0, showDistance = false }) => {
+const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0, showDistance = false, language }) => {
   const getCompanyInitial = (company) => {
     return company.charAt(0).toUpperCase();
   };
@@ -2171,7 +2228,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0, showDistance
         <JobInfo>
           <JobTitle>
             {job.title}
-            {job.urgent && <StatusBadge status="urgent" size="sm">Tuyển gấp</StatusBadge>}
+            {job.urgent && <StatusBadge status="urgent" size="sm">{language === 'vi' ? 'Tuyển gấp' : 'Urgent'}</StatusBadge>}
             {job.featured && <Star size={18} fill="#F59E0B" color="#F59E0B" />}
           </JobTitle>
           <CompanyName>
@@ -2181,7 +2238,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0, showDistance
           <JobMeta>
             <MetaItem>
               <MapPin />
-              {job.location}
+              {translateLocation(job.location, language)}
             </MetaItem>
             {showDistance && job.distance !== undefined && (
               <MetaItem style={{ color: '#10b981', fontWeight: '600' }}>
@@ -2197,7 +2254,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0, showDistance
             </MetaItem>
             <MetaItem>
               <Eye />
-              {job.views} lượt xem
+              {job.views} {language === 'vi' ? 'lượt xem' : 'views'}
             </MetaItem>
           </JobMeta>
         </JobInfo>
@@ -2212,7 +2269,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0, showDistance
         
         <JobSalary>
           <DollarSign />
-          <span>{job.salary}</span>
+          <span>{translateSalary(job.salary, language)}</span>
         </JobSalary>
       </JobCardBody>
 
@@ -2232,7 +2289,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0, showDistance
               onClick(job.id);
             }}
           >
-            Ứng tuyển ngay
+            {language === 'vi' ? 'Ứng tuyển ngay' : 'Apply Now'}
             <ArrowUpRight />
           </ActionButton>
           

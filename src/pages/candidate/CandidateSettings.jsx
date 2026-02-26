@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTheme } from '../../context/ThemeContext';
 import { 
   Bell, 
   Mail, 
@@ -436,8 +438,8 @@ const StatItem = styled.div`
 `;
 
 function CandidateSettings() {
-  const [language, setLanguage] = useState('vi');
-  const [darkMode, setDarkMode] = useState(false);
+  const { language, changeLanguage, t } = useLanguage();
+  const { isDarkMode, toggleTheme } = useTheme();
   const [notifications, setNotifications] = useState({
     email: true,
     profile: true,
@@ -497,8 +499,8 @@ function CandidateSettings() {
           transition={{ duration: 0.6 }}
         >
           <div className="header-content">
-            <h1><SettingsIcon />Cài đặt</h1>
-            <p>Quản lý tài khoản, thông báo và quyền riêng tư của bạn</p>
+            <h1><SettingsIcon />{t.settings.title}</h1>
+            <p>{language === 'vi' ? 'Quản lý tài khoản, thông báo và quyền riêng tư của bạn' : 'Manage your account, notifications and privacy'}</p>
           </div>
         </PageHeader>
 
@@ -511,7 +513,7 @@ function CandidateSettings() {
               transition={{ duration: 0.6, delay: 0.1 }}
             >
               <div className="card-header">
-                <h2><User />Cài đặt tài khoản</h2>
+                <h2><User />{t.settings.accountSettings}</h2>
               </div>
               
               <SettingItem
@@ -524,28 +526,28 @@ function CandidateSettings() {
                     <Globe />
                   </div>
                   <div className="setting-info">
-                    <h3>Ngôn ngữ</h3>
-                    <p>Chọn ngôn ngữ hiển thị cho ứng dụng</p>
+                    <h3>{t.settings.language}</h3>
+                    <p>{t.settings.languageDescription}</p>
                   </div>
                 </div>
                 <LanguageOptions>
                   <LanguageButton 
                     $active={language === 'vi'} 
-                    onClick={() => setLanguage('vi')}
+                    onClick={() => changeLanguage('vi')}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     {language === 'vi' && <Check />}
-                    🇻🇳 Tiếng Việt
+                    {t.settings.vietnamese}
                   </LanguageButton>
                   <LanguageButton 
                     $active={language === 'en'} 
-                    onClick={() => setLanguage('en')}
+                    onClick={() => changeLanguage('en')}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     {language === 'en' && <Check />}
-                    🇬🇧 English
+                    {t.settings.english}
                   </LanguageButton>
                 </LanguageOptions>
               </SettingItem>
@@ -557,18 +559,18 @@ function CandidateSettings() {
               >
                 <div className="setting-left">
                   <div className="icon-wrapper">
-                    {darkMode ? <Moon /> : <Sun />}
+                    {isDarkMode ? <Moon /> : <Sun />}
                   </div>
                   <div className="setting-info">
-                    <h3>Chế độ tối</h3>
-                    <p>Bật/tắt giao diện tối để giảm mỏi mắt</p>
+                    <h3>{t.settings.darkMode}</h3>
+                    <p>{t.settings.darkModeDesc}</p>
                   </div>
                 </div>
                 <Toggle>
                   <input 
                     type="checkbox" 
-                    checked={darkMode}
-                    onChange={(e) => setDarkMode(e.target.checked)}
+                    checked={isDarkMode}
+                    onChange={toggleTheme}
                   />
                   <span></span>
                 </Toggle>
@@ -582,7 +584,7 @@ function CandidateSettings() {
               transition={{ duration: 0.6, delay: 0.2 }}
             >
               <div className="card-header">
-                <h2><Bell />Thông báo</h2>
+                <h2><Bell />{t.settings.notifications}</h2>
               </div>
               
               <SettingItem
@@ -595,8 +597,8 @@ function CandidateSettings() {
                     <Mail />
                   </div>
                   <div className="setting-info">
-                    <h3>Nhận email</h3>
-                    <p>Nhận email về cơ hội việc làm mới và cập nhật quan trọng</p>
+                    <h3>{t.settings.emailNotifications}</h3>
+                    <p>{t.settings.emailNotificationsDesc}</p>
                   </div>
                 </div>
                 <Toggle>
@@ -619,8 +621,8 @@ function CandidateSettings() {
                     <Bell />
                   </div>
                   <div className="setting-info">
-                    <h3>Cập nhật hồ sơ</h3>
-                    <p>Nhận thông báo khi nhà tuyển dụng xem hồ sơ của bạn</p>
+                    <h3>{language === 'vi' ? 'Cập nhật hồ sơ' : 'Profile Updates'}</h3>
+                    <p>{language === 'vi' ? 'Nhận thông báo khi nhà tuyển dụng xem hồ sơ của bạn' : 'Get notified when employers view your profile'}</p>
                   </div>
                 </div>
                 <Toggle>
@@ -643,8 +645,8 @@ function CandidateSettings() {
                     <MessageSquare />
                   </div>
                   <div className="setting-info">
-                    <h3>Gợi ý việc làm</h3>
-                    <p>Nhận thông báo về việc làm phù hợp với kỹ năng của bạn</p>
+                    <h3>{t.settings.newMatches}</h3>
+                    <p>{t.settings.newMatchesDesc}</p>
                   </div>
                 </div>
                 <Toggle>
@@ -665,7 +667,7 @@ function CandidateSettings() {
               transition={{ duration: 0.6, delay: 0.3 }}
             >
               <div className="card-header">
-                <h2><Shield />Quyền riêng tư</h2>
+                <h2><Shield />{t.settings.privacy}</h2>
               </div>
               
               <SettingItem
@@ -678,8 +680,8 @@ function CandidateSettings() {
                     {privacy.showProfile ? <Eye /> : <EyeOff />}
                   </div>
                   <div className="setting-info">
-                    <h3>Hiển thị hồ sơ công khai</h3>
-                    <p>Cho phép nhà tuyển dụng tìm kiếm và xem hồ sơ của bạn</p>
+                    <h3>{t.settings.profileVisibility}</h3>
+                    <p>{t.settings.profileVisibilityDesc}</p>
                   </div>
                 </div>
                 <Toggle>
@@ -702,8 +704,8 @@ function CandidateSettings() {
                     <Mail />
                   </div>
                   <div className="setting-info">
-                    <h3>Hiển thị email</h3>
-                    <p>Cho phép nhà tuyển dụng liên hệ qua email</p>
+                    <h3>{t.settings.showEmail}</h3>
+                    <p>{t.settings.showEmailDesc}</p>
                   </div>
                 </div>
                 <Toggle>
@@ -726,8 +728,8 @@ function CandidateSettings() {
                     <Phone />
                   </div>
                   <div className="setting-info">
-                    <h3>Hiển thị số điện thoại</h3>
-                    <p>Cho phép nhà tuyển dụng liên hệ qua điện thoại</p>
+                    <h3>{t.settings.showPhone}</h3>
+                    <p>{t.settings.showPhoneDesc}</p>
                   </div>
                 </div>
                 <Toggle>
@@ -748,7 +750,7 @@ function CandidateSettings() {
               transition={{ duration: 0.6, delay: 0.5 }}
             >
               <div className="card-header">
-                <h2><FileText />Chính sách & điều khoản</h2>
+                <h2><FileText />{language === 'vi' ? 'Chính sách & điều khoản' : 'Policy & Terms'}</h2>
               </div>
               
               <PolicyItem
@@ -760,8 +762,8 @@ function CandidateSettings() {
                     <FileText />
                   </div>
                   <div className="policy-info">
-                    <h3>Điều khoản dịch vụ</h3>
-                    <p>Xem điều khoản và điều kiện sử dụng dịch vụ</p>
+                    <h3>{language === 'vi' ? 'Điều khoản dịch vụ' : 'Terms of Service'}</h3>
+                    <p>{language === 'vi' ? 'Xem điều khoản và điều kiện sử dụng dịch vụ' : 'View terms and conditions of service'}</p>
                   </div>
                 </div>
                 <ChevronRight />
@@ -776,8 +778,8 @@ function CandidateSettings() {
                     <Shield />
                   </div>
                   <div className="policy-info">
-                    <h3>Chính sách bảo mật</h3>
-                    <p>Tìm hiểu cách chúng tôi xử lý dữ liệu của bạn</p>
+                    <h3>{language === 'vi' ? 'Chính sách bảo mật' : 'Privacy Policy'}</h3>
+                    <p>{language === 'vi' ? 'Tìm hiểu cách chúng tôi xử lý dữ liệu của bạn' : 'Learn how we handle your data'}</p>
                   </div>
                 </div>
                 <ChevronRight />
@@ -792,8 +794,8 @@ function CandidateSettings() {
                     <FileText />
                   </div>
                   <div className="policy-info">
-                    <h3>Chính sách Cookies</h3>
-                    <p>Quản lý cookies và thiết lập theo dõi</p>
+                    <h3>{language === 'vi' ? 'Chính sách Cookies' : 'Cookie Policy'}</h3>
+                    <p>{language === 'vi' ? 'Quản lý cookies và thiết lập theo dõi' : 'Manage cookies and tracking settings'}</p>
                   </div>
                 </div>
                 <ChevronRight />
@@ -807,8 +809,8 @@ function CandidateSettings() {
                     <Download />
                   </div>
                   <div className="policy-info">
-                    <h3>Tải dữ liệu của bạn</h3>
-                    <p>Tải xuống bản sao dữ liệu cá nhân của bạn</p>
+                    <h3>{language === 'vi' ? 'Tải dữ liệu của bạn' : 'Download Your Data'}</h3>
+                    <p>{language === 'vi' ? 'Tải xuống bản sao dữ liệu cá nhân của bạn' : 'Download a copy of your personal data'}</p>
                   </div>
                 </div>
                 <ChevronRight />
@@ -824,18 +826,18 @@ function CandidateSettings() {
               transition={{ duration: 0.6, delay: 0.4 }}
             >
               <div className="card-header">
-                <h2><Lock />Bảo mật</h2>
+                <h2><Lock />{language === 'vi' ? 'Bảo mật' : 'Security'}</h2>
               </div>
               
               <PasswordForm>
                 <FormGroup>
-                  <Label>Mật khẩu hiện tại</Label>
+                  <Label>{language === 'vi' ? 'Mật khẩu hiện tại' : 'Current Password'}</Label>
                   <div style={{ position: 'relative' }}>
                     <Input
                       type={showPassword.current ? "text" : "password"}
                       value={passwordData.currentPassword}
                       onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                      placeholder="Nhập mật khẩu hiện tại"
+                      placeholder={language === 'vi' ? 'Nhập mật khẩu hiện tại' : 'Enter current password'}
                       style={{ paddingRight: '40px' }}
                     />
                     <button
@@ -858,13 +860,13 @@ function CandidateSettings() {
                 </FormGroup>
                 
                 <FormGroup>
-                  <Label>Mật khẩu mới</Label>
+                  <Label>{language === 'vi' ? 'Mật khẩu mới' : 'New Password'}</Label>
                   <div style={{ position: 'relative' }}>
                     <Input
                       type={showPassword.new ? "text" : "password"}
                       value={passwordData.newPassword}
                       onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                      placeholder="Nhập mật khẩu mới"
+                      placeholder={language === 'vi' ? 'Nhập mật khẩu mới' : 'Enter new password'}
                       style={{ paddingRight: '40px' }}
                     />
                     <button
@@ -887,13 +889,13 @@ function CandidateSettings() {
                 </FormGroup>
                 
                 <FormGroup>
-                  <Label>Xác nhận mật khẩu mới</Label>
+                  <Label>{language === 'vi' ? 'Xác nhận mật khẩu mới' : 'Confirm New Password'}</Label>
                   <div style={{ position: 'relative' }}>
                     <Input
                       type={showPassword.confirm ? "text" : "password"}
                       value={passwordData.confirmPassword}
                       onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                      placeholder="Xác nhận mật khẩu mới"
+                      placeholder={language === 'vi' ? 'Xác nhận mật khẩu mới' : 'Confirm new password'}
                       style={{ paddingRight: '40px' }}
                     />
                     <button
@@ -917,7 +919,7 @@ function CandidateSettings() {
                 
                 <Button onClick={handlePasswordChange} style={{ width: '100%', marginTop: '8px' }}>
                   <Key style={{ width: '16px', height: '16px', marginRight: '8px' }} />
-                  Đổi mật khẩu
+                  {language === 'vi' ? 'Đổi mật khẩu' : 'Change Password'}
                 </Button>
               </PasswordForm>
               
@@ -930,9 +932,9 @@ function CandidateSettings() {
                 >
                   <div className="info-header">
                     <Check />
-                    <h4>Thành công!</h4>
+                    <h4>{language === 'vi' ? 'Thành công!' : 'Success!'}</h4>
                   </div>
-                  <p>Đã lưu thay đổi thành công!</p>
+                  <p>{language === 'vi' ? 'Đã lưu thay đổi thành công!' : 'Changes saved successfully!'}</p>
                 </InfoBox>
               )}
               
@@ -945,9 +947,9 @@ function CandidateSettings() {
               >
                 <div className="info-header">
                   <Shield />
-                  <h4>Xác thực hai yếu tố (2FA)</h4>
+                  <h4>{language === 'vi' ? 'Xác thực hai yếu tố (2FA)' : 'Two-Factor Authentication (2FA)'}</h4>
                 </div>
-                <p>Tăng cường bảo mật tài khoản bằng xác thực hai yếu tố</p>
+                <p>{language === 'vi' ? 'Tăng cường bảo mật tài khoản bằng xác thực hai yếu tố' : 'Enhance account security with two-factor authentication'}</p>
               </InfoBox>
             </Card>
 
@@ -958,17 +960,17 @@ function CandidateSettings() {
               transition={{ duration: 0.6, delay: 0.6 }}
             >
               <div className="card-header">
-                <h2><User />Tổng quan</h2>
+                <h2><User />{language === 'vi' ? 'Tổng quan' : 'Overview'}</h2>
               </div>
               
               <QuickStats>
                 <StatItem $color="#667eea">
                   <div className="stat-value">8</div>
-                  <div className="stat-label">Cài đặt kích hoạt</div>
+                  <div className="stat-label">{language === 'vi' ? 'Cài đặt kích hoạt' : 'Active Settings'}</div>
                 </StatItem>
                 <StatItem $color="#10B981">
                   <div className="stat-value">100%</div>
-                  <div className="stat-label">Bảo mật</div>
+                  <div className="stat-label">{language === 'vi' ? 'Bảo mật' : 'Security'}</div>
                 </StatItem>
               </QuickStats>
               
@@ -980,9 +982,9 @@ function CandidateSettings() {
               >
                 <div className="info-header">
                   <Shield />
-                  <h4>Mức độ bảo mật: Cao</h4>
+                  <h4>{language === 'vi' ? 'Mức độ bảo mật: Cao' : 'Security Level: High'}</h4>
                 </div>
-                <p>Tài khoản của bạn được bảo vệ tốt với các cài đặt bảo mật hiện tại.</p>
+                <p>{language === 'vi' ? 'Tài khoản của bạn được bảo vệ tốt với các cài đặt bảo mật hiện tại.' : 'Your account is well protected with current security settings.'}</p>
               </InfoBox>
             </Card>
 
@@ -993,7 +995,7 @@ function CandidateSettings() {
               transition={{ duration: 0.6, delay: 0.7 }}
             >
               <div className="card-header">
-                <h2 style={{ color: '#DC2626' }}><AlertTriangle />Vùng nguy hiểm</h2>
+                <h2 style={{ color: '#DC2626' }}><AlertTriangle />{language === 'vi' ? 'Vùng nguy hiểm' : 'Danger Zone'}</h2>
               </div>
               
               <InfoBox 
@@ -1003,9 +1005,9 @@ function CandidateSettings() {
               >
                 <div className="info-header">
                   <AlertTriangle />
-                  <h4>Xóa tài khoản</h4>
+                  <h4>{language === 'vi' ? 'Xóa tài khoản' : 'Delete Account'}</h4>
                 </div>
-                <p>Xóa vĩnh viễn tài khoản và toàn bộ dữ liệu. Hành động này không thể hoàn tác!</p>
+                <p>{language === 'vi' ? 'Xóa vĩnh viễn tài khoản và toàn bộ dữ liệu. Hành động này không thể hoàn tác!' : 'Permanently delete your account and all data. This action cannot be undone!'}</p>
               </InfoBox>
               
               <Button 
@@ -1018,13 +1020,15 @@ function CandidateSettings() {
                   background: 'transparent'
                 }}
                 onClick={() => {
-                  if (window.confirm('Bạn có chắc chắn muốn xóa tài khoản? Hành động này không thể hoàn tác!')) {
+                  if (window.confirm(language === 'vi' 
+                    ? 'Bạn có chắc chắn muốn xóa tài khoản? Hành động này không thể hoàn tác!' 
+                    : 'Are you sure you want to delete your account? This action cannot be undone!')) {
                     console.log('Deleting account...');
                   }
                 }}
               >
                 <Trash2 style={{ width: '16px', height: '16px', marginRight: '8px' }} />
-                Xóa tài khoản
+                {language === 'vi' ? 'Xóa tài khoản' : 'Delete Account'}
               </Button>
             </DangerZone>
           </Sidebar>

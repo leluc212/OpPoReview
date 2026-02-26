@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTheme } from '../../context/ThemeContext';
 import { Globe, Moon, Sun } from 'lucide-react';
 import { Button } from '../../components/FormElements';
 
@@ -67,7 +69,7 @@ const LanguageButton = styled.button`
   padding: 8px 20px;
   border-radius: ${props => props.theme.borderRadius.md};
   border: 2px solid ${props => props.$active ? props.theme.colors.primary : props.theme.colors.border};
-  background: ${props => props.$active ? props.theme.colors.primary : 'white'};
+  background: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.bgDark};
   color: ${props => props.$active ? 'white' : props.theme.colors.text};
   font-weight: 500;
   cursor: pointer;
@@ -80,7 +82,6 @@ const LanguageButton = styled.button`
   &:hover {
     border-color: ${props => props.theme.colors.primary};
     transform: translateY(-2px);
-    background: ${props => props.$active ? props.theme.colors.primaryDark : props.theme.colors.bgDark};
   }
 `;
 
@@ -122,7 +123,7 @@ const Toggle = styled.label`
       width: 20px;
       left: 4px;
       bottom: 4px;
-      background: white;
+      background: ${props => props.theme.colors.bgLight};
       border-radius: 50%;
       transition: 0.3s;
     }
@@ -130,10 +131,8 @@ const Toggle = styled.label`
 `;
 
 const AdminSettings = () => {
-  // Giả lập state language để UI hoạt động nhưng không thực sự thay đổi ngôn ngữ
-  const [language, setLanguage] = useState('vi');
-  const changeLanguage = (lang) => setLanguage(lang);
-  const [darkMode, setDarkMode] = useState(false);
+  const { language, changeLanguage, t } = useLanguage();
+  const { isDarkMode, toggleTheme } = useTheme();
   
   const handleDarkModeToggle = (e) => {
     setDarkMode(e.target.checked);
@@ -143,31 +142,31 @@ const AdminSettings = () => {
   return (
     <DashboardLayout role="admin" showSearch={false}>
       <SettingsContainer>
-        <h1 style={{ fontSize: '32px', fontWeight: '700', marginBottom: '32px' }}>Cài Đặt</h1>
+        <h1 style={{ fontSize: '32px', fontWeight: '700', marginBottom: '32px' }}>{t.settings.title}</h1>
 
         <SettingsCard>
-          <SectionTitle>Cài Đặt Tài Khoản</SectionTitle>
+          <SectionTitle>{t.settings.accountSettings}</SectionTitle>
           
           <SettingItem>
             <SettingInfo>
               <h3>
                 <Globe size={18} style={{ marginRight: '8px', flexShrink: 0 }} />
-                <span>Ngôn Ngữ</span>
+                <span>{t.settings.language}</span>
               </h3>
-              <p>Chọn ngôn ngữ hiển thị</p>
+              <p>{t.settings.languageDescription}</p>
             </SettingInfo>
             <LanguageOptions>
               <LanguageButton
                 $active={language === 'vi'}
                 onClick={() => changeLanguage('vi')}
               >
-                Tiếng Việt
+                {t.settings.vietnamese}
               </LanguageButton>
               <LanguageButton
                 $active={language === 'en'}
                 onClick={() => changeLanguage('en')}
               >
-                English
+                {t.settings.english}
               </LanguageButton>
             </LanguageOptions>
           </SettingItem>
@@ -175,17 +174,17 @@ const AdminSettings = () => {
           <SettingItem>
             <SettingInfo>
               <h3>
-                {darkMode ? (
+                {isDarkMode ? (
                   <Moon size={18} style={{ marginRight: '8px', flexShrink: 0 }} />
                 ) : (
                   <Sun size={18} style={{ marginRight: '8px', flexShrink: 0 }} />
                 )}
-                <span>Chế Độ Tối</span>
+                <span>{t.settings.darkMode}</span>
               </h3>
-              <p>Chuyển đổi giữa giao diện sáng và tối</p>
+              <p>{t.settings.darkModeDesc}</p>
             </SettingInfo>
             <Toggle>
-              <input type="checkbox" checked={darkMode} onChange={handleDarkModeToggle} />
+              <input type="checkbox" checked={isDarkMode} onChange={toggleTheme} />
               <span></span>
             </Toggle>
           </SettingItem>

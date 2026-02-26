@@ -100,7 +100,7 @@ const StatsGrid = styled.div`
 `;
 
 const StatCard = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   padding: 1.5rem;
   border-radius: ${props => props.theme.borderRadius.lg};
   box-shadow: ${props => props.theme.shadows.sm};
@@ -120,7 +120,7 @@ const StatValue = styled.div`
 `;
 
 const TransactionSection = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.lg};
   box-shadow: ${props => props.theme.shadows.sm};
   padding: 1.5rem;
@@ -179,7 +179,7 @@ const Select = styled.select`
   padding: 0.75rem 1rem;
   border: 1px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.md};
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   color: ${props => props.theme.colors.text};
   font-size: 0.9rem;
   cursor: pointer;

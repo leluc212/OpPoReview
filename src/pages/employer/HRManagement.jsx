@@ -3,6 +3,7 @@ import styled, { keyframes } from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import { Calendar, CheckCircle, XCircle, Users, AlertCircle, Clock, Star, MapPin } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 const fadeIn = keyframes`
   from {
@@ -60,7 +61,7 @@ const TabContainer = styled.div`
 
 const Tab = styled(motion.button)`
   padding: 12px 24px;
-  background: ${props => props.$active ? 'white' : 'transparent'};
+  background: ${props => props.$active ? props.theme.colors.bgLight : 'transparent'};
   border: none;
   font-size: 14px;
   font-weight: 700;
@@ -73,7 +74,7 @@ const Tab = styled(motion.button)`
   
   &:hover {
     color: ${props => props.theme.colors.primary};
-    background: ${props => props.$active ? 'white' : 'rgba(255, 255, 255, 0.5)'};
+    background: ${props => props.$active ? props.theme.colors.bgLight : props.theme.colors.border};
   }
 `;
 
@@ -83,7 +84,7 @@ const StaffGrid = styled.div`
 `;
 
 const StaffCard = styled(motion.div)`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border: 2px solid ${props => props.theme.colors.border};
   border-radius: 20px;
   padding: 28px;
@@ -226,7 +227,7 @@ const StaffMeta = styled.div`
     font-size: 14px;
     font-weight: 500;
     padding: 8px 12px;
-    background: white;
+    background: ${props => props.theme.colors.bgDark};
     border-radius: 10px;
     border: 1.5px solid ${props => props.theme.colors.border};
     transition: all 0.3s ease;
@@ -304,7 +305,7 @@ const Button = styled(motion.button)`
       `;
     } else {
       return `
-        background: white;
+        background: ${props.theme.colors.bgLight};
         color: ${props.theme.colors.text};
         border: 2px solid ${props.theme.colors.border};
         &:hover { 
@@ -329,7 +330,7 @@ const Button = styled(motion.button)`
 const EmptyState = styled(motion.div)`
   text-align: center;
   padding: 80px 20px;
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border-radius: 20px;
   border: 2px dashed ${props => props.theme.colors.border};
   
@@ -392,49 +393,50 @@ const ReasonBox = styled.div`
 `;
 
 const HRManagement = () => {
+  const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState('active');
 
   const staffData = {
     active: [
       {
         id: 1,
-        name: 'Nguyễn Văn A',
-        position: 'Nhân viên bán hàng',
+        name: language === 'vi' ? 'Nguyễn Văn A' : 'Nguyen Van A',
+        position: language === 'vi' ? 'Nhân viên bán hàng' : 'Sales Staff',
         startDate: '15/01/2026',
-        shift: 'Ca sáng 8:00 - 12:00',
-        location: 'Hà Nội',
+        shift: language === 'vi' ? 'Ca sáng 8:00 - 12:00' : 'Morning shift 8:00 - 12:00',
+        location: language === 'vi' ? 'Hà Nội' : 'Hanoi',
         status: 'active'
       },
       {
         id: 2,
-        name: 'Trần Thị B',
-        position: 'Nhân viên kho',
+        name: language === 'vi' ? 'Trần Thị B' : 'Tran Thi B',
+        position: language === 'vi' ? 'Nhân viên kho' : 'Warehouse Staff',
         startDate: '12/01/2026',
-        shift: 'Ca chiều 13:00 - 17:00',
-        location: 'TP.HCM',
+        shift: language === 'vi' ? 'Ca chiều 13:00 - 17:00' : 'Afternoon shift 13:00 - 17:00',
+        location: language === 'vi' ? 'TP.HCM' : 'HCMC',
         status: 'active'
       }
     ],
     pending: [
       {
         id: 3,
-        name: 'Lê Văn C',
-        position: 'Lễ tân',
+        name: language === 'vi' ? 'Lê Văn C' : 'Le Van C',
+        position: language === 'vi' ? 'Lễ tân' : 'Receptionist',
         startDate: '20/02/2026',
-        shift: 'Ca full 8:00 - 17:00',
-        location: 'Đà Nẵng',
+        shift: language === 'vi' ? 'Ca full 8:00 - 17:00' : 'Full shift 8:00 - 17:00',
+        location: language === 'vi' ? 'Đà Nẵng' : 'Da Nang',
         status: 'pending'
       }
     ],
     completed: [
       {
         id: 4,
-        name: 'Phạm Thị D',
-        position: 'Nhân viên phục vụ',
+        name: language === 'vi' ? 'Phạm Thị D' : 'Pham Thi D',
+        position: language === 'vi' ? 'Nhân viên phục vụ' : 'Service Staff',
         startDate: '01/01/2026',
         endDate: '10/01/2026',
-        shift: 'Ca tối 18:00 - 22:00',
-        location: 'Hà Nội',
+        shift: language === 'vi' ? 'Ca tối 18:00 - 22:00' : 'Evening shift 18:00 - 22:00',
+        location: language === 'vi' ? 'Hà Nội' : 'Hanoi',
         status: 'completed',
         rating: 4.5
       }
@@ -442,22 +444,22 @@ const HRManagement = () => {
     change_request: [
       {
         id: 5,
-        name: 'Hoàng Văn E',
-        position: 'Nhân viên giao hàng',
+        name: language === 'vi' ? 'Hoàng Văn E' : 'Hoang Van E',
+        position: language === 'vi' ? 'Nhân viên giao hàng' : 'Delivery Staff',
         startDate: '10/01/2026',
-        shift: 'Ca sáng 8:00 - 12:00',
-        location: 'TP.HCM',
+        shift: language === 'vi' ? 'Ca sáng 8:00 - 12:00' : 'Morning shift 8:00 - 12:00',
+        location: language === 'vi' ? 'TP.HCM' : 'HCMC',
         status: 'requested',
-        reason: 'Yêu cầu thay đổi ca làm việc'
+        reason: language === 'vi' ? 'Yêu cầu thay đổi ca làm việc' : 'Request to change work shift'
       }
     ]
   };
 
   const tabs = [
-    { id: 'active', label: 'Đang làm việc', count: staffData.active.length },
-    { id: 'pending', label: 'Chờ xác nhận', count: staffData.pending.length },
-    { id: 'completed', label: 'Đã hoàn thành', count: staffData.completed.length },
-    { id: 'change_request', label: 'Yêu cầu thay đổi', count: staffData.change_request.length }
+    { id: 'active', label: language === 'vi' ? 'Đang làm việc' : 'Active', count: staffData.active.length },
+    { id: 'pending', label: language === 'vi' ? 'Chờ xác nhận' : 'Pending Confirmation', count: staffData.pending.length },
+    { id: 'completed', label: language === 'vi' ? 'Đã hoàn thành' : 'Completed', count: staffData.completed.length },
+    { id: 'change_request', label: language === 'vi' ? 'Yêu cầu thay đổi' : 'Change Requests', count: staffData.change_request.length }
   ];
 
   const handleConfirmStaff = (staffId) => {
@@ -492,10 +494,10 @@ const HRManagement = () => {
             <h3>{staff.name}</h3>
             <p>{staff.position}</p>
             <StatusBadge $status={staff.status}>
-              {staff.status === 'active' && 'Đang làm việc'}
-              {staff.status === 'pending' && 'Chờ xác nhận'}
-              {staff.status === 'completed' && 'Đã hoàn thành'}
-              {staff.status === 'requested' && 'Yêu cầu thay đổi'}
+              {staff.status === 'active' && (language === 'vi' ? 'Đang làm việc' : 'Active')}
+              {staff.status === 'pending' && (language === 'vi' ? 'Chờ xác nhận' : 'Pending confirmation')}
+              {staff.status === 'completed' && (language === 'vi' ? 'Đã hoàn thành' : 'Completed')}
+              {staff.status === 'requested' && (language === 'vi' ? 'Yêu cầu thay đổi' : 'Change request')}
             </StatusBadge>
           </StaffDetails>
         </StaffInfo>
@@ -526,7 +528,7 @@ const HRManagement = () => {
         <ReasonBox>
           <AlertCircle />
           <div>
-            <strong>Lý do yêu cầu:</strong>
+            <strong>{language === 'vi' ? 'Lý do yêu cầu:' : 'Request reason:'}</strong>
             <span>{staff.reason}</span>
           </div>
         </ReasonBox>
@@ -542,7 +544,7 @@ const HRManagement = () => {
               whileTap={{ scale: 0.98 }}
             >
               <CheckCircle />
-              Xác nhận
+              {language === 'vi' ? 'Xác nhận' : 'Confirm'}
             </Button>
             <Button 
               $variant="danger" 
@@ -551,7 +553,7 @@ const HRManagement = () => {
               whileTap={{ scale: 0.98 }}
             >
               <XCircle />
-              Từ chối
+              {language === 'vi' ? 'Từ chối' : 'Reject'}
             </Button>
           </>
         )}
@@ -565,7 +567,7 @@ const HRManagement = () => {
               whileTap={{ scale: 0.98 }}
             >
               <AlertCircle />
-              Yêu cầu thay đổi
+              {language === 'vi' ? 'Yêu cầu thay đổi' : 'Request change'}
             </Button>
             <Button 
               $variant="primary" 
@@ -574,7 +576,7 @@ const HRManagement = () => {
               whileTap={{ scale: 0.98 }}
             >
               <CheckCircle />
-              Kết thúc công việc
+              {language === 'vi' ? 'Kết thúc công việc' : 'Close assignment'}
             </Button>
           </>
         )}
@@ -587,7 +589,7 @@ const HRManagement = () => {
             whileTap={{ scale: 0.98 }}
           >
             <Star />
-            Đánh giá nhân viên
+            {language === 'vi' ? 'Đánh giá nhân viên' : 'Rate employee'}
           </Button>
         )}
         
@@ -600,7 +602,7 @@ const HRManagement = () => {
               whileTap={{ scale: 0.98 }}
             >
               <CheckCircle />
-              Chấp nhận
+              {language === 'vi' ? 'Chấp nhận' : 'Accept'}
             </Button>
             <Button 
               $variant="danger" 
@@ -609,7 +611,7 @@ const HRManagement = () => {
               whileTap={{ scale: 0.98 }}
             >
               <XCircle />
-              Từ chối
+              {language === 'vi' ? 'Từ chối' : 'Reject'}
             </Button>
           </>
         )}
@@ -623,8 +625,8 @@ const HRManagement = () => {
     <DashboardLayout role="employer">
       <PageContainer>
         <PageHeader>
-          <h1>Quản lý nhân sự</h1>
-          <p>Quản lý và theo dõi nhân viên đang làm việc</p>
+          <h1>{language === 'vi' ? 'Quản lý nhân sự' : 'HR Management'}</h1>
+          <p>{language === 'vi' ? 'Quản lý và theo dõi nhân viên đang làm việc' : 'Manage and track your active workforce'}</p>
         </PageHeader>
 
         <TabContainer>
@@ -652,8 +654,8 @@ const HRManagement = () => {
             transition={{ duration: 0.4 }}
           >
             <Users />
-            <h3>Chưa có nhân viên</h3>
-            <p>Không có nhân viên nào trong danh mục này</p>
+            <h3>{language === 'vi' ? 'Chưa có nhân viên' : 'No staff yet'}</h3>
+            <p>{language === 'vi' ? 'Không có nhân viên nào trong danh mục này' : 'There are no staff members in this category'}</p>
           </EmptyState>
         )}
       </PageContainer>

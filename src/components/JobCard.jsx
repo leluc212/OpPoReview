@@ -2,6 +2,28 @@ import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Briefcase, MapPin, Clock, DollarSign, Bookmark } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+
+// Translate salary string based on language
+const translateSalary = (salaryStr, language) => {
+  if (language === 'vi') return salaryStr;
+  return salaryStr
+    .replace(/triệu VND/g, 'million VND')
+    .replace(/\/ca/g, '/shift')
+    .replace(/\/giờ/g, '/hour');
+};
+
+// Translate location string based on language
+const translateLocation = (locationStr, language) => {
+  if (language === 'vi') return locationStr;
+  return locationStr
+    .replace(/Quận/g, 'District')
+    .replace(/TP\.HCM/g, 'HCMC')
+    .replace(/Hà Nội/g, 'Hanoi')
+    .replace(/Đà Nẵng/g, 'Da Nang')
+    .replace(/Tân Bình/g, 'Tan Binh')
+    .replace(/Phú Nhuận/g, 'Phu Nhuan');
+};
 
 const CardWrapper = styled(motion.div)`
   background: ${props => props.theme.colors.bgLight};
@@ -210,6 +232,8 @@ const BookmarkButton = styled(motion.button)`
 `;
 
 const JobCard = ({ job, onClick, onSave, saved = false }) => {
+  const { language } = useLanguage();
+  
   const handleSaveClick = (e) => {
     e.stopPropagation();
     onSave && onSave(job.id);
@@ -261,7 +285,7 @@ const JobCard = ({ job, onClick, onSave, saved = false }) => {
       <JobDetails>
         <DetailItem whileHover={{ x: 4 }}>
           <MapPin />
-          <span>{job.location}</span>
+          <span>{translateLocation(job.location, language)}</span>
         </DetailItem>
         <DetailItem whileHover={{ x: 4 }}>
           <Briefcase />
@@ -269,7 +293,7 @@ const JobCard = ({ job, onClick, onSave, saved = false }) => {
         </DetailItem>
         <DetailItem whileHover={{ x: 4 }}>
           <DollarSign />
-          <span>{job.salary}</span>
+          <span>{translateSalary(job.salary, language)}</span>
         </DetailItem>
         <DetailItem whileHover={{ x: 4 }}>
           <Clock />
