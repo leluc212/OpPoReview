@@ -47,7 +47,7 @@ const MainContent = styled.div``;
 const Sidebar = styled.div``;
 
 const Section = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.lg};
   box-shadow: ${props => props.theme.shadows.sm};
   padding: 2rem;
@@ -79,7 +79,7 @@ const FAQItem = styled.div`
 const FAQQuestion = styled.button`
   width: 100%;
   padding: 1rem 1.5rem;
-  background: ${props => props.$isOpen ? props.theme.colors.background : 'white'};
+  background: ${props => props.$isOpen ? props.theme.colors.bgDark : props.theme.colors.bgLight};
   border: none;
   text-align: left;
   font-weight: 600;
@@ -92,7 +92,7 @@ const FAQQuestion = styled.button`
   transition: all 0.2s;
 
   &:hover {
-    background: ${props => props.theme.colors.background};
+    background: ${props => props.theme.colors.bgDark};
   }
 `;
 
@@ -101,7 +101,7 @@ const FAQAnswer = styled.div`
   color: ${props => props.theme.colors.textSecondary};
   line-height: 1.6;
   border-top: 1px solid ${props => props.theme.colors.border};
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
 `;
 
 const FormGroup = styled.div`
@@ -109,7 +109,7 @@ const FormGroup = styled.div`
 `;
 
 const ContactCard = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.lg};
   box-shadow: ${props => props.theme.shadows.sm};
   padding: 1.5rem;

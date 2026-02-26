@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
+import { useLanguage } from '../../context/LanguageContext';
 import { 
   Bell, 
   Briefcase, 
@@ -245,9 +246,11 @@ const NotificationContent = styled.div`
   
   p {
     font-size: 14px;
-    color: ${props => props.theme.colors.textLight};
+    color: ${props => props.theme.colors.text};
+    opacity: 0.85;
     margin-bottom: 10px;
     line-height: 1.6;
+    font-weight: 500;
   }
   
   .notification-footer {
@@ -257,7 +260,9 @@ const NotificationContent = styled.div`
     
     time {
       font-size: 13px;
-      color: ${props => props.theme.colors.textLight};
+      color: ${props => props.theme.colors.text};
+      opacity: 0.7;
+      font-weight: 500;
       display: flex;
       align-items: center;
       gap: 4px;
@@ -389,16 +394,20 @@ const ActivityItem = styled.div`
 `;
 
 function CandidateNotifications() {
+  const { language } = useLanguage();
   const [filter, setFilter] = useState('all');
-  const [notifications, setNotifications] = useState([
+  
+  const getNotificationsData = () => [
     {
       id: 1,
       type: 'application',
       icon: Eye,
       color: '#667eea',
-      title: 'Hồ sơ đã được xem',
-      message: 'FPT Software đã xem hồ sơ ứng tuyển Senior React Developer của bạn',
-      time: '2 giờ trước',
+      title: language === 'vi' ? 'Hồ sơ đã được xem' : 'Profile viewed',
+      message: language === 'vi' 
+        ? 'FPT Software đã xem hồ sơ ứng tuyển Senior React Developer của bạn'
+        : 'FPT Software viewed your Senior React Developer application',
+      time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
       unread: true
     },
     {
@@ -406,9 +415,11 @@ function CandidateNotifications() {
       type: 'message',
       icon: MessageSquare,
       color: '#F59E0B',
-      title: 'Tin nhắn mới',
-      message: 'Bạn có tin nhắn mới từ Hồng Trà Ngô Gia',
-      time: '5 giờ trước',
+      title: language === 'vi' ? 'Tin nhắn mới' : 'New message',
+      message: language === 'vi'
+        ? 'Bạn có tin nhắn mới từ Hồng Trà Ngô Gia'
+        : 'You have a new message from Hong Tra Ngo Gia',
+      time: language === 'vi' ? '5 giờ trước' : '5 hours ago',
       unread: true
     },
     {
@@ -416,9 +427,11 @@ function CandidateNotifications() {
       type: 'success',
       icon: CheckCircle,
       color: '#10B981',
-      title: 'Hồ sơ được chấp nhận',
-      message: 'Hồ sơ Nhân viên tại Highlands của bạn đã được chấp nhận',
-      time: '1 ngày trước',
+      title: language === 'vi' ? 'Hồ sơ được chấp nhận' : 'Application accepted',
+      message: language === 'vi'
+        ? 'Hồ sơ Nhân viên tại Highlands của bạn đã được chấp nhận'
+        : 'Your application for Highlands has been accepted',
+      time: language === 'vi' ? '1 ngày trước' : '1 day ago',
       unread: false
     },
     {
@@ -426,9 +439,11 @@ function CandidateNotifications() {
       type: 'application',
       icon: Briefcase,
       color: '#667eea',
-      title: 'Công việc phù hợp với bạn',
-      message: 'Có 3 công việc mới phù hợp với kỹ năng React, Node.js của bạn',
-      time: '3 giờ trước',
+      title: language === 'vi' ? 'Công việc phù hợp với bạn' : 'Jobs matching your profile',
+      message: language === 'vi'
+        ? 'Có 3 công việc mới phù hợp với kỹ năng React, Node.js của bạn'
+        : '3 new jobs match your React, Node.js skills',
+      time: language === 'vi' ? '3 giờ trước' : '3 hours ago',
       unread: true
     },
     {
@@ -436,9 +451,11 @@ function CandidateNotifications() {
       type: 'success',
       icon: ThumbsUp,
       color: '#10B981',
-      title: 'Hồ sơ được yêu thích',
-      message: 'VNG Corporation đã lưu hồ sơ của bạn vào danh sách ứng viên tiềm năng',
-      time: '6 giờ trước',
+      title: language === 'vi' ? 'Hồ sơ được yêu thích' : 'Profile favorited',
+      message: language === 'vi'
+        ? 'VNG Corporation đã lưu hồ sơ của bạn vào danh sách ứng viên tiềm năng'
+        : 'VNG Corporation saved your profile as a potential candidate',
+      time: language === 'vi' ? '6 giờ trước' : '6 hours ago',
       unread: true
     },
     {
@@ -446,9 +463,11 @@ function CandidateNotifications() {
       type: 'alert',
       icon: Calendar,
       color: '#EF4444',
-      title: 'Lời mời phỏng vấn',
-      message: 'Grab Vietnam mời bạn tham gia phỏng vấn vào 10:00 AM ngày 28/02/2026',
-      time: '1 ngày trước',
+      title: language === 'vi' ? 'Lời mời phỏng vấn' : 'Interview invitation',
+      message: language === 'vi'
+        ? 'Grab Vietnam mời bạn tham gia phỏng vấn vào 10:00 AM ngày 28/02/2026'
+        : 'Grab Vietnam invites you to an interview at 10:00 AM on 28/02/2026',
+      time: language === 'vi' ? '1 ngày trước' : '1 day ago',
       unread: false
     },
     {
@@ -456,9 +475,11 @@ function CandidateNotifications() {
       type: 'info',
       icon: TrendingUp,
       color: '#667eea',
-      title: 'Hồ sơ của bạn nổi bật',
-      message: 'Hồ sơ của bạn đã được xem 156 lần trong tuần này, tăng 45% so với tuần trước',
-      time: '2 ngày trước',
+      title: language === 'vi' ? 'Hồ sơ của bạn nổi bật' : 'Your profile is trending',
+      message: language === 'vi'
+        ? 'Hồ sơ của bạn đã được xem 156 lần trong tuần này, tăng 45% so với tuần trước'
+        : 'Your profile was viewed 156 times this week, up 45% from last week',
+      time: language === 'vi' ? '2 ngày trước' : '2 days ago',
       unread: false
     },
     {
@@ -466,9 +487,11 @@ function CandidateNotifications() {
       type: 'success',
       icon: Award,
       color: '#10B981',
-      title: 'Chúc mừng! Hồ sơ hoàn thiện 100%',
-      message: 'Bạn đã hoàn thiện hồ sơ. Cơ hội được tuyển dụng tăng 70%',
-      time: '3 ngày trước',
+      title: language === 'vi' ? 'Chúc mừng! Hồ sơ hoàn thiện 100%' : 'Congratulations! Profile 100% complete',
+      message: language === 'vi'
+        ? 'Bạn đã hoàn thiện hồ sơ. Cơ hội được tuyển dụng tăng 70%'
+        : 'You completed your profile. Your hiring chances increased by 70%',
+      time: language === 'vi' ? '3 ngày trước' : '3 days ago',
       unread: false
     },
     {
@@ -476,9 +499,11 @@ function CandidateNotifications() {
       type: 'message',
       icon: MessageSquare,
       color: '#F59E0B',
-      title: 'Tin nhắn từ nhà tuyển dụng',
-      message: 'Shopee Vietnam đã gửi tin nhắn về vị trí Senior Frontend Engineer',
-      time: '4 giờ trước',
+      title: language === 'vi' ? 'Tin nhắn từ nhà tuyển dụng' : 'Message from employer',
+      message: language === 'vi'
+        ? 'Shopee Vietnam đã gửi tin nhắn về vị trí Senior Frontend Engineer'
+        : 'Shopee Vietnam sent a message about the Senior Frontend Engineer position',
+      time: language === 'vi' ? '4 giờ trước' : '4 hours ago',
       unread: true
     },
     {
@@ -486,12 +511,21 @@ function CandidateNotifications() {
       type: 'application',
       icon: UserPlus,
       color: '#667eea',
-      title: 'Nhà tuyển dụng theo dõi bạn',
-      message: 'Tiki Corporation và 2 công ty khác đã theo dõi hồ sơ của bạn',
-      time: '1 ngày trước',
+      title: language === 'vi' ? 'Nhà tuyển dụng theo dõi bạn' : 'Employers following you',
+      message: language === 'vi'
+        ? 'Tiki Corporation và 2 công ty khác đã theo dõi hồ sơ của bạn'
+        : 'Tiki Corporation and 2 other companies are following your profile',
+      time: language === 'vi' ? '1 ngày trước' : '1 day ago',
       unread: false
     }
-  ]);
+  ];
+
+  const [notifications, setNotifications] = useState(getNotificationsData());
+
+  useEffect(() => {
+    setNotifications(getNotificationsData());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language]);
 
   const handleRemoveNotification = (id) => {
     setNotifications(notifications.filter(n => n.id !== id));
@@ -521,17 +555,17 @@ function CandidateNotifications() {
         >
           <div className="header-content">
             <div className="header-left">
-              <h1><Bell />Thông Báo</h1>
-              <p>Cập nhật mới nhất về công việc và hồ sơ của bạn</p>
+              <h1><Bell />{language === 'vi' ? 'Thông Báo' : 'Notifications'}</h1>
+              <p>{language === 'vi' ? 'Cập nhật mới nhất về công việc và hồ sơ của bạn' : 'Latest updates about your jobs and profile'}</p>
             </div>
             <div className="header-stats">
               <div className="stat-item">
                 <div className="stat-value">{notifications.length}</div>
-                <div className="stat-label">Tổng số</div>
+                <div className="stat-label">{language === 'vi' ? 'Tổng số' : 'Total'}</div>
               </div>
               <div className="stat-item">
                 <div className="stat-value">{unreadCount}</div>
-                <div className="stat-label">Chưa đọc</div>
+                <div className="stat-label">{language === 'vi' ? 'Chưa đọc' : 'Unread'}</div>
               </div>
             </div>
           </div>
@@ -546,7 +580,7 @@ function CandidateNotifications() {
             >
               <div className="filter-left">
                 <Filter />
-                <span>Lọc thông báo</span>
+                <span>{language === 'vi' ? 'Lọc thông báo' : 'Filter notifications'}</span>
               </div>
               <div className="filter-buttons">
                 <FilterButton 
@@ -555,7 +589,7 @@ function CandidateNotifications() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Tất cả
+                  {language === 'vi' ? 'Tất cả' : 'All'}
                 </FilterButton>
                 <FilterButton 
                   $active={filter === 'unread'}
@@ -563,7 +597,7 @@ function CandidateNotifications() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Chưa đọc
+                  {language === 'vi' ? 'Chưa đọc' : 'Unread'}
                 </FilterButton>
                 <FilterButton 
                   $active={filter === 'application'}
@@ -571,7 +605,7 @@ function CandidateNotifications() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Ứng tuyển
+                  {language === 'vi' ? 'Ứng tuyển' : 'Applications'}
                 </FilterButton>
                 <FilterButton 
                   $active={filter === 'message'}
@@ -579,7 +613,7 @@ function CandidateNotifications() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Tin nhắn
+                  {language === 'vi' ? 'Tin nhắn' : 'Messages'}
                 </FilterButton>
               </div>
             </FilterBar>
@@ -632,12 +666,12 @@ function CandidateNotifications() {
               >
                 <Bell size={48} style={{ color: '#CBD5E1', marginBottom: '16px' }} />
                 <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '8px', color: '#64748B' }}>
-                  Không có thông báo
+                  {language === 'vi' ? 'Không có thông báo' : 'No notifications'}
                 </h3>
                 <p style={{ color: '#94A3B8', fontSize: '14px' }}>
                   {filter === 'unread' 
-                    ? 'Bạn đã đọc tất cả thông báo' 
-                    : 'Chưa có thông báo nào trong mục này'}
+                    ? (language === 'vi' ? 'Bạn đã đọc tất cả thông báo' : 'You have read all notifications')
+                    : (language === 'vi' ? 'Chưa có thông báo nào trong mục này' : 'No notifications in this category')}
                 </p>
               </Card>
             )}
@@ -650,13 +684,13 @@ function CandidateNotifications() {
               transition={{ duration: 0.6, delay: 0.2 }}
             >
               <div className="card-header">
-                <h2><TrendingUp />Thống kê</h2>
+                <h2><TrendingUp />{language === 'vi' ? 'Thống kê' : 'Statistics'}</h2>
               </div>
               
               <QuickStats>
                 <StatItem $color="#667eea">
                   <div className="stat-header">
-                    <span className="stat-label">Thông báo hôm nay</span>
+                    <span className="stat-label">{language === 'vi' ? 'Thông báo hôm nay' : 'Today\'s notifications'}</span>
                     <Bell />
                   </div>
                   <div className="stat-value">6</div>
@@ -664,7 +698,7 @@ function CandidateNotifications() {
                 
                 <StatItem $color="#10B981">
                   <div className="stat-header">
-                    <span className="stat-label">Lượt xem hồ sơ</span>
+                    <span className="stat-label">{language === 'vi' ? 'Lượt xem hồ sơ' : 'Profile views'}</span>
                     <Eye />
                   </div>
                   <div className="stat-value">156</div>
@@ -672,7 +706,7 @@ function CandidateNotifications() {
                 
                 <StatItem $color="#F59E0B">
                   <div className="stat-header">
-                    <span className="stat-label">Tin nhắn mới</span>
+                    <span className="stat-label">{language === 'vi' ? 'Tin nhắn mới' : 'New messages'}</span>
                     <MessageSquare />
                   </div>
                   <div className="stat-value">2</div>
@@ -680,7 +714,7 @@ function CandidateNotifications() {
                 
                 <StatItem $color="#EF4444">
                   <div className="stat-header">
-                    <span className="stat-label">Lời mời phỏng vấn</span>
+                    <span className="stat-label">{language === 'vi' ? 'Lời mời phỏng vấn' : 'Interview invites'}</span>
                     <Calendar />
                   </div>
                   <div className="stat-value">1</div>
@@ -694,27 +728,27 @@ function CandidateNotifications() {
               transition={{ duration: 0.6, delay: 0.3 }}
             >
               <div className="card-header">
-                <h2><Clock />Hoạt động gần đây</h2>
+                <h2><Clock />{language === 'vi' ? 'Hoạt động gần đây' : 'Recent Activity'}</h2>
               </div>
               
               <ActivityItem>
-                <h4>FPT Software xem hồ sơ</h4>
-                <p>2 giờ trước</p>
+                <h4>{language === 'vi' ? 'FPT Software xem hồ sơ' : 'FPT Software viewed profile'}</h4>
+                <p>{language === 'vi' ? '2 giờ trước' : '2 hours ago'}</p>
               </ActivityItem>
               
               <ActivityItem>
-                <h4>Bạn nhận tin nhắn mới</h4>
-                <p>5 giờ trước</p>
+                <h4>{language === 'vi' ? 'Bạn nhận tin nhắn mới' : 'You received a new message'}</h4>
+                <p>{language === 'vi' ? '5 giờ trước' : '5 hours ago'}</p>
               </ActivityItem>
               
               <ActivityItem>
-                <h4>Hồ sơ được chấp nhận</h4>
-                <p>1 ngày trước</p>
+                <h4>{language === 'vi' ? 'Hồ sơ được chấp nhận' : 'Application accepted'}</h4>
+                <p>{language === 'vi' ? '1 ngày trước' : '1 day ago'}</p>
               </ActivityItem>
               
               <ActivityItem>
-                <h4>Lời mời phỏng vấn từ Grab</h4>
-                <p>1 ngày trước</p>
+                <h4>{language === 'vi' ? 'Lời mời phỏng vấn từ Grab' : 'Interview invitation from Grab'}</h4>
+                <p>{language === 'vi' ? '1 ngày trước' : '1 day ago'}</p>
               </ActivityItem>
             </Card>
           </Sidebar>

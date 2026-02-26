@@ -4,6 +4,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
 import TableFilter from '../../components/TableFilter';
 import { Button } from '../../components/FormElements';
+import { useLanguage } from '../../context/LanguageContext';
 
 const UserManagementContainer = styled.div``;
 
@@ -48,6 +49,7 @@ const Table = styled.table`
 `;
 
 const UserManagement = () => {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState([]);
 
@@ -59,10 +61,10 @@ const UserManagement = () => {
   ]);
 
   const filterOptions = [
-    { value: 'candidate', label: 'Ứng viên' },
-    { value: 'employer', label: 'Nhà tuyển dụng' },
-    { value: 'active', label: 'Hoạt động' },
-    { value: 'pending', label: 'Chờ duyệt' },
+    { value: 'candidate', label: t.sidebar.dashboard },
+    { value: 'employer', label: t.nav.forEmployers },
+    { value: 'active', label: t.adminUsers.status },
+    { value: 'pending', label: t.adminEmployerApproval.status },
   ];
 
   const filteredUsers = useMemo(() => {
@@ -91,8 +93,8 @@ const UserManagement = () => {
     <DashboardLayout role="admin">
       <UserManagementContainer>
         <PageHeader>
-          <h1>Quản Lý Người Dùng</h1>
-          <p style={{ color: '#64748B' }}>Quản lý toàn bộ người dùng trên nền tảng</p>
+          <h1>{t.adminUsers.title}</h1>
+          <p style={{ color: '#64748B' }}>{t.adminUsers.subtitle}</p>
         </PageHeader>
 
         <TableFilter 
@@ -101,18 +103,18 @@ const UserManagement = () => {
           filterOptions={filterOptions}
           activeFilters={filters}
           onFilterToggle={handleFilterToggle}
-          searchPlaceholder="Tìm kiếm người dùng..."
+          searchPlaceholder={t.common.search}
         />
 
         <Table>
           <thead>
             <tr>
-              <th>Họ Tên</th>
-              <th>Email</th>
-              <th>Vai Trò</th>
-              <th>Trạng Thái</th>
-              <th>Ngày Tham Gia</th>
-              <th>Thao Tác</th>
+              <th>{t.adminUsers.name}</th>
+              <th>{t.adminUsers.email}</th>
+              <th>{t.adminUsers.role}</th>
+              <th>{t.adminUsers.status}</th>
+              <th>{t.adminUsers.joined}</th>
+              <th>{t.adminUsers.actions}</th>
             </tr>
           </thead>
           <tbody>
@@ -124,7 +126,7 @@ const UserManagement = () => {
                 <td><StatusBadge status={user.status} /></td>
                 <td style={{ color: '#64748B' }}>{user.joined}</td>
                 <td>
-                  <Button $variant="secondary" $size="small">Xem</Button>
+                  <Button $variant="secondary" $size="small">{t.adminUsers.view}</Button>
                 </td>
               </tr>
             ))}

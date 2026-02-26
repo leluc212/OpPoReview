@@ -1,6 +1,8 @@
-import React, { useRef, useEffect, useLayoutEffect } from 'react';
+import React, { useRef, useEffect, useLayoutEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { 
   LayoutDashboard, 
   Briefcase, 
@@ -44,7 +46,7 @@ const SidebarContainer = styled.aside`
 `;
 
 const Logo = styled.div`
-  padding: 24px 0;
+  padding: 20px 0;
   border-bottom: 1px solid ${props => props.theme.colors.border};
   display: flex;
   flex-direction: column;
@@ -53,7 +55,7 @@ const Logo = styled.div`
   gap: 8px;
   background: linear-gradient(135deg, ${props => props.theme.colors.primary}05 0%, transparent 100%);
   position: relative;
-  min-height: 88px;
+  min-height: 140px;
   
   &::after {
     content: '';
@@ -71,33 +73,88 @@ const Logo = styled.div`
   ${SidebarContainer}:hover &::after {
     width: 120px;
   }
+`;
+
+const LogoText = styled.h1`
+  font-size: 20px;
+  font-weight: 800;
+  color: ${props => props.theme.colors.primary};
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(-10px);
+  margin-bottom: 8px;
+  
+  ${SidebarContainer}:hover & {
+    opacity: 1;
+    max-height: 32px;
+    transform: translateY(0);
+  }
+`;
+
+const UserAvatar = styled.div`
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, ${props => props.theme.colors.primary}, ${props => props.theme.colors.secondary});
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px ${props => props.theme.colors.primary}30;
+  transition: all 0.3s ease;
   
   img {
-    height: 36px;
-    transition: all 0.3s ease;
-    filter: drop-shadow(0 2px 8px ${props => props.theme.colors.primary}20);
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
   
-  ${SidebarContainer}:hover & img {
-    height: 40px;
+  ${SidebarContainer}:hover & {
+    width: 56px;
+    height: 56px;
+    font-size: 20px;
   }
+`;
+
+const UserName = styled.p`
+  font-size: 13px;
+  font-weight: 600;
+  color: ${props => props.theme.colors.text};
+  white-space: nowrap;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(-10px);
   
-  h1 {
-    font-size: 24px;
-    font-weight: 800;
-    color: ${props => props.theme.colors.primary};
-    letter-spacing: -0.5px;
-    white-space: nowrap;
-    opacity: 0;
-    max-height: 0;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: translateY(-10px);
-  }
-  
-  ${SidebarContainer}:hover & h1 {
+  ${SidebarContainer}:hover & {
     opacity: 1;
-    max-height: 40px;
+    max-height: 24px;
+    transform: translateY(0);
+  }
+`;
+
+const UserRole = styled.p`
+  font-size: 11px;
+  font-weight: 500;
+  color: ${props => props.theme.colors.textLight};
+  white-space: nowrap;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(-10px);
+  
+  ${SidebarContainer}:hover & {
+    opacity: 1;
+    max-height: 20px;
     transform: translateY(0);
   }
 `;
@@ -285,10 +342,52 @@ const NavLink = styled.div`
 `;
 
 const Sidebar = ({ role }) => {
+  const { t } = useLanguage();
+  const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const navRef = useRef(null);
   const isNavigatingRef = useRef(false);
+  
+  const [profileImage, setProfileImage] = useState(() => {
+    if (role === 'candidate') return localStorage.getItem('profileImage');
+    if (role === 'employer') return localStorage.getItem('companyLogo');
+    if (role === 'admin') return localStorage.getItem('adminProfileImage');
+    return null;
+  });
+  
+  useEffect(() => {
+    const handleStorageChange = () => {
+      if (role === 'candidate') setProfileImage(localStorage.getItem('profileImage'));
+      if (role === 'employer') setProfileImage(localStorage.getItem('companyLogo'));
+      if (role === 'admin') setProfileImage(localStorage.getItem('adminProfileImage'));
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    const interval = setInterval(handleStorageChange, 1000);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [role]);
+  
+  const getRoleLabel = () => {
+    if (role === 'candidate') return t.login.roleCandidate || 'Candidate';
+    if (role === 'employer') return t.login.roleEmployer || 'Employer';
+    if (role === 'admin') return t.login.roleAdmin || 'Admin';
+    return role;
+  };
+  
+  const getInitials = () => {
+    if (user?.name) {
+      return user.name.charAt(0).toUpperCase();
+    }
+    if (role === 'candidate') return 'C';
+    if (role === 'employer') return 'E';
+    if (role === 'admin') return 'A';
+    return 'U';
+  };
   
   // Save scroll position to sessionStorage whenever it changes
   useEffect(() => {
@@ -343,68 +442,67 @@ const Sidebar = ({ role }) => {
   };
   
   const candidateLinks = [
-    { section: 'CHÍNH', items: [
-      { to: '/candidate/dashboard', icon: LayoutDashboard, label: 'Bảng Điều Khiển' },
-      { to: '/candidate/jobs', icon: Briefcase, label: 'Bài đăng' },
+    { section: t.sidebar.main, items: [
+      { to: '/candidate/dashboard', icon: LayoutDashboard, label: t.sidebar.dashboard },
+      { to: '/candidate/jobs', icon: Briefcase, label: t.sidebar.findJobs },
     ]},
-    { section: 'LIÊN LẠC', items: [
-      { to: '/candidate/notifications', icon: Bell, label: 'Thông Báo' },
+    { section: t.sidebar.communication, items: [
+      { to: '/candidate/notifications', icon: Bell, label: t.sidebar.notifications },
     ]},
-    { section: 'TÀI KHOẢN', items: [
-      { to: '/candidate/profile', icon: Users, label: 'Hồ Sơ Của Tôi' },
-      { to: '/candidate/settings', icon: Settings, label: 'Cài Đặt' },
+    { section: t.sidebar.account, items: [
+      { to: '/candidate/profile', icon: Users, label: t.sidebar.myProfile },
+      { to: '/candidate/settings', icon: Settings, label: t.sidebar.settings },
     ]},
-    { section: 'TIỆN ÍCH', items: [
-      { to: '#', icon: MapPin, label: 'Vị Trí' },
-      { to: '/candidate/availability', icon: ToggleLeft, label: 'Trạng Thái (Bật/Tắt)' },
-      { to: '/candidate/wallet', icon: Wallet, label: 'Ví Điện Tử' },
-      { to: '/candidate/support', icon: HelpCircle, label: 'Hỗ Trợ' },
-      { to: '#', icon: LogOut, label: 'Đăng Xuất' },
+    { section: t.sidebar.utilities, items: [
+      { to: '/candidate/availability', icon: ToggleLeft, label: t.sidebar.availability },
+      { to: '/candidate/wallet', icon: Wallet, label: t.sidebar.digitalWallet },
+      { to: '/candidate/support', icon: HelpCircle, label: t.sidebar.support },
+      { to: '#', icon: LogOut, label: t.sidebar.signOut },
     ]}
   ];
   
   const employerLinks = [
-    { section: 'CHÍNH', items: [
-      { to: '/employer/dashboard', icon: LayoutDashboard, label: 'Bảng Điều Khiển' },
-      { to: '/employer/jobs', icon: Briefcase, label: 'Việc Của Tôi' },
-      { to: '/employer/applications', icon: FileText, label: 'Hồ Sơ Ứng Tuyển' },
-      { to: '/employer/hr-management', icon: UsersRound, label: 'Quản lý nhân sự' },
+    { section: t.sidebar.main, items: [
+      { to: '/employer/dashboard', icon: LayoutDashboard, label: t.sidebar.dashboard },
+      { to: '/employer/jobs', icon: Briefcase, label: t.sidebar.myJobs },
+      { to: '/employer/applications', icon: FileText, label: t.sidebar.applications },
+      { to: '/employer/hr-management', icon: UsersRound, label: t.sidebar.userManagement || 'HR Management' },
     ]},
-    { section: 'LIÊN LẠC', items: [
-      { to: '/employer/notifications', icon: Bell, label: 'Thông Báo' },
+    { section: t.sidebar.communication, items: [
+      { to: '/employer/notifications', icon: Bell, label: t.sidebar.notifications },
     ]},
-    { section: 'TÀI KHOẢN', items: [
-      { to: '/employer/profile', icon: Users, label: 'Hồ Sơ Công Ty' },
-      { to: '/employer/subscription', icon: CreditCard, label: 'Gói Dịch Vụ' },
-      { to: '/employer/settings', icon: Settings, label: 'Cài Đặt' },
+    { section: t.sidebar.account, items: [
+      { to: '/employer/profile', icon: Users, label: t.sidebar.companyProfile },
+      { to: '/employer/subscription', icon: CreditCard, label: t.sidebar.subscription },
+      { to: '/employer/settings', icon: Settings, label: t.sidebar.settings },
     ]},
-    { section: 'TIỆN ÍCH', items: [
-      { to: '/employer/analytics', icon: BarChart3, label: 'Phân tích' },
-      { to: '/employer/wallet', icon: Wallet, label: 'Ví Điện Tử' },
-      { to: '/employer/support', icon: HelpCircle, label: 'Hỗ Trợ' },
-      { to: '#', icon: LogOut, label: 'Đăng Xuất' },
+    { section: t.sidebar.utilities, items: [
+      { to: '/employer/analytics', icon: BarChart3, label: t.sidebar.reports || 'Analytics' },
+      { to: '/employer/wallet', icon: Wallet, label: t.sidebar.digitalWallet },
+      { to: '/employer/support', icon: HelpCircle, label: t.sidebar.support },
+      { to: '#', icon: LogOut, label: t.sidebar.signOut },
     ]}
   ];
   
   const adminLinks = [
-    { section: 'CHÍNH', items: [
-      { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Bảng Điều Khiển' },
-      { to: '/admin/users', icon: Users, label: 'Quản Lý Người Dùng' },
-      { to: '/admin/employers', icon: CheckCircle, label: 'Duyệt Nhà Tuyển Dụng' },
+    { section: t.sidebar.main, items: [
+      { to: '/admin/dashboard', icon: LayoutDashboard, label: t.sidebar.dashboard },
+      { to: '/admin/users', icon: Users, label: t.sidebar.userManagement },
+      { to: '/admin/employers', icon: CheckCircle, label: t.sidebar.employerApproval },
     ]},
-    { section: 'Quản Lý', items: [
-      { to: '/admin/posts', icon: FileText, label: 'Quản lý bài đăng' },
-      { to: '/admin/packages', icon: Package, label: 'Gói Dịch Vụ' },
+    { section: t.sidebar.platform || 'Management', items: [
+      { to: '/admin/posts', icon: FileText, label: t.sidebar.posts || 'Posts Management' },
+      { to: '/admin/packages', icon: Package, label: t.sidebar.packages },
     ]},
-    { section: 'Phân Tích', items: [
-      { to: '/admin/analytics', icon: BarChart3, label: 'Phân tích dữ liệu' },
-      { to: '/admin/reports', icon: BarChart3, label: 'Báo Cáo' },
+    { section: t.sidebar.platform || 'Analytics', items: [
+      { to: '/admin/analytics', icon: BarChart3, label: 'Data Analysis' },
+      { to: '/admin/reports', icon: BarChart3, label: t.sidebar.reports },
     ]},
-    { section: 'Tiện Ích', items: [
-      { to: '/admin/wallet', icon: Wallet, label: 'Ví điện tử' },
-      { to: '/admin/notifications', icon: Bell, label: 'Thông Báo' },
-      { to: '/admin/profile', icon: User, label: 'Hồ sơ' },
-      { to: '/admin/settings', icon: Settings, label: 'Cài Đặt' },
+    { section: t.sidebar.utilities || 'Utilities', items: [
+      { to: '/admin/wallet', icon: Wallet, label: t.sidebar.digitalWallet },
+      { to: '/admin/notifications', icon: Bell, label: t.sidebar.notifications },
+      { to: '/admin/profile', icon: User, label: t.sidebar.myProfile },
+      { to: '/admin/settings', icon: Settings, label: t.sidebar.settings },
     ]}
   ];
   
@@ -415,8 +513,16 @@ const Sidebar = ({ role }) => {
   return (
     <SidebarContainer>
       <Logo>
-        <img src="/images/logo.png" alt="Ốp Pờ" style={{ height: '32px', marginBottom: '4px' }} />
-        <h1>Ốp Pờ</h1>
+        <LogoText>Ốp Pờ</LogoText>
+        <UserAvatar>
+          {profileImage ? (
+            <img src={profileImage} alt="Profile" />
+          ) : (
+            getInitials()
+          )}
+        </UserAvatar>
+        <UserName>{user?.name || getRoleLabel()}</UserName>
+        <UserRole>{getRoleLabel()}</UserRole>
       </Logo>
       
       <Nav ref={navRef}>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
+import { useLanguage } from '../../context/LanguageContext';
 import { 
   FileText, 
   AlertCircle,
@@ -44,7 +45,7 @@ const StatsGrid = styled.div`
 `;
 
 const StatCard = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   padding: 1.5rem;
   border-radius: ${props => props.theme.borderRadius.lg};
   box-shadow: ${props => props.theme.shadows.sm};
@@ -155,7 +156,7 @@ const Select = styled.select`
   padding: 0.75rem 1rem;
   border: 1px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.md};
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   color: ${props => props.theme.colors.text};
   font-size: 0.9rem;
   cursor: pointer;
@@ -173,7 +174,7 @@ const PostsGrid = styled.div`
 `;
 
 const PostCard = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.lg};
   box-shadow: ${props => props.theme.shadows.sm};
   padding: 1.5rem;
@@ -383,6 +384,7 @@ const Button = styled.button`
 `;
 
 const PostsManagement = () => {
+  const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState('pending');
   const [filterCategory, setFilterCategory] = useState('all');
 
@@ -390,12 +392,12 @@ const PostsManagement = () => {
     {
       id: 1,
       status: 'pending',
-      author: 'Công ty ABC Tech',
-      authorType: 'Nhà tuyển dụng',
+      author: language === 'vi' ? 'Công ty ABC Tech' : 'ABC Tech Company',
+      authorType: language === 'vi' ? 'Nhà tuyển dụng' : 'Employer',
       avatar: 'AB',
-      title: 'Tuyển Frontend Developer (React)',
-      content: 'Công ty chúng tôi đang tìm kiếm Frontend Developer có kinh nghiệm với React, TypeScript. Mức lương hấp dẫn, môi trường năng động...',
-      category: 'Việc làm toàn thời gian',
+      title: language === 'vi' ? 'Tuyển Frontend Developer (React)' : 'Hiring Frontend Developer (React)',
+      content: language === 'vi' ? 'Công ty chúng tôi đang tìm kiếm Frontend Developer có kinh nghiệm với React, TypeScript. Mức lương hấp dẫn, môi trường năng động...' : 'We are looking for a Frontend Developer with experience in React and TypeScript. Competitive salary and dynamic environment...',
+      category: language === 'vi' ? 'Việc làm toàn thời gian' : 'Full-time jobs',
       date: '15/02/2024',
       time: '14:30',
       views: 245,
@@ -404,27 +406,27 @@ const PostsManagement = () => {
     {
       id: 2,
       status: 'flagged',
-      author: 'Công ty XYZ Corp',
-      authorType: 'Nhà tuyển dụng',
+      author: language === 'vi' ? 'Công ty XYZ Corp' : 'XYZ Corp',
+      authorType: language === 'vi' ? 'Nhà tuyển dụng' : 'Employer',
       avatar: 'XY',
-      title: 'Tuyển nhân viên sale - Lương cao',
-      content: 'Tuyển gấp nhân viên kinh doanh. Lương cơ bản 50 triệu, hoa hồng không giới hạn. Liên hệ ngay!!!',
-      category: 'Việc làm ca',
+      title: language === 'vi' ? 'Tuyển nhân viên sale - Lương cao' : 'Hiring sales staff - high salary',
+      content: language === 'vi' ? 'Tuyển gấp nhân viên kinh doanh. Lương cơ bản 50 triệu, hoa hồng không giới hạn. Liên hệ ngay!!!' : 'Urgent hiring for sales staff. Base salary 50 million, unlimited commission. Contact now!!!',
+      category: language === 'vi' ? 'Việc làm ca' : 'Shift jobs',
       date: '14/02/2024',
       time: '16:20',
       views: 892,
       flagged: true,
-      flagReason: 'Nội dung có dấu hiệu spam, sử dụng nhiều dấu chấm than, mức lương không hợp lý'
+      flagReason: language === 'vi' ? 'Nội dung có dấu hiệu spam, sử dụng nhiều dấu chấm than, mức lương không hợp lý' : 'Content appears spammy: excessive exclamation marks and unrealistic salary claim'
     },
     {
       id: 3,
       status: 'pending',
-      author: 'Nhà Hàng DEF',
-      authorType: 'Nhà tuyển dụng',
+      author: language === 'vi' ? 'Nhà Hàng DEF' : 'DEF Restaurant',
+      authorType: language === 'vi' ? 'Nhà tuyển dụng' : 'Employer',
       avatar: 'DE',
-      title: 'Tuyển phục vụ nhà hàng Part-time',
-      content: 'Nhà hàng cần tuyển nhân viên phục vụ làm part-time, ca tối từ 18h-22h. Yêu cầu nhiệt tình, hoạt bát.',
-      category: 'Việc làm ca',
+      title: language === 'vi' ? 'Tuyển phục vụ nhà hàng Part-time' : 'Hiring part-time restaurant server',
+      content: language === 'vi' ? 'Nhà hàng cần tuyển nhân viên phục vụ làm part-time, ca tối từ 18h-22h. Yêu cầu nhiệt tình, hoạt bát.' : 'Restaurant needs part-time service staff for evening shift 18:00-22:00. Enthusiastic and active preferred.',
+      category: language === 'vi' ? 'Việc làm ca' : 'Shift jobs',
       date: '14/02/2024',
       time: '10:15',
       views: 156,
@@ -434,11 +436,11 @@ const PostsManagement = () => {
       id: 4,
       status: 'approved',
       author: 'Tech Startup GHI',
-      authorType: 'Nhà tuyển dụng',
+      authorType: language === 'vi' ? 'Nhà tuyển dụng' : 'Employer',
       avatar: 'GH',
       title: 'Backend Developer - NodeJS',
-      content: 'Startup công nghệ đang tìm Backend Developer có kinh nghiệm với NodeJS, MongoDB. Cơ hội phát triển sự nghiệp...',
-      category: 'Việc làm toàn thời gian',
+      content: language === 'vi' ? 'Startup công nghệ đang tìm Backend Developer có kinh nghiệm với NodeJS, MongoDB. Cơ hội phát triển sự nghiệp...' : 'Tech startup is looking for a Backend Developer with NodeJS and MongoDB experience. Great growth opportunities...',
+      category: language === 'vi' ? 'Việc làm toàn thời gian' : 'Full-time jobs',
       date: '13/02/2024',
       time: '09:00',
       views: 423,
@@ -462,14 +464,14 @@ const PostsManagement = () => {
     <DashboardLayout role="admin">
       <PageContainer>
         <PageHeader>
-          <Title>Quản Lý Bài Đăng</Title>
-          <Subtitle>Kiểm duyệt và quản lý tất cả bài đăng tuyển dụng</Subtitle>
+          <Title>{language === 'vi' ? 'Quản Lý Bài Đăng' : 'Post Management'}</Title>
+          <Subtitle>{language === 'vi' ? 'Kiểm duyệt và quản lý tất cả bài đăng tuyển dụng' : 'Moderate and manage all job posts'}</Subtitle>
         </PageHeader>
 
         <StatsGrid>
           <StatCard $color="#f59e0b">
             <StatHeader>
-              <StatLabel>Chờ duyệt</StatLabel>
+              <StatLabel>{language === 'vi' ? 'Chờ duyệt' : 'Pending'}</StatLabel>
               <StatIcon $color="#f59e0b">
                 <Clock size={20} />
               </StatIcon>
@@ -479,7 +481,7 @@ const PostsManagement = () => {
 
           <StatCard $color="#ef4444">
             <StatHeader>
-              <StatLabel>Bị cảnh báo</StatLabel>
+              <StatLabel>{language === 'vi' ? 'Bị cảnh báo' : 'Flagged'}</StatLabel>
               <StatIcon $color="#ef4444">
                 <Flag size={20} />
               </StatIcon>
@@ -489,7 +491,7 @@ const PostsManagement = () => {
 
           <StatCard $color="#10b981">
             <StatHeader>
-              <StatLabel>Đã duyệt</StatLabel>
+              <StatLabel>{language === 'vi' ? 'Đã duyệt' : 'Approved'}</StatLabel>
               <StatIcon $color="#10b981">
                 <CheckCircle size={20} />
               </StatIcon>
@@ -499,7 +501,7 @@ const PostsManagement = () => {
 
           <StatCard $color="#6b7280">
             <StatHeader>
-              <StatLabel>Đã từ chối</StatLabel>
+              <StatLabel>{language === 'vi' ? 'Đã từ chối' : 'Rejected'}</StatLabel>
               <StatIcon $color="#6b7280">
                 <XCircle size={20} />
               </StatIcon>
@@ -510,23 +512,23 @@ const PostsManagement = () => {
 
         <TabContainer>
           <Tab $active={activeTab === 'all'} onClick={() => setActiveTab('all')}>
-            Tất cả
+            {language === 'vi' ? 'Tất cả' : 'All'}
             <TabBadge $active={activeTab === 'all'}>{mockPosts.length}</TabBadge>
           </Tab>
           <Tab $active={activeTab === 'pending'} onClick={() => setActiveTab('pending')}>
-            Chờ duyệt
+            {language === 'vi' ? 'Chờ duyệt' : 'Pending'}
             <TabBadge $active={activeTab === 'pending'}>{stats.pending}</TabBadge>
           </Tab>
           <Tab $active={activeTab === 'flagged'} onClick={() => setActiveTab('flagged')}>
-            Bị cảnh báo
+            {language === 'vi' ? 'Bị cảnh báo' : 'Flagged'}
             <TabBadge $active={activeTab === 'flagged'}>{stats.flagged}</TabBadge>
           </Tab>
           <Tab $active={activeTab === 'approved'} onClick={() => setActiveTab('approved')}>
-            Đã duyệt
+            {language === 'vi' ? 'Đã duyệt' : 'Approved'}
             <TabBadge $active={activeTab === 'approved'}>{stats.approved}</TabBadge>
           </Tab>
           <Tab $active={activeTab === 'rejected'} onClick={() => setActiveTab('rejected')}>
-            Đã từ chối
+            {language === 'vi' ? 'Đã từ chối' : 'Rejected'}
             <TabBadge $active={activeTab === 'rejected'}>{stats.rejected}</TabBadge>
           </Tab>
         </TabContainer>
@@ -534,17 +536,17 @@ const PostsManagement = () => {
         <FilterBar>
           <SearchBox>
             <SearchIcon size={18} />
-            <SearchInput placeholder="Tìm kiếm bài đăng..." />
+            <SearchInput placeholder={language === 'vi' ? 'Tìm kiếm bài đăng...' : 'Search posts...'} />
           </SearchBox>
           <Select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
-            <option value="all">Tất cả danh mục</option>
-            <option value="fulltime">Việc làm toàn thời gian</option>
-            <option value="parttime">Việc làm ca</option>
+            <option value="all">{language === 'vi' ? 'Tất cả danh mục' : 'All categories'}</option>
+            <option value="fulltime">{language === 'vi' ? 'Việc làm toàn thời gian' : 'Full-time jobs'}</option>
+            <option value="parttime">{language === 'vi' ? 'Việc làm ca' : 'Shift jobs'}</option>
           </Select>
           <Select>
-            <option value="newest">Mới nhất</option>
-            <option value="oldest">Cũ nhất</option>
-            <option value="most-viewed">Nhiều lượt xem</option>
+            <option value="newest">{language === 'vi' ? 'Mới nhất' : 'Newest'}</option>
+            <option value="oldest">{language === 'vi' ? 'Cũ nhất' : 'Oldest'}</option>
+            <option value="most-viewed">{language === 'vi' ? 'Nhiều lượt xem' : 'Most viewed'}</option>
           </Select>
         </FilterBar>
 
@@ -564,7 +566,7 @@ const PostsManagement = () => {
                       </MetaItem>
                       <MetaItem>
                         <Eye size={14} />
-                        {post.views} lượt xem
+                        {post.views} {language === 'vi' ? 'lượt xem' : 'views'}
                       </MetaItem>
                     </PostMeta>
                   </AuthorInfo>
@@ -586,7 +588,7 @@ const PostsManagement = () => {
                 <FlaggedContent>
                   <FlaggedTitle>
                     <AlertCircle size={18} />
-                    Nội dung bị cảnh báo
+                    {language === 'vi' ? 'Nội dung bị cảnh báo' : 'Flagged content'}
                   </FlaggedTitle>
                   <FlaggedText>{post.flagReason}</FlaggedText>
                 </FlaggedContent>
@@ -595,10 +597,10 @@ const PostsManagement = () => {
               <PostFooter>
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                   <StatusBadge $status={post.status}>
-                    {post.status === 'pending' && 'Chờ duyệt'}
-                    {post.status === 'flagged' && 'Bị cảnh báo'}
-                    {post.status === 'approved' && 'Đã duyệt'}
-                    {post.status === 'rejected' && 'Đã từ chối'}
+                    {post.status === 'pending' && (language === 'vi' ? 'Chờ duyệt' : 'Pending')}
+                    {post.status === 'flagged' && (language === 'vi' ? 'Bị cảnh báo' : 'Flagged')}
+                    {post.status === 'approved' && (language === 'vi' ? 'Đã duyệt' : 'Approved')}
+                    {post.status === 'rejected' && (language === 'vi' ? 'Đã từ chối' : 'Rejected')}
                   </StatusBadge>
                   <StatusBadge>{post.category}</StatusBadge>
                 </div>
@@ -607,16 +609,16 @@ const PostsManagement = () => {
                   <ActionButtons>
                     <Button $variant="success">
                       <CheckCircle size={16} />
-                      Phê duyệt
+                      {language === 'vi' ? 'Phê duyệt' : 'Approve'}
                     </Button>
                     <Button $variant="danger">
                       <XCircle size={16} />
-                      Từ chối
+                      {language === 'vi' ? 'Từ chối' : 'Reject'}
                     </Button>
                     {post.status === 'flagged' && (
                       <Button $variant="warning">
                         <Ban size={16} />
-                        Chặn tác giả
+                        {language === 'vi' ? 'Chặn tác giả' : 'Block author'}
                       </Button>
                     )}
                   </ActionButtons>
@@ -624,11 +626,11 @@ const PostsManagement = () => {
                   <ActionButtons>
                     <Button>
                       <Eye size={16} />
-                      Xem chi tiết
+                      {language === 'vi' ? 'Xem chi tiết' : 'View details'}
                     </Button>
                     <Button $variant="danger">
                       <Trash2 size={16} />
-                      Xóa
+                      {language === 'vi' ? 'Xóa' : 'Delete'}
                     </Button>
                   </ActionButtons>
                 )}

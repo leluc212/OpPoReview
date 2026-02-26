@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
+import { useLanguage } from '../../context/LanguageContext';
 import { 
   HelpCircle, 
   MessageCircle, 
@@ -440,6 +441,7 @@ const InfoBox = styled(motion.div)`
 `;
 
 function Support() {
+  const { language } = useLanguage();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -450,64 +452,103 @@ function Support() {
   const [expandedFAQ, setExpandedFAQ] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const faqs = [
+  const getFAQs = () => [
     {
-      question: 'Làm thế nào để cập nhật hồ sơ của tôi?',
-      answer: 'Vào phần "Hồ Sơ Của Tôi" từ menu bên trái, sau đó chỉnh sửa thông tin và nhấn nút "Lưu Thay Đổi". Bạn có thể cập nhật ảnh đại diện, thông tin liên hệ, kỹ năng và kinh nghiệm làm việc.'
+      question: language === 'vi' 
+        ? 'Làm thế nào để cập nhật hồ sơ của tôi?'
+        : 'How do I update my profile?',
+      answer: language === 'vi'
+        ? 'Vào phần "Hồ Sơ Của Tôi" từ menu bên trái, sau đó chỉnh sửa thông tin và nhấn nút "Lưu Thay Đổi". Bạn có thể cập nhật ảnh đại diện, thông tin liên hệ, kỹ năng và kinh nghiệm làm việc.'
+        : 'Go to "My Profile" from the left menu, then edit your information and click "Save Changes". You can update your avatar, contact information, skills and work experience.'
     },
     {
-      question: 'Tôi có thể ứng tuyển bao nhiêu công việc?',
-      answer: 'Bạn có thể ứng tuyển không giới hạn số lượng công việc. Tuy nhiên, chúng tôi khuyến nghị bạn chọn lọc và ứng tuyển các vị trí phù hợp nhất với kỹ năng và kinh nghiệm của bạn để tăng cơ hội được nhận.'
+      question: language === 'vi'
+        ? 'Tôi có thể ứng tuyển bao nhiêu công việc?'
+        : 'How many jobs can I apply for?',
+      answer: language === 'vi'
+        ? 'Bạn có thể ứng tuyển không giới hạn số lượng công việc. Tuy nhiên, chúng tôi khuyến nghị bạn chọn lọc và ứng tuyển các vị trí phù hợp nhất với kỹ năng và kinh nghiệm của bạn để tăng cơ hội được nhận.'
+        : 'You can apply to unlimited jobs. However, we recommend selecting and applying to positions that best match your skills and experience to increase your chances of success.'
     },
     {
-      question: 'Làm sao để theo dõi trạng thái đơn ứng tuyển?',
-      answer: 'Truy cập phần "Thông Báo" để xem cập nhật về đơn ứng tuyển của bạn. Bạn cũng sẽ nhận email thông báo khi có thay đổi về trạng thái hồ sơ, lời mời phỏng vấn hoặc kết quả tuyển dụng.'
+      question: language === 'vi'
+        ? 'Làm sao để theo dõi trạng thái đơn ứng tuyển?'
+        : 'How do I track my application status?',
+      answer: language === 'vi'
+        ? 'Truy cập phần "Thông Báo" để xem cập nhật về đơn ứng tuyển của bạn. Bạn cũng sẽ nhận email thông báo khi có thay đổi về trạng thái hồ sơ, lời mời phỏng vấn hoặc kết quả tuyển dụng.'
+        : 'Visit the "Notifications" section to see updates about your applications. You will also receive email notifications when there are changes to your application status, interview invitations, or recruitment results.'
     },
     {
-      question: 'Tôi quên mật khẩu, phải làm sao?',
-      answer: 'Nhấn vào "Quên mật khẩu" ở trang đăng nhập, sau đó làm theo hướng dẫn để đặt lại mật khẩu qua email. Liên kết đặt lại mật khẩu sẽ có hiệu lực trong 24 giờ.'
+      question: language === 'vi'
+        ? 'Tôi quên mật khẩu, phải làm sao?'
+        : 'I forgot my password, what should I do?',
+      answer: language === 'vi'
+        ? 'Nhấn vào "Quên mật khẩu" ở trang đăng nhập, sau đó làm theo hướng dẫn để đặt lại mật khẩu qua email. Liên kết đặt lại mật khẩu sẽ có hiệu lực trong 24 giờ.'
+        : 'Click "Forgot Password" on the login page, then follow the instructions to reset your password via email. The password reset link will be valid for 24 hours.'
     },
     {
-      question: 'Làm thế nào để xóa tài khoản?',
-      answer: 'Vào phần "Cài Đặt" > "Vùng Nguy Hiểm" và chọn "Xóa Tài Khoản". Lưu ý rằng hành động này không thể hoàn tác và toàn bộ dữ liệu của bạn sẽ bị xóa vĩnh viễn.'
+      question: language === 'vi'
+        ? 'Làm thế nào để xóa tài khoản?'
+        : 'How do I delete my account?',
+      answer: language === 'vi'
+        ? 'Vào phần "Cài Đặt" > "Vùng Nguy Hiểm" và chọn "Xóa Tài Khoản". Lưu ý rằng hành động này không thể hoàn tác và toàn bộ dữ liệu của bạn sẽ bị xóa vĩnh viễn.'
+        : 'Go to "Settings" > "Danger Zone" and select "Delete Account". Note that this action cannot be undone and all your data will be permanently deleted.'
     },
     {
-      question: 'Tại sao tôi không nhận được thông báo email?',
-      answer: 'Kiểm tra phần "Cài Đặt" > "Thông Báo" để đảm bảo bạn đã bật nhận thông báo email. Cũng kiểm tra thư mục spam/junk trong email của bạn. Nếu vấn đề vẫn tiếp tục, vui lòng liên hệ bộ phận hỗ trợ.'
+      question: language === 'vi'
+        ? 'Tại sao tôi không nhận được thông báo email?'
+        : 'Why am I not receiving email notifications?',
+      answer: language === 'vi'
+        ? 'Kiểm tra phần "Cài Đặt" > "Thông Báo" để đảm bảo bạn đã bật nhận thông báo email. Cũng kiểm tra thư mục spam/junk trong email của bạn. Nếu vấn đề vẫn tiếp tục, vui lòng liên hệ bộ phận hỗ trợ.'
+        : 'Check the "Settings" > "Notifications" section to ensure you have enabled email notifications. Also check your email\'s spam/junk folder. If the problem persists, please contact support.'
     },
     {
-      question: 'Làm thế nào để nâng cao khả năng được tuyển dụng?',
-      answer: 'Hoàn thiện hồ sơ 100%, cập nhật thường xuyên, thêm kỹ năng và chứng chỉ liên quan, viết mô tả bản thân chi tiết và chuyên nghiệp. Đồng thời, hãy ứng tuyển vào các vị trí phù hợp với năng lực của bạn.'
+      question: language === 'vi'
+        ? 'Làm thế nào để nâng cao khả năng được tuyển dụng?'
+        : 'How can I improve my hiring chances?',
+      answer: language === 'vi'
+        ? 'Hoàn thiện hồ sơ 100%, cập nhật thường xuyên, thêm kỹ năng và chứng chỉ liên quan, viết mô tả bản thân chi tiết và chuyên nghiệp. Đồng thời, hãy ứng tuyển vào các vị trí phù hợp với năng lực của bạn.'
+        : 'Complete your profile 100%, update regularly, add relevant skills and certifications, write detailed and professional self-descriptions. Also, apply to positions that match your abilities.'
     },
     {
-      question: 'Tôi có thể thay đổi email đăng ký không?',
-      answer: 'Có, bạn có thể thay đổi email trong phần "Hồ Sơ Của Tôi". Sau khi thay đổi, bạn sẽ nhận email xác nhận tại địa chỉ email mới. Vui lòng xác nhận để hoàn tất quá trình.'
+      question: language === 'vi'
+        ? 'Tôi có thể thay đổi email đăng ký không?'
+        : 'Can I change my registered email?',
+      answer: language === 'vi'
+        ? 'Có, bạn có thể thay đổi email trong phần "Hồ Sơ Của Tôi". Sau khi thay đổi, bạn sẽ nhận email xác nhận tại địa chỉ email mới. Vui lòng xác nhận để hoàn tất quá trình.'
+        : 'Yes, you can change your email in the "My Profile" section. After changing, you will receive a confirmation email at the new email address. Please confirm to complete the process.'
     }
   ];
+
+  const [faqs, setFaqs] = useState(getFAQs());
+
+  useEffect(() => {
+    setFaqs(getFAQs());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language]);
 
   const supportCategories = [
     {
       icon: Book,
-      title: 'Trung Tâm Trợ Giúp',
-      description: 'Xem hướng dẫn chi tiết và bài viết',
+      title: language === 'vi' ? 'Trung Tâm Trợ Giúp' : 'Help Center',
+      description: language === 'vi' ? 'Xem hướng dẫn chi tiết và bài viết' : 'View detailed guides and articles',
       color: '#667eea'
     },
     {
       icon: Video,
-      title: 'Video Hướng Dẫn',
-      description: 'Xem video hướng dẫn sử dụng',
+      title: language === 'vi' ? 'Video Hướng Dẫn' : 'Video Tutorials',
+      description: language === 'vi' ? 'Xem video hướng dẫn sử dụng' : 'Watch tutorial videos',
       color: '#10B981'
     },
     {
       icon: FileQuestion,
-      title: 'Báo Cáo Sự Cố',
-      description: 'Báo cáo lỗi hoặc vấn đề kỹ thuật',
+      title: language === 'vi' ? 'Báo Cáo Sự Cố' : 'Report Issue',
+      description: language === 'vi' ? 'Báo cáo lỗi hoặc vấn đề kỹ thuật' : 'Report bugs or technical issues',
       color: '#F59E0B'
     },
     {
       icon: MessageCircle,
-      title: 'Chat Trực Tuyến',
-      description: 'Trò chuyện với đội ngũ hỗ trợ',
+      title: language === 'vi' ? 'Chat Trực Tuyến' : 'Live Chat',
+      description: language === 'vi' ? 'Trò chuyện với đội ngũ hỗ trợ' : 'Chat with support team',
       color: '#EF4444'
     }
   ];
@@ -515,7 +556,9 @@ function Support() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('Support ticket:', formData);
-    alert('Yêu cầu hỗ trợ đã được gửi! Chúng tôi sẽ phản hồi trong vòng 24 giờ.');
+    alert(language === 'vi' 
+      ? 'Yêu cầu hỗ trợ đã được gửi! Chúng tôi sẽ phản hồi trong vòng 24 giờ.'
+      : 'Support request submitted! We will respond within 24 hours.');
     setFormData({ name: '', email: '', subject: '', message: '' });
   };
 
@@ -533,8 +576,8 @@ function Support() {
           transition={{ duration: 0.6 }}
         >
           <div className="header-content">
-            <h1><Headphones />Trung Tâm Hỗ Trợ</h1>
-            <p>Chúng tôi luôn sẵn sàng giúp đỡ bạn 24/7</p>
+            <h1><Headphones />{language === 'vi' ? 'Trung Tâm Hỗ Trợ' : 'Support Center'}</h1>
+            <p>{language === 'vi' ? 'Chúng tôi luôn sẵn sàng giúp đỡ bạn 24/7' : 'We are always ready to help you 24/7'}</p>
           </div>
         </PageHeader>
 
@@ -566,14 +609,14 @@ function Support() {
               transition={{ duration: 0.6, delay: 0.2 }}
             >
               <div className="card-header">
-                <h2><HelpCircle />Câu Hỏi Thường Gặp (FAQ)</h2>
+                <h2><HelpCircle />{language === 'vi' ? 'Câu Hỏi Thường Gặp (FAQ)' : 'Frequently Asked Questions (FAQ)'}</h2>
               </div>
               
               <SearchBox>
                 <Search />
                 <input
                   type="text"
-                  placeholder="Tìm kiếm câu hỏi..."
+                  placeholder={language === 'vi' ? 'Tìm kiếm câu hỏi...' : 'Search questions...'}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -620,9 +663,11 @@ function Support() {
                 <InfoBox $type="warning" style={{ marginTop: '20px' }}>
                   <div className="info-header">
                     <AlertCircle />
-                    <h4>Không tìm thấy kết quả</h4>
+                    <h4>{language === 'vi' ? 'Không tìm thấy kết quả' : 'No results found'}</h4>
                   </div>
-                  <p>Không tìm thấy câu hỏi phù hợp. Vui lòng thử từ khóa khác hoặc liên hệ trực tiếp với chúng tôi.</p>
+                  <p>{language === 'vi' 
+                    ? 'Không tìm thấy câu hỏi phù hợp. Vui lòng thử từ khóa khác hoặc liên hệ trực tiếp với chúng tôi.'
+                    : 'No matching questions found. Please try other keywords or contact us directly.'}</p>
                 </InfoBox>
               )}
             </Card>
@@ -633,23 +678,25 @@ function Support() {
               transition={{ duration: 0.6, delay: 0.3 }}
             >
               <div className="card-header">
-                <h2><Send />Gửi Yêu Cầu Hỗ Trợ</h2>
+                <h2><Send />{language === 'vi' ? 'Gửi Yêu Cầu Hỗ Trợ' : 'Submit Support Request'}</h2>
               </div>
               
               <InfoBox $type="info" style={{ marginBottom: '24px' }}>
                 <div className="info-header">
                   <Clock />
-                  <h4>Thời gian phản hồi</h4>
+                  <h4>{language === 'vi' ? 'Thời gian phản hồi' : 'Response Time'}</h4>
                 </div>
-                <p>Chúng tôi sẽ phản hồi yêu cầu của bạn trong vòng 24 giờ làm việc.</p>
+                <p>{language === 'vi' 
+                  ? 'Chúng tôi sẽ phản hồi yêu cầu của bạn trong vòng 24 giờ làm việc.'
+                  : 'We will respond to your request within 24 working hours.'}</p>
               </InfoBox>
               
               <form onSubmit={handleSubmit}>
                 <FormGroup>
-                  <Label>Họ và Tên</Label>
+                  <Label>{language === 'vi' ? 'Họ và Tên' : 'Full Name'}</Label>
                   <Input
                     type="text"
-                    placeholder="Nhập họ tên của bạn"
+                    placeholder={language === 'vi' ? 'Nhập họ tên của bạn' : 'Enter your full name'}
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
@@ -668,10 +715,10 @@ function Support() {
                 </FormGroup>
 
                 <FormGroup>
-                  <Label>Tiêu Đề</Label>
+                  <Label>{language === 'vi' ? 'Tiêu Đề' : 'Subject'}</Label>
                   <Input
                     type="text"
-                    placeholder="Mô tả ngắn gọn vấn đề"
+                    placeholder={language === 'vi' ? 'Mô tả ngắn gọn vấn đề' : 'Brief description of the issue'}
                     value={formData.subject}
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                     required
@@ -679,9 +726,9 @@ function Support() {
                 </FormGroup>
 
                 <FormGroup>
-                  <Label>Nội Dung</Label>
+                  <Label>{language === 'vi' ? 'Nội Dung' : 'Message'}</Label>
                   <TextArea
-                    placeholder="Mô tả chi tiết vấn đề của bạn..."
+                    placeholder={language === 'vi' ? 'Mô tả chi tiết vấn đề của bạn...' : 'Describe your issue in detail...'}
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     rows={6}
@@ -691,7 +738,7 @@ function Support() {
 
                 <Button type="submit" $variant="primary" $fullWidth>
                   <Send style={{ width: '18px', height: '18px', marginRight: '8px' }} />
-                  Gửi Yêu Cầu
+                  {language === 'vi' ? 'Gửi Yêu Cầu' : 'Submit Request'}
                 </Button>
               </form>
             </Card>
@@ -704,13 +751,13 @@ function Support() {
               transition={{ duration: 0.6, delay: 0.4 }}
             >
               <div className="card-header">
-                <h2><Zap />Thống kê</h2>
+                <h2><Zap />{language === 'vi' ? 'Thống kê' : 'Statistics'}</h2>
               </div>
               
               <QuickStats>
                 <StatItem $color="#667eea">
                   <div className="stat-header">
-                    <span className="stat-label">Thời gian phản hồi</span>
+                    <span className="stat-label">{language === 'vi' ? 'Thời gian phản hồi' : 'Response Time'}</span>
                     <Clock />
                   </div>
                   <div className="stat-value">&lt; 24h</div>
@@ -718,7 +765,7 @@ function Support() {
                 
                 <StatItem $color="#10B981">
                   <div className="stat-header">
-                    <span className="stat-label">Độ hài lòng</span>
+                    <span className="stat-label">{language === 'vi' ? 'Độ hài lòng' : 'Satisfaction'}</span>
                     <CheckCircle />
                   </div>
                   <div className="stat-value">98%</div>
@@ -726,7 +773,7 @@ function Support() {
                 
                 <StatItem $color="#F59E0B">
                   <div className="stat-header">
-                    <span className="stat-label">Yêu cầu đã giải quyết</span>
+                    <span className="stat-label">{language === 'vi' ? 'Yêu cầu đã giải quyết' : 'Resolved Requests'}</span>
                     <Shield />
                   </div>
                   <div className="stat-value">15,420</div>
@@ -740,7 +787,7 @@ function Support() {
               transition={{ duration: 0.6, delay: 0.5 }}
             >
               <div className="card-header">
-                <h2><Phone />Liên Hệ Trực Tiếp</h2>
+                <h2><Phone />{language === 'vi' ? 'Liên Hệ Trực Tiếp' : 'Direct Contact'}</h2>
               </div>
               
               <ContactInfo 
@@ -766,7 +813,7 @@ function Support() {
                   <Phone />
                 </div>
                 <div className="info">
-                  <div className="label">Điện Thoại</div>
+                  <div className="label">{language === 'vi' ? 'Điện Thoại' : 'Phone'}</div>
                   <div className="value">1900 xxxx</div>
                 </div>
               </ContactInfo>
@@ -780,17 +827,19 @@ function Support() {
                   <Clock />
                 </div>
                 <div className="info">
-                  <div className="label">Giờ Làm Việc</div>
-                  <div className="value">24/7 - Mọi lúc</div>
+                  <div className="label">{language === 'vi' ? 'Giờ Làm Việc' : 'Working Hours'}</div>
+                  <div className="value">{language === 'vi' ? '24/7 - Mọi lúc' : '24/7 - Anytime'}</div>
                 </div>
               </ContactInfo>
               
               <InfoBox $type="success" style={{ marginTop: '16px' }}>
                 <div className="info-header">
                   <CheckCircle />
-                  <h4>Hỗ trợ nhanh chóng</h4>
+                  <h4>{language === 'vi' ? 'Hỗ trợ nhanh chóng' : 'Quick Support'}</h4>
                 </div>
-                <p>Đội ngũ hỗ trợ của chúng tôi luôn sẵn sàng giải đáp mọi thắc mắc của bạn.</p>
+                <p>{language === 'vi' 
+                  ? 'Đội ngũ hỗ trợ của chúng tôi luôn sẵn sàng giải đáp mọi thắc mắc của bạn.'
+                  : 'Our support team is always ready to answer all your questions.'}</p>
               </InfoBox>
             </Card>
           </Sidebar>

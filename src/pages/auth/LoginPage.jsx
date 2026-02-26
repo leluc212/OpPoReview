@@ -12,6 +12,7 @@ const LoginContainer = styled.div`
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   position: relative;
   overflow: hidden;
+  color-scheme: light;
   
   &::before {
     content: '';
@@ -154,15 +155,15 @@ const FormHeader = styled.div`
     font-size: 24px;
     font-weight: 700;
     margin-bottom: 6px;
-    color: ${props => props.theme.colors.text};
+    color: #1E293B;
   }
   
   p {
-    color: ${props => props.theme.colors.textLight};
+    color: #64748B;
     font-size: 13px;
     
     a {
-      color: ${props => props.theme.colors.primary};
+      color: #667eea;
       font-weight: 600;
       
       &:hover {
@@ -182,7 +183,7 @@ const SocialButtons = styled.div`
 const SocialButton = styled(motion.button)`
   padding: 10px 16px;
   border-radius: 10px;
-  border: 1px solid ${props => props.theme.colors.border};
+  border: 1px solid #E2E8F0;
   background: white;
   font-weight: 600;
   font-size: 13px;
@@ -192,11 +193,11 @@ const SocialButton = styled(motion.button)`
   align-items: center;
   justify-content: center;
   gap: 8px;
-  color: ${props => props.theme.colors.text};
+  color: #1E293B;
   
   &:hover {
-    border-color: ${props => props.$color || props.theme.colors.primary};
-    background: ${props => props.$color || props.theme.colors.primary}05;
+    border-color: ${props => props.$color || '#667eea'};
+    background: ${props => props.$color ? `${props.$color}05` : '#667eea05'};
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
@@ -217,7 +218,7 @@ const Divider = styled.div`
   align-items: center;
   gap: 12px;
   margin: 16px 0;
-  color: ${props => props.theme.colors.textLight};
+  color: #64748B;
   font-size: 12px;
   font-weight: 500;
   
@@ -226,7 +227,7 @@ const Divider = styled.div`
     content: '';
     flex: 1;
     height: 1px;
-    background: ${props => props.theme.colors.border};
+    background: #E2E8F0;
   }
 `;
 
@@ -236,7 +237,7 @@ const RoleSelector = styled.div`
   gap: 8px;
   margin-bottom: 16px;
   padding: 5px;
-  background: ${props => props.theme.colors.bgDark};
+  background: #F1F5F9;
   border-radius: 10px;
 `;
 
@@ -245,15 +246,15 @@ const RoleButton = styled(motion.button)`
   border-radius: 7px;
   border: none;
   background: ${props => props.$selected ? 'white' : 'transparent'};
-  color: ${props => props.$selected ? props.theme.colors.primary : props.theme.colors.textLight};
-  font-weight: 600;
-  font-size: 12px;
+  color: ${props => props.$selected ? '#667eea' : '#475569'};
+  font-weight: ${props => props.$selected ? '700' : '600'};
+  font-size: 13px;
   transition: all 0.3s;
   cursor: pointer;
   box-shadow: ${props => props.$selected ? '0 2px 8px rgba(0, 0, 0, 0.1)' : 'none'};
   
   &:hover {
-    color: ${props => props.theme.colors.primary};
+    color: #667eea;
   }
 `;
 
@@ -267,12 +268,14 @@ const InputWrapper = styled.div`
     transform: translateY(-50%);
     width: 18px;
     height: 18px;
-    color: ${props => props.theme.colors.textLight};
+    color: #64748B;
     pointer-events: none;
   }
   
   input {
     padding-left: 44px;
+    background: #FFFFFF;
+    color: #1E293B;
   }
   
   .password-toggle {
@@ -284,10 +287,10 @@ const InputWrapper = styled.div`
     border: none;
     cursor: pointer;
     padding: 4px;
-    color: ${props => props.theme.colors.textLight};
+    color: #64748B;
     
     &:hover {
-      color: ${props => props.theme.colors.primary};
+      color: #667eea;
     }
     
     svg {
@@ -300,7 +303,7 @@ const InputWrapper = styled.div`
 `;
 
 const ForgotPassword = styled(Link)`
-  color: ${props => props.theme.colors.primary};
+  color: #667eea;
   font-size: 13px;
   font-weight: 600;
   display: inline-block;

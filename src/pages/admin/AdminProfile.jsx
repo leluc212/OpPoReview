@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
+import { useLanguage } from '../../context/LanguageContext';
 import { 
   User, 
   Mail,
@@ -13,7 +14,8 @@ import {
   Moon,
   Sun,
   Camera,
-  Save
+  Save,
+  X
 } from 'lucide-react';
 import { Input, TextArea, Label, Button } from '../../components/FormElements';
 
@@ -54,7 +56,7 @@ const Sidebar = styled.div``;
 const MainContent = styled.div``;
 
 const ProfileCard = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.lg};
   box-shadow: ${props => props.theme.shadows.sm};
   padding: 2rem;
@@ -107,6 +109,33 @@ const AvatarUpload = styled.label`
   }
 `;
 
+const DeleteAvatarButton = styled.button`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 36px;
+  height: 36px;
+  background: #EF4444;
+  color: white;
+  border: none;
+  border-radius: ${props => props.theme.borderRadius.full};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: ${props => props.theme.shadows.md};
+  transition: all 0.2s;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover {
+    transform: scale(1.1);
+  }
+`;
+
 const ProfileName = styled.h2`
   font-size: 1.5rem;
   font-weight: 700;
@@ -133,7 +162,7 @@ const ProfileBadge = styled.div`
 `;
 
 const NavList = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.lg};
   box-shadow: ${props => props.theme.shadows.sm};
   overflow: hidden;
@@ -142,7 +171,7 @@ const NavList = styled.div`
 const NavItem = styled.button`
   width: 100%;
   padding: 1rem 1.25rem;
-  background: ${props => props.$active ? props.theme.colors.background : 'white'};
+  background: ${props => props.$active ? props.theme.colors.bgDark : props.theme.colors.bgLight};
   border: none;
   border-left: 3px solid ${props => props.$active ? props.theme.colors.primary : 'transparent'};
   text-align: left;
@@ -155,7 +184,7 @@ const NavItem = styled.button`
   transition: all 0.2s;
 
   &:hover {
-    background: ${props => props.theme.colors.background};
+    background: ${props => props.theme.colors.bgDark};
   }
 
   &:not(:last-child) {
@@ -164,7 +193,7 @@ const NavItem = styled.button`
 `;
 
 const Section = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.lg};
   box-shadow: ${props => props.theme.shadows.sm};
   padding: 2rem;
@@ -314,8 +343,12 @@ const ButtonGroup = styled.div`
 `;
 
 const AdminProfile = () => {
+  const { language, t } = useLanguage();
   const [activeSection, setActiveSection] = useState('profile');
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [profileImage, setProfileImage] = useState(() => {
+    return localStorage.getItem('adminProfileImage') || null;
+  });
   const [notifications, setNotifications] = useState({
     email: true,
     push: true,
@@ -327,7 +360,7 @@ const AdminProfile = () => {
     email: 'admin@oppo.vn',
     phone: '0909 123 456',
     address: 'Hà Nội, Việt Nam',
-    bio: 'Quản trị viên hệ thống OppoReview'
+    bio: language === 'vi' ? 'Quản trị viên hệ thống OppoReview' : 'OppoReview System Administrator'
   });
 
   const handleInputChange = (e) => {
@@ -345,6 +378,51 @@ const AdminProfile = () => {
     }));
   };
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 400;
+          const MAX_HEIGHT = 400;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+          setProfileImage(compressedBase64);
+          localStorage.setItem('adminProfileImage', compressedBase64);
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDeleteImage = () => {
+    setProfileImage(null);
+    localStorage.removeItem('adminProfileImage');
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('Profile updated:', profileData);
@@ -357,23 +435,23 @@ const AdminProfile = () => {
           <Section>
             <SectionTitle>
               <User size={24} />
-              Thông Tin Cá Nhân
+              {t.profile.personalInfo}
             </SectionTitle>
             <form onSubmit={handleSubmit}>
               <FormGrid>
                 <FormGroup>
-                  <Label>Họ và tên</Label>
+                  <Label>{t.profile.fullName}</Label>
                   <Input 
                     type="text"
                     name="fullName"
                     value={profileData.fullName}
                     onChange={handleInputChange}
-                    placeholder="Nhập họ và tên"
+                    placeholder={language === 'vi' ? 'Nhập họ và tên' : 'Enter full name'}
                   />
                 </FormGroup>
 
                 <FormGroup>
-                  <Label>Email</Label>
+                  <Label>{t.profile.email}</Label>
                   <Input 
                     type="email"
                     name="email"
@@ -384,7 +462,7 @@ const AdminProfile = () => {
                 </FormGroup>
 
                 <FormGroup>
-                  <Label>Số điện thoại</Label>
+                  <Label>{t.profile.phone}</Label>
                   <Input 
                     type="tel"
                     name="phone"
@@ -395,23 +473,23 @@ const AdminProfile = () => {
                 </FormGroup>
 
                 <FormGroup>
-                  <Label>Địa chỉ</Label>
+                  <Label>{t.profile.location}</Label>
                   <Input 
                     type="text"
                     name="address"
                     value={profileData.address}
                     onChange={handleInputChange}
-                    placeholder="Nhập địa chỉ"
+                    placeholder={language === 'vi' ? 'Nhập địa chỉ' : 'Enter address'}
                   />
                 </FormGroup>
 
                 <FormGroup className="full-width">
-                  <Label>Giới thiệu</Label>
+                  <Label>{t.profile.bio}</Label>
                   <TextArea 
                     name="bio"
                     value={profileData.bio}
                     onChange={handleInputChange}
-                    placeholder="Viết vài dòng về bạn..."
+                    placeholder={language === 'vi' ? 'Viết vài dòng về bạn...' : 'Write a few lines about yourself...'}
                     rows={4}
                   />
                 </FormGroup>
@@ -419,11 +497,11 @@ const AdminProfile = () => {
 
               <ButtonGroup>
                 <Button type="button" $variant="outline">
-                  Hủy bỏ
+                  {language === 'vi' ? 'Hủy bỏ' : 'Cancel'}
                 </Button>
                 <Button type="submit" $variant="primary">
                   <Save size={18} />
-                  Lưu thay đổi
+                  {language === 'vi' ? 'Lưu thay đổi' : 'Save changes'}
                 </Button>
               </ButtonGroup>
             </form>
@@ -435,39 +513,39 @@ const AdminProfile = () => {
           <Section>
             <SectionTitle>
               <Shield size={24} />
-              Bảo Mật
+              {language === 'vi' ? 'Bảo Mật' : 'Security'}
             </SectionTitle>
             <form>
               <FormGroup>
-                <Label>Mật khẩu hiện tại</Label>
-                <Input type="password" placeholder="Nhập mật khẩu hiện tại" />
+                <Label>{language === 'vi' ? 'Mật khẩu hiện tại' : 'Current Password'}</Label>
+                <Input type="password" placeholder={language === 'vi' ? 'Nhập mật khẩu hiện tại' : 'Enter current password'} />
               </FormGroup>
 
               <FormGroup>
-                <Label>Mật khẩu mới</Label>
-                <Input type="password" placeholder="Nhập mật khẩu mới" />
+                <Label>{language === 'vi' ? 'Mật khẩu mới' : 'New Password'}</Label>
+                <Input type="password" placeholder={language === 'vi' ? 'Nhập mật khẩu mới' : 'Enter new password'} />
               </FormGroup>
 
               <FormGroup>
-                <Label>Xác nhận mật khẩu mới</Label>
-                <Input type="password" placeholder="Nhập lại mật khẩu mới" />
+                <Label>{language === 'vi' ? 'Xác nhận mật khẩu mới' : 'Confirm New Password'}</Label>
+                <Input type="password" placeholder={language === 'vi' ? 'Nhập lại mật khẩu mới' : 'Re-enter new password'} />
               </FormGroup>
 
               <SettingItem>
                 <SettingInfo>
-                  <SettingLabel>Xác thực hai yếu tố (2FA)</SettingLabel>
-                  <SettingDescription>Tăng cường bảo mật cho tài khoản của bạn</SettingDescription>
+                  <SettingLabel>{language === 'vi' ? 'Xác thực hai yếu tố (2FA)' : 'Two-Factor Authentication (2FA)'}</SettingLabel>
+                  <SettingDescription>{language === 'vi' ? 'Tăng cường bảo mật cho tài khoản của bạn' : 'Enhance your account security'}</SettingDescription>
                 </SettingInfo>
-                <Button $variant="primary">Bật 2FA</Button>
+                <Button $variant="primary">{language === 'vi' ? 'Bật 2FA' : 'Enable 2FA'}</Button>
               </SettingItem>
 
               <ButtonGroup>
                 <Button type="button" $variant="outline">
-                  Hủy bỏ
+                  {language === 'vi' ? 'Hủy bỏ' : 'Cancel'}
                 </Button>
                 <Button type="submit" $variant="primary">
                   <Lock size={18} />
-                  Đổi mật khẩu
+                  {language === 'vi' ? 'Đổi mật khẩu' : 'Change Password'}
                 </Button>
               </ButtonGroup>
             </form>
@@ -479,13 +557,13 @@ const AdminProfile = () => {
           <Section>
             <SectionTitle>
               <Bell size={24} />
-              Thông Báo
+              {t.settings.notifications}
             </SectionTitle>
             
             <SettingItem>
               <SettingInfo>
-                <SettingLabel>Thông báo Email</SettingLabel>
-                <SettingDescription>Nhận thông báo qua email</SettingDescription>
+                <SettingLabel>{t.settings.emailNotifications}</SettingLabel>
+                <SettingDescription>{t.settings.emailNotificationsDesc}</SettingDescription>
               </SettingInfo>
               <ToggleSwitch>
                 <input 
@@ -499,8 +577,8 @@ const AdminProfile = () => {
 
             <SettingItem>
               <SettingInfo>
-                <SettingLabel>Thông báo Push</SettingLabel>
-                <SettingDescription>Nhận thông báo đẩy trên trình duyệt</SettingDescription>
+                <SettingLabel>{language === 'vi' ? 'Thông báo Push' : 'Push Notifications'}</SettingLabel>
+                <SettingDescription>{language === 'vi' ? 'Nhận thông báo đẩy trên trình duyệt' : 'Receive push notifications on browser'}</SettingDescription>
               </SettingInfo>
               <ToggleSwitch>
                 <input 
@@ -514,8 +592,8 @@ const AdminProfile = () => {
 
             <SettingItem>
               <SettingInfo>
-                <SettingLabel>Thông báo SMS</SettingLabel>
-                <SettingDescription>Nhận thông báo qua tin nhắn</SettingDescription>
+                <SettingLabel>{language === 'vi' ? 'Thông báo SMS' : 'SMS Notifications'}</SettingLabel>
+                <SettingDescription>{language === 'vi' ? 'Nhận thông báo qua tin nhắn' : 'Receive notifications via SMS'}</SettingDescription>
               </SettingInfo>
               <ToggleSwitch>
                 <input 
@@ -530,63 +608,7 @@ const AdminProfile = () => {
             <ButtonGroup>
               <Button $variant="primary">
                 <Save size={18} />
-                Lưu cài đặt
-              </Button>
-            </ButtonGroup>
-          </Section>
-        );
-
-      case 'preferences':
-        return (
-          <Section>
-            <SectionTitle>
-              <Globe size={24} />
-              Tùy Chỉnh
-            </SectionTitle>
-
-            <FormGroup>
-              <Label>Ngôn ngữ</Label>
-              <select style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #e5e7eb',
-                borderRadius: '8px',
-                fontSize: '0.95rem'
-              }}>
-                <option value="vi">Tiếng Việt</option>
-                <option value="en">English</option>
-              </select>
-            </FormGroup>
-
-            <FormGroup>
-              <Label>Giao diện</Label>
-              <ThemeOptions>
-                <ThemeOption $active={!isDarkMode} onClick={() => setIsDarkMode(false)}>
-                  <ThemeIcon $color="#f59e0b">
-                    <Sun size={20} />
-                  </ThemeIcon>
-                  <div>
-                    <div style={{ fontWeight: 600 }}>Sáng</div>
-                    <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>Giao diện sáng</div>
-                  </div>
-                </ThemeOption>
-
-                <ThemeOption $active={isDarkMode} onClick={() => setIsDarkMode(true)}>
-                  <ThemeIcon $color="#6366f1">
-                    <Moon size={20} />
-                  </ThemeIcon>
-                  <div>
-                    <div style={{ fontWeight: 600 }}>Tối</div>
-                    <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>Giao diện tối</div>
-                  </div>
-                </ThemeOption>
-              </ThemeOptions>
-            </FormGroup>
-
-            <ButtonGroup>
-              <Button $variant="primary">
-                <Save size={18} />
-                Lưu cài đặt
+                {language === 'vi' ? 'Lưu cài đặt' : 'Save Settings'}
               </Button>
             </ButtonGroup>
           </Section>
@@ -601,18 +623,29 @@ const AdminProfile = () => {
     <DashboardLayout role="admin">
       <PageContainer>
         <PageHeader>
-          <Title>Hồ Sơ Admin</Title>
-          <Subtitle>Quản lý thông tin cá nhân và cài đặt tài khoản</Subtitle>
+          <Title>{language === 'vi' ? 'Hồ Sơ Admin' : 'Admin Profile'}</Title>
+          <Subtitle>{language === 'vi' ? 'Quản lý thông tin cá nhân và cài đặt tài khoản' : 'Manage personal information and account settings'}</Subtitle>
         </PageHeader>
 
         <Grid>
           <Sidebar>
             <ProfileCard>
               <AvatarWrapper>
-                <Avatar>AD</Avatar>
+                <Avatar>
+                  {profileImage ? (
+                    <img src={profileImage} alt="Admin" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                  ) : (
+                    'AD'
+                  )}
+                </Avatar>
+                {profileImage && (
+                  <DeleteAvatarButton onClick={handleDeleteImage}>
+                    <X />
+                  </DeleteAvatarButton>
+                )}
                 <AvatarUpload>
                   <Camera size={18} />
-                  <input type="file" accept="image/*" />
+                  <input type="file" accept="image/*" onChange={handleImageUpload} />
                 </AvatarUpload>
               </AvatarWrapper>
               <ProfileName>{profileData.fullName}</ProfileName>
@@ -629,28 +662,21 @@ const AdminProfile = () => {
                 onClick={() => setActiveSection('profile')}
               >
                 <User size={20} />
-                Thông tin cá nhân
+                {language === 'vi' ? 'Thông tin cá nhân' : 'Personal Info'}
               </NavItem>
               <NavItem 
                 $active={activeSection === 'security'}
                 onClick={() => setActiveSection('security')}
               >
                 <Shield size={20} />
-                Bảo mật
+                {language === 'vi' ? 'Bảo mật' : 'Security'}
               </NavItem>
               <NavItem 
                 $active={activeSection === 'notifications'}
                 onClick={() => setActiveSection('notifications')}
               >
                 <Bell size={20} />
-                Thông báo
-              </NavItem>
-              <NavItem 
-                $active={activeSection === 'preferences'}
-                onClick={() => setActiveSection('preferences')}
-              >
-                <Globe size={20} />
-                Tùy chỉnh
+                {language === 'vi' ? 'Thông báo' : 'Notifications'}
               </NavItem>
             </NavList>
           </Sidebar>

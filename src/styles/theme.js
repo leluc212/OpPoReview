@@ -9,12 +9,13 @@ export const GlobalStyles = createGlobalStyle`
 
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-    background: #f8fafc;
+    background: ${props => props.theme.colors.bgDark};
     background-attachment: fixed;
     color: ${props => props.theme.colors.text};
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background 0.3s ease, color 0.3s ease;
   }
 
   #root {
@@ -84,7 +85,7 @@ export const theme = {
     secondaryLight: '#0D3880',
     
     // Background
-    background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+    background: '#F8FAFC',
     bgLight: '#FFFFFF',
     bgDark: '#F1F5F9',
     bgGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -92,6 +93,7 @@ export const theme = {
     // Text
     text: '#1E293B',
     textLight: '#64748B',
+    textSecondary: '#64748B',
     textDark: '#0F172A',
     
     // Borders
@@ -187,5 +189,21 @@ export const theme = {
       bold: 700,
       extrabold: 800,
     },
+  },
+};
+
+export const darkTheme = {
+  ...theme,
+  colors: {
+    ...theme.colors,
+    background: '#0F172A',
+    bgLight: '#1E293B',
+    bgDark: '#0F172A',
+    text: '#F1F5F9',
+    textLight: '#94A3B8',
+    textSecondary: '#94A3B8',
+    textDark: '#FFFFFF',
+    border: '#334155',
+    borderLight: '#1E293B',
   },
 };

@@ -7,6 +7,7 @@ import TableFilter from '../../components/TableFilter';
 import { Edit, Trash2, Users, Clock, TrendingUp, Eye, BarChart3, Plus, Calendar, MapPin, DollarSign } from 'lucide-react';
 import { Button } from '../../components/FormElements';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../../context/LanguageContext';
 
 const fadeIn = keyframes`
   from {
@@ -80,7 +81,7 @@ const JobGrid = styled.div`
 `;
 
 const JobCard = styled(motion.div)`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border-radius: 20px;
   border: 2px solid ${props => props.theme.colors.border};
   overflow: hidden;
@@ -186,7 +187,7 @@ const StatBox = styled.div`
   align-items: center;
   gap: 6px;
   padding: 12px 8px;
-  background: white;
+  background: ${props => props.theme.colors.bgDark};
   border-radius: 10px;
   border: 1.5px solid ${props => props.theme.colors.border};
   transition: all 0.3s ease;
@@ -330,7 +331,7 @@ const IconButton = styled(motion.button)`
 const EmptyState = styled(motion.div)`
   text-align: center;
   padding: 80px 20px;
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border-radius: 20px;
   border: 2px dashed ${props => props.theme.colors.border};
   
@@ -369,42 +370,45 @@ const StatusBadgeWrapper = styled.div`
 `;
 
 const JobManagement = () => {
+  const { language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilters, setStatusFilters] = useState([]);
 
-  const [jobs] = useState([
+  const getJobs = () => [
     { 
       id: 1, 
       title: 'Senior React Developer', 
       applicants: 45, 
       status: 'active', 
-      posted: '2 ngày trước',
+      posted: language === 'vi' ? '2 ngày trước' : '2 days ago',
       views: 234,
       responseRate: 85
     },
     { 
       id: 2, 
-      title: 'Thu ngân', 
+      title: language === 'vi' ? 'Thu ngân' : 'Cashier', 
       applicants: 32, 
       status: 'active', 
-      posted: '1 tuần trước',
+      posted: language === 'vi' ? '1 tuần trước' : '1 week ago',
       views: 156,
       responseRate: 72
     },
     { 
       id: 3, 
-      title: 'Nhân viên pha chế', 
+      title: language === 'vi' ? 'Nhân viên pha chế' : 'Barista', 
       applicants: 28, 
       status: 'inactive', 
-      posted: '2 tuần trước',
+      posted: language === 'vi' ? '2 tuần trước' : '2 weeks ago',
       views: 98,
       responseRate: 65
     },
-  ]);
+  ];
+
+  const [jobs] = useState(getJobs());
 
   const filterOptions = [
-    { value: 'active', label: 'Hoạt động' },
-    { value: 'inactive', label: 'Không hoạt động' },
+    { value: 'active', label: language === 'vi' ? 'Hoạt động' : 'Active' },
+    { value: 'inactive', label: language === 'vi' ? 'Không hoạt động' : 'Inactive' },
   ];
 
   const filteredJobs = useMemo(() => {
@@ -441,7 +445,7 @@ const JobManagement = () => {
     <DashboardLayout role="employer">
       <JobManagementContainer>
         <PageHeader>
-          <h1>Quản Lý Tin Tuyển Dụng</h1>
+          <h1>{language === 'vi' ? 'Quản Lý Tin Tuyển Dụng' : 'Job Management'}</h1>
           <CreateButton
             as={Link}
             to="/employer/post-job"
@@ -449,7 +453,7 @@ const JobManagement = () => {
             whileTap={{ scale: 0.98 }}
           >
             <Plus />
-            Đăng Tin Mới
+            {language === 'vi' ? 'Đăng Tin Mới' : 'Post New Job'}
           </CreateButton>
         </PageHeader>
 
@@ -459,7 +463,7 @@ const JobManagement = () => {
           filterOptions={filterOptions}
           activeFilters={statusFilters}
           onFilterToggle={handleFilterToggle}
-          searchPlaceholder="Tìm kiếm việc làm..."
+          searchPlaceholder={language === 'vi' ? 'Tìm kiếm việc làm...' : 'Search jobs...'}
         />
 
         {filteredJobs.length === 0 ? (
@@ -469,8 +473,8 @@ const JobManagement = () => {
             transition={{ duration: 0.4 }}
           >
             <BarChart3 />
-            <h3>Không tìm thấy tin tuyển dụng</h3>
-            <p>Thử điều chỉnh bộ lọc hoặc tạo tin tuyển dụng mới</p>
+            <h3>{language === 'vi' ? 'Không tìm thấy tin tuyển dụng' : 'No Jobs Found'}</h3>
+            <p>{language === 'vi' ? 'Thử điều chỉnh bộ lọc hoặc tạo tin tuyển dụng mới' : 'Try adjusting filters or create a new job posting'}</p>
             <CreateButton
               as={Link}
               to="/employer/post-job"
@@ -478,7 +482,7 @@ const JobManagement = () => {
               whileTap={{ scale: 0.98 }}
             >
               <Plus />
-              Đăng Tin Mới
+              {language === 'vi' ? 'Đăng Tin Mới' : 'Post New Job'}
             </CreateButton>
           </EmptyState>
         ) : (
@@ -512,17 +516,17 @@ const JobManagement = () => {
                     <StatBox $color="#667eea">
                       <Users />
                       <span className="value">{job.applicants}</span>
-                      <span className="label">Ứng viên</span>
+                      <span className="label">{language === 'vi' ? 'Ứng viên' : 'Applicants'}</span>
                     </StatBox>
                     <StatBox $color="#10B981">
                       <Eye />
                       <span className="value">{job.views}</span>
-                      <span className="label">Lượt xem</span>
+                      <span className="label">{language === 'vi' ? 'Lượt xem' : 'Views'}</span>
                     </StatBox>
                     <StatBox $color="#F59E0B">
                       <TrendingUp />
                       <span className="value">{job.responseRate}%</span>
-                      <span className="label">Phản hồi</span>
+                      <span className="label">{language === 'vi' ? 'Phản hồi' : 'Response'}</span>
                     </StatBox>
                   </StatsRow>
 
@@ -536,7 +540,7 @@ const JobManagement = () => {
                         whileHover={{ scale: 1.1, rotate: 5 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => handleEdit(job.id)}
-                        title="Chỉnh sửa"
+                        title={language === 'vi' ? 'Chỉnh sửa' : 'Edit'}
                       >
                         <Edit />
                       </IconButton>
@@ -545,7 +549,7 @@ const JobManagement = () => {
                         whileHover={{ scale: 1.1, rotate: -5 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => handleDelete(job.id)}
-                        title="Xóa"
+                        title={language === 'vi' ? 'Xóa' : 'Delete'}
                       >
                         <Trash2 />
                       </IconButton>

@@ -6,7 +6,7 @@ import Navbar from './Navbar';
 const LayoutContainer = styled.div`
   display: flex;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+  background: ${props => props.theme.colors.background};
   background-attachment: fixed;
 `;
 

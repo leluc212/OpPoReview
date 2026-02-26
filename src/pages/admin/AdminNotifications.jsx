@@ -17,6 +17,7 @@ import {
   Send
 } from 'lucide-react';
 import { Button } from '../../components/FormElements';
+import { useLanguage } from '../../context/LanguageContext';
 
 const PageContainer = styled.div`
   padding: 2rem;
@@ -73,7 +74,7 @@ const StatsGrid = styled.div`
 `;
 
 const StatCard = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   padding: 1.25rem;
   border-radius: ${props => props.theme.borderRadius.lg};
   box-shadow: ${props => props.theme.shadows.sm};
@@ -130,7 +131,7 @@ const Select = styled.select`
   padding: 0.75rem 1rem;
   border: 1px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.md};
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   color: ${props => props.theme.colors.text};
   font-size: 0.9rem;
   cursor: pointer;
@@ -148,8 +149,8 @@ const NotificationList = styled.div`
 `;
 
 const NotificationItem = styled.div`
-  background: ${props => props.$unread ? '#f0f9ff' : 'white'};
-  border: 1px solid ${props => props.$unread ? '#bfdbfe' : props.theme.colors.border};
+  background: ${props => props.$unread ? props.theme.colors.bgDark : props.theme.colors.bgLight};
+  border: 2px solid ${props => props.$unread ? props.theme.colors.primary : props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.lg};
   padding: 1.25rem;
   box-shadow: ${props => props.theme.shadows.sm};
@@ -159,6 +160,7 @@ const NotificationItem = styled.div`
   &:hover {
     box-shadow: ${props => props.theme.shadows.md};
     transform: translateY(-2px);
+    border-color: ${props => props.theme.colors.primary};
   }
 `;
 
@@ -186,16 +188,18 @@ const NotificationContent = styled.div`
 `;
 
 const NotificationTitle = styled.div`
-  font-weight: 600;
+  font-weight: 700;
   color: ${props => props.theme.colors.text};
   margin-bottom: 0.5rem;
+  font-size: 0.95rem;
 `;
 
 const NotificationMessage = styled.div`
-  color: ${props => props.theme.colors.textSecondary};
+  color: ${props => props.theme.colors.text};
   font-size: 0.9rem;
-  line-height: 1.5;
+  line-height: 1.6;
   margin-bottom: 0.5rem;
+  opacity: 0.85;
 `;
 
 const NotificationMeta = styled.div`
@@ -203,7 +207,9 @@ const NotificationMeta = styled.div`
   gap: 1rem;
   flex-wrap: wrap;
   font-size: 0.85rem;
-  color: ${props => props.theme.colors.textSecondary};
+  color: ${props => props.theme.colors.text};
+  opacity: 0.7;
+  font-weight: 500;
 `;
 
 const NotificationActions = styled.div`
@@ -265,7 +271,7 @@ const UnreadBadge = styled.span`
 `;
 
 const SettingsCard = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.lg};
   box-shadow: ${props => props.theme.shadows.sm};
   padding: 1.5rem;
@@ -343,6 +349,7 @@ const ToggleSwitch = styled.label`
 `;
 
 const AdminNotifications = () => {
+  const { language } = useLanguage();
   const [filterType, setFilterType] = useState('all');
   const [notificationSettings, setNotificationSettings] = useState({
     users: true,
@@ -358,9 +365,9 @@ const AdminNotifications = () => {
       type: 'users',
       icon: Users,
       color: '#6366f1',
-      title: 'Người dùng mới đăng ký',
-      message: '15 ứng viên và 3 nhà tuyển dụng mới đã đăng ký trong 24h qua',
-      time: '2 giờ trước',
+      title: language === 'vi' ? 'Người dùng mới đăng ký' : 'New user registrations',
+      message: language === 'vi' ? '15 ứng viên và 3 nhà tuyển dụng mới đã đăng ký trong 24h qua' : '15 candidates and 3 employers registered in the last 24 hours',
+      time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
       unread: true,
       actionRequired: false
     },
@@ -369,9 +376,9 @@ const AdminNotifications = () => {
       type: 'employers',
       icon: Briefcase,
       color: '#f59e0b',
-      title: 'Yêu cầu phê duyệt nhà tuyển dụng',
-      message: 'Công ty ABC Tech đang chờ phê duyệt. Vui lòng kiểm tra thông tin và xác minh.',
-      time: '3 giờ trước',
+      title: language === 'vi' ? 'Yêu cầu phê duyệt nhà tuyển dụng' : 'Employer approval request',
+      message: language === 'vi' ? 'Công ty ABC Tech đang chờ phê duyệt. Vui lòng kiểm tra thông tin và xác minh.' : 'ABC Tech is pending approval. Please review and verify the information.',
+      time: language === 'vi' ? '3 giờ trước' : '3 hours ago',
       unread: true,
       actionRequired: true
     },
@@ -380,9 +387,9 @@ const AdminNotifications = () => {
       type: 'posts',
       icon: AlertCircle,
       color: '#ef4444',
-      title: 'Bài đăng bị cảnh báo',
-      message: '5 bài đăng mới bị hệ thống tự động cảnh báo về nội dung vi phạm. Cần kiểm duyệt thủ công.',
-      time: '5 giờ trước',
+      title: language === 'vi' ? 'Bài đăng bị cảnh báo' : 'Flagged posts',
+      message: language === 'vi' ? '5 bài đăng mới bị hệ thống tự động cảnh báo về nội dung vi phạm. Cần kiểm duyệt thủ công.' : '5 new posts were automatically flagged for policy violations and require manual review.',
+      time: language === 'vi' ? '5 giờ trước' : '5 hours ago',
       unread: true,
       actionRequired: true
     },
@@ -391,9 +398,9 @@ const AdminNotifications = () => {
       type: 'payments',
       icon: DollarSign,
       color: '#10b981',
-      title: 'Thanh toán mới',
-      message: 'Công ty XYZ đã thanh toán gói Premium trị giá 5.000.000đ',
-      time: '1 ngày trước',
+      title: language === 'vi' ? 'Thanh toán mới' : 'New payment',
+      message: language === 'vi' ? 'Công ty XYZ đã thanh toán gói Premium trị giá 5.000.000đ' : 'XYZ company paid for the Premium package worth 5,000,000 VND',
+      time: language === 'vi' ? '1 ngày trước' : '1 day ago',
       unread: false,
       actionRequired: false
     },
@@ -402,9 +409,9 @@ const AdminNotifications = () => {
       type: 'system',
       icon: Info,
       color: '#8b5cf6',
-      title: 'Cập nhật hệ thống',
-      message: 'Hệ thống sẽ bảo trì vào 23:00 ngày 16/02/2024. Thời gian dự kiến: 2 giờ.',
-      time: '2 ngày trước',
+      title: language === 'vi' ? 'Cập nhật hệ thống' : 'System update',
+      message: language === 'vi' ? 'Hệ thống sẽ bảo trì vào 23:00 ngày 16/02/2024. Thời gian dự kiến: 2 giờ.' : 'System maintenance is scheduled at 23:00 on 16/02/2024. Estimated duration: 2 hours.',
+      time: language === 'vi' ? '2 ngày trước' : '2 days ago',
       unread: false,
       actionRequired: false
     }
@@ -425,36 +432,36 @@ const AdminNotifications = () => {
       <PageContainer>
         <PageHeader>
           <HeaderLeft>
-            <Title>Thông Báo Hệ Thống</Title>
-            <Subtitle>Theo dõi và quản lý tất cả thông báo</Subtitle>
+            <Title>{language === 'vi' ? 'Thông Báo Hệ Thống' : 'System Notifications'}</Title>
+            <Subtitle>{language === 'vi' ? 'Theo dõi và quản lý tất cả thông báo' : 'Track and manage all notifications'}</Subtitle>
           </HeaderLeft>
           <HeaderActions>
             <Button $variant="outline">
               <Eye size={18} />
-              Đánh dấu đã đọc tất cả
+              {language === 'vi' ? 'Đánh dấu đã đọc tất cả' : 'Mark all as read'}
             </Button>
             <Button $variant="primary">
               <Send size={18} />
-              Gửi thông báo mới
+              {language === 'vi' ? 'Gửi thông báo mới' : 'Send new notification'}
             </Button>
           </HeaderActions>
         </PageHeader>
 
         <StatsGrid>
           <StatCard $color="#3b82f6">
-            <StatLabel>Chưa đọc</StatLabel>
+            <StatLabel>{language === 'vi' ? 'Chưa đọc' : 'Unread'}</StatLabel>
             <StatValue>{unreadCount}</StatValue>
           </StatCard>
           <StatCard $color="#f59e0b">
-            <StatLabel>Cần xử lý</StatLabel>
+            <StatLabel>{language === 'vi' ? 'Cần xử lý' : 'Action required'}</StatLabel>
             <StatValue>{actionRequiredCount}</StatValue>
           </StatCard>
           <StatCard $color="#10b981">
-            <StatLabel>Hôm nay</StatLabel>
+            <StatLabel>{language === 'vi' ? 'Hôm nay' : 'Today'}</StatLabel>
             <StatValue>18</StatValue>
           </StatCard>
           <StatCard $color="#8b5cf6">
-            <StatLabel>Tuần này</StatLabel>
+            <StatLabel>{language === 'vi' ? 'Tuần này' : 'This week'}</StatLabel>
             <StatValue>127</StatValue>
           </StatCard>
         </StatsGrid>
@@ -464,20 +471,20 @@ const AdminNotifications = () => {
             <FilterBar>
               <SearchBox>
                 <SearchIcon size={18} />
-                <SearchInput placeholder="Tìm kiếm thông báo..." />
+                <SearchInput placeholder={language === 'vi' ? 'Tìm kiếm thông báo...' : 'Search notifications...'} />
               </SearchBox>
               <Select value={filterType} onChange={(e) => setFilterType(e.target.value)}>
-                <option value="all">Tất cả</option>
-                <option value="users">Người dùng</option>
-                <option value="employers">Nhà tuyển dụng</option>
-                <option value="posts">Bài đăng</option>
-                <option value="payments">Thanh toán</option>
-                <option value="system">Hệ thống</option>
+                <option value="all">{language === 'vi' ? 'Tất cả' : 'All'}</option>
+                <option value="users">{language === 'vi' ? 'Người dùng' : 'Users'}</option>
+                <option value="employers">{language === 'vi' ? 'Nhà tuyển dụng' : 'Employers'}</option>
+                <option value="posts">{language === 'vi' ? 'Bài đăng' : 'Posts'}</option>
+                <option value="payments">{language === 'vi' ? 'Thanh toán' : 'Payments'}</option>
+                <option value="system">{language === 'vi' ? 'Hệ thống' : 'System'}</option>
               </Select>
               <Select>
-                <option value="newest">Mới nhất</option>
-                <option value="oldest">Cũ nhất</option>
-                <option value="unread">Chưa đọc</option>
+                <option value="newest">{language === 'vi' ? 'Mới nhất' : 'Newest'}</option>
+                <option value="oldest">{language === 'vi' ? 'Cũ nhất' : 'Oldest'}</option>
+                <option value="unread">{language === 'vi' ? 'Chưa đọc' : 'Unread'}</option>
               </Select>
             </FilterBar>
 
@@ -498,7 +505,7 @@ const AdminNotifications = () => {
                         <span>{notification.time}</span>
                         {notification.actionRequired && (
                           <span style={{ color: '#f59e0b', fontWeight: 500 }}>
-                            • Cần xử lý
+                            • {language === 'vi' ? 'Cần xử lý' : 'Action required'}
                           </span>
                         )}
                       </NotificationMeta>
@@ -508,11 +515,11 @@ const AdminNotifications = () => {
                     <NotificationActions>
                       <ActionButton $variant="primary">
                         <CheckCircle size={16} />
-                        Xử lý ngay
+                        {language === 'vi' ? 'Xử lý ngay' : 'Handle now'}
                       </ActionButton>
                       <ActionButton>
                         <Eye size={16} />
-                        Xem chi tiết
+                        {language === 'vi' ? 'Xem chi tiết' : 'View details'}
                       </ActionButton>
                     </NotificationActions>
                   )}
@@ -525,11 +532,11 @@ const AdminNotifications = () => {
             <SettingsCard>
               <SettingsTitle>
                 <Settings size={20} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
-                Cài Đặt Thông Báo
+                {language === 'vi' ? 'Cài Đặt Thông Báo' : 'Notification Settings'}
               </SettingsTitle>
               
               <SettingItem>
-                <SettingLabel>Người dùng mới</SettingLabel>
+                <SettingLabel>{language === 'vi' ? 'Người dùng mới' : 'New users'}</SettingLabel>
                 <ToggleSwitch>
                   <input 
                     type="checkbox" 
@@ -541,7 +548,7 @@ const AdminNotifications = () => {
               </SettingItem>
 
               <SettingItem>
-                <SettingLabel>Nhà tuyển dụng</SettingLabel>
+                <SettingLabel>{language === 'vi' ? 'Nhà tuyển dụng' : 'Employers'}</SettingLabel>
                 <ToggleSwitch>
                   <input 
                     type="checkbox" 
@@ -553,7 +560,7 @@ const AdminNotifications = () => {
               </SettingItem>
 
               <SettingItem>
-                <SettingLabel>Bài đăng</SettingLabel>
+                <SettingLabel>{language === 'vi' ? 'Bài đăng' : 'Posts'}</SettingLabel>
                 <ToggleSwitch>
                   <input 
                     type="checkbox" 
@@ -565,7 +572,7 @@ const AdminNotifications = () => {
               </SettingItem>
 
               <SettingItem>
-                <SettingLabel>Thanh toán</SettingLabel>
+                <SettingLabel>{language === 'vi' ? 'Thanh toán' : 'Payments'}</SettingLabel>
                 <ToggleSwitch>
                   <input 
                     type="checkbox" 
@@ -577,7 +584,7 @@ const AdminNotifications = () => {
               </SettingItem>
 
               <SettingItem>
-                <SettingLabel>Cập nhật hệ thống</SettingLabel>
+                <SettingLabel>{language === 'vi' ? 'Cập nhật hệ thống' : 'System updates'}</SettingLabel>
                 <ToggleSwitch>
                   <input 
                     type="checkbox" 
@@ -590,14 +597,14 @@ const AdminNotifications = () => {
             </SettingsCard>
 
             <SettingsCard>
-              <SettingsTitle>Thao Tác Nhanh</SettingsTitle>
+              <SettingsTitle>{language === 'vi' ? 'Thao Tác Nhanh' : 'Quick Actions'}</SettingsTitle>
               <Button $variant="primary" style={{ width: '100%', marginBottom: '0.75rem' }}>
                 <Send size={18} />
-                Gửi thông báo
+                {language === 'vi' ? 'Gửi thông báo' : 'Send notification'}
               </Button>
               <Button $variant="outline" style={{ width: '100%' }}>
                 <Trash2 size={18} />
-                Xóa đã đọc
+                {language === 'vi' ? 'Xóa đã đọc' : 'Delete read'}
               </Button>
             </SettingsCard>
           </Sidebar>

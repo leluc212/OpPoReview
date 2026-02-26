@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
+import { useLanguage } from '../../context/LanguageContext';
 import { Users, Briefcase, Building2, DollarSign } from 'lucide-react';
 
 const DashboardContainer = styled.div`
@@ -123,10 +124,12 @@ const Table = styled.table`
 `;
 
 const AdminDashboard = () => {
+  const { t, language } = useLanguage();
+  
   const recentActivity = [
-    { user: 'Abc', action: 'Đăng ký nhà tuyển dụng', time: '2 giờ trước' },
-    { user: 'xyz', action: 'Ứng tuyển Senior Developer', time: '3 giờ trước' },
-    { user: 'Design Inc.', action: 'Đăng tin tuyển dụng mới', time: '5 giờ trước' },
+    { user: 'Abc', action: t.adminDashboard.activityRegisteredEmployer, time: t.adminDashboard.time2h },
+    { user: 'xyz', action: t.adminDashboard.activityApplied, time: t.adminDashboard.time3h },
+    { user: 'Design Inc.', action: t.adminDashboard.activityPostedJob, time: t.adminDashboard.time5h },
   ];
 
   return (
@@ -134,37 +137,37 @@ const AdminDashboard = () => {
       <DashboardContainer>
         <StatsGrid>
           <StatsCard
-            title="Tổng Người Dùng"
+            title={language === 'vi' ? 'Tổng Người Dùng' : 'Total Users'}
             value="2,458"
             change="+12%"
-            changeText="so với tháng trước"
+            changeText={language === 'vi' ? 'sơ với tháng trước' : 'vs last month'}
             icon={Users}
             color="linear-gradient(135deg, #0E3995 0%, #0055A5 100%)"
             positive
           />
           <StatsCard
-            title="Tin Đang Tuyển"
+            title={language === 'vi' ? 'Tin Đang Tuyển' : 'Active Jobs'}
             value="345"
             change="+8%"
-            changeText="so với tuần trước"
+            changeText={language === 'vi' ? 'sơ với tuần trước' : 'vs last week'}
             icon={Briefcase}
             color="linear-gradient(135deg, #F093FB 0%, #F5576C 100%)"
             positive
           />
           <StatsCard
-            title="Công Ty"
+            title={language === 'vi' ? 'Công Ty' : 'Companies'}
             value="156"
             change="+15"
-            changeText="đang chờ duyệt"
+            changeText={language === 'vi' ? 'đang chờ duyệt' : 'pending approval'}
             icon={Building2}
             color="linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%)"
             positive
           />
           <StatsCard
-            title="Doanh Thu"
-            value="24.5 tỷ VND"
+            title={language === 'vi' ? 'Doanh Thu' : 'Revenue'}
+            value={language === 'vi' ? '24.5 tỷ VND' : '$1.05M USD'}
             change="+23%"
-            changeText="so với tháng trước"
+            changeText={language === 'vi' ? 'sơ với tháng trước' : 'vs last month'}
             icon={DollarSign}
             color="linear-gradient(135deg, #43E97B 0%, #38F9D7 100%)"
             positive
@@ -173,15 +176,15 @@ const AdminDashboard = () => {
 
         <Section>
           <SectionHeader>
-            <h2>Hoạt Động Gần Đây</h2>
+            <h2>{language === 'vi' ? 'Hoạt Động Gần Đây' : 'Recent Activity'}</h2>
           </SectionHeader>
           
           <Table>
             <thead>
               <tr>
-                <th>Người Dùng</th>
-                <th>Hành Động</th>
-                <th>Thời Gian</th>
+                <th>{language === 'vi' ? 'Người Dùng' : 'User'}</th>
+                <th>{language === 'vi' ? 'Hành Động' : 'Action'}</th>
+                <th>{language === 'vi' ? 'Thời Gian' : 'Time'}</th>
               </tr>
             </thead>
             <tbody>

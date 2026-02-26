@@ -163,8 +163,8 @@ export const Select = styled.select`
 
 export const Label = styled.label`
   font-size: 13px;
-  font-weight: 500;
-  color: ${props => props.theme.colors.text};
+  font-weight: 600;
+  color: #1E293B;
   margin-bottom: 6px;
   display: block;
 `;

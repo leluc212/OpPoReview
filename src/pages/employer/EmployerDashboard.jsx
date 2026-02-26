@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
 import StatusBadge from '../../components/StatusBadge';
+import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import { 
   Briefcase, 
   Users, 
@@ -395,72 +397,89 @@ const PerformanceLabel = styled.div`
   color: ${props => props.theme.colors.textLight};
   font-weight: 600;
 `;
+
 const EmployerDashboard = () => {
+  const { language } = useLanguage();
+  const { user } = useAuth();
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  const recentApplications = [
+  const getRecentApplications = () => [
     { 
       id: 1,
-      candidate: 'Nguyễn Văn Hiếu', 
+      candidate: language === 'vi' ? 'Nguyễn Văn Hiếu' : 'Nguyen Van Hieu', 
       job: 'Senior React Developer', 
-      applied: '2 giờ trước', 
+      applied: language === 'vi' ? '2 giờ trước' : '2 hours ago',
       status: 'pending',
       avatar: 'H'
     },
     { 
       id: 2,
-      candidate: 'Trần Minh Duy', 
-      job: 'Thu ngân', 
-      applied: '5 giờ trước', 
+      candidate: language === 'vi' ? 'Trần Minh Duy' : 'Tran Minh Duy', 
+      job: language === 'vi' ? 'Thu ngân' : 'Cashier',
+      applied: language === 'vi' ? '5 giờ trước' : '5 hours ago',
       status: 'reviewed',
       avatar: 'D'
     },
     { 
       id: 3,
-      candidate: 'Lê Thị Nheo', 
-      job: 'Nhân viên pha chế', 
-      applied: '1 ngày trước', 
+      candidate: language === 'vi' ? 'Lê Thị Nheo' : 'Le Thi Nheo', 
+      job: language === 'vi' ? 'Nhân viên pha chế' : 'Barista',
+      applied: language === 'vi' ? '1 ngày trước' : '1 day ago',
       status: 'approved',
       avatar: 'N'
     },
   ];
 
-  const activities = [
+  const [recentApplications, setRecentApplications] = useState(getRecentApplications());
+  
+  useEffect(() => {
+    setRecentApplications(getRecentApplications());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language]);
+
+  const getActivities = () => [
     {
       type: 'application',
       icon: Users,
       color: '#0E3995',
-      title: '3 ứng viên mới ứng tuyển',
-      time: '30 phút trước'
+      title: language === 'vi' ? '3 ứng viên mới ứng tuyển' : '3 new candidates applied',
+      time: language === 'vi' ? '30 phút trước' : '30 minutes ago'
     },
     {
       type: 'job',
       icon: Briefcase,
       color: '#10B981',
-      title: 'Tin "Senior React Developer" đã được duyệt',
-      time: '2 giờ trước'
+      title: language === 'vi' ? 'Tin "Senior React Developer" đã được duyệt' : 'Job "Senior React Developer" approved',
+      time: language === 'vi' ? '2 giờ trước' : '2 hours ago'
     },
     {
       type: 'message',
       icon: MessageSquare,
       color: '#F59E0B',
-      title: 'Bạn có 5 tin nhắn mới',
-      time: '4 giờ trước'
+      title: language === 'vi' ? 'Bạn có 5 tin nhắn mới' : 'You have 5 new messages',
+      time: language === 'vi' ? '4 giờ trước' : '4 hours ago'
     },
     {
       type: 'hired',
       icon: CheckCircle,
       color: '#10B981',
-      title: 'Đã tuyển thành công "Thu ngân"',
-      time: '1 ngày trước'
+      title: language === 'vi' ? 'Đã tuyển thành công "Thu ngân"' : 'Successfully hired "Cashier"',
+      time: language === 'vi' ? '1 ngày trước' : '1 day ago'
     },
   ];
 
+  const [activities, setActivities] = useState(getActivities());
+  
+  useEffect(() => {
+    setActivities(getActivities());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language]);
+
   const getGreeting = () => {
     const hour = currentTime.getHours();
-    if (hour < 12) return 'Chào buổi sáng';
-    if (hour < 18) return 'Chào buổi chiều';
-    return 'Chào buổi tối';
+    if (hour < 12) return language === 'vi' ? 'Chào buổi sáng' : 'Good morning';
+    if (hour < 18) return language === 'vi' ? 'Chào buổi chiều' : 'Good afternoon';
+    return language === 'vi' ? 'Chào buổi tối' : 'Good evening';
   };
 
   return (
@@ -473,8 +492,8 @@ const EmployerDashboard = () => {
           transition={{ duration: 0.5 }}
         >
           <WelcomeContent>
-            <h1>{getGreeting()}, Nhà Tuyển Dụng! 👋</h1>
-            <p>Hôm nay bạn có 3 ứng viên mới và 5 tin nhắn cần xem</p>
+            <h1>{getGreeting()}, {user?.name || (language === 'vi' ? 'Nhà Tuyển Dụng' : 'Employer')}! 👋</h1>
+            <p>{language === 'vi' ? 'Hôm nay bạn có 3 ứng viên mới và 5 tin nhắn cần xem' : 'You have 3 new candidates and 5 messages to review'}</p>
             <QuickActions>
               <ActionButton
                 as={Link}
@@ -484,7 +503,7 @@ const EmployerDashboard = () => {
                 whileTap={{ scale: 0.98 }}
               >
                 <Plus />
-                Đăng Tin Mới
+                {language === 'vi' ? 'Đăng Tin Mới' : 'Post Job'}
               </ActionButton>
               <ActionButton
                 as={Link}
@@ -493,7 +512,7 @@ const EmployerDashboard = () => {
                 whileTap={{ scale: 0.98 }}
               >
                 <FileText />
-                Xem Hồ Sơ
+                {language === 'vi' ? 'Xem Hồ Sơ' : 'View Applications'}
               </ActionButton>
             </QuickActions>
           </WelcomeContent>
@@ -505,37 +524,37 @@ const EmployerDashboard = () => {
         {/* Stats Overview */}
         <StatsGrid>
           <StatsCard
-            title="Tin Đang Tuyển"
+            title={language === 'vi' ? 'Tin Đang Tuyển' : 'Active Jobs'}
             value="12"
             change="+3"
-            changeText="so với tháng trước"
+            changeText={language === 'vi' ? 'sơ với tháng trước' : 'vs last month'}
             icon={Briefcase}
             color="#0E3995"
             positive
           />
           <StatsCard
-            title="Tổng Hồ Sơ"
+            title={language === 'vi' ? 'Tổng Hồ Sơ' : 'Total Applications'}
             value="248"
             change="+45%"
-            changeText="so với tháng trước"
+            changeText={language === 'vi' ? 'sơ với tháng trước' : 'vs last month'}
             icon={Users}
             color="#F59E0B"
             positive
           />
           <StatsCard
-            title="Lượt Xem"
+            title={language === 'vi' ? 'Lượt Xem' : 'Views'}
             value="1,234"
             change="+12%"
-            changeText="so với tuần trước"
+            changeText={language === 'vi' ? 'sơ với tuần trước' : 'vs last week'}
             icon={Eye}
             color="#10B981"
             positive
           />
           <StatsCard
-            title="Đã Tuyển"
+            title={language === 'vi' ? 'Đã Tuyển' : 'Hired'}
             value="8"
             change="+2"
-            changeText="tháng này"
+            changeText={language === 'vi' ? 'tháng này' : 'this month'}
             icon={TrendingUp}
             color="#8B5CF6"
             positive
@@ -553,10 +572,10 @@ const EmployerDashboard = () => {
             <SectionHeader>
               <h2>
                 <Users />
-                Hồ Sơ Ứng Tuyển Mới Nhất
+                {language === 'vi' ? 'Hồ Sơ Ứng Tuyển Mới Nhất' : 'Recent Applications'}
               </h2>
               <Link to="/employer/applications">
-                Xem tất cả
+                {language === 'vi' ? 'Xem tất cả' : 'View all'}
                 <ArrowUpRight />
               </Link>
             </SectionHeader>
@@ -583,7 +602,7 @@ const EmployerDashboard = () => {
                   </span>
                   <span>
                     <Download />
-                    Tải CV
+                    {language === 'vi' ? 'Tải CV' : 'Download CV'}
                   </span>
                 </ApplicationMeta>
               </ApplicationCard>
@@ -599,7 +618,7 @@ const EmployerDashboard = () => {
             <SectionHeader>
               <h2>
                 <Calendar />
-                Hoạt Động Gần Đây
+                {language === 'vi' ? 'Hoạt Động Gần Đây' : 'Recent Activity'}
               </h2>
             </SectionHeader>
             
@@ -637,7 +656,7 @@ const EmployerDashboard = () => {
           <SectionHeader>
             <h2>
               <BarChart3 />
-              Hiệu Suất Tuyển Dụng
+              {language === 'vi' ? 'Hiệu Suất Tuyển Dụng' : 'Recruitment Performance'}
             </h2>
           </SectionHeader>
           
@@ -650,7 +669,7 @@ const EmployerDashboard = () => {
                 <Target />
               </PerformanceIcon>
               <PerformanceValue>85%</PerformanceValue>
-              <PerformanceLabel>Tỷ Lệ Phản Hồi</PerformanceLabel>
+              <PerformanceLabel>{language === 'vi' ? 'Tỷ Lệ Phản Hồi' : 'Response Rate'}</PerformanceLabel>
             </PerformanceCard>
 
             <PerformanceCard
@@ -661,7 +680,7 @@ const EmployerDashboard = () => {
                 <Award />
               </PerformanceIcon>
               <PerformanceValue>4.8/5</PerformanceValue>
-              <PerformanceLabel>Đánh Giá Công Ty</PerformanceLabel>
+              <PerformanceLabel>{language === 'vi' ? 'Đánh Giá Công Ty' : 'Company Rating'}</PerformanceLabel>
             </PerformanceCard>
 
             <PerformanceCard
@@ -671,8 +690,8 @@ const EmployerDashboard = () => {
               <PerformanceIcon $color="#F59E0B">
                 <Zap />
               </PerformanceIcon>
-              <PerformanceValue>12 ngày</PerformanceValue>
-              <PerformanceLabel>Thời Gian Tuyển TB</PerformanceLabel>
+              <PerformanceValue>{language === 'vi' ? '12 ngày' : '12 days'}</PerformanceValue>
+              <PerformanceLabel>{language === 'vi' ? 'Thời Gian Tuyển TB' : 'Avg. Hiring Time'}</PerformanceLabel>
             </PerformanceCard>
 
             <PerformanceCard
@@ -683,7 +702,7 @@ const EmployerDashboard = () => {
                 <TrendingUp />
               </PerformanceIcon>
               <PerformanceValue>+32%</PerformanceValue>
-              <PerformanceLabel>Tăng Trưởng Tháng Này</PerformanceLabel>
+              <PerformanceLabel>{language === 'vi' ? 'Tăng Trưởng Tháng Này' : 'Growth This Month'}</PerformanceLabel>
             </PerformanceCard>
           </PerformanceGrid>
         </Section>

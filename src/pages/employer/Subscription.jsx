@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import { Button } from '../../components/FormElements';
 import { Check, Zap, Star, Rocket, Sparkles, TrendingUp, X, HelpCircle, CreditCard, Shield, Clock } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 const pulse = keyframes`
   0%, 100% { opacity: 0.4; transform: scale(1); }
@@ -59,7 +60,7 @@ const PricingGrid = styled.div`
 `;
 
 const PricingCard = styled(motion.div)`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border: 3px solid ${props => props.$featured ? props.theme.colors.primary : props.theme.colors.border};
   border-radius: 24px;
   padding: 36px 28px;
@@ -224,7 +225,7 @@ const Features = styled.ul`
     }
     
     &:hover {
-      background: white;
+      background: ${props => props.theme.colors.bgDark};
       padding-left: 20px;
       transform: translateX(4px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -278,7 +279,7 @@ const ActionButton = styled(motion.button)`
       box-shadow: 0 12px 32px rgba(102, 126, 234, 0.45);
     }
   ` : `
-    background: white;
+    background: ${props.theme.colors.bgLight};
     color: ${props.theme.colors.text};
     border: 2px solid ${props.theme.colors.border};
     
@@ -294,7 +295,7 @@ const ActionButton = styled(motion.button)`
 const ComparisonSection = styled.div`
   margin-top: 60px;
   padding: 40px;
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border-radius: 24px;
   border: 2px solid ${props => props.theme.colors.border};
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
@@ -375,13 +376,13 @@ const ComparisonTable = styled.div`
 const FAQSection = styled.div`
   margin-top: 60px;
   padding: 40px;
-  background: linear-gradient(135deg, ${props => props.theme.colors.bgDark} 0%, white 100%);
+  background: linear-gradient(135deg, ${props => props.theme.colors.bgDark} 0%, ${props => props.theme.colors.bgLight} 100%);
   border-radius: 24px;
   border: 2px solid ${props => props.theme.colors.border};
 `;
 
 const FAQItem = styled(motion.div)`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 16px;
@@ -419,51 +420,52 @@ const FAQItem = styled(motion.div)`
 `;
 
 const Subscription = () => {
+  const { language } = useLanguage();
   const plans = [
     {
-      name: 'Cơ Bản',
-      price: '1.2 triệu',
+      name: language === 'vi' ? 'Cơ Bản' : 'Basic',
+      price: language === 'vi' ? '1.2 triệu' : '1.2 million',
       currency: 'VND',
-      period: '/tháng',
+      period: language === 'vi' ? '/tháng' : '/month',
       icon: Zap,
       color: '#10B981',
       features: [
-        '5 tin tuyển dụng',
-        '50 hồ sơ ứng tuyển',
-        'Hỗ trợ cơ bản',
-        'Bảng điều khiển phân tích',
+        language === 'vi' ? '5 tin tuyển dụng' : '5 job posts',
+        language === 'vi' ? '50 hồ sơ ứng tuyển' : '50 applications',
+        language === 'vi' ? 'Hỗ trợ cơ bản' : 'Basic support',
+        language === 'vi' ? 'Bảng điều khiển phân tích' : 'Analytics dashboard',
       ]
     },
     {
-      name: 'Chuyên Nghiệp',
-      price: '2.3 triệu',
+      name: language === 'vi' ? 'Chuyên Nghiệp' : 'Professional',
+      price: language === 'vi' ? '2.3 triệu' : '2.3 million',
       currency: 'VND',
-      period: '/tháng',
+      period: language === 'vi' ? '/tháng' : '/month',
       icon: Star,
       color: '#0E3995',
       features: [
-        '20 tin tuyển dụng',
-        'Hồ sơ ứng tuyển không giới hạn',
-        'Hỗ trợ ưu tiên',
-        'Phân tích nâng cao',
-        'Tin nổi bật',
+        language === 'vi' ? '20 tin tuyển dụng' : '20 job posts',
+        language === 'vi' ? 'Hồ sơ ứng tuyển không giới hạn' : 'Unlimited applications',
+        language === 'vi' ? 'Hỗ trợ ưu tiên' : 'Priority support',
+        language === 'vi' ? 'Phân tích nâng cao' : 'Advanced analytics',
+        language === 'vi' ? 'Tin nổi bật' : 'Featured posting',
       ],
       featured: true
     },
     {
-      name: 'Doanh Nghiệp',
-      price: '4.5 triệu',
+      name: language === 'vi' ? 'Doanh Nghiệp' : 'Enterprise',
+      price: language === 'vi' ? '4.5 triệu' : '4.5 million',
       currency: 'VND',
-      period: '/tháng',
+      period: language === 'vi' ? '/tháng' : '/month',
       icon: Rocket,
       color: '#F59E0B',
       features: [
-        'Tin tuyển dụng không giới hạn',
-        'Hồ sơ ứng tuyển không giới hạn',
-        'Hỗ trợ 24/7',
-        'Phân tích tùy chỉnh',
-        'Truy cập API',
-        'Quản lý riêng',
+        language === 'vi' ? 'Tin tuyển dụng không giới hạn' : 'Unlimited job posts',
+        language === 'vi' ? 'Hồ sơ ứng tuyển không giới hạn' : 'Unlimited applications',
+        language === 'vi' ? 'Hỗ trợ 24/7' : '24/7 support',
+        language === 'vi' ? 'Phân tích tùy chỉnh' : 'Custom analytics',
+        language === 'vi' ? 'Truy cập API' : 'API access',
+        language === 'vi' ? 'Quản lý riêng' : 'Dedicated manager',
       ]
     }
   ];
@@ -476,8 +478,8 @@ const Subscription = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1>Chọn Gói Của Bạn</h1>
-          <p>Chọn gói phù hợp cho nhu cầu tuyển dụng</p>
+          <h1>{language === 'vi' ? 'Chọn Gói Của Bạn' : 'Choose Your Plan'}</h1>
+          <p>{language === 'vi' ? 'Chọn gói phù hợp cho nhu cầu tuyển dụng' : 'Choose the right plan for your hiring needs'}</p>
         </PageHeader>
 
         <PricingGrid>
@@ -500,7 +502,7 @@ const Subscription = () => {
                     transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
                   >
                     <Sparkles />
-                    Phổ Biến Nhất
+                    {language === 'vi' ? 'Phổ Biến Nhất' : 'Most Popular'}
                   </Badge>
                 )}
                 
@@ -547,10 +549,10 @@ const Subscription = () => {
                   {plan.featured ? (
                     <>
                       <Sparkles size={18} />
-                      Bắt Đầu Ngay
+                      {language === 'vi' ? 'Bắt Đầu Ngay' : 'Start Now'}
                     </>
                   ) : (
-                    'Chọn Gói'
+                    language === 'vi' ? 'Chọn Gói' : 'Select Plan'
                   )}
                 </ActionButton>
               </PricingCard>
@@ -560,56 +562,56 @@ const Subscription = () => {
 
         {/* Comparison Section */}
         <ComparisonSection>
-          <ComparisonTitle>So Sánh Chi Tiết Các Gói</ComparisonTitle>
+          <ComparisonTitle>{language === 'vi' ? 'So Sánh Chi Tiết Các Gói' : 'Detailed Plan Comparison'}</ComparisonTitle>
           <ComparisonTable>
             <table>
               <thead>
                 <tr>
-                  <th>Tính Năng</th>
-                  <th>Cơ Bản</th>
-                  <th>Chuyên Nghiệp</th>
-                  <th>Doanh Nghiệp</th>
+                  <th>{language === 'vi' ? 'Tính Năng' : 'Feature'}</th>
+                  <th>{language === 'vi' ? 'Cơ Bản' : 'Basic'}</th>
+                  <th>{language === 'vi' ? 'Chuyên Nghiệp' : 'Professional'}</th>
+                  <th>{language === 'vi' ? 'Doanh Nghiệp' : 'Enterprise'}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>Số tin tuyển dụng</td>
+                  <td>{language === 'vi' ? 'Số tin tuyển dụng' : 'Job posts'}</td>
                   <td>5</td>
                   <td>20</td>
-                  <td>Không giới hạn</td>
+                  <td>{language === 'vi' ? 'Không giới hạn' : 'Unlimited'}</td>
                 </tr>
                 <tr>
-                  <td>Hồ sơ ứng tuyển</td>
+                  <td>{language === 'vi' ? 'Hồ sơ ứng tuyển' : 'Applications'}</td>
                   <td>50</td>
-                  <td>Không giới hạn</td>
-                  <td>Không giới hạn</td>
+                  <td>{language === 'vi' ? 'Không giới hạn' : 'Unlimited'}</td>
+                  <td>{language === 'vi' ? 'Không giới hạn' : 'Unlimited'}</td>
                 </tr>
                 <tr>
-                  <td>Tin nổi bật</td>
+                  <td>{language === 'vi' ? 'Tin nổi bật' : 'Featured posting'}</td>
                   <td><X color="#EF4444" /></td>
                   <td><Check /></td>
                   <td><Check /></td>
                 </tr>
                 <tr>
-                  <td>Phân tích nâng cao</td>
+                  <td>{language === 'vi' ? 'Phân tích nâng cao' : 'Advanced analytics'}</td>
                   <td><X color="#EF4444" /></td>
                   <td><Check /></td>
                   <td><Check /></td>
                 </tr>
                 <tr>
-                  <td>Truy cập API</td>
+                  <td>{language === 'vi' ? 'Truy cập API' : 'API access'}</td>
                   <td><X color="#EF4444" /></td>
                   <td><X color="#EF4444" /></td>
                   <td><Check /></td>
                 </tr>
                 <tr>
-                  <td>Hỗ trợ</td>
-                  <td>Cơ bản</td>
-                  <td>Ưu tiên</td>
+                  <td>{language === 'vi' ? 'Hỗ trợ' : 'Support'}</td>
+                  <td>{language === 'vi' ? 'Cơ bản' : 'Basic'}</td>
+                  <td>{language === 'vi' ? 'Ưu tiên' : 'Priority'}</td>
                   <td>24/7</td>
                 </tr>
                 <tr>
-                  <td>Quản lý riêng</td>
+                  <td>{language === 'vi' ? 'Quản lý riêng' : 'Dedicated manager'}</td>
                   <td><X color="#EF4444" /></td>
                   <td><X color="#EF4444" /></td>
                   <td><Check /></td>
@@ -621,30 +623,30 @@ const Subscription = () => {
 
         {/* FAQ Section */}
         <FAQSection>
-          <ComparisonTitle>Câu Hỏi Thường Gặp</ComparisonTitle>
+          <ComparisonTitle>{language === 'vi' ? 'Câu Hỏi Thường Gặp' : 'Frequently Asked Questions'}</ComparisonTitle>
           <FAQItem
             whileHover={{ scale: 1.01 }}
           >
-            <h3><CreditCard /> Các phương thức thanh toán nào được chấp nhận?</h3>
-            <p>Chúng tôi chấp nhận thẻ tín dụng, thẻ ghi nợ, chuyển khoản ngân hàng và ví điện tử. Tất cả giao dịch đều được bảo mật SSL 256-bit.</p>
+            <h3><CreditCard /> {language === 'vi' ? 'Các phương thức thanh toán nào được chấp nhận?' : 'Which payment methods are accepted?'}</h3>
+            <p>{language === 'vi' ? 'Chúng tôi chấp nhận thẻ tín dụng, thẻ ghi nợ, chuyển khoản ngân hàng và ví điện tử. Tất cả giao dịch đều được bảo mật SSL 256-bit.' : 'We accept credit cards, debit cards, bank transfer, and e-wallets. All transactions are protected with 256-bit SSL security.'}</p>
           </FAQItem>
           <FAQItem
             whileHover={{ scale: 1.01 }}
           >
-            <h3><Shield /> Tôi có thể hủy đăng ký bất cứ lúc nào không?</h3>
-            <p>Có, bạn có thể hủy đăng ký bất cứ lúc nào. Không có phí hủy và bạn vẫn có thể sử dụng dịch vụ cho đến hết kỳ thanh toán.</p>
+            <h3><Shield /> {language === 'vi' ? 'Tôi có thể hủy đăng ký bất cứ lúc nào không?' : 'Can I cancel my subscription anytime?'}</h3>
+            <p>{language === 'vi' ? 'Có, bạn có thể hủy đăng ký bất cứ lúc nào. Không có phí hủy và bạn vẫn có thể sử dụng dịch vụ cho đến hết kỳ thanh toán.' : 'Yes. You can cancel at any time with no cancellation fee, and still use the service until the end of your billing cycle.'}</p>
           </FAQItem>
           <FAQItem
             whileHover={{ scale: 1.01 }}
           >
-            <h3><Clock /> Tôi có thể nâng cấp hoặc hạ cấp gói không?</h3>
-            <p>Tất nhiên! Bạn có thể nâng cấp hoặc hạ cấp gói bất cứ lúc nào. Chúng tôi sẽ tính toán tỷ lệ cho thời gian còn lại.</p>
+            <h3><Clock /> {language === 'vi' ? 'Tôi có thể nâng cấp hoặc hạ cấp gói không?' : 'Can I upgrade or downgrade my plan?'}</h3>
+            <p>{language === 'vi' ? 'Tất nhiên! Bạn có thể nâng cấp hoặc hạ cấp gói bất cứ lúc nào. Chúng tôi sẽ tính toán tỷ lệ cho thời gian còn lại.' : 'Absolutely. You can upgrade or downgrade anytime, and we will prorate based on remaining time.'}</p>
           </FAQItem>
           <FAQItem
             whileHover={{ scale: 1.01 }}
           >
-            <h3><HelpCircle /> Có hỗ trợ khách hàng không?</h3>
-            <p>Có, tất cả các gói đều có hỗ trợ khách hàng. Gói Chuyên Nghiệp có hỗ trợ ưu tiên và gói Doanh Nghiệp có hỗ trợ 24/7 qua điện thoại, email và chat.</p>
+            <h3><HelpCircle /> {language === 'vi' ? 'Có hỗ trợ khách hàng không?' : 'Is customer support available?'}</h3>
+            <p>{language === 'vi' ? 'Có, tất cả các gói đều có hỗ trợ khách hàng. Gói Chuyên Nghiệp có hỗ trợ ưu tiên và gói Doanh Nghiệp có hỗ trợ 24/7 qua điện thoại, email và chat.' : 'Yes, all plans include customer support. Professional has priority support, and Enterprise includes 24/7 phone, email, and chat support.'}</p>
           </FAQItem>
         </FAQSection>
       </SubscriptionContainer>

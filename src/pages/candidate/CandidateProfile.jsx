@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import { Button, Input, TextArea, FormGroup, Label } from '../../components/FormElements';
+import { useLanguage } from '../../context/LanguageContext';
 import { 
   Upload, 
   Save, 
@@ -22,7 +23,8 @@ import {
   CheckCircle,
   Settings,
   FileText,
-  Star
+  Star,
+  X
 } from 'lucide-react';
 
 const ProfileContainer = styled.div`
@@ -116,6 +118,34 @@ const AvatarUpload = styled.label`
   
   input {
     display: none;
+  }
+`;
+
+const DeleteButton = styled.button`
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #EF4444;
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s;
+  
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
   }
 `;
 
@@ -414,7 +444,11 @@ const StatsGrid = styled.div`
 `;
 
 const CandidateProfile = () => {
+  const { language, t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
+  const [profileImage, setProfileImage] = useState(() => {
+    return localStorage.getItem('profileImage') || null;
+  });
   const [formData, setFormData] = useState({
     fullName: 'Lực Thứ Hai',
     email: 'lucthuhai@gmail.com',
@@ -435,20 +469,65 @@ const CandidateProfile = () => {
   ];
 
   const stats = [
-    { label: 'Công việc hoàn thành', value: '23', color: '#10B981' },
-    { label: 'Đánh giá', value: '4.8', color: '#F59E0B' },
-    { label: 'Tỷ lệ thành công', value: '95%', color: '#667eea' },
-    { label: 'Khách hàng', value: '18', color: '#EF4444' }
+    { label: language === 'vi' ? 'Công việc hoàn thành' : 'Completed Jobs', value: '23', color: '#10B981' },
+    { label: language === 'vi' ? 'Đánh giá' : 'Rating', value: '4.8', color: '#F59E0B' },
+    { label: language === 'vi' ? 'Tỷ lệ thành công' : 'Success Rate', value: '95%', color: '#667eea' },
+    { label: language === 'vi' ? 'Khách hàng' : 'Clients', value: '18', color: '#EF4444' }
   ];
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 400;
+          const MAX_HEIGHT = 400;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+          setProfileImage(compressedBase64);
+          localStorage.setItem('profileImage', compressedBase64);
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDeleteImage = () => {
+    setProfileImage(null);
+    localStorage.removeItem('profileImage');
+  };
+
   const handleSave = () => {
     console.log('Saving profile:', formData);
     setIsEditing(false);
-    alert('Đã lưu thay đổi thành công!');
+    alert(language === 'vi' ? 'Đã lưu thay đổi thành công!' : 'Changes saved successfully!');
   };
 
   return (
@@ -465,23 +544,34 @@ const CandidateProfile = () => {
               onClick={() => setIsEditing(!isEditing)}
             >
               <Edit2 />
-              {isEditing ? 'Hủy' : 'Chỉnh Sửa'}
+              {isEditing ? (language === 'vi' ? 'Hủy' : 'Cancel') : (language === 'vi' ? 'Chỉnh Sửa' : 'Edit')}
             </HeaderButton>
             <HeaderButton
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <Settings />
-              Cài Đặt
+              {language === 'vi' ? 'Cài Đặt' : 'Settings'}
             </HeaderButton>
           </div>
 
           <div className="header-content">
             <AvatarWrapper>
-              <Avatar>JD</Avatar>
+              <Avatar>
+                {profileImage ? (
+                  <img src={profileImage} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                ) : (
+                  'JD'
+                )}
+              </Avatar>
+              {profileImage && (
+                <DeleteButton onClick={handleDeleteImage}>
+                  <X />
+                </DeleteButton>
+              )}
               <AvatarUpload>
                 <Camera />
-                <input type="file" accept="image/*" />
+                <input type="file" accept="image/*" onChange={handleImageUpload} />
               </AvatarUpload>
             </AvatarWrapper>
 
@@ -506,7 +596,7 @@ const CandidateProfile = () => {
 
               <ProgressSection>
                 <div className="progress-header">
-                  <div className="label">Hoàn thiện hồ sơ</div>
+                  <div className="label">{language === 'vi' ? 'Hoàn thiện hồ sơ' : 'Profile Completion'}</div>
                   <div className="percentage">{profileCompletion}%</div>
                 </div>
                 <div className="progress-bar">
@@ -532,39 +622,39 @@ const CandidateProfile = () => {
               <div className="card-header">
                 <h2>
                   <User />
-                  Thông Tin Cá Nhân
+                  {language === 'vi' ? 'Thông Tin Cá Nhân' : 'Personal Information'}
                 </h2>
               </div>
 
               {isEditing ? (
                 <FormGrid>
                   <FormGroup>
-                    <Label>Họ Và Tên</Label>
+                    <Label>{t.profile.fullName}</Label>
                     <Input name="fullName" value={formData.fullName} onChange={handleChange} />
                   </FormGroup>
 
                   <FormGroup>
-                    <Label>Email</Label>
+                    <Label>{t.profile.email}</Label>
                     <Input name="email" type="email" value={formData.email} onChange={handleChange} />
                   </FormGroup>
 
                   <FormGroup>
-                    <Label>Số Điện Thoại</Label>
+                    <Label>{t.profile.phone}</Label>
                     <Input name="phone" type="tel" value={formData.phone} onChange={handleChange} />
                   </FormGroup>
 
                   <FormGroup>
-                    <Label>Địa Điểm</Label>
+                    <Label>{t.profile.location}</Label>
                     <Input name="location" value={formData.location} onChange={handleChange} />
                   </FormGroup>
 
                   <FormGroup className="full-width">
-                    <Label>Chức Danh Nghề Nghiệp</Label>
+                    <Label>{t.profile.professionalTitle}</Label>
                     <Input name="title" value={formData.title} onChange={handleChange} />
                   </FormGroup>
 
                   <FormGroup className="full-width">
-                    <Label>Giới Thiệu</Label>
+                    <Label>{t.profile.bio}</Label>
                     <TextArea name="bio" value={formData.bio} onChange={handleChange} rows={4} />
                   </FormGroup>
                 </FormGrid>
@@ -578,7 +668,7 @@ const CandidateProfile = () => {
                       <div className="icon">
                         <User />
                       </div>
-                      <div className="label">Họ và Tên</div>
+                      <div className="label">{language === 'vi' ? 'Họ và Tên' : 'Full Name'}</div>
                     </div>
                     <div className="value">{formData.fullName}</div>
                   </InfoCard>
@@ -605,7 +695,7 @@ const CandidateProfile = () => {
                         <div className="icon">
                           <Phone />
                         </div>
-                        <div className="label">Điện Thoại</div>
+                        <div className="label">{language === 'vi' ? 'Điện Thoại' : 'Phone'}</div>
                       </div>
                       <div className="value">{formData.phone}</div>
                     </InfoCard>
@@ -619,7 +709,7 @@ const CandidateProfile = () => {
                       <div className="icon">
                         <MapPin />
                       </div>
-                      <div className="label">Địa Điểm</div>
+                      <div className="label">{language === 'vi' ? 'Địa Điểm' : 'Location'}</div>
                     </div>
                     <div className="value">{formData.location}</div>
                   </InfoCard>
@@ -632,7 +722,7 @@ const CandidateProfile = () => {
                       <div className="icon">
                         <Briefcase />
                       </div>
-                      <div className="label">Chức Danh</div>
+                      <div className="label">{language === 'vi' ? 'Chức Danh' : 'Title'}</div>
                     </div>
                     <div className="value">{formData.title}</div>
                   </InfoCard>
@@ -645,7 +735,7 @@ const CandidateProfile = () => {
                       <div className="icon">
                         <FileText />
                       </div>
-                      <div className="label">Giới Thiệu</div>
+                      <div className="label">{language === 'vi' ? 'Giới Thiệu' : 'Bio'}</div>
                     </div>
                     <div className="value" style={{ lineHeight: '1.6' }}>{formData.bio}</div>
                   </InfoCard>
@@ -661,7 +751,7 @@ const CandidateProfile = () => {
               <div className="card-header">
                 <h2>
                   <LinkIcon />
-                  Liên Kết Mạng Xã Hội
+                  {language === 'vi' ? 'Liên Kết Mạng Xã Hội' : 'Social Links'}
                 </h2>
               </div>
 
@@ -727,7 +817,7 @@ const CandidateProfile = () => {
               <div className="card-header">
                 <h2>
                   <Award />
-                  Thống Kê
+                  {language === 'vi' ? 'Thống Kê' : 'Statistics'}
                 </h2>
               </div>
 
@@ -749,11 +839,11 @@ const CandidateProfile = () => {
               <div className="card-header">
                 <h2>
                   <Star />
-                  Kỹ Năng
+                  {t.profile.skills}
                 </h2>
                 <button className="edit-btn">
                   <Edit2 />
-                  Chỉnh Sửa
+                  {language === 'vi' ? 'Chỉnh Sửa' : 'Edit'}
                 </button>
               </div>
 
@@ -781,19 +871,19 @@ const CandidateProfile = () => {
               <div className="card-header">
                 <h2>
                   <Calendar />
-                  Hoạt Động Gần Đây
+                  {language === 'vi' ? 'Hoạt Động Gần Đây' : 'Recent Activity'}
                 </h2>
               </div>
 
               <div style={{ fontSize: '14px', color: '#64748B', lineHeight: '1.8' }}>
                 <div style={{ padding: '12px 0', borderBottom: '1px solid #E2E8F0' }}>
-                  ✅ Hoàn thành dự án cho FPT Software
+                  ✅ {language === 'vi' ? 'Hoàn thành dự án cho FPT Software' : 'Completed project for FPT Software'}
                 </div>
                 <div style={{ padding: '12px 0', borderBottom: '1px solid #E2E8F0' }}>
-                  📝 Cập nhật hồ sơ
+                  📝 {language === 'vi' ? 'Cập nhật hồ sơ' : 'Updated profile'}
                 </div>
                 <div style={{ padding: '12px 0' }}>
-                  ⭐ Nhận đánh giá 5 sao từ Viettel
+                  ⭐ {language === 'vi' ? 'Nhận đánh giá 5 sao từ Viettel' : 'Received 5-star rating from Viettel'}
                 </div>
               </div>
             </Card>
@@ -822,7 +912,7 @@ const CandidateProfile = () => {
                 minWidth: '200px'
               }}
             >
-              <Save /> Lưu Thay Đổi
+              <Save /> {language === 'vi' ? 'Lưu Thay Đổi' : 'Save Changes'}
             </Button>
           </motion.div>
         )}

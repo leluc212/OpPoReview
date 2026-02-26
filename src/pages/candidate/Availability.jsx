@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import Modal from '../../components/Modal';
+import { useLanguage } from '../../context/LanguageContext';
 import { 
   Power, 
   Search, 
@@ -608,6 +609,7 @@ const ConfirmationContent = styled.div`
 `;
 
 const Availability = () => {
+  const { language } = useLanguage();
   const [isAvailable, setIsAvailable] = useState(true);
   const [enableJobSearch, setEnableJobSearch] = useState(true);
   const [enableRecommendations, setEnableRecommendations] = useState(true);
@@ -656,15 +658,21 @@ const Availability = () => {
             <div className="status-info">
               <div className="status-badge">
                 {isAvailable ? <CheckCircle /> : <XCircle />}
-                Trạng Thái Hiện Tại
+                {language === 'vi' ? 'Trạng Thái Hiện Tại' : 'Current Status'}
               </div>
               <div className="status-label">
-                {isAvailable ? 'ĐANG TÌM VIỆC' : 'TẠM DỪNG'}
+                {isAvailable 
+                  ? (language === 'vi' ? 'ĐANG TÌM VIỆC' : 'ACTIVELY LOOKING')
+                  : (language === 'vi' ? 'TẠM DỬNG' : 'PAUSED')}
               </div>
               <div className="status-desc">
                 {isAvailable 
-                  ? 'Hồ sơ của bạn đang hiển thị với nhà tuyển dụng và bạn đang nhận gợi ý công việc'
-                  : 'Hồ sơ của bạn đã bị ẩn khỏi nhà tuyển dụng và không nhận gợi ý công việc'}
+                  ? (language === 'vi' 
+                      ? 'Hồ sơ của bạn đang hiển thị với nhà tuyển dụng và bạn đang nhận gợi ý công việc'
+                      : 'Your profile is visible to employers and you are receiving job suggestions')
+                  : (language === 'vi'
+                      ? 'Hồ sơ của bạn đã bị ẩn khỏi nhà tuyển dụng và không nhận gợi ý công việc'
+                      : 'Your profile is hidden from employers and you are not receiving job suggestions')}
               </div>
               <ToggleButton 
                 onClick={handleToggleAvailability} 
@@ -673,7 +681,9 @@ const Availability = () => {
                 whileTap={{ scale: 0.95 }}
               >
                 <Power />
-                {isAvailable ? 'Tắt Tìm Việc' : 'Bật Tìm Việc'}
+                {isAvailable 
+                  ? (language === 'vi' ? 'Tắt Tìm Việc' : 'Pause Job Search')
+                  : (language === 'vi' ? 'Bật Tìm Việc' : 'Activate Job Search')}
               </ToggleButton>
             </div>
             <motion.div 
@@ -699,7 +709,7 @@ const Availability = () => {
               <div className="card-header">
                 <h2>
                   <Settings />
-                  Cài Đặt Tìm Kiếm
+                  {language === 'vi' ? 'Cài Đặt Tìm Kiếm' : 'Search Settings'}
                 </h2>
               </div>
               
@@ -716,8 +726,8 @@ const Availability = () => {
                     <Search />
                   </div>
                   <div className="setting-info">
-                    <h3>Cho Phép Tìm Kiếm Công Việc</h3>
-                    <p>Bật để tìm kiếm và ứng tuyển các công việc mới</p>
+                    <h3>{language === 'vi' ? 'Cho Phép Tìm Kiếm Công Việc' : 'Enable Job Search'}</h3>
+                    <p>{language === 'vi' ? 'Bật để tìm kiếm và ứng tuyển các công việc mới' : 'Turn on to search and apply for new jobs'}</p>
                   </div>
                 </div>
                 <Toggle>
@@ -744,8 +754,8 @@ const Availability = () => {
                     <TrendingUp />
                   </div>
                   <div className="setting-info">
-                    <h3>Nhận Gợi Ý Công Việc</h3>
-                    <p>Nhận các gợi ý công việc phù hợp dựa trên hồ sơ của bạn</p>
+                    <h3>{language === 'vi' ? 'Nhận Gợi Ý Công Việc' : 'Receive Job Suggestions'}</h3>
+                    <p>{language === 'vi' ? 'Nhận các gợi ý công việc phù hợp dựa trên hồ sơ của bạn' : 'Get job suggestions matching your profile'}</p>
                   </div>
                 </div>
                 <Toggle>
@@ -772,8 +782,8 @@ const Availability = () => {
                     <Bell />
                   </div>
                   <div className="setting-info">
-                    <h3>Thông Báo Công Việc Mới</h3>
-                    <p>Nhận thông báo khi có công việc mới phù hợp</p>
+                    <h3>{language === 'vi' ? 'Thông Báo Công Việc Mới' : 'New Job Notifications'}</h3>
+                    <p>{language === 'vi' ? 'Nhận thông báo khi có công việc mới phù hợp' : 'Get notified when new matching jobs are posted'}</p>
                   </div>
                 </div>
                 <Toggle>

@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import JobCard from '../../components/JobCard';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../../context/LanguageContext';
 
 const SavedJobsContainer = styled.div``;
 
@@ -27,6 +28,7 @@ const JobsGrid = styled.div`
 `;
 
 const SavedJobs = () => {
+  const { language } = useLanguage();
   const navigate = useNavigate();
 
   const savedJobs = [
@@ -56,8 +58,8 @@ const SavedJobs = () => {
     <DashboardLayout role="candidate" showSearch={false}>
       <SavedJobsContainer>
         <PageHeader>
-          <h1>Tin Đã Lưu</h1>
-          <p>Các tin tuyển dụng bạn đã lưu để xem sau</p>
+          <h1>{language === 'vi' ? 'Tin Đã Lưu' : 'Saved Jobs'}</h1>
+          <p>{language === 'vi' ? 'Các tin tuyển dụng bạn đã lưu để xem sau' : 'Job postings you saved for later'}</p>
         </PageHeader>
 
         <JobsGrid>

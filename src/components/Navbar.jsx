@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Bell, MessageSquare, Search, LogOut, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const NavbarContainer = styled.nav`
   height: 80px;
@@ -137,6 +138,13 @@ const Avatar = styled.div`
   text-transform: uppercase;
   box-shadow: ${props => props.theme.shadows.sm};
   transition: all ${props => props.theme.transitions.normal};
+  overflow: hidden;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 `;
 
 const UserMenu = styled.div`
@@ -182,8 +190,27 @@ const UserInfo = styled.div`
 
 const Navbar = ({ showSearch = true }) => {
   const { user, logout } = useAuth();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState('');
+  const [profileImage, setProfileImage] = useState(null);
+  
+  useEffect(() => {
+    const loadImage = () => {
+      if (user?.role === 'candidate') {
+        setProfileImage(localStorage.getItem('profileImage'));
+      } else if (user?.role === 'employer') {
+        setProfileImage(localStorage.getItem('companyLogo'));
+      } else if (user?.role === 'admin') {
+        setProfileImage(localStorage.getItem('adminProfileImage'));
+      }
+    };
+    
+    loadImage();
+    const interval = setInterval(loadImage, 1000);
+    
+    return () => clearInterval(interval);
+  }, [user?.role]);
   
   const handleLogout = () => {
     logout();
@@ -210,7 +237,7 @@ const Navbar = ({ showSearch = true }) => {
             <Search onClick={handleSearch} />
             <input 
               type="text" 
-              placeholder="Tìm việc, công ty..." 
+              placeholder={language === 'vi' ? 'Tìm việc, công ty...' : 'Search jobs, companies...'}
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               onKeyPress={handleKeyPress}
@@ -232,7 +259,11 @@ const Navbar = ({ showSearch = true }) => {
         
         <UserMenu>
           <Avatar>
-            {user?.name?.charAt(0).toUpperCase() || 'U'}
+            {profileImage ? (
+              <img src={profileImage} alt="Profile" />
+            ) : (
+              user?.name?.charAt(0).toUpperCase() || 'U'
+            )}
           </Avatar>
           <UserInfo>
             <span>{user?.name || 'User'}</span>

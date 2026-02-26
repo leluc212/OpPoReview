@@ -5,6 +5,8 @@ import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
 import JobCard from '../../components/JobCard';
 import StatusBadge from '../../components/StatusBadge';
+import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import { 
   Briefcase, 
   FileText, 
@@ -483,9 +485,31 @@ const JobTags = styled.div`
 `;
 
 const CandidateDashboard = () => {
+  const { t, language } = useLanguage();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [currentTime] = useState(new Date());
   const [profileCompletion] = useState(75);
+
+  // Translation helper functions
+  const translateSalary = (salaryStr) => {
+    if (language === 'vi') return salaryStr;
+    return salaryStr
+      .replace(/triệu/g, 'million')
+      .replace(/\/ca/g, '/shift')
+      .replace(/\/giờ/g, '/hour');
+  };
+
+  const translateLocation = (locationStr) => {
+    if (language === 'vi') return locationStr;
+    return locationStr
+      .replace(/Quận/g, 'District')
+      .replace(/TP\.HCM/g, 'HCMC')
+      .replace(/Hà Nội/g, 'Hanoi')
+      .replace(/Đà Nẵng/g, 'Da Nang')
+      .replace(/Tân Bình/g, 'Tan Binh')
+      .replace(/Phú Nhuận/g, 'Phu Nhuan');
+  };
 
   const recommendedJobs = [
     {
@@ -576,8 +600,11 @@ const CandidateDashboard = () => {
   ];
 
   const getGreeting = () => {
-    const hour = currentTime.getHours();
-    if (hour < 12) return 'Chào buổi sáng';
+    const hour = currentTime.getHours();    if (language === 'en') {
+      if (hour < 12) return 'Good morning';
+      if (hour < 18) return 'Good afternoon';
+      return 'Good evening';
+    }    if (hour < 12) return 'Chào buổi sáng';
     if (hour < 18) return 'Chào buổi chiều';
     return 'Chào buổi tối';
   };
@@ -592,8 +619,8 @@ const CandidateDashboard = () => {
           transition={{ duration: 0.5 }}
         >
           <WelcomeContent>
-            <h1>{getGreeting()}, Ứng Viên! 👋</h1>
-            <p>Bạn có 12 nhà tuyển dụng đã xem hồ sơ và 5 công việc mới phù hợp</p>
+            <h1>{getGreeting()}, {user?.name || (language === 'vi' ? 'Ứng Viên' : 'Candidate')}! 👋</h1>
+            <p>{language === 'vi' ? 'Bạn có 12 nhà tuyển dụng đã xem hồ sơ và 5 công việc mới phù hợp' : 'You have 12 employer views and 5 new matching jobs'}</p>
             <QuickActions>
               <ActionButton
                 as={Link}
@@ -603,7 +630,7 @@ const CandidateDashboard = () => {
                 whileTap={{ scale: 0.98 }}
               >
                 <Search />
-                Tìm Việc Làm
+                {language === 'vi' ? 'Tìm Việc Làm' : 'Find Jobs'}
               </ActionButton>
               <ActionButton
                 as={Link}
@@ -612,7 +639,7 @@ const CandidateDashboard = () => {
                 whileTap={{ scale: 0.98 }}
               >
                 <Edit3 />
-                Cập Nhật CV
+                {language === 'vi' ? 'Cập Nhật CV' : 'Update CV'}
               </ActionButton>
             </QuickActions>
           </WelcomeContent>
@@ -631,9 +658,9 @@ const CandidateDashboard = () => {
             <div>
               <h3>
                 <Sparkles />
-                Hoàn thiện hồ sơ để tăng cơ hội được tuyển dụng
+                {language === 'vi' ? 'Hoàn thiện hồ sơ để tăng cơ hội được tuyển dụng' : 'Complete your profile to increase hiring chances'}
               </h3>
-              <p>Hồ sơ của bạn đã hoàn thành {profileCompletion}%</p>
+              <p>{language === 'vi' ? `Hồ sơ của bạn đã hoàn thành ${profileCompletion}%` : `Your profile is ${profileCompletion}% complete`}</p>
               <ProgressBar $progress={profileCompletion} />
             </div>
             <ActionButton
@@ -644,7 +671,7 @@ const CandidateDashboard = () => {
               whileTap={{ scale: 0.98 }}
             >
               <Upload />
-              Hoàn Thiện Ngay
+              {language === 'vi' ? 'Hoàn Thiện Ngay' : 'Complete Now'}
             </ActionButton>
           </ProfileCompletionBanner>
         )}
@@ -652,37 +679,37 @@ const CandidateDashboard = () => {
         {/* Stats Overview */}
         <StatsGrid>
           <StatsCard
-            title="Hồ Sơ Đã Nộp"
+            title={language === 'vi' ? 'Hồ Sơ Đã Nộp' : 'Applications'}
             value="24"
             change="+12%"
-            changeText="từ tháng trước"
+            changeText={language === 'vi' ? 'từ tháng trước' : 'from last month'}
             icon={FileText}
             color="#0E3995"
             positive
           />
           <StatsCard
-            title="Việc Đã Lưu"
+            title={language === 'vi' ? 'Việc Đã Lưu' : 'Saved Jobs'}
             value="18"
             change="+3"
-            changeText="tuần này"
+            changeText={language === 'vi' ? 'tuần này' : 'this week'}
             icon={Star}
             color="#F59E0B"
             positive
           />
           <StatsCard
-            title="Lượt Xem Hồ Sơ"
+            title={language === 'vi' ? 'Lượt Xem Hồ Sơ' : 'Profile Views'}
             value="156"
             change="+28%"
-            changeText="từ tuần trước"
+            changeText={language === 'vi' ? 'từ tuần trước' : 'from last week'}
             icon={Eye}
             color="#10B981"
             positive
           />
           <StatsCard
-            title="Phỏng Vấn"
+            title={language === 'vi' ? 'Phỏng Vấn' : 'Interviews'}
             value="5"
             change="+2"
-            changeText="tuần này"
+            changeText={language === 'vi' ? 'tuần này' : 'this week'}
             icon={Calendar}
             color="#8B5CF6"
             positive
@@ -700,10 +727,10 @@ const CandidateDashboard = () => {
             <SectionHeader>
               <h2>
                 <Target />
-                Việc Làm Phù Hợp Với Bạn
+                {language === 'vi' ? 'Việc Làm Phù Hợp Với Bạn' : 'Recommended Jobs'}
               </h2>
               <Link to="/candidate/jobs">
-                Xem tất cả
+                {language === 'vi' ? 'Xem tất cả' : 'View all'}
                 <ArrowUpRight />
               </Link>
             </SectionHeader>
@@ -729,11 +756,11 @@ const CandidateDashboard = () => {
                   <JobDetails>
                     <span>
                       <MapPin />
-                      {job.location}
+                      {translateLocation(job.location)}
                     </span>
                     <span>
                       <DollarSign />
-                      {job.salary}
+                      {translateSalary(job.salary)}
                     </span>
                     <span>
                       <Clock />
@@ -759,7 +786,7 @@ const CandidateDashboard = () => {
             <SectionHeader>
               <h2>
                 <Bell />
-                Hoạt Động
+                {language === 'vi' ? 'Hoạt Động' : 'Activity'}
               </h2>
             </SectionHeader>
             
@@ -797,10 +824,10 @@ const CandidateDashboard = () => {
           <SectionHeader>
             <h2>
               <FileText />
-              Đơn Ứng Tuyển Gần Đây
+              {language === 'vi' ? 'Đơn Ứng Tuyển Gần Đây' : 'Recent Applications'}
             </h2>
             <Link to="/candidate/applications">
-              Xem tất cả
+              {language === 'vi' ? 'Xem tất cả' : 'View all'}
               <ArrowUpRight />
             </Link>
           </SectionHeader>
@@ -827,7 +854,7 @@ const CandidateDashboard = () => {
                 </span>
                 <span>
                   <Eye />
-                  Xem chi tiết
+                  {language === 'vi' ? 'Xem chi tiết' : 'View details'}
                 </span>
               </ApplicationMeta>
             </ApplicationCard>

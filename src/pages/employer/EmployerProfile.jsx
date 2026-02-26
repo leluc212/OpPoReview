@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -15,8 +15,10 @@ import {
   Camera,
   Save,
   Edit3,
-  Check
+  Check,
+  X
 } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 const fadeIn = keyframes`
   from {
@@ -70,7 +72,7 @@ const SidePanel = styled(motion.div)`
 `;
 
 const CompanyLogoCard = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border: 2px solid ${props => props.theme.colors.border};
   border-radius: 20px;
   padding: 32px;
@@ -111,7 +113,7 @@ const UploadButton = styled(motion.label)`
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -135,6 +137,34 @@ const UploadButton = styled(motion.label)`
   }
 `;
 
+const DeleteLogoButton = styled(motion.button)`
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #EF4444;
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+  
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
 const CompanyName = styled.h2`
   font-size: 20px;
   font-weight: 700;
@@ -149,7 +179,7 @@ const CompanyType = styled.p`
 `;
 
 const StatsCard = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border: 2px solid ${props => props.theme.colors.border};
   border-radius: 20px;
   padding: 24px;
@@ -199,7 +229,7 @@ const StatItem = styled.div`
 `;
 
 const MainPanel = styled(motion.div)`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border: 2px solid ${props => props.theme.colors.border};
   border-radius: 20px;
   padding: 32px;
@@ -293,19 +323,29 @@ const SuccessMessage = styled(motion.div)`
   }
 `;
 
+const getInitialFormData = (language) => ({
+  companyName: language === 'vi' ? 'Công Ty TNHH Một Mình Tui' : 'Solo Company LLC',
+  email: 'contact@abcxyz.com',
+  phone: '0379784509',
+  address: language === 'vi' ? 'Quận 1, TP.HCM' : 'District 1, HCMC',
+  website: 'https://abcxyz.com',
+  description: language === 'vi' ? 'Công ty chuyên về phát triển phần mềm và giải pháp công nghệ.' : 'A company specializing in software development and technology solutions.',
+  industry: language === 'vi' ? 'Công nghệ thông tin' : 'Information Technology',
+  size: language === 'vi' ? '50-100 nhân viên' : '50-100 employees',
+  foundedYear: '2015'
+});
+
 const EmployerProfile = () => {
+  const { language } = useLanguage();
   const [showSuccess, setShowSuccess] = useState(false);
-  const [formData, setFormData] = useState({
-    companyName: 'Công Ty TNHH Một Mình Tui',
-    email: 'contact@abcxyz.com',
-    phone: '0379784509',
-    address: 'Quận 1, TP.HCM',
-    website: 'https://abcxyz.com',
-    description: 'Công ty chuyên về phát triển phần mềm và giải pháp công nghệ.',
-    industry: 'Công nghệ thông tin',
-    size: '50-100 nhân viên',
-    foundedYear: '2015'
+  const [companyLogo, setCompanyLogo] = useState(() => {
+    return localStorage.getItem('companyLogo') || null;
   });
+  const [formData, setFormData] = useState(() => getInitialFormData(language));
+
+  useEffect(() => {
+    setFormData(getInitialFormData(language));
+  }, [language]);
 
   const handleChange = (e) => {
     setFormData({
@@ -323,17 +363,54 @@ const EmployerProfile = () => {
   const handleLogoUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      console.log('Logo uploaded:', file);
-      // Handle logo upload logic here
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 400;
+          const MAX_HEIGHT = 400;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+          setCompanyLogo(compressedBase64);
+          localStorage.setItem('companyLogo', compressedBase64);
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
     }
+  };
+
+  const handleDeleteLogo = () => {
+    setCompanyLogo(null);
+    localStorage.removeItem('companyLogo');
   };
 
   return (
     <DashboardLayout role="employer">
       <ProfileContainer>
         <PageHeader>
-          <h1>Hồ Sơ Công Ty</h1>
-          <p>Quản lý thông tin công ty</p>
+          <h1>{language === 'vi' ? 'Hồ Sơ Công Ty' : 'Company Profile'}</h1>
+          <p>{language === 'vi' ? 'Quản lý thông tin công ty' : 'Manage your company information'}</p>
         </PageHeader>
 
         <ProfileContent>
@@ -344,6 +421,20 @@ const EmployerProfile = () => {
           >
             <CompanyLogoCard>
               <LogoUploadArea>
+                {companyLogo ? (
+                  <img src={companyLogo} alt="Company Logo" />
+                ) : (
+                  <Building2 size={64} color="white" />
+                )}
+                {companyLogo && (
+                  <DeleteLogoButton
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleDeleteLogo}
+                  >
+                    <X />
+                  </DeleteLogoButton>
+                )}
                 <UploadButton
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
@@ -360,19 +451,19 @@ const EmployerProfile = () => {
               <StatGrid>
                 <StatItem>
                   <span className="value">24</span>
-                  <span className="label">Tin tuyển dụng</span>
+                  <span className="label">{language === 'vi' ? 'Tin tuyển dụng' : 'Job posts'}</span>
                 </StatItem>
                 <StatItem>
                   <span className="value">156</span>
-                  <span className="label">Ứng viên</span>
+                  <span className="label">{language === 'vi' ? 'Ứng viên' : 'Candidates'}</span>
                 </StatItem>
                 <StatItem>
                   <span className="value">89</span>
-                  <span className="label">Đã tuyển</span>
+                  <span className="label">{language === 'vi' ? 'Đã tuyển' : 'Hired'}</span>
                 </StatItem>
                 <StatItem>
                   <span className="value">4.5</span>
-                  <span className="label">Đánh giá</span>
+                  <span className="label">{language === 'vi' ? 'Đánh giá' : 'Rating'}</span>
                 </StatItem>
               </StatGrid>
             </StatsCard>
@@ -386,12 +477,12 @@ const EmployerProfile = () => {
             <form onSubmit={handleSubmit}>
               <SectionTitle>
                 <Building2 />
-                Thông Tin Công Ty
+                {language === 'vi' ? 'Thông Tin Công Ty' : 'Company Information'}
               </SectionTitle>
 
               <FormRow $columns="1fr">
                 <FormGroup>
-                  <Label htmlFor="companyName">Tên công ty</Label>
+                  <Label htmlFor="companyName">{language === 'vi' ? 'Tên công ty' : 'Company name'}</Label>
                   <InputWrapper>
                     <Building2 className="input-icon" />
                     <Input
@@ -399,7 +490,7 @@ const EmployerProfile = () => {
                       name="companyName"
                       value={formData.companyName}
                       onChange={handleChange}
-                      placeholder="Nhập tên công ty"
+                      placeholder={language === 'vi' ? 'Nhập tên công ty' : 'Enter company name'}
                     />
                   </InputWrapper>
                 </FormGroup>
@@ -422,7 +513,7 @@ const EmployerProfile = () => {
                 </FormGroup>
 
                 <FormGroup>
-                  <Label htmlFor="phone">Số điện thoại</Label>
+                  <Label htmlFor="phone">{language === 'vi' ? 'Số điện thoại' : 'Phone number'}</Label>
                   <InputWrapper>
                     <Phone className="input-icon" />
                     <Input
@@ -438,7 +529,7 @@ const EmployerProfile = () => {
 
               <FormRow $columns="1fr">
                 <FormGroup>
-                  <Label htmlFor="address">Địa chỉ</Label>
+                  <Label htmlFor="address">{language === 'vi' ? 'Địa chỉ' : 'Address'}</Label>
                   <InputWrapper>
                     <MapPin className="input-icon" />
                     <Input
@@ -446,7 +537,7 @@ const EmployerProfile = () => {
                       name="address"
                       value={formData.address}
                       onChange={handleChange}
-                      placeholder="Địa chỉ công ty"
+                      placeholder={language === 'vi' ? 'Địa chỉ công ty' : 'Company address'}
                     />
                   </InputWrapper>
                 </FormGroup>
@@ -470,7 +561,7 @@ const EmployerProfile = () => {
 
               <FormRow $columns="1fr 1fr">
                 <FormGroup>
-                  <Label htmlFor="industry">Lĩnh vực</Label>
+                  <Label htmlFor="industry">{language === 'vi' ? 'Lĩnh vực' : 'Industry'}</Label>
                   <InputWrapper>
                     <FileText className="input-icon" />
                     <Input
@@ -478,13 +569,13 @@ const EmployerProfile = () => {
                       name="industry"
                       value={formData.industry}
                       onChange={handleChange}
-                      placeholder="Lĩnh vực hoạt động"
+                      placeholder={language === 'vi' ? 'Lĩnh vực hoạt động' : 'Business industry'}
                     />
                   </InputWrapper>
                 </FormGroup>
 
                 <FormGroup>
-                  <Label htmlFor="size">Quy mô</Label>
+                  <Label htmlFor="size">{language === 'vi' ? 'Quy mô' : 'Company size'}</Label>
                   <InputWrapper>
                     <Users className="input-icon" />
                     <Input
@@ -492,7 +583,7 @@ const EmployerProfile = () => {
                       name="size"
                       value={formData.size}
                       onChange={handleChange}
-                      placeholder="Số lượng nhân viên"
+                      placeholder={language === 'vi' ? 'Số lượng nhân viên' : 'Number of employees'}
                     />
                   </InputWrapper>
                 </FormGroup>
@@ -500,13 +591,13 @@ const EmployerProfile = () => {
 
               <FormRow $columns="1fr">
                 <FormGroup>
-                  <Label htmlFor="description">Mô tả công ty</Label>
+                  <Label htmlFor="description">{language === 'vi' ? 'Mô tả công ty' : 'Company description'}</Label>
                   <TextArea
                     id="description"
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
-                    placeholder="Giới thiệu về công ty..."
+                    placeholder={language === 'vi' ? 'Giới thiệu về công ty...' : 'Introduce your company...'}
                     rows={5}
                   />
                 </FormGroup>
@@ -518,7 +609,7 @@ const EmployerProfile = () => {
                 whileTap={{ scale: 0.98 }}
               >
                 <Save />
-                Lưu Thay Đổi
+                {language === 'vi' ? 'Lưu Thay Đổi' : 'Save Changes'}
               </SaveButton>
 
               {showSuccess && (
@@ -528,7 +619,7 @@ const EmployerProfile = () => {
                   exit={{ opacity: 0, y: -10 }}
                 >
                   <Check />
-                  Cập nhật thông tin thành công!
+                  {language === 'vi' ? 'Cập nhật thông tin thành công!' : 'Profile updated successfully!'}
                 </SuccessMessage>
               )}
             </form>

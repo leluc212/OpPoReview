@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
+import { useLanguage } from '../../context/LanguageContext';
 import { 
   Wallet as WalletIcon, 
   TrendingUp, 
@@ -583,13 +584,14 @@ const EmptyState = styled.div`
 `;
 
 const Wallet = () => {
+  const { language } = useLanguage();
   const [balance] = useState(15750000);
   const [showBalance, setShowBalance] = useState(true);
   const [filterType, setFilterType] = useState('all');
 
   const stats = [
     {
-      label: 'Tổng Thu Nhập',
+      label: language === 'vi' ? 'Tổng Thu Nhập' : 'Total Income',
       value: '12,300,000đ',
       icon: TrendingUp,
       color: '#10B981',
@@ -597,7 +599,7 @@ const Wallet = () => {
       positive: true
     },
     {
-      label: 'Đã Rút',
+      label: language === 'vi' ? 'Đã Rút' : 'Withdrawn',
       value: '5,000,000đ',
       icon: TrendingDown,
       color: '#EF4444',
@@ -605,7 +607,7 @@ const Wallet = () => {
       positive: false
     },
     {
-      label: 'Giao Dịch',
+      label: language === 'vi' ? 'Giao Dịch' : 'Transactions',
       value: '23',
       icon: BarChart3,
       color: '#667eea',
@@ -613,7 +615,7 @@ const Wallet = () => {
       positive: true
     },
     {
-      label: 'Hóa Đơn',
+      label: language === 'vi' ? 'Hóa Đơn' : 'Invoices',
       value: '8',
       icon: FileText,
       color: '#F59E0B',
@@ -682,16 +684,16 @@ const Wallet = () => {
         <Header>
           <h1>
             <WalletIcon />
-            Ví Điện Tử
+            {language === 'vi' ? 'Ví Điện Tử' : 'E-Wallet'}
           </h1>
           <div className="header-actions">
             <Button $variant="secondary" $size="small">
               <Settings style={{ width: '18px', height: '18px' }} />
-              Cài Đặt
+              {language === 'vi' ? 'Cài Đặt' : 'Settings'}
             </Button>
             <Button $variant="primary" $size="small">
               <Download style={{ width: '18px', height: '18px' }} />
-              Xuất Báo Cáo
+              {language === 'vi' ? 'Xuất Báo Cáo' : 'Export Report'}
             </Button>
           </div>
         </Header>
@@ -703,7 +705,7 @@ const Wallet = () => {
         >
           <div className="balance-header">
             <div className="balance-info">
-              <div className="label">Số Dư Khả Dụng</div>
+              <div className="label">{language === 'vi' ? 'Số Dư Khả Dụng' : 'Available Balance'}</div>
               <div className="amount-wrapper">
                 <div className="amount">
                   {showBalance ? balance.toLocaleString('vi-VN') + 'đ' : '••••••••'}
@@ -728,21 +730,21 @@ const Wallet = () => {
               whileTap={{ scale: 0.95 }}
             >
               <ArrowUpRight />
-              Rút Tiền
+              {language === 'vi' ? 'Rút Tiền' : 'Withdraw'}
             </ActionButton>
             <ActionButton
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <CreditCard />
-              Liên Kết Ngân Hàng
+              {language === 'vi' ? 'Liên Kết Ngân Hàng' : 'Link Bank'}
             </ActionButton>
             <ActionButton
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <Plus />
-              Nạp Tiền
+              {language === 'vi' ? 'Nạp Tiền' : 'Deposit'}
             </ActionButton>
           </div>
         </BalanceCard>
@@ -786,12 +788,12 @@ const Wallet = () => {
               <div className="card-header">
                 <h2>
                   <Calendar />
-                  Lịch Sử Giao Dịch
+                  {language === 'vi' ? 'Lịch Sử Giao Dịch' : 'Transaction History'}
                 </h2>
                 <div className="header-action">
                   <Button $variant="secondary" $size="small">
                     <Download style={{ width: '16px', height: '16px' }} />
-                    Xuất
+                    {language === 'vi' ? 'Xuất' : 'Export'}
                   </Button>
                 </div>
               </div>
@@ -804,7 +806,7 @@ const Wallet = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    Tất Cả
+                    {language === 'vi' ? 'Tất Cả' : 'All'}
                   </FilterButton>
                   <FilterButton 
                     $active={filterType === 'income'}
@@ -812,7 +814,7 @@ const Wallet = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    Thu Nhập
+                    {language === 'vi' ? 'Thu Nhập' : 'Income'}
                   </FilterButton>
                   <FilterButton 
                     $active={filterType === 'expense'}
@@ -820,7 +822,7 @@ const Wallet = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    Chi Tiêu
+                    {language === 'vi' ? 'Chi Tiêu' : 'Expense'}
                   </FilterButton>
                 </div>
                 <Input 

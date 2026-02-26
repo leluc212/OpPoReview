@@ -1,8 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
-import { GlobalStyles, theme } from './styles/theme';
+import { GlobalStyles, theme, darkTheme } from './styles/theme';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
+import { ThemeProvider as CustomThemeProvider, useTheme } from './context/ThemeContext';
 
 // Auth Pages
 import LandingPage from './pages/auth/LandingPage';
@@ -262,13 +264,25 @@ function AppRoutes() {
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
+    <CustomThemeProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <ThemedApp />
+        </AuthProvider>
+      </LanguageProvider>
+    </CustomThemeProvider>
+  );
+}
+
+function ThemedApp() {
+  const { isDarkMode } = useTheme();
+  
+  return (
+    <ThemeProvider theme={isDarkMode ? darkTheme : theme}>
       <GlobalStyles />
-      <AuthProvider>
-        <Router>
-          <AppRoutes />
-        </Router>
-      </AuthProvider>
+      <Router>
+        <AppRoutes />
+      </Router>
     </ThemeProvider>
   );
 }

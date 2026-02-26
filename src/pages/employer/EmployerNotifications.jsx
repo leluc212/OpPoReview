@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
+import { useLanguage } from '../../context/LanguageContext';
 import { 
   Bell, 
   BellOff, 
@@ -80,7 +81,7 @@ const TabContainer = styled.div`
 
 const Tab = styled(motion.button)`
   padding: 10px 20px;
-  background: ${props => props.$active ? 'white' : 'transparent'};
+  background: ${props => props.$active ? props.theme.colors.bgLight : 'transparent'};
   border: none;
   font-size: 14px;
   font-weight: 700;
@@ -96,7 +97,7 @@ const Tab = styled(motion.button)`
   
   &:hover {
     color: ${props => props.theme.colors.primary};
-    background: ${props => props.$active ? 'white' : 'rgba(255, 255, 255, 0.5)'};
+    background: ${props => props.$active ? props.theme.colors.bgLight : props.theme.colors.border};
   }
 `;
 
@@ -118,7 +119,7 @@ const ActionButton = styled(motion.button)`
   border: none;
   background: ${props => props.$variant === 'primary' 
     ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
-    : 'white'};
+    : props.theme.colors.bgLight};
   color: ${props => props.$variant === 'primary' ? 'white' : props.theme.colors.text};
   border: 2px solid ${props => props.$variant === 'primary' ? 'transparent' : props.theme.colors.border};
   box-shadow: ${props => props.$variant === 'primary' 
@@ -144,7 +145,7 @@ const NotificationsGrid = styled.div`
 `;
 
 const NotificationCard = styled(motion.div)`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border: 2px solid ${props => props.$read ? props.theme.colors.border : props.theme.colors.primary + '40'};
   border-radius: 16px;
   padding: 20px 24px;
@@ -236,9 +237,11 @@ const NotificationTitle = styled.h3`
 
 const NotificationMessage = styled.p`
   font-size: 14px;
-  color: ${props => props.theme.colors.textLight};
+  color: ${props => props.theme.colors.text};
+  opacity: 0.85;
   line-height: 1.6;
   margin-bottom: 8px;
+  font-weight: 500;
 `;
 
 const NotificationMeta = styled.div`
@@ -252,7 +255,8 @@ const NotificationMeta = styled.div`
     align-items: center;
     gap: 6px;
     font-size: 13px;
-    color: ${props => props.theme.colors.textLight};
+    color: ${props => props.theme.colors.text};
+    opacity: 0.75;
     font-weight: 500;
     
     svg {
@@ -321,7 +325,7 @@ const UnreadBadge = styled.span`
 const EmptyState = styled(motion.div)`
   text-align: center;
   padding: 80px 20px;
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border-radius: 20px;
   border: 2px dashed ${props => props.theme.colors.border};
   
@@ -346,89 +350,102 @@ const EmptyState = styled(motion.div)`
   }
 `;
 
+const getNotifications = (language) => ([
+  {
+    id: 1,
+    type: 'application',
+    title: language === 'vi' ? 'Ứng viên mới ứng tuyển' : 'New candidate application',
+    message: language === 'vi' ? 'Nguyễn Văn A đã ứng tuyển vào vị trí Senior React Developer' : 'Nguyen Van A applied for Senior React Developer',
+    time: language === 'vi' ? '5 phút trước' : '5 minutes ago',
+    read: false,
+    icon: UserPlus
+  },
+  {
+    id: 2,
+    type: 'application',
+    title: language === 'vi' ? 'Ứng viên mới ứng tuyển' : 'New candidate application',
+    message: language === 'vi' ? 'Trần Thị B đã ứng tuyển vào vị trí Nhân viên Marketing' : 'Tran Thi B applied for Marketing Executive',
+    time: language === 'vi' ? '15 phút trước' : '15 minutes ago',
+    read: false,
+    icon: UserPlus
+  },
+  {
+    id: 3,
+    type: 'interview',
+    title: language === 'vi' ? 'Lịch phỏng vấn sắp tới' : 'Upcoming interview',
+    message: language === 'vi' ? 'Bạn có lịch phỏng vấn với Lê Văn C vào lúc 14:00 ngày 26/02/2026' : 'You have an interview with Le Van C at 14:00 on 26/02/2026',
+    time: language === 'vi' ? '1 giờ trước' : '1 hour ago',
+    read: false,
+    icon: Clock
+  },
+  {
+    id: 4,
+    type: 'rating',
+    title: language === 'vi' ? 'Đánh giá nhân viên mới' : 'Rate new employee',
+    message: language === 'vi' ? 'Phạm Thị D đã hoàn thành công việc. Vui lòng đánh giá nhân viên.' : 'Pham Thi D has completed the job. Please provide a rating.',
+    time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
+    read: false,
+    icon: Star
+  },
+  {
+    id: 5,
+    type: 'system',
+    title: language === 'vi' ? 'Tin tuyển dụng sắp hết hạn' : 'Job post expiring soon',
+    message: language === 'vi' ? 'Tin tuyển dụng "Thu ngân" sẽ hết hạn vào 27/02/2026' : 'The "Cashier" job post will expire on 27/02/2026',
+    time: language === 'vi' ? '3 giờ trước' : '3 hours ago',
+    read: true,
+    icon: AlertCircle
+  },
+  {
+    id: 6,
+    type: 'application',
+    title: language === 'vi' ? 'Hồ sơ đã được xem' : 'Profiles viewed',
+    message: language === 'vi' ? '12 ứng viên mới đã xem tin tuyển dụng của bạn' : '12 new candidates viewed your job post',
+    time: language === 'vi' ? '4 giờ trước' : '4 hours ago',
+    read: true,
+    icon: Eye
+  },
+  {
+    id: 7,
+    type: 'system',
+    title: language === 'vi' ? 'Cập nhật hệ thống' : 'System update',
+    message: language === 'vi' ? 'Hệ thống đã được cập nhật phiên bản mới với nhiều tính năng hữu ích' : 'The system has been updated with a new version and useful features',
+    time: language === 'vi' ? '1 ngày trước' : '1 day ago',
+    read: true,
+    icon: CheckCircle
+  },
+  {
+    id: 8,
+    type: 'interview',
+    title: language === 'vi' ? 'Phỏng vấn đã hoàn thành' : 'Interview completed',
+    message: language === 'vi' ? 'Phỏng vấn với Hoàng Văn E đã hoàn thành. Vui lòng cập nhật kết quả.' : 'Interview with Hoang Van E is completed. Please update the result.',
+    time: language === 'vi' ? '2 ngày trước' : '2 days ago',
+    read: true,
+    icon: CheckCircle
+  }
+]);
+
 const EmployerNotifications = () => {
+  const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState('all');
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: 'application',
-      title: 'Ứng viên mới ứng tuyển',
-      message: 'Nguyễn Văn A đã ứng tuyển vào vị trí Senior React Developer',
-      time: '5 phút trước',
-      read: false,
-      icon: UserPlus
-    },
-    {
-      id: 2,
-      type: 'application',
-      title: 'Ứng viên mới ứng tuyển',
-      message: 'Trần Thị B đã ứng tuyển vào vị trí Nhân viên Marketing',
-      time: '15 phút trước',
-      read: false,
-      icon: UserPlus
-    },
-    {
-      id: 3,
-      type: 'interview',
-      title: 'Lịch phỏng vấn sắp tới',
-      message: 'Bạn có lịch phỏng vấn với Lê Văn C vào lúc 14:00 ngày 26/02/2026',
-      time: '1 giờ trước',
-      read: false,
-      icon: Clock
-    },
-    {
-      id: 4,
-      type: 'rating',
-      title: 'Đánh giá nhân viên mới',
-      message: 'Phạm Thị D đã hoàn thành công việc. Vui lòng đánh giá nhân viên.',
-      time: '2 giờ trước',
-      read: false,
-      icon: Star
-    },
-    {
-      id: 5,
-      type: 'system',
-      title: 'Tin tuyển dụng sắp hết hạn',
-      message: 'Tin tuyển dụng "Thu ngân" sẽ hết hạn vào 27/02/2026',
-      time: '3 giờ trước',
-      read: true,
-      icon: AlertCircle
-    },
-    {
-      id: 6,
-      type: 'application',
-      title: 'Hồ sơ đã được xem',
-      message: '12 ứng viên mới đã xem tin tuyển dụng của bạn',
-      time: '4 giờ trước',
-      read: true,
-      icon: Eye
-    },
-    {
-      id: 7,
-      type: 'system',
-      title: 'Cập nhật hệ thống',
-      message: 'Hệ thống đã được cập nhật phiên bản mới với nhiều tính năng hữu ích',
-      time: '1 ngày trước',
-      read: true,
-      icon: CheckCircle
-    },
-    {
-      id: 8,
-      type: 'interview',
-      title: 'Phỏng vấn đã hoàn thành',
-      message: 'Phỏng vấn với Hoàng Văn E đã hoàn thành. Vui lòng cập nhật kết quả.',
-      time: '2 ngày trước',
-      read: true,
-      icon: CheckCircle
-    }
-  ]);
+  const [notifications, setNotifications] = useState(() => getNotifications(language));
+
+  useEffect(() => {
+    setNotifications(prev => {
+      const next = getNotifications(language);
+      return next.map(item => {
+        const previousItem = prev.find(p => p.id === item.id);
+        return previousItem ? { ...item, read: previousItem.read } : item;
+      });
+    });
+  }, [language]);
 
   const tabs = [
-    { id: 'all', label: 'Tất cả', count: notifications.length },
-    { id: 'unread', label: 'Chưa đọc', count: notifications.filter(n => !n.read).length },
-    { id: 'application', label: 'Ứng tuyển', count: notifications.filter(n => n.type === 'application').length },
-    { id: 'interview', label: 'Phỏng vấn', count: notifications.filter(n => n.type === 'interview').length },
-    { id: 'system', label: 'Hệ thống', count: notifications.filter(n => n.type === 'system').length }
+    { id: 'all', label: language === 'vi' ? 'Tất cả' : 'All', count: notifications.length },
+    { id: 'unread', label: language === 'vi' ? 'Chưa đọc' : 'Unread', count: notifications.filter(n => !n.read).length },
+    { id: 'application', label: language === 'vi' ? 'Ứng tuyển' : 'Applications', count: notifications.filter(n => n.type === 'application').length },
+    { id: 'interview', label: language === 'vi' ? 'Phỏng vấn' : 'Interviews', count: notifications.filter(n => n.type === 'interview').length },
+    { id: 'system', label: language === 'vi' ? 'Hệ thống' : 'System', count: notifications.filter(n => n.type === 'system').length }
   ];
 
   const filteredNotifications = notifications.filter(notification => {
@@ -457,8 +474,8 @@ const EmployerNotifications = () => {
     <DashboardLayout role="employer">
       <NotificationsContainer>
         <PageHeader>
-          <h1>Thông Báo</h1>
-          <p>Cập nhật tình trạng tuyển dụng</p>
+          <h1>{language === 'vi' ? 'Thông Báo' : 'Notifications'}</h1>
+          <p>{language === 'vi' ? 'Cập nhật tình trạng tuyển dụng' : 'Stay updated on hiring status'}</p>
         </PageHeader>
 
         <HeaderActions>
@@ -485,7 +502,7 @@ const EmployerNotifications = () => {
                 whileTap={{ scale: 0.98 }}
               >
                 <CheckCircle />
-                Đánh dấu đã đọc tất cả
+                {language === 'vi' ? 'Đánh dấu đã đọc tất cả' : 'Mark all as read'}
               </ActionButton>
             )}
           </ActionButtons>
@@ -514,7 +531,7 @@ const EmployerNotifications = () => {
                       <Clock />
                       {notification.time}
                     </div>
-                    {!notification.read && <UnreadBadge>MỚI</UnreadBadge>}
+                    {!notification.read && <UnreadBadge>{language === 'vi' ? 'MỚI' : 'NEW'}</UnreadBadge>}
                   </NotificationMeta>
                 </NotificationContent>
                 
@@ -524,7 +541,7 @@ const EmployerNotifications = () => {
                       onClick={() => handleMarkAsRead(notification.id)}
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.95 }}
-                      title="Đánh dấu đã đọc"
+                      title={language === 'vi' ? 'Đánh dấu đã đọc' : 'Mark as read'}
                     >
                       <Eye />
                     </IconButton>
@@ -534,7 +551,7 @@ const EmployerNotifications = () => {
                     onClick={() => handleDelete(notification.id)}
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
-                    title="Xóa"
+                    title={language === 'vi' ? 'Xóa' : 'Delete'}
                   >
                     <Trash2 />
                   </IconButton>
@@ -549,8 +566,8 @@ const EmployerNotifications = () => {
             transition={{ duration: 0.4 }}
           >
             <BellOff />
-            <h3>Không có thông báo</h3>
-            <p>Bạn chưa có thông báo nào trong danh mục này</p>
+            <h3>{language === 'vi' ? 'Không có thông báo' : 'No notifications'}</h3>
+            <p>{language === 'vi' ? 'Bạn chưa có thông báo nào trong danh mục này' : 'There are no notifications in this category yet'}</p>
           </EmptyState>
         )}
       </NotificationsContainer>

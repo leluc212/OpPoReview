@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import { TrendingUp, Users, Eye, DollarSign, Calendar, BarChart3, PieChart, Activity, Briefcase } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 const PageContainer = styled.div`
   animation: fadeIn 0.5s ease-in;
@@ -39,7 +40,7 @@ const FilterButton = styled.button`
   padding: 10px 20px;
   border-radius: ${props => props.theme.borderRadius.md};
   border: 1px solid ${props => props.$active ? props.theme.colors.primary : props.theme.colors.border};
-  background: ${props => props.$active ? props.theme.colors.primary : 'white'};
+  background: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.bgLight};
   color: ${props => props.$active ? 'white' : props.theme.colors.text};
   font-weight: 600;
   font-size: 14px;
@@ -60,7 +61,7 @@ const StatsGrid = styled.div`
 `;
 
 const StatCard = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border: 1px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.lg};
   padding: 24px;
@@ -133,7 +134,7 @@ const ChartsGrid = styled.div`
 `;
 
 const ChartCard = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border: 1px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.lg};
   padding: 28px;
@@ -178,7 +179,7 @@ const ChartPlaceholder = styled.div`
 `;
 
 const TableContainer = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border: 1px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.lg};
   overflow: hidden;
@@ -246,12 +247,13 @@ const Badge = styled.span`
 `;
 
 const Analytics = () => {
+  const { language } = useLanguage();
   const [timeFilter, setTimeFilter] = useState('month');
 
   const stats = [
     {
       icon: <Briefcase />,
-      label: 'Tổng tin tuyển dụng',
+      label: language === 'vi' ? 'Tổng tin tuyển dụng' : 'Total job posts',
       value: '24',
       trend: '+12%',
       positive: true,
@@ -259,7 +261,7 @@ const Analytics = () => {
     },
     {
       icon: <Users />,
-      label: 'Tổng ứng viên',
+      label: language === 'vi' ? 'Tổng ứng viên' : 'Total candidates',
       value: '1,234',
       trend: '+28%',
       positive: true,
@@ -267,7 +269,7 @@ const Analytics = () => {
     },
     {
       icon: <Eye />,
-      label: 'Lượt xem công việc',
+      label: language === 'vi' ? 'Lượt xem công việc' : 'Job views',
       value: '8,456',
       trend: '+15%',
       positive: true,
@@ -275,7 +277,7 @@ const Analytics = () => {
     },
     {
       icon: <DollarSign />,
-      label: 'Chi phí tuyển dụng',
+      label: language === 'vi' ? 'Chi phí tuyển dụng' : 'Hiring cost',
       value: '45M',
       trend: '-8%',
       positive: true,
@@ -284,33 +286,33 @@ const Analytics = () => {
   ];
 
   const topJobs = [
-    { title: 'Nhân viên kinh doanh', applications: 156, views: 1234, status: 'active' },
-    { title: 'Nhân viên kho', applications: 89, views: 876, status: 'active' },
-    { title: 'Lễ tân', applications: 67, views: 654, status: 'closed' },
-    { title: 'Nhân viên phục vụ', applications: 45, views: 432, status: 'active' },
-    { title: 'Nhân viên giao hàng', applications: 34, views: 321, status: 'draft' }
+    { title: language === 'vi' ? 'Nhân viên kinh doanh' : 'Sales Executive', applications: 156, views: 1234, status: 'active' },
+    { title: language === 'vi' ? 'Nhân viên kho' : 'Warehouse Staff', applications: 89, views: 876, status: 'active' },
+    { title: language === 'vi' ? 'Lễ tân' : 'Receptionist', applications: 67, views: 654, status: 'closed' },
+    { title: language === 'vi' ? 'Nhân viên phục vụ' : 'Service Staff', applications: 45, views: 432, status: 'active' },
+    { title: language === 'vi' ? 'Nhân viên giao hàng' : 'Delivery Staff', applications: 34, views: 321, status: 'draft' }
   ];
 
   return (
     <DashboardLayout role="employer">
       <PageContainer>
         <PageHeader>
-          <h1>Phân tích & Thống kê</h1>
-          <p>Theo dõi hiệu suất tuyển dụng của bạn</p>
+          <h1>{language === 'vi' ? 'Phân tích & Thống kê' : 'Analytics & Insights'}</h1>
+          <p>{language === 'vi' ? 'Theo dõi hiệu suất tuyển dụng của bạn' : 'Track your hiring performance'}</p>
         </PageHeader>
 
         <FilterBar>
           <FilterButton $active={timeFilter === 'week'} onClick={() => setTimeFilter('week')}>
-            7 ngày qua
+            {language === 'vi' ? '7 ngày qua' : 'Last 7 days'}
           </FilterButton>
           <FilterButton $active={timeFilter === 'month'} onClick={() => setTimeFilter('month')}>
-            30 ngày qua
+            {language === 'vi' ? '30 ngày qua' : 'Last 30 days'}
           </FilterButton>
           <FilterButton $active={timeFilter === 'quarter'} onClick={() => setTimeFilter('quarter')}>
-            3 tháng qua
+            {language === 'vi' ? '3 tháng qua' : 'Last 3 months'}
           </FilterButton>
           <FilterButton $active={timeFilter === 'year'} onClick={() => setTimeFilter('year')}>
-            Năm nay
+            {language === 'vi' ? 'Năm nay' : 'This year'}
           </FilterButton>
         </FilterBar>
 
@@ -335,38 +337,38 @@ const Analytics = () => {
         <ChartsGrid>
           <ChartCard>
             <ChartHeader>
-              <h3>Xu hướng ứng tuyển</h3>
+              <h3>{language === 'vi' ? 'Xu hướng ứng tuyển' : 'Application Trend'}</h3>
               <Calendar size={20} />
             </ChartHeader>
             <ChartPlaceholder>
               <BarChart3 />
-              <p>Biểu đồ xu hướng ứng tuyển theo thời gian</p>
+              <p>{language === 'vi' ? 'Biểu đồ xu hướng ứng tuyển theo thời gian' : 'Application trend chart over time'}</p>
             </ChartPlaceholder>
           </ChartCard>
 
           <ChartCard>
             <ChartHeader>
-              <h3>Phân bố ứng viên</h3>
+              <h3>{language === 'vi' ? 'Phân bố ứng viên' : 'Candidate Distribution'}</h3>
               <PieChart size={20} />
             </ChartHeader>
             <ChartPlaceholder>
               <PieChart />
-              <p>Biểu đồ phân bố ứng viên theo vị trí</p>
+              <p>{language === 'vi' ? 'Biểu đồ phân bố ứng viên theo vị trí' : 'Candidate distribution by role'}</p>
             </ChartPlaceholder>
           </ChartCard>
         </ChartsGrid>
 
         <TableContainer>
           <TableHeader>
-            <h3>Top công việc hot nhất</h3>
+            <h3>{language === 'vi' ? 'Top công việc hot nhất' : 'Top Performing Jobs'}</h3>
           </TableHeader>
           <Table>
             <thead>
               <tr>
-                <th>Tiêu đề công việc</th>
-                <th>Ứng viên</th>
-                <th>Lượt xem</th>
-                <th>Trạng thái</th>
+                <th>{language === 'vi' ? 'Tiêu đề công việc' : 'Job title'}</th>
+                <th>{language === 'vi' ? 'Ứng viên' : 'Candidates'}</th>
+                <th>{language === 'vi' ? 'Lượt xem' : 'Views'}</th>
+                <th>{language === 'vi' ? 'Trạng thái' : 'Status'}</th>
               </tr>
             </thead>
             <tbody>
@@ -377,9 +379,9 @@ const Analytics = () => {
                   <td>{job.views}</td>
                   <td>
                     <Badge $status={job.status}>
-                      {job.status === 'active' && 'Đang tuyển'}
-                      {job.status === 'closed' && 'Đã đóng'}
-                      {job.status === 'draft' && 'Nháp'}
+                      {job.status === 'active' && (language === 'vi' ? 'Đang tuyển' : 'Active')}
+                      {job.status === 'closed' && (language === 'vi' ? 'Đã đóng' : 'Closed')}
+                      {job.status === 'draft' && (language === 'vi' ? 'Nháp' : 'Draft')}
                     </Badge>
                   </td>
                 </tr>
