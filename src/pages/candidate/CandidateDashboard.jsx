@@ -623,8 +623,9 @@ const CandidateDashboard = () => {
             <p>{language === 'vi' ? 'Bạn có 12 nhà tuyển dụng đã xem hồ sơ và 5 công việc mới phù hợp' : 'You have 12 employer views and 5 new matching jobs'}</p>
             <QuickActions>
               <ActionButton
-                as={Link}
-                to="/candidate/jobs"
+                as={motion.a}
+                href="/candidate/jobs"
+                onClick={(e) => { e.preventDefault(); navigate('/candidate/jobs'); }}
                 $variant="primary"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
@@ -633,8 +634,9 @@ const CandidateDashboard = () => {
                 {language === 'vi' ? 'Tìm Việc Làm' : 'Find Jobs'}
               </ActionButton>
               <ActionButton
-                as={Link}
-                to="/candidate/profile"
+                as={motion.a}
+                href="/candidate/profile"
+                onClick={(e) => { e.preventDefault(); navigate('/candidate/profile'); }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -664,8 +666,9 @@ const CandidateDashboard = () => {
               <ProgressBar $progress={profileCompletion} />
             </div>
             <ActionButton
-              as={Link}
-              to="/candidate/profile"
+              as={motion.a}
+              href="/candidate/profile"
+              onClick={(e) => { e.preventDefault(); navigate('/candidate/profile'); }}
               $variant="primary"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
