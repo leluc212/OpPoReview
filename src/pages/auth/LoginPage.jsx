@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Button, Input, FormGroup, Label, ErrorText } from '../../components/FormElements';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { Mail, Lock, Eye, EyeOff, CheckCircle, ArrowRight } from 'lucide-react';
 
 const LoginContainer = styled.div`
@@ -342,6 +343,7 @@ const SubmitButton = styled(Button)`
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { t } = useLanguage();
   const [role, setRole] = useState('candidate');
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -499,7 +501,7 @@ const LoginPage = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              Ứng Viên
+              {t.login.roleCandidate}
             </RoleButton>
             <RoleButton
               type="button"
@@ -508,7 +510,7 @@ const LoginPage = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              Nhà Tuyển Dụng
+              {t.login.roleEmployer}
             </RoleButton>
             <RoleButton
               type="button"
@@ -517,7 +519,7 @@ const LoginPage = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              Quản Trị
+              {t.login.roleAdmin}
             </RoleButton>
           </RoleSelector>
 

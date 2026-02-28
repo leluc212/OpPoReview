@@ -400,7 +400,7 @@ const AdminNotifications = () => {
       icon: DollarSign,
       color: '#10b981',
       title: language === 'vi' ? 'Thanh toán mới' : 'New payment',
-      message: language === 'vi' ? 'Công ty XYZ đã thanh toán gói Premium trị giá 5.000.000đ' : 'XYZ company paid for the Premium package worth 5,000,000 VND',
+      message: language === 'vi' ? 'Công ty XYZ đã thanh toán gói Premium trị giá 5.000.000 VND' : 'XYZ company paid for the Premium package worth 5,000,000 VND',
       time: language === 'vi' ? '1 ngày trước' : '1 day ago',
       unread: false,
       actionRequired: false

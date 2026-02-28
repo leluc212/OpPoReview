@@ -60,6 +60,13 @@ const UserManagement = () => {
     { name: 'Hồng Trà Ngô Gia', email: 'contact@Hồng Trà Ngô Gia.com', role: 'employer', status: 'pending', joined: '2024-02-01' },
   ]);
 
+  const getRoleTranslation = (role) => {
+    if (role === 'candidate') return t.login.roleCandidate;
+    if (role === 'employer') return t.login.roleEmployer;
+    if (role === 'admin') return t.login.roleAdmin;
+    return role;
+  };
+
   const filterOptions = [
     { value: 'candidate', label: t.sidebar.dashboard },
     { value: 'employer', label: t.nav.forEmployers },
@@ -122,7 +129,7 @@ const UserManagement = () => {
               <tr key={index}>
                 <td style={{ fontWeight: 600 }}>{user.name}</td>
                 <td>{user.email}</td>
-                <td style={{ textTransform: 'capitalize' }}>{user.role}</td>
+                <td>{getRoleTranslation(user.role)}</td>
                 <td><StatusBadge status={user.status} /></td>
                 <td style={{ color: '#64748B' }}>{user.joined}</td>
                 <td>

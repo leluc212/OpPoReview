@@ -443,10 +443,9 @@ const EmployerWallet = () => {
   ];
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat(language === 'vi' ? 'vi-VN' : 'en-US', {
-      style: 'currency',
-      currency: 'VND'
-    }).format(amount);
+    // Always use vi-VN locale for VND currency with VND text instead of symbol
+    const formatted = new Intl.NumberFormat('vi-VN').format(amount);
+    return formatted + ' VND';
   };
 
   const handleDownloadReceipt = (receiptId) => {

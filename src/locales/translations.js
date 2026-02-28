@@ -416,6 +416,28 @@ export const translations = {
       saveChanges: 'Lưu Thay Đổi',
     },
 
+    // Auth - Register
+    register: {
+      joinTitle: 'Tham Gia Ốp Pờ',
+      joinSubtitle: 'Chọn loại tài khoản để bắt đầu',
+      candidateTitle: 'Tôi là Ứng Viên',
+      candidateDescription: 'Đang tìm kiếm cơ hội nghề nghiệp hấp dẫn',
+      candidateFeature1: 'Duyệt hàng nghìn công việc',
+      candidateFeature2: 'Ứng tuyển chỉ với một cú nhấp chuột',
+      candidateFeature3: 'Theo dõi hồ sơ ứng tuyển',
+      candidateFeature4: 'Nhận gợi ý công việc phù hợp',
+      candidateButton: 'Tạo Tài Khoản Ứng Viên',
+      employerTitle: 'Tôi là Nhà Tuyển Dụng',
+      employerDescription: 'Sẵn sàng tuyển dụng ứng viên cho công ty',
+      employerFeature1: 'Đăng tin tuyển dụng không giới hạn',
+      employerFeature2: 'Truy cập cơ sở dữ liệu ứng viên',
+      employerFeature3: 'Quản lý hồ sơ dễ dàng',
+      employerFeature4: 'Đáp ứng nhu cầu tuyển dụng nhanh chóng',
+      employerButton: 'Tạo Tài Khoản Nhà Tuyển Dụng',
+      haveAccount: 'Đã có tài khoản?',
+      signIn: 'Đăng nhập',
+    },
+
     // Auth - Login
     login: {
       welcomeTitle: 'Chào mừng bạn quay lại Ốp Pờ',
@@ -425,7 +447,7 @@ export const translations = {
       createAccount: 'Tạo tài khoản',
       roleCandidate: 'Ứng Viên',
       roleEmployer: 'Nhà Tuyển Dụng',
-      roleAdmin: 'Quản Trị',
+      roleAdmin: 'Admin',
       email: 'Email',
       password: 'Mật khẩu',
       forgotPassword: 'Quên mật khẩu?',
@@ -849,6 +871,28 @@ export const translations = {
       typeMessage: 'Type a message...',
       send: 'Send',
       noMessages: 'No messages yet',
+    },
+
+    // Auth - Register
+    register: {
+      joinTitle: 'Join Ốp Pờ',
+      joinSubtitle: 'Choose your account type to get started',
+      candidateTitle: "I'm a Candidate",
+      candidateDescription: 'Looking for exciting career opportunities',
+      candidateFeature1: 'Browse thousands of jobs',
+      candidateFeature2: 'Apply with one click',
+      candidateFeature3: 'Track your applications',
+      candidateFeature4: 'Get personalized job recommendations',
+      candidateButton: 'Create Candidate Account',
+      employerTitle: "I'm an Employer",
+      employerDescription: 'Ready to hire talent for your company',
+      employerFeature1: 'Unlimited job postings',
+      employerFeature2: 'Access candidate database',
+      employerFeature3: 'Manage applications easily',
+      employerFeature4: 'Fill positions quickly',
+      employerButton: 'Create Employer Account',
+      haveAccount: 'Already have an account?',
+      signIn: 'Sign in',
     },
 
     // Auth - Login

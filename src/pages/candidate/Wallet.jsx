@@ -592,7 +592,7 @@ const Wallet = () => {
   const stats = [
     {
       label: language === 'vi' ? 'Tổng Thu Nhập' : 'Total Income',
-      value: '12,300,000đ',
+      value: '12,300,000 VND',
       icon: TrendingUp,
       color: '#10B981',
       change: '+15.3%',
@@ -600,7 +600,7 @@ const Wallet = () => {
     },
     {
       label: language === 'vi' ? 'Đã Rút' : 'Withdrawn',
-      value: '5,000,000đ',
+      value: '5,000,000 VND',
       icon: TrendingDown,
       color: '#EF4444',
       change: '-8.2%',
@@ -668,10 +668,10 @@ const Wallet = () => {
   ];
 
   const receipts = [
-    { id: 1, title: language === 'vi' ? 'Hóa đơn #INV-2026-001' : 'Invoice #INV-2026-001', date: '13/02/2026', amount: '2,500,000đ' },
-    { id: 2, title: language === 'vi' ? 'Hóa đơn #INV-2026-002' : 'Invoice #INV-2026-002', date: '10/02/2026', amount: '3,000,000đ' },
-    { id: 3, title: language === 'vi' ? 'Hóa đơn #INV-2026-003' : 'Invoice #INV-2026-003', date: '05/02/2026', amount: '1,800,000đ' },
-    { id: 4, title: language === 'vi' ? 'Hóa đơn #INV-2026-004' : 'Invoice #INV-2026-004', date: '01/02/2026', amount: '2,200,000đ' }
+    { id: 1, title: language === 'vi' ? 'Hóa đơn #INV-2026-001' : 'Invoice #INV-2026-001', date: '13/02/2026', amount: '2,500,000 VND' },
+    { id: 2, title: language === 'vi' ? 'Hóa đơn #INV-2026-002' : 'Invoice #INV-2026-002', date: '10/02/2026', amount: '3,000,000 VND' },
+    { id: 3, title: language === 'vi' ? 'Hóa đơn #INV-2026-003' : 'Invoice #INV-2026-003', date: '05/02/2026', amount: '1,800,000 VND' },
+    { id: 4, title: language === 'vi' ? 'Hóa đơn #INV-2026-004' : 'Invoice #INV-2026-004', date: '01/02/2026', amount: '2,200,000 VND' }
   ];
 
   const filteredTransactions = filterType === 'all' 
@@ -708,7 +708,7 @@ const Wallet = () => {
               <div className="label">{language === 'vi' ? 'Số Dư Khả Dụng' : 'Available Balance'}</div>
               <div className="amount-wrapper">
                 <div className="amount">
-                  {showBalance ? balance.toLocaleString('vi-VN') + 'đ' : '••••••••'}
+                  {showBalance ? balance.toLocaleString('vi-VN') + ' VND' : '••••••••'}
                 </div>
                 <button 
                   className="toggle-balance"
@@ -855,7 +855,7 @@ const Wallet = () => {
                     </div>
                     <div className="transaction-amount">
                       <div className="amount">
-                        {transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString('vi-VN')}đ
+                        {transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString('vi-VN')} VND
                       </div>
                       <div className="date">
                         <Calendar />

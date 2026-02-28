@@ -309,7 +309,9 @@ const AdminWallet = () => {
   const [filterStatus, setFilterStatus] = useState('all');
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    // Format with VND instead of ₫ symbol
+    const formatted = new Intl.NumberFormat('vi-VN').format(amount);
+    return formatted + ' VND';
   };
 
   const transactions = [
@@ -406,7 +408,7 @@ const AdminWallet = () => {
         <Grid>
           <BalanceCard>
             <BalanceLabel>{language === 'vi' ? 'Tổng Số Dư Nền Tảng' : 'Total Platform Balance'}</BalanceLabel>
-            <BalanceAmount>2,458,750,000đ</BalanceAmount>
+            <BalanceAmount>2,458,750,000 VND</BalanceAmount>
             <ActionButtons>
               <ActionButton>
                 <Download size={18} />
@@ -426,15 +428,15 @@ const AdminWallet = () => {
           <StatsGrid>
             <StatCard $color="#10b981">
               <StatLabel>{language === 'vi' ? 'Tổng Thu Nhập (Tháng này)' : 'Total Income (This Month)'}</StatLabel>
-              <StatValue>325,500,000đ</StatValue>
+              <StatValue>325,500,000 VND</StatValue>
             </StatCard>
             <StatCard $color="#ef4444">
               <StatLabel>{language === 'vi' ? 'Tổng Chi Phí (Tháng này)' : 'Total Expenses (This Month)'}</StatLabel>
-              <StatValue>187,250,000đ</StatValue>
+              <StatValue>187,250,000 VND</StatValue>
             </StatCard>
             <StatCard $color="#6366f1">
               <StatLabel>{language === 'vi' ? 'Lợi Nhuận Ròng' : 'Net Profit'}</StatLabel>
-              <StatValue>138,250,000đ</StatValue>
+              <StatValue>138,250,000 VND</StatValue>
             </StatCard>
           </StatsGrid>
         </Grid>

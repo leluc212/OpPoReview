@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Bell, Search, LogOut, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const NavbarContainer = styled.nav`
   height: 80px;
@@ -175,7 +176,15 @@ const UserInfo = styled.div`
 
 const Navbar = ({ showSearch = true }) => {
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
+  
+  const getRoleTranslation = (role) => {
+    if (role === 'candidate') return t.login.roleCandidate;
+    if (role === 'employer') return t.login.roleEmployer;
+    if (role === 'admin') return t.login.roleAdmin;
+    return role;
+  };
   
   const handleLogout = () => {
     logout();
@@ -215,7 +224,7 @@ const Navbar = ({ showSearch = true }) => {
           </Avatar>
           <UserInfo>
             <span>{user?.name || 'User'}</span>
-            <span>{user?.role || 'Role'}</span>
+            <span>{getRoleTranslation(user?.role) || 'Role'}</span>
           </UserInfo>
         </UserMenu>
         

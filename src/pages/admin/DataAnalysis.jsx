@@ -374,7 +374,7 @@ const DataAnalysis = () => {
           <tbody>
             <tr>
               <Td>{language === 'vi' ? 'Tuyển Dụng IT Hàng Đầu' : 'Top IT Hiring'}</Td>
-              <Td>125,000,000đ</Td>
+              <Td>125,000,000 VND</Td>
               <Td>850,000</Td>
               <Td>55,250</Td>
               <Td>6.5%</Td>
@@ -382,7 +382,7 @@ const DataAnalysis = () => {
             </tr>
             <tr>
               <Td>{language === 'vi' ? 'Việc Làm Bán Thời Gian' : 'Part-time Jobs'}</Td>
-              <Td>78,500,000đ</Td>
+              <Td>78,500,000 VND</Td>
               <Td>520,000</Td>
               <Td>31,200</Td>
               <Td>6.0%</Td>
@@ -390,7 +390,7 @@ const DataAnalysis = () => {
             </tr>
             <tr>
               <Td>{language === 'vi' ? 'Cơ Hội Nghề Nghiệp 2024' : 'Career Opportunities 2024'}</Td>
-              <Td>95,000,000đ</Td>
+              <Td>95,000,000 VND</Td>
               <Td>680,000</Td>
               <Td>47,600</Td>
               <Td>7.0%</Td>
@@ -398,7 +398,7 @@ const DataAnalysis = () => {
             </tr>
             <tr>
               <Td>{language === 'vi' ? 'Tuyển Dụng Fresher' : 'Fresher Hiring'}</Td>
-              <Td>62,000,000đ</Td>
+              <Td>62,000,000 VND</Td>
               <Td>420,000</Td>
               <Td>23,520</Td>
               <Td>5.6%</Td>
@@ -406,7 +406,7 @@ const DataAnalysis = () => {
             </tr>
             <tr>
               <Td>{language === 'vi' ? 'Nhân Viên Kinh Doanh' : 'Sales Staff'}</Td>
-              <Td>127,000,000đ</Td>
+              <Td>127,000,000 VND</Td>
               <Td>930,000</Td>
               <Td>65,100</Td>
               <Td>7.0%</Td>

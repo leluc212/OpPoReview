@@ -162,34 +162,46 @@ const PlanName = styled.h3`
 
 const PriceContainer = styled.div`
   margin: 24px 0;
-  padding: 24px;
+  padding: 20px 12px;
   background: linear-gradient(135deg, ${props => props.theme.colors.bgDark} 0%, ${props => props.theme.colors.bgLight} 100%);
   border-radius: 16px;
   border: 2px solid ${props => props.theme.colors.border};
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 const Price = styled.div`
-  font-size: 52px;
+  font-size: 38px;
   font-weight: 900;
   background: linear-gradient(135deg, ${props => props.$color || props.theme.colors.primary} 0%, ${props => props.$color ? `${props.$color}CC` : props.theme.colors.primary + 'CC'} 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  line-height: 1;
-  letter-spacing: -2px;
+  line-height: 1.2;
+  letter-spacing: -1px;
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  width: 100%;
   
   .amount {
-    display: inline-block;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
   
   .currency {
-    font-size: 22px;
-    font-weight: 700;
-    margin-left: 4px;
-    opacity: 0.8;
+    font-size: 28px;
+    font-weight: 800;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 `;
 
