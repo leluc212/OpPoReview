@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Users, Building2, ArrowRight } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 const SelectionContainer = styled.div`
   min-height: 100vh;
@@ -280,6 +281,7 @@ const LoginPrompt = styled.div`
 
 const RegisterRoleSelection = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   return (
     <SelectionContainer>
@@ -301,8 +303,8 @@ const RegisterRoleSelection = () => {
         </Logo>
         
         <Header>
-          <h1>Tham Gia Ốp Pờ</h1>
-          <p>Chọn loại tài khoản để bắt đầu</p>
+          <h1>{t.register.joinTitle}</h1>
+          <p>{t.register.joinSubtitle}</p>
         </Header>
 
         <RoleCards>
@@ -313,18 +315,18 @@ const RegisterRoleSelection = () => {
             <RoleIcon>
               <Users />
             </RoleIcon>
-            <RoleTitle>Tôi là Ứng Viên</RoleTitle>
+            <RoleTitle>{t.register.candidateTitle}</RoleTitle>
             <RoleDescription>
-              Đang tìm kiếm cơ hội nghề nghiệp hấp dẫn
+              {t.register.candidateDescription}
             </RoleDescription>
             <RoleFeatures>
-              <li>Duyệt hàng nghìn công việc</li>
-              <li>Ứng tuyển chỉ với một cú nhấp chuột</li>
-              <li>Theo dõi hồ sơ ứng tuyển</li>
-              <li>Nhận gợi ý công việc phù hợp</li>
+              <li>{t.register.candidateFeature1}</li>
+              <li>{t.register.candidateFeature2}</li>
+              <li>{t.register.candidateFeature3}</li>
+              <li>{t.register.candidateFeature4}</li>
             </RoleFeatures>
             <SelectButton>
-              Tạo Tài Khoản Ứng Viên
+              {t.register.candidateButton}
               <ArrowRight />
             </SelectButton>
           </RoleCard>
@@ -336,25 +338,25 @@ const RegisterRoleSelection = () => {
             <RoleIcon>
               <Building2 />
             </RoleIcon>
-            <RoleTitle>Tôi là Nhà Tuyển Dụng</RoleTitle>
+            <RoleTitle>{t.register.employerTitle}</RoleTitle>
             <RoleDescription>
-              Sẵn sàng tuyển dụng ứng viên cho công ty
+              {t.register.employerDescription}
             </RoleDescription>
             <RoleFeatures>
-              <li>Đăng tin tuyển dụng không giới hạn</li>
-              <li>Truy cập cơ sở dữ liệu ứng viên</li>
-              <li>Quản lý hồ sơ dễ dàng</li>
-              <li>Đáp ứng nhu cầu tuyển dụng nhanh chóng</li>
+              <li>{t.register.employerFeature1}</li>
+              <li>{t.register.employerFeature2}</li>
+              <li>{t.register.employerFeature3}</li>
+              <li>{t.register.employerFeature4}</li>
             </RoleFeatures>
             <SelectButton>
-              Tạo Tài Khoản Nhà Tuyển Dụng
+              {t.register.employerButton}
               <ArrowRight />
             </SelectButton>
           </RoleCard>
         </RoleCards>
 
         <LoginPrompt>
-          Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
+          {t.register.haveAccount} <Link to="/login">{t.register.signIn}</Link>
         </LoginPrompt>
       </ContentWrapper>
     </SelectionContainer>

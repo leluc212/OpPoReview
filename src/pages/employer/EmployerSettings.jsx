@@ -10,7 +10,6 @@ import {
   Lock, 
   Bell, 
   FileText, 
-  Palette, 
   Globe, 
   Trash2, 
   Shield,
@@ -311,24 +310,6 @@ const SettingRow = styled.div`
   }
 `;
 
-const Select = styled.select`
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid ${props => props.theme.colors.border};
-  border-radius: ${props => props.theme.borderRadius.md};
-  font-size: 15px;
-  color: ${props => props.theme.colors.text};
-  background: ${props => props.theme.colors.bgDark};
-  transition: all ${props => props.theme.transitions.fast};
-  cursor: pointer;
-  
-  &:focus {
-    outline: none;
-    border-color: ${props => props.theme.colors.primary};
-    box-shadow: 0 0 0 3px ${props => props.theme.colors.primary}14;
-  }
-`;
-
 const DangerZone = styled.div`
   border: 2px solid #EF4444;
   border-radius: ${props => props.theme.borderRadius.lg};
@@ -363,7 +344,6 @@ const EmployerSettings = () => {
     messages: true,
     system: false
   });
-  const [selectedTheme, setSelectedTheme] = useState('default');
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -443,29 +423,6 @@ const EmployerSettings = () => {
                 <span></span>
               </ToggleSwitch>
             </SettingRow>
-          </SettingCard>
-
-          {/* Themes */}
-          <SettingCard>
-            <SettingHeader>
-              <div className="icon">
-                <Palette />
-              </div>
-              <div className="info">
-                <h3>{language === 'vi' ? 'Chủ đề' : 'Theme'}</h3>
-                <p>{language === 'vi' ? 'Chọn màu sắc chủ đạo' : 'Choose primary color scheme'}</p>
-              </div>
-            </SettingHeader>
-
-            <FormGroup>
-              <Label>{language === 'vi' ? 'Chủ đề màu' : 'Color Theme'}</Label>
-              <Select value={selectedTheme} onChange={(e) => setSelectedTheme(e.target.value)}>
-                <option value="default">{language === 'vi' ? 'Mặc định (Xanh dương)' : 'Default (Blue)'}</option>
-                <option value="green">{language === 'vi' ? 'Xanh lá' : 'Green'}</option>
-                <option value="purple">{language === 'vi' ? 'Tím' : 'Purple'}</option>
-                <option value="orange">{language === 'vi' ? 'Cam' : 'Orange'}</option>
-              </Select>
-            </FormGroup>
           </SettingCard>
 
           {/* Security */}

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { Bell, MessageSquare, Search, LogOut, User } from 'lucide-react';
+import { Bell, Search, LogOut, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -62,13 +62,6 @@ const SearchBar = styled.div`
     width: 20px;
     height: 20px;
     color: ${props => props.theme.colors.textLight};
-    cursor: pointer;
-    transition: all ${props => props.theme.transitions.normal};
-    
-    &:hover {
-      color: ${props => props.theme.colors.primary};
-      transform: translateY(-50%) scale(1.1);
-    }
   }
 `;
 
@@ -138,13 +131,6 @@ const Avatar = styled.div`
   text-transform: uppercase;
   box-shadow: ${props => props.theme.shadows.sm};
   transition: all ${props => props.theme.transitions.normal};
-  overflow: hidden;
-  
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
 `;
 
 const UserMenu = styled.div`
@@ -190,42 +176,28 @@ const UserInfo = styled.div`
 
 const Navbar = ({ showSearch = true }) => {
   const { user, logout } = useAuth();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const navigate = useNavigate();
-  const [searchValue, setSearchValue] = useState('');
-  const [profileImage, setProfileImage] = useState(null);
   
-  useEffect(() => {
-    const loadImage = () => {
-      if (user?.role === 'candidate') {
-        setProfileImage(localStorage.getItem('profileImage'));
-      } else if (user?.role === 'employer') {
-        setProfileImage(localStorage.getItem('companyLogo'));
-      } else if (user?.role === 'admin') {
-        setProfileImage(localStorage.getItem('adminProfileImage'));
-      }
-    };
-    
-    loadImage();
-    const interval = setInterval(loadImage, 1000);
-    
-    return () => clearInterval(interval);
-  }, [user?.role]);
+  const getRoleTranslation = (role) => {
+    if (role === 'candidate') return t.login.roleCandidate;
+    if (role === 'employer') return t.login.roleEmployer;
+    if (role === 'admin') return t.login.roleAdmin;
+    return role;
+  };
   
   const handleLogout = () => {
     logout();
     navigate('/');
   };
   
-  const handleSearch = () => {
-    if (searchValue.trim()) {
-      navigate('/candidate/jobs', { state: { searchKeyword: searchValue } });
-    }
-  };
-  
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleSearch();
+  const handleNotificationClick = () => {
+    if (user?.role === 'candidate') {
+      navigate('/candidate/notifications');
+    } else if (user?.role === 'employer') {
+      navigate('/employer/notifications');
+    } else if (user?.role === 'admin') {
+      navigate('/admin/notifications');
     }
   };
   
@@ -234,40 +206,25 @@ const Navbar = ({ showSearch = true }) => {
       <NavLeft>
         {showSearch && (
           <SearchBar>
-            <Search onClick={handleSearch} />
-            <input 
-              type="text" 
-              placeholder={language === 'vi' ? 'Tìm việc, công ty...' : 'Search jobs, companies...'}
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-            />
+            <Search />
+            <input type="text" placeholder="Tìm việc, công ty..." />
           </SearchBar>
         )}
       </NavLeft>
       
       <NavRight>
-        <IconButton>
+        <IconButton onClick={handleNotificationClick}>
           <Bell />
           <Badge>3</Badge>
         </IconButton>
         
-        <IconButton>
-          <MessageSquare />
-          <Badge>5</Badge>
-        </IconButton>
-        
         <UserMenu>
           <Avatar>
-            {profileImage ? (
-              <img src={profileImage} alt="Profile" />
-            ) : (
-              user?.name?.charAt(0).toUpperCase() || 'U'
-            )}
+            {user?.name?.charAt(0).toUpperCase() || 'U'}
           </Avatar>
           <UserInfo>
             <span>{user?.name || 'User'}</span>
-            <span>{user?.role || 'Role'}</span>
+            <span>{getRoleTranslation(user?.role) || 'Role'}</span>
           </UserInfo>
         </UserMenu>
         

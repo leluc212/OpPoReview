@@ -56,6 +56,27 @@ const FormGrid = styled.div`
   gap: 24px;
 `;
 
+const SalaryInputWrapper = styled.div`
+  position: relative;
+  flex: 1;
+  
+  input {
+    padding-right: 50px;
+  }
+  
+  &::after {
+    content: 'VND';
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: ${props => props.theme.colors.textLight};
+    font-weight: 600;
+    font-size: 14px;
+    pointer-events: none;
+  }
+`;
+
 const PostJob = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
@@ -139,8 +160,12 @@ const PostJob = () => {
               <FormGroup>
                 <Label>{language === 'vi' ? 'Mức lương (Không bắt buộc)' : 'Salary Range (Optional)'}</Label>
                 <div style={{ display: 'flex', gap: '12px' }}>
-                  <Input name="salaryMin" placeholder={language === 'vi' ? 'Tối thiểu' : 'Minimum'} value={formData.salaryMin} onChange={handleChange} />
-                  <Input name="salaryMax" placeholder={language === 'vi' ? 'Tối đa' : 'Maximum'} value={formData.salaryMax} onChange={handleChange} />
+                  <SalaryInputWrapper>
+                    <Input name="salaryMin" placeholder={language === 'vi' ? 'Tối thiểu' : 'Minimum'} value={formData.salaryMin} onChange={handleChange} />
+                  </SalaryInputWrapper>
+                  <SalaryInputWrapper>
+                    <Input name="salaryMax" placeholder={language === 'vi' ? 'Tối đa' : 'Maximum'} value={formData.salaryMax} onChange={handleChange} />
+                  </SalaryInputWrapper>
                 </div>
               </FormGroup>
             </FormGrid>

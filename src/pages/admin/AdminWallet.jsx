@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
+import { useLanguage } from '../../context/LanguageContext';
 import { 
   Wallet, 
   TrendingUp, 
@@ -303,38 +304,41 @@ const StatusBadge = styled.span`
 `;
 
 const AdminWallet = () => {
+  const { language } = useLanguage();
   const [filterType, setFilterType] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    // Format with VND instead of ₫ symbol
+    const formatted = new Intl.NumberFormat('vi-VN').format(amount);
+    return formatted + ' VND';
   };
 
   const transactions = [
     {
       id: 1,
       type: 'income',
-      title: 'Thanh toán gói Premium - Công ty ABC',
+      title: language === 'vi' ? 'Thanh toán gói Premium - Công ty ABC' : 'Premium package payment - ABC Company',
       amount: 5000000,
       date: '15/02/2024',
       time: '14:30',
       status: 'completed',
-      method: 'Chuyển khoản'
+      method: language === 'vi' ? 'Chuyển khoản' : 'Bank transfer'
     },
     {
       id: 2,
       type: 'expense',
-      title: 'Hoàn tiền cho ứng viên Nguyễn Văn A',
+      title: language === 'vi' ? 'Hoàn tiền cho ứng viên Nguyễn Văn A' : 'Refund to candidate Nguyen Van A',
       amount: 500000,
       date: '14/02/2024',
       time: '10:15',
       status: 'completed',
-      method: 'Ví điện tử'
+      method: language === 'vi' ? 'Ví điện tử' : 'E-wallet'
     },
     {
       id: 3,
       type: 'income',
-      title: 'Phí dịch vụ quảng cáo - Công ty XYZ',
+      title: language === 'vi' ? 'Phí dịch vụ quảng cáo - Công ty XYZ' : 'Advertising service fee - XYZ Company',
       amount: 2500000,
       date: '14/02/2024',
       time: '09:00',
@@ -344,47 +348,47 @@ const AdminWallet = () => {
     {
       id: 4,
       type: 'income',
-      title: 'Thanh toán gói Basic - Công ty DEF',
+      title: language === 'vi' ? 'Thanh toán gói Basic - Công ty DEF' : 'Basic package payment - DEF Company',
       amount: 1500000,
       date: '13/02/2024',
       time: '16:45',
       status: 'pending',
-      method: 'Chuyển khoản'
+      method: language === 'vi' ? 'Chuyển khoản' : 'Bank transfer'
     },
     {
       id: 5,
       type: 'expense',
-      title: 'Chi phí vận hành hệ thống',
+      title: language === 'vi' ? 'Chi phí vận hành hệ thống' : 'System operation cost',
       amount: 10000000,
       date: '13/02/2024',
       time: '08:00',
       status: 'completed',
-      method: 'Chuyển khoản'
+      method: language === 'vi' ? 'Chuyển khoản' : 'Bank transfer'
     },
     {
       id: 6,
       type: 'income',
-      title: 'Phí đăng tin - Nhiều nhà tuyển dụng',
+      title: language === 'vi' ? 'Phí đăng tin - Nhiều nhà tuyển dụng' : 'Job posting fee - Multiple employers',
       amount: 8500000,
       date: '12/02/2024',
       time: '15:20',
       status: 'completed',
-      method: 'Ví điện tử'
+      method: language === 'vi' ? 'Ví điện tử' : 'E-wallet'
     },
     {
       id: 7,
       type: 'expense',
-      title: 'Hoàn tiền do lỗi hệ thống',
+      title: language === 'vi' ? 'Hoàn tiền do lỗi hệ thống' : 'Refund due to system error',
       amount: 1200000,
       date: '12/02/2024',
       time: '11:30',
       status: 'failed',
-      method: 'Chuyển khoản'
+      method: language === 'vi' ? 'Chuyển khoản' : 'Bank transfer'
     },
     {
       id: 8,
       type: 'income',
-      title: 'Gia hạn gói Premium - Công ty GHI',
+      title: language === 'vi' ? 'Gia hạn gói Premium - Công ty GHI' : 'Premium package renewal - GHI Company',
       amount: 5000000,
       date: '11/02/2024',
       time: '13:00',
@@ -397,68 +401,68 @@ const AdminWallet = () => {
     <DashboardLayout role="admin">
       <PageContainer>
         <PageHeader>
-          <Title>Ví Điện Tử Nền Tảng</Title>
-          <Subtitle>Quản lý tài chính và giao dịch của toàn bộ nền tảng</Subtitle>
+          <Title>{language === 'vi' ? 'Ví Điện Tử Nền Tảng' : 'Platform E-Wallet'}</Title>
+          <Subtitle>{language === 'vi' ? 'Quản lý tài chính và giao dịch của toàn bộ nền tảng' : 'Manage finances and transactions for the entire platform'}</Subtitle>
         </PageHeader>
 
         <Grid>
           <BalanceCard>
-            <BalanceLabel>Tổng Số Dư Nền Tảng</BalanceLabel>
-            <BalanceAmount>2,458,750,000đ</BalanceAmount>
+            <BalanceLabel>{language === 'vi' ? 'Tổng Số Dư Nền Tảng' : 'Total Platform Balance'}</BalanceLabel>
+            <BalanceAmount>2,458,750,000 VND</BalanceAmount>
             <ActionButtons>
               <ActionButton>
                 <Download size={18} />
-                Xuất Báo Cáo
+                {language === 'vi' ? 'Xuất Báo Cáo' : 'Export Report'}
               </ActionButton>
               <ActionButton>
                 <CreditCard size={18} />
-                Cài Đặt Thanh Toán
+                {language === 'vi' ? 'Cài Đặt Thanh Toán' : 'Payment Settings'}
               </ActionButton>
               <ActionButton>
                 <DollarSign size={18} />
-                Rút Tiền
+                {language === 'vi' ? 'Rút Tiền' : 'Withdraw'}
               </ActionButton>
             </ActionButtons>
           </BalanceCard>
 
           <StatsGrid>
             <StatCard $color="#10b981">
-              <StatLabel>Tổng Thu Nhập (Tháng này)</StatLabel>
-              <StatValue>325,500,000đ</StatValue>
+              <StatLabel>{language === 'vi' ? 'Tổng Thu Nhập (Tháng này)' : 'Total Income (This Month)'}</StatLabel>
+              <StatValue>325,500,000 VND</StatValue>
             </StatCard>
             <StatCard $color="#ef4444">
-              <StatLabel>Tổng Chi Phí (Tháng này)</StatLabel>
-              <StatValue>187,250,000đ</StatValue>
+              <StatLabel>{language === 'vi' ? 'Tổng Chi Phí (Tháng này)' : 'Total Expenses (This Month)'}</StatLabel>
+              <StatValue>187,250,000 VND</StatValue>
             </StatCard>
             <StatCard $color="#6366f1">
-              <StatLabel>Lợi Nhuận Ròng</StatLabel>
-              <StatValue>138,250,000đ</StatValue>
+              <StatLabel>{language === 'vi' ? 'Lợi Nhuận Ròng' : 'Net Profit'}</StatLabel>
+              <StatValue>138,250,000 VND</StatValue>
             </StatCard>
           </StatsGrid>
         </Grid>
 
         <TransactionSection>
           <SectionHeader>
-            <SectionTitle>Lịch Sử Giao Dịch</SectionTitle>
+            <SectionTitle>{language === 'vi' ? 'Lịch Sử Giao Dịch' : 'Transaction History'}</SectionTitle>
             <FilterBar>
               <SearchBox>
                 <SearchIcon size={18} />
-                <SearchInput placeholder="Tìm kiếm giao dịch..." />
+                <SearchInput placeholder={language === 'vi' ? 'Tìm kiếm giao dịch...' : 'Search transactions...'} />
               </SearchBox>
               <Select value={filterType} onChange={(e) => setFilterType(e.target.value)}>
-                <option value="all">Tất cả loại</option>
-                <option value="income">Thu nhập</option>
-                <option value="expense">Chi phí</option>
+                <option value="all">{language === 'vi' ? 'Tất cả loại' : 'All types'}</option>
+                <option value="income">{language === 'vi' ? 'Thu nhập' : 'Income'}</option>
+                <option value="expense">{language === 'vi' ? 'Chi phí' : 'Expenses'}</option>
               </Select>
               <Select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-                <option value="all">Tất cả trạng thái</option>
-                <option value="completed">Hoàn thành</option>
-                <option value="pending">Đang xử lý</option>
-                <option value="failed">Thất bại</option>
+                <option value="all">{language === 'vi' ? 'Tất cả trạng thái' : 'All statuses'}</option>
+                <option value="completed">{language === 'vi' ? 'Hoàn thành' : 'Completed'}</option>
+                <option value="pending">{language === 'vi' ? 'Đang xử lý' : 'Pending'}</option>
+                <option value="failed">{language === 'vi' ? 'Thất bại' : 'Failed'}</option>
               </Select>
               <Button>
                 <Download size={18} />
-                Xuất Excel
+                {language === 'vi' ? 'Xuất Excel' : 'Export Excel'}
               </Button>
             </FilterBar>
           </SectionHeader>
@@ -491,9 +495,9 @@ const AdminWallet = () => {
                   </TransactionAmount>
                   <TransactionStatus>
                     <StatusBadge $status={transaction.status}>
-                      {transaction.status === 'completed' && 'Hoàn thành'}
-                      {transaction.status === 'pending' && 'Đang xử lý'}
-                      {transaction.status === 'failed' && 'Thất bại'}
+                      {transaction.status === 'completed' && (language === 'vi' ? 'Hoàn thành' : 'Completed')}
+                      {transaction.status === 'pending' && (language === 'vi' ? 'Đang xử lý' : 'Pending')}
+                      {transaction.status === 'failed' && (language === 'vi' ? 'Thất bại' : 'Failed')}
                     </StatusBadge>
                   </TransactionStatus>
                 </div>

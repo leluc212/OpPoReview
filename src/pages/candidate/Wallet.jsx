@@ -592,7 +592,7 @@ const Wallet = () => {
   const stats = [
     {
       label: language === 'vi' ? 'Tổng Thu Nhập' : 'Total Income',
-      value: '12,300,000đ',
+      value: '12,300,000 VND',
       icon: TrendingUp,
       color: '#10B981',
       change: '+15.3%',
@@ -600,7 +600,7 @@ const Wallet = () => {
     },
     {
       label: language === 'vi' ? 'Đã Rút' : 'Withdrawn',
-      value: '5,000,000đ',
+      value: '5,000,000 VND',
       icon: TrendingDown,
       color: '#EF4444',
       change: '-8.2%',
@@ -628,50 +628,50 @@ const Wallet = () => {
     {
       id: 1,
       type: 'income',
-      title: 'Nhận tiền từ FPT Software',
-      description: 'Thanh toán cho công việc #12345',
+      title: language === 'vi' ? 'Nhận tiền từ FPT Software' : 'Payment from FPT Software',
+      description: language === 'vi' ? 'Thanh toán cho công việc #12345' : 'Payment for job #12345',
       amount: 2500000,
       date: '2026-02-13'
     },
     {
       id: 2,
       type: 'income',
-      title: 'Nhận tiền từ Viettel',
-      description: 'Thanh toán cho công việc #12344',
+      title: language === 'vi' ? 'Nhận tiền từ Viettel' : 'Payment from Viettel',
+      description: language === 'vi' ? 'Thanh toán cho công việc #12344' : 'Payment for job #12344',
       amount: 3000000,
       date: '2026-02-10'
     },
     {
       id: 3,
       type: 'expense',
-      title: 'Rút tiền về ngân hàng',
-      description: 'Chuyển về tài khoản VCB',
+      title: language === 'vi' ? 'Rút tiền về ngân hàng' : 'Withdraw to bank',
+      description: language === 'vi' ? 'Chuyển về tài khoản VCB' : 'Transfer to VCB account',
       amount: -5000000,
       date: '2026-02-08'
     },
     {
       id: 4,
       type: 'income',
-      title: 'Nhận tiền từ VinGroup',
-      description: 'Thanh toán cho công việc #12343',
+      title: language === 'vi' ? 'Nhận tiền từ VinGroup' : 'Payment from VinGroup',
+      description: language === 'vi' ? 'Thanh toán cho công việc #12343' : 'Payment for job #12343',
       amount: 1800000,
       date: '2026-02-05'
     },
     {
       id: 5,
       type: 'income',
-      title: 'Nhận tiền từ Bamboo Airways',
-      description: 'Thanh toán cho công việc #12342',
+      title: language === 'vi' ? 'Nhận tiền từ Bamboo Airways' : 'Payment from Bamboo Airways',
+      description: language === 'vi' ? 'Thanh toán cho công việc #12342' : 'Payment for job #12342',
       amount: 2200000,
       date: '2026-02-01'
     }
   ];
 
   const receipts = [
-    { id: 1, title: 'Hóa đơn #INV-2026-001', date: '13/02/2026', amount: '2,500,000đ' },
-    { id: 2, title: 'Hóa đơn #INV-2026-002', date: '10/02/2026', amount: '3,000,000đ' },
-    { id: 3, title: 'Hóa đơn #INV-2026-003', date: '05/02/2026', amount: '1,800,000đ' },
-    { id: 4, title: 'Hóa đơn #INV-2026-004', date: '01/02/2026', amount: '2,200,000đ' }
+    { id: 1, title: language === 'vi' ? 'Hóa đơn #INV-2026-001' : 'Invoice #INV-2026-001', date: '13/02/2026', amount: '2,500,000 VND' },
+    { id: 2, title: language === 'vi' ? 'Hóa đơn #INV-2026-002' : 'Invoice #INV-2026-002', date: '10/02/2026', amount: '3,000,000 VND' },
+    { id: 3, title: language === 'vi' ? 'Hóa đơn #INV-2026-003' : 'Invoice #INV-2026-003', date: '05/02/2026', amount: '1,800,000 VND' },
+    { id: 4, title: language === 'vi' ? 'Hóa đơn #INV-2026-004' : 'Invoice #INV-2026-004', date: '01/02/2026', amount: '2,200,000 VND' }
   ];
 
   const filteredTransactions = filterType === 'all' 
@@ -708,7 +708,7 @@ const Wallet = () => {
               <div className="label">{language === 'vi' ? 'Số Dư Khả Dụng' : 'Available Balance'}</div>
               <div className="amount-wrapper">
                 <div className="amount">
-                  {showBalance ? balance.toLocaleString('vi-VN') + 'đ' : '••••••••'}
+                  {showBalance ? balance.toLocaleString('vi-VN') + ' VND' : '••••••••'}
                 </div>
                 <button 
                   className="toggle-balance"
@@ -719,7 +719,7 @@ const Wallet = () => {
               </div>
               <div className="last-updated">
                 <Clock />
-                Cập nhật lần cuối: Hôm nay, 14:30
+                {language === 'vi' ? 'Cập nhật lần cuối: Hôm nay, 14:30' : 'Last updated: Today, 14:30'}
               </div>
             </div>
             <WalletIcon className="wallet-icon" />
@@ -855,7 +855,7 @@ const Wallet = () => {
                     </div>
                     <div className="transaction-amount">
                       <div className="amount">
-                        {transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString('vi-VN')}đ
+                        {transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString('vi-VN')} VND
                       </div>
                       <div className="date">
                         <Calendar />
@@ -877,7 +877,7 @@ const Wallet = () => {
               <div className="card-header">
                 <h2>
                   <Receipt />
-                  Hóa Đơn Điện Tử
+                  {language === 'vi' ? 'Hóa Đơn Điện Tử' : 'Electronic Invoices'}
                 </h2>
               </div>
               
@@ -908,7 +908,7 @@ const Wallet = () => {
                 $fullWidth 
                 style={{ marginTop: '16px' }}
               >
-                Xem Tất Cả Hóa Đơn
+                {language === 'vi' ? 'Xem Tất Cả Hóa Đơn' : 'View All Invoices'}
               </Button>
             </Card>
           </div>
