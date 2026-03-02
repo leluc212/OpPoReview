@@ -10,7 +10,7 @@ import { Mail, Lock, Eye, EyeOff, CheckCircle, ArrowRight } from 'lucide-react';
 const LoginContainer = styled.div`
   min-height: 100vh;
   display: flex;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #002e9d;
   position: relative;
   overflow: hidden;
   color-scheme: light;
@@ -139,13 +139,13 @@ const FormHeader = styled.div`
     margin-bottom: 16px;
     
     img {
-      height: 32px;
+      height: 52px;
     }
     
     .logo-text {
       font-size: 26px;
       font-weight: 800;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #002e9d;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -247,7 +247,7 @@ const RoleButton = styled(motion.button)`
   border-radius: 7px;
   border: none;
   background: ${props => props.$selected ? 'white' : 'transparent'};
-  color: ${props => props.$selected ? '#667eea' : '#475569'};
+  color: ${props => props.$selected ? '#002e9d' : '#475569'};
   font-weight: ${props => props.$selected ? '700' : '600'};
   font-size: 13px;
   transition: all 0.3s;
@@ -304,7 +304,7 @@ const InputWrapper = styled.div`
 `;
 
 const ForgotPassword = styled(Link)`
-  color: #667eea;
+  color: #002e9d;
   font-size: 13px;
   font-weight: 600;
   display: inline-block;
@@ -322,7 +322,7 @@ const SubmitButton = styled(Button)`
   gap: 8px;
   margin-top: 16px;
   margin-bottom: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #002e9d;
   
   &:hover {
     transform: translateY(-2px);

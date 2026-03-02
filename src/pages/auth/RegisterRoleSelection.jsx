@@ -10,7 +10,7 @@ const SelectionContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #002e9d;
   padding: 40px;
   position: relative;
   overflow: hidden;
@@ -101,19 +101,31 @@ const Logo = styled(Link)`
   gap: 12px;
   font-size: 28px;
   font-weight: 800;
-  color: white;
+  color: #002e9d;
   text-decoration: none;
   letter-spacing: -0.5px;
   margin-bottom: 48px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  padding: 16px 32px;
+  border-radius: 16px;
+  border: 2px solid rgba(55, 69, 219, 0.55);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.3) inset;
   
   &:hover {
-    opacity: 0.9;
     transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.35);
+    box-shadow: 
+      0 12px 48px rgba(0, 0, 0, 0.2),
+      0 0 0 1px rgba(255, 255, 255, 0.2) inset;
   }
   
   img {
-    height: 40px;
+    height: 52px;
   }
 `;
 
@@ -170,7 +182,7 @@ const RoleIcon = styled.div`
   width: 80px;
   height: 80px;
   margin: 0 auto 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #002e9d;
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -226,7 +238,7 @@ const RoleFeatures = styled.ul`
 const SelectButton = styled.button`
   width: 100%;
   padding: 16px 32px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #002e9d;
   color: white;
   border: none;
   border-radius: 12px;
@@ -273,7 +285,7 @@ const LoginPrompt = styled.div`
     border-radius: 6px;
     
     &:hover {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.35);
       text-decoration: none;
     }
   }

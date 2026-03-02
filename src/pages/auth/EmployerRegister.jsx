@@ -8,39 +8,42 @@ import { Mail, Lock, Eye, EyeOff, CheckCircle, ArrowRight, Building2 } from 'luc
 const RegisterContainer = styled.div`
   min-height: 100vh;
   display: flex;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #002e9d;
   position: relative;
   overflow: hidden;
-
-  @keyframes float {
-    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-    25% { transform: translate(20px, -20px) rotate(90deg); }
-    50% { transform: translate(-20px, 20px) rotate(180deg); }
-    75% { transform: translate(20px, 20px) rotate(270deg); }
-  }
-
+  color-scheme: light;
+  
   &::before {
     content: '';
     position: absolute;
+    top: -50%;
+    right: -20%;
     width: 800px;
     height: 800px;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
     border-radius: 50%;
-    top: -400px;
-    right: -200px;
-    animation: float 20s infinite ease-in-out;
+    animation: float 20s ease-in-out infinite;
   }
-
+  
   &::after {
     content: '';
     position: absolute;
+    bottom: -30%;
+    left: -20%;
     width: 600px;
     height: 600px;
-    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
     border-radius: 50%;
-    bottom: -300px;
-    left: -150px;
-    animation: float 15s infinite ease-in-out reverse;
+    animation: float 15s ease-in-out infinite reverse;
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    50% {
+      transform: translate(30px, -30px) rotate(5deg);
+    }
   }
 `;
 
@@ -49,7 +52,7 @@ const RegisterLeft = styled(motion.div)`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 80px;
+  padding: 40px;
   color: white;
   position: relative;
   z-index: 1;
@@ -64,7 +67,7 @@ const RegisterRight = styled(motion.div)`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 80px;
+  padding: 30px 20px;
   position: relative;
   z-index: 1;
 
@@ -75,20 +78,20 @@ const RegisterRight = styled(motion.div)`
 `;
 
 const HeroContent = styled.div`
-  max-width: 550px;
+  max-width: 500px;
 
   h1 {
-    font-size: 52px;
+    font-size: 38px;
     font-weight: 800;
     line-height: 1.2;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
     letter-spacing: -1px;
   }
 
   p {
-    font-size: 18px;
-    line-height: 1.7;
-    margin-bottom: 40px;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 20px;
     opacity: 0.95;
   }
 
@@ -117,31 +120,32 @@ const HeroContent = styled.div`
 const RegisterForm = styled.div`
   background: white;
   border-radius: 24px;
-  padding: 48px;
+  padding: 40px;
   width: 100%;
-  max-width: 480px;
+  height: 700px;
+  max-width: 450px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 `;
 
 const FormHeader = styled.div`
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 15px;
 
   .logo-section {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 24px;
-    gap: 12px;
+    margin-bottom: 10px;
+    gap: 10px;
 
     img {
-      height: 40px;
+      height: 52px;
     }
 
     .logo-text {
       font-size: 32px;
       font-weight: 800;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #002e9d;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
