@@ -1,53 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe } from 'lucide-react';
+import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package } from 'lucide-react';
 import { Button } from '../../components/FormElements';
 
 const LandingContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, #E0F2FE 0%, #DBEAFE 15%, #FCE7F3 35%, #FDF2F8 50%, #F0F9FF 65%, #E0F2FE 85%, #FECDD3 100%);
-  background-size: 400% 400%;
-  animation: gradientFlow 20s ease infinite;
+  background: #e3e7e9;
   position: relative;
   overflow-x: hidden;
   
-  @keyframes gradientFlow {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-  
   &::before {
-    content: '';
+    content: 'OP PO';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 100vh;
-    background: radial-gradient(circle at 30% 20%, rgba(147, 197, 253, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 70% 60%, rgba(251, 207, 232, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 50% 80%, rgba(186, 230, 253, 0.2) 0%, transparent 50%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 450px;
+    font-weight: 900;
+    line-height: 1;
+    color: transparent;
+    background: linear-gradient(
+      135deg,
+      #1a62ff 0%,
+      #1a62ff 20%,
+      #002e9d 20%,
+      #002e9d 40%,
+      #1a62ff 40%,
+      #1a62ff 60%,
+      #002e9d 60%,
+      #002e9d 80%,
+      #1a62ff 80%,
+      #1a62ff 100%
+    );
+    background-size: 300px 300px;
+    -webkit-background-clip: text;
+    background-clip: text;
+    opacity: 0.08;
     pointer-events: none;
+    z-index: 0;
+    white-space: nowrap;
   }
 `;
 
 const Header = styled(motion.header)`
-  padding: 20px 80px;
+  padding: 4px 90px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid rgba(219, 234, 254, 0.6);
+  border-bottom: 1px solid rgba(146, 217, 248, 0.6);
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 24px rgba(147, 197, 253, 0.15), 0 2px 12px rgba(251, 207, 232, 0.1);
+  box-shadow: 0 4px 24px #a4ddf8
 `;
 
 const Logo = styled(Link)`
@@ -56,20 +67,32 @@ const Logo = styled(Link)`
   gap: 12px;
   font-size: 28px;
   font-weight: 900;
-  color: #000000;
+  color: #002e9d;
   text-decoration: none;
   letter-spacing: -0.5px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:hover {
     transform: scale(1.05);
-    color: #0EA5E9;
+    color: #002e9d;
   }
+`;
+
+const LeftSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 40px;
+`;
+
+const RightSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
 `;
 
 const NavLinks = styled.div`
   display: flex;
-  gap: 32px;
+  gap: 8px;
   align-items: center;
   
   a {
@@ -83,6 +106,206 @@ const NavLinks = styled.div`
       transform: translateY(-2px);
     }
   }
+`;
+
+const DropdownContainer = styled.div`
+  position: relative;
+  display: inline-block;
+`;
+
+const DropdownButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #000000;
+  font-weight: 700;
+  font-size: 15px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    color: #0EA5E9;
+    background: rgba(14, 165, 233, 0.05);
+  }
+  
+  svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.3s;
+    transform: ${props => props.$isOpen ? 'rotate(180deg)' : 'rotate(0deg)'};
+  }
+`;
+
+const DropdownMenu = styled(motion.div)`
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(147, 197, 253, 0.25), 0 4px 16px rgba(0, 0, 0, 0.1);
+  padding: 8px;
+  min-width: 220px;
+  z-index: 1000;
+  border: 1px solid rgba(147, 197, 253, 0.3);
+`;
+
+const LargeDropdownMenu = styled(motion.div)`
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 12px 48px rgba(147, 197, 253, 0.3), 0 4px 16px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  min-width: 800px;
+  z-index: 1000;
+  border: 1px solid rgba(147, 197, 253, 0.3);
+  display: flex;
+  gap: 20px;
+`;
+
+const DropdownSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`;
+
+const DropdownSectionTitle = styled.h3`
+  font-size: 12px;
+  font-weight: 700;
+  color: #94A3B8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  padding: 0 8px;
+`;
+
+const GreenSectionTitle = styled.h3`
+  font-size: 13px;
+  font-weight: 700;
+  color: #002e9d;
+  margin-bottom: 6px;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+`;
+
+const CVTemplateItem = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  color: #475569;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    background: rgba(14, 165, 233, 0.06);
+    color: #0EA5E9;
+    transform: translateX(2px);
+  }
+  
+  svg {
+    width: 16px;
+    height: 16px;
+    color: #64748B;
+  }
+  
+  &:hover svg {
+    color: #0EA5E9;
+  }
+`;
+
+const DropdownLeftColumn = styled.div`
+  flex-shrink: 0;
+  width: 200px;
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+  padding-right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+const DropdownRightColumn = styled.div`
+  flex: 1;
+`;
+
+const JobCategoriesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+`;
+
+const DropdownItem = styled(Link)`
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 6px 15px;
+  color: #0F172A;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 6px;
+  
+  &:hover {
+    background: rgba(14, 165, 233, 0.08);
+    color: #0EA5E9;
+    transform: translateX(4px);
+  }
+  
+  svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: #64748B;
+  }
+  
+  &:hover svg {
+    color: #0EA5E9;
+  }
+`;
+
+const JobCategoryItem = styled(Link)`
+  display: block;
+  padding: 7px 12px;
+  color: #475569;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    background: rgba(14, 165, 233, 0.06);
+    color: #0EA5E9;
+    transform: translateX(2px);
+  }
+`;
+
+const ProBadge = styled.span`
+  background: linear-gradient(135deg, #FFA500, #FF8C00);
+  color: white;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 `;
 
 const LanguageToggle = styled.button`
@@ -118,25 +341,54 @@ const LanguageToggle = styled.button`
 const HeroSection = styled.section`
   max-width: 1280px;
   margin: 0 auto;
-  padding: 160px 80px 120px;
+  padding: 100px 50px 100px;
   text-align: center;
   position: relative;
-  min-height: 90vh;
+  min-height: 95vh;
   display: flex;
-  align-items: center;
+  align-items: top;
   justify-content: center;
 `;
 
 const AnimatedBackground = styled.div`
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  height: 100%;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(147, 197, 253, 0.15) 0%, rgba(251, 207, 232, 0.2) 50%, rgba(186, 230, 253, 0.15) 100%);
+  background: #002e9d;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      to bottom,
+      rgba(26, 98, 255, 0) 0%,
+      rgba(26, 98, 255, 0.3) 50%,
+      rgba(26, 98, 255, 0) 100%
+    );
+    animation: moveDown 8s ease-in-out infinite;
+  }
+  
+  @keyframes moveDown {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(200%);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
   
   @keyframes gradientShift {
     0%, 100% {
@@ -289,9 +541,19 @@ const HeroTitle = styled(motion.h1)`
   font-weight: 900;
   line-height: 1.2;
   margin-bottom: 24px;
-  color: #000000;
+  color: #ffffff;
+  font-family: 'Bricolage Grotesque', sans-serif;
   letter-spacing: -2px;
   white-space: nowrap;
+  
+  span {
+    animation: blink 1s infinite;
+  }
+  
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
   
   @media (max-width: 1200px) {
     font-size: 48px;
@@ -306,14 +568,24 @@ const HeroTitle = styled(motion.h1)`
 
 const HeroSubtitle = styled(motion.p)`
   font-size: 20px;
-  color: #000000;
+  color: #ffffff;
+  font-family: 'Bricolage Grotesque', sans-serif;
   margin-bottom: 48px;
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
   line-height: 1.6;
   font-weight: 600;
-  opacity: 0.8;
+  opacity: 0.9;
+  
+  span {
+    animation: blink 1s infinite;
+  }
+  
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
 `;
 
 const SearchContainer = styled(motion.div)`
@@ -410,8 +682,8 @@ const LogosGrid = styled.div`
 `;
 
 const CompanyLogo = styled(motion.div)`
-  width: 120px;
-  height: 60px;
+  width: 200px;
+  height: 100px;
   background: #FFFFFF;
   border: 1px solid rgba(147, 197, 253, 0.2);
   border-radius: 12px;
@@ -419,7 +691,7 @@ const CompanyLogo = styled(motion.div)`
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 24px;
   color: #64748B;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 8px rgba(147, 197, 253, 0.1);
@@ -623,10 +895,66 @@ const LandingPage = () => {
   const [language, setLanguage] = useState('vi');
   const [searchTerm, setSearchTerm] = useState('');
   const [location, setLocation] = useState('');
+  const [titleText, setTitleText] = useState('');
+  const [subtitleText, setSubtitleText] = useState('');
+  const [showCursor, setShowCursor] = useState(true);
+  const [isJobDropdownOpen, setIsJobDropdownOpen] = useState(false);
+  const [isCompanyDropdownOpen, setIsCompanyDropdownOpen] = useState(false);
+  
+  const jobDropdownRef = useRef(null);
+  const companyDropdownRef = useRef(null);
+
+  const fullTitle = 'Tìm việc & Tuyển Dụng Nhanh Hơn';
+  const fullSubtitle = 'Kết nối Ứng viên với cơ hội. Nền tảng tuyển dụng hiện đại.';
 
   const toggleLanguage = () => {
     setLanguage(language === 'vi' ? 'en' : 'vi');
   };
+
+  // Typewriter effect
+  useEffect(() => {
+    let titleIndex = 0;
+    let subtitleIndex = 0;
+    
+    // Type title first
+    const titleInterval = setInterval(() => {
+      if (titleIndex < fullTitle.length) {
+        setTitleText(fullTitle.substring(0, titleIndex + 1));
+        titleIndex++;
+      } else {
+        clearInterval(titleInterval);
+        // Start subtitle after title is done
+        const subtitleInterval = setInterval(() => {
+          if (subtitleIndex < fullSubtitle.length) {
+            setSubtitleText(fullSubtitle.substring(0, subtitleIndex + 1));
+            subtitleIndex++;
+          } else {
+            clearInterval(subtitleInterval);
+            setShowCursor(false);
+          }
+        }, 50);
+      }
+    }, 80);
+
+    return () => {
+      clearInterval(titleInterval);
+    };
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (jobDropdownRef.current && !jobDropdownRef.current.contains(event.target)) {
+        setIsJobDropdownOpen(false);
+      }
+      if (companyDropdownRef.current && !companyDropdownRef.current.contains(event.target)) {
+        setIsCompanyDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <LandingContainer>
@@ -635,11 +963,167 @@ const LandingPage = () => {
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
-        <Logo to="/">
-          <img src="/images/logo.png" alt="Ốp Pờ" style={{ height: '40px', marginRight: '8px' }} />
-          Ốp Pờ
-        </Logo>
-        <NavLinks>
+        <LeftSection>
+          <Logo to="/">
+            <img src="/images/logo.png" alt="Ốp Pờ" style={{ height: '60px', marginRight: '5px' }} />
+            Ốp Pờ
+          </Logo>
+          <NavLinks>
+          <DropdownContainer ref={jobDropdownRef}>
+            <DropdownButton
+              onClick={() => setIsJobDropdownOpen(!isJobDropdownOpen)}
+              $isOpen={isJobDropdownOpen}
+            >
+              Việc làm
+              <ChevronDown />
+            </DropdownButton>
+            {isJobDropdownOpen && (
+              <LargeDropdownMenu
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <DropdownLeftColumn>
+                  <DropdownSection>
+                    <GreenSectionTitle>
+                      Việc làm
+                      <ArrowRight />
+                    </GreenSectionTitle>
+                    <CVTemplateItem to="/candidate/jobs">
+                      <Search />
+                      Tìm việc làm
+                    </CVTemplateItem>
+                    <CVTemplateItem to="/candidate/saved-jobs">
+                      <Bookmark />
+                      Việc làm đã lưu
+                    </CVTemplateItem>
+                    <CVTemplateItem to="/candidate/applications">
+                      <FileText />
+                      Việc làm đã ứng tuyển
+                    </CVTemplateItem>
+                    <CVTemplateItem to="/candidate/jobs?recommended=true">
+                      <ThumbsUp />
+                      Việc làm phù hợp
+                    </CVTemplateItem>
+                  </DropdownSection>
+                  
+                  <DropdownSection>
+                    <GreenSectionTitle>
+                      Nhà tuyển dụng
+                      <ArrowRight />
+                    </GreenSectionTitle>
+                    <CVTemplateItem to="/companies">
+                      <Building2 />
+                      Danh sách nhà tuyển dụng
+                    </CVTemplateItem>
+                    <CVTemplateItem to="/companies/top-companies">
+                      <Star />
+                      Nhà tuyển dụng
+                    </CVTemplateItem>
+                  </DropdownSection>
+                </DropdownLeftColumn>
+                
+                <DropdownRightColumn>
+                  <GreenSectionTitle>
+                    Việc làm theo vị trí
+                    <ArrowRight />
+                  </GreenSectionTitle>
+                  <JobCategoriesGrid>
+                    <JobCategoryItem to="/candidate/jobs?category=sales">Nhân viên pha chế</JobCategoryItem>
+                    <JobCategoryItem to="/candidate/jobs?category=labor">Nhân viên thu ngân</JobCategoryItem>
+                    <JobCategoryItem to="/candidate/jobs?category=accountant">Nhân viên phụ bếp</JobCategoryItem>
+                    <JobCategoryItem to="/candidate/jobs?type=senior">Nhân viên phục vụ</JobCategoryItem>
+                    <JobCategoryItem to="/candidate/jobs?category=marketing">Nhân viên kho</JobCategoryItem>
+                    <JobCategoryItem to="/candidate/jobs?category=engineer">Nhân viên kỹ thuật</JobCategoryItem>
+                  </JobCategoriesGrid>
+                </DropdownRightColumn>
+              </LargeDropdownMenu>
+            )}
+          </DropdownContainer>
+          
+          <DropdownContainer ref={companyDropdownRef}>
+            <DropdownButton
+              onClick={() => setIsCompanyDropdownOpen(!isCompanyDropdownOpen)}
+              $isOpen={isCompanyDropdownOpen}
+            >
+              Tạo CV
+              <ChevronDown />
+            </DropdownButton>
+            {isCompanyDropdownOpen && (
+              <LargeDropdownMenu
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <DropdownLeftColumn>
+                  <DropdownSection>
+                    <GreenSectionTitle>
+                      Mẫu CV theo style
+                      <ArrowRight />
+                    </GreenSectionTitle>
+                    <CVTemplateItem to="/cv/templates/simple">
+                      <Package />
+                      Mẫu CV Đơn giản
+                    </CVTemplateItem>
+                    <CVTemplateItem to="/cv/templates/impressive">
+                      <Star />
+                      Mẫu CV Ấn tượng
+                    </CVTemplateItem>
+                  </DropdownSection>
+                  
+                  <DropdownSection>
+                    <GreenSectionTitle>
+                      Tạo CV bằng AI
+                      <ArrowRight />
+                    </GreenSectionTitle>
+                    <CVTemplateItem to="/cv/templates/sales">
+                      <Briefcase />
+                      Nhân viên pha chế
+                    </CVTemplateItem>
+                    <CVTemplateItem to="/cv/templates/programmer">
+                      <Briefcase />
+                      Lập trình viên
+                    </CVTemplateItem>
+                    <CVTemplateItem to="/cv/templates/accountant">
+                      <Briefcase />
+                      Nhân viên kế toán
+                    </CVTemplateItem>
+                    <CVTemplateItem to="/cv/templates/marketing">
+                      <Briefcase />
+                      Chuyên viên marketing
+                    </CVTemplateItem>
+                  </DropdownSection>
+                </DropdownLeftColumn>
+                
+                <DropdownRightColumn>
+                  <DropdownSection>
+                    <DropdownItem to="/candidate/cv/manage">
+                      <Folder />
+                      Quản lý CV
+                    </DropdownItem>
+                    <DropdownItem to="/candidate/cv/upload">
+                      <Upload />
+                      Tải CV lên
+                    </DropdownItem>
+                    <DropdownItem to="/candidate/cover-letter/manage">
+                      <Edit3 />
+                      Quản lý Cover Letter
+                    </DropdownItem>
+                    <DropdownItem to="/cover-letter/templates">
+                      <FileText />
+                      Mẫu Cover Letter
+                    </DropdownItem>
+                  </DropdownSection>
+                </DropdownRightColumn>
+              </LargeDropdownMenu>
+            )}
+          </DropdownContainer>
+          </NavLinks>
+        </LeftSection>
+        
+        <RightSection>
           <LanguageToggle onClick={toggleLanguage}>
             <Globe />
             {language === 'vi' ? 'VI' : 'EN'}
@@ -650,7 +1134,7 @@ const LandingPage = () => {
           <Button as={Link} to="/register" $variant="primary" $size="small">
             Đăng Ký
           </Button>
-        </NavLinks>
+        </RightSection>
       </Header>
 
       <HeroSection>
@@ -803,7 +1287,8 @@ const LandingPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            Tìm việc & Tuyển Dụng Nhanh Hơn
+            {titleText}
+            {showCursor && titleText.length < fullTitle.length && <span style={{ opacity: 0.7 }}>|</span>}
           </HeroTitle>
           
           <HeroSubtitle
@@ -811,7 +1296,8 @@ const LandingPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            Kết nối Ứng viên với cơ hội. Nền tảng tuyển dụng hiện đại.
+            {subtitleText}
+            {showCursor && subtitleText.length > 0 && subtitleText.length < fullSubtitle.length && <span style={{ opacity: 0.7 }}>|</span>}
           </HeroSubtitle>
 
           <SearchContainer
@@ -843,20 +1329,6 @@ const LandingPage = () => {
             Tìm việc
           </Button>
         </SearchContainer>
-
-        <CTAButtons 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-        >
-          <Button as={Link} to="/register/candidate" $variant="primary" $size="large">
-            Tìm việc ngay
-            <ArrowRight />
-          </Button>
-          <Button as={Link} to="/register/employer" $variant="outline" $size="large">
-            Đăng Tuyển
-          </Button>
-        </CTAButtons>
         </HeroContent>
       </HeroSection>
 
