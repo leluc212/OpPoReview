@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package, Heart, UserPlus, Shield, MessageCircle, Headphones, Moon, Sun, Clock, Mail, Send, Award, Zap, Target } from 'lucide-react';
+import { motion, useInView } from 'framer-motion';
+import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package, Heart, UserPlus, Shield, MessageCircle, Headphones, Moon, Sun, Clock, Mail, Send, Award, Zap, Target, Calendar } from 'lucide-react';
 import { Button } from '../../components/FormElements';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -49,7 +49,7 @@ const LandingContainer = styled.div`
 
 const ScrollContainer = styled.div`
   height: 100vh;
-  overflow-y: scroll;
+  overflow-y: auto;
   scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
@@ -57,6 +57,7 @@ const ScrollContainer = styled.div`
   /* Smooth scrolling with momentum */
   scroll-padding-top: 0;
   overscroll-behavior: contain;
+  will-change: scroll-position;
   
   &::-webkit-scrollbar {
     width: 8px;
@@ -419,6 +420,7 @@ const HeroSection = styled(motion.section)`
   align-items: top;
   justify-content: center;
   scroll-snap-align: start;
+  scroll-snap-stop: always;
 `;
 
 const AnimatedBackground = styled.div`
@@ -514,6 +516,7 @@ const GradientGlow = styled(motion.div)`
   filter: blur(60px);
   animation: glowPulse 8s ease-in-out infinite;
   pointer-events: none;
+  will-change: transform, opacity;
   z-index: 1;
 `;
 
@@ -852,10 +855,10 @@ const SearchContainer = styled(motion.div)`
   background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.98)'};
   backdrop-filter: blur(30px);
   border: 2px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.4)' : 'rgba(147, 197, 253, 0.4)'};
-  padding: 12px;
+  padding: 0;
   border-radius: 16px;
   box-shadow: ${props => props.$isDark 
-    ? '0 12px 48px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.2)'
+    ? '0 12px 48px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.5)'
     : '0 12px 48px rgba(147, 197, 253, 0.25), 0 4px 16px rgba(251, 207, 232, 0.2)'};
   display: flex;
   gap: 0;
@@ -878,25 +881,35 @@ const SearchContainer = styled(motion.div)`
 `;
 
 const SearchInput = styled.div`
-  flex: 1;
+  flex: ${props => props.$wide ? '6' : '0.4'};
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 14px 18px;
   background: ${props => props.$isDark ? 'rgba(15, 23, 42, 0.8)' : 'rgba(255, 255, 255, 0.95)'};
-  border-radius: 12px;
-  border: 2px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.3)' : 'rgba(147, 197, 253, 0.3)'};
+  border-radius: 0;
+  border: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   
-  &:last-of-type {
-    border-right: none;
+  &:first-of-type {
+    border-radius: 12px 0 0 12px;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1px;
+      height: 24px;
+      background: ${props => props.$isDark ? 'rgba(75, 85, 99, 0.5)' : 'rgba(100, 116, 139, 0.3)'};
+    }
   }
   
   &:focus-within {
     background: ${props => props.$isDark ? 'rgba(15, 23, 42, 1)' : 'rgba(255, 255, 255, 1)'};
-    border-color: #0EA5E9;
-    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15), 0 4px 12px rgba(14, 165, 233, 0.2);
+    z-index: 1;
   }
   
   svg {
@@ -927,11 +940,11 @@ const SearchInput = styled.div`
 
 const BannerContainer = styled.div`
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  gap: 30px;
+  gap: 20px;
   margin: 10px 0 0;
-  width: 120%;
+  width: 100%;
   max-width: 1200px;
   padding: 0;
   
@@ -939,6 +952,96 @@ const BannerContainer = styled.div`
     flex-direction: column;
     gap: 20px;
     width: 100%;
+  }
+`;
+
+const StatsCard = styled(motion.div)`
+  background: linear-gradient(135deg, #4a68a8 0%, #5b7fc4 100%);
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 380px;
+  max-width: 420px;
+  height: 300px;
+  align-self: flex-start;
+  
+  @media (max-width: 968px) {
+    width: 100%;
+    min-width: auto;
+    max-width: none;
+  }
+`;
+
+const StatsHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  white-space: nowrap;
+  
+  svg {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+  }
+`;
+
+const StatsRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 7px 0;
+`;
+
+const StatItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1.5;
+`;
+
+const StatLabel = styled.div`
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+`;
+
+const StatValue = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: white;
+  font-size: 20px;
+  font-weight: 700;
+  white-space: nowrap;
+  
+  svg {
+    width: 17px;
+    height: 17px;
+    color: #a3f7a3;
+    flex-shrink: 0;
+  }
+`;
+
+const BannerWrapper = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  justify-content: flex-end;
+  align-items: flex-start;
+  
+  @media (max-width: 968px) {
+    flex-direction: column;
+    justify-content: center;
   }
 `;
 
@@ -957,18 +1060,38 @@ const MascotImage = styled.img`
 `;
 
 const MainBanner = styled.img`
-  width: 110%;
+  width: auto;
+  max-width: 500px;
   height: auto;
+  max-height: 300px;
   border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(147, 197, 253, 0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55), 0 8px 24px rgba(147, 197, 253, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.8);
   flex-shrink: 0;
-  transform: scale(1.05);
+  object-fit: contain;
   
   @media (max-width: 968px) {
     width: 100%;
     max-width: 1000px;
-    transform: scale(1);
+    height: auto;
+  }
+`;
+
+const SecondaryBanner = styled.img`
+  width: auto;
+  max-width: 600px;
+  height: auto;
+  max-height: 450px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55), 0 8px 24px rgba(147, 197, 253, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  flex-shrink: 0;
+  object-fit: contain;
+  
+  @media (max-width: 968px) {
+    width: 100%;
+    max-width: 1000px;
+    height: auto;
   }
 `;
 
@@ -1111,6 +1234,88 @@ const CategoryCount = styled.p`
   font-weight: 400;
 `;
 
+const TechBannerSection = styled(motion.section)`
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1420 100%);
+  padding: 80px 60px;
+  position: relative;
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.12) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+    filter: blur(60px);
+    animation: pulse 8s ease-in-out infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.1); }
+  }
+  
+  @media (max-width: 768px) {
+    padding: 60px 20px;
+    min-height: 50vh;
+  }
+`;
+
+const TechBannerContent = styled.div`
+  max-width: 1200px;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+`;
+
+const TechBannerImage = styled(motion.img)`
+  width: 100%;
+  height: auto;
+  border-radius: 20px;
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(59, 130, 246, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  filter: brightness(1.05) contrast(1.1);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+      0 35px 100px rgba(0, 0, 0, 0.6),
+      0 0 60px rgba(59, 130, 246, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    filter: brightness(1.1) contrast(1.15);
+  }
+  
+  @media (max-width: 768px) {
+    border-radius: 12px;
+  }
+`;
+
 const CTASection = styled.section`
   max-width: 1440px;
   margin: 0 auto;
@@ -1160,6 +1365,7 @@ const DownloadAppSection = styled(motion.section)`
   display: flex;
   align-items: center;
   scroll-snap-align: start;
+  scroll-snap-stop: always;
   transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 `;
 
@@ -1599,8 +1805,8 @@ const SectionHeading = styled(motion.div)`
 
 const CompanyBannerSection = styled(motion.section)`
   background: ${props => props.$isDark 
-    ? 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%)' 
-    : 'linear-gradient(135deg, #F0F465 0%, #E8ED6F 50%, #C8D45A 100%)'};
+    ? '#1e293b' 
+    : '#E0F2FE'};
   padding: 60px 80px;
   position: relative;
   overflow: hidden;
@@ -1609,6 +1815,7 @@ const CompanyBannerSection = styled(motion.section)`
   align-items: center;
   justify-content: center;
   scroll-snap-align: start;
+  scroll-snap-stop: always;
   transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   
   &::before {
@@ -1619,8 +1826,8 @@ const CompanyBannerSection = styled(motion.section)`
     right: 0;
     bottom: 0;
     background: 
-      radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
-      radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
+      radial-gradient(circle at 30% 40%, rgba(125, 211, 252, 0.3) 0%, transparent 60%),
+      radial-gradient(circle at 70% 60%, rgba(147, 197, 253, 0.25) 0%, transparent 60%);
     pointer-events: none;
     transition: opacity 0.4s ease;
   }
@@ -1635,17 +1842,18 @@ const CompanyBannerContent = styled.div`
 
 const CompanyBannerTitle = styled(motion.h2)`
   text-align: center;
-  font-size: 42px;
-  font-weight: 700;
-  color: ${props => props.$isDark ? '#f1f5f9' : '#1F2937'};
-  margin-bottom: 50px;
-  line-height: 1.3;
-  letter-spacing: -0.5px;
+  font-size: 72px;
+  font-weight: 800;
+  color: ${props => props.$isDark ? '#f1f5f9' : '#0c4a6e'};
+  margin-bottom: 60px;
+  line-height: 1.2;
+  letter-spacing: -1px;
   transition: color 0.4s ease;
+  text-shadow: ${props => props.$isDark ? '0 2px 8px rgba(0, 0, 0, 0.3)' : '0 2px 8px rgba(12, 74, 110, 0.1)'};
   
   @media (max-width: 768px) {
-    font-size: 28px;
-    margin-bottom: 30px;
+    font-size: 38px;
+    margin-bottom: 40px;
   }
 `;
 
@@ -1670,14 +1878,14 @@ const LogoCarouselWrapper = styled.div`
     left: 0;
     background: ${props => props.$isDark 
       ? 'linear-gradient(to right, rgba(30, 41, 59, 1), rgba(30, 41, 59, 0))' 
-      : 'linear-gradient(to right, rgba(240, 244, 101, 1), rgba(240, 244, 101, 0))'};
+      : 'linear-gradient(to right, rgba(224, 242, 254, 1), rgba(224, 242, 254, 0))'};
   }
   
   &::after {
     right: 0;
     background: ${props => props.$isDark 
       ? 'linear-gradient(to left, rgba(30, 41, 59, 1), rgba(30, 41, 59, 0))' 
-      : 'linear-gradient(to left, rgba(240, 244, 101, 1), rgba(240, 244, 101, 0))'};
+      : 'linear-gradient(to left, rgba(224, 242, 254, 1), rgba(224, 242, 254, 0))'};
   }
 `;
 
@@ -1689,30 +1897,49 @@ const LogoCarousel = styled(motion.div)`
 `;
 
 const BannerCompanyLogo = styled.div`
-  background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : 'white'};
-  padding: 16px 32px;
-  border-radius: 12px;
+  background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)'};
+  padding: 24px 40px;
+  border-radius: 16px;
   box-shadow: ${props => props.$isDark 
-    ? '0 4px 16px rgba(0, 0, 0, 0.3)' 
-    : '0 4px 16px rgba(0, 0, 0, 0.08)'};
+    ? '0 6px 20px rgba(0, 0, 0, 0.3)' 
+    : '0 6px 20px rgba(14, 165, 233, 0.15)'};
+  border: 2px solid ${props => props.$isDark 
+    ? 'rgba(148, 163, 184, 0.2)' 
+    : 'rgba(14, 165, 233, 0.2)'};
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 180px;
-  height: 80px;
+  min-width: 220px;
+  height: 100px;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
   
   &:hover {
-    transform: translateY(-4px);
+    transform: translateY(-6px) scale(1.05);
     box-shadow: ${props => props.$isDark 
-      ? '0 8px 24px rgba(0, 0, 0, 0.4)' 
-      : '0 8px 24px rgba(0, 0, 0, 0.12)'};
+      ? '0 12px 32px rgba(0, 0, 0, 0.4)' 
+      : '0 12px 32px rgba(14, 165, 233, 0.25)'};
+    border-color: ${props => props.$isDark 
+      ? 'rgba(148, 163, 184, 0.4)' 
+      : 'rgba(14, 165, 233, 0.4)'};
   }
   
   img {
-    max-width: 140px;
-    max-height: 50px;
+    max-width: 180px;
+    max-height: 70px;
     object-fit: contain;
+    filter: ${props => props.$isDark ? 'brightness(1.1)' : 'brightness(1)'};
+    transition: filter 0.3s ease;
+  }
+  
+  &:hover img {
+    filter: ${props => props.$isDark ? 'brightness(1.2)' : 'brightness(0.95)'};
+  }
+  
+  span {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
   }
 `;
 
@@ -1730,15 +1957,15 @@ const particleConfigs = [
 ];
 
 const companyLogos = [
-  { name: 'F88', logo: 'F88' },
-  { name: 'HOME CREDIT', logo: 'HOME CREDIT' },
-  { name: 'MAERSK', logo: 'MAERSK' },
-  { name: 'Masan', logo: 'Masan' },
-  { name: 'MB', logo: 'MB' },
-  { name: 'TECHCOMBANK', logo: 'TECHCOMBANK' },
-  { name: 'THACO AUTO', logo: 'THACO AUTO' },
-  { name: 'Vinamilk', logo: 'Vinamilk' },
-  { name: 'VNPAY', logo: 'VNPAY' },
+  { name: 'TRUNG NGUYÊN', logo: '/images/trungnguyen.jpg' },
+  { name: 'KATINAT', logo: '/images/katinat.png' },
+  { name: 'BAMOS COFFEE', logo: '/images/bamos.png' },
+  { name: 'STARBUCK', logo: '/images/starbuck.png' },
+  { name: 'PHUC LONG', logo: '/images/phuclong.jpg' },
+  { name: 'THE COFFEE HOUSE', logo: '/images/coffeehouse.jpg' },
+  { name: 'HỒNG TRÀ NGÔ GIA', logo: '/images/ngogia.png' },
+  { name: 'SUNCHA', logo: '/images/suncha.jpg' },
+  { name: 'HIGHLANDS', logo: '/images/highlands.jpg' },
 ];
 
 const LandingPage = () => {
@@ -1764,23 +1991,8 @@ const LandingPage = () => {
   const companyRef = useRef(null);
   const downloadRef = useRef(null);
 
-  // Scroll animations
-  const { scrollYProgress } = useScroll({
-    container: scrollContainerRef,
-  });
-
-  // Parallax transforms with smoother easing
-  const heroY = useTransform(scrollYProgress, [0, 0.33], [0, -150]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.33], [1, 0.95]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.15, 0.33], [1, 0.6, 0]);
-  
-  const companyY = useTransform(scrollYProgress, [0.28, 0.33, 0.66], [150, 0, -150]);
-  const companyScale = useTransform(scrollYProgress, [0.28, 0.33, 0.66], [0.95, 1, 0.95]);
-  const companyOpacity = useTransform(scrollYProgress, [0.25, 0.33, 0.6, 0.66], [0, 1, 1, 0]);
-  
-  const downloadY = useTransform(scrollYProgress, [0.6, 0.66, 1], [150, 0, -50]);
-  const downloadScale = useTransform(scrollYProgress, [0.6, 0.66, 1], [0.95, 1, 1]);
-  const downloadOpacity = useTransform(scrollYProgress, [0.58, 0.66, 1], [0, 1, 1]);
+  // Removed scroll-linked parallax transforms to improve scroll performance
+  // Now using only whileInView animations which work better with scroll-snap
 
   const fullTitle = 'Tìm việc & Tuyển Dụng Nhanh Hơn';
   const fullSubtitle = 'Kết nối Ứng viên với cơ hội. Nền tảng tuyển dụng hiện đại.';
@@ -2142,7 +2354,6 @@ const LandingPage = () => {
       <ScrollContainer ref={scrollContainerRef}>
       <HeroSection
         ref={heroRef}
-        style={{ y: heroY, opacity: heroOpacity, scale: heroScale }}
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1, ease: "easeOut" }}
@@ -2766,7 +2977,7 @@ const LandingPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <SearchInput $isDark={isDarkMode}>
+            <SearchInput $isDark={isDarkMode} $wide>
               <Search />
               <input
                 type="text"
@@ -2776,30 +2987,79 @@ const LandingPage = () => {
               />
             </SearchInput>
           
-          <SearchInput $isDark={isDarkMode}>
-            <MapPin />
-            <input
-              type="text"
-              placeholder="Địa điểm"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            />
-          </SearchInput>
+            <SearchInput $isDark={isDarkMode}>
+              <MapPin />
+              <input
+                type="text"
+                placeholder="Địa điểm"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
+            </SearchInput>
           
-          <Button $variant="primary" onClick={() => navigate('/candidate/jobs')}>
-            Tìm việc
-          </Button>
-        </SearchContainer>
+            <Button $variant="primary" onClick={() => navigate('/candidate/jobs')}>
+              Tìm việc
+            </Button>
+          </SearchContainer>
         
         <BannerContainer>
-          <MascotImage
-            src="/images/mascot.png"
-            alt="Mascot"
-          />
-          <MainBanner
-            src="/images/bannerdai.png"
-            alt="Banner"
-          />
+          <StatsCard
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+          >
+            <StatsHeader>
+              <Calendar />
+              Thị trường làm việc hôm nay {new Date().toLocaleDateString('vi-VN')}
+            </StatsHeader>
+            
+            <StatsRow>
+              <StatItem>
+                <StatLabel>Việc làm đang tuyển</StatLabel>
+                <StatValue>
+                  100,000
+                  <TrendingUp />
+                </StatValue>
+              </StatItem>
+              
+              <StatItem>
+                <StatLabel>Việc làm gấp hôm nay</StatLabel>
+                <StatValue>
+                  50
+                  <TrendingUp />
+                </StatValue>
+              </StatItem>
+            </StatsRow>
+            
+            <StatsRow>
+              <StatItem>
+                <StatLabel>Số lượng ứng viên</StatLabel>
+                <StatValue>
+                  2,345
+                  <Users />
+                </StatValue>
+              </StatItem>
+              
+              <StatItem>
+                <StatLabel>Số lượng nhà tuyển dụng</StatLabel>
+                <StatValue>
+                  42
+                  <Building2 />
+                </StatValue>
+              </StatItem>
+            </StatsRow>
+          </StatsCard>
+          
+          <BannerWrapper>
+            <SecondaryBanner
+              src="/images/phache.png"
+              alt="Phache"
+            />
+            <MainBanner
+              src="/images/poster.png"
+              alt="Poster"
+            />
+          </BannerWrapper>
         </BannerContainer>
         </HeroContent>
       </HeroSection>
@@ -2807,7 +3067,6 @@ const LandingPage = () => {
       <CompanyBannerSection
         $isDark={isDarkMode}
         ref={companyRef}
-        style={{ y: companyY, opacity: companyOpacity, scale: companyScale }}
         initial={{ opacity: 0, y: 100, scale: 0.95 }}
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
         viewport={{ once: false, amount: 0.3 }}
@@ -2821,7 +3080,7 @@ const LandingPage = () => {
             viewport={{ once: false, amount: 0.5 }}
             transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            Nhiều doanh nghiệp đang tìm "tân binh" giỏi – giống bạn đó!
+            Nhiều doanh nghiệp đang tìm "tân binh"<br/>giỏi – giống bạn đó!
           </CompanyBannerTitle>
           
           <LogoCarouselWrapper $isDark={isDarkMode}>
@@ -2840,13 +3099,24 @@ const LandingPage = () => {
             >
               {[...companyLogos, ...companyLogos, ...companyLogos].map((company, index) => (
                 <BannerCompanyLogo $isDark={isDarkMode} key={`${company.name}-${index}`}>
+                  <img 
+                    src={company.logo} 
+                    alt={company.name}
+                    style={{ display: 'block' }}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'inline-block';
+                    }}
+                  />
                   <span style={{ 
                     fontSize: '20px', 
-                    fontWeight: '700',
-                    color: isDarkMode ? '#f1f5f9' : '#1F2937',
-                    whiteSpace: 'nowrap'
+                    fontWeight: '800',
+                    color: isDarkMode ? '#f1f5f9' : '#0c4a6e',
+                    whiteSpace: 'nowrap',
+                    display: 'none',
+                    letterSpacing: '0.5px'
                   }}>
-                    {company.logo}
+                    {company.name}
                   </span>
                 </BannerCompanyLogo>
               ))}
@@ -2854,6 +3124,24 @@ const LandingPage = () => {
           </LogoCarouselWrapper>
         </CompanyBannerContent>
       </CompanyBannerSection>
+
+      <TechBannerSection
+        initial={{ opacity: 0, y: 60 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: false, amount: 0.3 }}
+        transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+      >
+        <TechBannerContent>
+          <TechBannerImage
+            src="/images/lemoments.png"
+            alt="Le Moments Technology"
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: false, amount: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          />
+        </TechBannerContent>
+      </TechBannerSection>
 
       <CTASection>
         <CTACard
@@ -2889,7 +3177,6 @@ const LandingPage = () => {
 
       <DownloadAppSection
         ref={downloadRef}
-        style={{ y: downloadY, opacity: downloadOpacity, scale: downloadScale }}
         initial={{ opacity: 0, y: 100, scale: 0.95 }}
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
         viewport={{ once: false, amount: 0.3 }}
