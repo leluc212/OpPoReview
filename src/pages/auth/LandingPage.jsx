@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package, Heart, UserPlus, Shield, MessageCircle, Headphones } from 'lucide-react';
+import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package, Heart, UserPlus, Shield, MessageCircle, Headphones, Clock, Mail, Send, Award, Zap, Target } from 'lucide-react';
 import { Button } from '../../components/FormElements';
 
 const LandingContainer = styled.div`
@@ -135,6 +135,21 @@ const NavLinks = styled.div`
       color: #0EA5E9;
       transform: translateY(-2px);
     }
+  }
+`;
+
+const NavLinkItem = styled(Link)`
+  color: #000000;
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    color: #0EA5E9;
+    background: rgba(14, 165, 233, 0.05);
   }
 `;
 
@@ -391,7 +406,27 @@ const AnimatedBackground = styled.div`
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  background: #002e9d;
+  background: linear-gradient(135deg, #002e9d 0%, #001a5c 50%, #002e9d 100%);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+      ellipse at 30% 20%,
+      rgba(59, 130, 246, 0.15) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 70% 80%,
+      rgba(37, 99, 235, 0.1) 0%,
+      transparent 50%
+    );
+    z-index: 1;
+  }
   
   &::after {
     content: '';
@@ -407,6 +442,7 @@ const AnimatedBackground = styled.div`
       rgba(26, 98, 255, 0) 100%
     );
     animation: moveDown 8s ease-in-out infinite;
+    z-index: 2;
   }
   
   @keyframes moveDown {
@@ -551,6 +587,183 @@ const Particle = styled(motion.span)`
   box-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
 `;
 
+const WavePattern = styled(motion.div)`
+  position: absolute;
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+  
+  svg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+`;
+
+const FloatingIcon = styled(motion.div)`
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  
+  svg {
+    width: 20px;
+    height: 20px;
+    color: rgba(255, 255, 255, 0.8);
+  }
+`;
+
+const GeometricShape = styled(motion.div)`
+  position: absolute;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(5px);
+  background: rgba(255, 255, 255, 0.05);
+`;
+
+const CircuitPattern = styled(motion.div)`
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    background: rgba(147, 197, 253, 0.2);
+  }
+  
+  &::before {
+    width: 2px;
+    height: 60%;
+    left: 50%;
+    top: 0;
+  }
+  
+  &::after {
+    width: 60%;
+    height: 2px;
+    top: 50%;
+    left: 0;
+  }
+`;
+
+const DottedCircle = styled(motion.div)`
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+`;
+
+const ConnectionLine = styled(motion.div)`
+  position: absolute;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(147, 197, 253, 0.3) 50%, 
+    transparent 100%
+  );
+  height: 2px;
+  
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: rgba(147, 197, 253, 0.6);
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    box-shadow: 0 0 10px rgba(147, 197, 253, 0.8);
+  }
+  
+  &::before {
+    left: 0;
+  }
+  
+  &::after {
+    right: 0;
+  }
+`;
+
+const SmallFloatingDot = styled(motion.div)`
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(147, 197, 253, 0.6);
+`;
+
+const CornerPattern = styled(motion.div)`
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  opacity: 0.15;
+  
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    background: rgba(147, 197, 253, 0.3);
+    border-radius: 2px;
+  }
+`;
+
+const TopLeftPattern = styled(CornerPattern)`
+  top: 0;
+  left: 0;
+  
+  &::before {
+    width: 3px;
+    height: 100px;
+    top: 0;
+    left: 20px;
+  }
+  
+  &::after {
+    width: 100px;
+    height: 3px;
+    top: 20px;
+    left: 0;
+  }
+`;
+
+const BottomRightPattern = styled(CornerPattern)`
+  bottom: 0;
+  right: 0;
+  
+  &::before {
+    width: 3px;
+    height: 100px;
+    bottom: 0;
+    right: 20px;
+  }
+  
+  &::after {
+    width: 100px;
+    height: 3px;
+    bottom: 20px;
+    right: 0;
+  }
+`;
+
+const MiniSquare = styled(motion.div)`
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: rgba(147, 197, 253, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+`;
+
 const FloatingShape = styled(motion.div)`
   position: absolute;
   background: ${props => props.gradient || 'linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(37, 99, 235, 0.2))'};
@@ -625,17 +838,24 @@ const SearchContainer = styled(motion.div)`
   background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(30px);
   border: 2px solid rgba(147, 197, 253, 0.4);
-  padding: 12px;
+  padding: 0;
   border-radius: 16px;
   box-shadow: 0 12px 48px rgba(147, 197, 253, 0.25), 0 4px 16px rgba(251, 207, 232, 0.2);
   display: flex;
-  gap: 12px;
+  gap: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
   
   &:hover {
     box-shadow: 0 16px 64px rgba(147, 197, 253, 0.3), 0 8px 24px rgba(251, 207, 232, 0.25);
     border-color: #0EA5E9;
     transform: translateY(-3px);
+  }
+  
+  button {
+    border-radius: 0 14px 14px 0;
+    padding: 16px 32px;
+    flex-shrink: 0;
   }
 `;
 
@@ -644,22 +864,37 @@ const SearchInput = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 18px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 12px;
-  border: 2px solid rgba(147, 197, 253, 0.3);
+  padding: 18px 20px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid rgba(147, 197, 253, 0.3);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  
+  &:last-of-type {
+    border-right: none;
+  }
   
   &:focus-within {
-    background: rgba(255, 255, 255, 1);
-    border-color: #0EA5E9;
-    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15), 0 4px 12px rgba(14, 165, 233, 0.2);
+    background: rgba(213, 236, 247, 0.03);
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 0px;
+      background: #0EA5E9;
+      opacity: 0.5;
+    }
   }
   
   svg {
     width: 20px;
     height: 20px;
     color: #0EA5E9;
+    flex-shrink: 0;
   }
   
   input {
@@ -685,14 +920,16 @@ const BannerContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 60px;
-  margin: 20px 0 0;
-  width: 100%;
+  gap: 30px;
+  margin: 10px 0 0;
+  width: 120%;
+  max-width: 1200px;
   padding: 0;
   
   @media (max-width: 968px) {
     flex-direction: column;
     gap: 20px;
+    width: 100%;
   }
 `;
 
@@ -711,16 +948,18 @@ const MascotImage = styled.img`
 `;
 
 const MainBanner = styled.img`
-  width: 100%;
+  width: 110%;
   height: auto;
   border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(147, 197, 253, 0.2);
-  border: 3px solid rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.8);
   flex-shrink: 0;
+  transform: scale(1.05);
   
   @media (max-width: 968px) {
     width: 100%;
     max-width: 1000px;
+    transform: scale(1);
   }
 `;
 
@@ -1680,7 +1919,7 @@ const LandingPage = () => {
                       Việc làm
                       <ArrowRight />
                     </GreenSectionTitle>
-                    <CVTemplateItem to="/candidate/jobs">
+                    <CVTemplateItem to="/login?redirect=/candidate/jobs">
                       <Search />
                       Tìm việc làm
                     </CVTemplateItem>
@@ -1810,6 +2049,10 @@ const LandingPage = () => {
               </LargeDropdownMenu>
             )}
           </DropdownContainer>
+          
+          <NavLinkItem to="/login?redirect=/employer/jobs&role=employer">
+            Đăng tuyển
+          </NavLinkItem>
           </NavLinks>
         </LeftSection>
         
@@ -1974,6 +2217,457 @@ const LandingPage = () => {
             />
           ))}
           
+          {/* Corner Patterns */}
+          <TopLeftPattern
+            animate={{
+              opacity: [0.1, 0.2, 0.1],
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          
+          <BottomRightPattern
+            animate={{
+              opacity: [0.1, 0.2, 0.1],
+            }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1,
+            }}
+          />
+          
+          {/* Decorative Wave Patterns */}
+          <WavePattern
+            style={{ bottom: 0, left: 0 }}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 0.4, y: 0 }}
+            transition={{ duration: 2, ease: "easeOut" }}
+          >
+            <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
+              <path 
+                fill="rgba(147, 197, 253, 0.1)" 
+                d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+              ></path>
+            </svg>
+          </WavePattern>
+          
+          <WavePattern
+            style={{ top: 0, right: 0 }}
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 0.3, y: 0 }}
+            transition={{ duration: 2, delay: 0.3, ease: "easeOut" }}
+          >
+            <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
+              <path 
+                fill="rgba(96, 165, 250, 0.1)" 
+                d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,218.7C672,235,768,245,864,229.3C960,213,1056,171,1152,165.3C1248,160,1344,192,1392,208L1440,224L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"
+              ></path>
+            </svg>
+          </WavePattern>
+          
+          {/* Floating Icons */}
+          <FloatingIcon
+            style={{ top: '15%', left: '8%' }}
+            animate={{
+              y: [0, -20, 0],
+              rotate: [0, 5, 0],
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            <Clock />
+          </FloatingIcon>
+          
+          <FloatingIcon
+            style={{ top: '25%', right: '12%' }}
+            animate={{
+              y: [0, -15, 0],
+              rotate: [0, -5, 0],
+            }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 0.5,
+            }}
+          >
+            <Mail />
+          </FloatingIcon>
+          
+          <FloatingIcon
+            style={{ bottom: '30%', left: '10%' }}
+            animate={{
+              y: [0, -25, 0],
+              rotate: [0, 10, 0],
+            }}
+            transition={{
+              duration: 4.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1,
+            }}
+          >
+            <Send />
+          </FloatingIcon>
+          
+          <FloatingIcon
+            style={{ bottom: '20%', right: '15%' }}
+            animate={{
+              y: [0, -18, 0],
+              rotate: [0, -8, 0],
+            }}
+            transition={{
+              duration: 5.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1.5,
+            }}
+          >
+            <Award />
+          </FloatingIcon>
+          
+          <FloatingIcon
+            style={{ top: '40%', right: '8%' }}
+            animate={{
+              y: [0, -22, 0],
+              rotate: [0, 12, 0],
+            }}
+            transition={{
+              duration: 4.8,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 0.8,
+            }}
+          >
+            <Zap />
+          </FloatingIcon>
+          
+          <FloatingIcon
+            style={{ top: '60%', left: '12%' }}
+            animate={{
+              y: [0, -16, 0],
+              rotate: [0, -6, 0],
+            }}
+            transition={{
+              duration: 5.2,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1.2,
+            }}
+          >
+            <Target />
+          </FloatingIcon>
+          
+          {/* Geometric Shapes */}
+          <GeometricShape
+            style={{
+              top: '20%',
+              left: '5%',
+              width: '60px',
+              height: '60px',
+              borderRadius: '12px',
+              transform: 'rotate(15deg)',
+            }}
+            animate={{
+              rotate: [15, 25, 15],
+              scale: [1, 1.05, 1],
+            }}
+            transition={{
+              duration: 6,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          
+          <GeometricShape
+            style={{
+              bottom: '25%',
+              right: '8%',
+              width: '80px',
+              height: '80px',
+              borderRadius: '50%',
+            }}
+            animate={{
+              scale: [1, 1.1, 1],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1,
+            }}
+          />
+          
+          <GeometricShape
+            style={{
+              top: '35%',
+              right: '18%',
+              width: '50px',
+              height: '50px',
+              transform: 'rotate(45deg)',
+            }}
+            animate={{
+              rotate: [45, 60, 45],
+            }}
+            transition={{
+              duration: 7,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          
+          {/* Mini Squares */}
+          <MiniSquare
+            style={{ top: '28%', left: '22%' }}
+            animate={{
+              rotate: [0, 90, 0],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: 6,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          
+          <MiniSquare
+            style={{ top: '48%', right: '25%' }}
+            animate={{
+              rotate: [0, -90, 0],
+              scale: [1, 1.15, 1],
+            }}
+            transition={{
+              duration: 7,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1,
+            }}
+          />
+          
+          <MiniSquare
+            style={{ bottom: '32%', left: '20%' }}
+            animate={{
+              rotate: [0, 180, 0],
+              scale: [1, 1.3, 1],
+            }}
+            transition={{
+              duration: 5.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 0.5,
+            }}
+          />
+          
+          <MiniSquare
+            style={{ top: '65%', right: '30%' }}
+            animate={{
+              rotate: [0, 90, 0],
+              opacity: [0.3, 0.6, 0.3],
+            }}
+            transition={{
+              duration: 6.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1.5,
+            }}
+          />
+          
+          {/* Dotted Circles */}
+          <DottedCircle
+            style={{
+              top: '12%',
+              right: '20%',
+            }}
+            animate={{
+              rotate: [0, 360],
+              scale: [1, 1.1, 1],
+            }}
+            transition={{
+              rotate: { duration: 20, repeat: Infinity, ease: "linear" },
+              scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+            }}
+          />
+          
+          <DottedCircle
+            style={{
+              bottom: '15%',
+              left: '18%',
+            }}
+            animate={{
+              rotate: [0, -360],
+              scale: [1, 1.15, 1],
+            }}
+            transition={{
+              rotate: { duration: 25, repeat: Infinity, ease: "linear" },
+              scale: { duration: 5, repeat: Infinity, ease: "easeInOut" },
+            }}
+          />
+          
+          {/* Connection Lines */}
+          <ConnectionLine
+            style={{
+              top: '18%',
+              left: '10%',
+              width: '150px',
+              transform: 'rotate(-15deg)',
+            }}
+            animate={{
+              opacity: [0.3, 0.6, 0.3],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          
+          <ConnectionLine
+            style={{
+              top: '45%',
+              right: '12%',
+              width: '120px',
+              transform: 'rotate(25deg)',
+            }}
+            animate={{
+              opacity: [0.2, 0.5, 0.2],
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1,
+            }}
+          />
+          
+          <ConnectionLine
+            style={{
+              bottom: '28%',
+              left: '15%',
+              width: '180px',
+              transform: 'rotate(10deg)',
+            }}
+            animate={{
+              opacity: [0.25, 0.55, 0.25],
+            }}
+            transition={{
+              duration: 3.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 0.5,
+            }}
+          />
+          
+          {/* Small Floating Dots */}
+          <SmallFloatingDot
+            style={{ top: '22%', left: '25%' }}
+            animate={{
+              y: [0, -15, 0],
+              opacity: [0.4, 0.8, 0.4],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          
+          <SmallFloatingDot
+            style={{ top: '55%', right: '22%' }}
+            animate={{
+              y: [0, -20, 0],
+              opacity: [0.3, 0.7, 0.3],
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1,
+            }}
+          />
+          
+          <SmallFloatingDot
+            style={{ bottom: '35%', left: '28%' }}
+            animate={{
+              y: [0, -12, 0],
+              opacity: [0.35, 0.75, 0.35],
+            }}
+            transition={{
+              duration: 3.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 0.7,
+            }}
+          />
+          
+          <SmallFloatingDot
+            style={{ top: '38%', left: '18%' }}
+            animate={{
+              y: [0, -18, 0],
+              opacity: [0.3, 0.8, 0.3],
+            }}
+            transition={{
+              duration: 4.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1.5,
+            }}
+          />
+          
+          <SmallFloatingDot
+            style={{ bottom: '40%', right: '18%' }}
+            animate={{
+              y: [0, -16, 0],
+              opacity: [0.4, 0.75, 0.4],
+            }}
+            transition={{
+              duration: 3.8,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 0.3,
+            }}
+          />
+          
+          {/* Circuit Patterns */}
+          <CircuitPattern
+            style={{
+              top: '30%',
+              left: '15%',
+            }}
+            animate={{
+              opacity: [0.2, 0.4, 0.2],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          
+          <CircuitPattern
+            style={{
+              bottom: '35%',
+              right: '25%',
+            }}
+            animate={{
+              opacity: [0.15, 0.35, 0.15],
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1.5,
+            }}
+          />
+          
           {/* Glassmorphism overlay */}
           <GlassmorphismLayer />
         </AnimatedBackground>
@@ -2006,7 +2700,7 @@ const LandingPage = () => {
               <Search />
               <input
                 type="text"
-                placeholder="Vị trí công việc hoặc từ khóa"
+                placeholder="Vị trí công việc hoặc công ty"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -2419,8 +3113,8 @@ const LandingPage = () => {
                                 initial={{ pathLength: 0 }}
                                 animate={{ pathLength: 1 }}
                                 transition={{
-                                  duration: 3,
-                                  ease: "easeInOut",
+                                  duration: 5,
+                                  ease: "linear",
                                   repeat: Infinity
                                 }}
                               />
