@@ -824,7 +824,7 @@ const CTASection = styled.section`
 `;
 
 const CTACard = styled(motion.div)`
-  background: linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 100%);
+  background: linear-gradient(135deg, #dceaf9 0%, #ffffffb3 100%);
   border: 1px solid rgba(0, 0, 0, 0.06);
   padding: 80px 60px;
   border-radius: 24px;
@@ -1002,6 +1002,106 @@ const SectionHeading = styled(motion.div)`
   }
 `;
 
+const CompanyBannerSection = styled.section`
+  background: linear-gradient(135deg, #F0F465 0%, #E8ED6F 50%, #C8D45A 100%);
+  padding: 60px 80px;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
+    pointer-events: none;
+  }
+`;
+
+const CompanyBannerContent = styled.div`
+  max-width: 1440px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+`;
+
+const CompanyBannerTitle = styled(motion.h2)`
+  text-align: center;
+  font-size: 42px;
+  font-weight: 700;
+  color: #1F2937;
+  margin-bottom: 50px;
+  line-height: 1.3;
+  letter-spacing: -0.5px;
+  
+  @media (max-width: 768px) {
+    font-size: 28px;
+    margin-bottom: 30px;
+  }
+`;
+
+const LogoCarouselWrapper = styled.div`
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  
+  &::before {
+    left: 0;
+    background: linear-gradient(to right, rgba(240, 244, 101, 1), rgba(240, 244, 101, 0));
+  }
+  
+  &::after {
+    right: 0;
+    background: linear-gradient(to left, rgba(240, 244, 101, 1), rgba(240, 244, 101, 0));
+  }
+`;
+
+const LogoCarousel = styled(motion.div)`
+  display: flex;
+  gap: 60px;
+  align-items: center;
+  width: fit-content;
+`;
+
+const BannerCompanyLogo = styled.div`
+  background: white;
+  padding: 16px 32px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 180px;
+  height: 80px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+  
+  img {
+    max-width: 140px;
+    max-height: 50px;
+    object-fit: contain;
+  }
+`;
+
 const particleConfigs = [
   { top: '8%', left: '15%', duration: 16, delay: 0 },
   { top: '22%', left: '78%', duration: 19, delay: 1.2 },
@@ -1013,6 +1113,18 @@ const particleConfigs = [
   { top: '85%', left: '12%', duration: 19, delay: 2.1 },
   { top: '42%', left: '8%', duration: 18, delay: 1.1 },
   { top: '68%', left: '82%', duration: 20, delay: 2.8 },
+];
+
+const companyLogos = [
+  { name: 'F88', logo: 'F88' },
+  { name: 'HOME CREDIT', logo: 'HOME CREDIT' },
+  { name: 'MAERSK', logo: 'MAERSK' },
+  { name: 'Masan', logo: 'Masan' },
+  { name: 'MB', logo: 'MB' },
+  { name: 'TECHCOMBANK', logo: 'TECHCOMBANK' },
+  { name: 'THACO AUTO', logo: 'THACO AUTO' },
+  { name: 'Vinamilk', logo: 'Vinamilk' },
+  { name: 'VNPAY', logo: 'VNPAY' },
 ];
 
 const LandingPage = () => {
@@ -1528,6 +1640,48 @@ const LandingPage = () => {
         </BannerContainer>
         </HeroContent>
       </HeroSection>
+
+      <CompanyBannerSection>
+        <CompanyBannerContent>
+          <CompanyBannerTitle
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            Nhiều doanh nghiệp đang tìm "tân binh" giỏi – giống bạn đó!
+          </CompanyBannerTitle>
+          
+          <LogoCarouselWrapper>
+            <LogoCarousel
+              animate={{
+                x: [0, -1800],
+              }}
+              transition={{
+                x: {
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  duration: 30,
+                  ease: "linear",
+                },
+              }}
+            >
+              {[...companyLogos, ...companyLogos, ...companyLogos].map((company, index) => (
+                <BannerCompanyLogo key={`${company.name}-${index}`}>
+                  <span style={{ 
+                    fontSize: '20px', 
+                    fontWeight: '700',
+                    color: '#1F2937',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {company.logo}
+                  </span>
+                </BannerCompanyLogo>
+              ))}
+            </LogoCarousel>
+          </LogoCarouselWrapper>
+        </CompanyBannerContent>
+      </CompanyBannerSection>
 
       <CTASection>
         <CTACard
