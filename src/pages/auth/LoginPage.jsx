@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Button, Input, FormGroup, Label, ErrorText } from '../../components/FormElements';
@@ -342,6 +342,7 @@ const SubmitButton = styled(Button)`
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
   const { t } = useLanguage();
   const [role, setRole] = useState('candidate');
@@ -351,6 +352,15 @@ const LoginPage = () => {
     password: ''
   });
   const [errors, setErrors] = useState({});
+
+  // Set role from query parameter if provided
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const roleParam = searchParams.get('role');
+    if (roleParam && ['candidate', 'employer', 'admin'].includes(roleParam)) {
+      setRole(roleParam);
+    }
+  }, [location.search]);
 
   const handleChange = (e) => {
     setFormData({
@@ -400,7 +410,25 @@ const LoginPage = () => {
 
     login(userData);
 
-    // Redirect based on role
+    // Check for redirect query param
+    const searchParams = new URLSearchParams(location.search);
+    const redirectPath = searchParams.get('redirect');
+
+    // Redirect based on role or redirect param
+    if (redirectPath) {
+      if (role === 'candidate' && redirectPath.startsWith('/candidate/')) {
+        navigate(redirectPath);
+        return;
+      } else if (role === 'employer' && redirectPath.startsWith('/employer/')) {
+        navigate(redirectPath);
+        return;
+      } else if (role === 'admin' && redirectPath.startsWith('/admin/')) {
+        navigate(redirectPath);
+        return;
+      }
+    }
+    
+    // Default redirects
     if (role === 'candidate') {
       navigate('/candidate/dashboard');
     } else if (role === 'employer') {

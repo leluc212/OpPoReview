@@ -27,6 +27,7 @@ import EmployerProfileView from './pages/candidate/EmployerProfileView';
 import Support from './pages/candidate/Support';
 import Wallet from './pages/candidate/Wallet';
 import Availability from './pages/candidate/Availability';
+import CandidatePosts from './pages/candidate/CandidatePosts';
 
 // Employer Pages
 import EmployerDashboard from './pages/employer/EmployerDashboard';
@@ -134,6 +135,11 @@ function AppRoutes() {
       <Route path="/candidate/availability" element={
         <ProtectedRoute allowedRoles={['candidate']}>
           <Availability />
+        </ProtectedRoute>
+      } />
+      <Route path="/candidate/posts" element={
+        <ProtectedRoute allowedRoles={['candidate']}>
+          <CandidatePosts />
         </ProtectedRoute>
       } />
       
