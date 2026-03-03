@@ -222,32 +222,18 @@ const FilterSidebar = styled(motion.aside)`
   border-radius: ${props => props.theme.borderRadius.xl};
   padding: 20px;
   border: 1px solid ${props => props.theme.colors.border};
-  position: sticky;
-  top: 20px;
-  max-height: calc(100vh - 40px);
-  overflow-y: auto;
   box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-  
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: ${props => props.theme.colors.border};
-    border-radius: 3px;
-    
-    &:hover {
-      background: ${props => props.theme.colors.primary};
-    }
-  }
+  position: sticky;
+  top: 100px;
+  align-self: flex-start;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
   
   @media (max-width: 1024px) {
     position: static;
     max-height: none;
+    overflow: visible;
+    margin-bottom: 24px;
   }
 `;
 
@@ -278,7 +264,7 @@ const FilterHeader = styled.div`
 const ClearButton = styled.button`
   padding: 6px 12px;
   background: transparent;
-  color: ${props => props.theme.colors.danger};
+  color: #ffffff;
   border: 1px solid ${props => props.theme.colors.danger};
   border-radius: ${props => props.theme.borderRadius.md};
   font-size: 13px;
@@ -1829,18 +1815,24 @@ const JobListing = () => {
         >
           <HeroContent>
             <HeroTitle>
-              {jobCategory === 'standard' 
-                ? (language === 'vi' ? 'Tìm công việc mơ ước của bạn ' : 'Find Your Dream Job ')
-                : (language === 'vi' ? 'Công việc theo ca - Tuyển gấp ' : 'Shift Jobs - Hiring Now ')}
+              {showSavedJobsOnly
+                ? (language === 'vi' ? 'Công việc đã lưu' : 'Saved Jobs')
+                : jobCategory === 'standard' 
+                  ? (language === 'vi' ? 'Tìm công việc mơ ước của bạn ' : 'Find Your Dream Job ')
+                  : (language === 'vi' ? 'Công việc theo ca - Tuyển gấp ' : 'Shift Jobs - Hiring Now ')}
             </HeroTitle>
             <HeroSubtitle>
-              {jobCategory === 'standard'
-                ? (language === 'vi' 
-                    ? `Hơn ${allJobs.filter(j => j.category === 'standard').length} công việc tiêu chuẩn đang chờ bạn khám phá` 
-                    : `Over ${allJobs.filter(j => j.category === 'standard').length} standard jobs waiting for you to explore`)
-                : (language === 'vi'
-                    ? `${allJobs.filter(j => j.category === 'shift').length} công việc theo ca đang tuyển gấp, làm ngay hôm nay!`
-                    : `${allJobs.filter(j => j.category === 'shift').length} shift jobs hiring urgently, start today!`)}
+              {showSavedJobsOnly
+                ? (language === 'vi'
+                    ? `Bạn đang theo dõi ${filteredJobs.length} công việc đã lưu`
+                    : `You are tracking ${filteredJobs.length} saved jobs`)
+                : jobCategory === 'standard'
+                  ? (language === 'vi' 
+                      ? `Hơn ${allJobs.filter(j => j.category === 'standard').length} công việc tiêu chuẩn đang chờ bạn khám phá` 
+                      : `Over ${allJobs.filter(j => j.category === 'standard').length} standard jobs waiting for you to explore`)
+                  : (language === 'vi'
+                      ? `${allJobs.filter(j => j.category === 'shift').length} công việc theo ca đang tuyển gấp, làm ngay hôm nay!`
+                      : `${allJobs.filter(j => j.category === 'shift').length} shift jobs hiring urgently, start today!`)}
             </HeroSubtitle>
             
             <SearchContainer>
@@ -2270,13 +2262,19 @@ const JobListing = () => {
             <ContentHeader>
               <ResultsInfo>
                 <h2>
-                  {jobCategory === 'standard' 
-                    ? (language === 'vi' ? 'Công việc tiêu chuẩn' : 'Standard Jobs')
-                    : (language === 'vi' ? 'Công việc theo ca' : 'Shift Jobs')}
+                  {showSavedJobsOnly
+                    ? (language === 'vi' ? 'Công việc đã lưu' : 'Saved Jobs')
+                    : jobCategory === 'standard' 
+                      ? (language === 'vi' ? 'Công việc tiêu chuẩn' : 'Standard Jobs')
+                      : (language === 'vi' ? 'Công việc theo ca' : 'Shift Jobs')}
                 </h2>
                 <p>{language === 'vi' 
-                  ? `Tìm thấy ${filteredJobs.length} công việc phù hợp`
-                  : `Found ${filteredJobs.length} matching jobs`}</p>
+                  ? (showSavedJobsOnly
+                      ? `Bạn đang theo dõi ${filteredJobs.length} công việc đã lưu`
+                      : `Tìm thấy ${filteredJobs.length} công việc phù hợp`)
+                  : (showSavedJobsOnly
+                      ? `You are tracking ${filteredJobs.length} saved jobs`
+                      : `Found ${filteredJobs.length} matching jobs`)}</p>
               </ResultsInfo>
               
               <ViewControls>
@@ -2324,7 +2322,19 @@ const JobListing = () => {
                   gridColumn: '1 / -1',
                   color: '#6b7280'
                 }}>
-                  {jobCategory === 'shift' && !showNearbyJobs ? (
+                  {showSavedJobsOnly ? (
+                    <>
+                      <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔖</div>
+                      <p style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
+                        {language === 'vi' ? 'Bạn chưa lưu công việc nào' : "You haven't saved any jobs yet"}
+                      </p>
+                      <p style={{ fontSize: '15px', color: '#6b7280' }}>
+                        {language === 'vi'
+                          ? 'Nhấn vào biểu tượng lưu ở tin tuyển dụng mà bạn quan tâm để thêm vào danh sách.'
+                          : 'Click the save icon on any job to add it here.'}
+                      </p>
+                    </>
+                  ) : jobCategory === 'shift' && !showNearbyJobs ? (
                     <>
                       <div style={{ fontSize: '48px', marginBottom: '16px' }}>📍</div>
                       <p style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
