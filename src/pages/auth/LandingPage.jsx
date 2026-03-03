@@ -2,11 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-<<<<<<< HEAD
-import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package, Heart, UserPlus, Shield, MessageCircle, Headphones, Moon, Sun } from 'lucide-react';
-=======
-import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package, Heart, UserPlus, Shield, MessageCircle, Headphones, Clock, Mail, Send, Award, Zap, Target } from 'lucide-react';
->>>>>>> ed3f9172edada04bf619770c2f6f66ab813365db
+import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package, Heart, UserPlus, Shield, MessageCircle, Headphones, Moon, Sun, Clock, Mail, Send, Award, Zap, Target } from 'lucide-react';
 import { Button } from '../../components/FormElements';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -435,32 +431,8 @@ const AnimatedBackground = styled.div`
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-<<<<<<< HEAD
   background: ${props => props.$isDark ? '#0f172a' : '#002e9d'};
   transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-=======
-  background: linear-gradient(135deg, #002e9d 0%, #001a5c 50%, #002e9d 100%);
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(
-      ellipse at 30% 20%,
-      rgba(59, 130, 246, 0.15) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      ellipse at 70% 80%,
-      rgba(37, 99, 235, 0.1) 0%,
-      transparent 50%
-    );
-    z-index: 1;
-  }
->>>>>>> ed3f9172edada04bf619770c2f6f66ab813365db
   
   &::after {
     content: '';
@@ -483,11 +455,8 @@ const AnimatedBackground = styled.div`
           rgba(26, 98, 255, 0) 100%
         )`};
     animation: moveDown 8s ease-in-out infinite;
-<<<<<<< HEAD
     transition: background 0.4s ease;
-=======
     z-index: 2;
->>>>>>> ed3f9172edada04bf619770c2f6f66ab813365db
   }
   
   @keyframes moveDown {
@@ -882,13 +851,8 @@ const SearchContainer = styled(motion.div)`
   margin: 0 auto 40px;
   background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.98)'};
   backdrop-filter: blur(30px);
-<<<<<<< HEAD
   border: 2px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.4)' : 'rgba(147, 197, 253, 0.4)'};
   padding: 12px;
-=======
-  border: 2px solid rgba(147, 197, 253, 0.4);
-  padding: 0;
->>>>>>> ed3f9172edada04bf619770c2f6f66ab813365db
   border-radius: 16px;
   box-shadow: ${props => props.$isDark 
     ? '0 12px 48px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.2)'
@@ -918,17 +882,10 @@ const SearchInput = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
-<<<<<<< HEAD
   padding: 14px 18px;
   background: ${props => props.$isDark ? 'rgba(15, 23, 42, 0.8)' : 'rgba(255, 255, 255, 0.95)'};
   border-radius: 12px;
   border: 2px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.3)' : 'rgba(147, 197, 253, 0.3)'};
-=======
-  padding: 18px 20px;
-  background: transparent;
-  border: none;
-  border-right: 1px solid rgba(147, 197, 253, 0.3);
->>>>>>> ed3f9172edada04bf619770c2f6f66ab813365db
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   
@@ -937,24 +894,9 @@ const SearchInput = styled.div`
   }
   
   &:focus-within {
-<<<<<<< HEAD
     background: ${props => props.$isDark ? 'rgba(15, 23, 42, 1)' : 'rgba(255, 255, 255, 1)'};
     border-color: #0EA5E9;
     box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15), 0 4px 12px rgba(14, 165, 233, 0.2);
-=======
-    background: rgba(213, 236, 247, 0.03);
-    
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 0px;
-      background: #0EA5E9;
-      opacity: 0.5;
-    }
->>>>>>> ed3f9172edada04bf619770c2f6f66ab813365db
   }
   
   svg {
@@ -2042,11 +1984,7 @@ const LandingPage = () => {
                       Việc làm
                       <ArrowRight />
                     </GreenSectionTitle>
-<<<<<<< HEAD
                     <CVTemplateItem to="/candidate/jobs" $isDark={isDarkMode}>
-=======
-                    <CVTemplateItem to="/login?redirect=/candidate/jobs">
->>>>>>> ed3f9172edada04bf619770c2f6f66ab813365db
                       <Search />
                       Tìm việc làm
                     </CVTemplateItem>

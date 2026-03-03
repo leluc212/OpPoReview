@@ -21,7 +21,8 @@ import {
   Wallet,
   LogOut,
   UsersRound,
-  User
+  User,
+  Bookmark
 } from 'lucide-react';
 
 const SidebarContainer = styled.aside`

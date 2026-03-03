@@ -34,8 +34,8 @@ const Container = styled.div`
 const HeroSection = styled(motion.div)`
   background: linear-gradient(135deg, ${props => props.theme.colors.primary} 0%, #1e40af 100%);
   border-radius: ${props => props.theme.borderRadius.xl};
-  padding: 48px 40px;
-  margin-bottom: 32px;
+  padding: 32px 40px;
+  margin-bottom: 24px;
   position: relative;
   overflow: hidden;
   
@@ -62,17 +62,17 @@ const HeroContent = styled.div`
 `;
 
 const HeroTitle = styled.h1`
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 800;
   color: white;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   text-shadow: 0 2px 10px rgba(0,0,0,0.1);
 `;
 
 const HeroSubtitle = styled.p`
-  font-size: 16px;
+  font-size: 14px;
   color: rgba(255,255,255,0.9);
-  margin-bottom: 32px;
+  margin-bottom: 24px;
   font-weight: 500;
 `;
 
@@ -94,7 +94,7 @@ const SearchInput = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 20px;
+  padding: 10px 16px;
   border-radius: ${props => props.theme.borderRadius.lg};
   background: ${props => props.theme.colors.bgDark};
   
@@ -119,13 +119,13 @@ const SearchInput = styled.div`
 `;
 
 const SearchButton = styled(motion.button)`
-  padding: 16px 32px;
+  padding: 12px 24px;
   background: linear-gradient(135deg, ${props => props.theme.colors.primary}, ${props => props.theme.colors.secondary});
   color: white;
   border: none;
   border-radius: ${props => props.theme.borderRadius.lg};
   font-weight: 600;
-  font-size: 15px;
+  font-size: 14px;
   cursor: pointer;
   white-space: nowrap;
   display: flex;
@@ -139,21 +139,21 @@ const SearchButton = styled(motion.button)`
 `;
 
 const QuickFilters = styled.div`
-  margin-top: 24px;
+  margin-top: 16px;
   display: flex;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
   position: relative;
   z-index: 1;
 `;
 
 const FilterChip = styled(motion.button)`
-  padding: 8px 16px;
+  padding: 6px 14px;
   background: ${props => props.$active ? 'white' : 'rgba(255,255,255,0.2)'};
   color: ${props => props.$active ? props.theme.colors.primary : 'white'};
   border: 1px solid ${props => props.$active ? 'white' : 'rgba(255,255,255,0.3)'};
   border-radius: ${props => props.theme.borderRadius.full};
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -170,12 +170,12 @@ const FilterChip = styled(motion.button)`
 const CategoryTabs = styled.div`
   display: flex;
   gap: 12px;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 `;
 
 const CategoryTab = styled(motion.button)`
   flex: 1;
-  padding: 20px 28px;
+  padding: 16px 24px;
   background: ${props => props.$active 
     ? `linear-gradient(135deg, ${props.theme.colors.primary}, ${props.theme.colors.secondary})` 
     : props.theme.colors.bgLight};
@@ -220,7 +220,7 @@ const MainLayout = styled.div`
 const FilterSidebar = styled(motion.aside)`
   background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.xl};
-  padding: 24px;
+  padding: 20px;
   border: 1px solid ${props => props.theme.colors.border};
   position: sticky;
   top: 20px;
@@ -255,8 +255,8 @@ const FilterHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
   border-bottom: 2px solid ${props => props.theme.colors.border};
   
   h3 {
@@ -293,7 +293,7 @@ const ClearButton = styled.button`
 `;
 
 const FilterSection = styled.div`
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   
   &:last-child {
     margin-bottom: 0;
@@ -369,7 +369,7 @@ const ContentHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   flex-wrap: wrap;
   gap: 16px;
 `;
@@ -1494,6 +1494,13 @@ const JobListing = () => {
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [showNearbyJobs, setShowNearbyJobs] = useState(false);
   const [nearbyRadius, setNearbyRadius] = useState(3); // km
+  const [showSavedJobsOnly, setShowSavedJobsOnly] = useState(false);
+
+  // Load saved jobs from localStorage on mount
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+    setSavedJobs(saved.map(job => job.id));
+  }, []);
 
   // Handle search from Navbar
   useEffect(() => {
@@ -1574,6 +1581,22 @@ const JobListing = () => {
 
   const handleSaveJob = (jobId, e) => {
     e?.stopPropagation();
+    
+    const job = allJobs.find(j => j.id === jobId);
+    if (!job) return;
+    
+    const saved = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+    const isAlreadySaved = saved.some(j => j.id === jobId);
+    
+    let updated;
+    if (isAlreadySaved) {
+      updated = saved.filter(j => j.id !== jobId);
+    } else {
+      updated = [...saved, job];
+    }
+    
+    localStorage.setItem('savedJobs', JSON.stringify(updated));
+    
     setSavedJobs(prev => 
       prev.includes(jobId) 
         ? prev.filter(id => id !== jobId)
@@ -1689,6 +1712,11 @@ const JobListing = () => {
     
     let result = allJobs.filter(job => job.category === jobCategory);
     
+    // Filter by saved jobs only
+    if (showSavedJobsOnly) {
+      result = result.filter(job => savedJobs.includes(job.id));
+    }
+    
     // Add distance if user location is available
     if (userLocation) {
       result = result.map(job => ({
@@ -1778,7 +1806,7 @@ const JobListing = () => {
     return result;
   }, [jobCategory, searchKeyword, selectedLocation, selectedJobTypes, 
       selectedExperience, selectedSalaryRanges, selectedCompanies, 
-      quickFilter, savedJobs, sortBy, userLocation, showNearbyJobs, nearbyJobs, allJobs]);
+      quickFilter, savedJobs, sortBy, userLocation, showNearbyJobs, nearbyJobs, allJobs, showSavedJobsOnly]);
 
   const categoryJobs = allJobs.filter(job => job.category === jobCategory);
 
@@ -1847,6 +1875,26 @@ const JobListing = () => {
                 {language === 'vi' ? 'Tìm kiếm' : 'Search'}
               </SearchButton>
             </SearchContainer>
+            
+            <QuickFilters>
+              <FilterChip
+                $active={!showSavedJobsOnly}
+                onClick={() => setShowSavedJobsOnly(false)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {language === 'vi' ? 'Tất cả' : 'All Jobs'}
+              </FilterChip>
+              <FilterChip
+                $active={showSavedJobsOnly}
+                onClick={() => setShowSavedJobsOnly(true)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Bookmark size={16} />
+                {language === 'vi' ? 'Tin đã lưu' : 'Saved Jobs'}
+              </FilterChip>
+            </QuickFilters>
             
             {/* Location-based search button - Only for shift jobs */}
             {jobCategory === 'shift' && (
@@ -2109,16 +2157,6 @@ const JobListing = () => {
                       <span>{language === 'vi' ? 'Middle (2-5 năm)' : 'Middle (2-5 years)'}</span>
                       <small>32</small>
                     </FilterOption>
-                    <FilterOption>
-                      <input 
-                        type="checkbox" 
-                        id="senior" 
-                        checked={selectedExperience.includes('senior')}
-                        onChange={() => toggleExperience('senior')}
-                      />
-                      <span>{language === 'vi' ? 'Senior (5+ năm)' : 'Senior (5+ years)'}</span>
-                      <small>18</small>
-                    </FilterOption>
                   </FilterOptions>
                 )}
               </FilterSection>
@@ -2168,16 +2206,6 @@ const JobListing = () => {
                         />
                         <span>{language === 'vi' ? '100 - 150 triệu' : '100 - 150 million'}</span>
                         <small>18</small>
-                      </FilterOption>
-                      <FilterOption>
-                        <input 
-                          type="checkbox" 
-                          id="150+" 
-                          checked={selectedSalaryRanges.includes('150+')}
-                          onChange={() => toggleSalaryRange('150+')}
-                        />
-                        <span>{language === 'vi' ? 'Trên 150 triệu' : 'Over 150 million'}</span>
-                        <small>8</small>
                       </FilterOption>
                     </>
                   ) : (
