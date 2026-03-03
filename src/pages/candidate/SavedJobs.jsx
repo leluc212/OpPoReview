@@ -343,7 +343,7 @@ const SavedJobs = () => {
     <DashboardLayout role="candidate" showSearch={false}>
       <SavedJobsContainer>
         <PageHeader>
-          <h1>{language === 'vi' ? 'Tin Đã Lưu' : 'Saved Jobs'}</h1>
+          <h1>{language === 'vi' ? 'Công việc đã lưu' : 'Saved Jobs'}</h1>
           <p>
             {language === 'vi' 
               ? `${savedJobs.length} công việc đã lưu` 

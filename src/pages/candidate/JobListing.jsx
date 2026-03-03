@@ -1496,6 +1496,11 @@ const JobListing = () => {
   const [nearbyRadius, setNearbyRadius] = useState(3); // km
   const [showSavedJobsOnly, setShowSavedJobsOnly] = useState(false);
 
+  // Check if we're on saved jobs page
+  useEffect(() => {
+    // Removed - no longer using separate route for saved jobs
+  }, [location.pathname]);
+
   // Load saved jobs from localStorage on mount
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('savedJobs') || '[]');
@@ -1702,19 +1707,22 @@ const JobListing = () => {
 
   // Advanced filtering with useMemo for performance
   const filteredJobs = useMemo(() => {
-    // For shift jobs, only show nearby jobs when location is enabled
-    if (jobCategory === 'shift') {
-      if (!showNearbyJobs) {
-        return []; // Don't show any jobs until location is enabled
-      }
-      return nearbyJobs; // Show only nearby jobs within radius
-    }
-    
-    let result = allJobs.filter(job => job.category === jobCategory);
+    let result = allJobs;
     
     // Filter by saved jobs only
     if (showSavedJobsOnly) {
       result = result.filter(job => savedJobs.includes(job.id));
+      // Don't apply category filter for saved jobs
+    } else {
+      // For shift jobs, only show nearby jobs when location is enabled
+      if (jobCategory === 'shift') {
+        if (!showNearbyJobs) {
+          return []; // Don't show any jobs until location is enabled
+        }
+        return nearbyJobs; // Show only nearby jobs within radius
+      }
+      
+      result = result.filter(job => job.category === jobCategory);
     }
     
     // Add distance if user location is available
@@ -1876,26 +1884,6 @@ const JobListing = () => {
               </SearchButton>
             </SearchContainer>
             
-            <QuickFilters>
-              <FilterChip
-                $active={!showSavedJobsOnly}
-                onClick={() => setShowSavedJobsOnly(false)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {language === 'vi' ? 'Tất cả' : 'All Jobs'}
-              </FilterChip>
-              <FilterChip
-                $active={showSavedJobsOnly}
-                onClick={() => setShowSavedJobsOnly(true)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Bookmark size={16} />
-                {language === 'vi' ? 'Tin đã lưu' : 'Saved Jobs'}
-              </FilterChip>
-            </QuickFilters>
-            
             {/* Location-based search button - Only for shift jobs */}
             {jobCategory === 'shift' && (
               <motion.div
@@ -1979,10 +1967,12 @@ const JobListing = () => {
         {/* Category Tabs */}
         <CategoryTabs>
           <CategoryTab
-            $active={jobCategory === 'standard'}
+            $active={jobCategory === 'standard' && !showSavedJobsOnly}
             onClick={() => {
               setJobCategory('standard');
               setQuickFilter('all');
+              setShowSavedJobsOnly(false);
+              navigate('/candidate/jobs');
               setTimeout(() => scrollToResults(), 100);
             }}
             whileHover={{ scale: 1.02 }}
@@ -1996,10 +1986,12 @@ const JobListing = () => {
           </CategoryTab>
           
           <CategoryTab
-            $active={jobCategory === 'shift'}
+            $active={jobCategory === 'shift' && !showSavedJobsOnly}
             onClick={() => {
               setJobCategory('shift');
               setQuickFilter('all');
+              setShowSavedJobsOnly(false);
+              navigate('/candidate/jobs');
               setTimeout(() => scrollToResults(), 100);
             }}
             whileHover={{ scale: 1.02 }}
@@ -2009,6 +2001,22 @@ const JobListing = () => {
             {language === 'vi' ? 'Công việc theo ca - Tuyển gấp' : 'Shift Jobs - Hiring Now'}
             <span style={{ marginLeft: 'auto', fontSize: '14px', opacity: 0.9 }}>
               ({allJobs.filter(j => j.category === 'shift').length})
+            </span>
+          </CategoryTab>
+          
+          <CategoryTab
+            $active={showSavedJobsOnly}
+            onClick={() => {
+              setShowSavedJobsOnly(true);
+              setTimeout(() => scrollToResults(), 100);
+            }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Bookmark />
+            {language === 'vi' ? 'Công việc đã lưu' : 'Saved Jobs'}
+            <span style={{ marginLeft: 'auto', fontSize: '14px', opacity: 0.9 }}>
+              ({savedJobs.length})
             </span>
           </CategoryTab>
         </CategoryTabs>

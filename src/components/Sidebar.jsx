@@ -340,12 +340,15 @@ const Sidebar = ({ role }) => {
     isNavigatingRef.current = false;
   }, [location.pathname]);
   
-  const handleNavClick = (path) => {
-    if (path === '#') return;
+  const handleNavClick = (path, e) => {
+    if (path === '#') {
+      e?.preventDefault();
+      return;
+    }
     
+    e?.preventDefault();
     isNavigatingRef.current = true;
     
-    // Save current scroll position before navigation
     if (navRef.current) {
       sessionStorage.setItem('sidebarScrollPos', navRef.current.scrollTop.toString());
     }

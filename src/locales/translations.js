@@ -383,10 +383,10 @@ export const translations = {
       savedTab: 'Việc Đã Lưu',
       postsLabel: 'bài đăng',
       showing: 'Đang hiển thị',
-      savedJob: 'Tin Đã Lưu',
+      savedJob: 'Công việc đã lưu',
       viewEmployerProfile: 'Xem Hồ Sơ Nhà Tuyển Dụng',
       followEmployer: 'Theo Dõi Nhà Tuyển Dụng',
-      savedJobsTitle: 'Tin Đã Lưu',
+      savedJobsTitle: 'Công việc đã lưu',
       savedJobsSubtitle: 'Các tin tuyển dụng bạn đã lưu để xem sau',
     },
 
