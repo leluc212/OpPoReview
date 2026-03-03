@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package } from 'lucide-react';
+import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package, Heart, UserPlus, Shield, MessageCircle, Headphones } from 'lucide-react';
 import { Button } from '../../components/FormElements';
 
 const LandingContainer = styled.div`
-  min-height: 100vh;
+  min-height: 80vh;
   background: #e3e7e9;
   position: relative;
   overflow-x: hidden;
@@ -14,10 +14,10 @@ const LandingContainer = styled.div`
   &::before {
     content: 'OP PO';
     position: absolute;
-    top: 50%;
+    top: 56%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 450px;
+    font-size: 550px;
     font-weight: 900;
     line-height: 1;
     color: transparent;
@@ -650,6 +650,48 @@ const SearchInput = styled.div`
   }
 `;
 
+const BannerContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 60px;
+  margin: 20px auto 0;
+  max-width: 1200px;
+  padding: 0px 20px;
+  
+  @media (max-width: 968px) {
+    flex-direction: column;
+    gap: 20px;
+  }
+`;
+
+const MascotImage = styled.img`
+  width: auto;
+  height: 350px;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  filter: contrast(1.1) brightness(1.05);
+  flex-shrink: 0;
+  
+  @media (max-width: 968px) {
+    height: 350px;
+  }
+`;
+
+const MainBanner = styled.img`
+  width: 700px;
+  height: auto;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(147, 197, 253, 0.2);
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  flex-shrink: 0;
+  
+  @media (max-width: 968px) {
+    width: 100%;
+    max-width: 500px;
+  }
+`;
+
 const CTAButtons = styled(motion.div)`
   display: flex;
   gap: 16px;
@@ -857,6 +899,89 @@ const Copyright = styled.div`
   font-size: 14px;
 `;
 
+const StickyColumn = styled.div`
+  position: fixed;
+  right: 20px;
+  top: 550px;
+  transform: translateY(-50%);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  
+  @media (max-width: 1024px) {
+    display: none;
+  }
+`;
+
+const StickyIconButton = styled(motion.a)`
+  width: 46px;
+  height: 46px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(147, 197, 253, 0.4);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #0EA5E9;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(147, 197, 253, 0.15);
+  text-decoration: none;
+  position: relative;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 1);
+    border-color: #0EA5E9;
+    transform: translateX(-8px) scale(1.05);
+    box-shadow: 0 8px 24px rgba(14, 165, 233, 0.3);
+    
+    &::after {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  &::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    right: calc(100% + 16px);
+    background: rgba(15, 23, 42, 0.95);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateX(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  }
+  
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+`;
+
+const NotificationBadge = styled.span`
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  border: 2px solid white;
+  min-width: 18px;
+  text-align: center;
+`;
+
 const SectionHeading = styled(motion.div)`
   text-align: center;
   margin-bottom: 48px;
@@ -958,6 +1083,67 @@ const LandingPage = () => {
 
   return (
     <LandingContainer>
+      <StickyColumn>
+        <StickyIconButton
+          as={Link}
+          to="/candidate/saved-jobs"
+          data-tooltip="Việc làm đã lưu"
+          initial={{ x: -100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          whileHover={{ scale: 1.05 }}
+        >
+          <Heart />
+        </StickyIconButton>
+        
+        <StickyIconButton
+          as={Link}
+          to="/register"
+          data-tooltip="Đăng ký"
+          initial={{ x: -100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          whileHover={{ scale: 1.05 }}
+        >
+          <UserPlus />
+        </StickyIconButton>
+        
+        <StickyIconButton
+          as={Link}
+          to="/login"
+          data-tooltip="Đăng nhập an toàn"
+          initial={{ x: -100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          whileHover={{ scale: 1.05 }}
+        >
+          <Shield />
+        </StickyIconButton>
+        
+        <StickyIconButton
+          href="#"
+          data-tooltip="Góp ý"
+          initial={{ x: -100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          whileHover={{ scale: 1.05 }}
+        >
+          <MessageCircle />
+          <NotificationBadge>3</NotificationBadge>
+        </StickyIconButton>
+        
+        <StickyIconButton
+          href="#"
+          data-tooltip="Hỗ trợ"
+          initial={{ x: -100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          whileHover={{ scale: 1.05 }}
+        >
+          <Headphones />
+        </StickyIconButton>
+      </StickyColumn>
+      
       <Header
         initial={{ y: -100 }}
         animate={{ y: 0 }}
@@ -1329,6 +1515,17 @@ const LandingPage = () => {
             Tìm việc
           </Button>
         </SearchContainer>
+        
+        <BannerContainer>
+          <MascotImage
+            src="/images/mascot.png"
+            alt="Mascot"
+          />
+          <MainBanner
+            src="/images/banner2.png"
+            alt="Banner"
+          />
+        </BannerContainer>
         </HeroContent>
       </HeroSection>
 
