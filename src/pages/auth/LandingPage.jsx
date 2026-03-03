@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package, Heart, UserPlus, Shield, MessageCircle, Headphones, Clock, Mail, Send, Award, Zap, Target } from 'lucide-react';
+import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package, Heart, UserPlus, Shield, MessageCircle, Headphones, Clock, Mail, Send, Award, Zap, Target, Calendar } from 'lucide-react';
 import { Button } from '../../components/FormElements';
 
 const LandingContainer = styled.div`
@@ -860,25 +860,36 @@ const SearchContainer = styled(motion.div)`
 `;
 
 const SearchInput = styled.div`
-  flex: 1;
+  flex: ${props => props.$wide ? '4' : '0.6'};
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 18px 20px;
   background: transparent;
   border: none;
-  border-right: 1px solid rgba(147, 197, 253, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
-  &:last-of-type {
-    border-right: none;
+  &::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 30px;
+    background: rgba(147, 197, 253, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  &:last-of-type::after {
+    display: none;
   }
   
   &:focus-within {
     background: rgba(213, 236, 247, 0.03);
     
-    &::after {
+    &::before {
       content: '';
       position: absolute;
       bottom: 0;
@@ -918,11 +929,11 @@ const SearchInput = styled.div`
 
 const BannerContainer = styled.div`
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  gap: 30px;
+  gap: 20px;
   margin: 10px 0 0;
-  width: 120%;
+  width: 100%;
   max-width: 1200px;
   padding: 0;
   
@@ -930,6 +941,96 @@ const BannerContainer = styled.div`
     flex-direction: column;
     gap: 20px;
     width: 100%;
+  }
+`;
+
+const StatsCard = styled(motion.div)`
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 280px;
+  height: auto;
+  
+  @media (max-width: 968px) {
+    width: 100%;
+    min-width: auto;
+  }
+`;
+
+const StatsHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.9;
+  
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
+const StatsTitle = styled.h3`
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+  opacity: 0.8;
+`;
+
+const StatItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const StatLabel = styled.div`
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  font-weight: 500;
+`;
+
+const StatValue = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 24px;
+  font-weight: 700;
+  
+  svg {
+    width: 20px;
+    height: 20px;
+    color: #22c55e;
+  }
+  
+  span {
+    font-size: 14px;
+    opacity: 0.6;
+    margin-left: auto;
+  }
+`;
+
+const BannerWrapper = styled.div`
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  
+  @media (max-width: 968px) {
+    justify-content: center;
   }
 `;
 
@@ -948,18 +1049,17 @@ const MascotImage = styled.img`
 `;
 
 const MainBanner = styled.img`
-  width: 110%;
+  width: 100%;
+  max-width: 700px;
   height: auto;
   border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(147, 197, 253, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.8);
   flex-shrink: 0;
-  transform: scale(1.05);
   
   @media (max-width: 968px) {
     width: 100%;
     max-width: 1000px;
-    transform: scale(1);
   }
 `;
 
@@ -2696,7 +2796,7 @@ const LandingPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <SearchInput>
+            <SearchInput $wide>
               <Search />
               <input
                 type="text"
@@ -2722,14 +2822,39 @@ const LandingPage = () => {
         </SearchContainer>
         
         <BannerContainer>
-          <MascotImage
-            src="/images/mascot.png"
-            alt="Mascot"
-          />
-          <MainBanner
-            src="/images/bannerdai.png"
-            alt="Banner"
-          />
+          <StatsCard
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+          >
+            <StatsHeader>
+              <Calendar />
+              Thị trường làm việc hôm nay {new Date().toLocaleDateString('vi-VN')}
+            </StatsHeader>
+            
+            <StatItem>
+              <StatLabel>Việc làm đang tuyển</StatLabel>
+              <StatValue>
+                500,000
+                <TrendingUp />
+              </StatValue>
+            </StatItem>
+            
+            <StatItem>
+              <StatLabel>Việc làm gấp hôm nay</StatLabel>
+              <StatValue>
+                250
+                <TrendingUp />
+              </StatValue>
+            </StatItem>
+          </StatsCard>
+          
+          <BannerWrapper>
+            <MainBanner
+              src="/images/bannerdai.png"
+              alt="Banner"
+            />
+          </BannerWrapper>
         </BannerContainer>
         </HeroContent>
       </HeroSection>
