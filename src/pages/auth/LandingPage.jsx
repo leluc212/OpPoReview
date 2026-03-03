@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion, useInView } from 'framer-motion';
-import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package, Heart, UserPlus, Shield, MessageCircle, Headphones, Moon, Sun, Clock, Mail, Send, Award, Zap, Target, Calendar } from 'lucide-react';
+import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package, Heart, UserPlus, Shield, MessageCircle, Headphones, Moon, Sun, Clock, Mail, Send, Award, Zap, Target, Calendar, Download } from 'lucide-react';
 import { Button } from '../../components/FormElements';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -1000,7 +1000,7 @@ const StatsRow = styled.div`
   padding: 7px 0;
 `;
 
-const StatItem = styled.div`
+const StatItem = styled(motion.div)`
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -1031,7 +1031,7 @@ const StatValue = styled.div`
   }
 `;
 
-const BannerWrapper = styled.div`
+const BannerWrapper = styled(motion.div)`
   flex: 1;
   display: flex;
   flex-direction: row;
@@ -1059,7 +1059,7 @@ const MascotImage = styled.img`
   }
 `;
 
-const MainBanner = styled.img`
+const MainBanner = styled(motion.img)`
   width: auto;
   max-width: 500px;
   height: auto;
@@ -1077,7 +1077,7 @@ const MainBanner = styled.img`
   }
 `;
 
-const SecondaryBanner = styled.img`
+const SecondaryBanner = styled(motion.img)`
   width: auto;
   max-width: 600px;
   height: auto;
@@ -1357,8 +1357,8 @@ const CTAText = styled.p`
 const DownloadAppSection = styled(motion.section)`
   padding: 60px 90px;
   background: ${props => props.$isDark 
-    ? 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%)' 
-    : 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)'};
+    ? '#0c4a6e' 
+    : '#EFF6FF'};
   max-width: 1440px;
   margin: 0 auto;
   height: 100vh;
@@ -1367,6 +1367,37 @@ const DownloadAppSection = styled(motion.section)`
   scroll-snap-align: start;
   scroll-snap-stop: always;
   transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: ${props => props.$isDark 
+      ? 'radial-gradient(circle at 20% 50%, rgba(14, 165, 233, 0.15) 0%, transparent 50%)' 
+      : 'radial-gradient(circle at 80% 50%, rgba(14, 165, 233, 0.08) 0%, transparent 50%)'};
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: ${props => props.$isDark 
+      ? 'radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px)' 
+      : 'radial-gradient(rgba(14, 165, 233, 0.04) 1px, transparent 1px)'};
+    background-size: 20px 20px;
+    pointer-events: none;
+    opacity: 0.5;
+    z-index: 0;
+  }
 `;
 
 const DownloadAppContainer = styled.div`
@@ -1375,6 +1406,8 @@ const DownloadAppContainer = styled.div`
   justify-content: space-between;
   gap: 60px;
   width: 100%;
+  position: relative;
+  z-index: 1;
   
   @media (max-width: 1024px) {
     flex-direction: column;
@@ -1390,7 +1423,7 @@ const DownloadAppLeft = styled.div`
 const DownloadAppTitle = styled(motion.h2)`
   font-size: 44px;
   font-weight: 900;
-  color: ${props => props.$isDark ? '#f1f5f9' : '#1f2937'};
+  color: ${props => props.$isDark ? '#ffffff' : '#0c4a6e'};
   margin-bottom: 12px;
   line-height: 1.1;
   transition: color 0.4s ease;
@@ -1402,7 +1435,7 @@ const DownloadAppTitle = styled(motion.h2)`
 
 const DownloadAppSubtitle = styled(motion.p)`
   font-size: 18px;
-  color: ${props => props.$isDark ? '#94A3B8' : '#6b7280'};
+  color: ${props => props.$isDark ? '#cbd5e1' : '#0369a1'};
   margin-bottom: 32px;
   font-weight: 500;
   transition: color 0.4s ease;
@@ -1431,17 +1464,17 @@ const QRCodeSection = styled.div`
 const QRCode = styled.div`
   width: 120px;
   height: 120px;
-  background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : 'white'};
+  background: ${props => props.$isDark ? '#1e293b' : 'white'};
   border: 2px solid ${props => props.$isDark 
-    ? 'rgba(75, 85, 99, 0.5)' 
-    : '#e5e7eb'};
+    ? 'rgba(14, 165, 233, 0.3)' 
+    : 'rgba(14, 165, 233, 0.2)'};
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: ${props => props.$isDark 
-    ? '0 4px 16px rgba(0, 0, 0, 0.3)' 
-    : '0 4px 16px rgba(0, 0, 0, 0.08)'};
+    ? '0 4px 16px rgba(0, 0, 0, 0.5)' 
+    : '0 4px 16px rgba(14, 165, 233, 0.12)'};
   padding: 10px;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   
@@ -1453,7 +1486,7 @@ const QRCode = styled.div`
 
 const QRText = styled.p`
   font-size: 13px;
-  color: ${props => props.$isDark ? '#94A3B8' : '#6b7280'};
+  color: ${props => props.$isDark ? '#cbd5e1' : '#0369a1'};
   font-weight: 500;
   transition: color 0.4s ease;
 `;
@@ -1510,6 +1543,9 @@ const StoreButtonName = styled.span`
 const DownloadAppStats = styled.div`
   display: flex;
   gap: 60px;
+  align-items: flex-start;
+  justify-content: center;
+  margin-top: 16px;
   
   @media (max-width: 768px) {
     justify-content: center;
@@ -1520,11 +1556,15 @@ const DownloadAppStatItem = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex: 1;
+  align-items: center;
+  text-align: center;
 `;
 
 const DownloadAppStatValue = styled.div`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
 `;
 
@@ -1543,7 +1583,7 @@ const DownloadAppStatNumber = styled.span`
 
 const DownloadAppStatLabel = styled.span`
   font-size: 14px;
-  color: #6b7280;
+  color: ${props => props.$isDark ? '#cbd5e1' : '#0369a1'};
   font-weight: 600;
 `;
 
@@ -1647,12 +1687,23 @@ const AppServiceCard = styled.div`
   }
 `;
 
-const Footer = styled.footer`
-  background: #F8FAFC;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
+const Footer = styled(motion.footer)`
+  background: ${props => props.$isDark 
+    ? 'linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 100%)' 
+    : 'linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%)'};
+  border-top: 1px solid ${props => props.$isDark 
+    ? 'rgba(75, 85, 99, 0.3)' 
+    : 'rgba(0, 0, 0, 0.06)'};
   padding: 64px 80px 32px;
   max-width: 1440px;
   margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 `;
 
 const FooterGrid = styled.div`
@@ -1667,11 +1718,11 @@ const FooterSection = styled.div`
     font-size: 14px;
     font-weight: 600;
     margin-bottom: 16px;
-    color: #0F172A;
+    color: ${props => props.$isDark ? '#F1F5F9' : '#0F172A'};
   }
   
   p {
-    color: #64748B;
+    color: ${props => props.$isDark ? '#94A3B8' : '#64748B'};
     margin-bottom: 12px;
     line-height: 1.6;
     font-size: 14px;
@@ -1679,13 +1730,13 @@ const FooterSection = styled.div`
   
   a {
     display: block;
-    color: #64748B;
+    color: ${props => props.$isDark ? '#94A3B8' : '#64748B'};
     margin-bottom: 12px;
     transition: all 0.3s ease;
     font-size: 14px;
     
     &:hover {
-      color: #2563EB;
+      color: #0EA5E9;
     }
   }
 `;
@@ -1693,8 +1744,10 @@ const FooterSection = styled.div`
 const Copyright = styled.div`
   text-align: center;
   padding-top: 32px;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-  color: #94A3B8;
+  border-top: 1px solid ${props => props.$isDark 
+    ? 'rgba(148, 163, 184, 0.15)' 
+    : 'rgba(0, 0, 0, 0.06)'};
+  color: ${props => props.$isDark ? '#64748B' : '#94A3B8'};
   font-size: 14px;
 `;
 
@@ -2000,6 +2053,10 @@ const LandingPage = () => {
 
   const toggleLanguage = () => {
     setLanguage(language === 'vi' ? 'en' : 'vi');
+  };
+
+  const scrollToDownload = () => {
+    downloadRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   // Auto start downloading after app shows
@@ -2335,8 +2392,9 @@ const LandingPage = () => {
         </LeftSection>
         
         <RightSection>
-          <LanguageToggle onClick={toggleTheme} $isDark={isDarkMode}>
-            {isDarkMode ? <Sun /> : <Moon />}
+          <LanguageToggle onClick={scrollToDownload} $isDark={isDarkMode}>
+            <Download />
+            Tải ứng dụng
           </LanguageToggle>
           <LanguageToggle onClick={toggleLanguage} $isDark={isDarkMode}>
             <Globe />
@@ -3014,7 +3072,11 @@ const LandingPage = () => {
             </StatsHeader>
             
             <StatsRow>
-              <StatItem>
+              <StatItem
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.8 }}
+              >
                 <StatLabel>Việc làm đang tuyển</StatLabel>
                 <StatValue>
                   100,000
@@ -3022,7 +3084,11 @@ const LandingPage = () => {
                 </StatValue>
               </StatItem>
               
-              <StatItem>
+              <StatItem
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 1 }}
+              >
                 <StatLabel>Việc làm gấp hôm nay</StatLabel>
                 <StatValue>
                   50
@@ -3032,7 +3098,11 @@ const LandingPage = () => {
             </StatsRow>
             
             <StatsRow>
-              <StatItem>
+              <StatItem
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 1.2 }}
+              >
                 <StatLabel>Số lượng ứng viên</StatLabel>
                 <StatValue>
                   2,345
@@ -3040,7 +3110,11 @@ const LandingPage = () => {
                 </StatValue>
               </StatItem>
               
-              <StatItem>
+              <StatItem
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 1.4 }}
+              >
                 <StatLabel>Số lượng nhà tuyển dụng</StatLabel>
                 <StatValue>
                   42
@@ -3050,14 +3124,24 @@ const LandingPage = () => {
             </StatsRow>
           </StatsCard>
           
-          <BannerWrapper>
+          <BannerWrapper
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+          >
             <SecondaryBanner
               src="/images/phache.png"
               alt="Phache"
+              initial={{ opacity: 0, y: 30, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.7, delay: 0.7 }}
             />
             <MainBanner
               src="/images/poster.png"
               alt="Poster"
+              initial={{ opacity: 0, y: 30, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.7, delay: 0.9 }}
             />
           </BannerWrapper>
         </BannerContainer>
@@ -3245,6 +3329,21 @@ const LandingPage = () => {
                   </svg>
                 </QRCode>
                 <QRText $isDark={isDarkMode}>Quét mã QR</QRText>
+                
+                <DownloadAppStats>
+                  <DownloadAppStatItem>
+                    <DownloadAppStatValue>
+                      <DownloadAppStatStars>
+                        <Star fill="#FFB800" strokeWidth={0} size={20} />
+                        <Star fill="#FFB800" strokeWidth={0} size={20} />
+                        <Star fill="#FFB800" strokeWidth={0} size={20} />
+                        <Star fill="#FFB800" strokeWidth={0} size={20} />
+                        <Star fill="#FFB800" strokeWidth={0} size={20} />
+                      </DownloadAppStatStars>
+                    </DownloadAppStatValue>
+                    <DownloadAppStatLabel $isDark={isDarkMode}>Đánh giá ứng dụng</DownloadAppStatLabel>
+                  </DownloadAppStatItem>
+                </DownloadAppStats>
               </QRCodeSection>
               
               <StoreButtons>
@@ -3273,28 +3372,6 @@ const LandingPage = () => {
                 </StoreButton>
               </StoreButtons>
             </DownloadOptions>
-            
-            <DownloadAppStats>
-              <DownloadAppStatItem>
-                <DownloadAppStatValue>
-                  <DownloadAppStatStars>
-                    <Star fill="#FFB800" strokeWidth={0} size={20} />
-                    <Star fill="#FFB800" strokeWidth={0} size={20} />
-                    <Star fill="#FFB800" strokeWidth={0} size={20} />
-                    <Star fill="#FFB800" strokeWidth={0} size={20} />
-                    <Star fill="#FFB800" strokeWidth={0} size={20} />
-                  </DownloadAppStatStars>
-                </DownloadAppStatValue>
-                <DownloadAppStatLabel>Đánh giá ứng dụng</DownloadAppStatLabel>
-              </DownloadAppStatItem>
-              
-              <DownloadAppStatItem>
-                <DownloadAppStatValue>
-                  <DownloadAppStatNumber>20+</DownloadAppStatNumber>
-                </DownloadAppStatValue>
-                <DownloadAppStatLabel>Thành phố</DownloadAppStatLabel>
-              </DownloadAppStatItem>
-            </DownloadAppStats>
           </DownloadAppLeft>
           
           <DownloadAppRight
@@ -3363,7 +3440,7 @@ const LandingPage = () => {
                             flex: 1,
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '4px',
+                            gap: '2px',
                             minWidth: 0
                           }}
                           initial={{ opacity: 0, x: -10 }}
@@ -3492,32 +3569,56 @@ const LandingPage = () => {
           </DownloadAppRight>
         </DownloadAppContainer>
       </DownloadAppSection>
-      </ScrollContainer>
 
-      <Footer>
+      <Footer
+        $isDark={isDarkMode}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+      >
         <FooterGrid>
-          <FooterSection>
+          <FooterSection $isDark={isDarkMode}>
             <h3>Ốp Pờ</h3>
             <p>Ốp Pờ là nền tảng tuyển dụng hiện đại giúp kết nối nhà tuyển dụng với ứng viên tài năng.</p>
           </FooterSection>
           
-          <FooterSection>
+          <FooterSection $isDark={isDarkMode}>
             <h3>Dành Cho Ứng Viên</h3>
+            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Tìm việc làm</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Việc làm đã lưu</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Việc làm đã ứng tuyển</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Tạo CV trực tuyến</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Quản lý hồ sơ</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Tải ứng dụng</a>
           </FooterSection>
           
-          <FooterSection>
+          <FooterSection $isDark={isDarkMode}>
             <h3>Dành Cho Nhà Tuyển Dụng</h3>
+            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Đăng tin tuyển dụng</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Quản lý ứng viên</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Gói dịch vụ</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Tìm ứng viên</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Phân tích & Báo cáo</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Quản lý HR</a>
           </FooterSection>
           
-          <FooterSection>
+          <FooterSection $isDark={isDarkMode}>
             <h3>Hỗ Trợ</h3>
+            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Trung tâm trợ giúp</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Liên hệ</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Câu hỏi thường gặp</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Điều khoản sử dụng</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Chính sách bảo mật</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Về chúng tôi</a>
           </FooterSection>
         </FooterGrid>
         
-        <Copyright>
+        <Copyright $isDark={isDarkMode}>
           © 2026 Ốp Pờ. Tất cả quyền được bảo lưu.
         </Copyright>
       </Footer>
+      </ScrollContainer>
     </LandingContainer>
   );
 };

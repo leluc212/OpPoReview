@@ -324,13 +324,6 @@ const Stars = styled.div`
   color: #FFB800;
 `;
 
-const StatNumber = styled.span`
-  font-size: 40px;
-  font-weight: 900;
-  color: #FFB800;
-  line-height: 1;
-`;
-
 const StatLabel = styled.span`
   font-size: 14px;
   color: #6b7280;
@@ -564,13 +557,6 @@ const DownloadApp = () => {
                 </Stars>
               </StatValue>
               <StatLabel>Đánh giá ứng dụng</StatLabel>
-            </StatItem>
-            
-            <StatItem>
-              <StatValue>
-                <StatNumber>20+</StatNumber>
-              </StatValue>
-              <StatLabel>Thành phố</StatLabel>
             </StatItem>
           </Stats>
         </LeftContent>
