@@ -391,7 +391,7 @@ const AnimatedBackground = styled.div`
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  background: #002e9d;
+  background: ${props => props.$isDark ? '#0f172a' : '#002e9d'};
   
   &::after {
     content: '';
@@ -400,12 +400,19 @@ const AnimatedBackground = styled.div`
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-      to bottom,
-      rgba(26, 98, 255, 0) 0%,
-      rgba(26, 98, 255, 0.3) 50%,
-      rgba(26, 98, 255, 0) 100%
-    );
+    background: ${props => props.$isDark 
+      ? `linear-gradient(
+          to bottom,
+          rgba(59, 130, 246, 0) 0%,
+          rgba(59, 130, 246, 0.2) 50%,
+          rgba(59, 130, 246, 0) 100%
+        )`
+      : `linear-gradient(
+          to bottom,
+          rgba(26, 98, 255, 0) 0%,
+          rgba(26, 98, 255, 0.3) 50%,
+          rgba(26, 98, 255, 0) 100%
+        )`};
     animation: moveDown 8s ease-in-out infinite;
   }
   
@@ -622,18 +629,22 @@ const HeroSubtitle = styled(motion.p)`
 const SearchContainer = styled(motion.div)`
   max-width: 800px;
   margin: 0 auto 40px;
-  background: rgba(255, 255, 255, 0.98);
+  background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.98)'};
   backdrop-filter: blur(30px);
-  border: 2px solid rgba(147, 197, 253, 0.4);
+  border: 2px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.4)' : 'rgba(147, 197, 253, 0.4)'};
   padding: 12px;
   border-radius: 16px;
-  box-shadow: 0 12px 48px rgba(147, 197, 253, 0.25), 0 4px 16px rgba(251, 207, 232, 0.2);
+  box-shadow: ${props => props.$isDark 
+    ? '0 12px 48px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.2)'
+    : '0 12px 48px rgba(147, 197, 253, 0.25), 0 4px 16px rgba(251, 207, 232, 0.2)'};
   display: flex;
   gap: 12px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:hover {
-    box-shadow: 0 16px 64px rgba(147, 197, 253, 0.3), 0 8px 24px rgba(251, 207, 232, 0.25);
+    box-shadow: ${props => props.$isDark 
+      ? '0 16px 64px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.25)'
+      : '0 16px 64px rgba(147, 197, 253, 0.3), 0 8px 24px rgba(251, 207, 232, 0.25)'};
     border-color: #0EA5E9;
     transform: translateY(-3px);
   }
@@ -645,13 +656,13 @@ const SearchInput = styled.div`
   align-items: center;
   gap: 12px;
   padding: 14px 18px;
-  background: rgba(255, 255, 255, 0.95);
+  background: ${props => props.$isDark ? 'rgba(15, 23, 42, 0.8)' : 'rgba(255, 255, 255, 0.95)'};
   border-radius: 12px;
-  border: 2px solid rgba(147, 197, 253, 0.3);
+  border: 2px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.3)' : 'rgba(147, 197, 253, 0.3)'};
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:focus-within {
-    background: rgba(255, 255, 255, 1);
+    background: ${props => props.$isDark ? 'rgba(15, 23, 42, 1)' : 'rgba(255, 255, 255, 1)'};
     border-color: #0EA5E9;
     box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15), 0 4px 12px rgba(14, 165, 233, 0.2);
   }
@@ -667,11 +678,11 @@ const SearchInput = styled.div`
     border: none;
     background: none;
     font-size: 15px;
-    color: #0F172A;
+    color: ${props => props.$isDark ? '#f1f5f9' : '#0F172A'};
     font-weight: 500;
     
     &::placeholder {
-      color: #64748B;
+      color: ${props => props.$isDark ? '#94a3b8' : '#64748B'};
       font-weight: 500;
     }
     
@@ -1450,6 +1461,7 @@ const companyLogos = [
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { isDarkMode, toggleTheme } = useTheme();
   const [language, setLanguage] = useState('vi');
   const [searchTerm, setSearchTerm] = useState('');
   const [location, setLocation] = useState('');
@@ -2003,11 +2015,12 @@ const LandingPage = () => {
           </HeroSubtitle>
 
           <SearchContainer
+            $isDark={isDarkMode}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <SearchInput>
+            <SearchInput $isDark={isDarkMode}>
               <Search />
               <input
                 type="text"
@@ -2017,7 +2030,7 @@ const LandingPage = () => {
               />
             </SearchInput>
           
-          <SearchInput>
+          <SearchInput $isDark={isDarkMode}>
             <MapPin />
             <input
               type="text"
@@ -2065,7 +2078,7 @@ const LandingPage = () => {
             Nhiều doanh nghiệp đang tìm "tân binh" giỏi – giống bạn đó!
           </CompanyBannerTitle>
           
-          <LogoCarouselWrapper>
+          <LogoCarouselWrapper $isDark={isDarkMode}>
             <LogoCarousel
               animate={{
                 x: [0, -1800],
@@ -2080,7 +2093,7 @@ const LandingPage = () => {
               }}
             >
               {[...companyLogos, ...companyLogos, ...companyLogos].map((company, index) => (
-                <BannerCompanyLogo key={`${company.name}-${index}`}>
+                <BannerCompanyLogo $isDark={isDarkMode} key={`${company.name}-${index}`}>
                   <span style={{ 
                     fontSize: '20px', 
                     fontWeight: '700',
@@ -2098,13 +2111,14 @@ const LandingPage = () => {
 
       <CTASection>
         <CTACard
+          $isDark={isDarkMode}
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <CTATitle>Sẵn Sàng Tuyển Ứng viên Hàng Đầu?</CTATitle>
-          <CTAText>
+          <CTATitle $isDark={isDarkMode}>Sẵn Sàng Tuyển Ứng viên Hàng Đầu?</CTATitle>
+          <CTAText $isDark={isDarkMode}>
             Đăng công việc và kết nối với ứng viên chất lượng ngay hôm nay
           </CTAText>
           <Button 
