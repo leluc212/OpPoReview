@@ -14,6 +14,7 @@ import CandidateRegister from './pages/auth/CandidateRegister';
 import EmployerRegister from './pages/auth/EmployerRegister';
 import OTPVerification from './pages/auth/OTPVerification';
 import PendingApproval from './pages/auth/PendingApproval';
+import DownloadApp from './pages/auth/DownloadApp';
 
 // Candidate Pages
 import CandidateDashboard from './pages/candidate/CandidateDashboard';
@@ -75,6 +76,7 @@ function AppRoutes() {
     <Routes>
       {/* Public Routes */}
       <Route path="/" element={<LandingPage />} />
+      <Route path="/download" element={<DownloadApp />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterRoleSelection />} />
       <Route path="/register/candidate" element={<CandidateRegister />} />

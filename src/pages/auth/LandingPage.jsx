@@ -1,17 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
-import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package, Heart, UserPlus, Shield, MessageCircle, Headphones, Moon, Sun } from 'lucide-react';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package, Heart, UserPlus, Shield, MessageCircle, Headphones } from 'lucide-react';
 import { Button } from '../../components/FormElements';
-import { useTheme } from '../../context/ThemeContext';
 
 const LandingContainer = styled.div`
   min-height: 80vh;
-  background: ${props => props.$isDark ? '#0f172a' : '#e3e7e9'};
+  background: #e3e7e9;
   position: relative;
   overflow-x: hidden;
-  transition: background 0.3s ease;
   
   &::before {
     content: 'OP PO';
@@ -46,21 +44,51 @@ const LandingContainer = styled.div`
   }
 `;
 
+const ScrollContainer = styled.div`
+  height: 100vh;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  
+  /* Smooth scrolling with momentum */
+  scroll-padding-top: 0;
+  overscroll-behavior: contain;
+  
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: rgba(147, 197, 253, 0.5);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(147, 197, 253, 0.7);
+  }
+`;
+
 const Header = styled(motion.header)`
   padding: 4px 90px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: ${props => props.$isDark ? 'rgba(15, 23, 42, 0.85)' : 'rgba(255, 255, 255, 0.85)'};
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.6)' : 'rgba(146, 217, 248, 0.6)'};
+  border-bottom: 1px solid rgba(146, 217, 248, 0.6);
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: ${props => props.$isDark ? '0 4px 24px rgba(0, 0, 0, 0.3)' : '0 4px 24px #a4ddf8'}
+  box-shadow: 0 4px 24px #a4ddf8
 `;
 
 const Logo = styled(Link)`
@@ -69,14 +97,14 @@ const Logo = styled(Link)`
   gap: 12px;
   font-size: 28px;
   font-weight: 900;
-  color: ${props => props.$isDark ? '#60a5fa' : '#002e9d'};
+  color: #002e9d;
   text-decoration: none;
   letter-spacing: -0.5px;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:hover {
     transform: scale(1.05);
-    color: ${props => props.$isDark ? '#3b82f6' : '#002e9d'};
+    color: #002e9d;
   }
 `;
 
@@ -98,7 +126,7 @@ const NavLinks = styled.div`
   align-items: center;
   
   a {
-    color: ${props => props.$isDark ? '#e2e8f0' : '#000000'};
+    color: #000000;
     font-weight: 700;
     font-size: 15px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -119,7 +147,7 @@ const DropdownButton = styled.button`
   display: flex;
   align-items: center;
   gap: 6px;
-  color: ${props => props.$isDark ? '#e2e8f0' : '#000000'};
+  color: #000000;
   font-weight: 700;
   font-size: 15px;
   background: none;
@@ -146,26 +174,26 @@ const DropdownMenu = styled(motion.div)`
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
-  background: ${props => props.$isDark ? '#1e293b' : 'white'};
+  background: white;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(147, 197, 253, 0.25), 0 4px 16px rgba(0, 0, 0, 0.1);
   padding: 8px;
   min-width: 220px;
   z-index: 1000;
-  border: 1px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.3)' : 'rgba(147, 197, 253, 0.3)'};
+  border: 1px solid rgba(147, 197, 253, 0.3);
 `;
 
 const LargeDropdownMenu = styled(motion.div)`
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
-  background: ${props => props.$isDark ? '#1e293b' : 'white'};
+  background: white;
   border-radius: 16px;
   box-shadow: 0 12px 48px rgba(147, 197, 253, 0.3), 0 4px 16px rgba(0, 0, 0, 0.1);
   padding: 16px;
   min-width: 800px;
   z-index: 1000;
-  border: 1px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.3)' : 'rgba(147, 197, 253, 0.3)'};
+  border: 1px solid rgba(147, 197, 253, 0.3);
   display: flex;
   gap: 20px;
 `;
@@ -340,16 +368,17 @@ const LanguageToggle = styled.button`
   }
 `;
 
-const HeroSection = styled.section`
+const HeroSection = styled(motion.section)`
   max-width: 1280px;
   margin: 0 auto;
   padding: 100px 50px 100px;
   text-align: center;
   position: relative;
-  min-height: 95vh;
+  height: 100vh;
   display: flex;
   align-items: top;
   justify-content: center;
+  scroll-snap-align: start;
 `;
 
 const AnimatedBackground = styled.div`
@@ -362,7 +391,7 @@ const AnimatedBackground = styled.div`
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  background: ${props => props.$isDark ? '#0f172a' : '#002e9d'};
+  background: #002e9d;
   
   &::after {
     content: '';
@@ -371,19 +400,12 @@ const AnimatedBackground = styled.div`
     left: 0;
     width: 100%;
     height: 100%;
-    background: ${props => props.$isDark 
-      ? `linear-gradient(
-          to bottom,
-          rgba(59, 130, 246, 0) 0%,
-          rgba(59, 130, 246, 0.2) 50%,
-          rgba(59, 130, 246, 0) 100%
-        )`
-      : `linear-gradient(
-          to bottom,
-          rgba(26, 98, 255, 0) 0%,
-          rgba(26, 98, 255, 0.3) 50%,
-          rgba(26, 98, 255, 0) 100%
-        )`};
+    background: linear-gradient(
+      to bottom,
+      rgba(26, 98, 255, 0) 0%,
+      rgba(26, 98, 255, 0.3) 50%,
+      rgba(26, 98, 255, 0) 100%
+    );
     animation: moveDown 8s ease-in-out infinite;
   }
   
@@ -600,22 +622,18 @@ const HeroSubtitle = styled(motion.p)`
 const SearchContainer = styled(motion.div)`
   max-width: 800px;
   margin: 0 auto 40px;
-  background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.98)'};
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(30px);
-  border: 2px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.4)' : 'rgba(147, 197, 253, 0.4)'};
+  border: 2px solid rgba(147, 197, 253, 0.4);
   padding: 12px;
   border-radius: 16px;
-  box-shadow: ${props => props.$isDark 
-    ? '0 12px 48px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.2)'
-    : '0 12px 48px rgba(147, 197, 253, 0.25), 0 4px 16px rgba(251, 207, 232, 0.2)'};
+  box-shadow: 0 12px 48px rgba(147, 197, 253, 0.25), 0 4px 16px rgba(251, 207, 232, 0.2);
   display: flex;
   gap: 12px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:hover {
-    box-shadow: ${props => props.$isDark 
-      ? '0 16px 64px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.25)'
-      : '0 16px 64px rgba(147, 197, 253, 0.3), 0 8px 24px rgba(251, 207, 232, 0.25)'};
+    box-shadow: 0 16px 64px rgba(147, 197, 253, 0.3), 0 8px 24px rgba(251, 207, 232, 0.25);
     border-color: #0EA5E9;
     transform: translateY(-3px);
   }
@@ -627,13 +645,13 @@ const SearchInput = styled.div`
   align-items: center;
   gap: 12px;
   padding: 14px 18px;
-  background: ${props => props.$isDark ? 'rgba(15, 23, 42, 0.8)' : 'rgba(255, 255, 255, 0.95)'};
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 12px;
-  border: 2px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.3)' : 'rgba(147, 197, 253, 0.3)'};
+  border: 2px solid rgba(147, 197, 253, 0.3);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:focus-within {
-    background: ${props => props.$isDark ? 'rgba(15, 23, 42, 1)' : 'rgba(255, 255, 255, 1)'};
+    background: rgba(255, 255, 255, 1);
     border-color: #0EA5E9;
     box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15), 0 4px 12px rgba(14, 165, 233, 0.2);
   }
@@ -649,11 +667,11 @@ const SearchInput = styled.div`
     border: none;
     background: none;
     font-size: 15px;
-    color: ${props => props.$isDark ? '#f1f5f9' : '#0F172A'};
+    color: #0F172A;
     font-weight: 500;
     
     &::placeholder {
-      color: ${props => props.$isDark ? '#94a3b8' : '#64748B'};
+      color: #64748B;
       font-weight: 500;
     }
     
@@ -668,9 +686,9 @@ const BannerContainer = styled.div`
   align-items: center;
   justify-content: center;
   gap: 60px;
-  margin: 20px auto 0;
-  max-width: 1200px;
-  padding: 0px 20px;
+  margin: 20px 0 0;
+  width: 100%;
+  padding: 0;
   
   @media (max-width: 968px) {
     flex-direction: column;
@@ -679,6 +697,7 @@ const BannerContainer = styled.div`
 `;
 
 const MascotImage = styled.img`
+  display: none; /* Temporarily hidden */
   width: auto;
   height: 350px;
   object-fit: contain;
@@ -692,7 +711,7 @@ const MascotImage = styled.img`
 `;
 
 const MainBanner = styled.img`
-  width: 700px;
+  width: 100%;
   height: auto;
   border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(147, 197, 253, 0.2);
@@ -701,7 +720,7 @@ const MainBanner = styled.img`
   
   @media (max-width: 968px) {
     width: 100%;
-    max-width: 500px;
+    max-width: 1000px;
   }
 `;
 
@@ -834,40 +853,318 @@ const CTASection = styled.section`
   max-width: 1440px;
   margin: 0 auto;
   padding: 100px 80px;
+  display: none;
 `;
 
 const CTACard = styled(motion.div)`
-  background: ${props => props.$isDark 
-    ? 'linear-gradient(135deg, #1e293b 0%, #334155 100%)' 
-    : 'linear-gradient(135deg, #dceaf9 0%, #ffffffb3 100%)'};
-  border: 1px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.3)' : 'rgba(0, 0, 0, 0.06)'};
+  background: linear-gradient(135deg, #dceaf9 0%, #ffffffb3 100%);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   padding: 80px 60px;
   border-radius: 24px;
   text-align: center;
   position: relative;
-  box-shadow: ${props => props.$isDark 
-    ? '0 4px 24px rgba(0, 0, 0, 0.4)' 
-    : '0 4px 24px rgba(0, 0, 0, 0.04)'};
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
 `;
 
 const CTATitle = styled.h2`
   font-size: 48px;
   font-weight: 700;
   margin-bottom: 16px;
-  color: ${props => props.$isDark ? '#f1f5f9' : '#0F172A'};
+  color: #0F172A;
   letter-spacing: -1px;
 `;
 
 const CTAText = styled.p`
   font-size: 18px;
-  color: ${props => props.$isDark ? '#94a3b8' : '#64748B'};
+  color: #64748B;
   margin-bottom: 32px;
   font-weight: 400;
 `;
 
+const DownloadAppSection = styled(motion.section)`
+  padding: 60px 90px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  max-width: 1440px;
+  margin: 0 auto;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  scroll-snap-align: start;
+`;
+
+const DownloadAppContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 60px;
+  width: 100%;
+  
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    text-align: center;
+  }
+`;
+
+const DownloadAppLeft = styled.div`
+  flex: 1;
+  max-width: 600px;
+`;
+
+const DownloadAppTitle = styled(motion.h2)`
+  font-size: 44px;
+  font-weight: 900;
+  color: #1f2937;
+  margin-bottom: 12px;
+  line-height: 1.1;
+  
+  @media (max-width: 768px) {
+    font-size: 36px;
+  }
+`;
+
+const DownloadAppSubtitle = styled(motion.p)`
+  font-size: 18px;
+  color: #6b7280;
+  margin-bottom: 32px;
+  font-weight: 500;
+`;
+
+const DownloadOptions = styled.div`
+  display: flex;
+  gap: 30px;
+  align-items: center;
+  margin-bottom: 32px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 24px;
+    align-items: center;
+  }
+`;
+
+const QRCodeSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+`;
+
+const QRCode = styled.div`
+  width: 120px;
+  height: 120px;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 10px;
+  
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+`;
+
+const QRText = styled.p`
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+`;
+
+const StoreButtons = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+const StoreButton = styled.a`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0;
+  background: transparent;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  overflow: hidden;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  img {
+    display: block;
+  }
+`;
+
+const StoreButtonText = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+`;
+
+const StoreButtonLabel = styled.span`
+  font-size: 11px;
+  color: white;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+const StoreButtonName = styled.span`
+  font-size: 18px;
+  color: white;
+  font-weight: 700;
+`;
+
+const DownloadAppStats = styled.div`
+  display: flex;
+  gap: 60px;
+  
+  @media (max-width: 768px) {
+    justify-content: center;
+  }
+`;
+
+const DownloadAppStatItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const DownloadAppStatValue = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const DownloadAppStatStars = styled.div`
+  display: flex;
+  gap: 4px;
+  color: #FFB800;
+`;
+
+const DownloadAppStatNumber = styled.span`
+  font-size: 32px;
+  font-weight: 900;
+  color: #FFB800;
+  line-height: 1;
+`;
+
+const DownloadAppStatLabel = styled.span`
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 600;
+`;
+
+const DownloadAppRight = styled(motion.div)`
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+`;
+
+const PhoneMockup = styled.div`
+  width: 280px;
+  height: 560px;
+  background: #1f2937;
+  border-radius: 32px;
+  padding: 10px;
+  box-shadow: 
+    0 40px 80px rgba(0, 0, 0, 0.25),
+    0 16px 32px rgba(0, 0, 0, 0.15),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.1);
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 24px;
+    background: #1f2937;
+    border-radius: 0 0 16px 16px;
+    z-index: 10;
+  }
+  
+  @media (max-width: 768px) {
+    width: 240px;
+    height: 480px;
+  }
+`;
+
+const PhoneScreen = styled.div`
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #002e9d 0%, #0EA5E9 100%);
+  border-radius: 26px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+`;
+
+const AppPreview = styled.div`
+  width: 100%;
+  height: 100%;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  padding: 45px 16px 16px;
+  gap: 12px;
+`;
+
+const AppSearchBar = styled.div`
+  background: #f3f4f6;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #1f2937;
+  font-weight: 600;
+  min-height: 33px;
+  
+  span {
+    color: #1f2937;
+    font-weight: 600;
+  }
+  
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+`;
+
+const AppServiceCard = styled.div`
+  background: linear-gradient(135deg, #002e9d 0%, #0EA5E9 100%);
+  padding: 18px;
+  border-radius: 14px;
+  color: white;
+  
+  h3 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  
+  p {
+    font-size: 12px;
+    opacity: 0.9;
+  }
+`;
+
 const Footer = styled.footer`
-  background: ${props => props.$isDark ? '#1e293b' : '#F8FAFC'};
-  border-top: 1px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.3)' : 'rgba(0, 0, 0, 0.06)'};
+  background: #F8FAFC;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
   padding: 64px 80px 32px;
   max-width: 1440px;
   margin: 0 auto;
@@ -885,11 +1182,11 @@ const FooterSection = styled.div`
     font-size: 14px;
     font-weight: 600;
     margin-bottom: 16px;
-    color: ${props => props.$isDark ? '#f1f5f9' : '#0F172A'};
+    color: #0F172A;
   }
   
   p {
-    color: ${props => props.$isDark ? '#94a3b8' : '#64748B'};
+    color: #64748B;
     margin-bottom: 12px;
     line-height: 1.6;
     font-size: 14px;
@@ -897,13 +1194,13 @@ const FooterSection = styled.div`
   
   a {
     display: block;
-    color: ${props => props.$isDark ? '#94a3b8' : '#64748B'};
+    color: #64748B;
     margin-bottom: 12px;
     transition: all 0.3s ease;
     font-size: 14px;
     
     &:hover {
-      color: ${props => props.$isDark ? '#60a5fa' : '#2563EB'};
+      color: #2563EB;
     }
   }
 `;
@@ -911,8 +1208,8 @@ const FooterSection = styled.div`
 const Copyright = styled.div`
   text-align: center;
   padding-top: 32px;
-  border-top: 1px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.3)' : 'rgba(0, 0, 0, 0.06)'};
-  color: ${props => props.$isDark ? '#64748b' : '#94A3B8'};
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  color: #94A3B8;
   font-size: 14px;
 `;
 
@@ -934,22 +1231,22 @@ const StickyColumn = styled.div`
 const StickyIconButton = styled(motion.a)`
   width: 46px;
   height: 46px;
-  background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)'};
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border: 2px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.4)' : 'rgba(147, 197, 253, 0.4)'};
+  border: 2px solid rgba(147, 197, 253, 0.4);
   border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: ${props => props.$isDark ? '#60a5fa' : '#0EA5E9'};
+  color: #0EA5E9;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: ${props => props.$isDark ? '0 4px 16px rgba(0, 0, 0, 0.3)' : '0 4px 16px rgba(147, 197, 253, 0.15)'};
+  box-shadow: 0 4px 16px rgba(147, 197, 253, 0.15);
   text-decoration: none;
   position: relative;
   
   &:hover {
-    background: ${props => props.$isDark ? 'rgba(30, 41, 59, 1)' : 'rgba(255, 255, 255, 1)'};
+    background: rgba(255, 255, 255, 1);
     border-color: #0EA5E9;
     transform: translateX(-8px) scale(1.05);
     box-shadow: 0 8px 24px rgba(14, 165, 233, 0.3);
@@ -1006,7 +1303,7 @@ const SectionHeading = styled(motion.div)`
   h2 {
     font-size: 48px;
     font-weight: 700;
-    color: ${props => props.$isDark ? '#f1f5f9' : '#0F172A'};
+    color: #0F172A;
     margin-bottom: 12px;
     letter-spacing: -1px;
     line-height: 1.2;
@@ -1014,18 +1311,23 @@ const SectionHeading = styled(motion.div)`
   
   p {
     font-size: 18px;
-    color: ${props => props.$isDark ? '#94a3b8' : '#64748B'};
+    color: #64748B;
     font-weight: 400;
   }
 `;
 
-const CompanyBannerSection = styled.section`
+const CompanyBannerSection = styled(motion.section)`
   background: ${props => props.$isDark 
     ? 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%)' 
     : 'linear-gradient(135deg, #F0F465 0%, #E8ED6F 50%, #C8D45A 100%)'};
   padding: 60px 80px;
   position: relative;
   overflow: hidden;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  scroll-snap-align: start;
   
   &::before {
     content: '';
@@ -1034,11 +1336,9 @@ const CompanyBannerSection = styled.section`
     left: 0;
     right: 0;
     bottom: 0;
-    background: ${props => props.$isDark
-      ? `radial-gradient(circle at 20% 50%, rgba(96, 165, 250, 0.15) 0%, transparent 50%),
-         radial-gradient(circle at 80% 50%, rgba(96, 165, 250, 0.1) 0%, transparent 50%)`
-      : `radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
-         radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.2) 0%, transparent 50%)`};
+    background: 
+      radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
     pointer-events: none;
   }
 `;
@@ -1054,7 +1354,7 @@ const CompanyBannerTitle = styled(motion.h2)`
   text-align: center;
   font-size: 42px;
   font-weight: 700;
-  color: ${props => props.$isDark ? '#f1f5f9' : '#1F2937'};
+  color: #1F2937;
   margin-bottom: 50px;
   line-height: 1.3;
   letter-spacing: -0.5px;
@@ -1083,16 +1383,12 @@ const LogoCarouselWrapper = styled.div`
   
   &::before {
     left: 0;
-    background: ${props => props.$isDark 
-      ? 'linear-gradient(to right, rgba(30, 41, 59, 1), rgba(30, 41, 59, 0))'
-      : 'linear-gradient(to right, rgba(240, 244, 101, 1), rgba(240, 244, 101, 0))'};
+    background: linear-gradient(to right, rgba(240, 244, 101, 1), rgba(240, 244, 101, 0));
   }
   
   &::after {
     right: 0;
-    background: ${props => props.$isDark 
-      ? 'linear-gradient(to left, rgba(30, 41, 59, 1), rgba(30, 41, 59, 0))'
-      : 'linear-gradient(to left, rgba(240, 244, 101, 1), rgba(240, 244, 101, 0))'};
+    background: linear-gradient(to left, rgba(240, 244, 101, 1), rgba(240, 244, 101, 0));
   }
 `;
 
@@ -1104,12 +1400,10 @@ const LogoCarousel = styled(motion.div)`
 `;
 
 const BannerCompanyLogo = styled.div`
-  background: ${props => props.$isDark ? 'rgba(15, 23, 42, 0.8)' : 'white'};
+  background: white;
   padding: 16px 32px;
   border-radius: 12px;
-  box-shadow: ${props => props.$isDark 
-    ? '0 4px 16px rgba(0, 0, 0, 0.3)'
-    : '0 4px 16px rgba(0, 0, 0, 0.08)'};
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1119,9 +1413,7 @@ const BannerCompanyLogo = styled.div`
   
   &:hover {
     transform: translateY(-4px);
-    box-shadow: ${props => props.$isDark 
-      ? '0 8px 24px rgba(0, 0, 0, 0.4)'
-      : '0 8px 24px rgba(0, 0, 0, 0.12)'};
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   }
   
   img {
@@ -1158,7 +1450,6 @@ const companyLogos = [
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const { isDarkMode, toggleTheme } = useTheme();
   const [language, setLanguage] = useState('vi');
   const [searchTerm, setSearchTerm] = useState('');
   const [location, setLocation] = useState('');
@@ -1167,16 +1458,89 @@ const LandingPage = () => {
   const [showCursor, setShowCursor] = useState(true);
   const [isJobDropdownOpen, setIsJobDropdownOpen] = useState(false);
   const [isCompanyDropdownOpen, setIsCompanyDropdownOpen] = useState(false);
+  const [phoneSearchText, setPhoneSearchText] = useState('');
+  const [showPhoneApp, setShowPhoneApp] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [animationKey, setAnimationKey] = useState(0);
   
   const jobDropdownRef = useRef(null);
   const companyDropdownRef = useRef(null);
+  const scrollContainerRef = useRef(null);
+  const heroRef = useRef(null);
+  const companyRef = useRef(null);
+  const downloadRef = useRef(null);
+
+  // Scroll animations
+  const { scrollYProgress } = useScroll({
+    container: scrollContainerRef,
+  });
+
+  // Parallax transforms with smoother easing
+  const heroY = useTransform(scrollYProgress, [0, 0.33], [0, -150]);
+  const heroScale = useTransform(scrollYProgress, [0, 0.33], [1, 0.95]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.15, 0.33], [1, 0.6, 0]);
+  
+  const companyY = useTransform(scrollYProgress, [0.28, 0.33, 0.66], [150, 0, -150]);
+  const companyScale = useTransform(scrollYProgress, [0.28, 0.33, 0.66], [0.95, 1, 0.95]);
+  const companyOpacity = useTransform(scrollYProgress, [0.25, 0.33, 0.6, 0.66], [0, 1, 1, 0]);
+  
+  const downloadY = useTransform(scrollYProgress, [0.6, 0.66, 1], [150, 0, -50]);
+  const downloadScale = useTransform(scrollYProgress, [0.6, 0.66, 1], [0.95, 1, 1]);
+  const downloadOpacity = useTransform(scrollYProgress, [0.58, 0.66, 1], [0, 1, 1]);
 
   const fullTitle = 'Tìm việc & Tuyển Dụng Nhanh Hơn';
   const fullSubtitle = 'Kết nối Ứng viên với cơ hội. Nền tảng tuyển dụng hiện đại.';
+  const phoneSearchFullText = 'Ốp Pờ';
 
   const toggleLanguage = () => {
     setLanguage(language === 'vi' ? 'en' : 'vi');
   };
+
+  // Auto start downloading after app shows
+  useEffect(() => {
+    if (showPhoneApp) {
+      setTimeout(() => {
+        setIsDownloading(true);
+      }, 800);
+    }
+  }, [showPhoneApp]);
+
+  // Reset animation after complete cycle
+  useEffect(() => {
+    if (isDownloading) {
+      const resetTimer = setTimeout(() => {
+        // Reset all states
+        setPhoneSearchText('');
+        setShowPhoneApp(false);
+        setIsDownloading(false);
+        // Trigger new animation cycle
+        setAnimationKey(prev => prev + 1);
+      }, 4000); // Wait 4 seconds then reset
+
+      return () => clearTimeout(resetTimer);
+    }
+  }, [isDownloading]);
+
+  // Typewriter effect for phone search
+  useEffect(() => {
+    let phoneIndex = 0;
+    const phoneInterval = setInterval(() => {
+      if (phoneIndex <= phoneSearchFullText.length) {
+        setPhoneSearchText(phoneSearchFullText.substring(0, phoneIndex));
+        phoneIndex++;
+      } else {
+        clearInterval(phoneInterval);
+        // Show app after typing is done
+        setTimeout(() => {
+          setShowPhoneApp(true);
+        }, 300);
+      }
+    }, 150);
+
+    return () => {
+      clearInterval(phoneInterval);
+    };
+  }, [animationKey]);
 
   // Typewriter effect
   useEffect(() => {
@@ -1224,7 +1588,7 @@ const LandingPage = () => {
   }, []);
 
   return (
-    <LandingContainer $isDark={isDarkMode}>
+    <LandingContainer>
       <StickyColumn>
         <StickyIconButton
           as={Link}
@@ -1234,7 +1598,6 @@ const LandingPage = () => {
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
           whileHover={{ scale: 1.05 }}
-          $isDark={isDarkMode}
         >
           <Heart />
         </StickyIconButton>
@@ -1247,7 +1610,6 @@ const LandingPage = () => {
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
           whileHover={{ scale: 1.05 }}
-          $isDark={isDarkMode}
         >
           <UserPlus />
         </StickyIconButton>
@@ -1260,7 +1622,6 @@ const LandingPage = () => {
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}
           whileHover={{ scale: 1.05 }}
-          $isDark={isDarkMode}
         >
           <Shield />
         </StickyIconButton>
@@ -1272,7 +1633,6 @@ const LandingPage = () => {
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.5 }}
           whileHover={{ scale: 1.05 }}
-          $isDark={isDarkMode}
         >
           <MessageCircle />
           <NotificationBadge>3</NotificationBadge>
@@ -1285,36 +1645,32 @@ const LandingPage = () => {
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.6 }}
           whileHover={{ scale: 1.05 }}
-          $isDark={isDarkMode}
         >
           <Headphones />
         </StickyIconButton>
       </StickyColumn>
       
       <Header
-        $isDark={isDarkMode}
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <LeftSection>
-          <Logo to="/" $isDark={isDarkMode}>
+          <Logo to="/">
             <img src="/images/logo.png" alt="Ốp Pờ" style={{ height: '60px', marginRight: '5px' }} />
             Ốp Pờ
           </Logo>
-          <NavLinks $isDark={isDarkMode}>
+          <NavLinks>
           <DropdownContainer ref={jobDropdownRef}>
             <DropdownButton
               onClick={() => setIsJobDropdownOpen(!isJobDropdownOpen)}
               $isOpen={isJobDropdownOpen}
-              $isDark={isDarkMode}
             >
               Việc làm
               <ChevronDown />
             </DropdownButton>
             {isJobDropdownOpen && (
               <LargeDropdownMenu
-                $isDark={isDarkMode}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
@@ -1382,14 +1738,12 @@ const LandingPage = () => {
             <DropdownButton
               onClick={() => setIsCompanyDropdownOpen(!isCompanyDropdownOpen)}
               $isOpen={isCompanyDropdownOpen}
-              $isDark={isDarkMode}
             >
               Tạo CV
               <ChevronDown />
             </DropdownButton>
             {isCompanyDropdownOpen && (
               <LargeDropdownMenu
-                $isDark={isDarkMode}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
@@ -1478,8 +1832,15 @@ const LandingPage = () => {
         </RightSection>
       </Header>
 
-      <HeroSection>
-        <AnimatedBackground $isDark={isDarkMode}>
+      <ScrollContainer ref={scrollContainerRef}>
+      <HeroSection
+        ref={heroRef}
+        style={{ y: heroY, opacity: heroOpacity, scale: heroScale }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1, ease: "easeOut" }}
+      >
+        <AnimatedBackground>
           {/* Aurora ambient light layer */}
           <AuroraLayer />
           
@@ -1642,12 +2003,11 @@ const LandingPage = () => {
           </HeroSubtitle>
 
           <SearchContainer
-            $isDark={isDarkMode}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <SearchInput $isDark={isDarkMode}>
+            <SearchInput>
               <Search />
               <input
                 type="text"
@@ -1657,7 +2017,7 @@ const LandingPage = () => {
               />
             </SearchInput>
           
-          <SearchInput $isDark={isDarkMode}>
+          <SearchInput>
             <MapPin />
             <input
               type="text"
@@ -1678,26 +2038,34 @@ const LandingPage = () => {
             alt="Mascot"
           />
           <MainBanner
-            src="/images/banner2.png"
+            src="/images/bannerdai.png"
             alt="Banner"
           />
         </BannerContainer>
         </HeroContent>
       </HeroSection>
 
-      <CompanyBannerSection $isDark={isDarkMode}>
+      <CompanyBannerSection
+        $isDark={isDarkMode}
+        ref={companyRef}
+        style={{ y: companyY, opacity: companyOpacity, scale: companyScale }}
+        initial={{ opacity: 0, y: 100, scale: 0.95 }}
+        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+        viewport={{ once: false, amount: 0.3 }}
+        transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
+      >
         <CompanyBannerContent>
           <CompanyBannerTitle
             $isDark={isDarkMode}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            viewport={{ once: false, amount: 0.5 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
           >
             Nhiều doanh nghiệp đang tìm "tân binh" giỏi – giống bạn đó!
           </CompanyBannerTitle>
           
-          <LogoCarouselWrapper $isDark={isDarkMode}>
+          <LogoCarouselWrapper>
             <LogoCarousel
               animate={{
                 x: [0, -1800],
@@ -1712,11 +2080,11 @@ const LandingPage = () => {
               }}
             >
               {[...companyLogos, ...companyLogos, ...companyLogos].map((company, index) => (
-                <BannerCompanyLogo key={`${company.name}-${index}`} $isDark={isDarkMode}>
+                <BannerCompanyLogo key={`${company.name}-${index}`}>
                   <span style={{ 
                     fontSize: '20px', 
                     fontWeight: '700',
-                    color: isDarkMode ? '#e2e8f0' : '#1F2937',
+                    color: '#1F2937',
                     whiteSpace: 'nowrap'
                   }}>
                     {company.logo}
@@ -1730,14 +2098,13 @@ const LandingPage = () => {
 
       <CTASection>
         <CTACard
-          $isDark={isDarkMode}
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <CTATitle $isDark={isDarkMode}>Sẵn Sàng Tuyển Ứng viên Hàng Đầu?</CTATitle>
-          <CTAText $isDark={isDarkMode}>
+          <CTATitle>Sẵn Sàng Tuyển Ứng viên Hàng Đầu?</CTATitle>
+          <CTAText>
             Đăng công việc và kết nối với ứng viên chất lượng ngay hôm nay
           </CTAText>
           <Button 
@@ -1746,14 +2113,12 @@ const LandingPage = () => {
             $variant="secondary" 
             $size="large" 
             style={{ 
-              background: isDarkMode ? '#3b82f6' : 'white', 
-              color: isDarkMode ? 'white' : '#0E3995', 
+              background: 'white', 
+              color: '#0E3995', 
               position: 'relative',
               zIndex: 2,
               fontWeight: 700,
-              boxShadow: isDarkMode 
-                ? '0 8px 32px rgba(59, 130, 246, 0.3)' 
-                : '0 8px 32px rgba(255, 255, 255, 0.2)'
+              boxShadow: '0 8px 32px rgba(255, 255, 255, 0.2)'
             }}
           >
             Bắt Đầu Miễn Phí
@@ -1762,27 +2127,345 @@ const LandingPage = () => {
         </CTACard>
       </CTASection>
 
-      <Footer $isDark={isDarkMode}>
+      <DownloadAppSection
+        ref={downloadRef}
+        style={{ y: downloadY, opacity: downloadOpacity, scale: downloadScale }}
+        initial={{ opacity: 0, y: 100, scale: 0.95 }}
+        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+        viewport={{ once: false, amount: 0.3 }}
+        transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
+      >
+        <DownloadAppContainer>
+          <DownloadAppLeft>
+            <DownloadAppTitle
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.8 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+              Tải ứng dụng
+            </DownloadAppTitle>
+            
+            <DownloadAppSubtitle
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.8 }}
+              transition={{ duration: 0.8, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+              để trải nghiệm các dịch vụ của chúng tôi
+            </DownloadAppSubtitle>
+            
+            <DownloadOptions>
+              <QRCodeSection>
+                <QRCode>
+                  <svg viewBox="0 0 100 100" fill="none">
+                    <rect width="100" height="100" fill="white"/>
+                    <rect x="10" y="10" width="15" height="15" fill="black"/>
+                    <rect x="30" y="10" width="5" height="5" fill="black"/>
+                    <rect x="40" y="10" width="5" height="5" fill="black"/>
+                    <rect x="50" y="10" width="5" height="5" fill="black"/>
+                    <rect x="60" y="10" width="5" height="5" fill="black"/>
+                    <rect x="75" y="10" width="15" height="15" fill="black"/>
+                    <rect x="10" y="30" width="5" height="5" fill="black"/>
+                    <rect x="20" y="30" width="5" height="5" fill="black"/>
+                    <rect x="30" y="30" width="10" height="10" fill="black"/>
+                    <rect x="45" y="30" width="5" height="5" fill="black"/>
+                    <rect x="55" y="30" width="10" height="10" fill="black"/>
+                    <rect x="70" y="30" width="5" height="5" fill="black"/>
+                    <rect x="85" y="30" width="5" height="5" fill="black"/>
+                    <rect x="10" y="40" width="5" height="5" fill="black"/>
+                    <rect x="20" y="40" width="5" height="5" fill="black"/>
+                    <rect x="75" y="40" width="5" height="5" fill="black"/>
+                    <rect x="85" y="40" width="5" height="5" fill="black"/>
+                    <rect x="10" y="50" width="5" height="5" fill="black"/>
+                    <rect x="20" y="50" width="5" height="5" fill="black"/>
+                    <rect x="35" y="50" width="5" height="5" fill="black"/>
+                    <rect x="45" y="50" width="10" height="10" fill="black"/>
+                    <rect x="60" y="50" width="5" height="5" fill="black"/>
+                    <rect x="75" y="50" width="5" height="5" fill="black"/>
+                    <rect x="85" y="50" width="5" height="5" fill="black"/>
+                    <rect x="30" y="60" width="5" height="5" fill="black"/>
+                    <rect x="40" y="60" width="5" height="5" fill="black"/>
+                    <rect x="60" y="60" width="10" height="10" fill="black"/>
+                    <rect x="10" y="75" width="15" height="15" fill="black"/>
+                    <rect x="30" y="75" width="5" height="5" fill="black"/>
+                    <rect x="40" y="75" width="5" height="5" fill="black"/>
+                    <rect x="50" y="75" width="5" height="5" fill="black"/>
+                    <rect x="60" y="75" width="5" height="5" fill="black"/>
+                    <rect x="75" y="75" width="15" height="15" fill="black"/>
+                  </svg>
+                </QRCode>
+                <QRText>Quét mã QR</QRText>
+              </QRCodeSection>
+              
+              <StoreButtons>
+                <StoreButton href="https://apps.apple.com" target="_blank">
+                  <img 
+                    src="/images/appstore1.jpg" 
+                    alt="App Store"
+                    style={{ 
+                      width: '120px', 
+                      height: 'auto',
+                      objectFit: 'contain'
+                    }}
+                  />
+                </StoreButton>
+                
+                <StoreButton href="https://play.google.com" target="_blank">
+                  <img 
+                    src="/images/chplay.jpg" 
+                    alt="Google Play"
+                    style={{ 
+                      width: '120px', 
+                      height: 'auto',
+                      objectFit: 'contain'
+                    }}
+                  />
+                </StoreButton>
+              </StoreButtons>
+            </DownloadOptions>
+            
+            <DownloadAppStats>
+              <DownloadAppStatItem>
+                <DownloadAppStatValue>
+                  <DownloadAppStatStars>
+                    <Star fill="#FFB800" strokeWidth={0} size={20} />
+                    <Star fill="#FFB800" strokeWidth={0} size={20} />
+                    <Star fill="#FFB800" strokeWidth={0} size={20} />
+                    <Star fill="#FFB800" strokeWidth={0} size={20} />
+                    <Star fill="#FFB800" strokeWidth={0} size={20} />
+                  </DownloadAppStatStars>
+                </DownloadAppStatValue>
+                <DownloadAppStatLabel>Đánh giá ứng dụng</DownloadAppStatLabel>
+              </DownloadAppStatItem>
+              
+              <DownloadAppStatItem>
+                <DownloadAppStatValue>
+                  <DownloadAppStatNumber>20+</DownloadAppStatNumber>
+                </DownloadAppStatValue>
+                <DownloadAppStatLabel>Thành phố</DownloadAppStatLabel>
+              </DownloadAppStatItem>
+            </DownloadAppStats>
+          </DownloadAppLeft>
+          
+          <DownloadAppRight
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <PhoneMockup>
+              <PhoneScreen>
+                <AppPreview>
+                  <AppSearchBar>
+                    {phoneSearchText}
+                    {phoneSearchText.length < phoneSearchFullText.length && <span style={{ animation: 'blink 1s infinite' }}>|</span>}
+                  </AppSearchBar>
+                  {showPhoneApp && (
+                    <motion.div 
+                      style={{ 
+                        background: 'white',
+                        borderRadius: '12px',
+                        padding: '14px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '12px',
+                        marginTop: '12px',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)'
+                      }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      {/* Top Section: Logo + Info */}
+                      <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+                        {/* Logo */}
+                        <motion.div 
+                          style={{ 
+                            width: '56px', 
+                            height: '56px', 
+                            background: 'linear-gradient(135deg, #ffffff 0%, #ded4d46a 100%)',
+                            borderRadius: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            overflow: 'hidden',
+                            padding: '6px',
+                            flexShrink: 0
+                          }}
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ duration: 0.4, delay: 0.2 }}
+                        >
+                          <img 
+                            src="/images/logo.png" 
+                            alt="Ốp Pờ"
+                            style={{ 
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'contain'
+                            }}
+                          />
+                        </motion.div>
+                        
+                        {/* App Info */}
+                        <motion.div
+                          style={{ 
+                            flex: 1,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '4px',
+                            minWidth: 0
+                          }}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.4, delay: 0.3 }}
+                        >
+                          <div style={{ 
+                            fontSize: '14px', 
+                            fontWeight: '700',
+                            color: '#1f2937',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                          }}>
+                            Ốp Pờ
+                          </div>
+                          <div style={{ 
+                            fontSize: '11px', 
+                            color: '#6b7280',
+                            fontWeight: '500',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                          }}>
+                            Ứng dụng tuyển dụng
+                          </div>
+                          <div style={{ 
+                            fontSize: '10px', 
+                            color: '#9ca3af',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                          }}>
+                            Đã tải xuống - Giáo dục
+                          </div>
+                          {/* Star Rating */}
+                          <div style={{ 
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '2px',
+                            marginTop: '2px'
+                          }}>
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star 
+                                key={star}
+                                fill="#FFB800" 
+                                strokeWidth={0} 
+                                size={10}
+                                style={{ color: '#FFB800' }}
+                              />
+                            ))}
+                          </div>
+                        </motion.div>
+                      </div>
+                      
+                      {/* Download Button / Loading Spinner */}
+                      <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        {!isDownloading ? (
+                          <motion.div
+                            style={{ 
+                              padding: '8px 32px',
+                              background: '#3b82f6',
+                              color: 'white',
+                              borderRadius: '20px',
+                              fontSize: '13px',
+                              fontWeight: '700',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.5 }}
+                          >
+                            Tải về
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            style={{ 
+                              width: '24px',
+                              height: '24px',
+                              position: 'relative'
+                            }}
+                          >
+                            <svg
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              style={{ transform: 'rotate(90deg) scaleX(-1)' }}
+                            >
+                              {/* Background circle */}
+                              <circle
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                fill="none"
+                                stroke="#e5e7eb"
+                                strokeWidth="2"
+                              />
+                              {/* Progress circle */}
+                              <motion.circle
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                fill="none"
+                                stroke="#3b82f6"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                initial={{ pathLength: 0 }}
+                                animate={{ pathLength: 1 }}
+                                transition={{
+                                  duration: 3,
+                                  ease: "easeInOut",
+                                  repeat: Infinity
+                                }}
+                              />
+                            </svg>
+                        </motion.div>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AppPreview>
+              </PhoneScreen>
+            </PhoneMockup>
+          </DownloadAppRight>
+        </DownloadAppContainer>
+      </DownloadAppSection>
+      </ScrollContainer>
+
+      <Footer>
         <FooterGrid>
-          <FooterSection $isDark={isDarkMode}>
+          <FooterSection>
             <h3>Ốp Pờ</h3>
             <p>Ốp Pờ là nền tảng tuyển dụng hiện đại giúp kết nối nhà tuyển dụng với ứng viên tài năng.</p>
           </FooterSection>
           
-          <FooterSection $isDark={isDarkMode}>
+          <FooterSection>
             <h3>Dành Cho Ứng Viên</h3>
           </FooterSection>
           
-          <FooterSection $isDark={isDarkMode}>
+          <FooterSection>
             <h3>Dành Cho Nhà Tuyển Dụng</h3>
           </FooterSection>
           
-          <FooterSection $isDark={isDarkMode}>
+          <FooterSection>
             <h3>Hỗ Trợ</h3>
           </FooterSection>
         </FooterGrid>
         
-        <Copyright $isDark={isDarkMode}>
+        <Copyright>
           © 2026 Ốp Pờ. Tất cả quyền được bảo lưu.
         </Copyright>
       </Footer>
