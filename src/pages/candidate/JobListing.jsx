@@ -1971,7 +1971,7 @@ const JobListing = () => {
             whileTap={{ scale: 0.98 }}
           >
             <Briefcase />
-            {language === 'vi' ? 'Công việc tiêu chuẩn' : 'Standard Jobs'}
+            {language === 'vi' ? 'Công việc đã lưu' : 'Standard Jobs'}
             <span style={{ marginLeft: 'auto', fontSize: '14px', opacity: 0.9 }}>
               ({allJobs.filter(j => j.category === 'standard').length})
             </span>
