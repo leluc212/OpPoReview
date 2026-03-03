@@ -2,14 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package, Heart, UserPlus, Shield, MessageCircle, Headphones } from 'lucide-react';
+import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package, Heart, UserPlus, Shield, MessageCircle, Headphones, Moon, Sun } from 'lucide-react';
 import { Button } from '../../components/FormElements';
+import { useTheme } from '../../context/ThemeContext';
 
 const LandingContainer = styled.div`
   min-height: 80vh;
-  background: #e3e7e9;
+  background: ${props => props.$isDark ? '#0F172A' : '#e3e7e9'};
   position: relative;
   overflow-x: hidden;
+  transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   
   &::before {
     content: 'OP PO';
@@ -23,24 +25,25 @@ const LandingContainer = styled.div`
     color: transparent;
     background: linear-gradient(
       135deg,
-      #1a62ff 0%,
-      #1a62ff 20%,
-      #002e9d 20%,
-      #002e9d 40%,
-      #1a62ff 40%,
-      #1a62ff 60%,
-      #002e9d 60%,
-      #002e9d 80%,
-      #1a62ff 80%,
-      #1a62ff 100%
+      ${props => props.$isDark ? '#3b82f6' : '#1a62ff'} 0%,
+      ${props => props.$isDark ? '#3b82f6' : '#1a62ff'} 20%,
+      ${props => props.$isDark ? '#1e40af' : '#002e9d'} 20%,
+      ${props => props.$isDark ? '#1e40af' : '#002e9d'} 40%,
+      ${props => props.$isDark ? '#3b82f6' : '#1a62ff'} 40%,
+      ${props => props.$isDark ? '#3b82f6' : '#1a62ff'} 60%,
+      ${props => props.$isDark ? '#1e40af' : '#002e9d'} 60%,
+      ${props => props.$isDark ? '#1e40af' : '#002e9d'} 80%,
+      ${props => props.$isDark ? '#3b82f6' : '#1a62ff'} 80%,
+      ${props => props.$isDark ? '#3b82f6' : '#1a62ff'} 100%
     );
     background-size: 300px 300px;
     -webkit-background-clip: text;
     background-clip: text;
-    opacity: 0.08;
+    opacity: ${props => props.$isDark ? '0.04' : '0.08'};
     pointer-events: none;
     z-index: 0;
     white-space: nowrap;
+    transition: opacity 0.4s ease;
   }
 `;
 
@@ -79,16 +82,22 @@ const Header = styled(motion.header)`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(255, 255, 255, 0.85);
+  background: ${props => props.$isDark 
+    ? 'rgba(30, 41, 59, 0.85)' 
+    : 'rgba(255, 255, 255, 0.85)'};
   backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid rgba(146, 217, 248, 0.6);
+  border-bottom: 1px solid ${props => props.$isDark 
+    ? 'rgba(75, 85, 99, 0.6)' 
+    : 'rgba(146, 217, 248, 0.6)'};
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 24px #a4ddf8
+  box-shadow: ${props => props.$isDark 
+    ? '0 4px 24px rgba(0, 0, 0, 0.3)' 
+    : '0 4px 24px #a4ddf8'};
 `;
 
 const Logo = styled(Link)`
@@ -126,7 +135,7 @@ const NavLinks = styled.div`
   align-items: center;
   
   a {
-    color: #000000;
+    color: ${props => props.$isDark ? '#e2e8f0' : '#000000'};
     font-weight: 700;
     font-size: 15px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -147,7 +156,7 @@ const DropdownButton = styled.button`
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #000000;
+  color: ${props => props.$isDark ? '#e2e8f0' : '#000000'};
   font-weight: 700;
   font-size: 15px;
   background: none;
@@ -155,11 +164,13 @@ const DropdownButton = styled.button`
   cursor: pointer;
   padding: 8px 12px;
   border-radius: 8px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:hover {
     color: #0EA5E9;
-    background: rgba(14, 165, 233, 0.05);
+    background: ${props => props.$isDark 
+      ? 'rgba(14, 165, 233, 0.1)' 
+      : 'rgba(14, 165, 233, 0.05)'};
   }
   
   svg {
@@ -174,28 +185,40 @@ const DropdownMenu = styled(motion.div)`
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
-  background: white;
+  background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.98)' : 'white'};
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(147, 197, 253, 0.25), 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: ${props => props.$isDark 
+    ? '0 8px 32px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.2)' 
+    : '0 8px 32px rgba(147, 197, 253, 0.25), 0 4px 16px rgba(0, 0, 0, 0.1)'};
   padding: 8px;
   min-width: 220px;
   z-index: 1000;
-  border: 1px solid rgba(147, 197, 253, 0.3);
+  border: 1px solid ${props => props.$isDark 
+    ? 'rgba(75, 85, 99, 0.5)' 
+    : 'rgba(147, 197, 253, 0.3)'};
+  backdrop-filter: blur(20px);
+  transition: background 0.3s ease;
 `;
 
 const LargeDropdownMenu = styled(motion.div)`
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
-  background: white;
+  background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.98)' : 'white'};
   border-radius: 16px;
-  box-shadow: 0 12px 48px rgba(147, 197, 253, 0.3), 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: ${props => props.$isDark 
+    ? '0 12px 48px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3)' 
+    : '0 12px 48px rgba(147, 197, 253, 0.3), 0 4px 16px rgba(0, 0, 0, 0.1)'};
   padding: 16px;
   min-width: 800px;
   z-index: 1000;
-  border: 1px solid rgba(147, 197, 253, 0.3);
+  border: 1px solid ${props => props.$isDark 
+    ? 'rgba(75, 85, 99, 0.5)' 
+    : 'rgba(147, 197, 253, 0.3)'};
   display: flex;
   gap: 20px;
+  backdrop-filter: blur(20px);
+  transition: background 0.3s ease;
 `;
 
 const DropdownSection = styled.div`
@@ -207,7 +230,7 @@ const DropdownSection = styled.div`
 const DropdownSectionTitle = styled.h3`
   font-size: 12px;
   font-weight: 700;
-  color: #94A3B8;
+  color: ${props => props.$isDark ? '#94A3B8' : '#94A3B8'};
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 6px;
@@ -235,7 +258,7 @@ const CVTemplateItem = styled(Link)`
   align-items: center;
   gap: 8px;
   padding: 7px 12px;
-  color: #475569;
+  color: ${props => props.$isDark ? '#cbd5e1' : '#475569'};
   text-decoration: none;
   border-radius: 6px;
   font-weight: 600;
@@ -243,7 +266,7 @@ const CVTemplateItem = styled(Link)`
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:hover {
-    background: rgba(14, 165, 233, 0.06);
+    background: rgba(14, 165, 233, 0.1);
     color: #0EA5E9;
     transform: translateX(2px);
   }
@@ -251,7 +274,7 @@ const CVTemplateItem = styled(Link)`
   svg {
     width: 16px;
     height: 16px;
-    color: #64748B;
+    color: ${props => props.$isDark ? '#94A3B8' : '#64748B'};
   }
   
   &:hover svg {
@@ -262,7 +285,9 @@ const CVTemplateItem = styled(Link)`
 const DropdownLeftColumn = styled.div`
   flex-shrink: 0;
   width: 200px;
-  border-right: 1px solid rgba(0, 0, 0, 0.06);
+  border-right: 1px solid ${props => props.$isDark 
+    ? 'rgba(75, 85, 99, 0.3)' 
+    : 'rgba(0, 0, 0, 0.06)'};
   padding-right: 16px;
   display: flex;
   flex-direction: column;
@@ -285,7 +310,7 @@ const DropdownItem = styled(Link)`
   align-items: center;
   justify-content: flex-start;
   padding: 6px 15px;
-  color: #0F172A;
+  color: ${props => props.$isDark ? '#e2e8f0' : '#0F172A'};
   text-decoration: none;
   border-radius: 6px;
   font-weight: 600;
@@ -294,7 +319,7 @@ const DropdownItem = styled(Link)`
   gap: 6px;
   
   &:hover {
-    background: rgba(14, 165, 233, 0.08);
+    background: rgba(14, 165, 233, 0.1);
     color: #0EA5E9;
     transform: translateX(4px);
   }
@@ -303,7 +328,7 @@ const DropdownItem = styled(Link)`
     width: 16px;
     height: 16px;
     flex-shrink: 0;
-    color: #64748B;
+    color: ${props => props.$isDark ? '#94A3B8' : '#64748B'};
   }
   
   &:hover svg {
@@ -314,7 +339,7 @@ const DropdownItem = styled(Link)`
 const JobCategoryItem = styled(Link)`
   display: block;
   padding: 7px 12px;
-  color: #475569;
+  color: ${props => props.$isDark ? '#cbd5e1' : '#475569'};
   text-decoration: none;
   border-radius: 6px;
   font-weight: 600;
@@ -322,7 +347,7 @@ const JobCategoryItem = styled(Link)`
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:hover {
-    background: rgba(14, 165, 233, 0.06);
+    background: rgba(14, 165, 233, 0.1);
     color: #0EA5E9;
     transform: translateX(2px);
   }
@@ -392,6 +417,7 @@ const AnimatedBackground = styled.div`
   overflow: hidden;
   pointer-events: none;
   background: ${props => props.$isDark ? '#0f172a' : '#002e9d'};
+  transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   
   &::after {
     content: '';
@@ -414,6 +440,7 @@ const AnimatedBackground = styled.div`
           rgba(26, 98, 255, 0) 100%
         )`};
     animation: moveDown 8s ease-in-out infinite;
+    transition: background 0.4s ease;
   }
   
   @keyframes moveDown {
@@ -752,7 +779,7 @@ const CompaniesSection = styled.section`
 const SectionTitle = styled.h2`
   font-size: 12px;
   font-weight: 600;
-  color: #64748B;
+  color: ${props => props.$isDark ? '#94A3B8' : '#64748B'};
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-bottom: 16px;
@@ -769,21 +796,27 @@ const LogosGrid = styled.div`
 const CompanyLogo = styled(motion.div)`
   width: 200px;
   height: 100px;
-  background: #FFFFFF;
-  border: 1px solid rgba(147, 197, 253, 0.2);
+  background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : '#FFFFFF'};
+  border: 1px solid ${props => props.$isDark 
+    ? 'rgba(75, 85, 99, 0.4)' 
+    : 'rgba(147, 197, 253, 0.2)'};
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
   font-size: 24px;
-  color: #64748B;
+  color: ${props => props.$isDark ? '#94A3B8' : '#64748B'};
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(147, 197, 253, 0.1);
+  box-shadow: ${props => props.$isDark 
+    ? '0 2px 8px rgba(0, 0, 0, 0.3)' 
+    : '0 2px 8px rgba(147, 197, 253, 0.1)'};
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(147, 197, 253, 0.2), 0 2px 8px rgba(251, 207, 232, 0.15);
+    box-shadow: ${props => props.$isDark 
+      ? '0 4px 16px rgba(59, 130, 246, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2)' 
+      : '0 4px 16px rgba(147, 197, 253, 0.2), 0 2px 8px rgba(251, 207, 232, 0.15)'};
     border-color: #0EA5E9;
     color: #0EA5E9;
   }
@@ -804,19 +837,27 @@ const CategoriesGrid = styled.div`
 `;
 
 const CategoryCard = styled(motion.div)`
-  background: #FFFFFF;
+  background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : '#FFFFFF'};
   padding: 32px 24px;
   border-radius: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid ${props => props.$isDark 
+    ? 'rgba(75, 85, 99, 0.4)' 
+    : 'rgba(0, 0, 0, 0.06)'};
   text-align: center;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: ${props => props.$isDark 
+    ? '0 2px 8px rgba(0, 0, 0, 0.3)' 
+    : '0 2px 8px rgba(0, 0, 0, 0.04)'};
   
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    border-color: rgba(37, 99, 235, 0.2);
+    box-shadow: ${props => props.$isDark 
+      ? '0 8px 24px rgba(0, 0, 0, 0.4)' 
+      : '0 8px 24px rgba(0, 0, 0, 0.08)'};
+    border-color: ${props => props.$isDark 
+      ? 'rgba(59, 130, 246, 0.4)' 
+      : 'rgba(37, 99, 235, 0.2)'};
   }
 `;
 
@@ -846,7 +887,7 @@ const CategoryTitle = styled.h3`
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 8px;
-  color: #0F172A;
+  color: ${props => props.$isDark ? '#f1f5f9' : '#0F172A'};
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   ${CategoryCard}:hover & {
@@ -856,7 +897,7 @@ const CategoryTitle = styled.h3`
 
 const CategoryCount = styled.p`
   font-size: 14px;
-  color: #64748B;
+  color: ${props => props.$isDark ? '#94A3B8' : '#64748B'};
   font-weight: 400;
 `;
 
@@ -868,39 +909,48 @@ const CTASection = styled.section`
 `;
 
 const CTACard = styled(motion.div)`
-  background: linear-gradient(135deg, #dceaf9 0%, #ffffffb3 100%);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: ${props => props.$isDark 
+    ? 'linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%)' 
+    : 'linear-gradient(135deg, #dceaf9 0%, #ffffffb3 100%)'};
+  border: 1px solid ${props => props.$isDark 
+    ? 'rgba(75, 85, 99, 0.4)' 
+    : 'rgba(0, 0, 0, 0.06)'};
   padding: 80px 60px;
   border-radius: 24px;
   text-align: center;
   position: relative;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  box-shadow: ${props => props.$isDark 
+    ? '0 4px 24px rgba(0, 0, 0, 0.3)' 
+    : '0 4px 24px rgba(0, 0, 0, 0.04)'};
 `;
 
 const CTATitle = styled.h2`
   font-size: 48px;
   font-weight: 700;
   margin-bottom: 16px;
-  color: #0F172A;
+  color: ${props => props.$isDark ? '#f1f5f9' : '#0F172A'};
   letter-spacing: -1px;
 `;
 
 const CTAText = styled.p`
   font-size: 18px;
-  color: #64748B;
+  color: ${props => props.$isDark ? '#94A3B8' : '#64748B'};
   margin-bottom: 32px;
   font-weight: 400;
 `;
 
 const DownloadAppSection = styled(motion.section)`
   padding: 60px 90px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  background: ${props => props.$isDark 
+    ? 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%)' 
+    : 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)'};
   max-width: 1440px;
   margin: 0 auto;
   height: 100vh;
   display: flex;
   align-items: center;
   scroll-snap-align: start;
+  transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 `;
 
 const DownloadAppContainer = styled.div`
@@ -924,9 +974,10 @@ const DownloadAppLeft = styled.div`
 const DownloadAppTitle = styled(motion.h2)`
   font-size: 44px;
   font-weight: 900;
-  color: #1f2937;
+  color: ${props => props.$isDark ? '#f1f5f9' : '#1f2937'};
   margin-bottom: 12px;
   line-height: 1.1;
+  transition: color 0.4s ease;
   
   @media (max-width: 768px) {
     font-size: 36px;
@@ -935,9 +986,10 @@ const DownloadAppTitle = styled(motion.h2)`
 
 const DownloadAppSubtitle = styled(motion.p)`
   font-size: 18px;
-  color: #6b7280;
+  color: ${props => props.$isDark ? '#94A3B8' : '#6b7280'};
   margin-bottom: 32px;
   font-weight: 500;
+  transition: color 0.4s ease;
 `;
 
 const DownloadOptions = styled.div`
@@ -963,14 +1015,19 @@ const QRCodeSection = styled.div`
 const QRCode = styled.div`
   width: 120px;
   height: 120px;
-  background: white;
-  border: 2px solid #e5e7eb;
+  background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : 'white'};
+  border: 2px solid ${props => props.$isDark 
+    ? 'rgba(75, 85, 99, 0.5)' 
+    : '#e5e7eb'};
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: ${props => props.$isDark 
+    ? '0 4px 16px rgba(0, 0, 0, 0.3)' 
+    : '0 4px 16px rgba(0, 0, 0, 0.08)'};
   padding: 10px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   
   svg {
     width: 100%;
@@ -980,8 +1037,9 @@ const QRCode = styled.div`
 
 const QRText = styled.p`
   font-size: 13px;
-  color: #6b7280;
+  color: ${props => props.$isDark ? '#94A3B8' : '#6b7280'};
   font-weight: 500;
+  transition: color 0.4s ease;
 `;
 
 const StoreButtons = styled.div`
@@ -1242,22 +1300,24 @@ const StickyColumn = styled.div`
 const StickyIconButton = styled(motion.a)`
   width: 46px;
   height: 46px;
-  background: rgba(255, 255, 255, 0.95);
+  background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)'};
   backdrop-filter: blur(20px);
-  border: 2px solid rgba(147, 197, 253, 0.4);
+  border: 2px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.4)' : 'rgba(147, 197, 253, 0.4)'};
   border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   color: #0EA5E9;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 16px rgba(147, 197, 253, 0.15);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: ${props => props.$isDark 
+    ? '0 4px 16px rgba(0, 0, 0, 0.3)' 
+    : '0 4px 16px rgba(147, 197, 253, 0.15)'};
   text-decoration: none;
   position: relative;
   
   &:hover {
-    background: rgba(255, 255, 255, 1);
+    background: ${props => props.$isDark ? 'rgba(30, 41, 59, 1)' : 'rgba(255, 255, 255, 1)'};
     border-color: #0EA5E9;
     transform: translateX(-8px) scale(1.05);
     box-shadow: 0 8px 24px rgba(14, 165, 233, 0.3);
@@ -1339,6 +1399,7 @@ const CompanyBannerSection = styled(motion.section)`
   align-items: center;
   justify-content: center;
   scroll-snap-align: start;
+  transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   
   &::before {
     content: '';
@@ -1351,6 +1412,7 @@ const CompanyBannerSection = styled(motion.section)`
       radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
       radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
     pointer-events: none;
+    transition: opacity 0.4s ease;
   }
 `;
 
@@ -1365,10 +1427,11 @@ const CompanyBannerTitle = styled(motion.h2)`
   text-align: center;
   font-size: 42px;
   font-weight: 700;
-  color: #1F2937;
+  color: ${props => props.$isDark ? '#f1f5f9' : '#1F2937'};
   margin-bottom: 50px;
   line-height: 1.3;
   letter-spacing: -0.5px;
+  transition: color 0.4s ease;
   
   @media (max-width: 768px) {
     font-size: 28px;
@@ -1390,16 +1453,21 @@ const LogoCarouselWrapper = styled.div`
     width: 100px;
     z-index: 2;
     pointer-events: none;
+    transition: background 0.4s ease;
   }
   
   &::before {
     left: 0;
-    background: linear-gradient(to right, rgba(240, 244, 101, 1), rgba(240, 244, 101, 0));
+    background: ${props => props.$isDark 
+      ? 'linear-gradient(to right, rgba(30, 41, 59, 1), rgba(30, 41, 59, 0))' 
+      : 'linear-gradient(to right, rgba(240, 244, 101, 1), rgba(240, 244, 101, 0))'};
   }
   
   &::after {
     right: 0;
-    background: linear-gradient(to left, rgba(240, 244, 101, 1), rgba(240, 244, 101, 0));
+    background: ${props => props.$isDark 
+      ? 'linear-gradient(to left, rgba(30, 41, 59, 1), rgba(30, 41, 59, 0))' 
+      : 'linear-gradient(to left, rgba(240, 244, 101, 1), rgba(240, 244, 101, 0))'};
   }
 `;
 
@@ -1411,20 +1479,24 @@ const LogoCarousel = styled(motion.div)`
 `;
 
 const BannerCompanyLogo = styled.div`
-  background: white;
+  background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : 'white'};
   padding: 16px 32px;
   border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: ${props => props.$isDark 
+    ? '0 4px 16px rgba(0, 0, 0, 0.3)' 
+    : '0 4px 16px rgba(0, 0, 0, 0.08)'};
   display: flex;
   align-items: center;
   justify-content: center;
   min-width: 180px;
   height: 80px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    box-shadow: ${props => props.$isDark 
+      ? '0 8px 24px rgba(0, 0, 0, 0.4)' 
+      : '0 8px 24px rgba(0, 0, 0, 0.12)'};
   }
   
   img {
@@ -1600,9 +1672,10 @@ const LandingPage = () => {
   }, []);
 
   return (
-    <LandingContainer>
+    <LandingContainer $isDark={isDarkMode}>
       <StickyColumn>
         <StickyIconButton
+          $isDark={isDarkMode}
           as={Link}
           to="/candidate/saved-jobs"
           data-tooltip="Việc làm đã lưu"
@@ -1615,6 +1688,7 @@ const LandingPage = () => {
         </StickyIconButton>
         
         <StickyIconButton
+          $isDark={isDarkMode}
           as={Link}
           to="/register"
           data-tooltip="Đăng ký"
@@ -1627,6 +1701,7 @@ const LandingPage = () => {
         </StickyIconButton>
         
         <StickyIconButton
+          $isDark={isDarkMode}
           as={Link}
           to="/login"
           data-tooltip="Đăng nhập an toàn"
@@ -1639,6 +1714,7 @@ const LandingPage = () => {
         </StickyIconButton>
         
         <StickyIconButton
+          $isDark={isDarkMode}
           href="#"
           data-tooltip="Góp ý"
           initial={{ x: -100, opacity: 0 }}
@@ -1651,6 +1727,7 @@ const LandingPage = () => {
         </StickyIconButton>
         
         <StickyIconButton
+          $isDark={isDarkMode}
           href="#"
           data-tooltip="Hỗ trợ"
           initial={{ x: -100, opacity: 0 }}
@@ -1666,17 +1743,19 @@ const LandingPage = () => {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
+        $isDark={isDarkMode}
       >
         <LeftSection>
           <Logo to="/">
             <img src="/images/logo.png" alt="Ốp Pờ" style={{ height: '60px', marginRight: '5px' }} />
             Ốp Pờ
           </Logo>
-          <NavLinks>
+          <NavLinks $isDark={isDarkMode}>
           <DropdownContainer ref={jobDropdownRef}>
             <DropdownButton
               onClick={() => setIsJobDropdownOpen(!isJobDropdownOpen)}
               $isOpen={isJobDropdownOpen}
+              $isDark={isDarkMode}
             >
               Việc làm
               <ChevronDown />
@@ -1687,26 +1766,27 @@ const LandingPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
+                $isDark={isDarkMode}
               >
-                <DropdownLeftColumn>
+                <DropdownLeftColumn $isDark={isDarkMode}>
                   <DropdownSection>
                     <GreenSectionTitle>
                       Việc làm
                       <ArrowRight />
                     </GreenSectionTitle>
-                    <CVTemplateItem to="/candidate/jobs">
+                    <CVTemplateItem to="/candidate/jobs" $isDark={isDarkMode}>
                       <Search />
                       Tìm việc làm
                     </CVTemplateItem>
-                    <CVTemplateItem to="/candidate/saved-jobs">
+                    <CVTemplateItem to="/candidate/saved-jobs" $isDark={isDarkMode}>
                       <Bookmark />
                       Việc làm đã lưu
                     </CVTemplateItem>
-                    <CVTemplateItem to="/candidate/applications">
+                    <CVTemplateItem to="/candidate/applications" $isDark={isDarkMode}>
                       <FileText />
                       Việc làm đã ứng tuyển
                     </CVTemplateItem>
-                    <CVTemplateItem to="/candidate/jobs?recommended=true">
+                    <CVTemplateItem to="/candidate/jobs?recommended=true" $isDark={isDarkMode}>
                       <ThumbsUp />
                       Việc làm phù hợp
                     </CVTemplateItem>
@@ -1717,11 +1797,11 @@ const LandingPage = () => {
                       Nhà tuyển dụng
                       <ArrowRight />
                     </GreenSectionTitle>
-                    <CVTemplateItem to="/companies">
+                    <CVTemplateItem to="/companies" $isDark={isDarkMode}>
                       <Building2 />
                       Danh sách nhà tuyển dụng
                     </CVTemplateItem>
-                    <CVTemplateItem to="/companies/top-companies">
+                    <CVTemplateItem to="/companies/top-companies" $isDark={isDarkMode}>
                       <Star />
                       Nhà tuyển dụng
                     </CVTemplateItem>
@@ -1734,12 +1814,12 @@ const LandingPage = () => {
                     <ArrowRight />
                   </GreenSectionTitle>
                   <JobCategoriesGrid>
-                    <JobCategoryItem to="/candidate/jobs?category=sales">Nhân viên pha chế</JobCategoryItem>
-                    <JobCategoryItem to="/candidate/jobs?category=labor">Nhân viên thu ngân</JobCategoryItem>
-                    <JobCategoryItem to="/candidate/jobs?category=accountant">Nhân viên phụ bếp</JobCategoryItem>
-                    <JobCategoryItem to="/candidate/jobs?type=senior">Nhân viên phục vụ</JobCategoryItem>
-                    <JobCategoryItem to="/candidate/jobs?category=marketing">Nhân viên kho</JobCategoryItem>
-                    <JobCategoryItem to="/candidate/jobs?category=engineer">Nhân viên kỹ thuật</JobCategoryItem>
+                    <JobCategoryItem to="/candidate/jobs?category=sales" $isDark={isDarkMode}>Nhân viên pha chế</JobCategoryItem>
+                    <JobCategoryItem to="/candidate/jobs?category=labor" $isDark={isDarkMode}>Nhân viên thu ngân</JobCategoryItem>
+                    <JobCategoryItem to="/candidate/jobs?category=accountant" $isDark={isDarkMode}>Nhân viên phụ bếp</JobCategoryItem>
+                    <JobCategoryItem to="/candidate/jobs?type=senior" $isDark={isDarkMode}>Nhân viên phục vụ</JobCategoryItem>
+                    <JobCategoryItem to="/candidate/jobs?category=marketing" $isDark={isDarkMode}>Nhân viên kho</JobCategoryItem>
+                    <JobCategoryItem to="/candidate/jobs?category=engineer" $isDark={isDarkMode}>Nhân viên kỹ thuật</JobCategoryItem>
                   </JobCategoriesGrid>
                 </DropdownRightColumn>
               </LargeDropdownMenu>
@@ -1750,6 +1830,7 @@ const LandingPage = () => {
             <DropdownButton
               onClick={() => setIsCompanyDropdownOpen(!isCompanyDropdownOpen)}
               $isOpen={isCompanyDropdownOpen}
+              $isDark={isDarkMode}
             >
               Tạo CV
               <ChevronDown />
@@ -1852,7 +1933,7 @@ const LandingPage = () => {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1, ease: "easeOut" }}
       >
-        <AnimatedBackground>
+        <AnimatedBackground $isDark={isDarkMode}>
           {/* Aurora ambient light layer */}
           <AuroraLayer />
           
@@ -2097,7 +2178,7 @@ const LandingPage = () => {
                   <span style={{ 
                     fontSize: '20px', 
                     fontWeight: '700',
-                    color: '#1F2937',
+                    color: isDarkMode ? '#f1f5f9' : '#1F2937',
                     whiteSpace: 'nowrap'
                   }}>
                     {company.logo}
@@ -2152,6 +2233,7 @@ const LandingPage = () => {
         <DownloadAppContainer>
           <DownloadAppLeft>
             <DownloadAppTitle
+              $isDark={isDarkMode}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: false, amount: 0.8 }}
@@ -2161,6 +2243,7 @@ const LandingPage = () => {
             </DownloadAppTitle>
             
             <DownloadAppSubtitle
+              $isDark={isDarkMode}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: false, amount: 0.8 }}
@@ -2171,7 +2254,7 @@ const LandingPage = () => {
             
             <DownloadOptions>
               <QRCodeSection>
-                <QRCode>
+                <QRCode $isDark={isDarkMode}>
                   <svg viewBox="0 0 100 100" fill="none">
                     <rect width="100" height="100" fill="white"/>
                     <rect x="10" y="10" width="15" height="15" fill="black"/>
@@ -2209,7 +2292,7 @@ const LandingPage = () => {
                     <rect x="75" y="75" width="15" height="15" fill="black"/>
                   </svg>
                 </QRCode>
-                <QRText>Quét mã QR</QRText>
+                <QRText $isDark={isDarkMode}>Quét mã QR</QRText>
               </QRCodeSection>
               
               <StoreButtons>

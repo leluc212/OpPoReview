@@ -4,12 +4,14 @@ const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    return localStorage.getItem('darkMode') === 'true';
+    const saved = localStorage.getItem('darkMode');
+    return saved ? saved === 'true' : window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
 
   useEffect(() => {
     localStorage.setItem('darkMode', isDarkMode);
     document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+    document.body.style.transition = 'background-color 0.3s ease, color 0.3s ease';
   }, [isDarkMode]);
 
   const toggleTheme = () => setIsDarkMode(prev => !prev);

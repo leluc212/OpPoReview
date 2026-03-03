@@ -276,7 +276,7 @@ const InputWrapper = styled.div`
   input {
     padding-left: 44px;
     background: #FFFFFF;
-    color: #1E293B;
+    color: #1E293B !important;
   }
   
   .password-toggle {

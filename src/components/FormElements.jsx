@@ -100,8 +100,8 @@ export const Input = styled.input`
   font-size: 15px;
   border: 2px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.md};
-  background: ${props => props.theme.colors.bgDark};
-  color: #F1F5F9;
+  background: #FFFFFF;
+  color: #1E293B;
   transition: all ${props => props.theme.transitions.fast};
   width: 100%;
   font-weight: 600;
@@ -109,7 +109,7 @@ export const Input = styled.input`
   &:focus {
     border-color: ${props => props.theme.colors.primary};
     box-shadow: 0 0 0 3px ${props => props.theme.colors.primary}20;
-    background: ${props => props.theme.colors.bgLight};
+    background: #FFFFFF;
   }
   
   &::placeholder {
@@ -200,7 +200,7 @@ export const Select = styled.select`
 export const Label = styled.label`
   font-size: 13px;
   font-weight: 700;
-  color: ${props => props.theme.colors.text};
+  color: #1E293B;
   margin-bottom: 8px;
   display: block;
   text-transform: uppercase;
