@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Bell, Search, LogOut, User } from 'lucide-react';
@@ -39,6 +39,7 @@ const SearchBar = styled.div`
     border: 2px solid ${props => props.theme.colors.border};
     border-radius: ${props => props.theme.borderRadius.full};
     background: ${props => props.theme.colors.bgLight};
+    color: #F1F5F9;
     font-size: 15px;
     font-weight: 500;
     transition: all ${props => props.theme.transitions.normal};
@@ -62,6 +63,13 @@ const SearchBar = styled.div`
     width: 20px;
     height: 20px;
     color: ${props => props.theme.colors.textLight};
+    cursor: pointer;
+    transition: all ${props => props.theme.transitions.normal};
+    
+    &:hover {
+      color: ${props => props.theme.colors.primary};
+      transform: translateY(-50%) scale(1.1);
+    }
   }
 `;
 
@@ -178,6 +186,7 @@ const Navbar = ({ showSearch = true }) => {
   const { user, logout } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
   
   const getRoleTranslation = (role) => {
     if (role === 'candidate') return t.login.roleCandidate;
@@ -201,13 +210,31 @@ const Navbar = ({ showSearch = true }) => {
     }
   };
   
+  const handleSearch = (e) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      navigate('/candidate/jobs', { state: { searchKeyword: searchQuery } });
+    }
+  };
+  
+  const handleSearchIconClick = () => {
+    if (searchQuery.trim()) {
+      navigate('/candidate/jobs', { state: { searchKeyword: searchQuery } });
+    }
+  };
+  
   return (
     <NavbarContainer>
       <NavLeft>
         {showSearch && (
           <SearchBar>
-            <Search />
-            <input type="text" placeholder="Tìm việc, công ty..." />
+            <Search onClick={handleSearchIconClick} style={{ cursor: 'pointer' }} />
+            <input 
+              type="text" 
+              placeholder="Tìm việc, công ty..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={handleSearch}
+            />
           </SearchBar>
         )}
       </NavLeft>

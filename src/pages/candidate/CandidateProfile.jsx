@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -21,7 +21,6 @@ import {
   Edit2,
   Camera,
   CheckCircle,
-  Settings,
   FileText,
   Star,
   X
@@ -392,7 +391,7 @@ const SkillTag = styled(motion.div)`
   gap: 6px;
   padding: 10px 16px;
   background: ${props => props.theme.colors.primary}15;
-  color: ${props => props.theme.colors.primary};
+  color: white;
   border-radius: ${props => props.theme.borderRadius.lg};
   font-size: 14px;
   font-weight: 600;
@@ -407,6 +406,7 @@ const SkillTag = styled(motion.div)`
   svg {
     width: 16px;
     height: 16px;
+    color: white;
   }
 `;
 
@@ -449,7 +449,9 @@ const CandidateProfile = () => {
   const [profileImage, setProfileImage] = useState(() => {
     return localStorage.getItem('profileImage') || null;
   });
-  const [formData, setFormData] = useState({
+  
+  // Default profile data
+  const defaultFormData = {
     fullName: 'Lực Thứ Hai',
     email: 'lucthuhai@gmail.com',
     phone: '+84 379784509',
@@ -459,14 +461,57 @@ const CandidateProfile = () => {
     linkedin: 'linkedin.com/in/lucthuhai',
     github: 'github.com/lucthuhai',
     website: 'leluc.com'
+  };
+  
+  const [formData, setFormData] = useState(() => {
+    const savedData = localStorage.getItem('candidateProfile');
+    return savedData ? JSON.parse(savedData) : defaultFormData;
   });
+  
+  const [originalFormData, setOriginalFormData] = useState(formData);
 
-  const profileCompletion = 85;
-
-  const skills = [
+  const defaultSkills = [
     'React', 'Node.js', 'TypeScript', 'JavaScript', 'HTML/CSS',
     'MongoDB', 'PostgreSQL', 'AWS', 'Docker', 'Git'
   ];
+  
+  const [skills, setSkills] = useState(() => {
+    const savedSkills = localStorage.getItem('candidateSkills');
+    return savedSkills ? JSON.parse(savedSkills) : defaultSkills;
+  });
+  
+  const [newSkill, setNewSkill] = useState('');
+  const [isEditingSkills, setIsEditingSkills] = useState(false);
+  
+  // Calculate profile completion percentage
+  const calculateProfileCompletion = () => {
+    let completion = 0;
+    
+    // Basic info (30% total)
+    if (formData.fullName && formData.fullName.trim()) completion += 10;
+    if (formData.email && formData.email.trim()) completion += 10;
+    if (formData.phone && formData.phone.trim()) completion += 10;
+    
+    // Professional info (30% total)
+    if (formData.location && formData.location.trim()) completion += 10;
+    if (formData.title && formData.title.trim()) completion += 10;
+    if (formData.bio && formData.bio.trim()) completion += 10;
+    
+    // Profile image (15%)
+    if (profileImage) completion += 15;
+    
+    // Social links (15% total)
+    if (formData.linkedin && formData.linkedin.trim()) completion += 5;
+    if (formData.github && formData.github.trim()) completion += 5;
+    if (formData.website && formData.website.trim()) completion += 5;
+    
+    // Skills (10%)
+    if (skills && skills.length >= 3) completion += 10;
+    
+    return completion;
+  };
+  
+  const profileCompletion = calculateProfileCompletion();
 
   const stats = [
     { label: language === 'vi' ? 'Công việc hoàn thành' : 'Completed Jobs', value: '23', color: '#10B981' },
@@ -525,9 +570,29 @@ const CandidateProfile = () => {
   };
 
   const handleSave = () => {
-    console.log('Saving profile:', formData);
+    localStorage.setItem('candidateProfile', JSON.stringify(formData));
+    setOriginalFormData(formData);
     setIsEditing(false);
-    alert(language === 'vi' ? 'Đã lưu thay đổi thành công!' : 'Changes saved successfully!');
+  };
+  
+  const handleCancel = () => {
+    setFormData(originalFormData);
+    setIsEditing(false);
+  };
+  
+  const handleAddSkill = () => {
+    if (newSkill.trim() && !skills.includes(newSkill.trim())) {
+      const updatedSkills = [...skills, newSkill.trim()];
+      setSkills(updatedSkills);
+      localStorage.setItem('candidateSkills', JSON.stringify(updatedSkills));
+      setNewSkill('');
+    }
+  };
+  
+  const handleRemoveSkill = (skillToRemove) => {
+    const updatedSkills = skills.filter(skill => skill !== skillToRemove);
+    setSkills(updatedSkills);
+    localStorage.setItem('candidateSkills', JSON.stringify(updatedSkills));
   };
 
   return (
@@ -541,17 +606,10 @@ const CandidateProfile = () => {
             <HeaderButton
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setIsEditing(!isEditing)}
+              onClick={isEditing ? handleCancel : () => setIsEditing(true)}
             >
               <Edit2 />
               {isEditing ? (language === 'vi' ? 'Hủy' : 'Cancel') : (language === 'vi' ? 'Chỉnh Sửa' : 'Edit')}
-            </HeaderButton>
-            <HeaderButton
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Settings />
-              {language === 'vi' ? 'Cài Đặt' : 'Settings'}
             </HeaderButton>
           </div>
 
@@ -841,11 +899,28 @@ const CandidateProfile = () => {
                   <Star />
                   {t.profile.skills}
                 </h2>
-                <button className="edit-btn">
+                <button className="edit-btn" onClick={() => setIsEditingSkills(!isEditingSkills)}>
                   <Edit2 />
-                  {language === 'vi' ? 'Chỉnh Sửa' : 'Edit'}
+                  {isEditingSkills ? (language === 'vi' ? 'Xong' : 'Done') : (language === 'vi' ? 'Chỉnh Sửa' : 'Edit')}
                 </button>
               </div>
+
+              {isEditingSkills && (
+                <div style={{ marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <Input 
+                      value={newSkill} 
+                      onChange={(e) => setNewSkill(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleAddSkill()}
+                      placeholder={language === 'vi' ? 'Thêm kỹ năng mới' : 'Add new skill'}
+                      style={{ flex: 1 }}
+                    />
+                    <Button onClick={handleAddSkill}>
+                      {language === 'vi' ? 'Thêm' : 'Add'}
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               <SkillsGrid>
                 {skills.map((skill, index) => (
@@ -855,9 +930,34 @@ const CandidateProfile = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.4 + index * 0.05 }}
                     whileHover={{ scale: 1.05 }}
+                    style={{ position: 'relative' }}
                   >
                     <CheckCircle />
                     {skill}
+                    {isEditingSkills && (
+                      <button
+                        onClick={() => handleRemoveSkill(skill)}
+                        style={{
+                          position: 'absolute',
+                          top: '-8px',
+                          right: '-8px',
+                          width: '20px',
+                          height: '20px',
+                          borderRadius: '50%',
+                          background: '#EF4444',
+                          color: 'white',
+                          border: 'none',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        ×
+                      </button>
+                    )}
                   </SkillTag>
                 ))}
               </SkillsGrid>
@@ -875,7 +975,7 @@ const CandidateProfile = () => {
                 </h2>
               </div>
 
-              <div style={{ fontSize: '14px', color: '#64748B', lineHeight: '1.8' }}>
+              <div style={{ fontSize: '14px', color: 'white', lineHeight: '1.8' }}>
                 <div style={{ padding: '12px 0', borderBottom: '1px solid #E2E8F0' }}>
                   ✅ {language === 'vi' ? 'Hoàn thành dự án cho FPT Software' : 'Completed project for FPT Software'}
                 </div>

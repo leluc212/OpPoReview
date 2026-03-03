@@ -370,7 +370,7 @@ const ProfileDetailModal = React.memo(({ candidate, onClose }) => {
 
         <ProfileSection>
           <h3><FileText /> {language === 'vi' ? 'Giới thiệu bản thân' : 'About'}</h3>
-          <p style={{ lineHeight: '1.6', color: '#64748B', fontSize: '14px', margin: 0 }}>
+          <p style={{ lineHeight: '1.6', color: '#CBD5E1', fontSize: '14px', margin: 0 }}>
             {candidate.bio}
           </p>
         </ProfileSection>
@@ -402,7 +402,7 @@ const ApplicationRow = React.memo(({
         )}
       </td>
       <td>{app.job}</td>
-      <td style={{ color: '#64748B' }}>{app.applied}</td>
+      <td style={{ color: '#E2E8F0', fontWeight: 500 }}>{app.applied}</td>
       <td>
         <StatusBadge status={app.completed ? 'completed' : app.status} />
       </td>
@@ -495,7 +495,7 @@ const Applications = () => {
       <ApplicationsContainer>
         <PageHeader>
           <h1>{language === 'vi' ? 'Hồ Sơ Ứng Tuyển' : 'Applications'}</h1>
-          <p style={{ color: '#64748B' }}>
+          <p style={{ color: '#94A3B8' }}>
             {language === 'vi' ? 'Xem và quản lý hồ sơ ứng viên' : 'View and manage candidate applications'}
           </p>
         </PageHeader>

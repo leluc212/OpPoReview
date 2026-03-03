@@ -161,6 +161,8 @@ const SearchInput = styled.input`
   border: 1px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.md};
   font-size: 0.9rem;
+  background: ${props => props.theme.colors.bgLight};
+  color: #F1F5F9;
 
   &:focus {
     outline: none;

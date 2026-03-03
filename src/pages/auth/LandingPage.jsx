@@ -2,14 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package, Heart, UserPlus, Shield, MessageCircle, Headphones } from 'lucide-react';
+import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package, Heart, UserPlus, Shield, MessageCircle, Headphones, Moon, Sun } from 'lucide-react';
 import { Button } from '../../components/FormElements';
+import { useTheme } from '../../context/ThemeContext';
 
 const LandingContainer = styled.div`
   min-height: 80vh;
-  background: #e3e7e9;
+  background: ${props => props.$isDark ? '#0f172a' : '#e3e7e9'};
   position: relative;
   overflow-x: hidden;
+  transition: background 0.3s ease;
   
   &::before {
     content: 'OP PO';
@@ -49,16 +51,16 @@ const Header = styled(motion.header)`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(255, 255, 255, 0.85);
+  background: ${props => props.$isDark ? 'rgba(15, 23, 42, 0.85)' : 'rgba(255, 255, 255, 0.85)'};
   backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid rgba(146, 217, 248, 0.6);
+  border-bottom: 1px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.6)' : 'rgba(146, 217, 248, 0.6)'};
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 24px #a4ddf8
+  box-shadow: ${props => props.$isDark ? '0 4px 24px rgba(0, 0, 0, 0.3)' : '0 4px 24px #a4ddf8'}
 `;
 
 const Logo = styled(Link)`
@@ -67,14 +69,14 @@ const Logo = styled(Link)`
   gap: 12px;
   font-size: 28px;
   font-weight: 900;
-  color: #002e9d;
+  color: ${props => props.$isDark ? '#60a5fa' : '#002e9d'};
   text-decoration: none;
   letter-spacing: -0.5px;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:hover {
     transform: scale(1.05);
-    color: #002e9d;
+    color: ${props => props.$isDark ? '#3b82f6' : '#002e9d'};
   }
 `;
 
@@ -96,7 +98,7 @@ const NavLinks = styled.div`
   align-items: center;
   
   a {
-    color: #000000;
+    color: ${props => props.$isDark ? '#e2e8f0' : '#000000'};
     font-weight: 700;
     font-size: 15px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -117,7 +119,7 @@ const DropdownButton = styled.button`
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #000000;
+  color: ${props => props.$isDark ? '#e2e8f0' : '#000000'};
   font-weight: 700;
   font-size: 15px;
   background: none;
@@ -144,26 +146,26 @@ const DropdownMenu = styled(motion.div)`
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
-  background: white;
+  background: ${props => props.$isDark ? '#1e293b' : 'white'};
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(147, 197, 253, 0.25), 0 4px 16px rgba(0, 0, 0, 0.1);
   padding: 8px;
   min-width: 220px;
   z-index: 1000;
-  border: 1px solid rgba(147, 197, 253, 0.3);
+  border: 1px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.3)' : 'rgba(147, 197, 253, 0.3)'};
 `;
 
 const LargeDropdownMenu = styled(motion.div)`
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
-  background: white;
+  background: ${props => props.$isDark ? '#1e293b' : 'white'};
   border-radius: 16px;
   box-shadow: 0 12px 48px rgba(147, 197, 253, 0.3), 0 4px 16px rgba(0, 0, 0, 0.1);
   padding: 16px;
   min-width: 800px;
   z-index: 1000;
-  border: 1px solid rgba(147, 197, 253, 0.3);
+  border: 1px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.3)' : 'rgba(147, 197, 253, 0.3)'};
   display: flex;
   gap: 20px;
 `;
@@ -313,10 +315,10 @@ const LanguageToggle = styled.button`
   align-items: center;
   gap: 6px;
   padding: 10px 16px;
-  background: rgba(255, 255, 255, 0.95);
-  border: 2px solid rgba(147, 197, 253, 0.4);
+  background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)'};
+  border: 2px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.4)' : 'rgba(147, 197, 253, 0.4)'};
   border-radius: 10px;
-  color: #000000;
+  color: ${props => props.$isDark ? '#e2e8f0' : '#000000'};
   font-weight: 700;
   font-size: 14px;
   cursor: pointer;
@@ -325,7 +327,7 @@ const LanguageToggle = styled.button`
   box-shadow: 0 4px 16px rgba(147, 197, 253, 0.2);
   
   &:hover {
-    background: rgba(255, 255, 255, 1);
+    background: ${props => props.$isDark ? 'rgba(30, 41, 59, 1)' : 'rgba(255, 255, 255, 1)'};
     border-color: #0EA5E9;
     color: #0EA5E9;
     transform: translateY(-2px);
@@ -360,7 +362,7 @@ const AnimatedBackground = styled.div`
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  background: #002e9d;
+  background: ${props => props.$isDark ? '#0f172a' : '#002e9d'};
   
   &::after {
     content: '';
@@ -369,12 +371,19 @@ const AnimatedBackground = styled.div`
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-      to bottom,
-      rgba(26, 98, 255, 0) 0%,
-      rgba(26, 98, 255, 0.3) 50%,
-      rgba(26, 98, 255, 0) 100%
-    );
+    background: ${props => props.$isDark 
+      ? `linear-gradient(
+          to bottom,
+          rgba(59, 130, 246, 0) 0%,
+          rgba(59, 130, 246, 0.2) 50%,
+          rgba(59, 130, 246, 0) 100%
+        )`
+      : `linear-gradient(
+          to bottom,
+          rgba(26, 98, 255, 0) 0%,
+          rgba(26, 98, 255, 0.3) 50%,
+          rgba(26, 98, 255, 0) 100%
+        )`};
     animation: moveDown 8s ease-in-out infinite;
   }
   
@@ -591,18 +600,22 @@ const HeroSubtitle = styled(motion.p)`
 const SearchContainer = styled(motion.div)`
   max-width: 800px;
   margin: 0 auto 40px;
-  background: rgba(255, 255, 255, 0.98);
+  background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.98)'};
   backdrop-filter: blur(30px);
-  border: 2px solid rgba(147, 197, 253, 0.4);
+  border: 2px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.4)' : 'rgba(147, 197, 253, 0.4)'};
   padding: 12px;
   border-radius: 16px;
-  box-shadow: 0 12px 48px rgba(147, 197, 253, 0.25), 0 4px 16px rgba(251, 207, 232, 0.2);
+  box-shadow: ${props => props.$isDark 
+    ? '0 12px 48px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.2)'
+    : '0 12px 48px rgba(147, 197, 253, 0.25), 0 4px 16px rgba(251, 207, 232, 0.2)'};
   display: flex;
   gap: 12px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:hover {
-    box-shadow: 0 16px 64px rgba(147, 197, 253, 0.3), 0 8px 24px rgba(251, 207, 232, 0.25);
+    box-shadow: ${props => props.$isDark 
+      ? '0 16px 64px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.25)'
+      : '0 16px 64px rgba(147, 197, 253, 0.3), 0 8px 24px rgba(251, 207, 232, 0.25)'};
     border-color: #0EA5E9;
     transform: translateY(-3px);
   }
@@ -614,13 +627,13 @@ const SearchInput = styled.div`
   align-items: center;
   gap: 12px;
   padding: 14px 18px;
-  background: rgba(255, 255, 255, 0.95);
+  background: ${props => props.$isDark ? 'rgba(15, 23, 42, 0.8)' : 'rgba(255, 255, 255, 0.95)'};
   border-radius: 12px;
-  border: 2px solid rgba(147, 197, 253, 0.3);
+  border: 2px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.3)' : 'rgba(147, 197, 253, 0.3)'};
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   &:focus-within {
-    background: rgba(255, 255, 255, 1);
+    background: ${props => props.$isDark ? 'rgba(15, 23, 42, 1)' : 'rgba(255, 255, 255, 1)'};
     border-color: #0EA5E9;
     box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15), 0 4px 12px rgba(14, 165, 233, 0.2);
   }
@@ -636,11 +649,11 @@ const SearchInput = styled.div`
     border: none;
     background: none;
     font-size: 15px;
-    color: #0F172A;
+    color: ${props => props.$isDark ? '#f1f5f9' : '#0F172A'};
     font-weight: 500;
     
     &::placeholder {
-      color: #64748B;
+      color: ${props => props.$isDark ? '#94a3b8' : '#64748B'};
       font-weight: 500;
     }
     
@@ -824,33 +837,37 @@ const CTASection = styled.section`
 `;
 
 const CTACard = styled(motion.div)`
-  background: linear-gradient(135deg, #dceaf9 0%, #ffffffb3 100%);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: ${props => props.$isDark 
+    ? 'linear-gradient(135deg, #1e293b 0%, #334155 100%)' 
+    : 'linear-gradient(135deg, #dceaf9 0%, #ffffffb3 100%)'};
+  border: 1px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.3)' : 'rgba(0, 0, 0, 0.06)'};
   padding: 80px 60px;
   border-radius: 24px;
   text-align: center;
   position: relative;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  box-shadow: ${props => props.$isDark 
+    ? '0 4px 24px rgba(0, 0, 0, 0.4)' 
+    : '0 4px 24px rgba(0, 0, 0, 0.04)'};
 `;
 
 const CTATitle = styled.h2`
   font-size: 48px;
   font-weight: 700;
   margin-bottom: 16px;
-  color: #0F172A;
+  color: ${props => props.$isDark ? '#f1f5f9' : '#0F172A'};
   letter-spacing: -1px;
 `;
 
 const CTAText = styled.p`
   font-size: 18px;
-  color: #64748B;
+  color: ${props => props.$isDark ? '#94a3b8' : '#64748B'};
   margin-bottom: 32px;
   font-weight: 400;
 `;
 
 const Footer = styled.footer`
-  background: #F8FAFC;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  background: ${props => props.$isDark ? '#1e293b' : '#F8FAFC'};
+  border-top: 1px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.3)' : 'rgba(0, 0, 0, 0.06)'};
   padding: 64px 80px 32px;
   max-width: 1440px;
   margin: 0 auto;
@@ -868,11 +885,11 @@ const FooterSection = styled.div`
     font-size: 14px;
     font-weight: 600;
     margin-bottom: 16px;
-    color: #0F172A;
+    color: ${props => props.$isDark ? '#f1f5f9' : '#0F172A'};
   }
   
   p {
-    color: #64748B;
+    color: ${props => props.$isDark ? '#94a3b8' : '#64748B'};
     margin-bottom: 12px;
     line-height: 1.6;
     font-size: 14px;
@@ -880,13 +897,13 @@ const FooterSection = styled.div`
   
   a {
     display: block;
-    color: #64748B;
+    color: ${props => props.$isDark ? '#94a3b8' : '#64748B'};
     margin-bottom: 12px;
     transition: all 0.3s ease;
     font-size: 14px;
     
     &:hover {
-      color: #2563EB;
+      color: ${props => props.$isDark ? '#60a5fa' : '#2563EB'};
     }
   }
 `;
@@ -894,8 +911,8 @@ const FooterSection = styled.div`
 const Copyright = styled.div`
   text-align: center;
   padding-top: 32px;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-  color: #94A3B8;
+  border-top: 1px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.3)' : 'rgba(0, 0, 0, 0.06)'};
+  color: ${props => props.$isDark ? '#64748b' : '#94A3B8'};
   font-size: 14px;
 `;
 
@@ -917,22 +934,22 @@ const StickyColumn = styled.div`
 const StickyIconButton = styled(motion.a)`
   width: 46px;
   height: 46px;
-  background: rgba(255, 255, 255, 0.95);
+  background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)'};
   backdrop-filter: blur(20px);
-  border: 2px solid rgba(147, 197, 253, 0.4);
+  border: 2px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.4)' : 'rgba(147, 197, 253, 0.4)'};
   border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #0EA5E9;
+  color: ${props => props.$isDark ? '#60a5fa' : '#0EA5E9'};
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 16px rgba(147, 197, 253, 0.15);
+  box-shadow: ${props => props.$isDark ? '0 4px 16px rgba(0, 0, 0, 0.3)' : '0 4px 16px rgba(147, 197, 253, 0.15)'};
   text-decoration: none;
   position: relative;
   
   &:hover {
-    background: rgba(255, 255, 255, 1);
+    background: ${props => props.$isDark ? 'rgba(30, 41, 59, 1)' : 'rgba(255, 255, 255, 1)'};
     border-color: #0EA5E9;
     transform: translateX(-8px) scale(1.05);
     box-shadow: 0 8px 24px rgba(14, 165, 233, 0.3);
@@ -989,7 +1006,7 @@ const SectionHeading = styled(motion.div)`
   h2 {
     font-size: 48px;
     font-weight: 700;
-    color: #0F172A;
+    color: ${props => props.$isDark ? '#f1f5f9' : '#0F172A'};
     margin-bottom: 12px;
     letter-spacing: -1px;
     line-height: 1.2;
@@ -997,13 +1014,15 @@ const SectionHeading = styled(motion.div)`
   
   p {
     font-size: 18px;
-    color: #64748B;
+    color: ${props => props.$isDark ? '#94a3b8' : '#64748B'};
     font-weight: 400;
   }
 `;
 
 const CompanyBannerSection = styled.section`
-  background: linear-gradient(135deg, #F0F465 0%, #E8ED6F 50%, #C8D45A 100%);
+  background: ${props => props.$isDark 
+    ? 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%)' 
+    : 'linear-gradient(135deg, #F0F465 0%, #E8ED6F 50%, #C8D45A 100%)'};
   padding: 60px 80px;
   position: relative;
   overflow: hidden;
@@ -1015,9 +1034,11 @@ const CompanyBannerSection = styled.section`
     left: 0;
     right: 0;
     bottom: 0;
-    background: 
-      radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
-      radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
+    background: ${props => props.$isDark
+      ? `radial-gradient(circle at 20% 50%, rgba(96, 165, 250, 0.15) 0%, transparent 50%),
+         radial-gradient(circle at 80% 50%, rgba(96, 165, 250, 0.1) 0%, transparent 50%)`
+      : `radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
+         radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.2) 0%, transparent 50%)`};
     pointer-events: none;
   }
 `;
@@ -1033,7 +1054,7 @@ const CompanyBannerTitle = styled(motion.h2)`
   text-align: center;
   font-size: 42px;
   font-weight: 700;
-  color: #1F2937;
+  color: ${props => props.$isDark ? '#f1f5f9' : '#1F2937'};
   margin-bottom: 50px;
   line-height: 1.3;
   letter-spacing: -0.5px;
@@ -1062,12 +1083,16 @@ const LogoCarouselWrapper = styled.div`
   
   &::before {
     left: 0;
-    background: linear-gradient(to right, rgba(240, 244, 101, 1), rgba(240, 244, 101, 0));
+    background: ${props => props.$isDark 
+      ? 'linear-gradient(to right, rgba(30, 41, 59, 1), rgba(30, 41, 59, 0))'
+      : 'linear-gradient(to right, rgba(240, 244, 101, 1), rgba(240, 244, 101, 0))'};
   }
   
   &::after {
     right: 0;
-    background: linear-gradient(to left, rgba(240, 244, 101, 1), rgba(240, 244, 101, 0));
+    background: ${props => props.$isDark 
+      ? 'linear-gradient(to left, rgba(30, 41, 59, 1), rgba(30, 41, 59, 0))'
+      : 'linear-gradient(to left, rgba(240, 244, 101, 1), rgba(240, 244, 101, 0))'};
   }
 `;
 
@@ -1079,10 +1104,12 @@ const LogoCarousel = styled(motion.div)`
 `;
 
 const BannerCompanyLogo = styled.div`
-  background: white;
+  background: ${props => props.$isDark ? 'rgba(15, 23, 42, 0.8)' : 'white'};
   padding: 16px 32px;
   border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: ${props => props.$isDark 
+    ? '0 4px 16px rgba(0, 0, 0, 0.3)'
+    : '0 4px 16px rgba(0, 0, 0, 0.08)'};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1092,7 +1119,9 @@ const BannerCompanyLogo = styled.div`
   
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    box-shadow: ${props => props.$isDark 
+      ? '0 8px 24px rgba(0, 0, 0, 0.4)'
+      : '0 8px 24px rgba(0, 0, 0, 0.12)'};
   }
   
   img {
@@ -1129,6 +1158,7 @@ const companyLogos = [
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { isDarkMode, toggleTheme } = useTheme();
   const [language, setLanguage] = useState('vi');
   const [searchTerm, setSearchTerm] = useState('');
   const [location, setLocation] = useState('');
@@ -1194,7 +1224,7 @@ const LandingPage = () => {
   }, []);
 
   return (
-    <LandingContainer>
+    <LandingContainer $isDark={isDarkMode}>
       <StickyColumn>
         <StickyIconButton
           as={Link}
@@ -1204,6 +1234,7 @@ const LandingPage = () => {
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
           whileHover={{ scale: 1.05 }}
+          $isDark={isDarkMode}
         >
           <Heart />
         </StickyIconButton>
@@ -1216,6 +1247,7 @@ const LandingPage = () => {
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
           whileHover={{ scale: 1.05 }}
+          $isDark={isDarkMode}
         >
           <UserPlus />
         </StickyIconButton>
@@ -1228,6 +1260,7 @@ const LandingPage = () => {
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}
           whileHover={{ scale: 1.05 }}
+          $isDark={isDarkMode}
         >
           <Shield />
         </StickyIconButton>
@@ -1239,6 +1272,7 @@ const LandingPage = () => {
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.5 }}
           whileHover={{ scale: 1.05 }}
+          $isDark={isDarkMode}
         >
           <MessageCircle />
           <NotificationBadge>3</NotificationBadge>
@@ -1251,32 +1285,36 @@ const LandingPage = () => {
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.6 }}
           whileHover={{ scale: 1.05 }}
+          $isDark={isDarkMode}
         >
           <Headphones />
         </StickyIconButton>
       </StickyColumn>
       
       <Header
+        $isDark={isDarkMode}
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <LeftSection>
-          <Logo to="/">
+          <Logo to="/" $isDark={isDarkMode}>
             <img src="/images/logo.png" alt="Ốp Pờ" style={{ height: '60px', marginRight: '5px' }} />
             Ốp Pờ
           </Logo>
-          <NavLinks>
+          <NavLinks $isDark={isDarkMode}>
           <DropdownContainer ref={jobDropdownRef}>
             <DropdownButton
               onClick={() => setIsJobDropdownOpen(!isJobDropdownOpen)}
               $isOpen={isJobDropdownOpen}
+              $isDark={isDarkMode}
             >
               Việc làm
               <ChevronDown />
             </DropdownButton>
             {isJobDropdownOpen && (
               <LargeDropdownMenu
+                $isDark={isDarkMode}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
@@ -1344,12 +1382,14 @@ const LandingPage = () => {
             <DropdownButton
               onClick={() => setIsCompanyDropdownOpen(!isCompanyDropdownOpen)}
               $isOpen={isCompanyDropdownOpen}
+              $isDark={isDarkMode}
             >
               Tạo CV
               <ChevronDown />
             </DropdownButton>
             {isCompanyDropdownOpen && (
               <LargeDropdownMenu
+                $isDark={isDarkMode}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
@@ -1422,7 +1462,10 @@ const LandingPage = () => {
         </LeftSection>
         
         <RightSection>
-          <LanguageToggle onClick={toggleLanguage}>
+          <LanguageToggle onClick={toggleTheme} $isDark={isDarkMode}>
+            {isDarkMode ? <Sun /> : <Moon />}
+          </LanguageToggle>
+          <LanguageToggle onClick={toggleLanguage} $isDark={isDarkMode}>
             <Globe />
             {language === 'vi' ? 'VI' : 'EN'}
           </LanguageToggle>
@@ -1436,7 +1479,7 @@ const LandingPage = () => {
       </Header>
 
       <HeroSection>
-        <AnimatedBackground>
+        <AnimatedBackground $isDark={isDarkMode}>
           {/* Aurora ambient light layer */}
           <AuroraLayer />
           
@@ -1599,11 +1642,12 @@ const LandingPage = () => {
           </HeroSubtitle>
 
           <SearchContainer
+            $isDark={isDarkMode}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <SearchInput>
+            <SearchInput $isDark={isDarkMode}>
               <Search />
               <input
                 type="text"
@@ -1613,7 +1657,7 @@ const LandingPage = () => {
               />
             </SearchInput>
           
-          <SearchInput>
+          <SearchInput $isDark={isDarkMode}>
             <MapPin />
             <input
               type="text"
@@ -1641,9 +1685,10 @@ const LandingPage = () => {
         </HeroContent>
       </HeroSection>
 
-      <CompanyBannerSection>
+      <CompanyBannerSection $isDark={isDarkMode}>
         <CompanyBannerContent>
           <CompanyBannerTitle
+            $isDark={isDarkMode}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -1652,7 +1697,7 @@ const LandingPage = () => {
             Nhiều doanh nghiệp đang tìm "tân binh" giỏi – giống bạn đó!
           </CompanyBannerTitle>
           
-          <LogoCarouselWrapper>
+          <LogoCarouselWrapper $isDark={isDarkMode}>
             <LogoCarousel
               animate={{
                 x: [0, -1800],
@@ -1667,11 +1712,11 @@ const LandingPage = () => {
               }}
             >
               {[...companyLogos, ...companyLogos, ...companyLogos].map((company, index) => (
-                <BannerCompanyLogo key={`${company.name}-${index}`}>
+                <BannerCompanyLogo key={`${company.name}-${index}`} $isDark={isDarkMode}>
                   <span style={{ 
                     fontSize: '20px', 
                     fontWeight: '700',
-                    color: '#1F2937',
+                    color: isDarkMode ? '#e2e8f0' : '#1F2937',
                     whiteSpace: 'nowrap'
                   }}>
                     {company.logo}
@@ -1685,13 +1730,14 @@ const LandingPage = () => {
 
       <CTASection>
         <CTACard
+          $isDark={isDarkMode}
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <CTATitle>Sẵn Sàng Tuyển Ứng viên Hàng Đầu?</CTATitle>
-          <CTAText>
+          <CTATitle $isDark={isDarkMode}>Sẵn Sàng Tuyển Ứng viên Hàng Đầu?</CTATitle>
+          <CTAText $isDark={isDarkMode}>
             Đăng công việc và kết nối với ứng viên chất lượng ngay hôm nay
           </CTAText>
           <Button 
@@ -1700,12 +1746,14 @@ const LandingPage = () => {
             $variant="secondary" 
             $size="large" 
             style={{ 
-              background: 'white', 
-              color: '#0E3995', 
+              background: isDarkMode ? '#3b82f6' : 'white', 
+              color: isDarkMode ? 'white' : '#0E3995', 
               position: 'relative',
               zIndex: 2,
               fontWeight: 700,
-              boxShadow: '0 8px 32px rgba(255, 255, 255, 0.2)'
+              boxShadow: isDarkMode 
+                ? '0 8px 32px rgba(59, 130, 246, 0.3)' 
+                : '0 8px 32px rgba(255, 255, 255, 0.2)'
             }}
           >
             Bắt Đầu Miễn Phí
@@ -1714,27 +1762,27 @@ const LandingPage = () => {
         </CTACard>
       </CTASection>
 
-      <Footer>
+      <Footer $isDark={isDarkMode}>
         <FooterGrid>
-          <FooterSection>
+          <FooterSection $isDark={isDarkMode}>
             <h3>Ốp Pờ</h3>
             <p>Ốp Pờ là nền tảng tuyển dụng hiện đại giúp kết nối nhà tuyển dụng với ứng viên tài năng.</p>
           </FooterSection>
           
-          <FooterSection>
+          <FooterSection $isDark={isDarkMode}>
             <h3>Dành Cho Ứng Viên</h3>
           </FooterSection>
           
-          <FooterSection>
+          <FooterSection $isDark={isDarkMode}>
             <h3>Dành Cho Nhà Tuyển Dụng</h3>
           </FooterSection>
           
-          <FooterSection>
+          <FooterSection $isDark={isDarkMode}>
             <h3>Hỗ Trợ</h3>
           </FooterSection>
         </FooterGrid>
         
-        <Copyright>
+        <Copyright $isDark={isDarkMode}>
           © 2026 Ốp Pờ. Tất cả quyền được bảo lưu.
         </Copyright>
       </Footer>

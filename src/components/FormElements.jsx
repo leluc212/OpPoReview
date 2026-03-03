@@ -37,11 +37,14 @@ export const Button = styled.button`
   ${props => props.$variant === 'secondary' && `
     background: ${props.theme.colors.bgLight};
     color: ${props.theme.colors.text};
-    border: 1px solid ${props.theme.colors.border};
+    border: 2px solid ${props.theme.colors.border};
+    font-weight: 600;
     
     &:hover:not(:disabled) {
       border-color: ${props.theme.colors.primary};
       color: ${props.theme.colors.primary};
+      background: ${props.theme.colors.bgLight};
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
   `}
   
@@ -95,25 +98,29 @@ export const Button = styled.button`
 export const Input = styled.input`
   padding: 10px 14px;
   font-size: 15px;
-  border: 1px solid ${props => props.theme.colors.border};
+  border: 2px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.md};
-  background: ${props => props.theme.colors.bgLight};
-  color: ${props => props.theme.colors.text};
+  background: ${props => props.theme.colors.bgDark};
+  color: #F1F5F9;
   transition: all ${props => props.theme.transitions.fast};
   width: 100%;
+  font-weight: 600;
   
   &:focus {
     border-color: ${props => props.theme.colors.primary};
     box-shadow: 0 0 0 3px ${props => props.theme.colors.primary}20;
+    background: ${props => props.theme.colors.bgLight};
   }
   
   &::placeholder {
-    color: ${props => props.theme.colors.textLight};
+    color: #94A3B8;
+    font-weight: 400;
   }
   
   &:disabled {
     background: ${props => props.theme.colors.bgDark};
     cursor: not-allowed;
+    opacity: 0.6;
   }
   
   ${props => props.$error && `
@@ -124,49 +131,80 @@ export const Input = styled.input`
 export const TextArea = styled.textarea`
   padding: 12px 16px;
   font-size: 16px;
-  border: 1px solid ${props => props.theme.colors.border};
+  border: 2px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.md};
-  background: ${props => props.theme.colors.bgLight};
-  color: ${props => props.theme.colors.text};
+  background: ${props => props.theme.colors.bgDark};
+  color: #F1F5F9;
   transition: all ${props => props.theme.transitions.fast};
   width: 100%;
   resize: vertical;
   min-height: 120px;
   font-family: inherit;
+  font-weight: 600;
   
   &:focus {
     border-color: ${props => props.theme.colors.primary};
     box-shadow: 0 0 0 3px ${props => props.theme.colors.primary}20;
+    background: ${props => props.theme.colors.bgLight};
   }
   
   &::placeholder {
-    color: ${props => props.theme.colors.textLight};
+    color: #94A3B8;
+    font-weight: 400;
+  }
+  
+  &:disabled {
+    background: ${props => props.theme.colors.bgDark};
+    cursor: not-allowed;
+    opacity: 0.6;
   }
 `;
 
 export const Select = styled.select`
-  padding: 12px 16px;
-  font-size: 16px;
-  border: 1px solid ${props => props.theme.colors.border};
+  padding: 10px 14px;
+  font-size: 15px;
+  border: 2px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.md};
-  background: ${props => props.theme.colors.bgLight};
-  color: ${props => props.theme.colors.text};
+  background: ${props => props.theme.colors.bgDark};
+  color: #F1F5F9;
   transition: all ${props => props.theme.transitions.fast};
   width: 100%;
   cursor: pointer;
+  font-weight: 600;
   
   &:focus {
     border-color: ${props => props.theme.colors.primary};
     box-shadow: 0 0 0 3px ${props => props.theme.colors.primary}20;
+    background: ${props => props.theme.colors.bgLight};
+  }
+  
+  /* Style for empty/placeholder option */
+  &:invalid,
+  option[value=""] {
+    color: #94A3B8;
+    font-weight: 400;
+  }
+  
+  option {
+    background: white;
+    color: #1E293B;
+    font-weight: 600;
+  }
+  
+  option[value=""] {
+    color: #94A3B8;
+    font-weight: 400;
   }
 `;
 
 export const Label = styled.label`
   font-size: 13px;
-  font-weight: 600;
-  color: #1E293B;
-  margin-bottom: 6px;
+  font-weight: 700;
+  color: ${props => props.theme.colors.text};
+  margin-bottom: 8px;
   display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 `;
 
 export const FormGroup = styled.div`

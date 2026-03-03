@@ -110,7 +110,7 @@ const SearchInput = styled.div`
     background: none;
     outline: none;
     font-size: 15px;
-    color: ${props => props.theme.colors.text};
+    color: #F1F5F9;
     
     &::placeholder {
       color: ${props => props.theme.colors.textLight};
@@ -863,6 +863,51 @@ const translateJobType = (typeStr, language) => {
 };
 
 // Jobs data - moved outside component to avoid re-creation on each render
+// Helper function to get jobs from localStorage
+const getStoredJobs = () => {
+  try {
+    const storedJobs = localStorage.getItem('employerJobs');
+    if (storedJobs) {
+      const jobs = JSON.parse(storedJobs);
+      // Transform employer jobs to candidate job format
+      return jobs.map(job => ({
+        id: job.id,
+        title: job.title,
+        company: job.department || 'Công ty',
+        location: job.location,
+        lat: 10.7769, // Default HCM location
+        lng: 106.7009,
+        type: job.jobType === 'full-time' ? 'Full-time' : 
+              job.jobType === 'part-time' ? 'Part-time' :
+              job.jobType === 'contract' ? 'Contract' :
+              job.jobType === 'freelance' ? 'Freelance' : 'Full-time',
+        category: 'standard',
+        salary: job.salaryMin && job.salaryMax 
+          ? `${job.salaryMin} - ${job.salaryMax}` 
+          : job.salaryMin 
+            ? `Từ ${job.salaryMin}` 
+            : job.salaryMax
+              ? `Tối đa ${job.salaryMax}`
+              : 'Thỏa thuận',
+        postedAt: job.posted || 'Vừa xong',
+        tags: [
+          job.experienceLevel === 'entry' ? 'Entry Level' : 
+          job.experienceLevel === 'mid' ? 'Mid Level' :
+          job.experienceLevel === 'senior' ? 'Senior' :
+          job.experienceLevel === 'lead' ? 'Lead/Manager' : '',
+          job.department || ''
+        ].filter(Boolean),
+        featured: false,
+        urgent: false,
+        views: job.views || 0
+      }));
+    }
+  } catch (error) {
+    console.error('Error loading jobs from localStorage:', error);
+  }
+  return [];
+};
+
 const JOBS_DATA = [
   // Standard Jobs - Full-time
   {
@@ -1421,6 +1466,13 @@ const JobListing = () => {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
   const [jobCategory, setJobCategory] = useState('standard'); // 'standard' or 'shift'
+  
+  // Merge stored jobs with default jobs data
+  const allJobs = useMemo(() => {
+    const storedJobs = getStoredJobs();
+    return [...storedJobs, ...JOBS_DATA];
+  }, []); // Re-calculate when component mounts
+  
   const [quickFilter, setQuickFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState('list');
@@ -1615,7 +1667,7 @@ const JobListing = () => {
   const nearbyJobs = useMemo(() => {
     if (!userLocation) return [];
     
-    return JOBS_DATA
+    return allJobs
       .filter(job => job.category === jobCategory)
       .map(job => ({
         ...job,
@@ -1623,7 +1675,7 @@ const JobListing = () => {
       }))
       .filter(job => job.distance <= nearbyRadius)
       .sort((a, b) => a.distance - b.distance);
-  }, [userLocation, jobCategory, nearbyRadius]);
+  }, [userLocation, jobCategory, nearbyRadius, allJobs]);
 
   // Advanced filtering with useMemo for performance
   const filteredJobs = useMemo(() => {
@@ -1635,7 +1687,7 @@ const JobListing = () => {
       return nearbyJobs; // Show only nearby jobs within radius
     }
     
-    let result = JOBS_DATA.filter(job => job.category === jobCategory);
+    let result = allJobs.filter(job => job.category === jobCategory);
     
     // Add distance if user location is available
     if (userLocation) {
@@ -1726,9 +1778,9 @@ const JobListing = () => {
     return result;
   }, [jobCategory, searchKeyword, selectedLocation, selectedJobTypes, 
       selectedExperience, selectedSalaryRanges, selectedCompanies, 
-      quickFilter, savedJobs, sortBy, userLocation, showNearbyJobs, nearbyJobs]);
+      quickFilter, savedJobs, sortBy, userLocation, showNearbyJobs, nearbyJobs, allJobs]);
 
-  const categoryJobs = JOBS_DATA.filter(job => job.category === jobCategory);
+  const categoryJobs = allJobs.filter(job => job.category === jobCategory);
 
   return (
     <DashboardLayout role="candidate">
@@ -1748,11 +1800,11 @@ const JobListing = () => {
             <HeroSubtitle>
               {jobCategory === 'standard'
                 ? (language === 'vi' 
-                    ? `Hơn ${JOBS_DATA.filter(j => j.category === 'standard').length} công việc tiêu chuẩn đang chờ bạn khám phá` 
-                    : `Over ${JOBS_DATA.filter(j => j.category === 'standard').length} standard jobs waiting for you to explore`)
+                    ? `Hơn ${allJobs.filter(j => j.category === 'standard').length} công việc tiêu chuẩn đang chờ bạn khám phá` 
+                    : `Over ${allJobs.filter(j => j.category === 'standard').length} standard jobs waiting for you to explore`)
                 : (language === 'vi'
-                    ? `${JOBS_DATA.filter(j => j.category === 'shift').length} công việc theo ca đang tuyển gấp, làm ngay hôm nay!`
-                    : `${JOBS_DATA.filter(j => j.category === 'shift').length} shift jobs hiring urgently, start today!`)}
+                    ? `${allJobs.filter(j => j.category === 'shift').length} công việc theo ca đang tuyển gấp, làm ngay hôm nay!`
+                    : `${allJobs.filter(j => j.category === 'shift').length} shift jobs hiring urgently, start today!`)}
             </HeroSubtitle>
             
             <SearchContainer>
@@ -1891,7 +1943,7 @@ const JobListing = () => {
             <Briefcase />
             {language === 'vi' ? 'Công việc tiêu chuẩn' : 'Standard Jobs'}
             <span style={{ marginLeft: 'auto', fontSize: '14px', opacity: 0.9 }}>
-              ({JOBS_DATA.filter(j => j.category === 'standard').length})
+              ({allJobs.filter(j => j.category === 'standard').length})
             </span>
           </CategoryTab>
           
@@ -1908,7 +1960,7 @@ const JobListing = () => {
             <Zap />
             {language === 'vi' ? 'Công việc theo ca - Tuyển gấp' : 'Shift Jobs - Hiring Now'}
             <span style={{ marginLeft: 'auto', fontSize: '14px', opacity: 0.9 }}>
-              ({JOBS_DATA.filter(j => j.category === 'shift').length})
+              ({allJobs.filter(j => j.category === 'shift').length})
             </span>
           </CategoryTab>
         </CategoryTabs>

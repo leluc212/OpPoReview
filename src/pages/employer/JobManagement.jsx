@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -6,7 +6,7 @@ import StatusBadge from '../../components/StatusBadge';
 import TableFilter from '../../components/TableFilter';
 import { Edit, Trash2, Users, Clock, TrendingUp, Eye, BarChart3, Plus, Calendar, MapPin, DollarSign } from 'lucide-react';
 import { Button } from '../../components/FormElements';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 
 const fadeIn = keyframes`
@@ -371,10 +371,11 @@ const StatusBadgeWrapper = styled.div`
 
 const JobManagement = () => {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilters, setStatusFilters] = useState([]);
 
-  const getJobs = () => [
+  const getDefaultJobs = () => [
     { 
       id: 1, 
       title: 'Senior React Developer', 
@@ -382,7 +383,10 @@ const JobManagement = () => {
       status: 'active', 
       posted: language === 'vi' ? '2 ngày trước' : '2 days ago',
       views: 234,
-      responseRate: 85
+      responseRate: 85,
+      location: language === 'vi' ? 'Hà Nội' : 'Hanoi',
+      jobType: 'full-time',
+      department: language === 'vi' ? 'Kỹ thuật' : 'Engineering'
     },
     { 
       id: 2, 
@@ -391,7 +395,10 @@ const JobManagement = () => {
       status: 'active', 
       posted: language === 'vi' ? '1 tuần trước' : '1 week ago',
       views: 156,
-      responseRate: 72
+      responseRate: 72,
+      location: language === 'vi' ? 'Hồ Chí Minh' : 'Ho Chi Minh',
+      jobType: 'full-time',
+      department: language === 'vi' ? 'Bán hàng' : 'Sales'
     },
     { 
       id: 3, 
@@ -400,11 +407,27 @@ const JobManagement = () => {
       status: 'inactive', 
       posted: language === 'vi' ? '2 tuần trước' : '2 weeks ago',
       views: 98,
-      responseRate: 65
+      responseRate: 65,
+      location: language === 'vi' ? 'Đà Nẵng' : 'Da Nang',
+      jobType: 'part-time',
+      department: language === 'vi' ? 'Dịch vụ' : 'Service'
     },
   ];
 
-  const [jobs] = useState(getJobs());
+  const getJobs = () => {
+    // Get jobs from localStorage
+    const savedJobs = JSON.parse(localStorage.getItem('employerJobs') || '[]');
+    
+    // Merge with default jobs
+    return [...savedJobs, ...getDefaultJobs()];
+  };
+
+  const [jobs, setJobs] = useState(getJobs());
+  
+  // Refresh jobs when component mounts
+  useEffect(() => {
+    setJobs(getJobs());
+  }, [language]);
 
   const filterOptions = [
     { value: 'active', label: language === 'vi' ? 'Hoạt động' : 'Active' },
@@ -432,13 +455,22 @@ const JobManagement = () => {
   };
 
   const handleEdit = (jobId) => {
-    console.log('Edit job:', jobId);
-    // Navigate to edit page or open modal
+    // Find the job to edit
+    const jobToEdit = jobs.find(job => job.id === jobId);
+    if (jobToEdit) {
+      // Navigate to post job page with job data
+      navigate('/employer/post-job', { state: { job: jobToEdit } });
+    }
   };
 
   const handleDelete = (jobId) => {
-    console.log('Delete job:', jobId);
-    // Show confirmation and delete
+    // Remove from localStorage
+    const savedJobs = JSON.parse(localStorage.getItem('employerJobs') || '[]');
+    const updatedJobs = savedJobs.filter(job => job.id !== jobId);
+    localStorage.setItem('employerJobs', JSON.stringify(updatedJobs));
+    
+    // Update state
+    setJobs(getJobs());
   };
 
   return (
@@ -505,6 +537,17 @@ const JobManagement = () => {
                           <Clock />
                           {job.posted}
                         </MetaItem>
+                        {job.location && (
+                          <MetaItem>
+                            <MapPin />
+                            {job.location}
+                          </MetaItem>
+                        )}
+                        {job.department && (
+                          <MetaItem>
+                            {job.department}
+                          </MetaItem>
+                        )}
                       </JobMeta>
                     </JobInfo>
                     <StatusBadgeWrapper>

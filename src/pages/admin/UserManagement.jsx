@@ -101,7 +101,7 @@ const UserManagement = () => {
       <UserManagementContainer>
         <PageHeader>
           <h1>{t.adminUsers.title}</h1>
-          <p style={{ color: '#64748B' }}>{t.adminUsers.subtitle}</p>
+          <p style={{ color: '#94A3B8' }}>{t.adminUsers.subtitle}</p>
         </PageHeader>
 
         <TableFilter 
@@ -131,7 +131,7 @@ const UserManagement = () => {
                 <td>{user.email}</td>
                 <td>{getRoleTranslation(user.role)}</td>
                 <td><StatusBadge status={user.status} /></td>
-                <td style={{ color: '#64748B' }}>{user.joined}</td>
+                <td style={{ color: '#E2E8F0', fontWeight: 500 }}>{user.joined}</td>
                 <td>
                   <Button $variant="secondary" $size="small">{t.adminUsers.view}</Button>
                 </td>

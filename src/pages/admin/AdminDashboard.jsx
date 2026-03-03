@@ -192,7 +192,7 @@ const AdminDashboard = () => {
                 <tr key={index}>
                   <td style={{ fontWeight: 600 }}>{activity.user}</td>
                   <td>{activity.action}</td>
-                  <td style={{ color: '#64748B' }}>{activity.time}</td>
+                  <td style={{ color: '#E2E8F0', fontWeight: 500 }}>{activity.time}</td>
                 </tr>
               ))}
             </tbody>

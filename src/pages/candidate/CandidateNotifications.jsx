@@ -665,7 +665,7 @@ function CandidateNotifications() {
                 style={{ textAlign: 'center', padding: '60px 20px' }}
               >
                 <Bell size={48} style={{ color: '#CBD5E1', marginBottom: '16px' }} />
-                <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '8px', color: '#64748B' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '8px', color: '#E2E8F0' }}>
                   {language === 'vi' ? 'Không có thông báo' : 'No notifications'}
                 </h3>
                 <p style={{ color: '#94A3B8', fontSize: '14px' }}>

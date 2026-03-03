@@ -99,7 +99,7 @@ const EmployerApproval = () => {
       <EmployerApprovalContainer>
         <PageHeader>
           <h1>{t.adminEmployerApproval.title}</h1>
-          <p style={{ color: '#64748B' }}>{t.adminEmployerApproval.subtitle}</p>
+          <p style={{ color: '#94A3B8' }}>{t.adminEmployerApproval.subtitle}</p>
         </PageHeader>
 
         <TableFilter 
@@ -128,7 +128,7 @@ const EmployerApproval = () => {
                 <td style={{ fontWeight: 600 }}>{employer.company}</td>
                 <td>{employer.email}</td>
                 <td>{employer.industry}</td>
-                <td style={{ color: '#64748B' }}>{employer.submitted}</td>
+                <td style={{ color: '#E2E8F0', fontWeight: 500 }}>{employer.submitted}</td>
                 <td><StatusBadge status={employer.status} /></td>
                 <td>
                   <ActionButtons>

@@ -337,14 +337,23 @@ const getInitialFormData = (language) => ({
 
 const EmployerProfile = () => {
   const { language } = useLanguage();
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [companyLogo, setCompanyLogo] = useState(() => {
     return localStorage.getItem('companyLogo') || null;
   });
-  const [formData, setFormData] = useState(() => getInitialFormData(language));
+  
+  const [formData, setFormData] = useState(() => {
+    const savedData = localStorage.getItem('employerProfile');
+    return savedData ? JSON.parse(savedData) : getInitialFormData(language);
+  });
+  
+  const [originalFormData, setOriginalFormData] = useState(formData);
 
   useEffect(() => {
-    setFormData(getInitialFormData(language));
+    const savedData = localStorage.getItem('employerProfile');
+    if (!savedData) {
+      setFormData(getInitialFormData(language));
+    }
   }, [language]);
 
   const handleChange = (e) => {
@@ -354,10 +363,15 @@ const EmployerProfile = () => {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
+  const handleSave = () => {
+    localStorage.setItem('employerProfile', JSON.stringify(formData));
+    setOriginalFormData(formData);
+    setIsEditing(false);
+  };
+  
+  const handleCancel = () => {
+    setFormData(originalFormData);
+    setIsEditing(false);
   };
 
   const handleLogoUpload = (e) => {
@@ -409,8 +423,34 @@ const EmployerProfile = () => {
     <DashboardLayout role="employer">
       <ProfileContainer>
         <PageHeader>
-          <h1>{language === 'vi' ? 'Hồ Sơ Công Ty' : 'Company Profile'}</h1>
-          <p>{language === 'vi' ? 'Quản lý thông tin công ty' : 'Manage your company information'}</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h1>{language === 'vi' ? 'Hồ Sơ Công Ty' : 'Company Profile'}</h1>
+              <p>{language === 'vi' ? 'Quản lý thông tin công ty' : 'Manage your company information'}</p>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={isEditing ? handleCancel : () => setIsEditing(true)}
+              style={{
+                padding: '12px 24px',
+                borderRadius: '12px',
+                background: isEditing ? '#6B7280' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                border: 'none',
+                fontWeight: '700',
+                fontSize: '15px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+              }}
+            >
+              <Edit3 size={18} />
+              {isEditing ? (language === 'vi' ? 'Hủy' : 'Cancel') : (language === 'vi' ? 'Chỉnh Sửa' : 'Edit')}
+            </motion.button>
+          </div>
         </PageHeader>
 
         <ProfileContent>
@@ -474,7 +514,7 @@ const EmployerProfile = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={(e) => e.preventDefault()}>
               <SectionTitle>
                 <Building2 />
                 {language === 'vi' ? 'Thông Tin Công Ty' : 'Company Information'}
@@ -491,6 +531,7 @@ const EmployerProfile = () => {
                       value={formData.companyName}
                       onChange={handleChange}
                       placeholder={language === 'vi' ? 'Nhập tên công ty' : 'Enter company name'}
+                      disabled={!isEditing}
                     />
                   </InputWrapper>
                 </FormGroup>
@@ -508,6 +549,7 @@ const EmployerProfile = () => {
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="email@company.com"
+                      disabled={!isEditing}
                     />
                   </InputWrapper>
                 </FormGroup>
@@ -522,6 +564,7 @@ const EmployerProfile = () => {
                       value={formData.phone}
                       onChange={handleChange}
                       placeholder="0123456789"
+                      disabled={!isEditing}
                     />
                   </InputWrapper>
                 </FormGroup>
@@ -538,6 +581,7 @@ const EmployerProfile = () => {
                       value={formData.address}
                       onChange={handleChange}
                       placeholder={language === 'vi' ? 'Địa chỉ công ty' : 'Company address'}
+                      disabled={!isEditing}
                     />
                   </InputWrapper>
                 </FormGroup>
@@ -554,12 +598,13 @@ const EmployerProfile = () => {
                       value={formData.website}
                       onChange={handleChange}
                       placeholder="https://yourwebsite.com"
+                      disabled={!isEditing}
                     />
                   </InputWrapper>
                 </FormGroup>
               </FormRow>
 
-              <FormRow $columns="1fr 1fr">
+              <FormRow $columns="1fr 1fr 1fr">
                 <FormGroup>
                   <Label htmlFor="industry">{language === 'vi' ? 'Lĩnh vực' : 'Industry'}</Label>
                   <InputWrapper>
@@ -570,6 +615,7 @@ const EmployerProfile = () => {
                       value={formData.industry}
                       onChange={handleChange}
                       placeholder={language === 'vi' ? 'Lĩnh vực hoạt động' : 'Business industry'}
+                      disabled={!isEditing}
                     />
                   </InputWrapper>
                 </FormGroup>
@@ -584,6 +630,22 @@ const EmployerProfile = () => {
                       value={formData.size}
                       onChange={handleChange}
                       placeholder={language === 'vi' ? 'Số lượng nhân viên' : 'Number of employees'}
+                      disabled={!isEditing}
+                    />
+                  </InputWrapper>
+                </FormGroup>
+                
+                <FormGroup>
+                  <Label htmlFor="foundedYear">{language === 'vi' ? 'Năm thành lập' : 'Founded Year'}</Label>
+                  <InputWrapper>
+                    <FileText className="input-icon" />
+                    <Input
+                      id="foundedYear"
+                      name="foundedYear"
+                      value={formData.foundedYear}
+                      onChange={handleChange}
+                      placeholder="2015"
+                      disabled={!isEditing}
                     />
                   </InputWrapper>
                 </FormGroup>
@@ -599,28 +661,21 @@ const EmployerProfile = () => {
                     onChange={handleChange}
                     placeholder={language === 'vi' ? 'Giới thiệu về công ty...' : 'Introduce your company...'}
                     rows={5}
+                    disabled={!isEditing}
                   />
                 </FormGroup>
               </FormRow>
 
-              <SaveButton
-                type="submit"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Save />
-                {language === 'vi' ? 'Lưu Thay Đổi' : 'Save Changes'}
-              </SaveButton>
-
-              {showSuccess && (
-                <SuccessMessage
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
+              {isEditing && (
+                <SaveButton
+                  type="button"
+                  onClick={handleSave}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  <Check />
-                  {language === 'vi' ? 'Cập nhật thông tin thành công!' : 'Profile updated successfully!'}
-                </SuccessMessage>
+                  <Save />
+                  {language === 'vi' ? 'Lưu Thay Đổi' : 'Save Changes'}
+                </SaveButton>
               )}
             </form>
           </MainPanel>

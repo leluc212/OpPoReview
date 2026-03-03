@@ -29,28 +29,37 @@ const SearchBox = styled.div`
 const SearchInput = styled.input`
   width: 100%;
   padding: 10px 12px 10px 40px;
-  border: 1px solid ${props => props.theme.colors.border};
+  border: 2px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.md};
   font-size: 14px;
+  background: ${props => props.theme.colors.bgLight};
+  color: #F1F5F9;
+  font-weight: 500;
   
   &:focus {
     outline: none;
     border-color: ${props => props.theme.colors.primary};
+    background: ${props => props.theme.colors.bgLight};
+  }
+  
+  &::placeholder {
+    color: ${props => props.theme.colors.textLight};
   }
 `;
 
 const FilterButton = styled.button`
   padding: 10px 16px;
-  border: 1px solid ${props => props.theme.colors.border};
+  border: 2px solid ${props => props.$active ? props.theme.colors.primary : props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.md};
-  background: ${props => props.$active ? props.theme.colors.primary : 'white'};
+  background: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.bgLight};
   color: ${props => props.$active ? 'white' : props.theme.colors.text};
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 8px;
   transition: all 0.2s;
+  box-shadow: ${props => props.theme.shadows.sm};
   
   svg {
     width: 16px;
@@ -60,6 +69,8 @@ const FilterButton = styled.button`
   &:hover {
     border-color: ${props => props.theme.colors.primary};
     background: ${props => props.$active ? props.theme.colors.primaryDark : props.theme.colors.bgDark};
+    box-shadow: ${props => props.theme.shadows.md};
+    transform: translateY(-1px);
   }
 `;
 
@@ -71,8 +82,8 @@ const FilterOptions = styled.div`
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  background: white;
-  border: 1px solid ${props => props.theme.colors.border};
+  background: ${props => props.theme.colors.bgLight};
+  border: 2px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.md};
   box-shadow: ${props => props.theme.shadows.lg};
   padding: 12px;

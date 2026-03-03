@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import { Button, Input, TextArea, Select, FormGroup, Label } from '../../components/FormElements';
@@ -80,6 +80,10 @@ const SalaryInputWrapper = styled.div`
 const PostJob = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
+  const editingJob = location.state?.job; // Get job data if editing
+  const isEditing = !!editingJob;
+  
   const [formData, setFormData] = useState({
     title: '',
     department: '',
@@ -93,6 +97,25 @@ const PostJob = () => {
     requirements: '',
     benefits: ''
   });
+  
+  // Pre-fill form if editing
+  useEffect(() => {
+    if (editingJob) {
+      setFormData({
+        title: editingJob.title || '',
+        department: editingJob.department || '',
+        location: editingJob.location || '',
+        jobType: editingJob.jobType || '',
+        experienceLevel: editingJob.experienceLevel || '',
+        salaryMin: editingJob.salaryMin || '',
+        salaryMax: editingJob.salaryMax || '',
+        description: editingJob.description || '',
+        responsibilities: editingJob.responsibilities || '',
+        requirements: editingJob.requirements || '',
+        benefits: editingJob.benefits || ''
+      });
+    }
+  }, [editingJob]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -100,8 +123,37 @@ const PostJob = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Posting job:', formData);
-    alert('Job posted successfully!');
+    
+    // Get existing jobs from localStorage
+    const existingJobs = JSON.parse(localStorage.getItem('employerJobs') || '[]');
+    
+    if (isEditing) {
+      // Update existing job
+      const updatedJobs = existingJobs.map(job => 
+        job.id === editingJob.id 
+          ? { ...job, ...formData }
+          : job
+      );
+      localStorage.setItem('employerJobs', JSON.stringify(updatedJobs));
+    } else {
+      // Create new job with unique ID and metadata
+      const newJob = {
+        id: Date.now(),
+        ...formData,
+        applicants: 0,
+        status: 'active',
+        posted: language === 'vi' ? 'Vừa xong' : 'Just now',
+        views: 0,
+        responseRate: 0,
+        createdAt: new Date().toISOString()
+      };
+      
+      // Add new job to beginning of array
+      const updatedJobs = [newJob, ...existingJobs];
+      localStorage.setItem('employerJobs', JSON.stringify(updatedJobs));
+    }
+    
+    // Navigate to jobs page
     navigate('/employer/jobs');
   };
 
@@ -114,8 +166,14 @@ const PostJob = () => {
 
         <FormCard>
           <FormHeader>
-            <h1>{language === 'vi' ? 'Đăng Tin Tuyển Dụng Mới' : 'Post New Job'}</h1>
-            <p>{language === 'vi' ? 'Điền thông tin để tạo tin tuyển dụng' : 'Fill in the details to create a job posting'}</p>
+            <h1>{isEditing 
+              ? (language === 'vi' ? 'Chỉnh Sửa Tin Tuyển Dụng' : 'Edit Job Posting')
+              : (language === 'vi' ? 'Đăng Tin Tuyển Dụng Mới' : 'Post New Job')}
+            </h1>
+            <p>{isEditing
+              ? (language === 'vi' ? 'Cập nhật thông tin tin tuyển dụng' : 'Update job posting details')
+              : (language === 'vi' ? 'Điền thông tin để tạo tin tuyển dụng' : 'Fill in the details to create a job posting')}
+            </p>
           </FormHeader>
 
           <form onSubmit={handleSubmit}>
@@ -195,7 +253,9 @@ const PostJob = () => {
                 {language === 'vi' ? 'Hủy' : 'Cancel'}
               </Button>
               <Button type="submit" $variant="primary" $size="large">
-                <Save /> {language === 'vi' ? 'Đăng Tin' : 'Post Job'}
+                <Save /> {isEditing 
+                  ? (language === 'vi' ? 'Cập Nhật' : 'Update Job')
+                  : (language === 'vi' ? 'Đăng Tin' : 'Post Job')}
               </Button>
             </div>
           </form>

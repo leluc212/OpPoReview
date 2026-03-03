@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import styled from 'styled-components';
+import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
 import { 
@@ -15,7 +16,8 @@ import {
   Sun,
   Camera,
   Save,
-  X
+  X,
+  Edit3
 } from 'lucide-react';
 import { Input, TextArea, Label, Button } from '../../components/FormElements';
 
@@ -345,6 +347,7 @@ const ButtonGroup = styled.div`
 const AdminProfile = () => {
   const { language, t } = useLanguage();
   const [activeSection, setActiveSection] = useState('profile');
+  const [isEditing, setIsEditing] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [profileImage, setProfileImage] = useState(() => {
     return localStorage.getItem('adminProfileImage') || null;
@@ -355,13 +358,20 @@ const AdminProfile = () => {
     sms: false
   });
 
-  const [profileData, setProfileData] = useState({
+  const defaultProfileData = {
     fullName: 'Admin',
     email: 'admin@oppo.vn',
     phone: '0909 123 456',
     address: 'Hà Nội, Việt Nam',
     bio: language === 'vi' ? 'Quản trị viên hệ thống OppoReview' : 'OppoReview System Administrator'
+  };
+
+  const [profileData, setProfileData] = useState(() => {
+    const savedData = localStorage.getItem('adminProfile');
+    return savedData ? JSON.parse(savedData) : defaultProfileData;
   });
+  
+  const [originalProfileData, setOriginalProfileData] = useState(profileData);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -425,7 +435,11 @@ const AdminProfile = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Profile updated:', profileData);
+  };
+  
+  const handleSave = () => {
+    localStorage.setItem('adminProfile', JSON.stringify(profileData));
+    setOriginalProfileData(profileData);
   };
 
   const renderContent = () => {
@@ -496,10 +510,7 @@ const AdminProfile = () => {
               </FormGrid>
 
               <ButtonGroup>
-                <Button type="button" $variant="outline">
-                  {language === 'vi' ? 'Hủy bỏ' : 'Cancel'}
-                </Button>
-                <Button type="submit" $variant="primary">
+                <Button type="button" $variant="primary" onClick={handleSave}>
                   <Save size={18} />
                   {language === 'vi' ? 'Lưu thay đổi' : 'Save changes'}
                 </Button>
@@ -623,8 +634,10 @@ const AdminProfile = () => {
     <DashboardLayout role="admin">
       <PageContainer>
         <PageHeader>
-          <Title>{language === 'vi' ? 'Hồ Sơ Admin' : 'Admin Profile'}</Title>
-          <Subtitle>{language === 'vi' ? 'Quản lý thông tin cá nhân và cài đặt tài khoản' : 'Manage personal information and account settings'}</Subtitle>
+          <div>
+            <Title>{language === 'vi' ? 'Hồ Sơ Admin' : 'Admin Profile'}</Title>
+            <Subtitle>{language === 'vi' ? 'Quản lý thông tin cá nhân và cài đặt tài khoản' : 'Manage personal information and account settings'}</Subtitle>
+          </div>
         </PageHeader>
 
         <Grid>
