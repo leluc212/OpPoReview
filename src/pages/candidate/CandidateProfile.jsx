@@ -23,8 +23,34 @@ import {
   CheckCircle,
   FileText,
   Star,
-  X
+  X,
+  Facebook
 } from 'lucide-react';
+
+// Custom Zalo Icon Component - Based on official Zalo logo
+const ZaloIcon = ({ size = 24, color = "#0068FF", ...props }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 48 48" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <defs>
+      <linearGradient id="zaloGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style={{stopColor: '#1890FF', stopOpacity: 1}} />
+        <stop offset="100%" style={{stopColor: color, stopOpacity: 1}} />
+      </linearGradient>
+    </defs>
+    <circle cx="24" cy="24" r="22" fill="url(#zaloGradient)"/>
+    {/* Letter Z - simplified design */}
+    <path 
+      d="M15 15L33 15L33 19L22 28H33V33H15V29L26 20H15V15Z" 
+      fill="white"
+    />
+  </svg>
+);
 
 const ProfileContainer = styled.div`
   max-width: 1400px;
@@ -390,23 +416,23 @@ const SkillTag = styled(motion.div)`
   align-items: center;
   gap: 6px;
   padding: 10px 16px;
-  background: ${props => props.theme.colors.primary}15;
-  color: white;
+  background: ${props => props.theme.colors.primary}1A;
+  color: ${props => props.theme.colors.primary};
   border-radius: ${props => props.theme.borderRadius.lg};
   font-size: 14px;
   font-weight: 600;
-  border: 1px solid ${props => props.theme.colors.primary}30;
+  border: 1px solid ${props => props.theme.colors.primary}33;
   transition: all 0.2s;
-  
+
   &:hover {
-    background: ${props => props.theme.colors.primary}25;
+    background: ${props => props.theme.colors.primary}26;
     transform: translateY(-2px);
   }
-  
+
   svg {
     width: 16px;
     height: 16px;
-    color: white;
+    color: ${props => props.theme.colors.primary};
   }
 `;
 
@@ -456,11 +482,15 @@ const CandidateProfile = () => {
     email: 'lucthuhai@gmail.com',
     phone: '+84 379784509',
     location: 'Thủ Đức, TP.HCM',
+    cccd: '',
+    dateOfBirth: '',
     title: 'Senior React Developer',
     bio: 'Passionate developer with 5+ years of experience in building modern web applications. Specialized in React, Node.js, and cloud technologies.',
-    linkedin: 'linkedin.com/in/lucthuhai',
-    github: 'github.com/lucthuhai',
-    website: 'leluc.com'
+    linkedin: '',
+    github: '',
+    website: '',
+    facebook: '',
+    zalo: ''
   };
   
   const [formData, setFormData] = useState(() => {
@@ -469,6 +499,12 @@ const CandidateProfile = () => {
   });
   
   const [originalFormData, setOriginalFormData] = useState(formData);
+
+  // Track if CCCD and DOB are locked (can only be set once)
+  const [isLockedFields, setIsLockedFields] = useState(() => {
+    const saved = localStorage.getItem('lockedProfileFields');
+    return saved ? JSON.parse(saved) : { cccd: false, dateOfBirth: false };
+  });
 
   const defaultSkills = [
     'React', 'Node.js', 'TypeScript', 'JavaScript', 'HTML/CSS',
@@ -487,26 +523,30 @@ const CandidateProfile = () => {
   const calculateProfileCompletion = () => {
     let completion = 0;
     
-    // Basic info (30% total)
-    if (formData.fullName && formData.fullName.trim()) completion += 10;
-    if (formData.email && formData.email.trim()) completion += 10;
-    if (formData.phone && formData.phone.trim()) completion += 10;
+    // Basic info (40% total)
+    if (formData.fullName && formData.fullName.trim()) completion += 8;
+    if (formData.email && formData.email.trim()) completion += 8;
+    if (formData.phone && formData.phone.trim()) completion += 8;
+    if (formData.cccd && formData.cccd.trim()) completion += 8;
+    if (formData.dateOfBirth && formData.dateOfBirth.trim()) completion += 8;
     
-    // Professional info (30% total)
-    if (formData.location && formData.location.trim()) completion += 10;
-    if (formData.title && formData.title.trim()) completion += 10;
-    if (formData.bio && formData.bio.trim()) completion += 10;
+    // Professional info (25% total)
+    if (formData.location && formData.location.trim()) completion += 8;
+    if (formData.title && formData.title.trim()) completion += 9;
+    if (formData.bio && formData.bio.trim()) completion += 8;
     
     // Profile image (15%)
     if (profileImage) completion += 15;
     
     // Social links (15% total)
-    if (formData.linkedin && formData.linkedin.trim()) completion += 5;
-    if (formData.github && formData.github.trim()) completion += 5;
-    if (formData.website && formData.website.trim()) completion += 5;
+    if (formData.linkedin && formData.linkedin.trim()) completion += 3;
+    if (formData.github && formData.github.trim()) completion += 3;
+    if (formData.website && formData.website.trim()) completion += 3;
+    if (formData.facebook && formData.facebook.trim()) completion += 3;
+    if (formData.zalo && formData.zalo.trim()) completion += 3;
     
-    // Skills (10%)
-    if (skills && skills.length >= 3) completion += 10;
+    // Skills (5%)
+    if (skills && skills.length >= 3) completion += 5;
     
     return completion;
   };
@@ -570,6 +610,23 @@ const CandidateProfile = () => {
   };
 
   const handleSave = () => {
+    // Check if CCCD or DOB are being set for the first time
+    const newLockedFields = { ...isLockedFields };
+    
+    if (formData.cccd && formData.cccd.trim() && !isLockedFields.cccd) {
+      newLockedFields.cccd = true;
+    }
+    
+    if (formData.dateOfBirth && formData.dateOfBirth.trim() && !isLockedFields.dateOfBirth) {
+      newLockedFields.dateOfBirth = true;
+    }
+    
+    // Save locked state
+    if (newLockedFields.cccd !== isLockedFields.cccd || newLockedFields.dateOfBirth !== isLockedFields.dateOfBirth) {
+      setIsLockedFields(newLockedFields);
+      localStorage.setItem('lockedProfileFields', JSON.stringify(newLockedFields));
+    }
+    
     localStorage.setItem('candidateProfile', JSON.stringify(formData));
     setOriginalFormData(formData);
     setIsEditing(false);
@@ -706,6 +763,30 @@ const CandidateProfile = () => {
                     <Input name="location" value={formData.location} onChange={handleChange} />
                   </FormGroup>
 
+                  <FormGroup>
+                    <Label>{language === 'vi' ? 'Số CCCD' : 'Citizen ID'}</Label>
+                    <Input 
+                      name="cccd" 
+                      value={formData.cccd} 
+                      onChange={handleChange} 
+                      placeholder="079202012345"
+                      disabled={isLockedFields.cccd}
+                      style={isLockedFields.cccd ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
+                    />
+                  </FormGroup>
+
+                  <FormGroup>
+                    <Label>{language === 'vi' ? 'Ngày sinh' : 'Date of Birth'}</Label>
+                    <Input 
+                      name="dateOfBirth" 
+                      type="date" 
+                      value={formData.dateOfBirth} 
+                      onChange={handleChange}
+                      disabled={isLockedFields.dateOfBirth}
+                      style={isLockedFields.dateOfBirth ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
+                    />
+                  </FormGroup>
+
                   <FormGroup className="full-width">
                     <Label>{t.profile.professionalTitle}</Label>
                     <Input name="title" value={formData.title} onChange={handleChange} />
@@ -756,6 +837,43 @@ const CandidateProfile = () => {
                         <div className="label">{language === 'vi' ? 'Điện Thoại' : 'Phone'}</div>
                       </div>
                       <div className="value">{formData.phone}</div>
+                    </InfoCard>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                    <InfoCard
+                      $color="#3B82F6"
+                      whileHover={{ scale: 1.01 }}
+                    >
+                      <div className="info-header">
+                        <div className="icon">
+                          <FileText />
+                        </div>
+                        <div className="label">{language === 'vi' ? 'Số CCCD' : 'Citizen ID'}</div>
+                      </div>
+                      <div className="value">{formData.cccd || (language === 'vi' ? 'Chưa cập nhật' : 'Not updated')}</div>
+                    </InfoCard>
+
+                    <InfoCard
+                      $color="#EC4899"
+                      whileHover={{ scale: 1.01 }}
+                    >
+                      <div className="info-header">
+                        <div className="icon">
+                          <Calendar />
+                        </div>
+                        <div className="label">{language === 'vi' ? 'Ngày sinh' : 'Date of Birth'}</div>
+                      </div>
+                      <div className="value">
+                        {formData.dateOfBirth 
+                          ? new Date(formData.dateOfBirth).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })
+                          : (language === 'vi' ? 'Chưa cập nhật' : 'Not updated')
+                        }
+                      </div>
                     </InfoCard>
                   </div>
 
@@ -817,50 +935,99 @@ const CandidateProfile = () => {
                 <FormGrid>
                   <FormGroup>
                     <Label>LinkedIn</Label>
-                    <Input name="linkedin" value={formData.linkedin} onChange={handleChange} />
+                    <Input name="linkedin" value={formData.linkedin || ''} onChange={handleChange} placeholder="linkedin.com/in/yourusername" />
                   </FormGroup>
 
                   <FormGroup>
                     <Label>GitHub</Label>
-                    <Input name="github" value={formData.github} onChange={handleChange} />
+                    <Input name="github" value={formData.github || ''} onChange={handleChange} placeholder="github.com/yourusername" />
+                  </FormGroup>
+
+                  <FormGroup>
+                    <Label>Facebook</Label>
+                    <Input name="facebook" value={formData.facebook || ''} onChange={handleChange} placeholder="facebook.com/yourusername" />
+                  </FormGroup>
+
+                  <FormGroup>
+                    <Label>Zalo</Label>
+                    <Input name="zalo" value={formData.zalo || ''} onChange={handleChange} placeholder="0379784509" />
                   </FormGroup>
 
                   <FormGroup className="full-width">
                     <Label>Website</Label>
-                    <Input name="website" value={formData.website} onChange={handleChange} />
+                    <Input name="website" value={formData.website || ''} onChange={handleChange} placeholder="yourwebsite.com" />
                   </FormGroup>
                 </FormGrid>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <InfoCard $color="#0077B5" whileHover={{ scale: 1.01 }}>
-                    <div className="info-header">
-                      <div className="icon">
-                        <Linkedin />
+                  {formData.linkedin && formData.linkedin.trim() && (
+                    <InfoCard $color="#0077B5" whileHover={{ scale: 1.01 }}>
+                      <div className="info-header">
+                        <div className="icon">
+                          <Linkedin />
+                        </div>
+                        <div className="label">LinkedIn</div>
                       </div>
-                      <div className="label">LinkedIn</div>
-                    </div>
-                    <div className="value">{formData.linkedin}</div>
-                  </InfoCard>
+                      <div className="value">{formData.linkedin}</div>
+                    </InfoCard>
+                  )}
 
-                  <InfoCard $color="#333" whileHover={{ scale: 1.01 }}>
-                    <div className="info-header">
-                      <div className="icon">
-                        <Github />
+                  {formData.github && formData.github.trim() && (
+                    <InfoCard $color="#333" whileHover={{ scale: 1.01 }}>
+                      <div className="info-header">
+                        <div className="icon">
+                          <Github />
+                        </div>
+                        <div className="label">GitHub</div>
                       </div>
-                      <div className="label">GitHub</div>
-                    </div>
-                    <div className="value">{formData.github}</div>
-                  </InfoCard>
+                      <div className="value">{formData.github}</div>
+                    </InfoCard>
+                  )}
 
-                  <InfoCard $color="#667eea" whileHover={{ scale: 1.01 }}>
-                    <div className="info-header">
-                      <div className="icon">
-                        <Globe />
+                  {formData.facebook && formData.facebook.trim() && (
+                    <InfoCard $color="#1877F2" whileHover={{ scale: 1.01 }}>
+                      <div className="info-header">
+                        <div className="icon">
+                          <Facebook />
+                        </div>
+                        <div className="label">Facebook</div>
                       </div>
-                      <div className="label">Website</div>
+                      <div className="value">{formData.facebook}</div>
+                    </InfoCard>
+                  )}
+
+                  {formData.zalo && formData.zalo.trim() && (
+                    <InfoCard $color="#0068FF" whileHover={{ scale: 1.01 }}>
+                      <div className="info-header">
+                        <div className="icon">
+                          <ZaloIcon size={20} color="#0068FF" />
+                        </div>
+                        <div className="label">Zalo</div>
+                      </div>
+                      <div className="value">{formData.zalo}</div>
+                    </InfoCard>
+                  )}
+
+                  {formData.website && formData.website.trim() && (
+                    <InfoCard $color="#667eea" whileHover={{ scale: 1.01 }}>
+                      <div className="info-header">
+                        <div className="icon">
+                          <Globe />
+                        </div>
+                        <div className="label">Website</div>
+                      </div>
+                      <div className="value">{formData.website}</div>
+                    </InfoCard>
+                  )}
+
+                  {!formData.linkedin?.trim() && !formData.github?.trim() && !formData.facebook?.trim() && !formData.zalo?.trim() && !formData.website?.trim() && (
+                    <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94A3B8' }}>
+                      <LinkIcon size={48} style={{ marginBottom: '12px', opacity: 0.5 }} />
+                      <p style={{ fontSize: '14px', fontWeight: '600' }}>
+                        {language === 'vi' ? 'Chưa có liên kết mạng xã hội nào' : 'No social links added yet'}
+                      </p>
                     </div>
-                    <div className="value">{formData.website}</div>
-                  </InfoCard>
+                  )}
                 </div>
               )}
             </Card>

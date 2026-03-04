@@ -7,15 +7,14 @@ import {
   Bell, 
   Briefcase, 
   CheckCircle, 
-  MessageSquare, 
-  AlertCircle,
   Eye,
   Clock,
   X,
-  Filter,
-  Check,
   TrendingUp,
-  Award
+  Award,
+  Filter,
+  Inbox,
+  Mail
 } from 'lucide-react';
 
 const NotificationsContainer = styled.div`
@@ -132,52 +131,60 @@ const Sidebar = styled.div`
 `;
 
 const FilterBar = styled(motion.div)`
-  background: ${props => props.theme.colors.bgLight};
-  border-radius: ${props => props.theme.borderRadius.xl};
-  padding: 20px 24px;
-  border: 1px solid ${props => props.theme.colors.border};
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  
-  .filter-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    
-    svg {
-      width: 20px;
-      height: 20px;
-      color: ${props => props.theme.colors.primary};
-    }
-    
-    span {
-      font-weight: 600;
-      font-size: 14px;
-      color: ${props => props.theme.colors.text};
-    }
-  }
-  
-  .filter-buttons {
-    display: flex;
-    gap: 8px;
-  }
+  gap: 10px;
+  flex-wrap: wrap;
 `;
 
 const FilterButton = styled(motion.button)`
-  padding: 8px 16px;
-  border-radius: ${props => props.theme.borderRadius.lg};
-  border: 2px solid ${props => props.$active ? props.theme.colors.primary : props.theme.colors.border};
-  background: ${props => props.$active ? props.theme.colors.primary : 'transparent'};
+  padding: 10px 20px;
+  border-radius: 24px;
+  border: none;
+  background: ${props => props.$active 
+    ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+    : props.theme.colors.bgLight};
   color: ${props => props.$active ? 'white' : props.theme.colors.text};
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
+  box-shadow: ${props => props.$active 
+    ? '0 4px 12px rgba(102, 126, 234, 0.4)' 
+    : '0 2px 8px rgba(0, 0, 0, 0.08)'};
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .badge {
+    background: ${props => props.$active ? 'rgba(255, 255, 255, 0.3)' : props.theme.colors.primary};
+    color: ${props => props.$active ? 'white' : 'white'};
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 20px;
+    text-align: center;
+  }
   
   &:hover {
-    border-color: ${props => props.theme.colors.primary};
+    transform: translateY(-2px);
+    box-shadow: ${props => props.$active 
+      ? '0 6px 16px rgba(102, 126, 234, 0.5)' 
+      : '0 4px 12px rgba(0, 0, 0, 0.12)'};
+    ${props => !props.$active && `
+      background: ${props.theme.colors.bgDark};
+    `}
+  }
+  
+  &:active {
+    transform: translateY(0);
   }
 `;
 
@@ -462,9 +469,9 @@ function CandidateNotifications() {
     ));
   };
 
-  const filteredNotifications = filter === 'all' 
-    ? notifications 
-    : filter === 'unread' 
+  const filteredNotifications = filter === 'all'
+    ? notifications
+    : filter === 'unread'
     ? notifications.filter(n => n.unread)
     : notifications.filter(n => n.type === filter);
 
@@ -503,36 +510,26 @@ function CandidateNotifications() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
             >
-              <div className="filter-left">
-                <Filter />
-                <span>{language === 'vi' ? 'Lọc thông báo' : 'Filter notifications'}</span>
-              </div>
-              <div className="filter-buttons">
-                <FilterButton 
-                  $active={filter === 'all'}
-                  onClick={() => setFilter('all')}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {language === 'vi' ? 'Tất cả' : 'All'}
-                </FilterButton>
-                <FilterButton 
-                  $active={filter === 'unread'}
-                  onClick={() => setFilter('unread')}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {language === 'vi' ? 'Chưa đọc' : 'Unread'}
-                </FilterButton>
-                <FilterButton 
-                  $active={filter === 'application'}
-                  onClick={() => setFilter('application')}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {language === 'vi' ? 'Ứng tuyển' : 'Applications'}
-                </FilterButton>
-              </div>
+              <FilterButton
+                $active={filter === 'all'}
+                onClick={() => setFilter('all')}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Inbox />
+                <span>{language === 'vi' ? 'Tất cả' : 'All'}</span>
+                <span className="badge">{notifications.length}</span>
+              </FilterButton>
+              <FilterButton
+                $active={filter === 'unread'}
+                onClick={() => setFilter('unread')}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Mail />
+                <span>{language === 'vi' ? 'Chưa đọc' : 'Unread'}</span>
+                <span className="badge">{unreadCount}</span>
+              </FilterButton>
             </FilterBar>
 
             {filteredNotifications.map((notif, index) => (
@@ -586,9 +583,9 @@ function CandidateNotifications() {
                   {language === 'vi' ? 'Không có thông báo' : 'No notifications'}
                 </h3>
                 <p style={{ color: '#94A3B8', fontSize: '14px' }}>
-                  {filter === 'unread' 
+                  {filter === 'unread'
                     ? (language === 'vi' ? 'Bạn đã đọc tất cả thông báo' : 'You have read all notifications')
-                    : (language === 'vi' ? 'Chưa có thông báo nào trong mục này' : 'No notifications in this category')}
+                    : (language === 'vi' ? 'Không có thông báo nào trong mục này' : 'No notifications in this category')}
                 </p>
               </Card>
             )}
