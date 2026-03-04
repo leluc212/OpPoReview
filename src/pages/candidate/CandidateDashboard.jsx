@@ -577,13 +577,6 @@ const CandidateDashboard = () => {
       time: language === 'vi' ? 'Hôm nay' : 'Today'
     },
     {
-      type: 'interview',
-      icon: Calendar,
-      color: '#10B981',
-      title: language === 'vi' ? 'Lịch phỏng vấn với FPT Software' : 'Interview with FPT Software',
-      time: language === 'vi' ? 'Ngày mai, 10:00 AM' : 'Tomorrow, 10:00 AM'
-    },
-    {
       type: 'message',
       icon: Bell,
       color: '#F59E0B',
@@ -706,15 +699,6 @@ const CandidateDashboard = () => {
             changeText={language === 'vi' ? 'từ tuần trước' : 'from last week'}
             icon={Eye}
             color="#10B981"
-            positive
-          />
-          <StatsCard
-            title={language === 'vi' ? 'Phỏng Vấn' : 'Interviews'}
-            value="5"
-            change="+2"
-            changeText={language === 'vi' ? 'tuần này' : 'this week'}
-            icon={Calendar}
-            color="#8B5CF6"
             positive
           />
         </StatsGrid>

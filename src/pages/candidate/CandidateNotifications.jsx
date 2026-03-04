@@ -11,14 +11,11 @@ import {
   AlertCircle,
   Eye,
   Clock,
-  ThumbsUp,
   X,
   Filter,
   Check,
-  UserPlus,
   TrendingUp,
-  Award,
-  Calendar
+  Award
 } from 'lucide-react';
 
 const NotificationsContainer = styled.div`
@@ -411,18 +408,6 @@ function CandidateNotifications() {
       unread: true
     },
     {
-      id: 2,
-      type: 'message',
-      icon: MessageSquare,
-      color: '#F59E0B',
-      title: language === 'vi' ? 'Tin nhắn mới' : 'New message',
-      message: language === 'vi'
-        ? 'Bạn có tin nhắn mới từ Hồng Trà Ngô Gia'
-        : 'You have a new message from Hong Tra Ngo Gia',
-      time: language === 'vi' ? '5 giờ trước' : '5 hours ago',
-      unread: true
-    },
-    {
       id: 3,
       type: 'success',
       icon: CheckCircle,
@@ -447,42 +432,6 @@ function CandidateNotifications() {
       unread: true
     },
     {
-      id: 5,
-      type: 'success',
-      icon: ThumbsUp,
-      color: '#10B981',
-      title: language === 'vi' ? 'Hồ sơ được yêu thích' : 'Profile favorited',
-      message: language === 'vi'
-        ? 'VNG Corporation đã lưu hồ sơ của bạn vào danh sách ứng viên tiềm năng'
-        : 'VNG Corporation saved your profile as a potential candidate',
-      time: language === 'vi' ? '6 giờ trước' : '6 hours ago',
-      unread: true
-    },
-    {
-      id: 6,
-      type: 'alert',
-      icon: Calendar,
-      color: '#EF4444',
-      title: language === 'vi' ? 'Lời mời phỏng vấn' : 'Interview invitation',
-      message: language === 'vi'
-        ? 'Grab Vietnam mời bạn tham gia phỏng vấn vào 10:00 AM ngày 28/02/2026'
-        : 'Grab Vietnam invites you to an interview at 10:00 AM on 28/02/2026',
-      time: language === 'vi' ? '1 ngày trước' : '1 day ago',
-      unread: false
-    },
-    {
-      id: 7,
-      type: 'info',
-      icon: TrendingUp,
-      color: '#667eea',
-      title: language === 'vi' ? 'Hồ sơ của bạn nổi bật' : 'Your profile is trending',
-      message: language === 'vi'
-        ? 'Hồ sơ của bạn đã được xem 156 lần trong tuần này, tăng 45% so với tuần trước'
-        : 'Your profile was viewed 156 times this week, up 45% from last week',
-      time: language === 'vi' ? '2 ngày trước' : '2 days ago',
-      unread: false
-    },
-    {
       id: 8,
       type: 'success',
       icon: Award,
@@ -492,30 +441,6 @@ function CandidateNotifications() {
         ? 'Bạn đã hoàn thiện hồ sơ. Cơ hội được tuyển dụng tăng 70%'
         : 'You completed your profile. Your hiring chances increased by 70%',
       time: language === 'vi' ? '3 ngày trước' : '3 days ago',
-      unread: false
-    },
-    {
-      id: 9,
-      type: 'message',
-      icon: MessageSquare,
-      color: '#F59E0B',
-      title: language === 'vi' ? 'Tin nhắn từ nhà tuyển dụng' : 'Message from employer',
-      message: language === 'vi'
-        ? 'Shopee Vietnam đã gửi tin nhắn về vị trí Senior Frontend Engineer'
-        : 'Shopee Vietnam sent a message about the Senior Frontend Engineer position',
-      time: language === 'vi' ? '4 giờ trước' : '4 hours ago',
-      unread: true
-    },
-    {
-      id: 10,
-      type: 'application',
-      icon: UserPlus,
-      color: '#667eea',
-      title: language === 'vi' ? 'Nhà tuyển dụng theo dõi bạn' : 'Employers following you',
-      message: language === 'vi'
-        ? 'Tiki Corporation và 2 công ty khác đã theo dõi hồ sơ của bạn'
-        : 'Tiki Corporation and 2 other companies are following your profile',
-      time: language === 'vi' ? '1 ngày trước' : '1 day ago',
       unread: false
     }
   ];
@@ -607,14 +532,6 @@ function CandidateNotifications() {
                 >
                   {language === 'vi' ? 'Ứng tuyển' : 'Applications'}
                 </FilterButton>
-                <FilterButton 
-                  $active={filter === 'message'}
-                  onClick={() => setFilter('message')}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {language === 'vi' ? 'Tin nhắn' : 'Messages'}
-                </FilterButton>
               </div>
             </FilterBar>
 
@@ -693,7 +610,7 @@ function CandidateNotifications() {
                     <span className="stat-label">{language === 'vi' ? 'Thông báo hôm nay' : 'Today\'s notifications'}</span>
                     <Bell />
                   </div>
-                  <div className="stat-value">6</div>
+                  <div className="stat-value">{notifications.filter(n => n.time.includes(language === 'vi' ? 'giờ trước' : 'hours ago')).length}</div>
                 </StatItem>
                 
                 <StatItem $color="#10B981">
@@ -701,23 +618,23 @@ function CandidateNotifications() {
                     <span className="stat-label">{language === 'vi' ? 'Lượt xem hồ sơ' : 'Profile views'}</span>
                     <Eye />
                   </div>
-                  <div className="stat-value">156</div>
+                  <div className="stat-value">{notifications.filter(n => n.type === 'application' && (n.title.includes('xem') || n.title.includes('viewed'))).length}</div>
                 </StatItem>
                 
-                <StatItem $color="#F59E0B">
+                <StatItem $color="#667eea">
                   <div className="stat-header">
-                    <span className="stat-label">{language === 'vi' ? 'Tin nhắn mới' : 'New messages'}</span>
-                    <MessageSquare />
+                    <span className="stat-label">{language === 'vi' ? 'Hồ sơ được chấp nhận' : 'Applications accepted'}</span>
+                    <CheckCircle />
                   </div>
-                  <div className="stat-value">2</div>
+                  <div className="stat-value">{notifications.filter(n => n.type === 'success' && (n.title.includes('chấp nhận') || n.title.includes('accepted'))).length}</div>
                 </StatItem>
                 
-                <StatItem $color="#EF4444">
+                <StatItem $color="#10B981">
                   <div className="stat-header">
-                    <span className="stat-label">{language === 'vi' ? 'Lời mời phỏng vấn' : 'Interview invites'}</span>
-                    <Calendar />
+                    <span className="stat-label">{language === 'vi' ? 'Công việc phù hợp' : 'Matching jobs'}</span>
+                    <Briefcase />
                   </div>
-                  <div className="stat-value">1</div>
+                  <div className="stat-value">{notifications.filter(n => n.title.includes('phù hợp') || n.title.includes('matching')).length}</div>
                 </StatItem>
               </QuickStats>
             </Card>
@@ -731,25 +648,12 @@ function CandidateNotifications() {
                 <h2><Clock />{language === 'vi' ? 'Hoạt động gần đây' : 'Recent Activity'}</h2>
               </div>
               
-              <ActivityItem>
-                <h4>{language === 'vi' ? 'FPT Software xem hồ sơ' : 'FPT Software viewed profile'}</h4>
-                <p>{language === 'vi' ? '2 giờ trước' : '2 hours ago'}</p>
-              </ActivityItem>
-              
-              <ActivityItem>
-                <h4>{language === 'vi' ? 'Bạn nhận tin nhắn mới' : 'You received a new message'}</h4>
-                <p>{language === 'vi' ? '5 giờ trước' : '5 hours ago'}</p>
-              </ActivityItem>
-              
-              <ActivityItem>
-                <h4>{language === 'vi' ? 'Hồ sơ được chấp nhận' : 'Application accepted'}</h4>
-                <p>{language === 'vi' ? '1 ngày trước' : '1 day ago'}</p>
-              </ActivityItem>
-              
-              <ActivityItem>
-                <h4>{language === 'vi' ? 'Lời mời phỏng vấn từ Grab' : 'Interview invitation from Grab'}</h4>
-                <p>{language === 'vi' ? '1 ngày trước' : '1 day ago'}</p>
-              </ActivityItem>
+              {notifications.slice(0, 4).map((notif, index) => (
+                <ActivityItem key={notif.id}>
+                  <h4>{notif.title}</h4>
+                  <p>{notif.time}</p>
+                </ActivityItem>
+              ))}
             </Card>
           </Sidebar>
         </ContentGrid>

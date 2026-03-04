@@ -474,8 +474,8 @@ function Support() {
         ? 'Làm sao để theo dõi trạng thái đơn ứng tuyển?'
         : 'How do I track my application status?',
       answer: language === 'vi'
-        ? 'Truy cập phần "Thông Báo" để xem cập nhật về đơn ứng tuyển của bạn. Bạn cũng sẽ nhận email thông báo khi có thay đổi về trạng thái hồ sơ, lời mời phỏng vấn hoặc kết quả tuyển dụng.'
-        : 'Visit the "Notifications" section to see updates about your applications. You will also receive email notifications when there are changes to your application status, interview invitations, or recruitment results.'
+        ? 'Truy cập phần "Thông Báo" để xem cập nhật về đơn ứng tuyển của bạn. Bạn cũng sẽ nhận email thông báo khi có thay đổi về trạng thái hồ sơ hoặc kết quả tuyển dụng.'
+        : 'Visit the "Notifications" section to see updates about your applications. You will also receive email notifications when there are changes to your application status or recruitment results.'
     },
     {
       question: language === 'vi'
