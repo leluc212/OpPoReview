@@ -523,27 +523,27 @@ const CandidateProfile = () => {
   const calculateProfileCompletion = () => {
     let completion = 0;
     
-    // Basic info (40% total)
-    if (formData.fullName && formData.fullName.trim()) completion += 8;
-    if (formData.email && formData.email.trim()) completion += 8;
-    if (formData.phone && formData.phone.trim()) completion += 8;
-    if (formData.cccd && formData.cccd.trim()) completion += 8;
-    if (formData.dateOfBirth && formData.dateOfBirth.trim()) completion += 8;
+    // Basic info (50% total)
+    if (formData.fullName && formData.fullName.trim()) completion += 10;
+    if (formData.email && formData.email.trim()) completion += 10;
+    if (formData.phone && formData.phone.trim()) completion += 10;
+    if (formData.cccd && formData.cccd.trim()) completion += 10;
+    if (formData.dateOfBirth && formData.dateOfBirth.trim()) completion += 10;
     
-    // Professional info (25% total)
-    if (formData.location && formData.location.trim()) completion += 8;
-    if (formData.title && formData.title.trim()) completion += 9;
-    if (formData.bio && formData.bio.trim()) completion += 8;
+    // Professional info (30% total)
+    if (formData.location && formData.location.trim()) completion += 10;
+    if (formData.title && formData.title.trim()) completion += 10;
+    if (formData.bio && formData.bio.trim()) completion += 10;
     
     // Profile image (15%)
     if (profileImage) completion += 15;
     
-    // Social links (15% total)
-    if (formData.linkedin && formData.linkedin.trim()) completion += 3;
-    if (formData.github && formData.github.trim()) completion += 3;
-    if (formData.website && formData.website.trim()) completion += 3;
-    if (formData.facebook && formData.facebook.trim()) completion += 3;
-    if (formData.zalo && formData.zalo.trim()) completion += 3;
+    // Social links (not counted towards completion)
+    // if (formData.linkedin && formData.linkedin.trim()) completion += 0;
+    // if (formData.github && formData.github.trim()) completion += 0;
+    // if (formData.website && formData.website.trim()) completion += 0;
+    // if (formData.facebook && formData.facebook.trim()) completion += 0;
+    // if (formData.zalo && formData.zalo.trim()) completion += 0;
     
     // Skills (5%)
     if (skills && skills.length >= 3) completion += 5;
