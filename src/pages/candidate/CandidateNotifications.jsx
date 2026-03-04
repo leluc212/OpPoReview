@@ -408,7 +408,7 @@ function CandidateNotifications() {
       unread: true
     },
     {
-      id: 3,
+      id: 2,
       type: 'success',
       icon: CheckCircle,
       color: '#10B981',
@@ -420,7 +420,7 @@ function CandidateNotifications() {
       unread: false
     },
     {
-      id: 4,
+      id: 3,
       type: 'application',
       icon: Briefcase,
       color: '#667eea',
@@ -432,7 +432,7 @@ function CandidateNotifications() {
       unread: true
     },
     {
-      id: 8,
+      id: 4,
       type: 'success',
       icon: Award,
       color: '#10B981',

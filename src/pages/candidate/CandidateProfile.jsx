@@ -975,11 +975,11 @@ const CandidateProfile = () => {
                 </h2>
               </div>
 
-              <div style={{ fontSize: '14px', color: 'white', lineHeight: '1.8' }}>
-                <div style={{ padding: '12px 0', borderBottom: '1px solid #E2E8F0' }}>
-                  ✅ {language === 'vi' ? 'Hoàn thành dự án cho FPT Software' : 'Completed project for FPT Software'}
+              <div style={{ fontSize: '14px', color: 'black', lineHeight: '1.8' }}>
+                <div style={{ padding: '12px 0', borderBottom: '1px solid #77ace8' }}>
+                  ✅ {language === 'vi' ? 'Hoàn thành việc tuyển gấp cho Katinat' : 'Completed project for FPT Software'}
                 </div>
-                <div style={{ padding: '12px 0', borderBottom: '1px solid #E2E8F0' }}>
+                <div style={{ padding: '12px 0', borderBottom: '1px solid #77ace8' }}>
                   📝 {language === 'vi' ? 'Cập nhật hồ sơ' : 'Updated profile'}
                 </div>
                 <div style={{ padding: '12px 0' }}>

@@ -577,7 +577,7 @@ function Support() {
         >
           <div className="header-content">
             <h1><Headphones />{language === 'vi' ? 'Trung Tâm Hỗ Trợ' : 'Support Center'}</h1>
-            <p>{language === 'vi' ? 'Chúng tôi luôn sẵn sàng giúp đỡ bạn 24/7' : 'We are always ready to help you 24/7'}</p>
+            <p>{language === 'vi' ? 'Ốp Pờ luôn sẵn sàng giúp đỡ bạn 24/7' : 'We are always ready to help you 24/7'}</p>
           </div>
         </PageHeader>
 

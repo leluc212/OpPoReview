@@ -591,7 +591,7 @@ const Wallet = () => {
 
   const stats = [
     {
-      label: language === 'vi' ? 'Tổng Thu Nhập' : 'Total Income',
+      label: language === 'vi' ? 'Tổng Thu Nhập Tháng' : 'Total Income',
       value: '12,300,000 VND',
       icon: TrendingUp,
       color: '#10B981',
@@ -599,7 +599,7 @@ const Wallet = () => {
       positive: true
     },
     {
-      label: language === 'vi' ? 'Đã Rút' : 'Withdrawn',
+      label: language === 'vi' ? 'Đã Rút Trong Tháng' : 'Withdrawn',
       value: '5,000,000 VND',
       icon: TrendingDown,
       color: '#EF4444',
@@ -607,7 +607,7 @@ const Wallet = () => {
       positive: false
     },
     {
-      label: language === 'vi' ? 'Giao Dịch' : 'Transactions',
+      label: language === 'vi' ? 'Số Lượng Giao Dịch' : 'Transactions',
       value: '23',
       icon: BarChart3,
       color: '#667eea',
@@ -739,13 +739,6 @@ const Wallet = () => {
               <CreditCard />
               {language === 'vi' ? 'Liên Kết Ngân Hàng' : 'Link Bank'}
             </ActionButton>
-            <ActionButton
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Plus />
-              {language === 'vi' ? 'Nạp Tiền' : 'Deposit'}
-            </ActionButton>
           </div>
         </BalanceCard>
 
@@ -822,7 +815,7 @@ const Wallet = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    {language === 'vi' ? 'Chi Tiêu' : 'Expense'}
+                    {language === 'vi' ? 'Rút tiền' : 'Withdraw'}
                   </FilterButton>
                 </div>
                 <Input 
