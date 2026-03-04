@@ -425,8 +425,8 @@ const EmployerSettings = () => {
             </SettingRow>
           </SettingCard>
 
-          {/* Security */}
-          <SettingCard>
+          {/* Security - Hidden */}
+          {/* <SettingCard>
             <SettingHeader>
               <div className="icon">
                 <Lock />
@@ -473,7 +473,7 @@ const EmployerSettings = () => {
                 {language === 'vi' ? 'Đổi mật khẩu' : 'Change Password'}
               </Button>
             </form>
-          </SettingCard>
+          </SettingCard> */}
 
           {/* Notifications */}
           <SettingCard>
@@ -557,8 +557,8 @@ const EmployerSettings = () => {
             </ButtonGroup>
           </SettingCard>
 
-          {/* Danger Zone */}
-          <SettingCard>
+          {/* Danger Zone - Hidden */}
+          {/* <SettingCard>
             <DangerZone>
               <h4>{language === 'vi' ? 'Vùng nguy hiểm' : 'Danger Zone'}</h4>
               <p>{language === 'vi' ? 'Các hành động này không thể hoàn tác. Vui lòng cân nhắc kỹ trước khi thực hiện.' : 'These actions cannot be undone. Please proceed with caution.'}</p>
@@ -574,7 +574,7 @@ const EmployerSettings = () => {
                 </Button>
               </ButtonGroup>
             </DangerZone>
-          </SettingCard>
+          </SettingCard> */}
         </SettingsGrid>
       </PageContainer>
     </DashboardLayout>
