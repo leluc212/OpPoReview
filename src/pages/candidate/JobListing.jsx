@@ -79,12 +79,13 @@ const HeroSubtitle = styled.p`
 `;
 
 const SearchContainer = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.xl};
   padding: 8px;
   display: flex;
   gap: 8px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  border: 1px solid ${props => props.theme.colors.border};
   
   @media (max-width: 768px) {
     flex-direction: column;
@@ -112,7 +113,7 @@ const SearchInput = styled.div`
     background: none;
     outline: none;
     font-size: 15px;
-    color: #F1F5F9;
+    color: ${props => props.theme.colors.text};
     
     &::placeholder {
       color: ${props => props.theme.colors.textLight};
@@ -151,9 +152,9 @@ const QuickFilters = styled.div`
 
 const FilterChip = styled(motion.button)`
   padding: 6px 14px;
-  background: ${props => props.$active ? 'white' : 'rgba(255,255,255,0.2)'};
+  background: ${props => props.$active ? props.theme.colors.bgLight : 'rgba(255,255,255,0.2)'};
   color: ${props => props.$active ? props.theme.colors.primary : 'white'};
-  border: 1px solid ${props => props.$active ? 'white' : 'rgba(255,255,255,0.3)'};
+  border: 1px solid ${props => props.$active ? props.theme.colors.bgLight : 'rgba(255,255,255,0.3)'};
   border-radius: ${props => props.theme.borderRadius.full};
   font-size: 13px;
   font-weight: 600;
@@ -162,7 +163,7 @@ const FilterChip = styled(motion.button)`
   backdrop-filter: blur(10px);
   
   &:hover {
-    background: white;
+    background: ${props => props.theme.colors.bgLight};
     color: ${props => props.theme.colors.primary};
     transform: translateY(-2px);
   }
@@ -491,8 +492,8 @@ const FilterHeader = styled.div`
 const ClearButton = styled.button`
   padding: 6px 12px;
   background: transparent;
-  color: #ffffff;
-  border: 1px solid ${props => props.theme.colors.danger};
+  color: ${props => props.theme.colors.error};
+  border: 1px solid ${props => props.theme.colors.error};
   border-radius: ${props => props.theme.borderRadius.md};
   font-size: 13px;
   font-weight: 600;
@@ -500,7 +501,7 @@ const ClearButton = styled.button`
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${props => props.theme.colors.danger};
+    background: ${props => props.theme.colors.error};
     color: white;
   }
 `;
@@ -552,7 +553,7 @@ const FilterOption = styled.label`
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${props => props.theme.colors.bgLight};
+    background: ${props => props.theme.colors.bgDark};
   }
   
   input[type="checkbox"] {
@@ -640,7 +641,7 @@ const ViewToggle = styled.div`
 
 const ViewButton = styled.button`
   padding: 8px 12px;
-  background: ${props => props.$active ? 'white' : 'transparent'};
+  background: ${props => props.$active ? props.theme.colors.bgDark : 'transparent'};
   border: none;
   border-radius: ${props => props.theme.borderRadius.md};
   cursor: pointer;

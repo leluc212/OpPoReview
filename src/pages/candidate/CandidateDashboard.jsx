@@ -52,7 +52,7 @@ const DashboardContainer = styled.div`
 `;
 
 const WelcomeBanner = styled(motion.div)`
-  background: linear-gradient(135deg, #0E3995 0%, #0055A5 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
   border-radius: ${props => props.theme.borderRadius.xl};
   padding: 40px;
   margin-bottom: 32px;
@@ -575,7 +575,7 @@ const CandidateDashboard = () => {
     {
       type: 'view',
       icon: Eye,
-      color: '#0E3995',
+      color: '#1e40af',
       title: language === 'vi' ? '12 nhà tuyển dụng đã xem CV của bạn' : '12 employers viewed your CV',
       time: language === 'vi' ? 'Hôm nay' : 'Today'
     },
@@ -589,7 +589,7 @@ const CandidateDashboard = () => {
     {
       type: 'match',
       icon: Target,
-      color: '#8B5CF6',
+      color: '#1e40af',
       title: language === 'vi' ? '5 công việc mới phù hợp với bạn' : '5 new jobs match your profile',
       time: language === 'vi' ? '4 giờ trước' : '4 hours ago'
     },
@@ -683,7 +683,7 @@ const CandidateDashboard = () => {
             change="+12%"
             changeText={language === 'vi' ? 'từ tháng trước' : 'from last month'}
             icon={FileText}
-            color="#0E3995"
+            color="#1e40af"
             positive
           />
           <StatsCard
@@ -702,6 +702,15 @@ const CandidateDashboard = () => {
             changeText={language === 'vi' ? 'từ tuần trước' : 'from last week'}
             icon={Eye}
             color="#10B981"
+            positive
+          />
+          <StatsCard
+            title={language === 'vi' ? 'Job Match Thành Công' : 'Successful Matches'}
+            value="8"
+            change="+2"
+            changeText={language === 'vi' ? 'tháng này' : 'this month'}
+            icon={CheckCircle}
+            color="#1e40af"
             positive
           />
         </StatsGrid>

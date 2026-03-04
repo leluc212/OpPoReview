@@ -34,7 +34,7 @@ const PageHeader = styled.div`
     font-size: 32px;
     font-weight: 800;
     margin-bottom: 8px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -48,14 +48,14 @@ const PageHeader = styled.div`
 `;
 
 const BalanceCard = styled(motion.div)`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, ${props => props.theme.colors.primary} 0%, #1e40af 100%);
   border-radius: 24px;
   padding: 40px;
   margin-bottom: 32px;
   color: white;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 20px 60px ${props => props.theme.colors.primary}30;
   border: 2px solid rgba(255, 255, 255, 0.1);
   
   &::before {
@@ -157,11 +157,11 @@ const Card = styled(motion.div)`
   border: 2px solid ${props => props.theme.colors.border};
   border-radius: 20px;
   padding: 28px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: ${props => props.theme.shadows.sm};
   transition: all 0.3s ease;
   
   &:hover {
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+    box-shadow: ${props => props.theme.shadows.md};
     border-color: ${props => props.theme.colors.primary}40;
   }
   
@@ -200,7 +200,7 @@ const TransactionItem = styled(motion.div)`
   
   &:hover {
     background: ${props => props.theme.colors.bgDark};
-    border-color: ${props => props.$type === 'income' ? '#10B981' : '#EF4444'};
+    border-color: ${props => props.$type === 'income' ? props.theme.colors.success : props.theme.colors.error};
     transform: translateX(6px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
   }
@@ -211,17 +211,17 @@ const TransactionIcon = styled.div`
   height: 50px;
   border-radius: 14px;
   background: ${props => props.$type === 'income' 
-    ? 'linear-gradient(135deg, #10B98120 0%, #10B98130 100%)' 
-    : 'linear-gradient(135deg, #EF444420 0%, #EF444430 100%)'};
+    ? props.theme.colors.successBg
+    : props.theme.colors.errorBg};
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid ${props => props.$type === 'income' ? '#10B98140' : '#EF444440'};
+  border: 2px solid ${props => props.$type === 'income' ? props.theme.colors.success + '40' : props.theme.colors.error + '40'};
   
   svg {
     width: 24px;
     height: 24px;
-    color: ${props => props.$type === 'income' ? '#10B981' : '#EF4444'};
+    color: ${props => props.$type === 'income' ? props.theme.colors.success : props.theme.colors.error};
   }
 `;
 
@@ -249,11 +249,11 @@ const TransactionDetails = styled.div`
 const TransactionAmount = styled.div`
   font-size: 18px;
   font-weight: 800;
-  color: ${props => props.$type === 'income' ? '#10B981' : '#EF4444'};
-  background: ${props => props.$type === 'income' ? '#10B98110' : '#EF444410'};
+  color: ${props => props.$type === 'income' ? props.theme.colors.success : props.theme.colors.error};
+  background: ${props => props.$type === 'income' ? props.theme.colors.successBg : props.theme.colors.errorBg};
   padding: 8px 16px;
   border-radius: 10px;
-  border: 1px solid ${props => props.$type === 'income' ? '#10B98130' : '#EF444430'};
+  border: 1px solid ${props => props.$type === 'income' ? props.theme.colors.success + '30' : props.theme.colors.error + '30'};
 `;
 
 const StatsList = styled.div`
@@ -264,15 +264,15 @@ const StatsList = styled.div`
 
 const StatItem = styled(motion.div)`
   padding: 24px;
-  background: linear-gradient(135deg, ${props => props.theme.colors.bgLight} 0%, white 100%);
+  background: ${props => props.theme.colors.bgLight};
   border-radius: 16px;
   border-left: 5px solid ${props => props.$color || props.theme.colors.primary};
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: ${props => props.theme.shadows.sm};
   transition: all 0.3s ease;
   
   &:hover {
     transform: translateX(6px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    box-shadow: ${props => props.theme.shadows.md};
     border-left-width: 8px;
   }
   
@@ -305,11 +305,12 @@ const ReceiptItem = styled(motion.div)`
   border: 2px solid ${props => props.theme.colors.border};
   border-radius: 16px;
   background: ${props => props.theme.colors.bgLight};
+  box-shadow: ${props => props.theme.shadows.sm};
   transition: all 0.3s ease;
   
   &:hover {
     border-color: ${props => props.theme.colors.primary};
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.15);
+    box-shadow: ${props => props.theme.shadows.md};
     transform: translateY(-3px);
   }
 `;
@@ -353,7 +354,7 @@ const ReceiptInfo = styled.div`
 
 const DownloadButton = styled(motion.button)`
   padding: 10px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, ${props => props.theme.colors.primary} 0%, #1e40af 100%);
   color: white;
   border: none;
   border-radius: 12px;
@@ -364,11 +365,11 @@ const DownloadButton = styled(motion.button)`
   align-items: center;
   gap: 8px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px ${props => props.theme.colors.primary}30;
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 20px ${props => props.theme.colors.primary}40;
   }
   
   svg {

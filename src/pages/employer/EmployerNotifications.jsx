@@ -38,7 +38,7 @@ const PageHeader = styled.div`
     font-size: 32px;
     font-weight: 800;
     margin-bottom: 8px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -118,18 +118,18 @@ const ActionButton = styled(motion.button)`
   gap: 8px;
   border: none;
   background: ${props => props.$variant === 'primary' 
-    ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+    ? 'linear-gradient(135deg, #1e40af 0%, #1e40af 100%)' 
     : props.theme.colors.bgLight};
   color: ${props => props.$variant === 'primary' ? 'white' : props.theme.colors.text};
   border: 2px solid ${props => props.$variant === 'primary' ? 'transparent' : props.theme.colors.border};
   box-shadow: ${props => props.$variant === 'primary' 
-    ? '0 4px 12px rgba(102, 126, 234, 0.3)' 
+    ? '0 4px 12px rgba(30, 64, 175, 0.3)' 
     : '0 2px 8px rgba(0, 0, 0, 0.05)'};
   
   &:hover {
     transform: translateY(-2px);
     box-shadow: ${props => props.$variant === 'primary' 
-      ? '0 8px 20px rgba(102, 126, 234, 0.4)' 
+      ? '0 8px 20px rgba(30, 64, 175, 0.4)' 
       : '0 4px 12px rgba(0, 0, 0, 0.1)'};
   }
   
@@ -166,9 +166,9 @@ const NotificationCard = styled(motion.div)`
     width: 4px;
     background: ${props => {
       switch(props.$type) {
-        case 'application': return 'linear-gradient(180deg, #667eea 0%, #764ba2 100%)';
+        case 'application': return 'linear-gradient(180deg, #1e40af 0%, #1e40af 100%)';
         case 'interview': return 'linear-gradient(180deg, #10B981 0%, #059669 100%)';
-        case 'system': return 'linear-gradient(180deg, #3B82F6 0%, #2563EB 100%)';
+        case 'system': return 'linear-gradient(180deg, #1e40af 0%, #1e40af 100%)';
         case 'rating': return 'linear-gradient(180deg, #F59E0B 0%, #D97706 100%)';
         default: return 'linear-gradient(180deg, #94A3B8 0%, #64748B 100%)';
       }
@@ -178,7 +178,7 @@ const NotificationCard = styled(motion.div)`
   
   &:hover {
     transform: translateX(4px);
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.15);
     border-color: ${props => props.theme.colors.primary}60;
   }
 `;
@@ -190,9 +190,9 @@ const NotificationIcon = styled.div`
   border-radius: 12px;
   background: ${props => {
     switch(props.$type) {
-      case 'application': return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+      case 'application': return 'linear-gradient(135deg, #1e40af 0%, #1e40af 100%)';
       case 'interview': return 'linear-gradient(135deg, #10B981 0%, #059669 100%)';
-      case 'system': return 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)';
+      case 'system': return 'linear-gradient(135deg, #1e40af 0%, #1e40af 100%)';
       case 'rating': return 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)';
       default: return 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)';
     }
@@ -203,9 +203,9 @@ const NotificationIcon = styled.div`
   color: white;
   box-shadow: 0 4px 12px ${props => {
     switch(props.$type) {
-      case 'application': return 'rgba(102, 126, 234, 0.3)';
+      case 'application': return 'rgba(30, 64, 175, 0.3)';
       case 'interview': return 'rgba(16, 185, 129, 0.3)';
-      case 'system': return 'rgba(59, 130, 246, 0.3)';
+      case 'system': return 'rgba(30, 64, 175, 0.3)';
       case 'rating': return 'rgba(245, 158, 11, 0.3)';
       default: return 'rgba(0, 0, 0, 0.1)';
     }
@@ -302,7 +302,7 @@ const IconButton = styled(motion.button)`
     transform: scale(1.1);
     box-shadow: 0 4px 12px ${props => {
       if (props.$variant === 'danger') return props.theme.colors.error + '40';
-      return 'rgba(102, 126, 234, 0.3)';
+      return 'rgba(30, 64, 175, 0.3)';
     }};
   }
   

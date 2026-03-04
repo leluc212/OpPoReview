@@ -25,16 +25,16 @@ const LandingContainer = styled.div`
     color: transparent;
     background: linear-gradient(
       135deg,
-      ${props => props.$isDark ? '#3b82f6' : '#1a62ff'} 0%,
-      ${props => props.$isDark ? '#3b82f6' : '#1a62ff'} 20%,
+      ${props => props.$isDark ? '#1e40af' : '#1a62ff'} 0%,
+      ${props => props.$isDark ? '#1e40af' : '#1a62ff'} 20%,
       ${props => props.$isDark ? '#1e40af' : '#002e9d'} 20%,
       ${props => props.$isDark ? '#1e40af' : '#002e9d'} 40%,
-      ${props => props.$isDark ? '#3b82f6' : '#1a62ff'} 40%,
-      ${props => props.$isDark ? '#3b82f6' : '#1a62ff'} 60%,
+      ${props => props.$isDark ? '#1e40af' : '#1a62ff'} 40%,
+      ${props => props.$isDark ? '#1e40af' : '#1a62ff'} 60%,
       ${props => props.$isDark ? '#1e40af' : '#002e9d'} 60%,
       ${props => props.$isDark ? '#1e40af' : '#002e9d'} 80%,
-      ${props => props.$isDark ? '#3b82f6' : '#1a62ff'} 80%,
-      ${props => props.$isDark ? '#3b82f6' : '#1a62ff'} 100%
+      ${props => props.$isDark ? '#1e40af' : '#1a62ff'} 80%,
+      ${props => props.$isDark ? '#1e40af' : '#1a62ff'} 100%
     );
     background-size: 300px 300px;
     -webkit-background-clip: text;
@@ -446,9 +446,9 @@ const AnimatedBackground = styled.div`
     background: ${props => props.$isDark 
       ? `linear-gradient(
           to bottom,
-          rgba(59, 130, 246, 0) 0%,
-          rgba(59, 130, 246, 0.2) 50%,
-          rgba(59, 130, 246, 0) 100%
+          rgba(30, 64, 175, 0) 0%,
+          rgba(30, 64, 175, 0.2) 50%,
+          rgba(30, 64, 175, 0) 100%
         )`
       : `linear-gradient(
           to bottom,
@@ -532,8 +532,8 @@ const GridPattern = styled.div`
   position: absolute;
   inset: 0;
   background-image: 
-    linear-gradient(rgba(37, 99, 235, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(37, 99, 235, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(30, 64, 175, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30, 64, 175, 0.03) 1px, transparent 1px);
   background-size: 64px 64px;
   mask-image: radial-gradient(ellipse at center, black 0%, transparent 75%);
   -webkit-mask-image: radial-gradient(ellipse at center, black 0%, transparent 75%);
@@ -598,10 +598,10 @@ const Particle = styled(motion.span)`
   position: absolute;
   width: 6px;
   height: 6px;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, rgba(37, 99, 235, 0.2) 50%, transparent 70%);
+  background: radial-gradient(circle, rgba(30, 64, 175, 0.4) 0%, rgba(30, 64, 175, 0.2) 50%, transparent 70%);
   border-radius: 50%;
   opacity: 0.8;
-  box-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 0 10px rgba(30, 64, 175, 0.3);
 `;
 
 const WavePattern = styled(motion.div)`
@@ -783,7 +783,7 @@ const MiniSquare = styled(motion.div)`
 
 const FloatingShape = styled(motion.div)`
   position: absolute;
-  background: ${props => props.gradient || 'linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(37, 99, 235, 0.2))'};
+  background: ${props => props.gradient || 'linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(30, 64, 175, 0.2))'};
   opacity: ${props => props.opacity || 0.15};
   border-radius: ${props => props.rounded ? '50%' : '40%'};
   filter: blur(${props => props.blur || '80'}px);
@@ -803,7 +803,7 @@ const HeroTitle = styled(motion.h1)`
   line-height: 1.2;
   margin-bottom: 24px;
   color: #ffffff;
-  font-family: 'Bricolage Grotesque', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   letter-spacing: -2px;
   white-space: nowrap;
   
@@ -830,7 +830,7 @@ const HeroTitle = styled(motion.h1)`
 const HeroSubtitle = styled(motion.p)`
   font-size: 20px;
   color: #ffffff;
-  font-family: 'Bricolage Grotesque', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   margin-bottom: 48px;
   max-width: 600px;
   margin-left: auto;
@@ -1148,7 +1148,7 @@ const CompanyLogo = styled(motion.div)`
   &:hover {
     transform: translateY(-2px);
     box-shadow: ${props => props.$isDark 
-      ? '0 4px 16px rgba(59, 130, 246, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2)' 
+      ? '0 4px 16px rgba(30, 64, 175, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2)' 
       : '0 4px 16px rgba(147, 197, 253, 0.2), 0 2px 8px rgba(251, 207, 232, 0.15)'};
     border-color: #0EA5E9;
     color: #0EA5E9;
@@ -1189,8 +1189,8 @@ const CategoryCard = styled(motion.div)`
       ? '0 8px 24px rgba(0, 0, 0, 0.4)' 
       : '0 8px 24px rgba(0, 0, 0, 0.08)'};
     border-color: ${props => props.$isDark 
-      ? 'rgba(59, 130, 246, 0.4)' 
-      : 'rgba(37, 99, 235, 0.2)'};
+      ? 'rgba(30, 64, 175, 0.4)' 
+      : 'rgba(30, 64, 175, 0.2)'};
   }
 `;
 
@@ -1198,7 +1198,7 @@ const CategoryIcon = styled.div`
   width: 56px;
   height: 56px;
   margin: 0 auto 16px;
-  background: linear-gradient(135deg, #2563EB, #1E40AF);
+  background: linear-gradient(135deg, #1e40af, #1e40af);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -1224,7 +1224,7 @@ const CategoryTitle = styled.h3`
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   ${CategoryCard}:hover & {
-    color: #2563EB;
+    color: #1e40af;
   }
 `;
 
@@ -1254,7 +1254,7 @@ const TechBannerSection = styled(motion.section)`
     right: 0;
     bottom: 0;
     background: 
-      radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 20% 30%, rgba(30, 64, 175, 0.15) 0%, transparent 50%),
       radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.12) 0%, transparent 50%);
     pointer-events: none;
   }
@@ -1267,7 +1267,7 @@ const TechBannerSection = styled(motion.section)`
     transform: translate(-50%, -50%);
     width: 600px;
     height: 600px;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(30, 64, 175, 0.08) 0%, transparent 70%);
     filter: blur(60px);
     animation: pulse 8s ease-in-out infinite;
   }
@@ -1296,9 +1296,9 @@ const TechBannerImage = styled(motion.img)`
   border-radius: 20px;
   box-shadow: 
     0 25px 80px rgba(0, 0, 0, 0.5),
-    0 0 40px rgba(59, 130, 246, 0.2),
+    0 0 40px rgba(30, 64, 175, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(30, 64, 175, 0.2);
   filter: brightness(1.05) contrast(1.1);
   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   
@@ -1306,7 +1306,7 @@ const TechBannerImage = styled(motion.img)`
     transform: translateY(-8px) scale(1.02);
     box-shadow: 
       0 35px 100px rgba(0, 0, 0, 0.6),
-      0 0 60px rgba(59, 130, 246, 0.3),
+      0 0 60px rgba(30, 64, 175, 0.3),
       inset 0 1px 0 rgba(255, 255, 255, 0.15);
     filter: brightness(1.1) contrast(1.15);
   }
@@ -2453,7 +2453,7 @@ const LandingPage = () => {
               height: '600px',
               top: '5%',
               left: '-5%',
-              background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(59, 130, 246, 0.2))',
+              background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(30, 64, 175, 0.2))',
             }}
           />
           
@@ -2476,7 +2476,7 @@ const LandingPage = () => {
               height: '700px',
               top: '40%',
               right: '-10%',
-              background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.25), rgba(30, 64, 175, 0.15))',
+              background: 'linear-gradient(135deg, rgba(30, 64, 175, 0.25), rgba(30, 64, 175, 0.15))',
             }}
           />
           
@@ -2514,7 +2514,7 @@ const LandingPage = () => {
               height: '350px',
               top: '15%',
               right: '20%',
-              background: 'radial-gradient(circle, rgba(59, 130, 246, 0.3), rgba(37, 99, 235, 0.15))',
+              background: 'radial-gradient(circle, rgba(30, 64, 175, 0.3), rgba(30, 64, 175, 0.15))',
             }}
           />
           
@@ -2528,7 +2528,7 @@ const LandingPage = () => {
               height: '400px',
               bottom: '15%',
               right: '35%',
-              background: 'radial-gradient(circle, rgba(96, 165, 250, 0.28), rgba(59, 130, 246, 0.12))',
+              background: 'radial-gradient(circle, rgba(96, 165, 250, 0.28), rgba(30, 64, 175, 0.12))',
             }}
           />
           
@@ -3246,7 +3246,7 @@ const LandingPage = () => {
             $size="large" 
             style={{ 
               background: 'white', 
-              color: '#0E3995', 
+              color: '#1e40af', 
               position: 'relative',
               zIndex: 2,
               fontWeight: 700,
@@ -3502,7 +3502,7 @@ const LandingPage = () => {
                           <motion.div
                             style={{ 
                               padding: '8px 32px',
-                              background: '#3b82f6',
+                              background: '#1e40af',
                               color: 'white',
                               borderRadius: '20px',
                               fontSize: '13px',
@@ -3546,7 +3546,7 @@ const LandingPage = () => {
                                 cy="12"
                                 r="10"
                                 fill="none"
-                                stroke="#3b82f6"
+                                stroke="#1e40af"
                                 strokeWidth="2"
                                 strokeLinecap="round"
                                 initial={{ pathLength: 0 }}

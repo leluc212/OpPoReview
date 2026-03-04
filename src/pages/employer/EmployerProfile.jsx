@@ -42,7 +42,7 @@ const PageHeader = styled.div`
     font-size: 32px;
     font-weight: 800;
     margin-bottom: 8px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -81,7 +81,7 @@ const CompanyLogoCard = styled.div`
   transition: all 0.3s ease;
   
   &:hover {
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.15);
     border-color: ${props => props.theme.colors.primary}40;
   }
 `;
@@ -91,13 +91,13 @@ const LogoUploadArea = styled.div`
   height: 160px;
   margin: 0 auto 20px;
   border-radius: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.3);
   
   img {
     width: 100%;
@@ -200,9 +200,9 @@ const StatItem = styled.div`
   transition: all 0.3s ease;
   
   &:hover {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
     transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 6px 16px rgba(30, 64, 175, 0.3);
     
     .value, .label {
       color: white;
@@ -267,9 +267,10 @@ const InputWrapper = styled.div`
     left: 14px;
     top: 50%;
     transform: translateY(-50%);
-    width: 18px;
-    height: 18px;
-    color: ${props => props.theme.colors.textLight};
+    width: 22px;
+    height: 22px;
+    color: ${props => props.theme.colors.primary};
+    opacity: 0.9;
     pointer-events: none;
   }
   
@@ -281,7 +282,7 @@ const InputWrapper = styled.div`
 const SaveButton = styled(motion.button)`
   padding: 14px 32px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
   color: white;
   font-weight: 700;
   font-size: 15px;
@@ -289,14 +290,14 @@ const SaveButton = styled(motion.button)`
   align-items: center;
   gap: 10px;
   border: none;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.35);
+  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.35);
   transition: all 0.3s ease;
   cursor: pointer;
   margin-top: 24px;
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.45);
+    box-shadow: 0 12px 32px rgba(30, 64, 175, 0.45);
   }
   
   svg {
@@ -344,7 +345,15 @@ const EmployerProfile = () => {
   
   const [formData, setFormData] = useState(() => {
     const savedData = localStorage.getItem('employerProfile');
-    return savedData ? JSON.parse(savedData) : getInitialFormData(language);
+    if (savedData) {
+      try {
+        return JSON.parse(savedData);
+      } catch (e) {
+        console.error('Error parsing saved data:', e);
+        return getInitialFormData(language);
+      }
+    }
+    return getInitialFormData(language);
   });
   
   const [originalFormData, setOriginalFormData] = useState(formData);
@@ -352,7 +361,11 @@ const EmployerProfile = () => {
   useEffect(() => {
     const savedData = localStorage.getItem('employerProfile');
     if (!savedData) {
-      setFormData(getInitialFormData(language));
+      const initialData = getInitialFormData(language);
+      setFormData(initialData);
+      setOriginalFormData(initialData);
+      // Save initial data to localStorage so it's always available
+      localStorage.setItem('employerProfile', JSON.stringify(initialData));
     }
   }, [language]);
 
@@ -435,7 +448,7 @@ const EmployerProfile = () => {
               style={{
                 padding: '12px 24px',
                 borderRadius: '12px',
-                background: isEditing ? '#6B7280' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: isEditing ? '#6B7280' : 'linear-gradient(135deg, #1e40af 0%, #1e40af 100%)',
                 color: 'white',
                 border: 'none',
                 fontWeight: '700',
@@ -444,7 +457,7 @@ const EmployerProfile = () => {
                 alignItems: 'center',
                 gap: '8px',
                 cursor: 'pointer',
-                boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+                boxShadow: '0 4px 12px rgba(30, 64, 175, 0.3)'
               }}
             >
               <Edit3 size={18} />

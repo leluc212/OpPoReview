@@ -4,7 +4,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
 import TableFilter from '../../components/TableFilter';
 import Modal from '../../components/Modal';
-import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText } from 'lucide-react';
+import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText, Clock } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 // Mock data generator (language-aware)
@@ -149,10 +149,10 @@ const Table = styled.table`
 const ActionButton = styled.button`
   padding: 8px 16px;
   border-radius: ${props => props.theme.borderRadius.md};
-  background: ${props => props.$variant === 'success' ? '#10b981' : 
-              props.$variant === 'danger' ? '#ef4444' : 
-              props.$variant === 'warning' ? '#f59e0b' :
-              props.$variant === 'secondary' ? '#64748b' :
+  background: ${props => props.$variant === 'success' ? props.theme.colors.success : 
+              props.$variant === 'danger' ? props.theme.colors.error : 
+              props.$variant === 'warning' ? props.theme.colors.warning :
+              props.$variant === 'secondary' ? props.theme.colors.textLight :
               props.theme.colors.primary};
   color: white;
   font-size: 14px;
@@ -161,6 +161,9 @@ const ActionButton = styled.button`
   align-items: center;
   gap: 6px;
   margin-right: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
   
   svg {
     width: 16px;
@@ -169,6 +172,7 @@ const ActionButton = styled.button`
   
   &:hover {
     opacity: 0.9;
+    transform: translateY(-1px);
   }
   
   &:disabled {
@@ -182,8 +186,8 @@ const MarkedBadge = styled.span`
   align-items: center;
   gap: 4px;
   padding: 4px 8px;
-  background: #fef3c7;
-  color: #d97706;
+  background: ${props => props.theme.colors.warningBg};
+  color: ${props => props.theme.colors.warning};
   border-radius: 4px;
   font-size: 12px;
   font-weight: 600;
@@ -194,7 +198,25 @@ const MarkedBadge = styled.span`
   }
 `;
 
-
+const TimeDisplay = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: ${props => props.theme.colors.text};
+  font-weight: 600;
+  font-size: 14px;
+  padding: 6px 12px;
+  background: ${props => props.theme.colors.bgDark};
+  border-radius: ${props => props.theme.borderRadius.md};
+  border: 1px solid ${props => props.theme.colors.border};
+  
+  svg {
+    width: 14px;
+    height: 14px;
+    color: ${props => props.theme.colors.primary};
+    opacity: 0.8;
+  }
+`;
 
 const ProfileHeader = styled.div`
   background: ${props => props.theme.colors.gradientPrimary};
@@ -402,7 +424,12 @@ const ApplicationRow = React.memo(({
         )}
       </td>
       <td>{app.job}</td>
-      <td style={{ color: '#E2E8F0', fontWeight: 500 }}>{app.applied}</td>
+      <td>
+        <TimeDisplay>
+          <Clock />
+          {app.applied}
+        </TimeDisplay>
+      </td>
       <td>
         <StatusBadge status={app.completed ? 'completed' : app.status} />
       </td>

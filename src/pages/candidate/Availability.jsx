@@ -31,7 +31,7 @@ const AvailabilityContainer = styled.div`
 `;
 
 const PageHeader = styled(motion.div)`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
   border-radius: ${props => props.theme.borderRadius.xl};
   padding: 48px;
   margin-bottom: 32px;
@@ -373,7 +373,7 @@ const Toggle = styled.label`
 `;
 
 const InfoBox = styled(motion.div)`
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(30, 64, 175, 0.1) 0%, rgba(30, 64, 175, 0.1) 100%);
   border-left: 4px solid ${props => props.theme.colors.primary};
   padding: 24px;
   border-radius: ${props => props.theme.borderRadius.lg};
@@ -627,12 +627,12 @@ const Availability = () => {
   };
 
   const stats = [
-    { label: language === 'vi' ? 'Lượt Xem Hồ Sơ' : 'Profile Views', value: isAvailable ? '156' : '0', icon: Eye, color: '#667eea' },
+    { label: language === 'vi' ? 'Lượt Xem Hồ Sơ' : 'Profile Views', value: isAvailable ? '156' : '0', icon: Eye, color: '#1e40af' },
     { label: language === 'vi' ? 'Gợi Ý Công Việc' : 'Job Recommendations', value: isAvailable ? '23' : '0', icon: Briefcase, color: '#10B981' },
     { label: language === 'vi' ? 'Lời Mời' : 'Invitations', value: isAvailable ? '12' : '0', icon: Target, color: '#F59E0B' }
   ];
   const activities = [
-    { label: language === 'vi' ? 'FPT Software xem hồ sơ' : 'FPT Software viewed your profile', time: language === 'vi' ? '2 giờ trước' : '2 hours ago', icon: Eye, color: '#667eea' },
+    { label: language === 'vi' ? 'FPT Software xem hồ sơ' : 'FPT Software viewed your profile', time: language === 'vi' ? '2 giờ trước' : '2 hours ago', icon: Eye, color: '#1e40af' },
     { label: language === 'vi' ? 'Nhận gợi ý: Senior React Dev' : 'Recommendation: Senior React Dev', time: language === 'vi' ? '5 giờ trước' : '5 hours ago', icon: Zap, color: '#10B981' }
   ];
 

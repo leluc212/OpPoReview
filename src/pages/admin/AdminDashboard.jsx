@@ -142,7 +142,7 @@ const AdminDashboard = () => {
             change="+12%"
             changeText={language === 'vi' ? 'sơ với tháng trước' : 'vs last month'}
             icon={Users}
-            color="linear-gradient(135deg, #0E3995 0%, #0055A5 100%)"
+            color="linear-gradient(135deg, #1e40af 0%, #1e40af 100%)"
             positive
           />
           <StatsCard

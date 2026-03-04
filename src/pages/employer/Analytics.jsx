@@ -257,7 +257,7 @@ const Analytics = () => {
       value: '24',
       trend: '+12%',
       positive: true,
-      color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+      color: 'linear-gradient(135deg, #1e40af 0%, #1e40af 100%)'
     },
     {
       icon: <Users />,

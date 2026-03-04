@@ -23,7 +23,7 @@ const NotificationsContainer = styled.div`
 `;
 
 const PageHeader = styled(motion.div)`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
   border-radius: ${props => props.theme.borderRadius.xl};
   padding: 48px;
   margin-bottom: 32px;
@@ -142,7 +142,7 @@ const FilterButton = styled(motion.button)`
   border-radius: 24px;
   border: none;
   background: ${props => props.$active 
-    ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+    ? 'linear-gradient(135deg, #1e40af 0%, #1e40af 100%)' 
     : props.theme.colors.bgLight};
   color: ${props => props.$active ? 'white' : props.theme.colors.text};
   font-weight: 600;
@@ -150,7 +150,7 @@ const FilterButton = styled(motion.button)`
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: ${props => props.$active 
-    ? '0 4px 12px rgba(102, 126, 234, 0.4)' 
+    ? '0 4px 12px rgba(30, 64, 175, 0.4)' 
     : '0 2px 8px rgba(0, 0, 0, 0.08)'};
   display: flex;
   align-items: center;
@@ -176,7 +176,7 @@ const FilterButton = styled(motion.button)`
   &:hover {
     transform: translateY(-2px);
     box-shadow: ${props => props.$active 
-      ? '0 6px 16px rgba(102, 126, 234, 0.5)' 
+      ? '0 6px 16px rgba(30, 64, 175, 0.5)' 
       : '0 4px 12px rgba(0, 0, 0, 0.12)'};
     ${props => !props.$active && `
       background: ${props.theme.colors.bgDark};
@@ -207,7 +207,7 @@ const NotificationCard = styled(motion.div)`
   }
   
   ${props => props.$unread && `
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
+    background: linear-gradient(135deg, rgba(30, 64, 175, 0.03) 0%, rgba(30, 64, 175, 0.03) 100%);
   `}
 `;
 
@@ -406,7 +406,7 @@ function CandidateNotifications() {
       id: 1,
       type: 'application',
       icon: Eye,
-      color: '#667eea',
+      color: '#1e40af',
       title: language === 'vi' ? 'Hồ sơ đã được xem' : 'Profile viewed',
       message: language === 'vi' 
         ? 'FPT Software đã xem hồ sơ ứng tuyển Senior React Developer của bạn'
@@ -430,7 +430,7 @@ function CandidateNotifications() {
       id: 3,
       type: 'application',
       icon: Briefcase,
-      color: '#667eea',
+      color: '#1e40af',
       title: language === 'vi' ? 'Công việc phù hợp với bạn' : 'Jobs matching your profile',
       message: language === 'vi'
         ? 'Có 3 công việc mới phù hợp với kỹ năng React, Node.js của bạn'
@@ -602,7 +602,7 @@ function CandidateNotifications() {
               </div>
               
               <QuickStats>
-                <StatItem $color="#667eea">
+                <StatItem $color="#1e40af">
                   <div className="stat-header">
                     <span className="stat-label">{language === 'vi' ? 'Thông báo hôm nay' : 'Today\'s notifications'}</span>
                     <Bell />
@@ -618,7 +618,7 @@ function CandidateNotifications() {
                   <div className="stat-value">{notifications.filter(n => n.type === 'application' && (n.title.includes('xem') || n.title.includes('viewed'))).length}</div>
                 </StatItem>
                 
-                <StatItem $color="#667eea">
+                <StatItem $color="#1e40af">
                   <div className="stat-header">
                     <span className="stat-label">{language === 'vi' ? 'Hồ sơ được chấp nhận' : 'Applications accepted'}</span>
                     <CheckCircle />

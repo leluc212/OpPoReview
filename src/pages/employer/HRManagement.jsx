@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
-import { Calendar, CheckCircle, XCircle, Users, AlertCircle, Clock, Star, MapPin } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 const fadeIn = keyframes`
@@ -27,7 +26,7 @@ const PageHeader = styled.div`
     font-size: 32px;
     font-weight: 800;
     margin-bottom: 8px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -52,7 +51,7 @@ const JobTypeContainer = styled.div`
 const JobTypeTab = styled(motion.button)`
   flex: 1;
   padding: 14px 28px;
-  background: ${props => props.$active ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent'};
+  background: ${props => props.$active ? 'linear-gradient(135deg, #1e40af 0%, #1e40af 100%)' : 'transparent'};
   border: none;
   font-size: 15px;
   font-weight: 700;
@@ -60,11 +59,11 @@ const JobTypeTab = styled(motion.button)`
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: ${props => props.$active ? '0 4px 12px rgba(102, 126, 234, 0.3)' : 'none'};
+  box-shadow: ${props => props.$active ? '0 4px 12px rgba(30, 64, 175, 0.3)' : 'none'};
   
   &:hover {
     color: ${props => props.$active ? 'white' : props.theme.colors.primary};
-    background: ${props => props.$active ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : props.theme.colors.border};
+    background: ${props => props.$active ? 'linear-gradient(135deg, #1e40af 0%, #1e40af 100%)' : props.theme.colors.border};
   }
 `;
 
@@ -132,7 +131,7 @@ const StaffCard = styled(motion.div)`
       switch(props.$status) {
         case 'active': return 'linear-gradient(90deg, #10B981 0%, #059669 100%)';
         case 'pending': return 'linear-gradient(90deg, #F59E0B 0%, #D97706 100%)';
-        case 'completed': return 'linear-gradient(90deg, #3B82F6 0%, #2563EB 100%)';
+        case 'completed': return 'linear-gradient(90deg, #1e40af 0%, #1e40af 100%)';
         case 'requested': return 'linear-gradient(90deg, #EF4444 0%, #DC2626 100%)';
         default: return 'linear-gradient(90deg, #94A3B8 0%, #64748B 100%)';
       }
@@ -141,7 +140,7 @@ const StaffCard = styled(motion.div)`
   
   &:hover {
     transform: translateY(-6px);
-    box-shadow: 0 20px 48px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 20px 48px rgba(30, 64, 175, 0.2);
     border-color: ${props => props.theme.colors.primary}40;
   }
 `;
@@ -168,19 +167,19 @@ const Avatar = styled.div`
   height: 64px;
   min-width: 64px;
   border-radius: 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   font-size: 26px;
   font-weight: 800;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.3);
   transition: all 0.3s ease;
   
   ${StaffCard}:hover & {
     transform: scale(1.08) rotate(3deg);
-    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 12px 32px rgba(30, 64, 175, 0.4);
   }
 `;
 
@@ -221,7 +220,7 @@ const StatusBadge = styled.span`
     switch(props.$status) {
       case 'active': return 'linear-gradient(135deg, #10B981 0%, #059669 100%)';
       case 'pending': return 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)';
-      case 'completed': return 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)';
+      case 'completed': return 'linear-gradient(135deg, #1e40af 0%, #1e40af 100%)';
       case 'requested': return 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)';
       default: return props.theme.colors.bgLight;
     }
@@ -231,7 +230,7 @@ const StatusBadge = styled.span`
     switch(props.$status) {
       case 'active': return 'rgba(16, 185, 129, 0.3)';
       case 'pending': return 'rgba(245, 158, 11, 0.3)';
-      case 'completed': return 'rgba(59, 130, 246, 0.3)';
+      case 'completed': return 'rgba(30, 64, 175, 0.3)';
       case 'requested': return 'rgba(239, 68, 68, 0.3)';
       default: return 'rgba(0, 0, 0, 0.1)';
     }
@@ -250,27 +249,21 @@ const StaffMeta = styled.div`
   .meta-item {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: center;
     color: ${props => props.theme.colors.text};
     font-size: 14px;
-    font-weight: 500;
-    padding: 8px 12px;
-    background: ${props => props.theme.colors.bgDark};
+    font-weight: 600;
+    padding: 10px 16px;
+    background: ${props => props.theme.colors.bgLight};
     border-radius: 10px;
-    border: 1.5px solid ${props => props.theme.colors.border};
+    border: 2px solid ${props => props.theme.colors.border};
     transition: all 0.3s ease;
+    text-align: center;
     
     &:hover {
       border-color: ${props => props.theme.colors.primary};
-      transform: translateX(3px);
-      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
-    }
-    
-    svg {
-      width: 18px;
-      height: 18px;
-      color: ${props => props.theme.colors.primary};
-      flex-shrink: 0;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
     }
   }
 `;
@@ -282,26 +275,27 @@ const ActionButtons = styled.div`
 `;
 
 const Button = styled(motion.button)`
-  padding: 12px 24px;
+  padding: 13px 28px;
   border-radius: 12px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
   border: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  letter-spacing: 0.3px;
   
   ${props => {
     if (props.$variant === 'primary') {
       return `
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
         color: white;
         &:hover { 
           transform: translateY(-2px); 
-          box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+          box-shadow: 0 8px 20px rgba(30, 64, 175, 0.4);
         }
       `;
     } else if (props.$variant === 'success') {
@@ -348,11 +342,6 @@ const Button = styled(motion.button)`
   &:active {
     transform: scale(0.98);
   }
-  
-  svg {
-    width: 18px;
-    height: 18px;
-  }
 `;
 
 const EmptyState = styled(motion.div)`
@@ -362,16 +351,8 @@ const EmptyState = styled(motion.div)`
   border-radius: 20px;
   border: 2px dashed ${props => props.theme.colors.border};
   
-  svg {
-    width: 80px;
-    height: 80px;
-    margin-bottom: 20px;
-    color: ${props => props.theme.colors.primary};
-    opacity: 0.4;
-  }
-  
   h3 {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 700;
     margin-bottom: 10px;
     color: ${props => props.theme.colors.text};
@@ -385,37 +366,24 @@ const EmptyState = styled(motion.div)`
 
 const ReasonBox = styled.div`
   margin-bottom: 20px;
-  padding: 16px 20px;
+  padding: 18px 24px;
   background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
   border-radius: 12px;
   border: 2px solid #FBBF24;
-  display: flex;
-  align-items: start;
-  gap: 12px;
-  
-  svg {
-    width: 20px;
-    height: 20px;
-    color: #D97706;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
   
   div {
-    flex: 1;
-    
     strong {
       font-weight: 700;
       color: #92400E;
       display: block;
-      margin-bottom: 4px;
-      font-size: 13px;
+      margin-bottom: 6px;
+      font-size: 14px;
     }
     
     span {
       color: #78350F;
       font-size: 14px;
-      line-height: 1.5;
+      line-height: 1.6;
     }
   }
 `;
@@ -595,20 +563,16 @@ const HRManagement = () => {
 
       <StaffMeta>
         <div className="meta-item">
-          <Calendar />
           <span>{staff.startDate}</span>
         </div>
         <div className="meta-item">
-          <Clock />
           <span>{staff.shift}</span>
         </div>
         <div className="meta-item">
-          <MapPin />
           <span>{staff.location}</span>
         </div>
         {staff.rating && (
           <div className="meta-item">
-            <Star />
             <span>{staff.rating}/5.0</span>
           </div>
         )}
@@ -616,7 +580,6 @@ const HRManagement = () => {
 
       {staff.reason && (
         <ReasonBox>
-          <AlertCircle />
           <div>
             <strong>{language === 'vi' ? 'Lý do yêu cầu:' : 'Request reason:'}</strong>
             <span>{staff.reason}</span>
@@ -633,7 +596,6 @@ const HRManagement = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
-              <CheckCircle />
               {language === 'vi' ? 'Xác nhận' : 'Confirm'}
             </Button>
             <Button 
@@ -642,7 +604,6 @@ const HRManagement = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
-              <XCircle />
               {language === 'vi' ? 'Từ chối' : 'Reject'}
             </Button>
           </>
@@ -656,7 +617,6 @@ const HRManagement = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
-              <AlertCircle />
               {language === 'vi' ? 'Yêu cầu thay đổi' : 'Request change'}
             </Button>
             <Button 
@@ -665,7 +625,6 @@ const HRManagement = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
-              <CheckCircle />
               {language === 'vi' ? 'Kết thúc công việc' : 'Close assignment'}
             </Button>
           </>
@@ -678,7 +637,6 @@ const HRManagement = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
           >
-            <Star />
             {language === 'vi' ? 'Đánh giá nhân viên' : 'Rate employee'}
           </Button>
         )}
@@ -691,7 +649,6 @@ const HRManagement = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
-              <CheckCircle />
               {language === 'vi' ? 'Chấp nhận' : 'Accept'}
             </Button>
             <Button 
@@ -700,7 +657,6 @@ const HRManagement = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
-              <XCircle />
               {language === 'vi' ? 'Từ chối' : 'Reject'}
             </Button>
           </>
@@ -726,7 +682,7 @@ const HRManagement = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            {language === 'vi' ? '🏢 Công việc tiêu chuẩn' : '🏢 Standard Jobs'}
+            {language === 'vi' ? 'Công việc tiêu chuẩn' : 'Standard Jobs'}
           </JobTypeTab>
           <JobTypeTab
             $active={jobType === 'quick'}
@@ -734,7 +690,7 @@ const HRManagement = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            {language === 'vi' ? '⚡ Công việc theo ca' : '⚡ Quick Jobs'}
+            {language === 'vi' ? 'Công việc theo ca' : 'Quick Jobs'}
           </JobTypeTab>
         </JobTypeContainer>
 
@@ -762,7 +718,6 @@ const HRManagement = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4 }}
           >
-            <Users />
             <h3>{language === 'vi' ? 'Chưa có nhân viên' : 'No staff yet'}</h3>
             <p>{language === 'vi' ? 'Không có nhân viên nào trong danh mục này' : 'There are no staff members in this category'}</p>
           </EmptyState>

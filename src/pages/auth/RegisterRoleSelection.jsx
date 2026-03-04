@@ -188,7 +188,7 @@ const RoleIcon = styled.div`
   align-items: center;
   justify-content: center;
   color: white;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.4);
   
   svg {
     width: 40px;
@@ -228,7 +228,7 @@ const RoleFeatures = styled.ul`
       content: '✓';
       position: absolute;
       left: 0;
-      color: #667eea;
+      color: #1e40af;
       font-weight: 700;
       font-size: 16px;
     }
@@ -249,12 +249,12 @@ const SelectButton = styled.button`
   justify-content: center;
   gap: 8px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
   cursor: pointer;
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.4);
   }
   
   &:active {

@@ -164,7 +164,7 @@ const FormHeader = styled.div`
     font-size: 13px;
     
     a {
-      color: #667eea;
+      color: #1e40af;
       font-weight: 600;
       
       &:hover {
@@ -197,8 +197,8 @@ const SocialButton = styled(motion.button)`
   color: #1E293B;
   
   &:hover {
-    border-color: ${props => props.$color || '#667eea'};
-    background: ${props => props.$color ? `${props.$color}05` : '#667eea05'};
+    border-color: ${props => props.$color || '#1e40af'};
+    background: ${props => props.$color ? `${props.$color}05` : '#1e40af05'};
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
@@ -255,7 +255,7 @@ const RoleButton = styled(motion.button)`
   box-shadow: ${props => props.$selected ? '0 2px 8px rgba(0, 0, 0, 0.1)' : 'none'};
   
   &:hover {
-    color: #667eea;
+    color: #1e40af;
   }
 `;
 
@@ -291,7 +291,7 @@ const InputWrapper = styled.div`
     color: #64748B;
     
     &:hover {
-      color: #667eea;
+      color: #1e40af;
     }
     
     svg {
@@ -327,7 +327,7 @@ const SubmitButton = styled(Button)`
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 20px rgba(30, 64, 175, 0.4);
   }
   
   svg {

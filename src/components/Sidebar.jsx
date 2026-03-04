@@ -87,7 +87,7 @@ const Logo = styled.div`
 const LogoText = styled.h1`
   font-size: 22px;
   font-weight: 700;
-  font-family: 'Be Vietnam Pro', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   color: ${props => props.theme.colors.primary};
   letter-spacing: -0.2px;
   line-height: 1.4;
@@ -193,7 +193,7 @@ const NavLink = styled.div`
   gap: 12px;
   padding: 12px;
   border-radius: ${props => props.theme.borderRadius.lg};
-  color: ${props => props.$active ? 'white' : props.theme.colors.textLight};
+  color: ${props => props.$active ? 'white' : props.theme.colors.text};
   background: ${props => props.$active ? `linear-gradient(135deg, ${props.theme.colors.primary}, ${props.theme.colors.secondary})` : 'transparent'};
   font-weight: ${props => props.$active ? 600 : 500};
   font-size: 14px;

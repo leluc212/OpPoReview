@@ -441,7 +441,7 @@ const EmployerDashboard = () => {
     {
       type: 'application',
       icon: Users,
-      color: '#0E3995',
+      color: '#1e40af',
       title: language === 'vi' ? '3 ứng viên mới ứng tuyển' : '3 new candidates applied',
       time: language === 'vi' ? '30 phút trước' : '30 minutes ago'
     },
@@ -522,7 +522,7 @@ const EmployerDashboard = () => {
             change="+3"
             changeText={language === 'vi' ? 'sơ với tháng trước' : 'vs last month'}
             icon={Briefcase}
-            color="#0E3995"
+            color="#1e40af"
             positive
           />
           <StatsCard
@@ -549,7 +549,7 @@ const EmployerDashboard = () => {
             change="+2"
             changeText={language === 'vi' ? 'tháng này' : 'this month'}
             icon={TrendingUp}
-            color="#8B5CF6"
+            color="#1e40af"
             positive
           />
         </StatsGrid>
@@ -655,10 +655,10 @@ const EmployerDashboard = () => {
           
           <PerformanceGrid>
             <PerformanceCard
-              $color="#0E3995"
+              $color="#1e40af"
               whileHover={{ scale: 1.05 }}
             >
-              <PerformanceIcon $color="#0E3995">
+              <PerformanceIcon $color="#1e40af">
                 <Target />
               </PerformanceIcon>
               <PerformanceValue>85%</PerformanceValue>
@@ -688,10 +688,10 @@ const EmployerDashboard = () => {
             </PerformanceCard>
 
             <PerformanceCard
-              $color="#8B5CF6"
+              $color="#1e40af"
               whileHover={{ scale: 1.05 }}
             >
-              <PerformanceIcon $color="#8B5CF6">
+              <PerformanceIcon $color="#1e40af">
                 <TrendingUp />
               </PerformanceIcon>
               <PerformanceValue>+32%</PerformanceValue>

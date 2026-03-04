@@ -81,7 +81,7 @@ const PricingCard = styled(motion.div)`
     right: 0;
     height: 6px;
     background: ${props => {
-      if (props.$featured) return 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)';
+      if (props.$featured) return 'linear-gradient(90deg, #1e40af 0%, #1e40af 100%)';
       if (props.$color) return `linear-gradient(90deg, ${props.$color} 0%, ${props.$color}CC 100%)`;
       return 'linear-gradient(90deg, #94A3B8 0%, #64748B 100%)';
     }};
@@ -101,7 +101,7 @@ const PricingCard = styled(motion.div)`
   &:hover {
     transform: translateY(-12px) scale(1.02);
     box-shadow: 0 30px 80px ${props => props.$featured 
-      ? 'rgba(102, 126, 234, 0.3)' 
+      ? 'rgba(30, 64, 175, 0.3)' 
       : 'rgba(0,0,0,0.15)'};
     border-color: ${props => props.$color || props.theme.colors.primary};
     
@@ -116,13 +116,13 @@ const Badge = styled(motion.div)`
   top: -14px;
   left: 50%;
   transform: translateX(-50%);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
   color: white;
   padding: 8px 24px;
   border-radius: 20px;
   font-size: 13px;
   font-weight: 700;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 15px rgba(30, 64, 175, 0.4);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -282,13 +282,13 @@ const ActionButton = styled(motion.button)`
   margin-top: 8px;
   
   ${props => props.$featured ? `
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
     color: white;
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.35);
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.35);
     
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(102, 126, 234, 0.45);
+      box-shadow: 0 12px 32px rgba(30, 64, 175, 0.45);
     }
   ` : `
     background: ${props.theme.colors.bgLight};
@@ -299,7 +299,7 @@ const ActionButton = styled(motion.button)`
       border-color: ${props.theme.colors.primary};
       color: ${props.theme.colors.primary};
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+      box-shadow: 0 8px 24px rgba(30, 64, 175, 0.2);
     }
   `}
 `;
@@ -318,7 +318,7 @@ const ComparisonTitle = styled.h2`
   font-weight: 800;
   text-align: center;
   margin-bottom: 32px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -404,7 +404,7 @@ const FAQItem = styled(motion.div)`
   
   &:hover {
     border-color: ${props => props.theme.colors.primary};
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.15);
     transform: translateY(-2px);
   }
   
@@ -454,7 +454,7 @@ const Subscription = () => {
       currency: 'VND',
       period: language === 'vi' ? '/tháng' : '/month',
       icon: Star,
-      color: '#0E3995',
+      color: '#1e40af',
       features: [
         language === 'vi' ? '20 tin tuyển dụng' : '20 job posts',
         language === 'vi' ? 'Hồ sơ ứng tuyển không giới hạn' : 'Unlimited applications',

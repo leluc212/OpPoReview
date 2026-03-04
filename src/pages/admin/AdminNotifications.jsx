@@ -267,7 +267,7 @@ const ActionButton = styled.button`
 const UnreadBadge = styled.span`
   width: 8px;
   height: 8px;
-  background: #3b82f6;
+  background: #1e40af;
   border-radius: 50%;
   flex-shrink: 0;
 `;
@@ -367,7 +367,7 @@ const AdminNotifications = () => {
       id: 1,
       type: 'users',
       icon: Users,
-      color: '#6366f1',
+      color: '#1e40af',
       title: language === 'vi' ? 'Người dùng mới đăng ký' : 'New user registrations',
       message: language === 'vi' ? '15 ứng viên và 3 nhà tuyển dụng mới đã đăng ký trong 24h qua' : '15 candidates and 3 employers registered in the last 24 hours',
       time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
@@ -411,7 +411,7 @@ const AdminNotifications = () => {
       id: 5,
       type: 'system',
       icon: Info,
-      color: '#8b5cf6',
+      color: '#1e40af',
       title: language === 'vi' ? 'Cập nhật hệ thống' : 'System update',
       message: language === 'vi' ? 'Hệ thống sẽ bảo trì vào 23:00 ngày 16/02/2024. Thời gian dự kiến: 2 giờ.' : 'System maintenance is scheduled at 23:00 on 16/02/2024. Estimated duration: 2 hours.',
       time: language === 'vi' ? '2 ngày trước' : '2 days ago',
@@ -489,7 +489,7 @@ const AdminNotifications = () => {
         </PageHeader>
 
         <StatsGrid>
-          <StatCard $color="#3b82f6">
+          <StatCard $color="#1e40af">
             <StatLabel>{language === 'vi' ? 'Chưa đọc' : 'Unread'}</StatLabel>
             <StatValue>{unreadCount}</StatValue>
           </StatCard>
@@ -501,7 +501,7 @@ const AdminNotifications = () => {
             <StatLabel>{language === 'vi' ? 'Hôm nay' : 'Today'}</StatLabel>
             <StatValue>18</StatValue>
           </StatCard>
-          <StatCard $color="#8b5cf6">
+          <StatCard $color="#1e40af">
             <StatLabel>{language === 'vi' ? 'Tuần này' : 'This week'}</StatLabel>
             <StatValue>127</StatValue>
           </StatCard>

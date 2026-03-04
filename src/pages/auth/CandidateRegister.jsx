@@ -164,7 +164,7 @@ const FormHeader = styled.div`
     color: #64748B;
 
     a {
-      color: #667eea;
+      color: #1e40af;
       font-weight: 600;
       text-decoration: none;
       
@@ -268,7 +268,7 @@ const InputWrapper = styled.div`
     transition: color 0.3s;
 
     &:hover {
-      color: #667eea;
+      color: #1e40af;
     }
 
     svg {
@@ -287,11 +287,11 @@ const SubmitButton = styled(Button)`
   gap: 8px;
   margin-top: 24px;
   margin-bottom: 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.4);
   }
 
   svg {
@@ -309,7 +309,7 @@ const BackLink = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #667eea;
+  color: #1e40af;
   font-size: 13px;
   font-weight: 600;
   margin-bottom: 16px;
@@ -318,7 +318,7 @@ const BackLink = styled(Link)`
 
   &:hover {
     gap: 8px;
-    color: #764ba2;
+    color: #1e40af;
   }
 
   svg {

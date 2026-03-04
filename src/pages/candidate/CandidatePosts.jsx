@@ -57,13 +57,13 @@ const Button = styled(motion.button)`
   transition: all 0.3s ease;
   
   ${props => props.$variant === 'primary' ? `
-    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
     color: white;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
     
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+      box-shadow: 0 6px 20px rgba(30, 64, 175, 0.4);
     }
   ` : `
     background: white;
@@ -101,8 +101,8 @@ const SearchInput = styled.div`
     
     &:focus {
       outline: none;
-      border-color: #3B82F6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      border-color: #1e40af;
+      box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
     }
   }
   
@@ -135,7 +135,7 @@ const PostCard = styled(motion.div)`
   
   &:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    border-color: #3B82F6;
+    border-color: #1e40af;
   }
 `;
 
@@ -150,7 +150,7 @@ const Avatar = styled.div`
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -236,8 +236,8 @@ const PostTags = styled.div`
 
 const Tag = styled.span`
   padding: 4px 12px;
-  background: rgba(59, 130, 246, 0.1);
-  color: #3B82F6;
+  background: rgba(30, 64, 175, 0.1);
+  color: #1e40af;
   border-radius: 16px;
   font-size: 12px;
   font-weight: 500;
@@ -271,10 +271,10 @@ const ActionButton = styled.button`
   }
   
   ${props => props.$active && `
-    color: #3B82F6;
+    color: #1e40af;
     
     &:hover {
-      color: #2563EB;
+      color: #1e40af;
     }
   `}
   

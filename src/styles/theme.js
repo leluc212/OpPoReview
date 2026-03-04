@@ -75,20 +75,20 @@ export const GlobalStyles = createGlobalStyle`
 export const theme = {
   colors: {
     // Primary colors
-    primary: '#0E3995',
-    primaryDark: '#0D3880',
-    primaryLight: '#0055A5',
+    primary: '#1e40af',
+    primaryDark: '#1e40af',
+    primaryLight: '#1e40af',
     
     // Secondary colors
-    secondary: '#0055A5',
-    secondaryDark: '#0E3995',
-    secondaryLight: '#0D3880',
+    secondary: '#1e40af',
+    secondaryDark: '#1e40af',
+    secondaryLight: '#1e40af',
     
     // Background
     background: '#F8FAFC',
     bgLight: '#FFFFFF',
     bgDark: '#F1F5F9',
-    bgGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    bgGradient: 'linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%)',
     
     // Text
     text: '#1E293B',
@@ -104,7 +104,7 @@ export const theme = {
     success: '#10B981',
     warning: '#F59E0B',
     error: '#EF4444',
-    info: '#0055A5',
+    info: '#1e40af',
     
     // Status light backgrounds
     successBg: '#D1FAE5',
@@ -113,13 +113,13 @@ export const theme = {
     infoBg: '#DBEAFE',
     
     // Gradients - Rich and Modern
-    gradientPrimary: 'linear-gradient(135deg, #0E3995 0%, #0055A5 100%)',
-    gradientSecondary: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    gradientHero: 'linear-gradient(135deg, #0D3880 0%, #0055A5 100%)',
+    gradientPrimary: 'linear-gradient(135deg, #1e40af 0%, #1e40af 100%)',
+    gradientSecondary: 'linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%)',
+    gradientHero: 'linear-gradient(135deg, #1e40af 0%, #1e40af 100%)',
     gradientSuccess: 'linear-gradient(135deg, #43E97B 0%, #38F9D7 100%)',
     gradientWarning: 'linear-gradient(135deg, #FA709A 0%, #FEE140 100%)',
     gradientInfo: 'linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%)',
-    gradientPurple: 'linear-gradient(135deg, #F093FB 0%, #F5576C 100%)',
+    gradientPurple: 'linear-gradient(135deg, #60A5FA 0%, #1e40af 100%)',
     gradientOrange: 'linear-gradient(135deg, #FA8BFF 0%, #2BD2FF 90%, #2BFF88 100%)',
     
     // Overlay

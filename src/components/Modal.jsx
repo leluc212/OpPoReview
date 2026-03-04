@@ -48,7 +48,7 @@ const CloseButton = styled.button`
   height: 36px;
   border-radius: ${props => props.theme.borderRadius.md};
   background: ${props => props.theme.colors.bgDark};
-  color: ${props => props.theme.colors.textLight};
+  color: ${props => props.theme.colors.text};
   display: flex;
   align-items: center;
   justify-content: center;

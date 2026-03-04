@@ -58,14 +58,14 @@ const Header = styled.div`
 `;
 
 const BalanceCard = styled(motion.div)`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, ${props => props.theme.colors.primary} 0%, #1e40af 100%);
   border-radius: ${props => props.theme.borderRadius.xl};
   padding: 48px;
   margin-bottom: 32px;
   color: white;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 20px 60px -10px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 20px 60px -10px ${props => props.theme.colors.primary}40;
   
   &::before {
     content: '';
@@ -209,15 +209,32 @@ const StatCard = styled(motion.div)`
   background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.lg};
   padding: 20px 24px;
-  border: 1px solid ${props => props.theme.colors.border};
+  border: 2px solid ${props => props.theme.colors.border};
   display: flex;
   align-items: center;
   justify-content: space-between;
   transition: all 0.3s;
-  border-left: 3px solid ${props => props.$color || props.theme.colors.primary};
+  box-shadow: ${props => props.theme.shadows.sm};
+  border-left: 3px solid ${props => {
+    const colorMap = {
+      'success': props.theme.colors.success,
+      'error': props.theme.colors.error,
+      'warning': props.theme.colors.warning,
+      'primary': props.theme.colors.primary
+    };
+    return colorMap[props.$color] || props.theme.colors.primary;
+  }};
   
   &:hover {
-    border-color: ${props => props.$color || props.theme.colors.primary};
+    border-color: ${props => {
+      const colorMap = {
+        'success': props.theme.colors.success,
+        'error': props.theme.colors.error,
+        'warning': props.theme.colors.warning,
+        'primary': props.theme.colors.primary
+      };
+      return colorMap[props.$color] || props.theme.colors.primary;
+    }};
     transform: translateX(4px);
     box-shadow: ${props => props.theme.shadows.md};
   }
@@ -232,7 +249,15 @@ const StatCard = styled(motion.div)`
       width: 48px;
       height: 48px;
       border-radius: ${props => props.theme.borderRadius.lg};
-      background: ${props => props.$color || props.theme.colors.primary}15;
+      background: ${props => {
+        const colorMap = {
+          'success': props.theme.colors.successBg,
+          'error': props.theme.colors.errorBg,
+          'warning': props.theme.colors.warningBg,
+          'primary': props.theme.colors.primary + '15'
+        };
+        return colorMap[props.$color] || props.theme.colors.primary + '15';
+      }};
       display: flex;
       align-items: center;
       justify-content: center;
@@ -241,7 +266,15 @@ const StatCard = styled(motion.div)`
       svg {
         width: 24px;
         height: 24px;
-        color: ${props => props.$color || props.theme.colors.primary};
+        color: ${props => {
+          const colorMap = {
+            'success': props.theme.colors.success,
+            'error': props.theme.colors.error,
+            'warning': props.theme.colors.warning,
+            'primary': props.theme.colors.primary
+          };
+          return colorMap[props.$color] || props.theme.colors.primary;
+        }};
       }
     }
     
@@ -275,8 +308,8 @@ const StatCard = styled(motion.div)`
       align-items: center;
       gap: 4px;
       font-size: 12px;
-      color: ${props => props.$positive ? '#10B981' : '#EF4444'};
-      background: ${props => props.$positive ? '#10B98115' : '#EF444415'};
+      color: ${props => props.$positive ? props.theme.colors.success : props.theme.colors.error};
+      background: ${props => props.$positive ? props.theme.colors.successBg : props.theme.colors.errorBg};
       padding: 6px 10px;
       border-radius: ${props => props.theme.borderRadius.full};
       font-weight: 600;
@@ -304,7 +337,14 @@ const Card = styled(motion.div)`
   background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.xl};
   padding: 32px;
-  border: 1px solid ${props => props.theme.colors.border};
+  border: 2px solid ${props => props.theme.colors.border};
+  box-shadow: ${props => props.theme.shadows.sm};
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: ${props => props.theme.colors.primary}30;
+    box-shadow: ${props => props.theme.shadows.md};
+  }
   
   .card-header {
     display: flex;
@@ -354,13 +394,15 @@ const FilterButton = styled(motion.button)`
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  border: 1px solid ${props => props.theme.colors.border};
+  border: 2px solid ${props => props.$active ? props.theme.colors.primary : props.theme.colors.border};
   background: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.bgDark};
   color: ${props => props.$active ? 'white' : props.theme.colors.text};
+  box-shadow: ${props => props.$active ? props.theme.shadows.sm : 'none'};
   
   &:hover {
     border-color: ${props => props.theme.colors.primary};
     transform: translateY(-2px);
+    box-shadow: ${props => props.theme.shadows.sm};
   }
 `;
 
@@ -398,12 +440,13 @@ const TransactionItem = styled(motion.div)`
   padding: 20px;
   background: ${props => props.theme.colors.bgDark};
   border-radius: ${props => props.theme.borderRadius.lg};
-  border: 1px solid ${props => props.theme.colors.border};
+  border: 2px solid ${props => props.theme.colors.border};
   transition: all 0.3s;
   cursor: pointer;
+  box-shadow: ${props => props.theme.shadows.sm};
   
   &:hover {
-    border-color: ${props => props.$type === 'income' ? '#10B981' : '#EF4444'};
+    border-color: ${props => props.$type === 'income' ? props.theme.colors.success : props.theme.colors.error};
     transform: translateX(8px);
     box-shadow: ${props => props.theme.shadows.md};
   }
@@ -418,7 +461,7 @@ const TransactionItem = styled(motion.div)`
       width: 52px;
       height: 52px;
       border-radius: ${props => props.theme.borderRadius.lg};
-      background: ${props => props.$type === 'income' ? '#10B98115' : '#EF444415'};
+      background: ${props => props.$type === 'income' ? props.theme.colors.successBg : props.theme.colors.errorBg};
       display: flex;
       align-items: center;
       justify-content: center;
@@ -427,7 +470,7 @@ const TransactionItem = styled(motion.div)`
       svg {
         width: 24px;
         height: 24px;
-        color: ${props => props.$type === 'income' ? '#10B981' : '#EF4444'};
+        color: ${props => props.$type === 'income' ? props.theme.colors.success : props.theme.colors.error};
       }
     }
     
@@ -462,7 +505,7 @@ const TransactionItem = styled(motion.div)`
     .amount {
       font-size: 20px;
       font-weight: 800;
-      color: ${props => props.$type === 'income' ? '#10B981' : '#EF4444'};
+      color: ${props => props.$type === 'income' ? props.theme.colors.success : props.theme.colors.error};
       margin-bottom: 6px;
       letter-spacing: -0.5px;
     }
@@ -487,14 +530,15 @@ const ReceiptCard = styled(motion.div)`
   padding: 20px;
   background: ${props => props.theme.colors.bgDark};
   border-radius: ${props => props.theme.borderRadius.lg};
-  border: 1px solid ${props => props.theme.colors.border};
+  border: 2px solid ${props => props.theme.colors.border};
   margin-bottom: 12px;
   transition: all 0.3s;
+  box-shadow: ${props => props.theme.shadows.sm};
   
   &:hover {
     border-color: ${props => props.theme.colors.primary};
     transform: translateY(-2px);
-    box-shadow: ${props => props.theme.shadows.sm};
+    box-shadow: ${props => props.theme.shadows.md};
     cursor: pointer;
   }
   
@@ -594,7 +638,7 @@ const Wallet = () => {
       label: language === 'vi' ? 'Tổng Thu Nhập Tháng' : 'Total Income',
       value: '12,300,000 VND',
       icon: TrendingUp,
-      color: '#10B981',
+      color: 'success',
       change: '+15.3%',
       positive: true
     },
@@ -602,7 +646,7 @@ const Wallet = () => {
       label: language === 'vi' ? 'Đã Rút Trong Tháng' : 'Withdrawn',
       value: '5,000,000 VND',
       icon: TrendingDown,
-      color: '#EF4444',
+      color: 'error',
       change: '-8.2%',
       positive: false
     },
@@ -610,7 +654,7 @@ const Wallet = () => {
       label: language === 'vi' ? 'Số Lượng Giao Dịch' : 'Transactions',
       value: '23',
       icon: BarChart3,
-      color: '#667eea',
+      color: 'primary',
       change: '+12',
       positive: true
     },
@@ -618,7 +662,7 @@ const Wallet = () => {
       label: language === 'vi' ? 'Hóa Đơn' : 'Invoices',
       value: '8',
       icon: FileText,
-      color: '#F59E0B',
+      color: 'warning',
       change: '+3',
       positive: true
     }

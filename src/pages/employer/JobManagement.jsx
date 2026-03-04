@@ -33,7 +33,7 @@ const PageHeader = styled.div`
   h1 {
     font-size: 32px;
     font-weight: 800;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -43,7 +43,7 @@ const PageHeader = styled.div`
 const CreateButton = styled(motion.button)`
   padding: 14px 28px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
   color: white;
   font-weight: 700;
   font-size: 15px;
@@ -51,12 +51,12 @@ const CreateButton = styled(motion.button)`
   align-items: center;
   gap: 10px;
   border: none;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.35);
+  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.35);
   transition: all 0.3s ease;
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.45);
+    box-shadow: 0 12px 32px rgba(30, 64, 175, 0.45);
   }
   
   svg {
@@ -104,7 +104,7 @@ const JobCard = styled(motion.div)`
   
   &:hover {
     transform: translateY(-6px);
-    box-shadow: 0 20px 48px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 20px 48px rgba(30, 64, 175, 0.2);
     border-color: ${props => props.theme.colors.primary}40;
   }
 `;
@@ -556,7 +556,7 @@ const JobManagement = () => {
                   </CardHeader>
 
                   <StatsRow>
-                    <StatBox $color="#667eea">
+                    <StatBox $color="#1e40af">
                       <Users />
                       <span className="value">{job.applicants}</span>
                       <span className="label">{language === 'vi' ? 'Ứng viên' : 'Applicants'}</span>

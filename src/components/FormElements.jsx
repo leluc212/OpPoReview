@@ -26,7 +26,7 @@ export const Button = styled.button`
     &:hover:not(:disabled) {
       transform: translateY(-2px) scale(1.03);
       box-shadow: 0 12px 36px rgba(96, 165, 250, 0.5);
-      background: #3B82F6;
+      background: #1e40af;
     }
     
     &:active:not(:disabled) {
@@ -58,10 +58,10 @@ export const Button = styled.button`
     
     &:hover:not(:disabled) {
       background: #EFF6FF;
-      border-color: #3B82F6;
-      color: #3B82F6;
+      border-color: #1e40af;
+      color: #1e40af;
       transform: translateY(-2px);
-      box-shadow: 0 8px 28px rgba(59, 130, 246, 0.25);
+      box-shadow: 0 8px 28px rgba(30, 64, 175, 0.25);
     }
   `}
   
@@ -100,8 +100,8 @@ export const Input = styled.input`
   font-size: 15px;
   border: 2px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.md};
-  background: #FFFFFF;
-  color: #0F172A;
+  background: ${props => props.theme.colors.bgLight};
+  color: ${props => props.theme.colors.text};
   transition: all ${props => props.theme.transitions.fast};
   width: 100%;
   font-weight: 600;
@@ -109,18 +109,20 @@ export const Input = styled.input`
   &:focus {
     border-color: ${props => props.theme.colors.primary};
     box-shadow: 0 0 0 3px ${props => props.theme.colors.primary}20;
-    background: #FFFFFF;
+    background: ${props => props.theme.colors.bgLight};
   }
   
   &::placeholder {
-    color: #94A3B8;
+    color: ${props => props.theme.colors.textLight};
     font-weight: 400;
   }
   
   &:disabled {
     background: ${props => props.theme.colors.bgDark};
+    color: ${props => props.theme.colors.textDark};
     cursor: not-allowed;
-    opacity: 0.6;
+    opacity: 1;
+    font-weight: 700;
   }
   
   ${props => props.$error && `
@@ -133,8 +135,8 @@ export const TextArea = styled.textarea`
   font-size: 16px;
   border: 2px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.md};
-  background: #FFFFFF;
-  color: #0F172A;
+  background: ${props => props.theme.colors.bgLight};
+  color: ${props => props.theme.colors.text};
   transition: all ${props => props.theme.transitions.fast};
   width: 100%;
   resize: vertical;
@@ -146,18 +148,20 @@ export const TextArea = styled.textarea`
   &:focus {
     border-color: ${props => props.theme.colors.primary};
     box-shadow: 0 0 0 3px ${props => props.theme.colors.primary}20;
-    background: #FFFFFF;
+    background: ${props => props.theme.colors.bgLight};
   }
   
   &::placeholder {
-    color: #94A3B8;
+    color: ${props => props.theme.colors.textLight};
     font-weight: 400;
   }
   
   &:disabled {
     background: ${props => props.theme.colors.bgDark};
+    color: ${props => props.theme.colors.textDark};
     cursor: not-allowed;
-    opacity: 0.6;
+    opacity: 1;
+    font-weight: 700;
   }
 `;
 
@@ -166,8 +170,8 @@ export const Select = styled.select`
   font-size: 15px;
   border: 2px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.md};
-  background: ${props => props.theme.colors.bgDark};
-  color: #F1F5F9;
+  background: ${props => props.theme.colors.bgLight};
+  color: ${props => props.theme.colors.text};
   transition: all ${props => props.theme.transitions.fast};
   width: 100%;
   cursor: pointer;
@@ -182,26 +186,26 @@ export const Select = styled.select`
   /* Style for empty/placeholder option */
   &:invalid,
   option[value=""] {
-    color: #94A3B8;
+    color: ${props => props.theme.colors.textLight};
     font-weight: 400;
   }
   
   option {
-    background: white;
-    color: #1E293B;
+    background: ${props => props.theme.colors.bgLight};
+    color: ${props => props.theme.colors.text};
     font-weight: 600;
   }
   
   option[value=""] {
-    color: #94A3B8;
+    color: ${props => props.theme.colors.textLight};
     font-weight: 400;
   }
 `;
 
 export const Label = styled.label`
   font-size: 13px;
-  font-weight: 700;
-  color: #1E293B;
+  font-weight: 800;
+  color: ${props => props.theme.colors.textDark};
   margin-bottom: 8px;
   display: block;
   text-transform: uppercase;

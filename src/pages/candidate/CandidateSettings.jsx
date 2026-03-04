@@ -36,14 +36,14 @@ const SettingsContainer = styled.div`
 `;
 
 const PageHeader = styled(motion.div)`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
   border-radius: ${props => props.theme.borderRadius.xl};
   padding: 56px 48px;
   margin-bottom: 40px;
   color: white;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 10px 40px rgba(30, 64, 175, 0.3);
   
   &::before {
     content: '';
@@ -292,7 +292,7 @@ const LanguageButton = styled(motion.button)`
   padding: 12px 24px;
   border-radius: ${props => props.theme.borderRadius.lg};
   border: 2px solid ${props => props.$active ? props.theme.colors.primary : props.theme.colors.border};
-  background: ${props => props.$active ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent'};
+  background: ${props => props.$active ? 'linear-gradient(135deg, #1e40af 0%, #1e40af 100%)' : 'transparent'};
   color: ${props => props.$active ? 'white' : props.theme.colors.text};
   font-weight: 700;
   cursor: pointer;
@@ -301,12 +301,12 @@ const LanguageButton = styled(motion.button)`
   align-items: center;
   gap: 10px;
   font-size: 15px;
-  box-shadow: ${props => props.$active ? '0 4px 16px rgba(102, 126, 234, 0.3)' : '0 2px 6px rgba(0, 0, 0, 0.05)'};
+  box-shadow: ${props => props.$active ? '0 4px 16px rgba(30, 64, 175, 0.3)' : '0 2px 6px rgba(0, 0, 0, 0.05)'};
   
   &:hover {
     border-color: ${props => props.theme.colors.primary};
     transform: translateY(-3px);
-    box-shadow: 0 6px 20px ${props => props.$active ? 'rgba(102, 126, 234, 0.4)' : 'rgba(102, 126, 234, 0.15)'};
+    box-shadow: 0 6px 20px ${props => props.$active ? 'rgba(30, 64, 175, 0.4)' : 'rgba(30, 64, 175, 0.15)'};
   }
   
   &:active {
@@ -333,7 +333,7 @@ const InfoBox = styled(motion.div)`
   background: ${props => {
     if (props.$type === 'warning') return 'linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.12) 100%)';
     if (props.$type === 'success') return 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.12) 100%)';
-    return 'linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.12) 100%)';
+    return 'linear-gradient(135deg, rgba(30, 64, 175, 0.12) 0%, rgba(30, 64, 175, 0.12) 100%)';
   }};
   border-left: 5px solid ${props => {
     if (props.$type === 'warning') return '#EF4444';
@@ -345,7 +345,7 @@ const InfoBox = styled(motion.div)`
   box-shadow: 0 2px 12px ${props => {
     if (props.$type === 'warning') return 'rgba(239, 68, 68, 0.1)';
     if (props.$type === 'success') return 'rgba(16, 185, 129, 0.1)';
-    return 'rgba(102, 126, 234, 0.1)';
+    return 'rgba(30, 64, 175, 0.1)';
   }};
   transition: all 0.3s ease;
   
@@ -354,7 +354,7 @@ const InfoBox = styled(motion.div)`
     box-shadow: 0 4px 20px ${props => {
       if (props.$type === 'warning') return 'rgba(239, 68, 68, 0.15)';
       if (props.$type === 'success') return 'rgba(16, 185, 129, 0.15)';
-      return 'rgba(102, 126, 234, 0.15)';
+      return 'rgba(30, 64, 175, 0.15)';
     }};
   }
   
@@ -586,7 +586,7 @@ function CandidateSettings() {
               </div>
               
               <SettingItem
-                $color="#667eea"
+                $color="#1e40af"
                 whileHover={{ scale: 1.01 }}
                 transition={{ duration: 0.2 }}
               >
@@ -681,7 +681,7 @@ function CandidateSettings() {
               </SettingItem>
               
               <SettingItem
-                $color="#667eea"
+                $color="#1e40af"
                 whileHover={{ scale: 1.01 }}
                 transition={{ duration: 0.2 }}
               >
@@ -764,7 +764,7 @@ function CandidateSettings() {
               </SettingItem>
               
               <SettingItem
-                $color="#667eea"
+                $color="#1e40af"
                 whileHover={{ scale: 1.01 }}
                 transition={{ duration: 0.2 }}
               >
@@ -823,7 +823,7 @@ function CandidateSettings() {
               </div>
               
               <PolicyItem
-                $color="#667eea"
+                $color="#1e40af"
                 whileHover={{ scale: 1.01 }}
                 transition={{ duration: 0.2 }}
                 onClick={() => window.open('/terms', '_blank')}
@@ -877,7 +877,7 @@ function CandidateSettings() {
               </PolicyItem>
               
               <PolicyItem
-                $color="#8B5CF6"
+                $color="#1e40af"
                 whileHover={{ scale: 1.01 }}
                 transition={{ duration: 0.2 }}
               >

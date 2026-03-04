@@ -269,7 +269,7 @@ const DataAnalysis = () => {
   const renderAdvertisementAnalysis = () => (
     <>
       <StatsGrid>
-        <StatCard $color="#6366f1">
+        <StatCard $color="#1e40af">
           <StatHeader>
             <div>
               <StatLabel>{language === 'vi' ? 'Tổng Chi Phí Quảng Cáo' : 'Total Ad Spend'}</StatLabel>
@@ -279,7 +279,7 @@ const DataAnalysis = () => {
                 {language === 'vi' ? '+23% so với tháng trước' : '+23% vs last month'}
               </StatTrend>
             </div>
-            <StatIcon $color="#6366f1">
+            <StatIcon $color="#1e40af">
               <DollarSign size={24} />
             </StatIcon>
           </StatHeader>
@@ -317,7 +317,7 @@ const DataAnalysis = () => {
           </StatHeader>
         </StatCard>
 
-        <StatCard $color="#8b5cf6">
+        <StatCard $color="#1e40af">
           <StatHeader>
             <div>
               <StatLabel>{language === 'vi' ? 'Tỷ Lệ Nhấp (CTR)' : 'Click-through Rate (CTR)'}</StatLabel>
@@ -327,7 +327,7 @@ const DataAnalysis = () => {
                 {language === 'vi' ? '+2.1% so với tháng trước' : '+2.1% vs last month'}
               </StatTrend>
             </div>
-            <StatIcon $color="#8b5cf6">
+            <StatIcon $color="#1e40af">
               <Activity size={24} />
             </StatIcon>
           </StatHeader>

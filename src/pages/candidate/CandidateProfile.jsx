@@ -58,7 +58,7 @@ const ProfileContainer = styled.div`
 `;
 
 const ProfileHeader = styled(motion.div)`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
   border-radius: ${props => props.theme.borderRadius.xl};
   padding: 48px;
   margin-bottom: 32px;
@@ -464,9 +464,15 @@ const StatItem = styled.div`
 
 const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
   margin-bottom: 20px;
+  max-width: 900px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 `;
 
 const CandidateProfile = () => {
@@ -556,8 +562,7 @@ const CandidateProfile = () => {
   const stats = [
     { label: language === 'vi' ? 'Công việc hoàn thành' : 'Completed Jobs', value: '23', color: '#10B981' },
     { label: language === 'vi' ? 'Đánh giá' : 'Rating', value: '4.8', color: '#F59E0B' },
-    { label: language === 'vi' ? 'Tỷ lệ thành công' : 'Success Rate', value: '95%', color: '#667eea' },
-    { label: language === 'vi' ? 'Khách hàng' : 'Clients', value: '18', color: '#EF4444' }
+    { label: language === 'vi' ? 'Tỷ lệ thành công' : 'Success Rate', value: '95%', color: '#1e40af' }
   ];
 
   const handleChange = (e) => {
@@ -800,7 +805,7 @@ const CandidateProfile = () => {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <InfoCard
-                    $color="#667eea"
+                    $color="#1e40af"
                     whileHover={{ scale: 1.01 }}
                   >
                     <div className="info-header">
@@ -842,7 +847,7 @@ const CandidateProfile = () => {
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                     <InfoCard
-                      $color="#3B82F6"
+                      $color="#1e40af"
                       whileHover={{ scale: 1.01 }}
                     >
                       <div className="info-header">
@@ -891,7 +896,7 @@ const CandidateProfile = () => {
                   </InfoCard>
 
                   <InfoCard
-                    $color="#8B5CF6"
+                    $color="#1e40af"
                     whileHover={{ scale: 1.01 }}
                   >
                     <div className="info-header">
@@ -1009,7 +1014,7 @@ const CandidateProfile = () => {
                   )}
 
                   {formData.website && formData.website.trim() && (
-                    <InfoCard $color="#667eea" whileHover={{ scale: 1.01 }}>
+                    <InfoCard $color="#1e40af" whileHover={{ scale: 1.01 }}>
                       <div className="info-header">
                         <div className="icon">
                           <Globe />
@@ -1175,7 +1180,7 @@ const CandidateProfile = () => {
               $size="large" 
               onClick={handleSave}
               style={{ 
-                boxShadow: '0 10px 40px rgba(102, 126, 234, 0.3)',
+                boxShadow: '0 10px 40px rgba(30, 64, 175, 0.3)',
                 minWidth: '200px'
               }}
             >

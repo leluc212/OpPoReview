@@ -31,7 +31,7 @@ const SupportContainer = styled.div`
 `;
 
 const PageHeader = styled(motion.div)`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
   border-radius: ${props => props.theme.borderRadius.xl};
   padding: 48px;
   margin-bottom: 32px;
@@ -399,7 +399,7 @@ const InfoBox = styled(motion.div)`
   background: ${props => {
     if (props.$type === 'success') return 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%)';
     if (props.$type === 'warning') return 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.1) 100%)';
-    return 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)';
+    return 'linear-gradient(135deg, rgba(30, 64, 175, 0.1) 0%, rgba(30, 64, 175, 0.1) 100%)';
   }};
   border-left: 4px solid ${props => {
     if (props.$type === 'success') return '#10B981';
@@ -531,7 +531,7 @@ function Support() {
       icon: Book,
       title: language === 'vi' ? 'Trung Tâm Trợ Giúp' : 'Help Center',
       description: language === 'vi' ? 'Xem hướng dẫn chi tiết và bài viết' : 'View detailed guides and articles',
-      color: '#667eea'
+      color: '#1e40af'
     },
     {
       icon: Video,
@@ -755,7 +755,7 @@ function Support() {
               </div>
               
               <QuickStats>
-                <StatItem $color="#667eea">
+                <StatItem $color="#1e40af">
                   <div className="stat-header">
                     <span className="stat-label">{language === 'vi' ? 'Thời gian phản hồi' : 'Response Time'}</span>
                     <Clock />
@@ -791,7 +791,7 @@ function Support() {
               </div>
               
               <ContactInfo 
-                $color="#667eea"
+                $color="#1e40af"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.2 }}
               >
