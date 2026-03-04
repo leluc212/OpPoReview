@@ -635,14 +635,11 @@ const Availability = () => {
   const stats = [
     { label: language === 'vi' ? 'Lượt Xem Hồ Sơ' : 'Profile Views', value: isAvailable ? '156' : '0', icon: Eye, color: '#667eea' },
     { label: language === 'vi' ? 'Gợi Ý Công Việc' : 'Job Recommendations', value: isAvailable ? '23' : '0', icon: Briefcase, color: '#10B981' },
-    { label: language === 'vi' ? 'Lời Mời' : 'Invitations', value: isAvailable ? '12' : '0', icon: Target, color: '#F59E0B' },
-    { label: language === 'vi' ? 'Phỏng Vấn' : 'Interviews', value: isAvailable ? '8' : '0', icon: Calendar, color: '#EF4444' }
+    { label: language === 'vi' ? 'Lời Mời' : 'Invitations', value: isAvailable ? '12' : '0', icon: Target, color: '#F59E0B' }
   ];
-
   const activities = [
     { label: language === 'vi' ? 'FPT Software xem hồ sơ' : 'FPT Software viewed your profile', time: language === 'vi' ? '2 giờ trước' : '2 hours ago', icon: Eye, color: '#667eea' },
-    { label: language === 'vi' ? 'Nhận gợi ý: Senior React Dev' : 'Recommendation: Senior React Dev', time: language === 'vi' ? '5 giờ trước' : '5 hours ago', icon: Zap, color: '#10B981' },
-    { label: language === 'vi' ? 'Viettel lời mời phỏng vấn' : 'Viettel interview invitation', time: language === 'vi' ? '1 ngày trước' : '1 day ago', icon: Calendar, color: '#F59E0B' }
+    { label: language === 'vi' ? 'Nhận gợi ý: Senior React Dev' : 'Recommendation: Senior React Dev', time: language === 'vi' ? '5 giờ trước' : '5 hours ago', icon: Zap, color: '#10B981' }
   ];
 
   return (

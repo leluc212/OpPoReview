@@ -412,18 +412,6 @@ function CandidateNotifications() {
     },
     {
       id: 2,
-      type: 'message',
-      icon: MessageSquare,
-      color: '#F59E0B',
-      title: language === 'vi' ? 'Tin nhắn mới' : 'New message',
-      message: language === 'vi'
-        ? 'Bạn có tin nhắn mới từ Hồng Trà Ngô Gia'
-        : 'You have a new message from Hong Tra Ngo Gia',
-      time: language === 'vi' ? '5 giờ trước' : '5 hours ago',
-      unread: true
-    },
-    {
-      id: 3,
       type: 'success',
       icon: CheckCircle,
       color: '#10B981',
@@ -435,7 +423,7 @@ function CandidateNotifications() {
       unread: false
     },
     {
-      id: 4,
+      id: 3,
       type: 'application',
       icon: Briefcase,
       color: '#667eea',
@@ -447,31 +435,7 @@ function CandidateNotifications() {
       unread: true
     },
     {
-      id: 5,
-      type: 'success',
-      icon: ThumbsUp,
-      color: '#10B981',
-      title: language === 'vi' ? 'Hồ sơ được yêu thích' : 'Profile favorited',
-      message: language === 'vi'
-        ? 'VNG Corporation đã lưu hồ sơ của bạn vào danh sách ứng viên tiềm năng'
-        : 'VNG Corporation saved your profile as a potential candidate',
-      time: language === 'vi' ? '6 giờ trước' : '6 hours ago',
-      unread: true
-    },
-    {
-      id: 6,
-      type: 'alert',
-      icon: Calendar,
-      color: '#EF4444',
-      title: language === 'vi' ? 'Lời mời phỏng vấn' : 'Interview invitation',
-      message: language === 'vi'
-        ? 'Grab Vietnam mời bạn tham gia phỏng vấn vào 10:00 AM ngày 28/02/2026'
-        : 'Grab Vietnam invites you to an interview at 10:00 AM on 28/02/2026',
-      time: language === 'vi' ? '1 ngày trước' : '1 day ago',
-      unread: false
-    },
-    {
-      id: 7,
+      id: 4,
       type: 'info',
       icon: TrendingUp,
       color: '#667eea',
@@ -483,7 +447,7 @@ function CandidateNotifications() {
       unread: false
     },
     {
-      id: 8,
+      id: 5,
       type: 'success',
       icon: Award,
       color: '#10B981',
@@ -492,30 +456,6 @@ function CandidateNotifications() {
         ? 'Bạn đã hoàn thiện hồ sơ. Cơ hội được tuyển dụng tăng 70%'
         : 'You completed your profile. Your hiring chances increased by 70%',
       time: language === 'vi' ? '3 ngày trước' : '3 days ago',
-      unread: false
-    },
-    {
-      id: 9,
-      type: 'message',
-      icon: MessageSquare,
-      color: '#F59E0B',
-      title: language === 'vi' ? 'Tin nhắn từ nhà tuyển dụng' : 'Message from employer',
-      message: language === 'vi'
-        ? 'Shopee Vietnam đã gửi tin nhắn về vị trí Senior Frontend Engineer'
-        : 'Shopee Vietnam sent a message about the Senior Frontend Engineer position',
-      time: language === 'vi' ? '4 giờ trước' : '4 hours ago',
-      unread: true
-    },
-    {
-      id: 10,
-      type: 'application',
-      icon: UserPlus,
-      color: '#667eea',
-      title: language === 'vi' ? 'Nhà tuyển dụng theo dõi bạn' : 'Employers following you',
-      message: language === 'vi'
-        ? 'Tiki Corporation và 2 công ty khác đã theo dõi hồ sơ của bạn'
-        : 'Tiki Corporation and 2 other companies are following your profile',
-      time: language === 'vi' ? '1 ngày trước' : '1 day ago',
       unread: false
     }
   ];
@@ -607,14 +547,6 @@ function CandidateNotifications() {
                 >
                   {language === 'vi' ? 'Ứng tuyển' : 'Applications'}
                 </FilterButton>
-                <FilterButton 
-                  $active={filter === 'message'}
-                  onClick={() => setFilter('message')}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {language === 'vi' ? 'Tin nhắn' : 'Messages'}
-                </FilterButton>
               </div>
             </FilterBar>
 
@@ -703,22 +635,6 @@ function CandidateNotifications() {
                   </div>
                   <div className="stat-value">156</div>
                 </StatItem>
-                
-                <StatItem $color="#F59E0B">
-                  <div className="stat-header">
-                    <span className="stat-label">{language === 'vi' ? 'Tin nhắn mới' : 'New messages'}</span>
-                    <MessageSquare />
-                  </div>
-                  <div className="stat-value">2</div>
-                </StatItem>
-                
-                <StatItem $color="#EF4444">
-                  <div className="stat-header">
-                    <span className="stat-label">{language === 'vi' ? 'Lời mời phỏng vấn' : 'Interview invites'}</span>
-                    <Calendar />
-                  </div>
-                  <div className="stat-value">1</div>
-                </StatItem>
               </QuickStats>
             </Card>
 
@@ -737,19 +653,10 @@ function CandidateNotifications() {
               </ActivityItem>
               
               <ActivityItem>
-                <h4>{language === 'vi' ? 'Bạn nhận tin nhắn mới' : 'You received a new message'}</h4>
-                <p>{language === 'vi' ? '5 giờ trước' : '5 hours ago'}</p>
-              </ActivityItem>
-              
-              <ActivityItem>
                 <h4>{language === 'vi' ? 'Hồ sơ được chấp nhận' : 'Application accepted'}</h4>
                 <p>{language === 'vi' ? '1 ngày trước' : '1 day ago'}</p>
               </ActivityItem>
-              
-              <ActivityItem>
-                <h4>{language === 'vi' ? 'Lời mời phỏng vấn từ Grab' : 'Interview invitation from Grab'}</h4>
-                <p>{language === 'vi' ? '1 ngày trước' : '1 day ago'}</p>
-              </ActivityItem>
+          
             </Card>
           </Sidebar>
         </ContentGrid>

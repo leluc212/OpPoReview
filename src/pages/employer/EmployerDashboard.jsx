@@ -453,13 +453,6 @@ const EmployerDashboard = () => {
       time: language === 'vi' ? '2 giờ trước' : '2 hours ago'
     },
     {
-      type: 'message',
-      icon: MessageSquare,
-      color: '#F59E0B',
-      title: language === 'vi' ? 'Bạn có 5 tin nhắn mới' : 'You have 5 new messages',
-      time: language === 'vi' ? '4 giờ trước' : '4 hours ago'
-    },
-    {
       type: 'hired',
       icon: CheckCircle,
       color: '#10B981',
