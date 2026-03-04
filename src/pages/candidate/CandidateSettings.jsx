@@ -32,26 +32,29 @@ import { Button, FormGroup, Label, Input } from '../../components/FormElements';
 const SettingsContainer = styled.div`
   max-width: 1400px;
   margin: 0 auto;
+  padding: 0 24px 32px;
 `;
 
 const PageHeader = styled(motion.div)`
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: ${props => props.theme.borderRadius.xl};
-  padding: 48px;
-  margin-bottom: 32px;
+  padding: 56px 48px;
+  margin-bottom: 40px;
   color: white;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
   
   &::before {
     content: '';
     position: absolute;
     top: -50%;
     right: -10%;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
     border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
   }
   
   &::after {
@@ -59,10 +62,20 @@ const PageHeader = styled(motion.div)`
     position: absolute;
     bottom: -30%;
     left: -10%;
-    width: 300px;
-    height: 300px;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
     border-radius: 50%;
+    animation: float 8s ease-in-out infinite reverse;
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      transform: translateY(-20px) scale(1.05);
+    }
   }
   
   .header-content {
@@ -70,36 +83,37 @@ const PageHeader = styled(motion.div)`
     z-index: 1;
     
     h1 {
-      font-size: 36px;
+      font-size: 42px;
       font-weight: 800;
-      margin-bottom: 12px;
-      letter-spacing: -0.5px;
+      margin-bottom: 16px;
+      letter-spacing: -1px;
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 18px;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
       
       svg {
-        width: 40px;
-        height: 40px;
+        width: 44px;
+        height: 44px;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
       }
     }
     
     p {
-      font-size: 16px;
-      opacity: 0.9;
+      font-size: 18px;
+      opacity: 0.95;
       font-weight: 400;
+      letter-spacing: 0.2px;
     }
   }
 `;
 
 const ContentGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 380px;
+  display: flex;
+  flex-direction: column;
   gap: 24px;
-  
-  @media (max-width: 1200px) {
-    grid-template-columns: 1fr;
-  }
+  max-width: 900px;
+  margin: 0 auto;
 `;
 
 const MainContent = styled.div`
@@ -109,34 +123,41 @@ const MainContent = styled.div`
 `;
 
 const Sidebar = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+  display: none;
 `;
 
 const Card = styled(motion.div)`
   background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.xl};
-  padding: 32px;
+  padding: 40px;
   border: 1px solid ${props => props.theme.colors.border};
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
   
   .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 28px;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid ${props => props.theme.colors.border};
     
     h2 {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 700;
       color: ${props => props.theme.colors.text};
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       
       svg {
-        width: 24px;
-        height: 24px;
+        width: 28px;
+        height: 28px;
         color: ${props => props.theme.colors.primary};
       }
     }
@@ -147,12 +168,13 @@ const SettingItem = styled(motion.div)`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 24px;
   background: ${props => props.theme.colors.bgDark};
   border-radius: ${props => props.theme.borderRadius.lg};
   border: 1px solid ${props => props.theme.colors.border};
-  margin-bottom: 12px;
-  transition: all 0.3s;
+  margin-bottom: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
   
   &:last-child {
     margin-bottom: 0;
@@ -160,29 +182,31 @@ const SettingItem = styled(motion.div)`
   
   &:hover {
     border-color: ${props => props.$color || props.theme.colors.primary};
-    transform: translateX(4px);
-    box-shadow: ${props => props.theme.shadows.sm};
+    transform: translateX(8px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    background: ${props => props.theme.colors.bgLight};
   }
   
   .setting-left {
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
     
     .icon-wrapper {
-      width: 48px;
-      height: 48px;
+      width: 56px;
+      height: 56px;
       border-radius: ${props => props.theme.borderRadius.lg};
-      background: ${props => props.$color || props.theme.colors.primary}15;
+      background: linear-gradient(135deg, ${props => props.$color || props.theme.colors.primary}15, ${props => props.$color || props.theme.colors.primary}25);
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      box-shadow: 0 4px 12px ${props => props.$color || props.theme.colors.primary}20;
       
       svg {
-        width: 24px;
-        height: 24px;
+        width: 26px;
+        height: 26px;
         color: ${props => props.$color || props.theme.colors.primary};
       }
     }
@@ -191,16 +215,16 @@ const SettingItem = styled(motion.div)`
       flex: 1;
       
       h3 {
-        font-size: 16px;
+        font-size: 17px;
         font-weight: 700;
         color: ${props => props.theme.colors.text};
-        margin-bottom: 6px;
+        margin-bottom: 8px;
       }
       
       p {
         font-size: 14px;
         color: ${props => props.theme.colors.textLight};
-        line-height: 1.5;
+        line-height: 1.6;
       }
     }
   }
@@ -209,8 +233,8 @@ const SettingItem = styled(motion.div)`
 const Toggle = styled.label`
   position: relative;
   display: inline-block;
-  width: 56px;
-  height: 32px;
+  width: 60px;
+  height: 34px;
   flex-shrink: 0;
   
   input {
@@ -220,11 +244,11 @@ const Toggle = styled.label`
     
     &:checked + span {
       background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
     }
     
     &:checked + span:before {
-      transform: translateX(24px);
+      transform: translateX(26px);
     }
   }
   
@@ -236,51 +260,62 @@ const Toggle = styled.label`
     right: 0;
     bottom: 0;
     background: #CBD5E1;
-    border-radius: 32px;
+    border-radius: 34px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    
+    &:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
     
     &:before {
       position: absolute;
       content: '';
-      height: 24px;
-      width: 24px;
+      height: 26px;
+      width: 26px;
       left: 4px;
       bottom: 4px;
       background: white;
       border-radius: 50%;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
     }
   }
 `;
 
 const LanguageOptions = styled.div`
   display: flex;
-  gap: 12px;
+  gap: 14px;
 `;
 
 const LanguageButton = styled(motion.button)`
-  padding: 10px 20px;
+  padding: 12px 24px;
   border-radius: ${props => props.theme.borderRadius.lg};
   border: 2px solid ${props => props.$active ? props.theme.colors.primary : props.theme.colors.border};
-  background: ${props => props.$active ? props.theme.colors.primary : 'transparent'};
+  background: ${props => props.$active ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent'};
   color: ${props => props.$active ? 'white' : props.theme.colors.text};
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
+  gap: 10px;
+  font-size: 15px;
+  box-shadow: ${props => props.$active ? '0 4px 16px rgba(102, 126, 234, 0.3)' : '0 2px 6px rgba(0, 0, 0, 0.05)'};
   
   &:hover {
     border-color: ${props => props.theme.colors.primary};
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px ${props => props.$active ? 'rgba(102, 126, 234, 0.4)' : 'rgba(102, 126, 234, 0.15)'};
+  }
+  
+  &:active {
+    transform: translateY(-1px);
   }
   
   svg {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
   }
 `;
 
@@ -296,27 +331,42 @@ const PasswordForm = styled.div`
 
 const InfoBox = styled(motion.div)`
   background: ${props => {
-    if (props.$type === 'warning') return 'linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%)';
-    if (props.$type === 'success') return 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%)';
-    return 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)';
+    if (props.$type === 'warning') return 'linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.12) 100%)';
+    if (props.$type === 'success') return 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.12) 100%)';
+    return 'linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.12) 100%)';
   }};
-  border-left: 4px solid ${props => {
+  border-left: 5px solid ${props => {
     if (props.$type === 'warning') return '#EF4444';
     if (props.$type === 'success') return '#10B981';
     return props.theme.colors.primary;
   }};
-  padding: 20px;
+  padding: 24px;
   border-radius: ${props => props.theme.borderRadius.lg};
+  box-shadow: 0 2px 12px ${props => {
+    if (props.$type === 'warning') return 'rgba(239, 68, 68, 0.1)';
+    if (props.$type === 'success') return 'rgba(16, 185, 129, 0.1)';
+    return 'rgba(102, 126, 234, 0.1)';
+  }};
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 20px ${props => {
+      if (props.$type === 'warning') return 'rgba(239, 68, 68, 0.15)';
+      if (props.$type === 'success') return 'rgba(16, 185, 129, 0.15)';
+      return 'rgba(102, 126, 234, 0.15)';
+    }};
+  }
   
   .info-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 8px;
+    gap: 14px;
+    margin-bottom: 10px;
     
     svg {
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
       color: ${props => {
         if (props.$type === 'warning') return '#EF4444';
         if (props.$type === 'success') return '#10B981';
@@ -325,7 +375,7 @@ const InfoBox = styled(motion.div)`
     }
     
     h4 {
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 700;
       color: ${props => props.theme.colors.text};
     }
@@ -334,8 +384,8 @@ const InfoBox = styled(motion.div)`
   p {
     font-size: 14px;
     color: ${props => props.theme.colors.textLight};
-    line-height: 1.7;
-    margin-left: 32px;
+    line-height: 1.8;
+    margin-left: 38px;
   }
 `;
 
@@ -343,65 +393,84 @@ const PolicyItem = styled(motion.div)`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 24px;
   background: ${props => props.theme.colors.bgDark};
   border-radius: ${props => props.theme.borderRadius.lg};
   border: 1px solid ${props => props.theme.colors.border};
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
   
   &:last-child {
     margin-bottom: 0;
   }
   
   &:hover {
-    border-color: ${props => props.theme.colors.primary};
-    transform: translateX(4px);
-    box-shadow: ${props => props.theme.shadows.sm};
+    border-color: ${props => props.$color || props.theme.colors.primary};
+    transform: translateX(8px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    background: ${props => props.theme.colors.bgLight};
+    
+    .icon {
+      transform: scale(1.1);
+    }
+    
+    > svg {
+      transform: translateX(4px);
+      color: ${props => props.$color || props.theme.colors.primary};
+    }
   }
   
   .policy-left {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
     flex: 1;
     
     .icon {
-      width: 48px;
-      height: 48px;
+      width: 56px;
+      height: 56px;
       border-radius: ${props => props.theme.borderRadius.lg};
-      background: ${props => props.theme.colors.primary}15;
+      background: linear-gradient(135deg, ${props => props.$color || props.theme.colors.primary}15, ${props => props.$color || props.theme.colors.primary}25);
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: transform 0.3s ease;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px ${props => props.$color || props.theme.colors.primary}20;
       
       svg {
-        width: 24px;
-        height: 24px;
-        color: ${props => props.theme.colors.primary};
+        width: 26px;
+        height: 26px;
+        color: ${props => props.$color || props.theme.colors.primary};
       }
     }
     
     .policy-info {
+      flex: 1;
+      
       h3 {
-        font-size: 16px;
+        font-size: 17px;
         font-weight: 700;
         color: ${props => props.theme.colors.text};
-        margin-bottom: 4px;
+        margin-bottom: 6px;
       }
       
       p {
         font-size: 14px;
         color: ${props => props.theme.colors.textLight};
+        line-height: 1.6;
       }
     }
   }
   
-  svg {
-    width: 20px;
-    height: 20px;
+  > svg {
+    width: 22px;
+    height: 22px;
     color: ${props => props.theme.colors.textLight};
+    transition: all 0.3s ease;
+    flex-shrink: 0;
   }
 `;
 
@@ -754,7 +823,9 @@ function CandidateSettings() {
               </div>
               
               <PolicyItem
+                $color="#667eea"
                 whileHover={{ scale: 1.01 }}
+                transition={{ duration: 0.2 }}
                 onClick={() => window.open('/terms', '_blank')}
               >
                 <div className="policy-left">
@@ -770,7 +841,9 @@ function CandidateSettings() {
               </PolicyItem>
               
               <PolicyItem
+                $color="#10B981"
                 whileHover={{ scale: 1.01 }}
+                transition={{ duration: 0.2 }}
                 onClick={() => window.open('/privacy', '_blank')}
               >
                 <div className="policy-left">
@@ -786,7 +859,9 @@ function CandidateSettings() {
               </PolicyItem>
               
               <PolicyItem
+                $color="#F59E0B"
                 whileHover={{ scale: 1.01 }}
+                transition={{ duration: 0.2 }}
                 onClick={() => window.open('/cookies', '_blank')}
               >
                 <div className="policy-left">
@@ -802,7 +877,9 @@ function CandidateSettings() {
               </PolicyItem>
               
               <PolicyItem
+                $color="#8B5CF6"
                 whileHover={{ scale: 1.01 }}
+                transition={{ duration: 0.2 }}
               >
                 <div className="policy-left">
                   <div className="icon">
@@ -819,218 +896,7 @@ function CandidateSettings() {
           </MainContent>
 
           <Sidebar>
-            {/* Security Card */}
-            <Card
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              <div className="card-header">
-                <h2><Lock />{language === 'vi' ? 'Bảo mật' : 'Security'}</h2>
-              </div>
-              
-              <PasswordForm>
-                <FormGroup>
-                  <Label>{language === 'vi' ? 'Mật khẩu hiện tại' : 'Current Password'}</Label>
-                  <div style={{ position: 'relative' }}>
-                    <Input
-                      type={showPassword.current ? "text" : "password"}
-                      value={passwordData.currentPassword}
-                      onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                      placeholder={language === 'vi' ? 'Nhập mật khẩu hiện tại' : 'Enter current password'}
-                      style={{ paddingRight: '40px' }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword({...showPassword, current: !showPassword.current})}
-                      style={{
-                        position: 'absolute',
-                        right: '12px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        padding: '4px'
-                      }}
-                    >
-                      {showPassword.current ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </FormGroup>
-                
-                <FormGroup>
-                  <Label>{language === 'vi' ? 'Mật khẩu mới' : 'New Password'}</Label>
-                  <div style={{ position: 'relative' }}>
-                    <Input
-                      type={showPassword.new ? "text" : "password"}
-                      value={passwordData.newPassword}
-                      onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                      placeholder={language === 'vi' ? 'Nhập mật khẩu mới' : 'Enter new password'}
-                      style={{ paddingRight: '40px' }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword({...showPassword, new: !showPassword.new})}
-                      style={{
-                        position: 'absolute',
-                        right: '12px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        padding: '4px'
-                      }}
-                    >
-                      {showPassword.new ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </FormGroup>
-                
-                <FormGroup>
-                  <Label>{language === 'vi' ? 'Xác nhận mật khẩu mới' : 'Confirm New Password'}</Label>
-                  <div style={{ position: 'relative' }}>
-                    <Input
-                      type={showPassword.confirm ? "text" : "password"}
-                      value={passwordData.confirmPassword}
-                      onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                      placeholder={language === 'vi' ? 'Xác nhận mật khẩu mới' : 'Confirm new password'}
-                      style={{ paddingRight: '40px' }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword({...showPassword, confirm: !showPassword.confirm})}
-                      style={{
-                        position: 'absolute',
-                        right: '12px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        padding: '4px'
-                      }}
-                    >
-                      {showPassword.confirm ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </FormGroup>
-                
-                <Button onClick={handlePasswordChange} style={{ width: '100%', marginTop: '8px' }}>
-                  <Key style={{ width: '16px', height: '16px', marginRight: '8px' }} />
-                  {language === 'vi' ? 'Đổi mật khẩu' : 'Change Password'}
-                </Button>
-              </PasswordForm>
-              
-              {showSavedMessage && (
-                <InfoBox 
-                  $type="success"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  style={{ marginTop: '16px' }}
-                >
-                  <div className="info-header">
-                    <Check />
-                    <h4>{language === 'vi' ? 'Thành công!' : 'Success!'}</h4>
-                  </div>
-                  <p>{language === 'vi' ? 'Đã lưu thay đổi thành công!' : 'Changes saved successfully!'}</p>
-                </InfoBox>
-              )}
-              
-              <InfoBox 
-                $type="info"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                style={{ marginTop: '16px', cursor: 'pointer' }}
-              >
-                <div className="info-header">
-                  <Shield />
-                  <h4>{language === 'vi' ? 'Xác thực hai yếu tố (2FA)' : 'Two-Factor Authentication (2FA)'}</h4>
-                </div>
-                <p>{language === 'vi' ? 'Tăng cường bảo mật tài khoản bằng xác thực hai yếu tố' : 'Enhance account security with two-factor authentication'}</p>
-              </InfoBox>
-            </Card>
-
-            {/* Stats Overview */}
-            <Card
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-            >
-              <div className="card-header">
-                <h2><User />{language === 'vi' ? 'Tổng quan' : 'Overview'}</h2>
-              </div>
-              
-              <QuickStats>
-                <StatItem $color="#667eea">
-                  <div className="stat-value">8</div>
-                  <div className="stat-label">{language === 'vi' ? 'Cài đặt kích hoạt' : 'Active Settings'}</div>
-                </StatItem>
-                <StatItem $color="#10B981">
-                  <div className="stat-value">100%</div>
-                  <div className="stat-label">{language === 'vi' ? 'Bảo mật' : 'Security'}</div>
-                </StatItem>
-              </QuickStats>
-              
-              <InfoBox 
-                $type="info"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-              >
-                <div className="info-header">
-                  <Shield />
-                  <h4>{language === 'vi' ? 'Mức độ bảo mật: Cao' : 'Security Level: High'}</h4>
-                </div>
-                <p>{language === 'vi' ? 'Tài khoản của bạn được bảo vệ tốt với các cài đặt bảo mật hiện tại.' : 'Your account is well protected with current security settings.'}</p>
-              </InfoBox>
-            </Card>
-
-            {/* Danger Zone */}
-            <DangerZone
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.7 }}
-            >
-              <div className="card-header">
-                <h2 style={{ color: '#DC2626' }}><AlertTriangle />{language === 'vi' ? 'Vùng nguy hiểm' : 'Danger Zone'}</h2>
-              </div>
-              
-              <InfoBox 
-                $type="warning"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
-                <div className="info-header">
-                  <AlertTriangle />
-                  <h4>{language === 'vi' ? 'Xóa tài khoản' : 'Delete Account'}</h4>
-                </div>
-                <p>{language === 'vi' ? 'Xóa vĩnh viễn tài khoản và toàn bộ dữ liệu. Hành động này không thể hoàn tác!' : 'Permanently delete your account and all data. This action cannot be undone!'}</p>
-              </InfoBox>
-              
-              <Button 
-                variant="outline" 
-                style={{ 
-                  width: '100%',
-                  marginTop: '16px',
-                  borderColor: '#DC2626', 
-                  color: '#DC2626',
-                  background: 'transparent'
-                }}
-                onClick={() => {
-                  if (window.confirm(language === 'vi' 
-                    ? 'Bạn có chắc chắn muốn xóa tài khoản? Hành động này không thể hoàn tác!' 
-                    : 'Are you sure you want to delete your account? This action cannot be undone!')) {
-                    console.log('Deleting account...');
-                  }
-                }}
-              >
-                <Trash2 style={{ width: '16px', height: '16px', marginRight: '8px' }} />
-                {language === 'vi' ? 'Xóa tài khoản' : 'Delete Account'}
-              </Button>
-            </DangerZone>
+            {/* Security, Overview, and Danger Zone cards hidden */}
           </Sidebar>
         </ContentGrid>
       </SettingsContainer>

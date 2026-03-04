@@ -101,7 +101,7 @@ export const Input = styled.input`
   border: 2px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.md};
   background: #FFFFFF;
-  color: #1E293B;
+  color: #0F172A;
   transition: all ${props => props.theme.transitions.fast};
   width: 100%;
   font-weight: 600;
@@ -133,19 +133,20 @@ export const TextArea = styled.textarea`
   font-size: 16px;
   border: 2px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.md};
-  background: ${props => props.theme.colors.bgDark};
-  color: #F1F5F9;
+  background: #FFFFFF;
+  color: #0F172A;
   transition: all ${props => props.theme.transitions.fast};
   width: 100%;
   resize: vertical;
   min-height: 120px;
   font-family: inherit;
   font-weight: 600;
+  line-height: 1.6;
   
   &:focus {
     border-color: ${props => props.theme.colors.primary};
     box-shadow: 0 0 0 3px ${props => props.theme.colors.primary}20;
-    background: ${props => props.theme.colors.bgLight};
+    background: #FFFFFF;
   }
   
   &::placeholder {

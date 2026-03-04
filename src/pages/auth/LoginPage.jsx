@@ -234,7 +234,7 @@ const Divider = styled.div`
 
 const RoleSelector = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 8px;
   margin-bottom: 16px;
   padding: 5px;
@@ -303,12 +303,13 @@ const InputWrapper = styled.div`
   }
 `;
 
-const ForgotPassword = styled(Link)`
+const ForgotPassword = styled.span`
   color: #002e9d;
   font-size: 13px;
   font-weight: 600;
   display: inline-block;
   margin-top: 8px;
+  cursor: pointer;
   
   &:hover {
     text-decoration: underline;
@@ -374,6 +375,11 @@ const LoginPage = () => {
         [e.target.name]: ''
       });
     }
+    
+    // Auto-detect admin role based on email
+    if (e.target.name === 'email' && e.target.value.endsWith('@admin')) {
+      setRole('admin');
+    }
   };
 
   const validate = () => {
@@ -383,6 +389,17 @@ const LoginPage = () => {
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email không hợp lệ';
     }
+    
+    // Validate admin email
+    if (role === 'admin' && !formData.email.endsWith('@admin')) {
+      newErrors.email = 'Email admin phải có đuôi @admin';
+    }
+    
+    // Prevent non-admin from accessing admin
+    if (formData.email.endsWith('@admin') && role !== 'admin') {
+      setRole('admin');
+    }
+    
     if (!formData.password) {
       newErrors.password = 'Vui lòng nhập mật khẩu';
     } else if (formData.password.length < 6) {
@@ -540,15 +557,7 @@ const LoginPage = () => {
             >
               {t.login.roleEmployer}
             </RoleButton>
-            <RoleButton
-              type="button"
-              $selected={role === 'admin'}
-              onClick={() => setRole('admin')}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {t.login.roleAdmin}
-            </RoleButton>
+            {/* Admin tab hidden - auto-detected via @admin email */}
           </RoleSelector>
 
           <form onSubmit={handleSubmit}>
@@ -591,7 +600,7 @@ const LoginPage = () => {
                 </button>
               </InputWrapper>
               {errors.password && <ErrorText>{errors.password}</ErrorText>}
-              <ForgotPassword to="/forgot-password">Quên mật khẩu?</ForgotPassword>
+              <ForgotPassword onClick={() => alert('Chức năng đang phát triển')}>Quên mật khẩu?</ForgotPassword>
             </FormGroup>
 
             <SubmitButton type="submit" $variant="primary" $fullWidth $size="large">

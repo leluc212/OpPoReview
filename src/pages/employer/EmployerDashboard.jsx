@@ -453,13 +453,6 @@ const EmployerDashboard = () => {
       time: language === 'vi' ? '2 giờ trước' : '2 hours ago'
     },
     {
-      type: 'message',
-      icon: MessageSquare,
-      color: '#F59E0B',
-      title: language === 'vi' ? 'Bạn có 5 tin nhắn mới' : 'You have 5 new messages',
-      time: language === 'vi' ? '4 giờ trước' : '4 hours ago'
-    },
-    {
       type: 'hired',
       icon: CheckCircle,
       color: '#10B981',
@@ -524,7 +517,7 @@ const EmployerDashboard = () => {
         {/* Stats Overview */}
         <StatsGrid>
           <StatsCard
-            title={language === 'vi' ? 'Tin Đang Tuyển' : 'Active Jobs'}
+            title={language === 'vi' ? 'Tin đã hiển thị' : 'Active Jobs'}
             value="12"
             change="+3"
             changeText={language === 'vi' ? 'sơ với tháng trước' : 'vs last month'}
@@ -533,7 +526,7 @@ const EmployerDashboard = () => {
             positive
           />
           <StatsCard
-            title={language === 'vi' ? 'Tổng Hồ Sơ' : 'Total Applications'}
+            title={language === 'vi' ? 'Tổng Hồ Sơ được ứng tuyển' : 'Total Applications'}
             value="248"
             change="+45%"
             changeText={language === 'vi' ? 'sơ với tháng trước' : 'vs last month'}
@@ -542,7 +535,7 @@ const EmployerDashboard = () => {
             positive
           />
           <StatsCard
-            title={language === 'vi' ? 'Lượt Xem' : 'Views'}
+            title={language === 'vi' ? 'Lượt Xem Tin Tuyển Dụng' : 'Views'}
             value="1,234"
             change="+12%"
             changeText={language === 'vi' ? 'sơ với tuần trước' : 'vs last week'}
@@ -551,7 +544,7 @@ const EmployerDashboard = () => {
             positive
           />
           <StatsCard
-            title={language === 'vi' ? 'Đã Tuyển' : 'Hired'}
+            title={language === 'vi' ? 'Đã Tuyển Ứng Viên (Job tuyển gấp)' : 'Hired'}
             value="8"
             change="+2"
             changeText={language === 'vi' ? 'tháng này' : 'this month'}

@@ -21,7 +21,7 @@ const PageContainer = styled.div`
 `;
 
 const PageHeader = styled.div`
-  margin-bottom: 32px;
+  margin-bottom: 24px;
   
   h1 {
     font-size: 32px;
@@ -37,6 +37,34 @@ const PageHeader = styled.div`
     color: ${props => props.theme.colors.textLight};
     font-size: 15px;
     font-weight: 500;
+  }
+`;
+
+const JobTypeContainer = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 6px;
+  background: ${props => props.theme.colors.bgDark};
+  border-radius: 14px;
+`;
+
+const JobTypeTab = styled(motion.button)`
+  flex: 1;
+  padding: 14px 28px;
+  background: ${props => props.$active ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent'};
+  border: none;
+  font-size: 15px;
+  font-weight: 700;
+  color: ${props => props.$active ? 'white' : props.theme.colors.textLight};
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: ${props => props.$active ? '0 4px 12px rgba(102, 126, 234, 0.3)' : 'none'};
+  
+  &:hover {
+    color: ${props => props.$active ? 'white' : props.theme.colors.primary};
+    background: ${props => props.$active ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : props.theme.colors.border};
   }
 `;
 
@@ -394,66 +422,128 @@ const ReasonBox = styled.div`
 
 const HRManagement = () => {
   const { language } = useLanguage();
+  const [jobType, setJobType] = useState('standard'); // 'standard' or 'quick'
   const [activeTab, setActiveTab] = useState('active');
 
-  const staffData = {
-    active: [
-      {
-        id: 1,
-        name: language === 'vi' ? 'Nguyễn Văn A' : 'Nguyen Van A',
-        position: language === 'vi' ? 'Nhân viên bán hàng' : 'Sales Staff',
-        startDate: '15/01/2026',
-        shift: language === 'vi' ? 'Ca sáng 8:00 - 12:00' : 'Morning shift 8:00 - 12:00',
-        location: language === 'vi' ? 'Hà Nội' : 'Hanoi',
-        status: 'active'
-      },
-      {
-        id: 2,
-        name: language === 'vi' ? 'Trần Thị B' : 'Tran Thi B',
-        position: language === 'vi' ? 'Nhân viên kho' : 'Warehouse Staff',
-        startDate: '12/01/2026',
-        shift: language === 'vi' ? 'Ca chiều 13:00 - 17:00' : 'Afternoon shift 13:00 - 17:00',
-        location: language === 'vi' ? 'TP.HCM' : 'HCMC',
-        status: 'active'
-      }
-    ],
-    pending: [
-      {
-        id: 3,
-        name: language === 'vi' ? 'Lê Văn C' : 'Le Van C',
-        position: language === 'vi' ? 'Lễ tân' : 'Receptionist',
-        startDate: '20/02/2026',
-        shift: language === 'vi' ? 'Ca full 8:00 - 17:00' : 'Full shift 8:00 - 17:00',
-        location: language === 'vi' ? 'Đà Nẵng' : 'Da Nang',
-        status: 'pending'
-      }
-    ],
-    completed: [
-      {
-        id: 4,
-        name: language === 'vi' ? 'Phạm Thị D' : 'Pham Thi D',
-        position: language === 'vi' ? 'Nhân viên phục vụ' : 'Service Staff',
-        startDate: '01/01/2026',
-        endDate: '10/01/2026',
-        shift: language === 'vi' ? 'Ca tối 18:00 - 22:00' : 'Evening shift 18:00 - 22:00',
-        location: language === 'vi' ? 'Hà Nội' : 'Hanoi',
-        status: 'completed',
-        rating: 4.5
-      }
-    ],
-    change_request: [
-      {
-        id: 5,
-        name: language === 'vi' ? 'Hoàng Văn E' : 'Hoang Van E',
-        position: language === 'vi' ? 'Nhân viên giao hàng' : 'Delivery Staff',
-        startDate: '10/01/2026',
-        shift: language === 'vi' ? 'Ca sáng 8:00 - 12:00' : 'Morning shift 8:00 - 12:00',
-        location: language === 'vi' ? 'TP.HCM' : 'HCMC',
-        status: 'requested',
-        reason: language === 'vi' ? 'Yêu cầu thay đổi ca làm việc' : 'Request to change work shift'
-      }
-    ]
+  // Separate data for standard and quick jobs
+  const allStaffData = {
+    standard: {
+      active: [
+        {
+          id: 1,
+          name: language === 'vi' ? 'Nguyễn Văn A' : 'Nguyen Van A',
+          position: language === 'vi' ? 'Kỹ sư phần mềm' : 'Software Engineer',
+          startDate: '01/01/2026',
+          shift: language === 'vi' ? 'Toàn thời gian' : 'Full-time',
+          location: language === 'vi' ? 'Hà Nội' : 'Hanoi',
+          status: 'active',
+          jobType: 'standard'
+        },
+        {
+          id: 2,
+          name: language === 'vi' ? 'Trần Thị B' : 'Tran Thi B',
+          position: language === 'vi' ? 'Kế toán' : 'Accountant',
+          startDate: '15/12/2025',
+          shift: language === 'vi' ? 'Toàn thời gian' : 'Full-time',
+          location: language === 'vi' ? 'TP.HCM' : 'HCMC',
+          status: 'active',
+          jobType: 'standard'
+        }
+      ],
+      pending: [
+        {
+          id: 3,
+          name: language === 'vi' ? 'Lê Văn C' : 'Le Van C',
+          position: language === 'vi' ? 'Marketing Manager' : 'Marketing Manager',
+          startDate: '10/03/2026',
+          shift: language === 'vi' ? 'Toàn thời gian' : 'Full-time',
+          location: language === 'vi' ? 'Đà Nẵng' : 'Da Nang',
+          status: 'pending',
+          jobType: 'standard'
+        }
+      ],
+      completed: [
+        {
+          id: 4,
+          name: language === 'vi' ? 'Phạm Thị D' : 'Pham Thi D',
+          position: language === 'vi' ? 'Nhân viên hành chính' : 'Admin Staff',
+          startDate: '01/10/2025',
+          endDate: '28/02/2026',
+          shift: language === 'vi' ? 'Toàn thời gian' : 'Full-time',
+          location: language === 'vi' ? 'Hà Nội' : 'Hanoi',
+          status: 'completed',
+          rating: 4.8,
+          jobType: 'standard'
+        }
+      ],
+      change_request: []
+    },
+    quick: {
+      active: [
+        {
+          id: 11,
+          name: language === 'vi' ? 'Nguyễn Văn X' : 'Nguyen Van X',
+          position: language === 'vi' ? 'Nhân viên bán hàng' : 'Sales Staff',
+          startDate: '15/02/2026',
+          shift: language === 'vi' ? 'Ca sáng 8:00 - 12:00' : 'Morning shift 8:00 - 12:00',
+          location: language === 'vi' ? 'Hà Nội' : 'Hanoi',
+          status: 'active',
+          jobType: 'quick'
+        },
+        {
+          id: 12,
+          name: language === 'vi' ? 'Trần Thị Y' : 'Tran Thi Y',
+          position: language === 'vi' ? 'Nhân viên kho' : 'Warehouse Staff',
+          startDate: '12/02/2026',
+          shift: language === 'vi' ? 'Ca chiều 13:00 - 17:00' : 'Afternoon shift 13:00 - 17:00',
+          location: language === 'vi' ? 'TP.HCM' : 'HCMC',
+          status: 'active',
+          jobType: 'quick'
+        }
+      ],
+      pending: [
+        {
+          id: 13,
+          name: language === 'vi' ? 'Lê Văn Z' : 'Le Van Z',
+          position: language === 'vi' ? 'Lễ tân' : 'Receptionist',
+          startDate: '20/03/2026',
+          shift: language === 'vi' ? 'Ca full 8:00 - 17:00' : 'Full shift 8:00 - 17:00',
+          location: language === 'vi' ? 'Đà Nẵng' : 'Da Nang',
+          status: 'pending',
+          jobType: 'quick'
+        }
+      ],
+      completed: [
+        {
+          id: 14,
+          name: language === 'vi' ? 'Phạm Thị K' : 'Pham Thi K',
+          position: language === 'vi' ? 'Nhân viên phục vụ' : 'Service Staff',
+          startDate: '01/02/2026',
+          endDate: '10/02/2026',
+          shift: language === 'vi' ? 'Ca tối 18:00 - 22:00' : 'Evening shift 18:00 - 22:00',
+          location: language === 'vi' ? 'Hà Nội' : 'Hanoi',
+          status: 'completed',
+          rating: 4.5,
+          jobType: 'quick'
+        }
+      ],
+      change_request: [
+        {
+          id: 15,
+          name: language === 'vi' ? 'Hoàng Văn L' : 'Hoang Van L',
+          position: language === 'vi' ? 'Nhân viên giao hàng' : 'Delivery Staff',
+          startDate: '10/02/2026',
+          shift: language === 'vi' ? 'Ca sáng 8:00 - 12:00' : 'Morning shift 8:00 - 12:00',
+          location: language === 'vi' ? 'TP.HCM' : 'HCMC',
+          status: 'requested',
+          reason: language === 'vi' ? 'Yêu cầu thay đổi ca làm việc' : 'Request to change work shift',
+          jobType: 'quick'
+        }
+      ]
+    }
   };
+
+  const staffData = allStaffData[jobType];
 
   const tabs = [
     { id: 'active', label: language === 'vi' ? 'Đang làm việc' : 'Active', count: staffData.active.length },
@@ -628,6 +718,25 @@ const HRManagement = () => {
           <h1>{language === 'vi' ? 'Quản lý nhân sự' : 'HR Management'}</h1>
           <p>{language === 'vi' ? 'Quản lý và theo dõi nhân viên đang làm việc' : 'Manage and track your active workforce'}</p>
         </PageHeader>
+
+        <JobTypeContainer>
+          <JobTypeTab
+            $active={jobType === 'standard'}
+            onClick={() => setJobType('standard')}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            {language === 'vi' ? '🏢 Công việc tiêu chuẩn' : '🏢 Standard Jobs'}
+          </JobTypeTab>
+          <JobTypeTab
+            $active={jobType === 'quick'}
+            onClick={() => setJobType('quick')}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            {language === 'vi' ? '⚡ Công việc theo ca' : '⚡ Quick Jobs'}
+          </JobTypeTab>
+        </JobTypeContainer>
 
         <TabContainer>
           {tabs.map(tab => (

@@ -371,15 +371,6 @@ const getNotifications = (language) => ([
   },
   {
     id: 3,
-    type: 'interview',
-    title: language === 'vi' ? 'Lịch phỏng vấn sắp tới' : 'Upcoming interview',
-    message: language === 'vi' ? 'Bạn có lịch phỏng vấn với Lê Văn C vào lúc 14:00 ngày 26/02/2026' : 'You have an interview with Le Van C at 14:00 on 26/02/2026',
-    time: language === 'vi' ? '1 giờ trước' : '1 hour ago',
-    read: false,
-    icon: Clock
-  },
-  {
-    id: 4,
     type: 'rating',
     title: language === 'vi' ? 'Đánh giá nhân viên mới' : 'Rate new employee',
     message: language === 'vi' ? 'Phạm Thị D đã hoàn thành công việc. Vui lòng đánh giá nhân viên.' : 'Pham Thi D has completed the job. Please provide a rating.',
@@ -388,7 +379,7 @@ const getNotifications = (language) => ([
     icon: Star
   },
   {
-    id: 5,
+    id: 4,
     type: 'system',
     title: language === 'vi' ? 'Tin tuyển dụng sắp hết hạn' : 'Job post expiring soon',
     message: language === 'vi' ? 'Tin tuyển dụng "Thu ngân" sẽ hết hạn vào 27/02/2026' : 'The "Cashier" job post will expire on 27/02/2026',
@@ -397,7 +388,7 @@ const getNotifications = (language) => ([
     icon: AlertCircle
   },
   {
-    id: 6,
+    id: 5,
     type: 'application',
     title: language === 'vi' ? 'Hồ sơ đã được xem' : 'Profiles viewed',
     message: language === 'vi' ? '12 ứng viên mới đã xem tin tuyển dụng của bạn' : '12 new candidates viewed your job post',
@@ -406,20 +397,11 @@ const getNotifications = (language) => ([
     icon: Eye
   },
   {
-    id: 7,
+    id: 6,
     type: 'system',
     title: language === 'vi' ? 'Cập nhật hệ thống' : 'System update',
     message: language === 'vi' ? 'Hệ thống đã được cập nhật phiên bản mới với nhiều tính năng hữu ích' : 'The system has been updated with a new version and useful features',
     time: language === 'vi' ? '1 ngày trước' : '1 day ago',
-    read: true,
-    icon: CheckCircle
-  },
-  {
-    id: 8,
-    type: 'interview',
-    title: language === 'vi' ? 'Phỏng vấn đã hoàn thành' : 'Interview completed',
-    message: language === 'vi' ? 'Phỏng vấn với Hoàng Văn E đã hoàn thành. Vui lòng cập nhật kết quả.' : 'Interview with Hoang Van E is completed. Please update the result.',
-    time: language === 'vi' ? '2 ngày trước' : '2 days ago',
     read: true,
     icon: CheckCircle
   }
@@ -444,7 +426,6 @@ const EmployerNotifications = () => {
     { id: 'all', label: language === 'vi' ? 'Tất cả' : 'All', count: notifications.length },
     { id: 'unread', label: language === 'vi' ? 'Chưa đọc' : 'Unread', count: notifications.filter(n => !n.read).length },
     { id: 'application', label: language === 'vi' ? 'Ứng tuyển' : 'Applications', count: notifications.filter(n => n.type === 'application').length },
-    { id: 'interview', label: language === 'vi' ? 'Phỏng vấn' : 'Interviews', count: notifications.filter(n => n.type === 'interview').length },
     { id: 'system', label: language === 'vi' ? 'Hệ thống' : 'System', count: notifications.filter(n => n.type === 'system').length }
   ];
 

@@ -15,7 +15,6 @@ import {
   BarChart3,
   Package,
   MapPin,
-  ToggleLeft,
   ShieldCheck,
   HelpCircle,
   Wallet,
@@ -369,7 +368,6 @@ const Sidebar = ({ role }) => {
       { to: '/candidate/settings', icon: Settings, label: t.sidebar.settings },
     ]},
     { section: t.sidebar.utilities, items: [
-      { to: '/candidate/availability', icon: ToggleLeft, label: t.sidebar.availability },
       { to: '/candidate/wallet', icon: Wallet, label: t.sidebar.digitalWallet },
       { to: '/candidate/support', icon: HelpCircle, label: t.sidebar.support },
       { to: '#', icon: LogOut, label: t.sidebar.signOut },

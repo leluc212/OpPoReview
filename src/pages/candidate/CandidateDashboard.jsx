@@ -343,24 +343,27 @@ const ActivityFeed = styled.div``;
 const ActivityItem = styled(motion.div)`
   display: flex;
   gap: 16px;
-  padding: 16px;
-  border-left: 3px solid ${props => props.$color || props.theme.colors.border};
+  padding: 24px;
+  border-left: 4px solid ${props => props.$color || props.theme.colors.border};
   margin-bottom: 12px;
-  background: ${props => props.theme.colors.bgDark};
-  border-radius: 0 ${props => props.theme.borderRadius.md} ${props => props.theme.borderRadius.md} 0;
+  background: ${props => props.theme.colors.bgLight};
+  border-radius: ${props => props.theme.borderRadius.xl};
+  border: 1px solid ${props => props.theme.colors.border};
   transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
   
   &:hover {
-    background: ${props => props.theme.colors.bgLight};
-    transform: translateX(8px);
-    box-shadow: ${props => props.theme.shadows.sm};
+    transform: translateX(4px);
+    box-shadow: ${props => props.theme.shadows.md};
+    border-color: ${props => props.$color || props.theme.colors.primary};
   }
 `;
 
 const ActivityIcon = styled.div`
-  width: 40px;
-  height: 40px;
-  border-radius: ${props => props.theme.borderRadius.md};
+  width: 56px;
+  height: 56px;
+  border-radius: ${props => props.theme.borderRadius.lg};
   background: ${props => props.$color || props.theme.colors.primary}15;
   color: ${props => props.$color || props.theme.colors.primary};
   display: flex;
@@ -369,8 +372,8 @@ const ActivityIcon = styled.div`
   flex-shrink: 0;
   
   svg {
-    width: 20px;
-    height: 20px;
+    width: 28px;
+    height: 28px;
   }
 `;
 
@@ -378,14 +381,14 @@ const ActivityContent = styled.div`
   flex: 1;
   
   h5 {
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 17px;
+    font-weight: 700;
     color: ${props => props.theme.colors.text};
-    margin-bottom: 4px;
+    margin-bottom: 6px;
   }
   
   p {
-    font-size: 13px;
+    font-size: 14px;
     color: ${props => props.theme.colors.textLight};
   }
 `;
@@ -577,13 +580,6 @@ const CandidateDashboard = () => {
       time: language === 'vi' ? 'Hôm nay' : 'Today'
     },
     {
-      type: 'interview',
-      icon: Calendar,
-      color: '#10B981',
-      title: language === 'vi' ? 'Lịch phỏng vấn với FPT Software' : 'Interview with FPT Software',
-      time: language === 'vi' ? 'Ngày mai, 10:00 AM' : 'Tomorrow, 10:00 AM'
-    },
-    {
       type: 'message',
       icon: Bell,
       color: '#F59E0B',
@@ -706,15 +702,6 @@ const CandidateDashboard = () => {
             changeText={language === 'vi' ? 'từ tuần trước' : 'from last week'}
             icon={Eye}
             color="#10B981"
-            positive
-          />
-          <StatsCard
-            title={language === 'vi' ? 'Phỏng Vấn' : 'Interviews'}
-            value="5"
-            change="+2"
-            changeText={language === 'vi' ? 'tuần này' : 'this week'}
-            icon={Calendar}
-            color="#8B5CF6"
             positive
           />
         </StatsGrid>
