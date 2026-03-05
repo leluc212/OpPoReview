@@ -19,9 +19,7 @@ import {
   AlertCircle,
   Search,
   ExternalLink,
-  Video,
-  Shield,
-  Zap
+  Video
 } from 'lucide-react';
 import { Button, Input, TextArea, FormGroup, Label } from '../../components/FormElements';
 
@@ -356,45 +354,6 @@ const ContactInfo = styled(motion.div)`
   }
 `;
 
-const QuickStats = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-  margin-bottom: 20px;
-`;
-
-const StatItem = styled.div`
-  padding: 16px;
-  background: ${props => props.theme.colors.bgDark};
-  border-radius: ${props => props.theme.borderRadius.lg};
-  border-left: 4px solid ${props => props.$color || props.theme.colors.primary};
-  
-  .stat-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 8px;
-    
-    .stat-label {
-      font-size: 13px;
-      color: ${props => props.theme.colors.textLight};
-      font-weight: 600;
-    }
-    
-    svg {
-      width: 18px;
-      height: 18px;
-      color: ${props => props.$color || props.theme.colors.primary};
-    }
-  }
-  
-  .stat-value {
-    font-size: 24px;
-    font-weight: 800;
-    color: ${props => props.$color || props.theme.colors.primary};
-  }
-`;
-
 const InfoBox = styled(motion.div)`
   background: ${props => {
     if (props.$type === 'success') return 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%)';
@@ -681,16 +640,6 @@ function Support() {
                 <h2><Send />{language === 'vi' ? 'Gửi Yêu Cầu Hỗ Trợ' : 'Submit Support Request'}</h2>
               </div>
               
-              <InfoBox $type="info" style={{ marginBottom: '24px' }}>
-                <div className="info-header">
-                  <Clock />
-                  <h4>{language === 'vi' ? 'Thời gian phản hồi' : 'Response Time'}</h4>
-                </div>
-                <p>{language === 'vi' 
-                  ? 'Chúng tôi sẽ phản hồi yêu cầu của bạn trong vòng 24 giờ làm việc.'
-                  : 'We will respond to your request within 24 working hours.'}</p>
-              </InfoBox>
-              
               <form onSubmit={handleSubmit}>
                 <FormGroup>
                   <Label>{language === 'vi' ? 'Họ và Tên' : 'Full Name'}</Label>
@@ -745,42 +694,6 @@ function Support() {
           </MainContent>
 
           <Sidebar>
-            <Card
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              <div className="card-header">
-                <h2><Zap />{language === 'vi' ? 'Thống kê' : 'Statistics'}</h2>
-              </div>
-              
-              <QuickStats>
-                <StatItem $color="#1e40af">
-                  <div className="stat-header">
-                    <span className="stat-label">{language === 'vi' ? 'Thời gian phản hồi' : 'Response Time'}</span>
-                    <Clock />
-                  </div>
-                  <div className="stat-value">&lt; 24h</div>
-                </StatItem>
-                
-                <StatItem $color="#10B981">
-                  <div className="stat-header">
-                    <span className="stat-label">{language === 'vi' ? 'Độ hài lòng' : 'Satisfaction'}</span>
-                    <CheckCircle />
-                  </div>
-                  <div className="stat-value">98%</div>
-                </StatItem>
-                
-                <StatItem $color="#F59E0B">
-                  <div className="stat-header">
-                    <span className="stat-label">{language === 'vi' ? 'Yêu cầu đã giải quyết' : 'Resolved Requests'}</span>
-                    <Shield />
-                  </div>
-                  <div className="stat-value">15,420</div>
-                </StatItem>
-              </QuickStats>
-            </Card>
-
             <Card
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

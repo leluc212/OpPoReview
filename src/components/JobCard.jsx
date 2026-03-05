@@ -25,6 +25,56 @@ const translateLocation = (locationStr, language) => {
     .replace(/Phú Nhuận/g, 'Phu Nhuan');
 };
 
+// Translate job titles
+const translateJobTitle = (titleVi, language) => {
+  if (language === 'vi') return titleVi;
+  const titleMap = {
+    'Nhân viên Bán Hàng': 'Sales Staff',
+    'Nhân viên Văn Phòng': 'Office Staff',
+    'Nhân viên Phục Vụ': 'Service Staff'
+  };
+  return titleMap[titleVi] || titleVi;
+};
+
+// Translate job type
+const translateJobType = (typeVi, language) => {
+  if (language === 'vi') return typeVi;
+  const typeMap = {
+    'Toàn thời gian': 'Full-time',
+    'Bán thời gian': 'Part-time',
+    'Hợp đồng': 'Contract',
+    'Thực tập': 'Internship'
+  };
+  return typeMap[typeVi] || typeVi;
+};
+
+// Translate job tags
+const translateTag = (tagVi, language) => {
+  if (language === 'vi') return tagVi;
+  const tagMap = {
+    'Bán hàng': 'Sales',
+    'Giao tiếp': 'Communication',
+    'Nhiệt tình': 'Enthusiastic',
+    'Văn phòng': 'Office',
+    'Word/Excel': 'Word/Excel',
+    'Hành chính': 'Admin',
+    'Phục vụ': 'Service',
+    'F&B': 'F&B',
+    'Ca làm linh động': 'Flexible Shifts'
+  };
+  return tagMap[tagVi] || tagVi;
+};
+
+// Translate time posted
+const translatePostedAt = (timeStr, language) => {
+  if (language === 'vi') return timeStr;
+  return timeStr
+    .replace(/ngày trước/g, 'days ago')
+    .replace(/giờ trước/g, 'hours ago')
+    .replace(/tuần trước/g, 'weeks ago')
+    .replace(/tháng trước/g, 'months ago');
+};
+
 const CardWrapper = styled(motion.div)`
   background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.xl};
@@ -257,7 +307,7 @@ const JobCard = ({ job, onClick, onSave, saved = false }) => {
             {job.company.charAt(0).toUpperCase()}
           </CompanyLogo>
           <CardContent>
-            <JobTitle>{job.title}</JobTitle>
+            <JobTitle>{translateJobTitle(job.title, language)}</JobTitle>
             <CompanyName>{job.company}</CompanyName>
             <TagsContainer>
               {job.tags && job.tags.map((tag, index) => (
@@ -266,7 +316,7 @@ const JobCard = ({ job, onClick, onSave, saved = false }) => {
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  {tag}
+                  {translateTag(tag, language)}
                 </Tag>
               ))}
             </TagsContainer>
@@ -289,7 +339,7 @@ const JobCard = ({ job, onClick, onSave, saved = false }) => {
         </DetailItem>
         <DetailItem whileHover={{ x: 4 }}>
           <Briefcase />
-          <span>{job.type}</span>
+          <span>{translateJobType(job.type, language)}</span>
         </DetailItem>
         <DetailItem whileHover={{ x: 4 }}>
           <DollarSign />
@@ -297,7 +347,7 @@ const JobCard = ({ job, onClick, onSave, saved = false }) => {
         </DetailItem>
         <DetailItem whileHover={{ x: 4 }}>
           <Clock />
-          <span>{job.postedAt}</span>
+          <span>{translatePostedAt(job.postedAt, language)}</span>
         </DetailItem>
       </JobDetails>
     </CardWrapper>

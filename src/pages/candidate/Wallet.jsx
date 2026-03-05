@@ -630,7 +630,7 @@ const EmptyState = styled.div`
 const Wallet = () => {
   const { language } = useLanguage();
   const [balance] = useState(15750000);
-  const [showBalance, setShowBalance] = useState(true);
+  const [showBalance, setShowBalance] = useState(false);
   const [filterType, setFilterType] = useState('all');
 
   const stats = [

@@ -514,36 +514,86 @@ const CandidateDashboard = () => {
       .replace(/Phú Nhuận/g, 'Phu Nhuan');
   };
 
+  // Translate job titles
+  const translateJobTitle = (titleVi) => {
+    if (language === 'vi') return titleVi;
+    const titleMap = {
+      'Nhân viên Bán Hàng': 'Sales Staff',
+      'Nhân viên Văn Phòng': 'Office Staff',
+      'Nhân viên Phục Vụ': 'Service Staff'
+    };
+    return titleMap[titleVi] || titleVi;
+  };
+
+  // Translate job type
+  const translateJobType = (typeVi) => {
+    if (language === 'vi') return typeVi;
+    const typeMap = {
+      'Toàn thời gian': 'Full-time',
+      'Bán thời gian': 'Part-time',
+      'Hợp đồng': 'Contract',
+      'Thực tập': 'Internship'
+    };
+    return typeMap[typeVi] || typeVi;
+  };
+
+  // Translate job tags
+  const translateTag = (tagVi) => {
+    if (language === 'vi') return tagVi;
+    const tagMap = {
+      'Bán hàng': 'Sales',
+      'Giao tiếp': 'Communication',
+      'Nhiệt tình': 'Enthusiastic',
+      'Văn phòng': 'Office',
+      'Word/Excel': 'Word/Excel',
+      'Hành chính': 'Admin',
+      'Phục vụ': 'Service',
+      'F&B': 'F&B',
+      'Ca làm linh động': 'Flexible Shifts'
+    };
+    return tagMap[tagVi] || tagVi;
+  };
+
+  // Translate time posted
+  const translatePostedAt = (timeStr) => {
+    if (language === 'vi') return timeStr;
+    return timeStr
+      .replace(/ngày trước/g, 'days ago')
+      .replace(/giờ trước/g, 'hours ago')
+      .replace(/tuần trước/g, 'weeks ago')
+      .replace(/tháng trước/g, 'months ago');
+  };
+
   const recommendedJobs = [
     {
       id: 1,
-      title: 'General Accountant',
+      title: 'Nhân viên Bán Hàng',
       company: 'Vinamilk',
       location: 'Quận 1, TP.HCM',
-      type: 'Full-time',
-      salary: '12-18 triệu',
+      type: 'Toàn thời gian',
+      salary: '8-12 triệu',
       postedAt: '2 ngày trước',
-      tags: ['Accounting', 'Excel', 'MBA']
+      tags: ['Bán hàng', 'Giao tiếp', 'Nhiệt tình']
     },
     {
       id: 2,
-      title: 'B2B Sales Executive',
+      title: 'Nhân viên Văn Phòng',
       company: 'Viettel',  
       location: 'Quận 7, TP.HCM',
-      type: 'Full-time',
-      salary: '15-25 triệu',
+      type: 'Toàn thời gian',
+      salary: '7-10 triệu',
       postedAt: '1 ngày trước',
-      tags: ['Sales', 'B2B', 'High Commission']
+      tags: ['Văn phòng', 'Word/Excel', 'Hành chính']
     },
     {
       id: 3,
-      title: 'Senior React Developer',
-      company: 'FPT Software',
+      title: 'Nhân viên Phục Vụ',
+      company: 'Highland Coffee',
       location: 'Quận 1, TP.HCM',
-      type: 'Full-time',
-      salary: '20-30 triệu',
+      type: 'Toàn thời gian',
+      salary: '6-9 triệu',
       postedAt: '2 ngày trước',
-      tags: ['React', 'TypeScript', 'Remote']
+      tags: ['Phục vụ', 'F&B', 'Ca làm linh động']
     }
   ];
 
@@ -748,7 +798,7 @@ const CandidateDashboard = () => {
                       {job.company.charAt(0)}
                     </CompanyLogo>
                     <JobInfo>
-                      <h4>{job.title}</h4>
+                      <h4>{translateJobTitle(job.title)}</h4>
                       <p>{job.company}</p>
                     </JobInfo>
                   </JobHeader>
@@ -763,12 +813,12 @@ const CandidateDashboard = () => {
                     </span>
                     <span>
                       <Clock />
-                      {job.postedAt}
+                      {translatePostedAt(job.postedAt)}
                     </span>
                   </JobDetails>
                   <JobTags>
                     {job.tags.map((tag, idx) => (
-                      <span key={idx}>{tag}</span>
+                      <span key={idx}>{translateTag(tag)}</span>
                     ))}
                   </JobTags>
                 </RecommendedJobCard>
