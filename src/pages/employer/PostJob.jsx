@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
+import Modal from '../../components/Modal';
 import { Button, Input, TextArea, Select, FormGroup, Label } from '../../components/FormElements';
-import { Save, ArrowLeft } from 'lucide-react';
+import { Save, ArrowLeft, AlertCircle, CheckCircle } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 const PostJobContainer = styled.div`
@@ -77,12 +78,109 @@ const SalaryInputWrapper = styled.div`
   }
 `;
 
+const VerificationWarning = styled.div`
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  border-radius: ${props => props.theme.borderRadius.xl};
+  padding: 32px;
+  margin-bottom: 32px;
+  color: white;
+  display: flex;
+  align-items: start;
+  gap: 20px;
+  
+  svg {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+  
+  .content {
+    flex: 1;
+    
+    h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    p {
+      font-size: 15px;
+      opacity: 0.95;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    
+    button {
+      background: white;
+      color: #D97706;
+      font-weight: 600;
+      padding: 12px 24px;
+      border-radius: ${props => props.theme.borderRadius.md};
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      }
+    }
+  }
+`;
+
+const VerificationModalContent = styled.div`
+  text-align: center;
+  padding: 20px;
+  
+  .icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 24px;
+    border-radius: 50%;
+    background: ${props => props.theme.colors.warning}20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${props => props.theme.colors.warning};
+    
+    svg {
+      width: 40px;
+      height: 40px;
+    }
+  }
+  
+  h3 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: ${props => props.theme.colors.text};
+  }
+  
+  p {
+    font-size: 16px;
+    color: ${props => props.theme.colors.textLight};
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  
+  .button-group {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    
+    button {
+      flex: 1;
+      max-width: 200px;
+    }
+  }
+`;
+
 const PostJob = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const editingJob = location.state?.job; // Get job data if editing
   const isEditing = !!editingJob;
+  
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [verificationStatus, setVerificationStatus] = useState('');
   
   const [formData, setFormData] = useState({
     title: '',
@@ -97,6 +195,17 @@ const PostJob = () => {
     requirements: '',
     benefits: ''
   });
+  
+  // Check verification status on mount
+  useEffect(() => {
+    const status = localStorage.getItem('companyVerificationStatus') || 'not_started';
+    setVerificationStatus(status);
+    
+    // If not verified and not editing, show modal
+    if (status !== 'approved' && !isEditing) {
+      setShowVerificationModal(true);
+    }
+  }, [isEditing]);
   
   // Pre-fill form if editing
   useEffect(() => {
@@ -163,6 +272,32 @@ const PostJob = () => {
         <BackButton onClick={() => navigate('/employer/dashboard')}>
           <ArrowLeft /> {language === 'vi' ? 'Quay lại Dashboard' : 'Back to Dashboard'}
         </BackButton>
+
+        {/* Verification Warning */}
+        {verificationStatus !== 'approved' && !isEditing && (
+          <VerificationWarning>
+            <AlertCircle />
+            <div className="content">
+              <h3>{language === 'vi' ? '⚠️ Yêu cầu xác thực hồ sơ công ty' : '⚠️ Company Verification Required'}</h3>
+              <p>
+                {language === 'vi'
+                  ? 'Bạn cần hoàn tất xác thực hồ sơ công ty trước khi đăng tin tuyển dụng. Quá trình xác thực bao gồm 4 bước: Giấy phép kinh doanh, Thông tin doanh nghiệp, Người đại diện, và Thông tin liên hệ.'
+                  : 'You need to complete company verification before posting jobs. The verification process includes 4 steps: Business License, Company Information, Representative, and Contact Information.'}
+              </p>
+              {verificationStatus === 'pending' ? (
+                <p style={{ fontWeight: '600', marginBottom: 0 }}>
+                  {language === 'vi'
+                    ? '✓ Hồ sơ đang được xem xét. Chúng tôi sẽ phê duyệt trong vòng 24-48 giờ.'
+                    : '✓ Your profile is under review. We will approve within 24-48 hours.'}
+                </p>
+              ) : (
+                <button onClick={() => navigate('/employer/verification')}>
+                  {language === 'vi' ? 'Bắt đầu xác thực ngay' : 'Start Verification Now'}
+                </button>
+              )}
+            </div>
+          </VerificationWarning>
+        )}
 
         <FormCard>
           <FormHeader>
@@ -261,6 +396,54 @@ const PostJob = () => {
           </form>
         </FormCard>
       </PostJobContainer>
+
+      {/* Verification Required Modal */}
+      <Modal
+        isOpen={showVerificationModal}
+        onClose={() => {
+          setShowVerificationModal(false);
+          if (verificationStatus !== 'approved') {
+            navigate('/employer/dashboard');
+          }
+        }}
+        title={language === 'vi' ? 'Xác Thực Hồ Sơ Công Ty' : 'Company Verification'}
+        size="medium"
+      >
+        <VerificationModalContent>
+          <div className="icon">
+            <AlertCircle />
+          </div>
+          <h3>{language === 'vi' ? 'Yêu cầu xác thực hồ sơ' : 'Verification Required'}</h3>
+          <p>
+            {verificationStatus === 'pending' 
+              ? (language === 'vi'
+                  ? 'Hồ sơ công ty của bạn đang được xem xét. Vui lòng chờ phê duyệt trước khi đăng tin tuyển dụng. Thời gian xử lý: 24-48 giờ.'
+                  : 'Your company profile is under review. Please wait for approval before posting jobs. Processing time: 24-48 hours.')
+              : (language === 'vi'
+                  ? 'Để đăng tin tuyển dụng, bạn cần hoàn tất 4 bước xác thực hồ sơ công ty: Giấy phép kinh doanh, Thông tin doanh nghiệp, Người đại diện và Thông tin liên hệ.'
+                  : 'To post jobs, you need to complete 4 steps of company verification: Business License, Company Information, Representative, and Contact Information.')}
+          </p>
+          <div className="button-group">
+            <Button 
+              $variant="secondary" 
+              onClick={() => {
+                setShowVerificationModal(false);
+                navigate('/employer/dashboard');
+              }}
+            >
+              {language === 'vi' ? 'Để sau' : 'Later'}
+            </Button>
+            {verificationStatus !== 'pending' && (
+              <Button 
+                $variant="primary" 
+                onClick={() => navigate('/employer/verification')}
+              >
+                {language === 'vi' ? 'Xác thực ngay' : 'Verify Now'}
+              </Button>
+            )}
+          </div>
+        </VerificationModalContent>
+      </Modal>
     </DashboardLayout>
   );
 };

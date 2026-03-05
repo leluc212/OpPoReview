@@ -45,7 +45,7 @@ export const translations = {
       applications: 'Hồ Sơ Ứng Tuyển',
       companyProfile: 'Hồ Sơ Công Ty',
       subscription: 'Gói Dịch Vụ',
-      userManagement: 'Quản Lý Nhân Sự',
+      userManagement: 'Quản Lý Người Dùng',
       employerApproval: 'Duyệt Nhà Tuyển Dụng',
       packages: 'Gói Dịch Vụ',
       reports: 'Báo Cáo',

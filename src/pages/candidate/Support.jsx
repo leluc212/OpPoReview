@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
+import Modal from '../../components/Modal';
 import { useLanguage } from '../../context/LanguageContext';
 import { 
   HelpCircle, 
@@ -9,7 +10,6 @@ import {
   Book, 
   Mail, 
   Phone, 
-  Send, 
   FileQuestion,
   Headphones,
   ChevronDown,
@@ -19,7 +19,9 @@ import {
   AlertCircle,
   Search,
   ExternalLink,
-  Video
+  Video,
+  Send,
+  X
 } from 'lucide-react';
 import { Button, Input, TextArea, FormGroup, Label } from '../../components/FormElements';
 
@@ -399,17 +401,71 @@ const InfoBox = styled(motion.div)`
   }
 `;
 
+const Select = styled.select`
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.md};
+  background: ${props => props.theme.colors.bgDark};
+  color: ${props => props.theme.colors.text};
+  font-size: 15px;
+  font-family: inherit;
+  transition: all ${props => props.theme.transitions.normal};
+  
+  &:focus {
+    outline: none;
+    border-color: ${props => props.theme.colors.primary};
+    box-shadow: 0 0 0 3px ${props => props.theme.colors.primary}20;
+  }
+  
+  option {
+    padding: 10px;
+  }
+`;
+
+const ReportForm = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+`;
+
+const SuccessMessage = styled(motion.div)`
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+  padding: 24px;
+  border-radius: ${props => props.theme.borderRadius.lg};
+  text-align: center;
+  
+  svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+  }
+  
+  h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  
+  p {
+    font-size: 15px;
+    opacity: 0.9;
+  }
+`;
+
 function Support() {
   const { language } = useLanguage();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
-  });
   
   const [expandedFAQ, setExpandedFAQ] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [reportData, setReportData] = useState({
+    issueType: '',
+    subject: '',
+    description: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const getFAQs = () => [
     {
@@ -512,19 +568,48 @@ function Support() {
     }
   ];
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Support ticket:', formData);
-    alert(language === 'vi' 
-      ? 'Yêu cầu hỗ trợ đã được gửi! Chúng tôi sẽ phản hồi trong vòng 24 giờ.'
-      : 'Support request submitted! We will respond within 24 hours.');
-    setFormData({ name: '', email: '', subject: '', message: '' });
-  };
-
   const filteredFAQs = faqs.filter(faq => 
     faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
     faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleCategoryClick = (category) => {
+    if (category.title === (language === 'vi' ? 'Báo Cáo Sự Cố' : 'Report Issue')) {
+      setIsReportModalOpen(true);
+    } else {
+      // Handle other categories as needed
+      console.log('Category clicked:', category.title);
+    }
+  };
+
+  const handleReportSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    console.log('Report submitted:', reportData);
+    
+    setIsSubmitting(false);
+    
+    // Show success message
+    alert(language === 'vi' 
+      ? '✅ Báo cáo của bạn đã được gửi thành công! Chúng tôi sẽ xem xét và phản hồi trong vòng 24 giờ.'
+      : '✅ Your report has been submitted successfully! We will review and respond within 24 hours.');
+    
+    // Reset form and close modal
+    setReportData({
+      issueType: '',
+      subject: '',
+      description: ''
+    });
+    setIsReportModalOpen(false);
+  };
+
+  const handleReportChange = (field, value) => {
+    setReportData(prev => ({ ...prev, [field]: value }));
+  };
 
   return (
     <DashboardLayout role="candidate" showSearch={false}>
@@ -550,6 +635,8 @@ function Support() {
               transition={{ duration: 0.4, delay: 0.1 + index * 0.1 }}
               whileHover={{ scale: 1.02, y: -4 }}
               whileTap={{ scale: 0.98 }}
+              onClick={() => handleCategoryClick(category)}
+              style={{ cursor: 'pointer' }}
             >
               <div className="icon">
                 <category.icon />
@@ -630,67 +717,6 @@ function Support() {
                 </InfoBox>
               )}
             </Card>
-
-            <Card
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <div className="card-header">
-                <h2><Send />{language === 'vi' ? 'Gửi Yêu Cầu Hỗ Trợ' : 'Submit Support Request'}</h2>
-              </div>
-              
-              <form onSubmit={handleSubmit}>
-                <FormGroup>
-                  <Label>{language === 'vi' ? 'Họ và Tên' : 'Full Name'}</Label>
-                  <Input
-                    type="text"
-                    placeholder={language === 'vi' ? 'Nhập họ tên của bạn' : 'Enter your full name'}
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                  />
-                </FormGroup>
-
-                <FormGroup>
-                  <Label>Email</Label>
-                  <Input
-                    type="email"
-                    placeholder="email@example.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    required
-                  />
-                </FormGroup>
-
-                <FormGroup>
-                  <Label>{language === 'vi' ? 'Tiêu Đề' : 'Subject'}</Label>
-                  <Input
-                    type="text"
-                    placeholder={language === 'vi' ? 'Mô tả ngắn gọn vấn đề' : 'Brief description of the issue'}
-                    value={formData.subject}
-                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                    required
-                  />
-                </FormGroup>
-
-                <FormGroup>
-                  <Label>{language === 'vi' ? 'Nội Dung' : 'Message'}</Label>
-                  <TextArea
-                    placeholder={language === 'vi' ? 'Mô tả chi tiết vấn đề của bạn...' : 'Describe your issue in detail...'}
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    rows={6}
-                    required
-                  />
-                </FormGroup>
-
-                <Button type="submit" $variant="primary" $fullWidth>
-                  <Send style={{ width: '18px', height: '18px', marginRight: '8px' }} />
-                  {language === 'vi' ? 'Gửi Yêu Cầu' : 'Submit Request'}
-                </Button>
-              </form>
-            </Card>
           </MainContent>
 
           <Sidebar>
@@ -758,6 +784,87 @@ function Support() {
           </Sidebar>
         </ContentSection>
       </SupportContainer>
+
+      {/* Report Issue Modal */}
+      <Modal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        title={language === 'vi' ? 'Báo Cáo Sự Cố' : 'Report Issue'}
+        size="medium"
+      >
+        <ReportForm onSubmit={handleReportSubmit}>
+          <FormGroup>
+            <Label>{language === 'vi' ? 'Loại Sự Cố' : 'Issue Type'} *</Label>
+            <Select
+              value={reportData.issueType}
+              onChange={(e) => handleReportChange('issueType', e.target.value)}
+              required
+              style={{ fontWeight: '500' }}
+            >
+              <option value="">{language === 'vi' ? 'Chọn loại sự cố' : 'Select issue type'}</option>
+              <option value="bug">{language === 'vi' ? 'Lỗi phần mềm' : 'Software Bug'}</option>
+              <option value="performance">{language === 'vi' ? 'Vấn đề hiệu suất' : 'Performance Issue'}</option>
+              <option value="ui">{language === 'vi' ? 'Lỗi giao diện' : 'UI Issue'}</option>
+              <option value="feature">{language === 'vi' ? 'Đề xuất tính năng' : 'Feature Request'}</option>
+              <option value="security">{language === 'vi' ? 'Vấn đề bảo mật' : 'Security Issue'}</option>
+              <option value="data">{language === 'vi' ? 'Lỗi dữ liệu' : 'Data Issue'}</option>
+              <option value="other">{language === 'vi' ? 'Khác' : 'Other'}</option>
+            </Select>
+          </FormGroup>
+
+          <FormGroup>
+            <Label>{language === 'vi' ? 'Tiêu Đề' : 'Subject'} *</Label>
+            <Input
+              type="text"
+              placeholder={language === 'vi' ? 'Mô tả ngắn gọn vấn đề...' : 'Brief description of the issue...'}
+              value={reportData.subject}
+              onChange={(e) => handleReportChange('subject', e.target.value)}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label>{language === 'vi' ? 'Mô Tả Chi Tiết' : 'Detailed Description'} *</Label>
+            <TextArea
+              placeholder={language === 'vi' 
+                ? 'Vui lòng mô tả chi tiết:\n• Bạn đang làm gì khi gặp sự cố?\n• Sự cố xảy ra như thế nào?\n• Kết quả mong đợi là gì?\n• Có thông báo lỗi nào không?'
+                : 'Please describe in detail:\n• What were you doing when the issue occurred?\n• How did the issue happen?\n• What was the expected result?\n• Were there any error messages?'}
+              value={reportData.description}
+              onChange={(e) => handleReportChange('description', e.target.value)}
+              rows={8}
+              required
+            />
+          </FormGroup>
+
+          <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+            <Button
+              type="button"
+              $variant="secondary"
+              onClick={() => setIsReportModalOpen(false)}
+              style={{ flex: 1 }}
+              disabled={isSubmitting}
+            >
+              <X style={{ width: '18px', height: '18px', marginRight: '8px' }} />
+              {language === 'vi' ? 'Hủy' : 'Cancel'}
+            </Button>
+            <Button
+              type="submit"
+              $variant="primary"
+              style={{ flex: 1 }}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>⏳ {language === 'vi' ? 'Đang gửi...' : 'Submitting...'}</>
+              ) : (
+                <>
+                  <Send style={{ width: '18px', height: '18px', marginRight: '8px' }} />
+                  {language === 'vi' ? 'Gửi Báo Cáo' : 'Submit Report'}
+                </>
+              )}
+            </Button>
+          </div>
+        </ReportForm>
+      </Modal>
     </DashboardLayout>
   );
 }

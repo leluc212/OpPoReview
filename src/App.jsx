@@ -32,6 +32,7 @@ import CandidatePosts from './pages/candidate/CandidatePosts';
 // Employer Pages
 import EmployerDashboard from './pages/employer/EmployerDashboard';
 import PostJob from './pages/employer/PostJob';
+import CompanyVerification from './pages/employer/CompanyVerification';
 import JobManagement from './pages/employer/JobManagement';
 import Applications from './pages/employer/Applications';
 import EmployerProfile from './pages/employer/EmployerProfile';
@@ -152,6 +153,11 @@ function AppRoutes() {
       <Route path="/employer/post-job" element={
         <ProtectedRoute allowedRoles={['employer']}>
           <PostJob />
+        </ProtectedRoute>
+      } />
+      <Route path="/employer/verification" element={
+        <ProtectedRoute allowedRoles={['employer']}>
+          <CompanyVerification />
         </ProtectedRoute>
       } />
       <Route path="/employer/jobs" element={

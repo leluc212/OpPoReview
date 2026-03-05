@@ -14,12 +14,13 @@ export const Button = styled.button`
   align-items: center;
   gap: 8px;
   justify-content: center;
+  cursor: pointer;
+  border: none;
   
   ${props => props.$variant === 'primary' && `
     background: #60A5FA;
     color: white;
     box-shadow: 0 8px 24px rgba(96, 165, 250, 0.4);
-    border: none;
     font-weight: 700;
     font-size: 16px;
     

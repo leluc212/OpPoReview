@@ -386,13 +386,14 @@ const LoginPage = () => {
     const newErrors = {};
     if (!formData.email) {
       newErrors.email = 'Vui lòng nhập email';
+    } else if (role === 'admin') {
+      // Admin email validation
+      if (!formData.email.endsWith('@admin')) {
+        newErrors.email = 'Email admin phải có đuôi @admin';
+      }
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      // Regular email validation for candidate/employer
       newErrors.email = 'Email không hợp lệ';
-    }
-    
-    // Validate admin email
-    if (role === 'admin' && !formData.email.endsWith('@admin')) {
-      newErrors.email = 'Email admin phải có đuôi @admin';
     }
     
     // Prevent non-admin from accessing admin
