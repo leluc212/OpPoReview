@@ -303,6 +303,7 @@ const CardSub = styled.p`
       &:hover { text-decoration: underline; } }
 `;
 
+<<<<<<< HEAD
 /* Role tabs */
 const RoleTabs = styled.div`
   display: grid;
@@ -312,6 +313,184 @@ const RoleTabs = styled.div`
   border-radius: 14px;
   padding: 4px;
   margin-bottom: 20px;
+=======
+const LoginRight = styled(motion.div)`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  position: relative;
+  z-index: 1;
+  
+  @media (max-width: 1024px) {
+    flex: 1;
+    width: 100%;
+  }
+`;
+
+const HeroContent = styled.div`
+  max-width: 500px;
+  
+  h1 {
+    font-size: 38px;
+    font-weight: 800;
+    margin-bottom: 16px;
+    line-height: 1.2;
+    letter-spacing: -1px;
+  }
+  
+  p {
+    font-size: 16px;
+    opacity: 0.95;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  
+  .features {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      
+      svg {
+        width: 20px;
+        height: 20px;
+        color: #10B981;
+        flex-shrink: 0;
+      }
+    }
+  }
+`;
+
+const LoginForm = styled.div`
+  width: 100%;
+  max-width: 480px;
+  background: white;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+`;
+
+const FormHeader = styled.div`
+  margin-bottom: 20px;
+  text-align: center;
+  
+  .logo-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    
+    img {
+      height: 52px;
+    }
+    
+    .logo-text {
+      font-size: 26px;
+      font-weight: 800;
+      background: #002e9d;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  }
+  
+  h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #1E293B;
+  }
+  
+  p {
+    color: #64748B;
+    font-size: 13px;
+    
+    a {
+      color: #1e40af;
+      font-weight: 600;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+`;
+
+const SocialButtons = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+`;
+
+const SocialButton = styled(motion.button)`
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid #E2E8F0;
+  background: white;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #1E293B;
+  
+  &:hover {
+    border-color: ${props => props.$color || '#1e40af'};
+    background: ${props => props.$color ? `${props.$color}05` : '#1e40af05'};
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  img {
+    width: 20px;
+    height: 20px;
+  }
+  
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+`;
+
+const Divider = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  color: #64748B;
+  font-size: 12px;
+  font-weight: 500;
+  
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #E2E8F0;
+  }
+`;
+
+const RoleSelector = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 5px;
+  background: #F1F5F9;
+  border-radius: 10px;
+>>>>>>> 8ed761b33c0c943034121fbd278c350e649e5007
 `;
 
 const RoleTab = styled(motion.button)`
@@ -346,9 +525,13 @@ const SocialBtn = styled(motion.button)`
   font-family: inherit;
   transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
   &:hover {
+<<<<<<< HEAD
     border-color: ${p => p.$c};
     background: ${p => p.$c}0a;
     box-shadow: 0 3px 10px ${p => p.$c}20;
+=======
+    color: #1e40af;
+>>>>>>> 8ed761b33c0c943034121fbd278c350e649e5007
   }
 `;
 
@@ -435,6 +618,7 @@ const SubmitBtn = styled(motion.button)`
     background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
     pointer-events: none;
   }
+<<<<<<< HEAD
   &:hover { box-shadow: 0 8px 28px ${p => p.$shadow}; }
 
   svg { transition: transform 0.25s; }
@@ -473,6 +657,76 @@ function FI({ id, name, type = 'text', label, value, onChange, error, iconL, ico
     </FieldWrap>
   );
 }
+=======
+  
+  input {
+    padding-left: 44px;
+    background: #FFFFFF;
+    color: #1E293B !important;
+  }
+  
+  .password-toggle {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: #64748B;
+    
+    &:hover {
+      color: #1e40af;
+    }
+    
+    svg {
+      position: relative;
+      left: 0;
+      top: 0;
+      transform: none;
+    }
+  }
+`;
+
+const ForgotPassword = styled.span`
+  color: #002e9d;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+  margin-top: 8px;
+  cursor: pointer;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const SubmitButton = styled(Button)`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  margin-bottom: 0;
+  background: #002e9d;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(30, 64, 175, 0.4);
+  }
+  
+  svg {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.3s;
+  }
+  
+  &:hover svg {
+    transform: translateX(4px);
+  }
+`;
+>>>>>>> 8ed761b33c0c943034121fbd278c350e649e5007
 
 /* Google SVG */
 const GoogleSVG = () => (
@@ -508,6 +762,7 @@ const LoginPage = () => {
     if (p && ROLES[p]) setRole(p);
   }, [location.search]);
 
+<<<<<<< HEAD
   const rc = ROLES[role];
 
   const onChange = e => {
@@ -523,6 +778,52 @@ const LoginPage = () => {
     if (!form.password) e.password = t.login.requiredPassword;
     else if (form.password.length < 6) e.password = 'Mật khẩu phải có ít nhất 6 ký tự';
     return e;
+=======
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+    // Clear error when user starts typing
+    if (errors[e.target.name]) {
+      setErrors({
+        ...errors,
+        [e.target.name]: ''
+      });
+    }
+    
+    // Auto-detect admin role based on email
+    if (e.target.name === 'email' && e.target.value.endsWith('@admin')) {
+      setRole('admin');
+    }
+  };
+
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.email) {
+      newErrors.email = 'Vui lòng nhập email';
+    } else if (role === 'admin') {
+      // Admin email validation
+      if (!formData.email.endsWith('@admin')) {
+        newErrors.email = 'Email admin phải có đuôi @admin';
+      }
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      // Regular email validation for candidate/employer
+      newErrors.email = 'Email không hợp lệ';
+    }
+    
+    // Prevent non-admin from accessing admin
+    if (formData.email.endsWith('@admin') && role !== 'admin') {
+      setRole('admin');
+    }
+    
+    if (!formData.password) {
+      newErrors.password = 'Vui lòng nhập mật khẩu';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+    }
+    return newErrors;
+>>>>>>> 8ed761b33c0c943034121fbd278c350e649e5007
   };
 
   const handleSubmit = async e => {
@@ -706,9 +1007,33 @@ const LoginPage = () => {
                 accent={rc.color}
               />
 
+<<<<<<< HEAD
               <ForgotBtn to="/forgot-password" $c={rc.color}>
                 {t.login.forgotPassword}
               </ForgotBtn>
+=======
+          <RoleSelector>
+            <RoleButton
+              type="button"
+              $selected={role === 'candidate'}
+              onClick={() => setRole('candidate')}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {t.login.roleCandidate}
+            </RoleButton>
+            <RoleButton
+              type="button"
+              $selected={role === 'employer'}
+              onClick={() => setRole('employer')}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {t.login.roleEmployer}
+            </RoleButton>
+            {/* Admin tab hidden - auto-detected via @admin email */}
+          </RoleSelector>
+>>>>>>> 8ed761b33c0c943034121fbd278c350e649e5007
 
               <SubmitBtn
                 type="submit"
@@ -731,6 +1056,7 @@ const LoginPage = () => {
             </motion.form>
           </AnimatePresence>
 
+<<<<<<< HEAD
           <FootRow>
             <FootNote>
               <Link to="/">← Về trang chủ</Link>
@@ -743,6 +1069,41 @@ const LoginPage = () => {
         </Card>
       </Right>
     </Root>
+=======
+            <FormGroup>
+              <Label htmlFor="password">Mật khẩu</Label>
+              <InputWrapper>
+                <Lock />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  $error={errors.password}
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff /> : <Eye />}
+                </button>
+              </InputWrapper>
+              {errors.password && <ErrorText>{errors.password}</ErrorText>}
+              <ForgotPassword onClick={() => alert('Chức năng đang phát triển')}>Quên mật khẩu?</ForgotPassword>
+            </FormGroup>
+
+            <SubmitButton type="submit" $variant="primary" $fullWidth $size="large">
+              Đăng Nhập
+              <ArrowRight />
+            </SubmitButton>
+          </form>
+        </LoginForm>
+      </LoginRight>
+    </LoginContainer>
+>>>>>>> 8ed761b33c0c943034121fbd278c350e649e5007
   );
 };
 

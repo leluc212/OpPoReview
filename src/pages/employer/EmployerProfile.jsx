@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import { Input, TextArea, Button, Label, FormGroup } from '../../components/FormElements';
@@ -16,7 +17,8 @@ import {
   Save,
   Edit3,
   Check,
-  X
+  X,
+  ShieldCheck
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -36,21 +38,50 @@ const ProfileContainer = styled.div`
 `;
 
 const PageHeader = styled.div`
-  margin-bottom: 32px;
-  
-  h1 {
-    font-size: 32px;
-    font-weight: 800;
-    margin-bottom: 8px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+`;
+
+const PageTitleGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+`;
+
+const PageIconBox = styled.div`
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  background: #EFF6FF;
+  border: 1.5px solid #BFDBFE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 22px;
+    height: 22px;
+    color: #1e40af;
   }
-  
+`;
+
+const PageTitleText = styled.div`
+  h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: ${props => props.theme.colors.text};
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
   p {
     color: ${props => props.theme.colors.textLight};
-    font-size: 15px;
+    font-size: 13.5px;
     font-weight: 500;
   }
 `;
@@ -72,17 +103,17 @@ const SidePanel = styled(motion.div)`
 `;
 
 const CompanyLogoCard = styled.div`
-  background: ${props => props.theme.colors.bgLight};
-  border: 2px solid ${props => props.theme.colors.border};
-  border-radius: 20px;
+  background: #ffffff;
+  border: 1.5px solid #E8EFFF;
+  border-radius: 16px;
   padding: 32px;
   text-align: center;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.06);
+  transition: all 0.22s ease;
   
   &:hover {
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
-    border-color: ${props => props.theme.colors.primary}40;
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.13);
+    border-color: #BFDBFE;
   }
 `;
 
@@ -91,13 +122,13 @@ const LogoUploadArea = styled.div`
   height: 160px;
   margin: 0 auto 20px;
   border-radius: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.3);
   
   img {
     width: 100%;
@@ -113,23 +144,25 @@ const UploadButton = styled(motion.label)`
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: ${props => props.theme.colors.bgLight};
+  background: #EFF6FF;
+  border: 1.5px solid #BFDBFE;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.1);
+  transition: all 0.22s ease;
   
   &:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    transform: scale(1.05);
+    background: #DBEAFE;
+    border-color: #93C5FD;
   }
   
   svg {
     width: 20px;
     height: 20px;
-    color: ${props => props.theme.colors.primary};
+    color: #1e40af;
   }
   
   input {
@@ -144,19 +177,20 @@ const DeleteLogoButton = styled(motion.button)`
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: #EF4444;
-  color: white;
-  border: none;
+  background: #FEF2F2;
+  color: #EF4444;
+  border: 1.5px solid #FECACA;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+  transition: all 0.22s ease;
   
   &:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    transform: scale(1.05);
+    background: #FEE2E2;
+    border-color: #FCA5A5;
   }
   
   svg {
@@ -179,11 +213,17 @@ const CompanyType = styled.p`
 `;
 
 const StatsCard = styled.div`
-  background: ${props => props.theme.colors.bgLight};
-  border: 2px solid ${props => props.theme.colors.border};
-  border-radius: 20px;
+  background: #ffffff;
+  border: 1.5px solid #E8EFFF;
+  border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.06);
+  transition: all 0.22s ease;
+  
+  &:hover {
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.13);
+    border-color: #BFDBFE;
+  }
 `;
 
 const StatGrid = styled.div`
@@ -192,27 +232,95 @@ const StatGrid = styled.div`
   gap: 16px;
 `;
 
+const VerifyActionCard = styled(motion.div)`
+  background: #ffffff;
+  border: 1.5px solid #E8EFFF;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.06);
+  transition: all 0.22s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: center;
+  
+  &:hover {
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.13);
+    border-color: #BFDBFE;
+  }
+
+  .icon-wrapper {
+    width: 48px;
+    height: 48px;
+    background: #EFF6FF;
+    color: #1e40af;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+  
+  h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1E293B;
+    margin: 0;
+  }
+  
+  p {
+    font-size: 13.5px;
+    color: #64748B;
+    margin: 0;
+    line-height: 1.5;
+  }
+  
+  button {
+    width: 100%;
+    padding: 12px;
+    background: #EFF6FF;
+    color: #1e40af;
+    border: 1.5px solid #BFDBFE;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 4px;
+    
+    &:hover {
+      background: #1e40af;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
+    }
+  }
+`;
+
 const StatItem = styled.div`
   text-align: center;
   padding: 16px;
-  background: ${props => props.theme.colors.bgDark};
+  background: #EFF6FF;
+  border: 1.5px solid transparent;
   border-radius: 12px;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   
   &:hover {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
-    
-    .value, .label {
-      color: white;
-    }
+    background: #ffffff;
+    border-color: #BFDBFE;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.08);
   }
   
   .value {
     font-size: 24px;
-    font-weight: 900;
-    color: ${props => props.theme.colors.text};
+    font-weight: 800;
+    color: #1e40af;
     display: block;
     margin-bottom: 4px;
     transition: color 0.3s ease;
@@ -220,7 +328,7 @@ const StatItem = styled.div`
   
   .label {
     font-size: 12px;
-    color: ${props => props.theme.colors.textLight};
+    color: #475569;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -229,11 +337,17 @@ const StatItem = styled.div`
 `;
 
 const MainPanel = styled(motion.div)`
-  background: ${props => props.theme.colors.bgLight};
-  border: 2px solid ${props => props.theme.colors.border};
-  border-radius: 20px;
+  background: #ffffff;
+  border: 1.5px solid #E8EFFF;
+  border-radius: 16px;
   padding: 32px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.06);
+  transition: all 0.22s ease;
+  
+  &:hover {
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.13);
+    border-color: #BFDBFE;
+  }
 `;
 
 const SectionTitle = styled.h3`
@@ -243,12 +357,17 @@ const SectionTitle = styled.h3`
   margin-bottom: 24px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   
   svg {
-    width: 24px;
-    height: 24px;
-    color: ${props => props.theme.colors.primary};
+    width: 22px;
+    height: 22px;
+    color: #1e40af;
+    background: #EFF6FF;
+    padding: 6px;
+    border-radius: 8px;
+    width: 34px;
+    height: 34px;
   }
 `;
 
@@ -264,24 +383,40 @@ const InputWrapper = styled.div`
   
   svg.input-icon {
     position: absolute;
-    left: 14px;
+    left: 16px;
     top: 50%;
     transform: translateY(-50%);
-    width: 18px;
-    height: 18px;
-    color: ${props => props.theme.colors.textLight};
+    width: 20px;
+    height: 20px;
+    color: #1e40af;
+    opacity: 0.7;
     pointer-events: none;
+    transition: all 0.2s ease;
   }
   
   input, textarea {
-    padding-left: 44px;
+    padding-left: 46px;
+    border-radius: 12px;
+    border: 1.5px solid #E8EFFF;
+    background: #ffffff;
+    transition: all 0.2s ease;
+    
+    &:focus {
+      border-color: #3B82F6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+  }
+  
+  &:focus-within svg.input-icon {
+    opacity: 1;
+    color: #3B82F6;
   }
 `;
 
 const SaveButton = styled(motion.button)`
   padding: 14px 32px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
   color: white;
   font-weight: 700;
   font-size: 15px;
@@ -289,14 +424,14 @@ const SaveButton = styled(motion.button)`
   align-items: center;
   gap: 10px;
   border: none;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.35);
+  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.35);
   transition: all 0.3s ease;
   cursor: pointer;
   margin-top: 24px;
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.45);
+    box-shadow: 0 12px 32px rgba(30, 64, 175, 0.45);
   }
   
   svg {
@@ -324,27 +459,40 @@ const SuccessMessage = styled(motion.div)`
 `;
 
 const getInitialFormData = (language) => ({
-  companyName: language === 'vi' ? 'Công Ty TNHH Một Mình Tui' : 'Solo Company LLC',
-  email: 'contact@abcxyz.com',
+  companyName: language === 'vi' ? 'Katinat Quận 8' : 'Katinat District 8',
+  email: 'contact@katinat.vn',
   phone: '0379784509',
-  address: language === 'vi' ? 'Quận 1, TP.HCM' : 'District 1, HCMC',
-  website: 'https://abcxyz.com',
-  description: language === 'vi' ? 'Công ty chuyên về phát triển phần mềm và giải pháp công nghệ.' : 'A company specializing in software development and technology solutions.',
-  industry: language === 'vi' ? 'Công nghệ thông tin' : 'Information Technology',
+  address: language === 'vi' ? 'Quận 8, TP.HCM' : 'District 8, HCMC',
+  website: 'https://katinat.vn',
+  description: language === 'vi' ? 'Hệ thống cửa hàng cà phê và trà Katinat.' : 'Katinat Coffee and Tea Store Chain.',
+  industry: 'F&B',
   size: language === 'vi' ? '50-100 nhân viên' : '50-100 employees',
-  foundedYear: '2015'
+  foundedYear: '2020'
 });
 
 const EmployerProfile = () => {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [companyLogo, setCompanyLogo] = useState(() => {
-    return localStorage.getItem('companyLogo') || null;
+    return localStorage.getItem('companyLogo') || '/images/katinatlogo.jpg';
   });
   
   const [formData, setFormData] = useState(() => {
     const savedData = localStorage.getItem('employerProfile');
-    return savedData ? JSON.parse(savedData) : getInitialFormData(language);
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData);
+        if (parsed.companyName === 'Công Ty TNHH Một Mình Tui' || parsed.companyName === 'Solo Company LLC') {
+          return getInitialFormData(language);
+        }
+        return parsed;
+      } catch (e) {
+        console.error('Error parsing saved data:', e);
+        return getInitialFormData(language);
+      }
+    }
+    return getInitialFormData(language);
   });
   
   const [originalFormData, setOriginalFormData] = useState(formData);
@@ -352,7 +500,11 @@ const EmployerProfile = () => {
   useEffect(() => {
     const savedData = localStorage.getItem('employerProfile');
     if (!savedData) {
-      setFormData(getInitialFormData(language));
+      const initialData = getInitialFormData(language);
+      setFormData(initialData);
+      setOriginalFormData(initialData);
+      // Save initial data to localStorage so it's always available
+      localStorage.setItem('employerProfile', JSON.stringify(initialData));
     }
   }, [language]);
 
@@ -407,6 +559,7 @@ const EmployerProfile = () => {
           const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
           setCompanyLogo(compressedBase64);
           localStorage.setItem('companyLogo', compressedBase64);
+          window.dispatchEvent(new Event('logoChanged'));
         };
         img.src = reader.result;
       };
@@ -415,42 +568,47 @@ const EmployerProfile = () => {
   };
 
   const handleDeleteLogo = () => {
-    setCompanyLogo(null);
+    setCompanyLogo('/images/katinatlogo.jpg');
     localStorage.removeItem('companyLogo');
+    window.dispatchEvent(new Event('logoChanged'));
   };
 
   return (
     <DashboardLayout role="employer">
       <ProfileContainer>
         <PageHeader>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
+          <PageTitleGroup>
+            <PageIconBox>
+              <Building2 />
+            </PageIconBox>
+            <PageTitleText>
               <h1>{language === 'vi' ? 'Hồ Sơ Công Ty' : 'Company Profile'}</h1>
               <p>{language === 'vi' ? 'Quản lý thông tin công ty' : 'Manage your company information'}</p>
-            </div>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={isEditing ? handleCancel : () => setIsEditing(true)}
-              style={{
-                padding: '12px 24px',
-                borderRadius: '12px',
-                background: isEditing ? '#6B7280' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                border: 'none',
-                fontWeight: '700',
-                fontSize: '15px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                cursor: 'pointer',
-                boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
-              }}
-            >
-              <Edit3 size={18} />
-              {isEditing ? (language === 'vi' ? 'Hủy' : 'Cancel') : (language === 'vi' ? 'Chỉnh Sửa' : 'Edit')}
-            </motion.button>
-          </div>
+            </PageTitleText>
+          </PageTitleGroup>
+          
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={isEditing ? handleCancel : () => setIsEditing(true)}
+            style={{
+              padding: '12px 24px',
+              borderRadius: '12px',
+              background: isEditing ? '#6B7280' : '#1e40af',
+              color: 'white',
+              border: 'none',
+              fontWeight: '700',
+              fontSize: '15px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              cursor: 'pointer',
+              boxShadow: isEditing ? 'none' : '0 4px 12px rgba(30, 64, 175, 0.2)'
+            }}
+          >
+            <Edit3 size={18} />
+            {isEditing ? (language === 'vi' ? 'Hủy' : 'Cancel') : (language === 'vi' ? 'Chỉnh Sửa' : 'Edit')}
+          </motion.button>
         </PageHeader>
 
         <ProfileContent>
@@ -466,7 +624,7 @@ const EmployerProfile = () => {
                 ) : (
                   <Building2 size={64} color="white" />
                 )}
-                {companyLogo && (
+                {companyLogo && companyLogo !== '/images/katinatlogo.jpg' && (
                   <DeleteLogoButton
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
@@ -507,6 +665,17 @@ const EmployerProfile = () => {
                 </StatItem>
               </StatGrid>
             </StatsCard>
+
+            <VerifyActionCard>
+              <div className="icon-wrapper">
+                <ShieldCheck />
+              </div>
+              <h4>{language === 'vi' ? 'Xác Thực Doanh Nghiệp' : 'Verify Company'}</h4>
+              <p>{language === 'vi' ? 'Xác thực hồ sơ để tăng mức độ uy tín và thu hút ứng viên.' : 'Verify your profile to increase trust and attract more candidates.'}</p>
+              <button type="button" onClick={() => navigate('/employer/verification')}>
+                {language === 'vi' ? 'Đi tới Xác thực ngay' : 'Go to Verify Now'}
+              </button>
+            </VerifyActionCard>
           </SidePanel>
 
           <MainPanel

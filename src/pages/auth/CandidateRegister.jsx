@@ -319,6 +319,59 @@ const Card = styled(motion.div)`
 /* card header */
 const CardTop = styled.div`
   text-align: center;
+<<<<<<< HEAD
+=======
+  margin-bottom: 15px;
+
+  .logo-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    gap: 10px;
+
+    img {
+      height: 52px;
+    }
+
+    .logo-text {
+      font-size: 32px;
+      font-weight: 800;
+      background: #002e9d;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  }
+
+  h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #1E293B;
+  }
+
+  p {
+    font-size: 14px;
+    color: #64748B;
+
+    a {
+      color: #1e40af;
+      font-weight: 600;
+      text-decoration: none;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+`;
+
+const SocialButtons = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+>>>>>>> 8ed761b33c0c943034121fbd278c350e649e5007
   margin-bottom: 24px;
 `;
 
@@ -422,7 +475,51 @@ const OrDivider = styled.div`
 /* ─ Floating input ─ */
 const FieldWrap = styled.div`
   position: relative;
+<<<<<<< HEAD
   margin-bottom: 13px;
+=======
+
+  svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: #94A3B8;
+    pointer-events: none;
+  }
+
+  input {
+    padding-left: 44px;
+  }
+
+  .password-toggle {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    color: #94A3B8;
+    transition: color 0.3s;
+
+    &:hover {
+      color: #1e40af;
+    }
+
+    svg {
+      position: static;
+      transform: none;
+      width: 18px;
+      height: 18px;
+    }
+  }
+>>>>>>> 8ed761b33c0c943034121fbd278c350e649e5007
 `;
 
 const FLabel = styled.label`
@@ -561,6 +658,7 @@ const SubmitBtn = styled(motion.button)`
   align-items: center;
   justify-content: center;
   gap: 8px;
+<<<<<<< HEAD
   margin-bottom: 12px;
   position: relative;
   overflow: hidden;
@@ -571,6 +669,15 @@ const SubmitBtn = styled(motion.button)`
     position: absolute; inset: 0;
     background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
     pointer-events: none;
+=======
+  margin-top: 24px;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.4);
+>>>>>>> 8ed761b33c0c943034121fbd278c350e649e5007
   }
 
   &:hover:not(:disabled) { box-shadow: 0 8px 28px rgba(14,57,149,0.45); }
@@ -580,6 +687,7 @@ const SubmitBtn = styled(motion.button)`
   &:hover:not(:disabled) svg { transform: translateX(4px); }
 `;
 
+<<<<<<< HEAD
 const SecondaryBtn = styled.button`
   width: 100%;
   height: 44px;
@@ -587,6 +695,13 @@ const SecondaryBtn = styled.button`
   border-radius: 11px;
   background: transparent;
   color: #64748b;
+=======
+const BackLink = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #1e40af;
+>>>>>>> 8ed761b33c0c943034121fbd278c350e649e5007
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -594,7 +709,19 @@ const SecondaryBtn = styled.button`
   transition: border-color 0.2s, color 0.2s;
   margin-bottom: 14px;
 
+<<<<<<< HEAD
   &:hover { border-color: #0E3995; color: #0E3995; }
+=======
+  &:hover {
+    gap: 8px;
+    color: #1e40af;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+>>>>>>> 8ed761b33c0c943034121fbd278c350e649e5007
 `;
 
 const FootNote = styled.p`

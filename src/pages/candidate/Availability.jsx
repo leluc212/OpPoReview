@@ -31,7 +31,7 @@ const AvailabilityContainer = styled.div`
 `;
 
 const PageHeader = styled(motion.div)`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
   border-radius: ${props => props.theme.borderRadius.xl};
   padding: 48px;
   margin-bottom: 32px;
@@ -89,13 +89,7 @@ const PageHeader = styled(motion.div)`
 `;
 
 const ContentGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 400px;
-  gap: 24px;
-  
-  @media (max-width: 1200px) {
-    grid-template-columns: 1fr;
-  }
+  display: none;
 `;
 
 const MainContent = styled.div`
@@ -379,7 +373,7 @@ const Toggle = styled.label`
 `;
 
 const InfoBox = styled(motion.div)`
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(30, 64, 175, 0.1) 0%, rgba(30, 64, 175, 0.1) 100%);
   border-left: 4px solid ${props => props.theme.colors.primary};
   padding: 24px;
   border-radius: ${props => props.theme.borderRadius.lg};
@@ -633,16 +627,13 @@ const Availability = () => {
   };
 
   const stats = [
-    { label: language === 'vi' ? 'Lượt Xem Hồ Sơ' : 'Profile Views', value: isAvailable ? '156' : '0', icon: Eye, color: '#667eea' },
+    { label: language === 'vi' ? 'Lượt Xem Hồ Sơ' : 'Profile Views', value: isAvailable ? '156' : '0', icon: Eye, color: '#1e40af' },
     { label: language === 'vi' ? 'Gợi Ý Công Việc' : 'Job Recommendations', value: isAvailable ? '23' : '0', icon: Briefcase, color: '#10B981' },
-    { label: language === 'vi' ? 'Lời Mời' : 'Invitations', value: isAvailable ? '12' : '0', icon: Target, color: '#F59E0B' },
-    { label: language === 'vi' ? 'Phỏng Vấn' : 'Interviews', value: isAvailable ? '8' : '0', icon: Calendar, color: '#EF4444' }
+    { label: language === 'vi' ? 'Lời Mời' : 'Invitations', value: isAvailable ? '12' : '0', icon: Target, color: '#F59E0B' }
   ];
-
   const activities = [
-    { label: language === 'vi' ? 'FPT Software xem hồ sơ' : 'FPT Software viewed your profile', time: language === 'vi' ? '2 giờ trước' : '2 hours ago', icon: Eye, color: '#667eea' },
-    { label: language === 'vi' ? 'Nhận gợi ý: Senior React Dev' : 'Recommendation: Senior React Dev', time: language === 'vi' ? '5 giờ trước' : '5 hours ago', icon: Zap, color: '#10B981' },
-    { label: language === 'vi' ? 'Viettel lời mời phỏng vấn' : 'Viettel interview invitation', time: language === 'vi' ? '1 ngày trước' : '1 day ago', icon: Calendar, color: '#F59E0B' }
+    { label: language === 'vi' ? 'FPT Software xem hồ sơ' : 'FPT Software viewed your profile', time: language === 'vi' ? '2 giờ trước' : '2 hours ago', icon: Eye, color: '#1e40af' },
+    { label: language === 'vi' ? 'Nhận gợi ý: Senior React Dev' : 'Recommendation: Senior React Dev', time: language === 'vi' ? '5 giờ trước' : '5 hours ago', icon: Zap, color: '#10B981' }
   ];
 
   return (
@@ -701,196 +692,11 @@ const Availability = () => {
 
         <ContentGrid>
           <MainContent>
-            <Card
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <div className="card-header">
-                <h2>
-                  <Settings />
-                  {language === 'vi' ? 'Cài Đặt Tìm Kiếm' : 'Search Settings'}
-                </h2>
-              </div>
-              
-              <SettingItem
-                $enabled={enableJobSearch && isAvailable}
-                $color="#667eea"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                whileHover={{ scale: 1.01 }}
-              >
-                <div className="setting-left">
-                  <div className="icon-wrapper">
-                    <Search />
-                  </div>
-                  <div className="setting-info">
-                    <h3>{language === 'vi' ? 'Cho Phép Tìm Kiếm Công Việc' : 'Enable Job Search'}</h3>
-                    <p>{language === 'vi' ? 'Bật để tìm kiếm và ứng tuyển các công việc mới' : 'Turn on to search and apply for new jobs'}</p>
-                  </div>
-                </div>
-                <Toggle>
-                  <input 
-                    type="checkbox" 
-                    checked={enableJobSearch} 
-                    onChange={(e) => setEnableJobSearch(e.target.checked)}
-                    disabled={!isAvailable}
-                  />
-                  <span></span>
-                </Toggle>
-              </SettingItem>
-
-              <SettingItem
-                $enabled={enableRecommendations && isAvailable}
-                $color="#10B981"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35 }}
-                whileHover={{ scale: 1.01 }}
-              >
-                <div className="setting-left">
-                  <div className="icon-wrapper">
-                    <TrendingUp />
-                  </div>
-                  <div className="setting-info">
-                    <h3>{language === 'vi' ? 'Nhận Gợi Ý Công Việc' : 'Receive Job Suggestions'}</h3>
-                    <p>{language === 'vi' ? 'Nhận các gợi ý công việc phù hợp dựa trên hồ sơ của bạn' : 'Get job suggestions matching your profile'}</p>
-                  </div>
-                </div>
-                <Toggle>
-                  <input 
-                    type="checkbox" 
-                    checked={enableRecommendations} 
-                    onChange={(e) => setEnableRecommendations(e.target.checked)}
-                    disabled={!isAvailable}
-                  />
-                  <span></span>
-                </Toggle>
-              </SettingItem>
-
-              <SettingItem
-                $enabled={enableNotifications && isAvailable}
-                $color="#F59E0B"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                whileHover={{ scale: 1.01 }}
-              >
-                <div className="setting-left">
-                  <div className="icon-wrapper">
-                    <Bell />
-                  </div>
-                  <div className="setting-info">
-                    <h3>{language === 'vi' ? 'Thông Báo Công Việc Mới' : 'New Job Notifications'}</h3>
-                    <p>{language === 'vi' ? 'Nhận thông báo khi có công việc mới phù hợp' : 'Get notified when new matching jobs are posted'}</p>
-                  </div>
-                </div>
-                <Toggle>
-                  <input 
-                    type="checkbox" 
-                    checked={enableNotifications} 
-                    onChange={(e) => setEnableNotifications(e.target.checked)}
-                    disabled={!isAvailable}
-                  />
-                  <span></span>
-                </Toggle>
-              </SettingItem>
-
-              <InfoBox
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-              >
-                <div className="info-header">
-                  <Shield />
-                  <h4>{language === 'vi' ? 'Lưu Ý Quan Trọng' : 'Important Note'}</h4>
-                </div>
-                <p>
-                  {language === 'vi'
-                    ? 'Khi bạn tắt trạng thái tìm việc, hồ sơ của bạn sẽ bị ẩn khỏi tất cả nhà tuyển dụng và bạn sẽ không nhận được bất kỳ gợi ý công việc nào. Các cài đặt tìm kiếm sẽ tự động bị vô hiệu hóa.'
-                    : 'When you pause job search, your profile will be hidden from all employers and you will not receive any job suggestions. Search settings will be automatically disabled.'}
-                </p>
-              </InfoBox>
-            </Card>
+            {/* Search Settings section removed */}
           </MainContent>
 
           <Sidebar>
-            <Card
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <div className="card-header">
-                <h2>
-                  <BarChart3 />
-                  {language === 'vi' ? 'Thống Kê' : 'Statistics'}
-                </h2>
-              </div>
-
-              <StatsGrid>
-                {stats.map((stat, index) => (
-                  <StatCard
-                    key={index}
-                    $color={stat.color}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.4 + index * 0.05 }}
-                    whileHover={{ scale: 1.05 }}
-                  >
-                    <div className="stat-icon">
-                      <stat.icon />
-                    </div>
-                    <div className="stat-value">{stat.value}</div>
-                    <div className="stat-label">{stat.label}</div>
-                  </StatCard>
-                ))}
-              </StatsGrid>
-            </Card>
-
-            <Card
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <div className="card-header">
-                <h2>
-                  <Clock />
-                  {language === 'vi' ? 'Hoạt Động Gần Đây' : 'Recent Activity'}
-                </h2>
-              </div>
-
-              {isAvailable ? (
-                activities.map((activity, index) => (
-                  <ActivityItem
-                    key={index}
-                    $color={activity.color}
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5 + index * 0.05 }}
-                  >
-                    <div className="icon">
-                      <activity.icon />
-                    </div>
-                    <div className="content">
-                      <h4>{activity.label}</h4>
-                      <p>{activity.time}</p>
-                    </div>
-                  </ActivityItem>
-                ))
-              ) : (
-                <div style={{ 
-                  textAlign: 'center', 
-                  padding: '40px 20px',
-                  color: '#94A3B8' 
-                }}>
-                  <XCircle style={{ width: '48px', height: '48px', margin: '0 auto 16px' }} />
-                  <p style={{ fontSize: '14px' }}>
-                    {language === 'vi' ? 'Không có hoạt động khi tắt tìm việc' : 'No activity when job search is off'}
-                  </p>
-                </div>
-              )}
-            </Card>
+            {/* Statistics and Recent Activity sections removed */}
           </Sidebar>
         </ContentGrid>
       </AvailabilityContainer>

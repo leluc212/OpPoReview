@@ -1,98 +1,115 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
+import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
 import TableFilter from '../../components/TableFilter';
 import Modal from '../../components/Modal';
-import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText } from 'lucide-react';
+import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText, Clock, Users } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 // Mock data generator (language-aware)
 const getInitialApplications = (language) => [
-  { 
-    id: 1, 
-    candidate: language === 'vi' ? 'Hiếu sàn' : 'Hieu san', 
-    job: 'Senior React Developer', 
-    applied: language === 'vi' ? '2 giờ trước' : '2 hours ago', 
-    status: 'pending', 
-    completed: false, 
-    marked: false, 
+  {
+    id: 1,
+    candidate: language === 'vi' ? 'Hiếu sàn' : 'Hieu san',
+    job: language === 'vi' ? 'Cửa hàng trưởng' : 'Store Manager',
+    applied: language === 'vi' ? '2 giờ trước' : '2 hours ago',
+    status: 'pending',
+    completed: false,
+    marked: false,
     messagesDeleted: false,
     email: 'hieuseu@example.com',
     phone: '0123 456 789',
-    location: language === 'vi' ? 'Hà Nội' : 'Hanoi',
+    location: language === 'vi' ? 'Quận 1, TP.HCM' : 'District 1, HCMC',
     experience: language === 'vi' ? '5 năm' : '5 years',
-    education: language === 'vi' ? 'Đại học Bách Khoa' : 'Hanoi University of Science and Technology',
-    skills: language === 'vi' ? ['React', 'Node.js', 'TypeScript', 'MongoDB', 'AWS'] : ['React', 'Node.js', 'TypeScript', 'MongoDB', 'AWS'],
-    bio: language === 'vi' ? 'Tôi là một Senior Developer với 5 năm kinh nghiệm trong phát triển web. Đam mê công nghệ và luôn học hỏi những điều mới.' : 'I am a Senior Developer with 5 years of experience in web development. Passionate about technology and continuously learning.'
+    education: language === 'vi' ? 'Đại học Kinh Tế' : 'University of Economics',
+    skills: language === 'vi' ? ['Quản lý vận hành', 'Đào tạo nhân sự', 'Quản lý tồn kho', 'Pha chế', 'Chăm sóc khách hàng'] : ['Operations management', 'Staff training', 'Inventory management', 'Barista', 'Customer service'],
+    bio: language === 'vi' ? 'Tôi có 5 năm kinh nghiệm quản lý các chuỗi F&B lớn. Làm việc với niềm đam mê và luôn muốn xây dựng văn hóa làm việc tích cực cho cửa hàng.' : 'I have 5 years of experience managing large F&B chains. Working with passion to build a positive store culture.',
+    reviews: [
+      { id: 1, employer: language === 'vi' ? 'Phúc Long Coffee & Tea' : 'Phuc Long Coffee & Tea', position: language === 'vi' ? 'Cửa hàng trưởng' : 'Store Manager', rating: 5, date: language === 'vi' ? 'Tháng 11/2024' : 'Nov 2024', comment: language === 'vi' ? 'Quản lý xuất sắc, luôn hoàn thành và vượt chỉ tiêu doanh thu. Thái độ làm việc rất chuyên nghiệp.' : 'Excellent manager, always exceeding revenue targets. Very professional attitude.' },
+      { id: 2, employer: language === 'vi' ? 'The Coffee House' : 'The Coffee House', position: language === 'vi' ? 'Giám sát cửa hàng' : 'Store Supervisor', rating: 4, date: language === 'vi' ? 'Tháng 5/2023' : 'May 2023', comment: language === 'vi' ? 'Kỹ năng giải quyết tình huống tốt, training nhân viên hiệu quả. Cần hỗ trợ thêm về làm báo cáo.' : 'Good problem-solving skills, effective staff training. Needs some support with reporting.' },
+    ]
   },
-  { 
-    id: 2, 
-    candidate: language === 'vi' ? 'Duy sàn' : 'Duy san', 
-    job: language === 'vi' ? 'Thu ngân' : 'Cashier', 
-    applied: language === 'vi' ? '5 giờ trước' : '5 hours ago', 
-    status: 'pending', 
-    completed: false, 
-    marked: false, 
+  {
+    id: 2,
+    candidate: language === 'vi' ? 'Duy sàn' : 'Duy san',
+    job: language === 'vi' ? 'Thu ngân' : 'Cashier',
+    applied: language === 'vi' ? '5 giờ trước' : '5 hours ago',
+    status: 'pending',
+    completed: false,
+    marked: false,
     messagesDeleted: false,
     email: 'duuyseu@example.com',
     phone: '0987 654 321',
-    location: language === 'vi' ? 'TP. Hồ Chí Minh' : 'HCMC',
+    location: language === 'vi' ? 'Quận Bình Thạnh, TP.HCM' : 'Binh Thanh Dist., HCMC',
     experience: language === 'vi' ? '2 năm' : '2 years',
     education: language === 'vi' ? 'Cao đẳng Kinh tế' : 'College of Economics',
     skills: language === 'vi' ? ['Kế toán', 'Excel', 'Giao tiếp', 'Quản lý tiền mặt'] : ['Accounting', 'Excel', 'Communication', 'Cash handling'],
-    bio: language === 'vi' ? 'Có kinh nghiệm làm việc tại các cửa hàng bán lẻ và nhà hàng. Cẩn thận, chính xác và trung thực.' : 'Experienced in retail and restaurant roles. Detail-oriented, accurate and honest.'
+    bio: language === 'vi' ? 'Có kinh nghiệm làm việc tại các cửa hàng bán lẻ và nhà hàng. Cẩn thận, chính xác và trung thực.' : 'Experienced in retail and restaurant roles. Detail-oriented, accurate and honest.',
+    reviews: [
+      { id: 1, employer: language === 'vi' ? 'Siêu thị CoopMart' : 'CoopMart Supermarket', position: language === 'vi' ? 'Thu ngân' : 'Cashier', rating: 4, date: language === 'vi' ? 'Tháng 8/2024' : 'Aug 2024', comment: language === 'vi' ? 'Cẩn thận, ít sai sót trong việc xử lý tiền mặt. Thái độ phục vụ tốt.' : 'Careful with cash handling, few errors. Good customer service attitude.' },
+      { id: 2, employer: language === 'vi' ? 'Nhà hàng Hương Việt' : 'Huong Viet Restaurant', position: language === 'vi' ? 'Thu ngân kiêm lễ tân' : 'Cashier & Receptionist', rating: 3, date: language === 'vi' ? 'Tháng 1/2023' : 'Jan 2023', comment: language === 'vi' ? 'Làm việc ổn định nhưng đôi khi cần nhắc nhở. Cần cải thiện tốc độ xử lý.' : 'Stable work but sometimes needs reminders. Speed of processing needs improvement.' },
+    ]
   },
-  { 
-    id: 3, 
-    candidate: 'Nheo', 
-    job: language === 'vi' ? 'Nhân viên pha chế' : 'Barista', 
-    applied: language === 'vi' ? '1 ngày trước' : '1 day ago', 
-    status: 'approved', 
-    completed: false, 
-    marked: false, 
+  {
+    id: 3,
+    candidate: 'Nheo',
+    job: language === 'vi' ? 'Nhân viên pha chế' : 'Barista',
+    applied: language === 'vi' ? '1 ngày trước' : '1 day ago',
+    status: 'approved',
+    completed: false,
+    marked: false,
     messagesDeleted: false,
     email: 'nheo@example.com',
     phone: '0909 123 456',
-    location: language === 'vi' ? 'Đà Nẵng' : 'Da Nang',
+    location: language === 'vi' ? 'Quận 7, TP.HCM' : 'District 7, HCMC',
     experience: language === 'vi' ? '3 năm' : '3 years',
     education: language === 'vi' ? 'Trung cấp Ẩm thực' : 'Vocational Culinary School',
     skills: language === 'vi' ? ['Pha chế cà phê', 'Trà sữa', 'Cocktail', 'Latte Art', 'Phục vụ khách hàng'] : ['Coffee brewing', 'Bubble tea', 'Cocktail', 'Latte Art', 'Customer service'],
-    bio: language === 'vi' ? 'Đam mê nghệ thuật pha chế và tạo ra những ly đồ uống hoàn hảo. Có chứng chỉ Barista quốc tế.' : 'Passionate about beverage crafting and creating perfect drinks. Holds an international Barista certificate.'
+    bio: language === 'vi' ? 'Đam mê nghệ thuật pha chế và tạo ra những ly đồ uống hoàn hảo. Có chứng chỉ Barista quốc tế.' : 'Passionate about beverage crafting and creating perfect drinks. Holds an international Barista certificate.',
+    reviews: [
+      { id: 1, employer: language === 'vi' ? 'The Coffee House' : 'The Coffee House', position: language === 'vi' ? 'Barista chính' : 'Head Barista', rating: 5, date: language === 'vi' ? 'Tháng 9/2024' : 'Sep 2024', comment: language === 'vi' ? 'Tuyệt vời! Kỹ năng pha chế cực kỳ chuyên nghiệp, khách hàng rất hài lòng.' : 'Excellent! Extremely professional barista skills, customers loved the drinks.' },
+      { id: 2, employer: language === 'vi' ? 'Highlands Coffee' : 'Highlands Coffee', position: 'Barista', rating: 5, date: language === 'vi' ? 'Tháng 3/2022' : 'Mar 2022', comment: language === 'vi' ? 'Nhân viên tốt bụng, nhanh nhẹn và luôn giữ vệ sinh khu vực làm việc sạch sẽ.' : 'Kind, agile and always kept the workspace clean.' },
+    ]
   },
-  { 
-    id: 4, 
-    candidate: 'Gemmin', 
-    job: 'Senior React Developer', 
-    applied: language === 'vi' ? '2 ngày trước' : '2 days ago', 
-    status: 'rejected', 
-    completed: false, 
-    marked: false, 
+  {
+    id: 4,
+    candidate: 'Gemmin',
+    job: language === 'vi' ? 'Giám sát ca' : 'Shift Supervisor',
+    applied: language === 'vi' ? '2 ngày trước' : '2 days ago',
+    status: 'rejected',
+    completed: false,
+    marked: false,
     messagesDeleted: false,
     email: 'gemminseu@example.com',
     phone: '0901 234 567',
-    location: language === 'vi' ? 'Hải Phòng' : 'Hai Phong',
+    location: language === 'vi' ? 'Quận Tân Bình, TP.HCM' : 'Tan Binh Dist., HCMC',
     experience: language === 'vi' ? '4 năm' : '4 years',
-    education: language === 'vi' ? 'Đại học FPT' : 'FPT University',
-    skills: ['React', 'Vue.js', 'JavaScript', 'CSS', 'REST API'],
-    bio: language === 'vi' ? 'Full-stack Developer với kinh nghiệm phát triển nhiều dự án lớn. Làm việc nhóm tốt và có khả năng giải quyết vấn đề.' : 'Full-stack Developer experienced in large projects. Strong teamwork and problem-solving skills.'
+    education: language === 'vi' ? 'Cao đẳng Du lịch' : 'Tourism College',
+    skills: language === 'vi' ? ['Quản lý ca', 'Giải quyết sự cố', 'Pha chế cà phê', 'Làm việc nhóm', 'Giao tiếp'] : ['Shift management', 'Problem solving', 'Coffee brewing', 'Teamwork', 'Communication'],
+    bio: language === 'vi' ? 'Có kinh nghiệm giám sát ca tại nhiều cửa hàng cà phê lớn. Khả năng bao quát công việc, làm việc nhóm tốt và luôn đặt trải nghiệm khách hàng lên hàng đầu.' : 'Experienced in shift supervision at large coffee shops. Good teamwork and customer-first mindset.',
+    reviews: [
+      { id: 1, employer: language === 'vi' ? 'Highlands Coffee' : 'Highlands Coffee', position: language === 'vi' ? 'Trưởng ca' : 'Shift Leader', rating: 4, date: language === 'vi' ? 'Tháng 6/2024' : 'Jun 2024', comment: language === 'vi' ? 'Tác phong nhanh nhẹn, luôn hỗ trợ đồng nghiệp. Đôi khi hơi cứng nhắc trong giao tiếp với khách hàng.' : 'Agile and supportive of colleagues. Sometimes a bit rigid when communicating with customers.' },
+    ]
   },
-  { 
-    id: 5, 
-    candidate: 'Zun', 
-    job: language === 'vi' ? 'Nhân viên phục vụ' : 'Waiter/Server', 
-    applied: language === 'vi' ? '1 tuần trước' : '1 week ago', 
-    status: 'pending', 
-    completed: false, 
-    marked: false, 
+  {
+    id: 5,
+    candidate: 'Zun',
+    job: language === 'vi' ? 'Nhân viên phục vụ' : 'Waiter/Server',
+    applied: language === 'vi' ? '1 tuần trước' : '1 week ago',
+    status: 'pending',
+    completed: false,
+    marked: false,
     messagesDeleted: false,
     email: 'zunseu@example.com',
     phone: '0912 345 678',
-    location: language === 'vi' ? 'Cần Thơ' : 'Can Tho',
+    location: language === 'vi' ? 'Quận Gò Vấp, TP.HCM' : 'Go Vap Dist., HCMC',
     experience: language === 'vi' ? '1 năm' : '1 year',
     education: language === 'vi' ? 'Trung học phổ thông' : 'High School',
     skills: language === 'vi' ? ['Phục vụ bàn', 'Giao tiếp', 'Nhanh nhẹn', 'Làm việc nhóm'] : ['Table service', 'Communication', 'Fast-paced', 'Teamwork'],
-    bio: language === 'vi' ? 'Nhiệt tình, vui vẻ và luôn sẵn sàng học hỏi. Có kinh nghiệm làm việc tại các nhà hàng buffet.' : 'Enthusiastic, friendly and eager to learn. Experienced in buffet restaurant service.'
+    bio: language === 'vi' ? 'Nhiệt tình, vui vẻ và luôn sẵn sàng học hỏi. Có kinh nghiệm làm việc tại các nhà hàng buffet.' : 'Enthusiastic, friendly and eager to learn. Experienced in buffet restaurant service.',
+    reviews: []
   },
 ];
 
@@ -104,117 +121,365 @@ const FILTER_OPTIONS = (language) => ([
   { value: 'marked', label: language === 'vi' ? 'Đã đánh dấu' : 'Marked' },
 ]);
 
-const ApplicationsContainer = styled.div``;
+const ApplicationsContainer = styled(motion.div)``;
 
 const PageHeader = styled.div`
-  margin-bottom: 32px;
-  
-  h1 {
-    font-size: 32px;
-    font-weight: 700;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+`;
+
+const PageTitleGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+`;
+
+const PageIconBox = styled.div`
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  background: #EFF6FF;
+  border: 1.5px solid #BFDBFE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 22px;
+    height: 22px;
+    color: #1e40af;
   }
 `;
 
-const Table = styled.table`
-  width: 100%;
-  background: ${props => props.theme.colors.bgLight};
-  border-radius: ${props => props.theme.borderRadius.md};
-  border: 1px solid ${props => props.theme.colors.border};
-  border-collapse: collapse;
-  
-  th {
-    text-align: left;
-    padding: 16px;
-    background: ${props => props.theme.colors.bgDark};
-    font-weight: 600;
-    font-size: 14px;
+const PageTitleText = styled.div`
+  h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: ${props => props.theme.colors.text};
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
+  p {
     color: ${props => props.theme.colors.textLight};
-    border-bottom: 1px solid ${props => props.theme.colors.border};
+    font-size: 13.5px;
+    font-weight: 500;
   }
-  
-  td {
-    padding: 16px;
-    border-bottom: 1px solid ${props => props.theme.colors.border};
+`;
+
+const CountBadge = styled.div`
+  align-self: flex-start;
+  padding: 6px 16px;
+  background: #EFF6FF;
+  border: 1.5px solid #BFDBFE;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e40af;
+  white-space: nowrap;
+`;
+
+// --- Card Grid ---
+const CardGrid = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+const AppCard = styled(motion.div)`
+  background: #ffffff;
+  border: 1.5px solid #E8EFFF;
+  border-radius: 16px;
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.06);
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+  position: relative;
+  overflow: hidden;
+
+  /* left accent bar — always visible */
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    border-radius: 16px 0 0 16px;
+    background: ${props => {
+      if (props.$status === 'approved') return '#10B981';
+      if (props.$status === 'rejected') return '#EF4444';
+      if (props.$status === 'completed') return '#1e40af';
+      return '#F59E0B';
+    }};
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
   }
-  
-  tr:last-child td {
-    border-bottom: none;
+
+  &:hover {
+    border-color: #BFDBFE;
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.13);
+    transform: translateY(-2px);
+
+    &::before {
+      opacity: 1;
+    }
   }
-  
-  tr:hover {
-    background: ${props => props.theme.colors.bgDark};
+`;
+
+const CandidateAvatar = styled.div`
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 12px;
+  background: #EFF6FF;
+  border: 1.5px solid #BFDBFE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 800;
+  color: #1e40af;
+  transition: all 0.2s ease;
+
+  ${AppCard}:hover & {
+    background: #1e40af;
+    color: white;
+    border-color: #1e40af;
   }
+`;
+
+const CandidateInfo = styled.div`
+  flex: 0 0 200px;
+  min-width: 0;
+
+  .name {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: ${props => props.theme.colors.text};
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .position {
+    font-size: 12.5px;
+    color: ${props => props.theme.colors.textLight};
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+`;
+
+const MetaChip = styled.div`
+  flex: 0 0 130px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: ${props => props.theme.colors.bgDark};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: ${props => props.theme.colors.textLight};
+  white-space: nowrap;
+
+  svg {
+    width: 12px;
+    height: 12px;
+    color: #1e40af;
+    opacity: 0.7;
+    flex-shrink: 0;
+  }
+`;
+
+const StatusCol = styled.div`
+  flex: 0 0 120px;
+  display: flex;
+  justify-content: center;
+
+  /* force badge to not wrap */
+  span {
+    white-space: nowrap;
+  }
+`;
+
+const ActionsCol = styled.div`
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
 `;
 
 const ActionButton = styled.button`
-  padding: 8px 16px;
-  border-radius: ${props => props.theme.borderRadius.md};
-  background: ${props => props.$variant === 'success' ? '#10b981' : 
-              props.$variant === 'danger' ? '#ef4444' : 
-              props.$variant === 'warning' ? '#f59e0b' :
-              props.$variant === 'secondary' ? '#64748b' :
-              props.theme.colors.primary};
+  padding: 8px 14px;
+  border-radius: 9px;
+  background: ${props =>
+    props.$variant === 'success' ? '#10B981' :
+      props.$variant === 'danger' ? '#EF4444' :
+        props.$variant === 'warning' ? '#F59E0B' :
+          '#1e40af'
+  };
   color: white;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 12.5px;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  margin-right: 8px;
-  
-  svg {
-    width: 16px;
-    height: 16px;
-  }
-  
+  gap: 5px;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s ease;
+  box-shadow: 0 2px 6px ${props =>
+    props.$variant === 'success' ? 'rgba(16,185,129,0.22)' :
+      props.$variant === 'danger' ? 'rgba(239,68,68,0.22)' :
+        props.$variant === 'warning' ? 'rgba(245,158,11,0.22)' :
+          'rgba(30,64,175,0.22)'
+  };
+
+  svg { width: 13px; height: 13px; }
+
   &:hover {
-    opacity: 0.9;
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px ${props =>
+    props.$variant === 'success' ? 'rgba(16,185,129,0.32)' :
+      props.$variant === 'danger' ? 'rgba(239,68,68,0.32)' :
+        props.$variant === 'warning' ? 'rgba(245,158,11,0.32)' :
+          'rgba(30,64,175,0.32)'
+  };
   }
-  
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+
+  &:active { transform: scale(0.97); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 `;
 
 const MarkedBadge = styled.span`
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  background: #fef3c7;
-  color: #d97706;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 600;
+  gap: 3px;
+  padding: 2px 7px;
+  background: #FEF3C7;
+  color: #D97706;
+  border: 1px solid #FCD34D;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  svg { width: 10px; height: 10px; }
+`;
+
+const ProfileHeader = styled.div`
+  position: relative;
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 45%, #1e40af 100%);
+  padding: 36px 36px 48px;
+  color: white;
+  overflow: hidden;
+  
+  /* Decorative blobs */
+  &::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 220px;
+    height: 220px;
+    background: radial-gradient(circle, rgba(96, 165, 250, 0.25) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -40px;
+    left: 30%;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+`;
+
+const ProfileAvatarRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  z-index: 1;
+`;
+
+const ProfileAvatar = styled.div`
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 100%);
+  border: 2.5px solid rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -1px;
+  backdrop-filter: blur(8px);
+  flex-shrink: 0;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.3);
+`;
+
+const ProfileHeaderInfo = styled.div`
+  h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+  }
+`;
+
+const ProfileJobBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
   
   svg {
     width: 14px;
     height: 14px;
-  }
-`;
-
-
-
-const ProfileHeader = styled.div`
-  background: ${props => props.theme.colors.gradientPrimary};
-  padding: 40px;
-  color: white;
-  
-  h2 {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-  
-  p {
-    font-size: 16px;
-    opacity: 0.9;
+    opacity: 0.8;
   }
 `;
 
 const ProfileContent = styled.div`
-  padding: 24px;
+  padding: 0;
+  margin-top: -16px;
+  position: relative;
+  z-index: 2;
+`;
+
+const ProfileInner = styled.div`
+  background: ${props => props.theme.colors.bgLight};
+  border-radius: 16px 16px 0 0;
+  padding: 28px 28px 8px;
 `;
 
 const ProfileSection = styled.div`
@@ -229,17 +494,26 @@ const ProfileSection = styled.div`
   }
   
   h3 {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 16px;
-    color: ${props => props.theme.colors.text};
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    color: ${props => props.theme.colors.textLight};
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
     display: flex;
     align-items: center;
     gap: 8px;
     
+    &::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: ${props => props.theme.colors.border};
+    }
+    
     svg {
-      width: 20px;
-      height: 20px;
+      width: 14px;
+      height: 14px;
       color: ${props => props.theme.colors.primary};
     }
   }
@@ -248,132 +522,395 @@ const ProfileSection = styled.div`
 const InfoGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  margin-bottom: 8px;
+  gap: 12px;
+`;
+
+const InfoCard = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: ${props => props.theme.colors.bgDark};
+  border-radius: 12px;
+  border: 1px solid ${props => props.theme.colors.border};
+  transition: all 0.2s ease;
+  
+  &:hover {
+    border-color: ${props => props.theme.colors.primary}30;
+    background: #EFF6FF;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.08);
+  }
+`;
+
+const InfoIconBox = styled.div`
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1e40af15, #3b82f620);
+  border: 1px solid ${props => props.theme.colors.primary}20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  svg {
+    width: 16px;
+    height: 16px;
+    color: ${props => props.theme.colors.primary};
+  }
 `;
 
 const InfoItem = styled.div`
-  display: flex;
-  align-items: start;
-  gap: 10px;
+  flex: 1;
+  min-width: 0;
   
-  svg {
-    width: 18px;
-    height: 18px;
-    color: ${props => props.theme.colors.primary};
-    margin-top: 2px;
+  .label {
+    font-size: 11px;
+    font-weight: 600;
+    color: ${props => props.theme.colors.textLight};
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
   }
   
-  div {
-    flex: 1;
-    
-    .label {
-      font-size: 12px;
-      color: ${props => props.theme.colors.textLight};
-      margin-bottom: 4px;
-    }
-    
-    .value {
-      font-size: 14px;
-      color: ${props => props.theme.colors.text};
-      font-weight: 500;
-    }
+  .value {
+    font-size: 14px;
+    color: ${props => props.theme.colors.text};
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 `;
 
-const SkillTag = styled.span`
-  display: inline-block;
-  padding: 8px 16px;
-  background: ${props => props.theme.colors.primary};
-  color: white;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
-  margin-right: 8px;
-  margin-bottom: 8px;
+const SkillsWrap = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 `;
+
+const SkillTag = styled.span`
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 16px;
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  color: #1e40af;
+  border: 1.5px solid #BFDBFE;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+    color: white;
+    border-color: #1e40af;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25);
+  }
+`;
+
+const BioText = styled.p`
+  font-size: 14px;
+  line-height: 1.7;
+  color: ${props => props.theme.colors.textLight};
+  background: ${props => props.theme.colors.bgDark};
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid ${props => props.theme.colors.border};
+  border-left: 3px solid #1e40af;
+  margin: 0;
+`;
+
+// --- Review styled components ---
+const ReviewList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+const ReviewCard = styled.div`
+  background: ${props => props.theme.colors.bgDark};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: 14px;
+  padding: 16px 18px;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(30, 64, 175, 0.09);
+    border-color: #BFDBFE;
+  }
+`;
+
+const ReviewHeader = styled.div`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 12px;
+`;
+
+const ReviewEmployerInfo = styled.div`
+  .employer-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: ${props => props.theme.colors.text};
+    margin-bottom: 2px;
+  }
+  .position-date {
+    font-size: 12px;
+    color: ${props => props.theme.colors.textLight};
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+`;
+
+const StarRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+`;
+
+const StarIcon = styled.span`
+  font-size: 16px;
+  line-height: 1;
+  color: ${props => props.$filled ? '#F59E0B' : '#E2E8F0'};
+  filter: ${props => props.$filled ? 'drop-shadow(0 1px 2px rgba(245,158,11,0.4))' : 'none'};
+`;
+
+const RatingLabel = styled.span`
+  font-size: 13px;
+  font-weight: 700;
+  color: #F59E0B;
+  margin-left: 4px;
+`;
+
+const ReviewComment = styled.p`
+  font-size: 13px;
+  line-height: 1.6;
+  color: ${props => props.theme.colors.textLight};
+  margin: 0;
+  font-style: italic;
+`;
+
+const EmptyReviews = styled.div`
+  text-align: center;
+  padding: 28px 16px;
+  color: ${props => props.theme.colors.textLight};
+  background: ${props => props.theme.colors.bgDark};
+  border-radius: 12px;
+  border: 1.5px dashed ${props => props.theme.colors.border};
+  
+  .icon { font-size: 28px; margin-bottom: 8px; }
+  p { font-size: 13px; margin: 0; }
+`;
+
+const OverallRatingBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+  border: 1.5px solid #FCD34D;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #92400E;
+  margin-left: 8px;
+`;
+
+const HeaderRatingBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  padding: 5px 14px;
+  background: linear-gradient(135deg, rgba(245,158,11,0.25), rgba(252,211,77,0.18));
+  border: 1.5px solid rgba(252, 211, 77, 0.5);
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #FDE68A;
+  backdrop-filter: blur(4px);
+  
+  .stars {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+  }
+  
+  .star-char {
+    font-size: 13px;
+    line-height: 1;
+  }
+  
+  .rating-text {
+    margin-left: 2px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  
+  .count-text {
+    font-size: 11px;
+    font-weight: 500;
+    opacity: 0.8;
+  }
+`;
+
+// Star rendering helper
+const StarRating = ({ rating }) => (
+  <StarRow>
+    {[1, 2, 3, 4, 5].map(i => (
+      <StarIcon key={i} $filled={i <= rating}>★</StarIcon>
+    ))}
+    <RatingLabel>{rating}/5</RatingLabel>
+  </StarRow>
+);
 
 // Profile Detail Modal Component
 const ProfileDetailModal = React.memo(({ candidate, onClose }) => {
   const { language } = useLanguage();
+  const initials = candidate.candidate
+    .split(' ')
+    .map(n => n[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+
+  const avgRating = candidate.reviews && candidate.reviews.length > 0
+    ? (candidate.reviews.reduce((s, r) => s + r.rating, 0) / candidate.reviews.length)
+    : null;
 
   return (
     <>
       <ProfileHeader>
-        <h2>{candidate.candidate}</h2>
-        <p>{language === 'vi' ? 'Ứng tuyển vị trí:' : 'Applied for:'} {candidate.job}</p>
+        <ProfileAvatarRow>
+          <ProfileAvatar>{initials}</ProfileAvatar>
+          <ProfileHeaderInfo>
+            <h2>{candidate.candidate}</h2>
+            <ProfileJobBadge>
+              <Briefcase />
+              {language === 'vi' ? 'Ứng tuyển:' : 'Applied for:'} {candidate.job}
+            </ProfileJobBadge>
+            {avgRating !== null && (
+              <HeaderRatingBadge>
+                <div className="stars">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <span key={i} className="star-char" style={{ color: i <= Math.round(avgRating) ? '#FCD34D' : 'rgba(255,255,255,0.25)' }}>★</span>
+                  ))}
+                </div>
+                <span className="rating-text">{avgRating.toFixed(1)}/5</span>
+                <span className="count-text">({candidate.reviews.length} {language === 'vi' ? 'đánh giá' : 'reviews'})</span>
+              </HeaderRatingBadge>
+            )}
+          </ProfileHeaderInfo>
+        </ProfileAvatarRow>
       </ProfileHeader>
 
       <ProfileContent>
-        <ProfileSection>
-          <h3><FileText /> {language === 'vi' ? 'Thông tin liên hệ' : 'Contact Information'}</h3>
-          <InfoGrid>
-            <InfoItem>
-              <Mail />
-              <div>
-                <div className="label">{language === 'vi' ? 'Email' : 'Email'}</div>
-                <div className="value">{candidate.email}</div>
-              </div>
-            </InfoItem>
-            <InfoItem>
-              <Phone />
-              <div>
-                <div className="label">{language === 'vi' ? 'Điện thoại' : 'Phone'}</div>
-                <div className="value">{candidate.phone}</div>
-              </div>
-            </InfoItem>
-            <InfoItem>
-              <MapPin />
-              <div>
-                <div className="label">{language === 'vi' ? 'Địa điểm' : 'Location'}</div>
-                <div className="value">{candidate.location}</div>
-              </div>
-            </InfoItem>
-            <InfoItem>
-              <Calendar />
-              <div>
-                <div className="label">{language === 'vi' ? 'Thời gian ứng tuyển' : 'Applied'}</div>
-                <div className="value">{candidate.applied}</div>
-              </div>
-            </InfoItem>
-          </InfoGrid>
-        </ProfileSection>
+        <ProfileInner>
+          <ProfileSection>
+            <h3><FileText /> {language === 'vi' ? 'Thông tin liên hệ' : 'Contact'}</h3>
+            <InfoGrid>
+              <InfoCard>
+                <InfoIconBox><Mail /></InfoIconBox>
+                <InfoItem>
+                  <div className="label">{language === 'vi' ? 'Email' : 'Email'}</div>
+                  <div className="value">{candidate.email}</div>
+                </InfoItem>
+              </InfoCard>
+              <InfoCard>
+                <InfoIconBox><Phone /></InfoIconBox>
+                <InfoItem>
+                  <div className="label">{language === 'vi' ? 'Điện thoại' : 'Phone'}</div>
+                  <div className="value">{candidate.phone}</div>
+                </InfoItem>
+              </InfoCard>
+              <InfoCard>
+                <InfoIconBox><MapPin /></InfoIconBox>
+                <InfoItem>
+                  <div className="label">{language === 'vi' ? 'Địa điểm' : 'Location'}</div>
+                  <div className="value">{candidate.location}</div>
+                </InfoItem>
+              </InfoCard>
+              <InfoCard>
+                <InfoIconBox><Calendar /></InfoIconBox>
+                <InfoItem>
+                  <div className="label">{language === 'vi' ? 'Thời gian ứng tuyển' : 'Applied'}</div>
+                  <div className="value">{candidate.applied}</div>
+                </InfoItem>
+              </InfoCard>
+            </InfoGrid>
+          </ProfileSection>
 
-        <ProfileSection>
-          <h3><Award /> {language === 'vi' ? 'Học vấn & Kinh nghiệm' : 'Education & Experience'}</h3>
-          <InfoGrid>
-            <InfoItem>
-              <Award />
-              <div>
-                <div className="label">{language === 'vi' ? 'Trình độ học vấn' : 'Education'}</div>
-                <div className="value">{candidate.education}</div>
-              </div>
-            </InfoItem>
-            <InfoItem>
-              <Briefcase />
-              <div>
-                <div className="label">{language === 'vi' ? 'Kinh nghiệm' : 'Experience'}</div>
-                <div className="value">{candidate.experience}</div>
-              </div>
-            </InfoItem>
-          </InfoGrid>
-        </ProfileSection>
+          <ProfileSection>
+            <h3><Award /> {language === 'vi' ? 'Học vấn & Kinh nghiệm' : 'Education & Experience'}</h3>
+            <InfoGrid>
+              <InfoCard>
+                <InfoIconBox><Award /></InfoIconBox>
+                <InfoItem>
+                  <div className="label">{language === 'vi' ? 'Trình độ học vấn' : 'Education'}</div>
+                  <div className="value">{candidate.education}</div>
+                </InfoItem>
+              </InfoCard>
+              <InfoCard>
+                <InfoIconBox><Briefcase /></InfoIconBox>
+                <InfoItem>
+                  <div className="label">{language === 'vi' ? 'Kinh nghiệm' : 'Experience'}</div>
+                  <div className="value">{candidate.experience}</div>
+                </InfoItem>
+              </InfoCard>
+            </InfoGrid>
+          </ProfileSection>
 
-        <ProfileSection>
-          <h3><Briefcase /> {language === 'vi' ? 'Kỹ năng' : 'Skills'}</h3>
-          <div>
-            {candidate.skills.map((skill, index) => (
-              <SkillTag key={index}>{skill}</SkillTag>
-            ))}
-          </div>
-        </ProfileSection>
+          <ProfileSection>
+            <h3><Star /> {language === 'vi' ? 'Kỹ năng' : 'Skills'}</h3>
+            <SkillsWrap>
+              {candidate.skills.map((skill, index) => (
+                <SkillTag key={index}>{skill}</SkillTag>
+              ))}
+            </SkillsWrap>
+          </ProfileSection>
 
-        <ProfileSection>
-          <h3><FileText /> {language === 'vi' ? 'Giới thiệu bản thân' : 'About'}</h3>
-          <p style={{ lineHeight: '1.6', color: '#CBD5E1', fontSize: '14px', margin: 0 }}>
-            {candidate.bio}
-          </p>
-        </ProfileSection>
+          <ProfileSection>
+            <h3><Star /> {language === 'vi' ? 'Lịch sử & Đánh giá' : 'History & Reviews'}</h3>
+            {candidate.reviews && candidate.reviews.length > 0 ? (
+              <ReviewList>
+                {candidate.reviews.map(review => (
+                  <ReviewCard key={review.id}>
+                    <ReviewHeader>
+                      <ReviewEmployerInfo>
+                        <div className="employer-name">{review.employer}</div>
+                        <div className="position-date">
+                          <Briefcase size={11} />
+                          {review.position}
+                          <span>·</span>
+                          <Calendar size={11} />
+                          {review.date}
+                        </div>
+                      </ReviewEmployerInfo>
+                      <StarRating rating={review.rating} />
+                    </ReviewHeader>
+                    <ReviewComment>"{review.comment}"</ReviewComment>
+                  </ReviewCard>
+                ))}
+              </ReviewList>
+            ) : (
+              <EmptyReviews>
+                <div className="icon">📋</div>
+                <p>{language === 'vi' ? 'Chưa có đánh giá nào từ nhà tuyển dụng.' : 'No employer reviews yet.'}</p>
+              </EmptyReviews>
+            )}
+          </ProfileSection>
+
+          <ProfileSection>
+            <h3><FileText /> {language === 'vi' ? 'Giới thiệu bản thân' : 'About'}</h3>
+            <BioText>{candidate.bio}</BioText>
+          </ProfileSection>
+        </ProfileInner>
       </ProfileContent>
     </>
   );
@@ -381,55 +918,66 @@ const ProfileDetailModal = React.memo(({ candidate, onClose }) => {
 
 ProfileDetailModal.displayName = 'ProfileDetailModal';
 
-// Application Row Component
-
-const ApplicationRow = React.memo(({ 
-  app, 
-  onViewProfile, 
-  onCompleteJob, 
-  onMarkCandidate 
+// Application Card Component
+const ApplicationRow = React.memo(({
+  app,
+  onViewProfile,
+  onCompleteJob,
+  onMarkCandidate,
+  index = 0
 }) => {
   const { language } = useLanguage();
+  const initials = app.candidate
+    .split(' ')
+    .map(n => n[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+
+  const currentStatus = app.completed ? 'completed' : app.status;
 
   return (
-    <tr>
-      <td style={{ fontWeight: 600 }}>
-        {app.candidate}
-        {app.marked && (
-          <MarkedBadge style={{ marginLeft: '8px' }}>
-            <Star /> {language === 'vi' ? 'Đã đánh dấu' : 'Marked'}
-          </MarkedBadge>
-        )}
-      </td>
-      <td>{app.job}</td>
-      <td style={{ color: '#E2E8F0', fontWeight: 500 }}>{app.applied}</td>
-      <td>
-        <StatusBadge status={app.completed ? 'completed' : app.status} />
-      </td>
-      <td>
+    <AppCard
+      $status={currentStatus}
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8, scale: 0.98 }}
+      transition={{ duration: 0.25, delay: index * 0.06, ease: [0.4, 0, 0.2, 1] }}
+      whileHover={{ y: -2 }}
+      layout
+    >
+      <CandidateAvatar>{initials}</CandidateAvatar>
+
+      <CandidateInfo>
+        <div className="name">
+          {app.candidate}
+          {app.marked && (
+            <MarkedBadge><Star />{language === 'vi' ? 'Đã đánh dấu' : 'Marked'}</MarkedBadge>
+          )}
+        </div>
+        <div className="position">{app.job}</div>
+      </CandidateInfo>
+
+      <MetaChip><Clock />{app.applied}</MetaChip>
+
+      <StatusCol><StatusBadge status={currentStatus} /></StatusCol>
+
+      <ActionsCol>
         <ActionButton onClick={() => onViewProfile(app)}>
-          <Eye /> {language === 'vi' ? 'Xem Hồ Sơ' : 'View Profile'}
+          <Eye />{language === 'vi' ? 'Xem hồ sơ' : 'View'}
         </ActionButton>
-        
         {!app.completed && app.status === 'approved' && (
-          <ActionButton 
-            $variant="success"
-            onClick={() => onCompleteJob(app.id)}
-          >
-            <CheckCircle /> {language === 'vi' ? 'Hoàn thành' : 'Complete'}
+          <ActionButton $variant="success" onClick={() => onCompleteJob(app.id)}>
+            <CheckCircle />{language === 'vi' ? 'Hoàn thành' : 'Complete'}
           </ActionButton>
         )}
-        
         {app.completed && (
-          <ActionButton 
-            $variant="warning"
-            onClick={() => onMarkCandidate(app.id)}
-          >
-            <Star /> {app.marked ? (language === 'vi' ? 'Bỏ đánh dấu' : 'Unmark') : (language === 'vi' ? 'Đánh dấu' : 'Mark')}
+          <ActionButton $variant="warning" onClick={() => onMarkCandidate(app.id)}>
+            <Star />{app.marked ? (language === 'vi' ? 'Bỏ đánh dấu' : 'Unmark') : (language === 'vi' ? 'Đánh dấu' : 'Mark')}
           </ActionButton>
         )}
-      </td>
-    </tr>
+      </ActionsCol>
+    </AppCard>
   );
 });
 
@@ -492,12 +1040,22 @@ const Applications = () => {
 
   return (
     <DashboardLayout role="employer">
-      <ApplicationsContainer>
+      <ApplicationsContainer
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+      >
         <PageHeader>
-          <h1>{language === 'vi' ? 'Hồ Sơ Ứng Tuyển' : 'Applications'}</h1>
-          <p style={{ color: '#94A3B8' }}>
-            {language === 'vi' ? 'Xem và quản lý hồ sơ ứng viên' : 'View and manage candidate applications'}
-          </p>
+          <PageTitleGroup>
+            <PageIconBox><Users /></PageIconBox>
+            <PageTitleText>
+              <h1>{language === 'vi' ? 'Hồ Sơ Ứng Tuyển' : 'Applications'}</h1>
+              <p>{language === 'vi' ? 'Xem và quản lý hồ sơ ứng viên' : 'View and manage candidate applications'}</p>
+            </PageTitleText>
+          </PageTitleGroup>
+          <CountBadge>
+            {filteredApplications.length} {language === 'vi' ? 'ứng viên' : 'candidates'}
+          </CountBadge>
         </PageHeader>
 
         <TableFilter
@@ -509,28 +1067,20 @@ const Applications = () => {
           searchPlaceholder={language === 'vi' ? 'Tìm kiếm theo ứng viên hoặc vị trí...' : 'Search by candidate or position...'}
         />
 
-        <Table>
-          <thead>
-            <tr>
-              <th>{language === 'vi' ? 'Ứng Viên' : 'Candidate'}</th>
-              <th>{language === 'vi' ? 'Vị Trí' : 'Position'}</th>
-              <th>{language === 'vi' ? 'Thời Gian Ứng Tuyển' : 'Applied'}</th>
-              <th>{language === 'vi' ? 'Trạng Thái' : 'Status'}</th>
-              <th>{language === 'vi' ? 'Thao Tác' : 'Actions'}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredApplications.map((app) => (
+        <CardGrid>
+          <AnimatePresence>
+            {filteredApplications.map((app, index) => (
               <ApplicationRow
                 key={app.id}
                 app={app}
                 onViewProfile={handleViewProfile}
                 onCompleteJob={handleCompleteJob}
                 onMarkCandidate={handleMarkCandidate}
+                index={index}
               />
             ))}
-          </tbody>
-        </Table>
+          </AnimatePresence>
+        </CardGrid>
       </ApplicationsContainer>
 
       {selectedCandidate && (

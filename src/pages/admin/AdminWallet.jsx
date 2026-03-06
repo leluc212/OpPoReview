@@ -50,11 +50,14 @@ const Grid = styled.div`
 `;
 
 const BalanceCard = styled.div`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, ${props => props.theme.colors.primary} 0%, #1e40af 100%);
   padding: 2rem;
   border-radius: ${props => props.theme.borderRadius.lg};
-  box-shadow: ${props => props.theme.shadows.lg};
+  box-shadow: 0 20px 60px ${props => props.theme.colors.primary}30;
   color: white;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.1);
 `;
 
 const BalanceLabel = styled.div`
@@ -105,7 +108,16 @@ const StatCard = styled.div`
   padding: 1.5rem;
   border-radius: ${props => props.theme.borderRadius.lg};
   box-shadow: ${props => props.theme.shadows.sm};
-  border-left: 4px solid ${props => props.$color};
+  border-left: 4px solid ${props => {
+    const colorMap = {
+      'success': props.theme.colors.success,
+      'error': props.theme.colors.error,
+      'primary': props.theme.colors.primary,
+      'warning': props.theme.colors.warning,
+      'info': props.theme.colors.info
+    };
+    return colorMap[props.$color] || props.$color || props.theme.colors.primary;
+  }};
 `;
 
 const StatLabel = styled.div`
@@ -124,6 +136,7 @@ const TransactionSection = styled.div`
   background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.lg};
   box-shadow: ${props => props.theme.shadows.sm};
+  border: 2px solid ${props => props.theme.colors.border};
   padding: 1.5rem;
   margin-bottom: 2rem;
 `;
@@ -162,7 +175,7 @@ const SearchInput = styled.input`
   border-radius: ${props => props.theme.borderRadius.md};
   font-size: 0.9rem;
   background: ${props => props.theme.colors.bgLight};
-  color: #F1F5F9;
+  color: ${props => props.theme.colors.text};
 
   &:focus {
     outline: none;
@@ -223,13 +236,15 @@ const TransactionItem = styled.div`
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  border: 1px solid ${props => props.theme.colors.border};
+  border: 2px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.md};
+  background: ${props => props.theme.colors.bgLight};
   transition: all 0.2s;
 
   &:hover {
     box-shadow: ${props => props.theme.shadows.sm};
     border-color: ${props => props.theme.colors.primary};
+    transform: translateX(4px);
   }
 `;
 
@@ -237,8 +252,8 @@ const TransactionIcon = styled.div`
   width: 48px;
   height: 48px;
   border-radius: ${props => props.theme.borderRadius.md};
-  background: ${props => props.$type === 'income' ? '#dcfce7' : '#fee2e2'};
-  color: ${props => props.$type === 'income' ? '#15803d' : '#dc2626'};
+  background: ${props => props.$type === 'income' ? props.theme.colors.successBg : props.theme.colors.errorBg};
+  color: ${props => props.$type === 'income' ? props.theme.colors.success : props.theme.colors.error};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -272,7 +287,7 @@ const MetaItem = styled.span`
 const TransactionAmount = styled.div`
   font-size: 1.1rem;
   font-weight: 700;
-  color: ${props => props.$type === 'income' ? '#15803d' : '#dc2626'};
+  color: ${props => props.$type === 'income' ? props.theme.colors.success : props.theme.colors.error};
   text-align: right;
 `;
 
@@ -289,18 +304,18 @@ const StatusBadge = styled.span`
   font-weight: 500;
   background: ${props => {
     switch(props.$status) {
-      case 'completed': return '#dcfce7';
-      case 'pending': return '#fef3c7';
-      case 'failed': return '#fee2e2';
-      default: return '#e0e7ff';
+      case 'completed': return props.theme.colors.successBg;
+      case 'pending': return props.theme.colors.warningBg;
+      case 'failed': return props.theme.colors.errorBg;
+      default: return props.theme.colors.infoBg;
     }
   }};
   color: ${props => {
     switch(props.$status) {
-      case 'completed': return '#15803d';
-      case 'pending': return '#ca8a04';
-      case 'failed': return '#dc2626';
-      default: return '#4338ca';
+      case 'completed': return props.theme.colors.success;
+      case 'pending': return props.theme.colors.warning;
+      case 'failed': return props.theme.colors.error;
+      default: return props.theme.colors.info;
     }
   }};
 `;
@@ -428,15 +443,15 @@ const AdminWallet = () => {
           </BalanceCard>
 
           <StatsGrid>
-            <StatCard $color="#10b981">
+            <StatCard $color="success">
               <StatLabel>{language === 'vi' ? 'Tổng Thu Nhập (Tháng này)' : 'Total Income (This Month)'}</StatLabel>
               <StatValue>325,500,000 VND</StatValue>
             </StatCard>
-            <StatCard $color="#ef4444">
+            <StatCard $color="error">
               <StatLabel>{language === 'vi' ? 'Tổng Chi Phí (Tháng này)' : 'Total Expenses (This Month)'}</StatLabel>
               <StatValue>187,250,000 VND</StatValue>
             </StatCard>
-            <StatCard $color="#6366f1">
+            <StatCard $color="primary">
               <StatLabel>{language === 'vi' ? 'Lợi Nhuận Ròng' : 'Net Profit'}</StatLabel>
               <StatValue>138,250,000 VND</StatValue>
             </StatCard>

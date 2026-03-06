@@ -20,9 +20,10 @@ const SearchBox = styled.div`
     left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    width: 18px;
-    height: 18px;
-    color: ${props => props.theme.colors.textLight};
+    width: 20px;
+    height: 20px;
+    color: ${props => props.theme.colors.primary};
+    opacity: 0.7;
   }
 `;
 
@@ -33,7 +34,7 @@ const SearchInput = styled.input`
   border-radius: ${props => props.theme.borderRadius.md};
   font-size: 14px;
   background: ${props => props.theme.colors.bgLight};
-  color: #F1F5F9;
+  color: ${props => props.theme.colors.text};
   font-weight: 500;
   
   &:focus {

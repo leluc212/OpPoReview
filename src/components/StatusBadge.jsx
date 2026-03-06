@@ -65,17 +65,17 @@ const BadgeWrapper = styled.span`
   `}
   
   ${props => props.$status === 'completed' && `
-    background: #dcfce7;
-    color: #16a34a;
-    border: 2px solid #16a34a40;
-    box-shadow: 0 2px 8px #16a34a20;
+    background: ${props.theme.colors.successBg};
+    color: ${props.theme.colors.success};
+    border: 2px solid ${props.theme.colors.success}40;
+    box-shadow: 0 2px 8px ${props.theme.colors.success}20;
   `}
   
   ${props => props.$status === 'urgent' && `
-    background: #dcfce7;
-    color: #16a34a;
-    border: 2px solid #16a34a40;
-    box-shadow: 0 2px 8px #16a34a20;
+    background: ${props.theme.colors.errorBg};
+    color: ${props.theme.colors.error};
+    border: 2px solid ${props.theme.colors.error}40;
+    box-shadow: 0 2px 8px ${props.theme.colors.error}20;
   `}
 `;
 

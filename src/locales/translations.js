@@ -16,7 +16,7 @@ export const translations = {
       account: 'TÀI KHOẢN',
       platform: 'NỀN TẢNG',
       utilities: 'TIỆN ÍCH',
-      dashboard: 'Bảng Điều Khiển',
+      dashboard: 'Trang chủ',
       findJobs: 'Bài đăng',
       savedJobs: 'Việc Đã Lưu',
       messages: 'Tin Nhắn',
@@ -41,7 +41,7 @@ export const translations = {
       followEmployer: 'Follow Employer',
       support: 'Hỗ Trợ',
       signOut: 'Đăng Xuất',
-      myJobs: 'Việc Của Tôi',
+      myJobs: 'Quản lý Tin Tuyển Dụng',
       applications: 'Hồ Sơ Ứng Tuyển',
       companyProfile: 'Hồ Sơ Công Ty',
       subscription: 'Gói Dịch Vụ',
@@ -106,13 +106,12 @@ export const translations = {
     // Dashboard
     dashboard: {
       candidate: {
-        title: 'Bảng Điều Khiển',
+        title: 'Trang chủ',
         welcome: 'Chào mừng trở lại',
         stats: {
           applications: 'Hồ Sơ Đã Nộp',
           profileViews: 'Lượt Xem Hồ Sơ',
           savedJobs: 'Việc Đã Lưu',
-          interviews: 'Phỏng Vấn',
         },
         recommendedJobs: 'Việc Làm Đề Xuất',
         recentApplications: 'Hồ Sơ Ứng Tuyển Gần Đây',
@@ -128,7 +127,6 @@ export const translations = {
         stats: {
           activeJobs: 'Tin Đang Tuyển',
           totalApplications: 'Tổng Hồ Sơ',
-          interviews: 'Phỏng Vấn',
           hired: 'Đã Tuyển',
         },
         recentApplications: 'Hồ Sơ Ứng Tuyển Gần Đây',
@@ -466,8 +464,6 @@ export const translations = {
       applicationViewedTitle: 'Hồ sơ đã được xem',
       applicationViewedMessage: 'FPT Software đã xem hồ sơ ứng tuyển Senior React Developer của bạn',
       applicationViewedTime: '2 giờ trước',
-      newMessageTitle: 'Tin nhắn mới',
-      newMessageMessage: 'Bạn có tin nhắn mới từ Hồng Trà Ngô Gia',
       newMessageTime: '5 giờ trước',
       applicationAcceptedTitle: 'Hồ sơ được chấp nhận',
       applicationAcceptedMessage: 'Hồ sơ Nhân viên tại Highlands của bạn đã được chấp nhận',
@@ -493,6 +489,13 @@ export const translations = {
       previous: 'Trước',
       submit: 'Gửi',
       close: 'Đóng',
+    },
+
+    // Under Development Modal
+    underDevelopment: {
+      title: 'Đang Phát Triển',
+      message: 'Chức năng này đang trong quá trình phát triển và sẽ sớm được ra mắt. Cảm ơn bạn đã kiên nhẫn!',
+      button: 'Đã Hiểu',
     },
   },
 
@@ -950,6 +953,13 @@ export const translations = {
       previous: 'Previous',
       submit: 'Submit',
       close: 'Close',
+    },
+
+    // Under Development Modal
+    underDevelopment: {
+      title: 'Under Development',
+      message: 'This feature is currently under development and will be launched soon. Thank you for your patience!',
+      button: 'Got It',
     },
   },
 };

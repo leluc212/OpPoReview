@@ -5,6 +5,7 @@ import { GlobalStyles, theme, darkTheme } from './styles/theme';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { ThemeProvider as CustomThemeProvider, useTheme } from './context/ThemeContext';
+import ScrollToTop from './components/ScrollToTop';
 
 // Auth Pages
 import LandingPage from './pages/auth/LandingPage';
@@ -28,10 +29,13 @@ import Support from './pages/candidate/Support';
 import Wallet from './pages/candidate/Wallet';
 import Availability from './pages/candidate/Availability';
 import CandidatePosts from './pages/candidate/CandidatePosts';
+import ChangePassword from './pages/candidate/ChangePassword';
+import DeleteAccount from './pages/candidate/DeleteAccount';
 
 // Employer Pages
 import EmployerDashboard from './pages/employer/EmployerDashboard';
 import PostJob from './pages/employer/PostJob';
+import CompanyVerification from './pages/employer/CompanyVerification';
 import JobManagement from './pages/employer/JobManagement';
 import Applications from './pages/employer/Applications';
 import EmployerProfile from './pages/employer/EmployerProfile';
@@ -142,6 +146,16 @@ function AppRoutes() {
           <CandidatePosts />
         </ProtectedRoute>
       } />
+      <Route path="/candidate/change-password" element={
+        <ProtectedRoute allowedRoles={['candidate']}>
+          <ChangePassword />
+        </ProtectedRoute>
+      } />
+      <Route path="/candidate/delete-account" element={
+        <ProtectedRoute allowedRoles={['candidate']}>
+          <DeleteAccount />
+        </ProtectedRoute>
+      } />
       
       {/* Employer Routes */}
       <Route path="/employer/dashboard" element={
@@ -152,6 +166,11 @@ function AppRoutes() {
       <Route path="/employer/post-job" element={
         <ProtectedRoute allowedRoles={['employer']}>
           <PostJob />
+        </ProtectedRoute>
+      } />
+      <Route path="/employer/verification" element={
+        <ProtectedRoute allowedRoles={['employer']}>
+          <CompanyVerification />
         </ProtectedRoute>
       } />
       <Route path="/employer/jobs" element={
@@ -289,6 +308,7 @@ function ThemedApp() {
     <ThemeProvider theme={isDarkMode ? darkTheme : theme}>
       <GlobalStyles />
       <Router>
+        <ScrollToTop />
         <AppRoutes />
       </Router>
     </ThemeProvider>

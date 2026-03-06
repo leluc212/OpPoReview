@@ -260,6 +260,7 @@ const IconWrap = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+<<<<<<< HEAD
   margin-bottom: 24px;
   font-size: 32px;
   flex-shrink: 0;
@@ -267,6 +268,14 @@ const IconWrap = styled.div`
 
   ${RoleCard}:hover & {
     transform: scale(1.08) rotate(-4deg);
+=======
+  color: white;
+  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.4);
+  
+  svg {
+    width: 40px;
+    height: 40px;
+>>>>>>> 8ed761b33c0c943034121fbd278c350e649e5007
   }
 `;
 
@@ -285,6 +294,7 @@ const CardDesc = styled.p`
   margin-bottom: 24px;
 `;
 
+<<<<<<< HEAD
 const FeatureList = styled.ul`
   list-style: none;
   margin: 0 0 32px;
@@ -316,6 +326,28 @@ const FeatureItem = styled.li`
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+=======
+const RoleFeatures = styled.ul`
+  text-align: left;
+  margin-bottom: 32px;
+  
+  li {
+    color: #64748B;
+    margin-bottom: 12px;
+    padding-left: 28px;
+    position: relative;
+    font-size: 15px;
+    line-height: 1.5;
+    
+    &::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: #1e40af;
+      font-weight: 700;
+      font-size: 16px;
+    }
+>>>>>>> 8ed761b33c0c943034121fbd278c350e649e5007
   }
 `;
 
@@ -337,6 +369,7 @@ const SelectBtn = styled(motion.button)`
   align-items: center;
   justify-content: center;
   gap: 8px;
+<<<<<<< HEAD
   transition: box-shadow 0.25s, opacity 0.25s;
   position: relative;
   overflow: hidden;
@@ -351,6 +384,15 @@ const SelectBtn = styled(motion.button)`
   &:hover {
     box-shadow: 0 8px 28px ${p => p.$shadow};
     opacity: 0.93;
+=======
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+  cursor: pointer;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.4);
+>>>>>>> 8ed761b33c0c943034121fbd278c350e649e5007
   }
 
   .arrow {

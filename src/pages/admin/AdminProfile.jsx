@@ -77,7 +77,7 @@ const Avatar = styled.div`
   width: 120px;
   height: 120px;
   border-radius: ${props => props.theme.borderRadius.full};
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
   color: white;
   display: flex;
   align-items: center;

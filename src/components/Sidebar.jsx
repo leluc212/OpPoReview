@@ -15,7 +15,6 @@ import {
   BarChart3,
   Package,
   MapPin,
-  ToggleLeft,
   ShieldCheck,
   HelpCircle,
   Wallet,
@@ -88,7 +87,7 @@ const Logo = styled.div`
 const LogoText = styled.h1`
   font-size: 22px;
   font-weight: 700;
-  font-family: 'Be Vietnam Pro', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   color: ${props => props.theme.colors.primary};
   letter-spacing: -0.2px;
   line-height: 1.4;
@@ -194,7 +193,7 @@ const NavLink = styled.div`
   gap: 12px;
   padding: 12px;
   border-radius: ${props => props.theme.borderRadius.lg};
-  color: ${props => props.$active ? 'white' : props.theme.colors.textLight};
+  color: ${props => props.$active ? 'white' : props.theme.colors.text};
   background: ${props => props.$active ? `linear-gradient(135deg, ${props.theme.colors.primary}, ${props.theme.colors.secondary})` : 'transparent'};
   font-weight: ${props => props.$active ? 600 : 500};
   font-size: 14px;
@@ -369,10 +368,8 @@ const Sidebar = ({ role }) => {
       { to: '/candidate/settings', icon: Settings, label: t.sidebar.settings },
     ]},
     { section: t.sidebar.utilities, items: [
-      { to: '/candidate/availability', icon: ToggleLeft, label: t.sidebar.availability },
       { to: '/candidate/wallet', icon: Wallet, label: t.sidebar.digitalWallet },
-      { to: '/candidate/support', icon: HelpCircle, label: t.sidebar.support },
-      { to: '#', icon: LogOut, label: t.sidebar.signOut },
+      { to: '/candidate/support', icon: HelpCircle, label: t.sidebar.support }
     ]}
   ];
   
@@ -394,8 +391,7 @@ const Sidebar = ({ role }) => {
     { section: t.sidebar.utilities, items: [
       { to: '/employer/analytics', icon: BarChart3, label: t.sidebar.reports || 'Analytics' },
       { to: '/employer/wallet', icon: Wallet, label: t.sidebar.digitalWallet },
-      { to: '/employer/support', icon: HelpCircle, label: t.sidebar.support },
-      { to: '#', icon: LogOut, label: t.sidebar.signOut },
+      { to: '/employer/support', icon: HelpCircle, label: t.sidebar.support }
     ]}
   ];
   

@@ -32,21 +32,50 @@ const NotificationsContainer = styled.div`
 `;
 
 const PageHeader = styled.div`
-  margin-bottom: 32px;
-  
-  h1 {
-    font-size: 32px;
-    font-weight: 800;
-    margin-bottom: 8px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+`;
+
+const PageTitleGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+`;
+
+const PageIconBox = styled.div`
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  background: #EFF6FF;
+  border: 1.5px solid #BFDBFE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 24px;
+    height: 24px;
+    color: #1e40af;
   }
-  
+`;
+
+const PageTitleText = styled.div`
+  h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: ${props => props.theme.colors.text};
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
   p {
     color: ${props => props.theme.colors.textLight};
-    font-size: 15px;
+    font-size: 13.5px;
     font-weight: 500;
   }
 `;
@@ -64,9 +93,10 @@ const TabContainer = styled.div`
   display: flex;
   gap: 8px;
   padding: 6px;
-  background: ${props => props.theme.colors.bgDark};
+  background: #f8fafc;
   border-radius: 14px;
   overflow-x: auto;
+  border: 1.5px solid #E8EFFF;
   flex: 1;
   
   &::-webkit-scrollbar {
@@ -74,30 +104,30 @@ const TabContainer = styled.div`
   }
   
   &::-webkit-scrollbar-thumb {
-    background: ${props => props.theme.colors.border};
+    background: #e2e8f0;
     border-radius: 3px;
   }
 `;
 
 const Tab = styled(motion.button)`
   padding: 10px 20px;
-  background: ${props => props.$active ? props.theme.colors.bgLight : 'transparent'};
+  background: ${props => props.$active ? '#ffffff' : 'transparent'};
   border: none;
   font-size: 14px;
   font-weight: 700;
-  color: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.textLight};
+  color: ${props => props.$active ? '#1e40af' : '#64748B'};
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   white-space: nowrap;
-  box-shadow: ${props => props.$active ? '0 2px 8px rgba(0, 0, 0, 0.1)' : 'none'};
+  box-shadow: ${props => props.$active ? '0 2px 8px rgba(30, 64, 175, 0.08)' : 'none'};
   display: flex;
   align-items: center;
   gap: 8px;
   
   &:hover {
-    color: ${props => props.theme.colors.primary};
-    background: ${props => props.$active ? props.theme.colors.bgLight : props.theme.colors.border};
+    color: #1e40af;
+    background: ${props => props.$active ? '#ffffff' : '#f1f5f9'};
   }
 `;
 
@@ -112,24 +142,22 @@ const ActionButton = styled(motion.button)`
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 8px;
   border: none;
-  background: ${props => props.$variant === 'primary' 
-    ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
-    : props.theme.colors.bgLight};
-  color: ${props => props.$variant === 'primary' ? 'white' : props.theme.colors.text};
-  border: 2px solid ${props => props.$variant === 'primary' ? 'transparent' : props.theme.colors.border};
+  background: ${props => props.$variant === 'primary' ? '#1e40af' : '#ffffff'};
+  color: ${props => props.$variant === 'primary' ? 'white' : '#1E293B'};
+  border: 1.5px solid ${props => props.$variant === 'primary' ? 'transparent' : '#e2e8f0'};
   box-shadow: ${props => props.$variant === 'primary' 
-    ? '0 4px 12px rgba(102, 126, 234, 0.3)' 
+    ? '0 4px 12px rgba(30, 64, 175, 0.25)' 
     : '0 2px 8px rgba(0, 0, 0, 0.05)'};
   
   &:hover {
     transform: translateY(-2px);
     box-shadow: ${props => props.$variant === 'primary' 
-      ? '0 8px 20px rgba(102, 126, 234, 0.4)' 
+      ? '0 6px 16px rgba(30, 64, 175, 0.35)' 
       : '0 4px 12px rgba(0, 0, 0, 0.1)'};
   }
   
@@ -145,12 +173,12 @@ const NotificationsGrid = styled.div`
 `;
 
 const NotificationCard = styled(motion.div)`
-  background: ${props => props.theme.colors.bgLight};
-  border: 2px solid ${props => props.$read ? props.theme.colors.border : props.theme.colors.primary + '40'};
+  background: #ffffff;
+  border: 1.5px solid ${props => props.$read ? '#F1F5F9' : '#BFDBFE'};
   border-radius: 16px;
   padding: 20px 24px;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.22s ease;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.04);
   position: relative;
   overflow: hidden;
   display: flex;
@@ -164,61 +192,74 @@ const NotificationCard = styled(motion.div)`
     top: 0;
     bottom: 0;
     width: 4px;
+    border-radius: 16px 0 0 16px;
     background: ${props => {
       switch(props.$type) {
-        case 'application': return 'linear-gradient(180deg, #667eea 0%, #764ba2 100%)';
-        case 'interview': return 'linear-gradient(180deg, #10B981 0%, #059669 100%)';
-        case 'system': return 'linear-gradient(180deg, #3B82F6 0%, #2563EB 100%)';
-        case 'rating': return 'linear-gradient(180deg, #F59E0B 0%, #D97706 100%)';
-        default: return 'linear-gradient(180deg, #94A3B8 0%, #64748B 100%)';
+        case 'application': return '#1e40af';
+        case 'interview': return '#10B981';
+        case 'system': return '#1e40af';
+        case 'rating': return '#F59E0B';
+        default: return '#64748B';
       }
     }};
-    opacity: ${props => props.$read ? '0.3' : '1'};
+    opacity: ${props => props.$read ? '0.2' : '0.8'};
+    transition: opacity 0.2s ease;
   }
   
   &:hover {
-    transform: translateX(4px);
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
-    border-color: ${props => props.theme.colors.primary}60;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.12);
+    border-color: #93C5FD;
+    &::before {
+      opacity: 1;
+    }
   }
 `;
 
 const NotificationIcon = styled.div`
-  width: 48px;
-  height: 48px;
-  min-width: 48px;
-  border-radius: 12px;
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  border-radius: 14px;
   background: ${props => {
     switch(props.$type) {
-      case 'application': return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-      case 'interview': return 'linear-gradient(135deg, #10B981 0%, #059669 100%)';
-      case 'system': return 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)';
-      case 'rating': return 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)';
-      default: return 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)';
+      case 'application': return '#EFF6FF';
+      case 'interview': return '#ECFDF5';
+      case 'system': return '#EFF6FF';
+      case 'rating': return '#FFFBEB';
+      default: return '#F8FAFC';
+    }
+  }};
+  border: 1.5px solid ${props => {
+    switch(props.$type) {
+      case 'application': return '#BFDBFE';
+      case 'interview': return '#A7F3D0';
+      case 'system': return '#BFDBFE';
+      case 'rating': return '#FDE68A';
+      default: return '#E2E8F0';
     }
   }};
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  box-shadow: 0 4px 12px ${props => {
+  color: ${props => {
     switch(props.$type) {
-      case 'application': return 'rgba(102, 126, 234, 0.3)';
-      case 'interview': return 'rgba(16, 185, 129, 0.3)';
-      case 'system': return 'rgba(59, 130, 246, 0.3)';
-      case 'rating': return 'rgba(245, 158, 11, 0.3)';
-      default: return 'rgba(0, 0, 0, 0.1)';
+      case 'application': return '#1e40af';
+      case 'interview': return '#10B981';
+      case 'system': return '#1e40af';
+      case 'rating': return '#F59E0B';
+      default: return '#64748B';
     }
   }};
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   
   ${NotificationCard}:hover & {
-    transform: scale(1.1) rotate(5deg);
+    transform: scale(1.05);
   }
   
   svg {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
   }
 `;
 
@@ -230,15 +271,14 @@ const NotificationContent = styled.div`
 const NotificationTitle = styled.h3`
   font-size: 16px;
   font-weight: 700;
-  color: ${props => props.theme.colors.text};
+  color: #1E293B;
   margin-bottom: 6px;
   line-height: 1.4;
 `;
 
 const NotificationMessage = styled.p`
-  font-size: 14px;
-  color: ${props => props.theme.colors.text};
-  opacity: 0.85;
+  font-size: 14.5px;
+  color: #475569;
   line-height: 1.6;
   margin-bottom: 8px;
   font-weight: 500;
@@ -255,14 +295,13 @@ const NotificationMeta = styled.div`
     align-items: center;
     gap: 6px;
     font-size: 13px;
-    color: ${props => props.theme.colors.text};
-    opacity: 0.75;
+    color: #64748B;
     font-weight: 500;
     
     svg {
       width: 14px;
       height: 14px;
-      opacity: 0.7;
+      opacity: 0.8;
     }
   }
 `;
@@ -279,30 +318,36 @@ const IconButton = styled(motion.button)`
   height: 36px;
   border-radius: 10px;
   background: ${props => {
-    if (props.$variant === 'danger') return props.theme.colors.error + '10';
-    return props.theme.colors.bgDark;
+    if (props.$variant === 'danger') return '#FEF2F2';
+    return '#F1F5F9';
   }};
   color: ${props => {
-    if (props.$variant === 'danger') return props.theme.colors.error;
-    return props.theme.colors.text;
+    if (props.$variant === 'danger') return '#EF4444';
+    return '#64748B';
   }};
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid transparent;
-  transition: all 0.3s ease;
+  border: 1.5px solid ${props => {
+    if (props.$variant === 'danger') return '#FECACA';
+    return '#E2E8F0';
+  }};
+  transition: all 0.2s ease;
   cursor: pointer;
   
   &:hover {
     background: ${props => {
-      if (props.$variant === 'danger') return props.theme.colors.error;
-      return props.theme.colors.primary;
+      if (props.$variant === 'danger') return '#FEE2E2';
+      return '#E2E8F0';
     }};
-    color: white;
-    transform: scale(1.1);
+    color: ${props => {
+      if (props.$variant === 'danger') return '#DC2626';
+      return '#334155';
+    }};
+    transform: translateY(-2px);
     box-shadow: 0 4px 12px ${props => {
-      if (props.$variant === 'danger') return props.theme.colors.error + '40';
-      return 'rgba(102, 126, 234, 0.3)';
+      if (props.$variant === 'danger') return 'rgba(239, 68, 68, 0.15)';
+      return 'rgba(0, 0, 0, 0.05)';
     }};
   }
   
@@ -371,15 +416,6 @@ const getNotifications = (language) => ([
   },
   {
     id: 3,
-    type: 'interview',
-    title: language === 'vi' ? 'Lịch phỏng vấn sắp tới' : 'Upcoming interview',
-    message: language === 'vi' ? 'Bạn có lịch phỏng vấn với Lê Văn C vào lúc 14:00 ngày 26/02/2026' : 'You have an interview with Le Van C at 14:00 on 26/02/2026',
-    time: language === 'vi' ? '1 giờ trước' : '1 hour ago',
-    read: false,
-    icon: Clock
-  },
-  {
-    id: 4,
     type: 'rating',
     title: language === 'vi' ? 'Đánh giá nhân viên mới' : 'Rate new employee',
     message: language === 'vi' ? 'Phạm Thị D đã hoàn thành công việc. Vui lòng đánh giá nhân viên.' : 'Pham Thi D has completed the job. Please provide a rating.',
@@ -388,7 +424,7 @@ const getNotifications = (language) => ([
     icon: Star
   },
   {
-    id: 5,
+    id: 4,
     type: 'system',
     title: language === 'vi' ? 'Tin tuyển dụng sắp hết hạn' : 'Job post expiring soon',
     message: language === 'vi' ? 'Tin tuyển dụng "Thu ngân" sẽ hết hạn vào 27/02/2026' : 'The "Cashier" job post will expire on 27/02/2026',
@@ -397,7 +433,7 @@ const getNotifications = (language) => ([
     icon: AlertCircle
   },
   {
-    id: 6,
+    id: 5,
     type: 'application',
     title: language === 'vi' ? 'Hồ sơ đã được xem' : 'Profiles viewed',
     message: language === 'vi' ? '12 ứng viên mới đã xem tin tuyển dụng của bạn' : '12 new candidates viewed your job post',
@@ -406,20 +442,11 @@ const getNotifications = (language) => ([
     icon: Eye
   },
   {
-    id: 7,
+    id: 6,
     type: 'system',
     title: language === 'vi' ? 'Cập nhật hệ thống' : 'System update',
     message: language === 'vi' ? 'Hệ thống đã được cập nhật phiên bản mới với nhiều tính năng hữu ích' : 'The system has been updated with a new version and useful features',
     time: language === 'vi' ? '1 ngày trước' : '1 day ago',
-    read: true,
-    icon: CheckCircle
-  },
-  {
-    id: 8,
-    type: 'interview',
-    title: language === 'vi' ? 'Phỏng vấn đã hoàn thành' : 'Interview completed',
-    message: language === 'vi' ? 'Phỏng vấn với Hoàng Văn E đã hoàn thành. Vui lòng cập nhật kết quả.' : 'Interview with Hoang Van E is completed. Please update the result.',
-    time: language === 'vi' ? '2 ngày trước' : '2 days ago',
     read: true,
     icon: CheckCircle
   }
@@ -444,7 +471,6 @@ const EmployerNotifications = () => {
     { id: 'all', label: language === 'vi' ? 'Tất cả' : 'All', count: notifications.length },
     { id: 'unread', label: language === 'vi' ? 'Chưa đọc' : 'Unread', count: notifications.filter(n => !n.read).length },
     { id: 'application', label: language === 'vi' ? 'Ứng tuyển' : 'Applications', count: notifications.filter(n => n.type === 'application').length },
-    { id: 'interview', label: language === 'vi' ? 'Phỏng vấn' : 'Interviews', count: notifications.filter(n => n.type === 'interview').length },
     { id: 'system', label: language === 'vi' ? 'Hệ thống' : 'System', count: notifications.filter(n => n.type === 'system').length }
   ];
 
@@ -474,8 +500,15 @@ const EmployerNotifications = () => {
     <DashboardLayout role="employer">
       <NotificationsContainer>
         <PageHeader>
-          <h1>{language === 'vi' ? 'Thông Báo' : 'Notifications'}</h1>
-          <p>{language === 'vi' ? 'Cập nhật tình trạng tuyển dụng' : 'Stay updated on hiring status'}</p>
+          <PageTitleGroup>
+            <PageIconBox>
+              <Bell />
+            </PageIconBox>
+            <PageTitleText>
+              <h1>{language === 'vi' ? 'Thông Báo' : 'Notifications'}</h1>
+              <p>{language === 'vi' ? 'Cập nhật tình trạng tuyển dụng' : 'Stay updated on hiring status'}</p>
+            </PageTitleText>
+          </PageTitleGroup>
         </PageHeader>
 
         <HeaderActions>

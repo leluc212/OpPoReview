@@ -52,7 +52,7 @@ const DashboardContainer = styled.div`
 `;
 
 const WelcomeBanner = styled(motion.div)`
-  background: linear-gradient(135deg, #0E3995 0%, #0055A5 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
   border-radius: ${props => props.theme.borderRadius.xl};
   padding: 40px;
   margin-bottom: 32px;
@@ -343,24 +343,27 @@ const ActivityFeed = styled.div``;
 const ActivityItem = styled(motion.div)`
   display: flex;
   gap: 16px;
-  padding: 16px;
-  border-left: 3px solid ${props => props.$color || props.theme.colors.border};
+  padding: 24px;
+  border-left: 4px solid ${props => props.$color || props.theme.colors.border};
   margin-bottom: 12px;
-  background: ${props => props.theme.colors.bgDark};
-  border-radius: 0 ${props => props.theme.borderRadius.md} ${props => props.theme.borderRadius.md} 0;
+  background: ${props => props.theme.colors.bgLight};
+  border-radius: ${props => props.theme.borderRadius.xl};
+  border: 1px solid ${props => props.theme.colors.border};
   transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
   
   &:hover {
-    background: ${props => props.theme.colors.bgLight};
-    transform: translateX(8px);
-    box-shadow: ${props => props.theme.shadows.sm};
+    transform: translateX(4px);
+    box-shadow: ${props => props.theme.shadows.md};
+    border-color: ${props => props.$color || props.theme.colors.primary};
   }
 `;
 
 const ActivityIcon = styled.div`
-  width: 40px;
-  height: 40px;
-  border-radius: ${props => props.theme.borderRadius.md};
+  width: 56px;
+  height: 56px;
+  border-radius: ${props => props.theme.borderRadius.lg};
   background: ${props => props.$color || props.theme.colors.primary}15;
   color: ${props => props.$color || props.theme.colors.primary};
   display: flex;
@@ -369,8 +372,8 @@ const ActivityIcon = styled.div`
   flex-shrink: 0;
   
   svg {
-    width: 20px;
-    height: 20px;
+    width: 28px;
+    height: 28px;
   }
 `;
 
@@ -378,14 +381,14 @@ const ActivityContent = styled.div`
   flex: 1;
   
   h5 {
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 17px;
+    font-weight: 700;
     color: ${props => props.theme.colors.text};
-    margin-bottom: 4px;
+    margin-bottom: 6px;
   }
   
   p {
-    font-size: 13px;
+    font-size: 14px;
     color: ${props => props.theme.colors.textLight};
   }
 `;
@@ -511,58 +514,108 @@ const CandidateDashboard = () => {
       .replace(/Phú Nhuận/g, 'Phu Nhuan');
   };
 
+  // Translate job titles
+  const translateJobTitle = (titleVi) => {
+    if (language === 'vi') return titleVi;
+    const titleMap = {
+      'Nhân viên Bán Hàng': 'Sales Staff',
+      'Nhân viên Văn Phòng': 'Office Staff',
+      'Nhân viên Phục Vụ': 'Service Staff'
+    };
+    return titleMap[titleVi] || titleVi;
+  };
+
+  // Translate job type
+  const translateJobType = (typeVi) => {
+    if (language === 'vi') return typeVi;
+    const typeMap = {
+      'Toàn thời gian': 'Full-time',
+      'Bán thời gian': 'Part-time',
+      'Hợp đồng': 'Contract',
+      'Thực tập': 'Internship'
+    };
+    return typeMap[typeVi] || typeVi;
+  };
+
+  // Translate job tags
+  const translateTag = (tagVi) => {
+    if (language === 'vi') return tagVi;
+    const tagMap = {
+      'Bán hàng': 'Sales',
+      'Giao tiếp': 'Communication',
+      'Nhiệt tình': 'Enthusiastic',
+      'Văn phòng': 'Office',
+      'Word/Excel': 'Word/Excel',
+      'Hành chính': 'Admin',
+      'Phục vụ': 'Service',
+      'F&B': 'F&B',
+      'Ca làm linh động': 'Flexible Shifts'
+    };
+    return tagMap[tagVi] || tagVi;
+  };
+
+  // Translate time posted
+  const translatePostedAt = (timeStr) => {
+    if (language === 'vi') return timeStr;
+    return timeStr
+      .replace(/ngày trước/g, 'days ago')
+      .replace(/giờ trước/g, 'hours ago')
+      .replace(/tuần trước/g, 'weeks ago')
+      .replace(/tháng trước/g, 'months ago');
+  };
+
   const recommendedJobs = [
     {
       id: 1,
-      title: 'General Accountant',
+      title: 'Nhân viên Bán Hàng',
       company: 'Vinamilk',
       location: 'Quận 1, TP.HCM',
-      type: 'Full-time',
-      salary: '12-18 triệu',
+      type: 'Toàn thời gian',
+      salary: '8-12 triệu',
       postedAt: '2 ngày trước',
-      tags: ['Accounting', 'Excel', 'MBA']
+      tags: ['Bán hàng', 'Giao tiếp', 'Nhiệt tình']
     },
     {
       id: 2,
-      title: 'B2B Sales Executive',
+      title: 'Nhân viên Văn Phòng',
       company: 'Viettel',  
       location: 'Quận 7, TP.HCM',
-      type: 'Full-time',
-      salary: '15-25 triệu',
+      type: 'Toàn thời gian',
+      salary: '7-10 triệu',
       postedAt: '1 ngày trước',
-      tags: ['Sales', 'B2B', 'High Commission']
+      tags: ['Văn phòng', 'Word/Excel', 'Hành chính']
     },
     {
       id: 3,
-      title: 'Senior React Developer',
-      company: 'FPT Software',
+      title: 'Nhân viên Phục Vụ',
+      company: 'Highland Coffee',
       location: 'Quận 1, TP.HCM',
-      type: 'Full-time',
-      salary: '20-30 triệu',
+      type: 'Toàn thời gian',
+      salary: '6-9 triệu',
       postedAt: '2 ngày trước',
-      tags: ['React', 'TypeScript', 'Remote']
+      tags: ['Phục vụ', 'F&B', 'Ca làm linh động']
     }
   ];
 
   const recentApplications = [
     { 
       id: 1, 
-      title: 'Product Designer', 
-      company: 'Shopee', 
+      title: 'Nhân viên Chăm Sóc Khách Hàng', 
+      company: 'FPT Telecom', 
       appliedDate: '2 ngày trước', 
       status: 'reviewed' 
     },
     { 
       id: 2, 
-      title: 'Backend Developer', 
-      company: 'Grab', 
+      title: 'Nhân viên Pha Chế', 
+      company: 'Phúc Long', 
       appliedDate: '5 ngày trước', 
       status: 'pending' 
     },
     { 
       id: 3, 
-      title: 'Full Stack Engineer', 
-      company: 'Sendo', 
+      title: 'Nhân viên Bảo Vệ', 
+      company: 'Vincom Center', 
       appliedDate: '1 tuần trước', 
       status: 'approved' 
     },
@@ -572,16 +625,9 @@ const CandidateDashboard = () => {
     {
       type: 'view',
       icon: Eye,
-      color: '#0E3995',
+      color: '#1e40af',
       title: language === 'vi' ? '12 nhà tuyển dụng đã xem CV của bạn' : '12 employers viewed your CV',
       time: language === 'vi' ? 'Hôm nay' : 'Today'
-    },
-    {
-      type: 'interview',
-      icon: Calendar,
-      color: '#10B981',
-      title: language === 'vi' ? 'Lịch phỏng vấn với FPT Software' : 'Interview with FPT Software',
-      time: language === 'vi' ? 'Ngày mai, 10:00 AM' : 'Tomorrow, 10:00 AM'
     },
     {
       type: 'message',
@@ -593,7 +639,7 @@ const CandidateDashboard = () => {
     {
       type: 'match',
       icon: Target,
-      color: '#8B5CF6',
+      color: '#1e40af',
       title: language === 'vi' ? '5 công việc mới phù hợp với bạn' : '5 new jobs match your profile',
       time: language === 'vi' ? '4 giờ trước' : '4 hours ago'
     },
@@ -687,7 +733,7 @@ const CandidateDashboard = () => {
             change="+12%"
             changeText={language === 'vi' ? 'từ tháng trước' : 'from last month'}
             icon={FileText}
-            color="#0E3995"
+            color="#1e40af"
             positive
           />
           <StatsCard
@@ -709,12 +755,12 @@ const CandidateDashboard = () => {
             positive
           />
           <StatsCard
-            title={language === 'vi' ? 'Phỏng Vấn' : 'Interviews'}
-            value="5"
+            title={language === 'vi' ? 'Job Match Thành Công' : 'Successful Matches'}
+            value="8"
             change="+2"
-            changeText={language === 'vi' ? 'tuần này' : 'this week'}
-            icon={Calendar}
-            color="#8B5CF6"
+            changeText={language === 'vi' ? 'tháng này' : 'this month'}
+            icon={CheckCircle}
+            color="#1e40af"
             positive
           />
         </StatsGrid>
@@ -752,7 +798,7 @@ const CandidateDashboard = () => {
                       {job.company.charAt(0)}
                     </CompanyLogo>
                     <JobInfo>
-                      <h4>{job.title}</h4>
+                      <h4>{translateJobTitle(job.title)}</h4>
                       <p>{job.company}</p>
                     </JobInfo>
                   </JobHeader>
@@ -767,12 +813,12 @@ const CandidateDashboard = () => {
                     </span>
                     <span>
                       <Clock />
-                      {job.postedAt}
+                      {translatePostedAt(job.postedAt)}
                     </span>
                   </JobDetails>
                   <JobTags>
                     {job.tags.map((tag, idx) => (
-                      <span key={idx}>{tag}</span>
+                      <span key={idx}>{translateTag(tag)}</span>
                     ))}
                   </JobTags>
                 </RecommendedJobCard>

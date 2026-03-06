@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Bell, Search, LogOut, User } from 'lucide-react';
@@ -39,7 +39,7 @@ const SearchBar = styled.div`
     border: 2px solid ${props => props.theme.colors.border};
     border-radius: ${props => props.theme.borderRadius.full};
     background: ${props => props.theme.colors.bgLight};
-    color: #F1F5F9;
+    color: ${props => props.theme.colors.text};
     font-size: 15px;
     font-weight: 500;
     transition: all ${props => props.theme.transitions.normal};
@@ -62,12 +62,14 @@ const SearchBar = styled.div`
     transform: translateY(-50%);
     width: 20px;
     height: 20px;
-    color: ${props => props.theme.colors.textLight};
+    color: ${props => props.theme.colors.primary};
+    opacity: 0.7;
     cursor: pointer;
     transition: all ${props => props.theme.transitions.normal};
     
     &:hover {
       color: ${props => props.theme.colors.primary};
+      opacity: 1;
       transform: translateY(-50%) scale(1.1);
     }
   }
@@ -84,7 +86,7 @@ const IconButton = styled.button`
   height: 48px;
   border-radius: ${props => props.theme.borderRadius.lg};
   background: ${props => props.theme.colors.bgDark};
-  color: ${props => props.theme.colors.textLight};
+  color: ${props => props.theme.colors.text};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -121,7 +123,7 @@ const Badge = styled.span`
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid white;
+  border: 2px solid ${props => props.theme.colors.bgLight};
   box-shadow: ${props => props.theme.shadows.md};
 `;
 
@@ -187,6 +189,15 @@ const Navbar = ({ showSearch = true }) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [companyLogo, setCompanyLogo] = useState(() => localStorage.getItem('companyLogo') || '/images/katinatlogo.jpg');
+
+  useEffect(() => {
+    const handleLogoChange = () => {
+      setCompanyLogo(localStorage.getItem('companyLogo') || '/images/katinatlogo.jpg');
+    };
+    window.addEventListener('logoChanged', handleLogoChange);
+    return () => window.removeEventListener('logoChanged', handleLogoChange);
+  }, []);
   
   const getRoleTranslation = (role) => {
     if (role === 'candidate') return t.login.roleCandidate;
@@ -222,6 +233,16 @@ const Navbar = ({ showSearch = true }) => {
     }
   };
   
+  const handleProfileClick = () => {
+    if (user?.role === 'candidate') {
+      navigate('/candidate/profile');
+    } else if (user?.role === 'employer') {
+      navigate('/employer/profile');
+    } else if (user?.role === 'admin') {
+      navigate('/admin/profile');
+    }
+  };
+  
   return (
     <NavbarContainer>
       <NavLeft>
@@ -245,12 +266,16 @@ const Navbar = ({ showSearch = true }) => {
           <Badge>3</Badge>
         </IconButton>
         
-        <UserMenu>
+        <UserMenu onClick={handleProfileClick}>
           <Avatar>
-            {user?.name?.charAt(0).toUpperCase() || 'U'}
+            {user?.role === 'employer' ? (
+              <img src={companyLogo} alt="Logo" style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
+            ) : (
+              user?.name?.charAt(0).toUpperCase() || 'U'
+            )}
           </Avatar>
           <UserInfo>
-            <span>{user?.name || 'User'}</span>
+            <span>{user?.role === 'employer' ? 'Katinat Quận 8' : (user?.name || 'User')}</span>
             <span>{getRoleTranslation(user?.role) || 'Role'}</span>
           </UserInfo>
         </UserMenu>

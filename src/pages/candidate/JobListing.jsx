@@ -2,10 +2,12 @@ import React, { useMemo, useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
+import Modal from '../../components/Modal';
 import { 
   Search, MapPin, Briefcase, DollarSign, Clock, Star, TrendingUp, 
   ChevronDown, Building2, Bookmark, Eye, ArrowUpRight, Filter,
-  X, SlidersHorizontal, Grid, List, Sparkles, Zap, Navigation, Target
+  X, SlidersHorizontal, Grid, List, Sparkles, Zap, Navigation, Target,
+  Power, XCircle, AlertCircle, CheckCircle
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import StatusBadge from '../../components/StatusBadge';
@@ -77,12 +79,13 @@ const HeroSubtitle = styled.p`
 `;
 
 const SearchContainer = styled.div`
-  background: white;
+  background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.xl};
   padding: 8px;
   display: flex;
   gap: 8px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  border: 1px solid ${props => props.theme.colors.border};
   
   @media (max-width: 768px) {
     flex-direction: column;
@@ -110,7 +113,7 @@ const SearchInput = styled.div`
     background: none;
     outline: none;
     font-size: 15px;
-    color: #F1F5F9;
+    color: ${props => props.theme.colors.text};
     
     &::placeholder {
       color: ${props => props.theme.colors.textLight};
@@ -149,9 +152,9 @@ const QuickFilters = styled.div`
 
 const FilterChip = styled(motion.button)`
   padding: 6px 14px;
-  background: ${props => props.$active ? 'white' : 'rgba(255,255,255,0.2)'};
+  background: ${props => props.$active ? props.theme.colors.bgLight : 'rgba(255,255,255,0.2)'};
   color: ${props => props.$active ? props.theme.colors.primary : 'white'};
-  border: 1px solid ${props => props.$active ? 'white' : 'rgba(255,255,255,0.3)'};
+  border: 1px solid ${props => props.$active ? props.theme.colors.bgLight : 'rgba(255,255,255,0.3)'};
   border-radius: ${props => props.theme.borderRadius.full};
   font-size: 13px;
   font-weight: 600;
@@ -160,7 +163,7 @@ const FilterChip = styled(motion.button)`
   backdrop-filter: blur(10px);
   
   &:hover {
-    background: white;
+    background: ${props => props.theme.colors.bgLight};
     color: ${props => props.theme.colors.primary};
     transform: translateY(-2px);
   }
@@ -206,6 +209,231 @@ const CategoryTab = styled(motion.button)`
   }
 `;
 
+const StatusCard = styled(motion.div)`
+  background: ${props => props.$active 
+    ? 'rgba(16, 185, 129, 0.2)' 
+    : 'rgba(255, 255, 255, 0.15)'};
+  border: 2px solid ${props => props.$active 
+    ? 'rgba(16, 185, 129, 0.5)'
+    : 'rgba(255, 255, 255, 0.3)'};
+  border-radius: 12px;
+  padding: 12px 24px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  
+  .status-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      text-align: center;
+      gap: 10px;
+    }
+    
+    .status-info {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      
+      @media (max-width: 768px) {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+        
+        svg {
+          width: 16px;
+          height: 16px;
+        }
+      }
+      
+      .status-label {
+        font-size: 14px;
+        font-weight: 600;
+        opacity: 0.95;
+      }
+      
+      .status-desc {
+        display: none;
+      }
+    }
+    
+    .status-icon {
+      display: none;
+    }
+  }
+`;
+
+const LocationButton = styled(motion.button)`
+  padding: 12px 24px;
+  background: ${props => props.$active 
+    ? 'rgba(16, 185, 129, 0.2)' 
+    : 'rgba(255, 255, 255, 0.15)'};
+  border: 2px solid ${props => props.$active 
+    ? 'rgba(16, 185, 129, 0.5)'
+    : 'rgba(255, 255, 255, 0.3)'};
+  border-radius: 12px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  height: 48px;
+  white-space: nowrap;
+  
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+`;
+
+const ToggleButton = styled(motion.button)`
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  font-weight: 600;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+  
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+`;
+
+const ConfirmationContent = styled.div`
+  padding: 20px;
+  
+  .icon-wrapper {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    background: ${props => props.$isActive 
+      ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%)'
+      : 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%)'};
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid ${props => props.$isActive ? '#FEE2E2' : '#D1FAE5'};
+    
+    svg {
+      width: 32px;
+      height: 32px;
+      color: ${props => props.$isActive ? '#EF4444' : '#10B981'};
+    }
+  }
+  
+  h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: ${props => props.theme.colors.text};
+    text-align: center;
+    margin-bottom: 10px;
+    letter-spacing: -0.3px;
+  }
+  
+  p {
+    font-size: 14px;
+    color: ${props => props.theme.colors.textLight};
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  
+  .button-group {
+    display: flex;
+    gap: 10px;
+    
+    button {
+      flex: 1;
+      padding: 11px 20px;
+      border-radius: ${props => props.theme.borderRadius.md};
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      
+      &.confirm {
+        background: ${props => props.$isActive 
+          ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)'
+          : 'linear-gradient(135deg, #10B981 0%, #059669 100%)'};
+        color: white;
+        box-shadow: ${props => props.$isActive 
+          ? '0 3px 10px rgba(239, 68, 68, 0.25)'
+          : '0 3px 10px rgba(16, 185, 129, 0.25)'};
+        
+        &:hover {
+          transform: translateY(-1px);
+          box-shadow: ${props => props.$isActive 
+            ? '0 6px 16px rgba(239, 68, 68, 0.3)'
+            : '0 6px 16px rgba(16, 185, 129, 0.3)'};
+        }
+      }
+      
+      &.cancel {
+        background: ${props => props.theme.colors.bgDark};
+        color: ${props => props.theme.colors.text};
+        border: 1px solid ${props => props.theme.colors.border};
+        
+        &:hover {
+          background: ${props => props.theme.colors.border};
+        }
+      }
+      
+      &:active {
+        transform: translateY(0);
+      }
+    }
+  }
+`;
+
 const MainLayout = styled.div`
   display: grid;
   grid-template-columns: 320px 1fr;
@@ -222,32 +450,18 @@ const FilterSidebar = styled(motion.aside)`
   border-radius: ${props => props.theme.borderRadius.xl};
   padding: 20px;
   border: 1px solid ${props => props.theme.colors.border};
-  position: sticky;
-  top: 20px;
-  max-height: calc(100vh - 40px);
-  overflow-y: auto;
   box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-  
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: ${props => props.theme.colors.border};
-    border-radius: 3px;
-    
-    &:hover {
-      background: ${props => props.theme.colors.primary};
-    }
-  }
+  position: sticky;
+  top: 100px;
+  align-self: flex-start;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
   
   @media (max-width: 1024px) {
     position: static;
     max-height: none;
+    overflow: visible;
+    margin-bottom: 24px;
   }
 `;
 
@@ -278,8 +492,8 @@ const FilterHeader = styled.div`
 const ClearButton = styled.button`
   padding: 6px 12px;
   background: transparent;
-  color: ${props => props.theme.colors.danger};
-  border: 1px solid ${props => props.theme.colors.danger};
+  color: ${props => props.theme.colors.error};
+  border: 1px solid ${props => props.theme.colors.error};
   border-radius: ${props => props.theme.borderRadius.md};
   font-size: 13px;
   font-weight: 600;
@@ -287,7 +501,7 @@ const ClearButton = styled.button`
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${props => props.theme.colors.danger};
+    background: ${props => props.theme.colors.error};
     color: white;
   }
 `;
@@ -339,7 +553,7 @@ const FilterOption = styled.label`
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${props => props.theme.colors.bgLight};
+    background: ${props => props.theme.colors.bgDark};
   }
   
   input[type="checkbox"] {
@@ -427,7 +641,7 @@ const ViewToggle = styled.div`
 
 const ViewButton = styled.button`
   padding: 8px 12px;
-  background: ${props => props.$active ? 'white' : 'transparent'};
+  background: ${props => props.$active ? props.theme.colors.bgDark : 'transparent'};
   border: none;
   border-radius: ${props => props.theme.borderRadius.md};
   cursor: pointer;
@@ -1495,6 +1709,19 @@ const JobListing = () => {
   const [showNearbyJobs, setShowNearbyJobs] = useState(false);
   const [nearbyRadius, setNearbyRadius] = useState(3); // km
   const [showSavedJobsOnly, setShowSavedJobsOnly] = useState(false);
+  
+  // Job search status states
+  const [isAvailable, setIsAvailable] = useState(true);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  const handleToggleAvailability = () => {
+    setShowConfirmModal(true);
+  };
+  
+  const confirmToggle = () => {
+    setIsAvailable(!isAvailable);
+    setShowConfirmModal(false);
+  };
 
   // Check if we're on saved jobs page
   useEffect(() => {
@@ -1610,7 +1837,31 @@ const JobListing = () => {
   };
 
   const handleJobClick = (jobId) => {
-    // Job detail page removed
+    // Check KYC completion before allowing application
+    const savedKYC = localStorage.getItem('candidateKYC');
+    let kycCompleted = false;
+    
+    if (savedKYC) {
+      const kycData = JSON.parse(savedKYC);
+      kycCompleted = kycData.completed === true;
+    }
+    
+    if (!kycCompleted) {
+      alert(
+        language === 'vi' 
+          ? '⚠️ Bạn cần hoàn thành xác minh KYC trước khi ứng tuyển!\n\nVui lòng vào trang Hồ Sơ để hoàn tất xác minh.'
+          : '⚠️ You need to complete KYC verification before applying!\n\nPlease go to Profile page to complete verification.'
+      );
+      navigate('/candidate/profile');
+      return;
+    }
+    
+    // If KYC completed, show success message
+    alert(
+      language === 'vi'
+        ? '✅ Ứng tuyển thành công! Nhà tuyển dụng sẽ liên hệ với bạn sớm.'
+        : '✅ Application submitted successfully! The employer will contact you soon.'
+    );
   };
 
   const toggleFilter = (filterName) => {
@@ -1829,18 +2080,24 @@ const JobListing = () => {
         >
           <HeroContent>
             <HeroTitle>
-              {jobCategory === 'standard' 
-                ? (language === 'vi' ? 'Tìm công việc mơ ước của bạn ' : 'Find Your Dream Job ')
-                : (language === 'vi' ? 'Công việc theo ca - Tuyển gấp ' : 'Shift Jobs - Hiring Now ')}
+              {showSavedJobsOnly
+                ? (language === 'vi' ? 'Công việc đã lưu' : 'Saved Jobs')
+                : jobCategory === 'standard' 
+                  ? (language === 'vi' ? 'Tìm công việc mơ ước của bạn ' : 'Find Your Dream Job ')
+                  : (language === 'vi' ? 'Công việc theo ca - Tuyển gấp ' : 'Shift Jobs - Hiring Now ')}
             </HeroTitle>
             <HeroSubtitle>
-              {jobCategory === 'standard'
-                ? (language === 'vi' 
-                    ? `Hơn ${allJobs.filter(j => j.category === 'standard').length} công việc tiêu chuẩn đang chờ bạn khám phá` 
-                    : `Over ${allJobs.filter(j => j.category === 'standard').length} standard jobs waiting for you to explore`)
-                : (language === 'vi'
-                    ? `${allJobs.filter(j => j.category === 'shift').length} công việc theo ca đang tuyển gấp, làm ngay hôm nay!`
-                    : `${allJobs.filter(j => j.category === 'shift').length} shift jobs hiring urgently, start today!`)}
+              {showSavedJobsOnly
+                ? (language === 'vi'
+                    ? `Bạn đang theo dõi ${filteredJobs.length} công việc đã lưu`
+                    : `You are tracking ${filteredJobs.length} saved jobs`)
+                : jobCategory === 'standard'
+                  ? (language === 'vi' 
+                      ? `Hơn ${allJobs.filter(j => j.category === 'standard').length} công việc tiêu chuẩn đang chờ bạn khám phá` 
+                      : `Over ${allJobs.filter(j => j.category === 'standard').length} standard jobs waiting for you to explore`)
+                  : (language === 'vi'
+                      ? `${allJobs.filter(j => j.category === 'shift').length} công việc theo ca đang tuyển gấp, làm ngay hôm nay!`
+                      : `${allJobs.filter(j => j.category === 'shift').length} shift jobs hiring urgently, start today!`)}
             </HeroSubtitle>
             
             <SearchContainer>
@@ -1884,80 +2141,93 @@ const JobListing = () => {
               </SearchButton>
             </SearchContainer>
             
-            {/* Location-based search button - Only for shift jobs */}
+            {/* Location-based search & Job Status - Only for shift jobs */}
             {jobCategory === 'shift' && (
               <motion.div
                 style={{ 
                   marginTop: '16px',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px'
+                  gap: '12px',
+                  flexWrap: 'wrap'
                 }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
               >
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={getUserLocation}
-                disabled={isLoadingLocation}
-                style={{
-                  padding: '12px 24px',
-                  background: showNearbyJobs 
-                    ? 'rgba(16, 185, 129, 0.2)' 
-                    : 'rgba(255, 255, 255, 0.15)',
-                  border: showNearbyJobs 
-                    ? '2px solid rgba(16, 185, 129, 0.5)'
-                    : '2px solid rgba(255, 255, 255, 0.3)',
-                  borderRadius: '12px',
-                  color: 'white',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: isLoadingLocation ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  backdropFilter: 'blur(10px)',
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                {isLoadingLocation ? (
-                  <>
-                    <div style={{ 
-                      width: '16px', 
-                      height: '16px', 
-                      border: '2px solid rgba(255,255,255,0.3)',
-                      borderTop: '2px solid white',
-                      borderRadius: '50%',
-                      animation: 'spin 0.8s linear infinite'
-                    }} />
-                    {language === 'vi' ? 'Đang lấy vị trí...' : 'Getting location...'}
-                  </>
-                ) : (
-                  <>
-                    <Navigation size={16} />
-                    {showNearbyJobs 
-                      ? (language === 'vi' ? 'Vị trí đã bật' : 'Location Enabled') 
-                      : (language === 'vi' ? 'Tìm việc gần tôi' : 'Find Jobs Near Me')}
-                  </>
-                )}
-              </motion.button>
-              
-              {showNearbyJobs && (
-                <motion.span
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  style={{
-                    color: 'rgba(255,255,255,0.9)',
-                    fontSize: '13px',
-                    fontWeight: '500'
-                  }}
+              {/* Job Search Status Toggle */}
+              {!showSavedJobsOnly && (
+                <StatusCard
+                  $active={isAvailable}
+                  as={motion.div}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  {language === 'vi' 
-                    ? `Tìm thấy ${nearbyJobs.length} việc làm trong bán kính ${nearbyRadius}km`
-                    : `Found ${nearbyJobs.length} jobs within ${nearbyRadius}km radius`}
-                </motion.span>
+                  <div className="status-content">
+                    <div className="status-info">
+                      <div className="status-badge">
+                        {isAvailable ? <CheckCircle /> : <XCircle />}
+                        {isAvailable 
+                          ? (language === 'vi' ? 'Trạng thái tìm việc đang bật' : 'Job Search Active')
+                          : (language === 'vi' ? 'Trạng thái tìm việc đang tắt' : 'Job Search Paused')}
+                      </div>
+                    </div>
+                    <ToggleButton
+                      onClick={handleToggleAvailability}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Power />
+                      {isAvailable 
+                        ? (language === 'vi' ? 'Tắt' : 'Pause')
+                        : (language === 'vi' ? 'Bật' : 'Activate')}
+                    </ToggleButton>
+                  </div>
+                </StatusCard>
+              )}
+              
+              {/* Location button - Only show when job search is active */}
+              {isAvailable && (
+                <>
+                  <LocationButton
+                    $active={showNearbyJobs}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={getUserLocation}
+                    disabled={isLoadingLocation}
+                  >
+                    {isLoadingLocation ? (
+                      <>
+                        <div className="spinner" />
+                        {language === 'vi' ? 'Đang lấy vị trí...' : 'Getting location...'}
+                      </>
+                    ) : (
+                      <>
+                        <Navigation size={16} />
+                        {showNearbyJobs 
+                          ? (language === 'vi' ? 'Vị trí đã bật' : 'Location Enabled') 
+                          : (language === 'vi' ? 'Tìm việc gần tôi' : 'Find Jobs Near Me')}
+                      </>
+                    )}
+                  </LocationButton>
+                  
+                  {showNearbyJobs && (
+                    <motion.span
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      style={{
+                        color: 'rgba(255,255,255,0.9)',
+                        fontSize: '13px',
+                        fontWeight: '500'
+                      }}
+                    >
+                      {language === 'vi' 
+                        ? `Tìm thấy ${nearbyJobs.length} việc làm trong bán kính ${nearbyRadius}km`
+                        : `Found ${nearbyJobs.length} jobs within ${nearbyRadius}km radius`}
+                    </motion.span>
+                  )}
+                </>
               )}
               </motion.div>
             )}
@@ -1973,7 +2243,6 @@ const JobListing = () => {
               setQuickFilter('all');
               setShowSavedJobsOnly(false);
               navigate('/candidate/jobs');
-              setTimeout(() => scrollToResults(), 100);
             }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -1992,7 +2261,6 @@ const JobListing = () => {
               setQuickFilter('all');
               setShowSavedJobsOnly(false);
               navigate('/candidate/jobs');
-              setTimeout(() => scrollToResults(), 100);
             }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -2008,7 +2276,6 @@ const JobListing = () => {
             $active={showSavedJobsOnly}
             onClick={() => {
               setShowSavedJobsOnly(true);
-              setTimeout(() => scrollToResults(), 100);
             }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -2270,13 +2537,19 @@ const JobListing = () => {
             <ContentHeader>
               <ResultsInfo>
                 <h2>
-                  {jobCategory === 'standard' 
-                    ? (language === 'vi' ? 'Công việc tiêu chuẩn' : 'Standard Jobs')
-                    : (language === 'vi' ? 'Công việc theo ca' : 'Shift Jobs')}
+                  {showSavedJobsOnly
+                    ? (language === 'vi' ? 'Công việc đã lưu' : 'Saved Jobs')
+                    : jobCategory === 'standard' 
+                      ? (language === 'vi' ? 'Công việc tiêu chuẩn' : 'Standard Jobs')
+                      : (language === 'vi' ? 'Công việc theo ca' : 'Shift Jobs')}
                 </h2>
                 <p>{language === 'vi' 
-                  ? `Tìm thấy ${filteredJobs.length} công việc phù hợp`
-                  : `Found ${filteredJobs.length} matching jobs`}</p>
+                  ? (showSavedJobsOnly
+                      ? `Bạn đang theo dõi ${filteredJobs.length} công việc đã lưu`
+                      : `Tìm thấy ${filteredJobs.length} công việc phù hợp`)
+                  : (showSavedJobsOnly
+                      ? `You are tracking ${filteredJobs.length} saved jobs`
+                      : `Found ${filteredJobs.length} matching jobs`)}</p>
               </ResultsInfo>
               
               <ViewControls>
@@ -2324,7 +2597,19 @@ const JobListing = () => {
                   gridColumn: '1 / -1',
                   color: '#6b7280'
                 }}>
-                  {jobCategory === 'shift' && !showNearbyJobs ? (
+                  {showSavedJobsOnly ? (
+                    <>
+                      <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔖</div>
+                      <p style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
+                        {language === 'vi' ? 'Bạn chưa lưu công việc nào' : "You haven't saved any jobs yet"}
+                      </p>
+                      <p style={{ fontSize: '15px', color: '#6b7280' }}>
+                        {language === 'vi'
+                          ? 'Nhấn vào biểu tượng lưu ở tin tuyển dụng mà bạn quan tâm để thêm vào danh sách.'
+                          : 'Click the save icon on any job to add it here.'}
+                      </p>
+                    </>
+                  ) : jobCategory === 'shift' && !showNearbyJobs ? (
                     <>
                       <div style={{ fontSize: '48px', marginBottom: '16px' }}>📍</div>
                       <p style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
@@ -2360,6 +2645,43 @@ const JobListing = () => {
           </MainContent>
         </MainLayout>
       </Container>
+
+      {/* Confirmation Modal */}
+      <Modal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        title=""
+      >
+        <ConfirmationContent $isActive={isAvailable}>
+          <div className="icon-wrapper">
+            {isAvailable ? <XCircle /> : <CheckCircle />}
+          </div>
+          <h3>
+            {isAvailable
+              ? (language === 'vi' ? 'Tắt tìm việc?' : 'Pause Job Search?')
+              : (language === 'vi' ? 'Bật tìm việc?' : 'Activate Job Search?')}
+          </h3>
+          <p>
+            {isAvailable
+              ? (language === 'vi'
+                  ? 'Hồ sơ của bạn sẽ bị ẩn với nhà tuyển dụng và bạn sẽ không nhận được thông báo về cơ hội việc làm.'
+                  : 'Your profile will be hidden from employers and you will not receive job opportunity notifications.')
+              : (language === 'vi'
+                  ? 'Hồ sơ của bạn sẽ hiển thị với nhà tuyển dụng và bạn sẽ nhận được thông báo về cơ hội việc làm phù hợp.'
+                  : 'Your profile will be visible to employers and you will receive notifications about suitable job opportunities.')}
+          </p>
+          <div className="button-group">
+            <button className="cancel" onClick={() => setShowConfirmModal(false)}>
+              {language === 'vi' ? 'Hủy' : 'Cancel'}
+            </button>
+            <button className="confirm" onClick={confirmToggle}>
+              {isAvailable
+                ? (language === 'vi' ? 'Tắt ngay' : 'Pause Now')
+                : (language === 'vi' ? 'Bật ngay' : 'Activate Now')}
+            </button>
+          </div>
+        </ConfirmationContent>
+      </Modal>
     </DashboardLayout>
   );
 };

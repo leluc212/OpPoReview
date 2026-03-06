@@ -28,34 +28,63 @@ const PageContainer = styled.div`
 `;
 
 const PageHeader = styled.div`
-  margin-bottom: 32px;
-  
-  h1 {
-    font-size: 32px;
-    font-weight: 800;
-    margin-bottom: 8px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+`;
+
+const PageTitleGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+`;
+
+const PageIconBox = styled.div`
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  background: #EFF6FF;
+  border: 1.5px solid #BFDBFE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 24px;
+    height: 24px;
+    color: #1e40af;
   }
-  
+`;
+
+const PageTitleText = styled.div`
+  h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: ${props => props.theme.colors.text};
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
   p {
     color: ${props => props.theme.colors.textLight};
-    font-size: 15px;
+    font-size: 13.5px;
     font-weight: 500;
   }
 `;
 
 const BalanceCard = styled(motion.div)`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 24px;
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+  border-radius: 16px;
   padding: 40px;
   margin-bottom: 32px;
   color: white;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 20px 60px ${props => props.theme.colors.primary}30;
   border: 2px solid rgba(255, 255, 255, 0.1);
   
   &::before {
@@ -153,16 +182,16 @@ const Grid = styled.div`
 `;
 
 const Card = styled(motion.div)`
-  background: ${props => props.theme.colors.bgLight};
-  border: 2px solid ${props => props.theme.colors.border};
-  border-radius: 20px;
+  background: #ffffff;
+  border: 1.5px solid #E8EFFF;
+  border-radius: 16px;
   padding: 28px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.04);
+  transition: all 0.22s ease;
   
   &:hover {
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
-    border-color: ${props => props.theme.colors.primary}40;
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.12);
+    border-color: #BFDBFE;
   }
   
   h3 {
@@ -177,7 +206,7 @@ const Card = styled(motion.div)`
     svg {
       width: 22px;
       height: 22px;
-      color: ${props => props.theme.colors.primary};
+      color: #1e40af;
     }
   }
 `;
@@ -193,35 +222,34 @@ const TransactionItem = styled(motion.div)`
   justify-content: space-between;
   align-items: center;
   padding: 18px;
-  background: ${props => props.theme.colors.bgLight};
+  background: #ffffff;
   border-radius: 16px;
-  border: 2px solid transparent;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1.5px solid #E8EFFF;
+  transition: all 0.22s ease;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.04);
   
   &:hover {
-    background: ${props => props.theme.colors.bgDark};
-    border-color: ${props => props.$type === 'income' ? '#10B981' : '#EF4444'};
-    transform: translateX(6px);
+    background: #f8fafc;
+    border-color: ${props => props.$type === 'income' ? '#86efac' : '#fca5a5'};
+    transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
   }
 `;
 
 const TransactionIcon = styled.div`
-  width: 50px;
-  height: 50px;
+  width: 46px;
+  height: 46px;
   border-radius: 14px;
-  background: ${props => props.$type === 'income' 
-    ? 'linear-gradient(135deg, #10B98120 0%, #10B98130 100%)' 
-    : 'linear-gradient(135deg, #EF444420 0%, #EF444430 100%)'};
+  background: ${props => props.$type === 'income' ? '#dcfce7' : '#fee2e2'};
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid ${props => props.$type === 'income' ? '#10B98140' : '#EF444440'};
+  border: 1.5px solid ${props => props.$type === 'income' ? '#bbf7d0' : '#fecaca'};
   
   svg {
-    width: 24px;
-    height: 24px;
-    color: ${props => props.$type === 'income' ? '#10B981' : '#EF4444'};
+    width: 22px;
+    height: 22px;
+    color: ${props => props.$type === 'income' ? '#16a34a' : '#ef4444'};
   }
 `;
 
@@ -249,11 +277,11 @@ const TransactionDetails = styled.div`
 const TransactionAmount = styled.div`
   font-size: 18px;
   font-weight: 800;
-  color: ${props => props.$type === 'income' ? '#10B981' : '#EF4444'};
-  background: ${props => props.$type === 'income' ? '#10B98110' : '#EF444410'};
+  color: ${props => props.$type === 'income' ? props.theme.colors.success : props.theme.colors.error};
+  background: ${props => props.$type === 'income' ? props.theme.colors.successBg : props.theme.colors.errorBg};
   padding: 8px 16px;
   border-radius: 10px;
-  border: 1px solid ${props => props.$type === 'income' ? '#10B98130' : '#EF444430'};
+  border: 1px solid ${props => props.$type === 'income' ? props.theme.colors.success + '30' : props.theme.colors.error + '30'};
 `;
 
 const StatsList = styled.div`
@@ -264,15 +292,15 @@ const StatsList = styled.div`
 
 const StatItem = styled(motion.div)`
   padding: 24px;
-  background: linear-gradient(135deg, ${props => props.theme.colors.bgLight} 0%, white 100%);
+  background: ${props => props.theme.colors.bgLight};
   border-radius: 16px;
   border-left: 5px solid ${props => props.$color || props.theme.colors.primary};
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: ${props => props.theme.shadows.sm};
   transition: all 0.3s ease;
   
   &:hover {
     transform: translateX(6px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    box-shadow: ${props => props.theme.shadows.md};
     border-left-width: 8px;
   }
   
@@ -302,15 +330,16 @@ const ReceiptItem = styled(motion.div)`
   justify-content: space-between;
   align-items: center;
   padding: 18px;
-  border: 2px solid ${props => props.theme.colors.border};
+  border: 1.5px solid #E8EFFF;
   border-radius: 16px;
-  background: ${props => props.theme.colors.bgLight};
-  transition: all 0.3s ease;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.04);
+  transition: all 0.22s ease;
   
   &:hover {
-    border-color: ${props => props.theme.colors.primary};
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.15);
-    transform: translateY(-3px);
+    border-color: #BFDBFE;
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.12);
+    transform: translateY(-2px);
   }
 `;
 
@@ -319,12 +348,12 @@ const ReceiptInfo = styled.div`
   align-items: center;
   gap: 12px;
   
-  .icon {
+    .icon {
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    background: linear-gradient(135deg, ${props => props.theme.colors.primary}20 0%, ${props => props.theme.colors.primary}10 100%);
-    border: 2px solid ${props => props.theme.colors.primary}30;
+    background: #EFF6FF;
+    border: 1.5px solid #BFDBFE;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -332,7 +361,7 @@ const ReceiptInfo = styled.div`
     svg {
       width: 20px;
       height: 20px;
-      color: ${props => props.theme.colors.primary};
+      color: #1e40af;
     }
   }
   
@@ -353,7 +382,7 @@ const ReceiptInfo = styled.div`
 
 const DownloadButton = styled(motion.button)`
   padding: 10px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, ${props => props.theme.colors.primary} 0%, #1e40af 100%);
   color: white;
   border: none;
   border-radius: 12px;
@@ -364,11 +393,11 @@ const DownloadButton = styled(motion.button)`
   align-items: center;
   gap: 8px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px ${props => props.theme.colors.primary}30;
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 20px ${props => props.theme.colors.primary}40;
   }
   
   svg {
@@ -477,8 +506,15 @@ const EmployerWallet = () => {
     <DashboardLayout role="employer">
       <PageContainer>
         <PageHeader>
-          <h1>{language === 'vi' ? 'Ví điện tử' : 'Wallet'}</h1>
-          <p>{language === 'vi' ? 'Quản lý tài chính và giao dịch của bạn' : 'Manage your finances and transactions'}</p>
+          <PageTitleGroup>
+            <PageIconBox>
+              <WalletIcon />
+            </PageIconBox>
+            <PageTitleText>
+              <h1>{language === 'vi' ? 'Ví điện tử' : 'Wallet'}</h1>
+              <p>{language === 'vi' ? 'Quản lý tài chính và giao dịch của bạn' : 'Manage your finances and transactions'}</p>
+            </PageTitleText>
+          </PageTitleGroup>
         </PageHeader>
 
         <BalanceCard
@@ -555,7 +591,7 @@ const EmployerWallet = () => {
                     </TransactionDetails>
                   </TransactionInfo>
                   <TransactionAmount $type={transaction.type}>
-                    {transaction.type === 'income' ? '+' : ''}
+                    {transaction.type === 'income' ? '+' : '-'}
                     {formatCurrency(Math.abs(transaction.amount))}
                   </TransactionAmount>
                 </TransactionItem>
