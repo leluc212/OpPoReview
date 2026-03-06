@@ -570,7 +570,7 @@ const EmployerSettings = () => {
                 </Button>
                 <Button variant="danger" onClick={handleDeleteAccount}>
                   <Trash2 size={18} />
-                  {language === 'vi' ? 'Xóa tài khoản vĩnh viễn' : 'Delete Account Permanently'}
+                  {language === 'vi' ? 'Xóa tài khoản ' : 'Delete Account '}
                 </Button>
               </ButtonGroup>
             </DangerZone>

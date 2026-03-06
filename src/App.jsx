@@ -28,6 +28,8 @@ import Support from './pages/candidate/Support';
 import Wallet from './pages/candidate/Wallet';
 import Availability from './pages/candidate/Availability';
 import CandidatePosts from './pages/candidate/CandidatePosts';
+import ChangePassword from './pages/candidate/ChangePassword';
+import DeleteAccount from './pages/candidate/DeleteAccount';
 
 // Employer Pages
 import EmployerDashboard from './pages/employer/EmployerDashboard';
@@ -141,6 +143,16 @@ function AppRoutes() {
       <Route path="/candidate/posts" element={
         <ProtectedRoute allowedRoles={['candidate']}>
           <CandidatePosts />
+        </ProtectedRoute>
+      } />
+      <Route path="/candidate/change-password" element={
+        <ProtectedRoute allowedRoles={['candidate']}>
+          <ChangePassword />
+        </ProtectedRoute>
+      } />
+      <Route path="/candidate/delete-account" element={
+        <ProtectedRoute allowedRoles={['candidate']}>
+          <DeleteAccount />
         </ProtectedRoute>
       } />
       

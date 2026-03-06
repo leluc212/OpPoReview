@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -22,12 +23,9 @@ import {
   Phone,
   Key,
   Download,
-  AlertTriangle,
   ChevronRight,
-  Check,
-  X
+  Check
 } from 'lucide-react';
-import { Button, FormGroup, Label, Input } from '../../components/FormElements';
 
 const SettingsContainer = styled.div`
   max-width: 1400px;
@@ -319,76 +317,6 @@ const LanguageButton = styled(motion.button)`
   }
 `;
 
-const PasswordForm = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 24px;
-  background: ${props => props.theme.colors.bgDark};
-  border-radius: ${props => props.theme.borderRadius.lg};
-  border: 1px solid ${props => props.theme.colors.border};
-`;
-
-const InfoBox = styled(motion.div)`
-  background: ${props => {
-    if (props.$type === 'warning') return 'linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.12) 100%)';
-    if (props.$type === 'success') return 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.12) 100%)';
-    return 'linear-gradient(135deg, rgba(30, 64, 175, 0.12) 0%, rgba(30, 64, 175, 0.12) 100%)';
-  }};
-  border-left: 5px solid ${props => {
-    if (props.$type === 'warning') return '#EF4444';
-    if (props.$type === 'success') return '#10B981';
-    return props.theme.colors.primary;
-  }};
-  padding: 24px;
-  border-radius: ${props => props.theme.borderRadius.lg};
-  box-shadow: 0 2px 12px ${props => {
-    if (props.$type === 'warning') return 'rgba(239, 68, 68, 0.1)';
-    if (props.$type === 'success') return 'rgba(16, 185, 129, 0.1)';
-    return 'rgba(30, 64, 175, 0.1)';
-  }};
-  transition: all 0.3s ease;
-  
-  &:hover {
-    transform: translateX(4px);
-    box-shadow: 0 4px 20px ${props => {
-      if (props.$type === 'warning') return 'rgba(239, 68, 68, 0.15)';
-      if (props.$type === 'success') return 'rgba(16, 185, 129, 0.15)';
-      return 'rgba(30, 64, 175, 0.15)';
-    }};
-  }
-  
-  .info-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 10px;
-    
-    svg {
-      width: 24px;
-      height: 24px;
-      color: ${props => {
-        if (props.$type === 'warning') return '#EF4444';
-        if (props.$type === 'success') return '#10B981';
-        return props.theme.colors.primary;
-      }};
-    }
-    
-    h4 {
-      font-size: 16px;
-      font-weight: 700;
-      color: ${props => props.theme.colors.text};
-    }
-  }
-  
-  p {
-    font-size: 14px;
-    color: ${props => props.theme.colors.textLight};
-    line-height: 1.8;
-    margin-left: 38px;
-  }
-`;
-
 const PolicyItem = styled(motion.div)`
   display: flex;
   justify-content: space-between;
@@ -521,18 +449,7 @@ function CandidateSettings() {
     showPhone: false
   });
   
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-  
-  const [showSavedMessage, setShowSavedMessage] = useState(false);
-  const [showPassword, setShowPassword] = useState({
-    current: false,
-    new: false,
-    confirm: false
-  });
+  const navigate = useNavigate();
 
   const handleNotificationToggle = (key) => {
     setNotifications(prev => ({
@@ -548,16 +465,7 @@ function CandidateSettings() {
     }));
   };
   
-  const handlePasswordChange = (e) => {
-    e.preventDefault();
-    setShowSavedMessage(true);
-    setTimeout(() => setShowSavedMessage(false), 3000);
-    setPasswordData({
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
-    });
-  };
+
 
   return (
     <DashboardLayout role="candidate" showSearch={false}>
@@ -646,11 +554,60 @@ function CandidateSettings() {
               </SettingItem>
             </Card>
 
-            {/* Notifications */}
+            {/* Account & Password */}
             <Card
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <div className="card-header">
+                <h2><Lock />{language === 'vi' ? 'Tài khoản và mật khẩu' : 'Account & Password'}</h2>
+              </div>
+              
+              <SettingItem
+                $color="#1e40af"
+                whileHover={{ scale: 1.01 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => navigate('/candidate/change-password')}
+                style={{ cursor: 'pointer' }}
+              >
+                <div className="setting-left">
+                  <div className="icon-wrapper">
+                    <Key />
+                  </div>
+                  <div className="setting-info">
+                    <h3>{language === 'vi' ? 'Đổi mật khẩu' : 'Change Password'}</h3>
+                    <p>{language === 'vi' ? 'Cập nhật mật khẩu để bảo mật tài khoản' : 'Update your password to secure your account'}</p>
+                  </div>
+                </div>
+                <ChevronRight />
+              </SettingItem>
+              
+              <SettingItem
+                $color="#EF4444"
+                whileHover={{ scale: 1.01 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => navigate('/candidate/delete-account')}
+                style={{ cursor: 'pointer' }}
+              >
+                <div className="setting-left">
+                  <div className="icon-wrapper">
+                    <Trash2 />
+                  </div>
+                  <div className="setting-info">
+                    <h3>{language === 'vi' ? 'Xóa tài khoản' : 'Delete Account'}</h3>
+                    <p>{language === 'vi' ? 'Xóa vĩnh viễn tài khoản và dữ liệu của bạn' : 'Permanently delete your account and data'}</p>
+                  </div>
+                </div>
+                <ChevronRight />
+              </SettingItem>
+            </Card>
+
+            {/* Notifications */}
+            <Card
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
             >
               <div className="card-header">
                 <h2><Bell />{t.settings.notifications}</h2>
@@ -733,7 +690,7 @@ function CandidateSettings() {
             <Card
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
             >
               <div className="card-header">
                 <h2><Shield />{t.settings.privacy}</h2>
@@ -816,7 +773,7 @@ function CandidateSettings() {
             <Card
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
             >
               <div className="card-header">
                 <h2><FileText />{language === 'vi' ? 'Chính sách & điều khoản' : 'Policy & Terms'}</h2>
@@ -896,7 +853,7 @@ function CandidateSettings() {
           </MainContent>
 
           <Sidebar>
-            {/* Security, Overview, and Danger Zone cards hidden */}
+            {/* Sidebar hidden */}
           </Sidebar>
         </ContentGrid>
       </SettingsContainer>
