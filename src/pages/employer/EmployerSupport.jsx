@@ -1,32 +1,61 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import { Input, TextArea, Label, Button } from '../../components/FormElements';
-import { HelpCircle, Mail, Phone, Clock, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
+import { HelpCircle, Mail, Phone, Clock, MessageSquare, ChevronDown, ChevronUp, LifeBuoy } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
-const PageContainer = styled.div`
-  animation: fadeIn 0.5s ease-in;
-  
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+const PageContainer = styled(motion.div)`
+  width: 100%;
 `;
 
 const PageHeader = styled.div`
-  margin-bottom: 32px;
-  
-  h1 {
-    font-size: 32px;
-    font-weight: 800;
-    margin-bottom: 8px;
-    color: ${props => props.theme.colors.primary};
+  margin-bottom: 28px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+`;
+
+const PageTitleGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+`;
+
+const PageIconBox = styled.div`
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  background: #EFF6FF;
+  border: 1.5px solid #BFDBFE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 24px;
+    height: 24px;
+    color: #1e40af;
   }
-  
+`;
+
+const PageTitleText = styled.div`
+  h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: ${props => props.theme.colors.text};
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
   p {
     color: ${props => props.theme.colors.textLight};
-    font-size: 16px;
+    font-size: 13.5px;
+    font-weight: 500;
   }
 `;
 
@@ -46,15 +75,17 @@ const MainContent = styled.div`
   gap: 24px;
 `;
 
-const Card = styled.div`
-  background: ${props => props.theme.colors.bgLight};
-  border: 1px solid ${props => props.theme.colors.border};
-  border-radius: ${props => props.theme.borderRadius.lg};
+const Card = styled(motion.div)`
+  background: #ffffff;
+  border: 1.5px solid #E8EFFF;
+  border-radius: 16px;
   padding: 28px;
-  transition: all ${props => props.theme.transitions.normal};
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.04);
+  transition: all 0.22s ease;
   
   &:hover {
-    box-shadow: ${props => props.theme.shadows.md};
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.12);
+    border-color: #BFDBFE;
   }
 `;
 
@@ -64,28 +95,29 @@ const CardHeader = styled.div`
   gap: 16px;
   margin-bottom: 24px;
   padding-bottom: 20px;
-  border-bottom: 1px solid ${props => props.theme.colors.border};
+  border-bottom: 1.5px solid #E8EFFF;
   
   .icon {
-    width: 48px;
-    height: 48px;
-    border-radius: ${props => props.theme.borderRadius.md};
-    background: ${props => props.theme.colors.gradientPrimary};
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #EFF6FF;
+    border: 1.5px solid #BFDBFE;
     display: flex;
     align-items: center;
     justify-content: center;
     
     svg {
-      width: 24px;
-      height: 24px;
-      color: white;
+      width: 20px;
+      height: 20px;
+      color: #1e40af;
     }
   }
   
   h2 {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
-    color: ${props => props.theme.colors.text};
+    color: #1E293B;
   }
 `;
 
@@ -96,13 +128,15 @@ const FAQList = styled.div`
 `;
 
 const FAQItem = styled.div`
-  border: 1px solid ${props => props.theme.colors.border};
-  border-radius: ${props => props.theme.borderRadius.md};
+  border: 1.5px solid ${props => props.$isOpen ? '#BFDBFE' : '#E8EFFF'};
+  border-radius: 12px;
   overflow: hidden;
-  transition: all ${props => props.theme.transitions.normal};
+  transition: all 0.22s ease;
+  background: ${props => props.$isOpen ? '#FAFBFF' : '#ffffff'};
   
   &:hover {
-    border-color: ${props => props.theme.colors.primary};
+    border-color: #BFDBFE;
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.05);
   }
 `;
 
@@ -112,36 +146,31 @@ const FAQQuestion = styled.div`
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  background: ${props => props.$isOpen ? props.theme.colors.bgDark : props.theme.colors.bgLight};
-  transition: all ${props => props.theme.transitions.fast};
+  background: transparent;
+  transition: all 0.22s ease;
   
   h4 {
     font-size: 15px;
-    font-weight: 600;
-    color: ${props => props.theme.colors.text};
+    font-weight: 700;
+    color: #1E293B;
   }
   
   svg {
     width: 20px;
     height: 20px;
-    color: ${props => props.theme.colors.primary};
-    transition: transform ${props => props.theme.transitions.fast};
-  }
-  
-  &:hover {
-    background: ${props => props.theme.colors.bgLight};
+    color: #1e40af;
+    transition: transform 0.2s ease;
   }
 `;
 
 const FAQAnswer = styled.div`
-  padding: ${props => props.$isOpen ? '16px 20px' : '0 20px'};
+  padding: ${props => props.$isOpen ? '0 20px 20px 20px' : '0 20px'};
   max-height: ${props => props.$isOpen ? '500px' : '0'};
   overflow: hidden;
-  transition: all ${props => props.theme.transitions.normal};
-  color: ${props => props.theme.colors.textLight};
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #475569;
   font-size: 14px;
   line-height: 1.6;
-  border-top: ${props => props.$isOpen ? `1px solid ${props.theme.colors.border}` : 'none'};
 `;
 
 const FormGroup = styled.div`
@@ -165,38 +194,48 @@ const ContactItem = styled.div`
   padding: 16px 0;
   
   &:not(:last-child) {
-    border-bottom: 1px solid ${props => props.theme.colors.borderLight};
+    border-bottom: 1.5px dashed #E8EFFF;
   }
   
   .icon {
-    width: 40px;
-    height: 40px;
-    border-radius: ${props => props.theme.borderRadius.md};
-    background: ${props => props.theme.colors.bgLight};
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #EFF6FF;
+    border: 1.5px solid #BFDBFE;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    transition: all 0.2s ease;
     
     svg {
       width: 20px;
       height: 20px;
-      color: ${props => props.theme.colors.primary};
+      color: #1e40af;
     }
   }
   
   .info {
+    flex: 1;
     h4 {
       font-size: 14px;
-      font-weight: 600;
-      color: ${props => props.theme.colors.text};
+      font-weight: 700;
+      color: #1E293B;
       margin-bottom: 4px;
     }
     
     p {
-      font-size: 14px;
-      color: ${props => props.theme.colors.textLight};
+      font-size: 13.5px;
+      color: #475569;
+      line-height: 1.5;
     }
+  }
+  
+  &:hover .icon {
+    background: #1e40af;
+    border-color: #1e40af;
+    svg { color: white; }
   }
 `;
 
@@ -247,10 +286,21 @@ const EmployerSupport = () => {
 
   return (
     <DashboardLayout role="employer">
-      <PageContainer>
+      <PageContainer
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
         <PageHeader>
-          <h1>{language === 'vi' ? 'Trung tâm hỗ trợ' : 'Support Center'}</h1>
-          <p>{language === 'vi' ? 'Chúng tôi luôn sẵn sàng hỗ trợ bạn' : 'We are always ready to support you'}</p>
+          <PageTitleGroup>
+            <PageIconBox>
+              <LifeBuoy />
+            </PageIconBox>
+            <PageTitleText>
+              <h1>{language === 'vi' ? 'Trung tâm hỗ trợ' : 'Support Center'}</h1>
+              <p>{language === 'vi' ? 'Chúng tôi luôn sẵn sàng hỗ trợ bạn' : 'We are always ready to support you'}</p>
+            </PageTitleText>
+          </PageTitleGroup>
         </PageHeader>
 
         <ContentGrid>

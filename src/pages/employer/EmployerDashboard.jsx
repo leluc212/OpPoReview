@@ -16,6 +16,7 @@ import {
   Calendar, 
   MessageSquare,
   BarChart3,
+  Landmark,
   CheckCircle,
   Clock,
   AlertCircle,
@@ -59,7 +60,9 @@ const DashboardContainer = styled.div`
 `;
 
 const WelcomeBanner = styled(motion.div)`
-  background: ${props => props.theme.colors.primary};
+  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/images/katinatQ8.jpg');
+  background-size: cover;
+  background-position: center;
   border-radius: ${props => props.theme.borderRadius.xl};
   padding: 40px;
   margin-bottom: 32px;
@@ -69,28 +72,6 @@ const WelcomeBanner = styled(motion.div)`
   position: relative;
   overflow: hidden;
   box-shadow: 0 20px 60px ${props => props.theme.colors.primary}30;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -10%;
-    width: 400px;
-    height: 400px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-  }
-  
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -30%;
-    right: 20%;
-    width: 300px;
-    height: 300px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 50%;
-  }
 `;
 
 const WelcomeContent = styled.div`
@@ -145,11 +126,19 @@ const ActionButton = styled(motion.button)`
 const IllustrationContainer = styled.div`
   position: relative;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   
-  svg {
-    width: 200px;
-    height: 200px;
-    animation: ${float} 3s ease-in-out infinite;
+  img {
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    border: 5px solid rgba(255,255,255,0.25);
+    animation: ${float} 4s ease-in-out infinite;
+    backdrop-filter: blur(4px);
   }
 `;
 
@@ -406,23 +395,23 @@ const EmployerDashboard = () => {
   const getRecentApplications = () => [
     { 
       id: 1,
-      candidate: language === 'vi' ? 'Nguyễn Văn Hiếu' : 'Nguyen Van Hieu', 
-      job: 'Senior React Developer', 
+      candidate: language === 'vi' ? 'Hiếu sàn' : 'Hieu san', 
+      job: language === 'vi' ? 'Cửa hàng trưởng' : 'Store Manager', 
       applied: language === 'vi' ? '2 giờ trước' : '2 hours ago',
       status: 'pending',
       avatar: 'H'
     },
     { 
       id: 2,
-      candidate: language === 'vi' ? 'Trần Minh Duy' : 'Tran Minh Duy', 
+      candidate: language === 'vi' ? 'Duy sàn' : 'Duy san', 
       job: language === 'vi' ? 'Thu ngân' : 'Cashier',
       applied: language === 'vi' ? '5 giờ trước' : '5 hours ago',
-      status: 'reviewed',
+      status: 'pending',
       avatar: 'D'
     },
     { 
       id: 3,
-      candidate: language === 'vi' ? 'Lê Thị Nheo' : 'Le Thi Nheo', 
+      candidate: 'Nheo', 
       job: language === 'vi' ? 'Nhân viên pha chế' : 'Barista',
       applied: language === 'vi' ? '1 ngày trước' : '1 day ago',
       status: 'approved',
@@ -449,7 +438,7 @@ const EmployerDashboard = () => {
       type: 'job',
       icon: Briefcase,
       color: '#10B981',
-      title: language === 'vi' ? 'Tin "Senior React Developer" đã được duyệt' : 'Job "Senior React Developer" approved',
+      title: language === 'vi' ? 'Tin "Cửa hàng trưởng" đã được duyệt' : 'Job "Store Manager" approved',
       time: language === 'vi' ? '2 giờ trước' : '2 hours ago'
     },
     {
@@ -485,7 +474,7 @@ const EmployerDashboard = () => {
           transition={{ duration: 0.5 }}
         >
           <WelcomeContent>
-            <h1>{getGreeting()}, {user?.name || (language === 'vi' ? 'Nhà Tuyển Dụng' : 'Employer')}! 👋</h1>
+            <h1>{getGreeting()}, {user?.role === 'employer' ? (language === 'vi' ? 'Katinat Quận 8' : 'Katinat District 8') : (user?.name || 'User')}! 👋</h1>
             <p>{language === 'vi' ? 'Hôm nay bạn có 3 ứng viên mới và 5 tin nhắn cần xem' : 'You have 3 new candidates and 5 messages to review'}</p>
             <QuickActions>
               <ActionButton
@@ -510,7 +499,7 @@ const EmployerDashboard = () => {
             </QuickActions>
           </WelcomeContent>
           <IllustrationContainer>
-            <BarChart3 size={200} color="rgba(255,255,255,0.3)" />
+            <img src="/images/katinatlogo.jpg" alt="Katinat Logo" />
           </IllustrationContainer>
         </WelcomeBanner>
 

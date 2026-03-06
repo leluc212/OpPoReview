@@ -18,9 +18,9 @@ const translateLocation = (locationStr, language) => {
   if (language === 'vi') return locationStr;
   return locationStr
     .replace(/Quận/g, 'District')
-    .replace(/TP\.HCM/g, 'HCMC')
-    .replace(/Hà Nội/g, 'Hanoi')
-    .replace(/Đà Nẵng/g, 'Da Nang')
+    .replace(/Quận 1/g, 'District 1')
+    .replace(/Quận 3/g, 'District 3')
+    .replace(/Quận 7/g, 'District 7')
     .replace(/Tân Bình/g, 'Tan Binh')
     .replace(/Phú Nhuận/g, 'Phu Nhuan');
 };
@@ -283,7 +283,7 @@ const BookmarkButton = styled(motion.button)`
 
 const JobCard = ({ job, onClick, onSave, saved = false }) => {
   const { language } = useLanguage();
-  
+
   const handleSaveClick = (e) => {
     e.stopPropagation();
     onSave && onSave(job.id);
@@ -311,7 +311,7 @@ const JobCard = ({ job, onClick, onSave, saved = false }) => {
             <CompanyName>{job.company}</CompanyName>
             <TagsContainer>
               {job.tags && job.tags.map((tag, index) => (
-                <Tag 
+                <Tag
                   key={index}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
@@ -322,8 +322,8 @@ const JobCard = ({ job, onClick, onSave, saved = false }) => {
             </TagsContainer>
           </CardContent>
         </div>
-        <BookmarkButton 
-          onClick={handleSaveClick} 
+        <BookmarkButton
+          onClick={handleSaveClick}
           $saved={saved}
           whileHover={{ scale: 1.15, rotate: 10 }}
           whileTap={{ scale: 1.05 }}
@@ -331,7 +331,7 @@ const JobCard = ({ job, onClick, onSave, saved = false }) => {
           <Bookmark fill={saved ? 'white' : 'none'} />
         </BookmarkButton>
       </CardHeader>
-      
+
       <JobDetails>
         <DetailItem whileHover={{ x: 4 }}>
           <MapPin />

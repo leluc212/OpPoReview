@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Bell, Search, LogOut, User } from 'lucide-react';
@@ -189,6 +189,15 @@ const Navbar = ({ showSearch = true }) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [companyLogo, setCompanyLogo] = useState(() => localStorage.getItem('companyLogo') || '/images/katinatlogo.jpg');
+
+  useEffect(() => {
+    const handleLogoChange = () => {
+      setCompanyLogo(localStorage.getItem('companyLogo') || '/images/katinatlogo.jpg');
+    };
+    window.addEventListener('logoChanged', handleLogoChange);
+    return () => window.removeEventListener('logoChanged', handleLogoChange);
+  }, []);
   
   const getRoleTranslation = (role) => {
     if (role === 'candidate') return t.login.roleCandidate;
@@ -249,10 +258,14 @@ const Navbar = ({ showSearch = true }) => {
         
         <UserMenu>
           <Avatar>
-            {user?.name?.charAt(0).toUpperCase() || 'U'}
+            {user?.role === 'employer' ? (
+              <img src={companyLogo} alt="Logo" style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
+            ) : (
+              user?.name?.charAt(0).toUpperCase() || 'U'
+            )}
           </Avatar>
           <UserInfo>
-            <span>{user?.name || 'User'}</span>
+            <span>{user?.role === 'employer' ? 'Katinat Quận 8' : (user?.name || 'User')}</span>
             <span>{getRoleTranslation(user?.role) || 'Role'}</span>
           </UserInfo>
         </UserMenu>

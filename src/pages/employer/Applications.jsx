@@ -13,7 +13,7 @@ const getInitialApplications = (language) => [
   {
     id: 1,
     candidate: language === 'vi' ? 'Hiếu sàn' : 'Hieu san',
-    job: 'Senior React Developer',
+    job: language === 'vi' ? 'Cửa hàng trưởng' : 'Store Manager',
     applied: language === 'vi' ? '2 giờ trước' : '2 hours ago',
     status: 'pending',
     completed: false,
@@ -23,12 +23,12 @@ const getInitialApplications = (language) => [
     phone: '0123 456 789',
     location: language === 'vi' ? 'Quận 1, TP.HCM' : 'District 1, HCMC',
     experience: language === 'vi' ? '5 năm' : '5 years',
-    education: language === 'vi' ? 'Đại học Bách Khoa' : 'HCM University of Science and Technology',
-    skills: language === 'vi' ? ['React', 'Node.js', 'TypeScript', 'MongoDB', 'AWS'] : ['React', 'Node.js', 'TypeScript', 'MongoDB', 'AWS'],
-    bio: language === 'vi' ? 'Tôi là một Senior Developer với 5 năm kinh nghiệm trong phát triển web. Đam mê công nghệ và luôn học hỏi những điều mới.' : 'I am a Senior Developer with 5 years of experience in web development. Passionate about technology and continuously learning.',
+    education: language === 'vi' ? 'Đại học Kinh Tế' : 'University of Economics',
+    skills: language === 'vi' ? ['Quản lý vận hành', 'Đào tạo nhân sự', 'Quản lý tồn kho', 'Pha chế', 'Chăm sóc khách hàng'] : ['Operations management', 'Staff training', 'Inventory management', 'Barista', 'Customer service'],
+    bio: language === 'vi' ? 'Tôi có 5 năm kinh nghiệm quản lý các chuỗi F&B lớn. Làm việc với niềm đam mê và luôn muốn xây dựng văn hóa làm việc tích cực cho cửa hàng.' : 'I have 5 years of experience managing large F&B chains. Working with passion to build a positive store culture.',
     reviews: [
-      { id: 1, employer: language === 'vi' ? 'Công ty TNHH TechSoft' : 'TechSoft Ltd.', position: 'React Developer', rating: 5, date: language === 'vi' ? 'Tháng 11/2024' : 'Nov 2024', comment: language === 'vi' ? 'Nhân viên xuất sắc, làm việc chủ động và sáng tạo. Luôn hoàn thành công việc đúng hạn.' : 'Outstanding employee, proactive and creative. Always delivers on time.' },
-      { id: 2, employer: language === 'vi' ? 'Startup ABC Việt Nam' : 'ABC Vietnam Startup', position: 'Frontend Lead', rating: 4, date: language === 'vi' ? 'Tháng 5/2023' : 'May 2023', comment: language === 'vi' ? 'Kỹ năng kỹ thuật tốt, giao tiếp tốt với team. Cần cải thiện kỹ năng quản lý thời gian.' : 'Good technical skills, communicates well with the team. Could improve time management.' },
+      { id: 1, employer: language === 'vi' ? 'Phúc Long Coffee & Tea' : 'Phuc Long Coffee & Tea', position: language === 'vi' ? 'Cửa hàng trưởng' : 'Store Manager', rating: 5, date: language === 'vi' ? 'Tháng 11/2024' : 'Nov 2024', comment: language === 'vi' ? 'Quản lý xuất sắc, luôn hoàn thành và vượt chỉ tiêu doanh thu. Thái độ làm việc rất chuyên nghiệp.' : 'Excellent manager, always exceeding revenue targets. Very professional attitude.' },
+      { id: 2, employer: language === 'vi' ? 'The Coffee House' : 'The Coffee House', position: language === 'vi' ? 'Giám sát cửa hàng' : 'Store Supervisor', rating: 4, date: language === 'vi' ? 'Tháng 5/2023' : 'May 2023', comment: language === 'vi' ? 'Kỹ năng giải quyết tình huống tốt, training nhân viên hiệu quả. Cần hỗ trợ thêm về làm báo cáo.' : 'Good problem-solving skills, effective staff training. Needs some support with reporting.' },
     ]
   },
   {
@@ -76,7 +76,7 @@ const getInitialApplications = (language) => [
   {
     id: 4,
     candidate: 'Gemmin',
-    job: 'Senior React Developer',
+    job: language === 'vi' ? 'Giám sát ca' : 'Shift Supervisor',
     applied: language === 'vi' ? '2 ngày trước' : '2 days ago',
     status: 'rejected',
     completed: false,
@@ -86,11 +86,11 @@ const getInitialApplications = (language) => [
     phone: '0901 234 567',
     location: language === 'vi' ? 'Quận Tân Bình, TP.HCM' : 'Tan Binh Dist., HCMC',
     experience: language === 'vi' ? '4 năm' : '4 years',
-    education: language === 'vi' ? 'Đại học FPT' : 'FPT University',
-    skills: ['React', 'Vue.js', 'JavaScript', 'CSS', 'REST API'],
-    bio: language === 'vi' ? 'Full-stack Developer với kinh nghiệm phát triển nhiều dự án lớn. Làm việc nhóm tốt và có khả năng giải quyết vấn đề.' : 'Full-stack Developer experienced in large projects. Strong teamwork and problem-solving skills.',
+    education: language === 'vi' ? 'Cao đẳng Du lịch' : 'Tourism College',
+    skills: language === 'vi' ? ['Quản lý ca', 'Giải quyết sự cố', 'Pha chế cà phê', 'Làm việc nhóm', 'Giao tiếp'] : ['Shift management', 'Problem solving', 'Coffee brewing', 'Teamwork', 'Communication'],
+    bio: language === 'vi' ? 'Có kinh nghiệm giám sát ca tại nhiều cửa hàng cà phê lớn. Khả năng bao quát công việc, làm việc nhóm tốt và luôn đặt trải nghiệm khách hàng lên hàng đầu.' : 'Experienced in shift supervision at large coffee shops. Good teamwork and customer-first mindset.',
     reviews: [
-      { id: 1, employer: language === 'vi' ? 'FPT Software' : 'FPT Software', position: 'Frontend Developer', rating: 4, date: language === 'vi' ? 'Tháng 6/2024' : 'Jun 2024', comment: language === 'vi' ? 'Kỹ năng kỹ thuật tốt, đặc biệt về React và Vue. Thái độ hợp tác tốt.' : 'Strong technical skills especially React and Vue. Good collaborative attitude.' },
+      { id: 1, employer: language === 'vi' ? 'Highlands Coffee' : 'Highlands Coffee', position: language === 'vi' ? 'Trưởng ca' : 'Shift Leader', rating: 4, date: language === 'vi' ? 'Tháng 6/2024' : 'Jun 2024', comment: language === 'vi' ? 'Tác phong nhanh nhẹn, luôn hỗ trợ đồng nghiệp. Đôi khi hơi cứng nhắc trong giao tiếp với khách hàng.' : 'Agile and supportive of colleagues. Sometimes a bit rigid when communicating with customers.' },
     ]
   },
   {

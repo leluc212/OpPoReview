@@ -16,7 +16,7 @@ export const translations = {
       account: 'TÀI KHOẢN',
       platform: 'NỀN TẢNG',
       utilities: 'TIỆN ÍCH',
-      dashboard: 'Bảng Điều Khiển',
+      dashboard: 'Trang chủ',
       findJobs: 'Bài đăng',
       savedJobs: 'Việc Đã Lưu',
       messages: 'Tin Nhắn',
@@ -122,7 +122,7 @@ export const translations = {
         viewAll: 'Xem Tất Cả',
       },
       employer: {
-        title: 'Bảng Điều Khiển',
+        title: 'Trang Chủ',
         welcome: 'Chào mừng trở lại',
         stats: {
           activeJobs: 'Tin Đang Tuyển',
@@ -576,8 +576,8 @@ export const translations = {
         postJob: 'Post a Job',
         manageJobs: 'Manage Jobs',
         viewApplications: 'View Applications',
-          savedJobsTitle: 'Saved Jobs',
-          savedJobsSubtitle: 'Jobs you have bookmarked for later',
+        savedJobsTitle: 'Saved Jobs',
+        savedJobsSubtitle: 'Jobs you have bookmarked for later',
         support: 'Support',
         helpCenter: 'Help Center',
         contact: 'Contact',
