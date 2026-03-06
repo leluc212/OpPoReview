@@ -563,7 +563,8 @@ const HeroSection = styled(motion.section)`
   padding: 100px 50px 100px;
   text-align: center;
   position: relative;
-  height: 100vh;
+  min-height: 100vh;
+  height: 900px;
   display: flex;
   align-items: top;
   justify-content: center;
@@ -590,7 +591,7 @@ const AnimatedBackground = styled.div`
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 100vw;
+  width: 100%;
   height: 100%;
   z-index: 0;
   overflow: hidden;

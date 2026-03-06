@@ -11,6 +11,12 @@ export const GlobalStyles = createGlobalStyle`
     box-sizing: border-box;
   }
 
+  html {
+    @media (min-width: 1025px) and (max-width: 1440px) {
+      zoom: calc(100vw / 1440);
+    }
+  }
+
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
     background: ${props => props.theme.colors.bgDark};

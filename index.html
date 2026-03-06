@@ -12,38 +12,5 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
-    <script>
-      function fitScreen() {
-        const root = document.getElementById('root');
-        if (!root) return;
-        
-        // Sử dụng clientWidth thay vì innerWidth (bỏ đi phần viền thanh cuộn)
-        const currentWidth = document.documentElement.clientWidth;
-        const baseWidth = 1440;
-        
-        if (currentWidth < baseWidth) {
-          // Tính tỷ lệ và đảm bảo không vượt quá lớn, fit vừa đẹp
-          const scale = currentWidth / baseWidth;
-          root.style.zoom = scale;
-          
-          // Firefox cũ ko hỗ trợ zoom
-          if (getComputedStyle(root).zoom === undefined || getComputedStyle(root).zoom === 'normal' || getComputedStyle(root).zoom === '') {
-             root.style.MozTransform = `scale(${scale})`;
-             root.style.MozTransformOrigin = 'top left';
-             root.style.width = `${baseWidth}px`;
-          }
-        } else {
-          // Reset nếu màn hình to hơn 1440
-          root.style.zoom = 1;
-          root.style.MozTransform = 'none';
-          root.style.width = '100%';
-        }
-      }
-      
-      // Chạy 1 lần khởi tạo
-      fitScreen();
-      // Chạy mỗi khi có thay đổi size màn hình
-      window.addEventListener('resize', fitScreen);
-    </script>
   </body>
 </html>
