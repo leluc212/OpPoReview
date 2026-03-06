@@ -122,7 +122,7 @@ export const translations = {
         viewAll: 'Xem Tất Cả',
       },
       employer: {
-        title: 'Trang chủ',
+        title: 'Bảng Điều Khiển',
         welcome: 'Chào mừng trở lại',
         stats: {
           activeJobs: 'Tin Đang Tuyển',
@@ -583,8 +583,8 @@ export const translations = {
         postJob: 'Post a Job',
         manageJobs: 'Manage Jobs',
         viewApplications: 'View Applications',
-          savedJobsTitle: 'Saved Jobs',
-          savedJobsSubtitle: 'Jobs you have bookmarked for later',
+        savedJobsTitle: 'Saved Jobs',
+        savedJobsSubtitle: 'Jobs you have bookmarked for later',
         support: 'Support',
         helpCenter: 'Help Center',
         contact: 'Contact',

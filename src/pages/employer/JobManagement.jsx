@@ -418,13 +418,13 @@ const JobManagement = () => {
   const getDefaultJobs = () => [
     { 
       id: 1, 
-      title: 'Senior React Developer', 
+      title: language === 'vi' ? 'Cửa hàng trưởng' : 'Store Manager', 
       applicants: 45, 
       status: 'active', 
       posted: language === 'vi' ? '2 ngày trước' : '2 days ago',
       views: 234,
       responseRate: 85,
-      location: language === 'vi' ? 'Hà Nội' : 'Hanoi',
+      location: language === 'vi' ? 'Quận 1, TP.HCM' : 'District 1, HCMC',
       jobType: 'full-time',
       department: language === 'vi' ? 'Kỹ thuật' : 'Engineering'
     },
@@ -436,7 +436,7 @@ const JobManagement = () => {
       posted: language === 'vi' ? '1 tuần trước' : '1 week ago',
       views: 156,
       responseRate: 72,
-      location: language === 'vi' ? 'Hồ Chí Minh' : 'Ho Chi Minh',
+      location: language === 'vi' ? 'Quận 3, TP.HCM' : 'District 3, HCMC',
       jobType: 'full-time',
       department: language === 'vi' ? 'Bán hàng' : 'Sales'
     },
@@ -448,7 +448,7 @@ const JobManagement = () => {
       posted: language === 'vi' ? '2 tuần trước' : '2 weeks ago',
       views: 98,
       responseRate: 65,
-      location: language === 'vi' ? 'Đà Nẵng' : 'Da Nang',
+      location: language === 'vi' ? 'Quận 7, TP.HCM' : 'District 7, HCMC',
       jobType: 'part-time',
       department: language === 'vi' ? 'Dịch vụ' : 'Service'
     },

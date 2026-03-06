@@ -369,8 +369,7 @@ const Sidebar = ({ role }) => {
     ]},
     { section: t.sidebar.utilities, items: [
       { to: '/candidate/wallet', icon: Wallet, label: t.sidebar.digitalWallet },
-      { to: '/candidate/support', icon: HelpCircle, label: t.sidebar.support },
-      { to: '#', icon: LogOut, label: t.sidebar.signOut },
+      { to: '/candidate/support', icon: HelpCircle, label: t.sidebar.support }
     ]}
   ];
   
@@ -392,8 +391,7 @@ const Sidebar = ({ role }) => {
     { section: t.sidebar.utilities, items: [
       { to: '/employer/analytics', icon: BarChart3, label: t.sidebar.reports || 'Analytics' },
       { to: '/employer/wallet', icon: Wallet, label: t.sidebar.digitalWallet },
-      { to: '/employer/support', icon: HelpCircle, label: t.sidebar.support },
-      { to: '#', icon: LogOut, label: t.sidebar.signOut },
+      { to: '/employer/support', icon: HelpCircle, label: t.sidebar.support }
     ]}
   ];
   

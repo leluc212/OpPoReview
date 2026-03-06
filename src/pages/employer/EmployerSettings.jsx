@@ -10,7 +10,7 @@ import { Settings as SettingsIcon, Bell, FileText, Globe, Shield, Construction }
 
 // ─── Page wrapper ────────────────────────────────────────────
 const PageContainer = styled(motion.div)`
-  max-width: 860px;
+  width: 100%;
 `;
 
 // ─── Header (đồng nhất với Applications) ─────────────────────
