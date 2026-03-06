@@ -4,6 +4,7 @@ import styled, { keyframes, css } from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
+import UnderDevelopmentModal from '../../components/UnderDevelopmentModal';
 
 /* ═══════════════════════════════════════════════════
    KEYFRAMES
@@ -500,6 +501,7 @@ const LoginPage = () => {
   const [form, setForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   /* Sync i18n labels */
   ROLES.candidate.label = t.login.roleCandidate;
@@ -550,7 +552,7 @@ const LoginPage = () => {
     navigate(role === 'admin' ? '/admin/dashboard' : role === 'employer' ? '/employer/dashboard' : '/candidate/dashboard');
   };
 
-  const handleSocial = p => alert(`Đăng nhập bằng ${p} (đang phát triển)`);
+  const handleSocial = p => setShowModal(true);
 
   const panelVariants = {
     initial: { opacity: 0, x: -40 },
@@ -745,6 +747,12 @@ const LoginPage = () => {
           </FootRow>
         </Card>
       </Right>
+
+      {/* Development Modal */}
+      <UnderDevelopmentModal 
+        isOpen={showModal} 
+        onClose={() => setShowModal(false)} 
+      />
     </Root>
   );
 };

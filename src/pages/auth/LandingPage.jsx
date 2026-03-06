@@ -2195,7 +2195,8 @@ const LandingPage = () => {
         
         <StickyIconButton
           $isDark={isDarkMode}
-          href="#"
+          as="button"
+          onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}
           data-tooltip="Góp ý"
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -2207,7 +2208,8 @@ const LandingPage = () => {
         
         <StickyIconButton
           $isDark={isDarkMode}
-          href="#"
+          as="button"
+          onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}
           data-tooltip="Hỗ trợ"
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -3617,12 +3619,12 @@ const LandingPage = () => {
           © 2026 Ốp Pờ. Tất cả quyền được bảo lưu.
         </Copyright>
       </Footer>
+      </ScrollContainer>
 
       <UnderDevelopmentModal
         isOpen={isDevModalOpen}
         onClose={() => setIsDevModalOpen(false)}
       />
-      </ScrollContainer>
     </LandingContainer>
   );
 };

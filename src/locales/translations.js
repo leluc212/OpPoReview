@@ -456,6 +456,36 @@ export const translations = {
       requiredPassword: 'Vui lòng nhập mật khẩu',
     },
 
+    forgotPassword: {
+      title: 'Quên mật khẩu?',
+      subtitlePhone: 'Nhập số điện thoại của bạn để nhận mã xác minh',
+      labelPhone: 'Số điện thoại',
+      placeholderPhone: '0912345678',
+      buttonSendOtp: 'Gửi mã xác minh',
+      errorPhoneRequired: 'Vui lòng nhập số điện thoại',
+      errorPhoneInvalid: 'Số điện thoại không hợp lệ',
+      titleOtp: 'Nhập mã xác minh',
+      subtitleOtp: 'Nhập mã OTP 6 chữ số đã được gửi đến',
+      buttonVerifyOtp: 'Xác minh',
+      errorOtpRequired: 'Vui lòng nhập đầy đủ mã OTP',
+      textDidntReceive: 'Không nhận được mã?',
+      textResendIn: 'Gửi lại sau',
+      buttonResend: 'Gửi lại mã',
+      titleNewPassword: 'Đặt mật khẩu mới',
+      subtitleNewPassword: 'Nhập mật khẩu mới cho tài khoản của bạn',
+      labelNewPassword: 'Mật khẩu mới',
+      labelConfirmPassword: 'Xác nhận mật khẩu',
+      placeholderPassword: 'Nhập mật khẩu mới',
+      placeholderConfirmPassword: 'Nhập lại mật khẩu',
+      buttonResetPassword: 'Đặt lại mật khẩu',
+      errorPasswordRequired: 'Vui lòng nhập mật khẩu mới',
+      errorPasswordMinLength: 'Mật khẩu phải có ít nhất 6 ký tự',
+      errorConfirmPasswordRequired: 'Vui lòng xác nhận mật khẩu',
+      errorPasswordMismatch: 'Mật khẩu xác nhận không khớp',
+      titleSuccess: 'Thành công!',
+      subtitleSuccess: 'Mật khẩu của bạn đã được đặt lại thành công. Bạn sẽ được chuyển đến trang đăng nhập...',
+    },
+
     // Notifications
     notifications: {
       title: 'Thông Báo',
@@ -918,6 +948,36 @@ export const translations = {
       requiredPassword: 'Password is required',
     },
 
+    forgotPassword: {
+      title: 'Forgot Password?',
+      subtitlePhone: 'Enter your phone number to receive a verification code',
+      labelPhone: 'Phone Number',
+      placeholderPhone: '0912345678',
+      buttonSendOtp: 'Send Verification Code',
+      errorPhoneRequired: 'Please enter your phone number',
+      errorPhoneInvalid: 'Invalid phone number',
+      titleOtp: 'Enter Verification Code',
+      subtitleOtp: 'Enter the 6-digit OTP code sent to',
+      buttonVerifyOtp: 'Verify',
+      errorOtpRequired: 'Please enter the complete OTP code',
+      textDidntReceive: "Didn't receive the code?",
+      textResendIn: 'Resend in',
+      buttonResend: 'Resend Code',
+      titleNewPassword: 'Set New Password',
+      subtitleNewPassword: 'Enter a new password for your account',
+      labelNewPassword: 'New Password',
+      labelConfirmPassword: 'Confirm Password',
+      placeholderPassword: 'Enter new password',
+      placeholderConfirmPassword: 'Re-enter password',
+      buttonResetPassword: 'Reset Password',
+      errorPasswordRequired: 'Please enter a new password',
+      errorPasswordMinLength: 'Password must be at least 6 characters',
+      errorConfirmPasswordRequired: 'Please confirm your password',
+      errorPasswordMismatch: 'Passwords do not match',
+      titleSuccess: 'Success!',
+      subtitleSuccess: 'Your password has been reset successfully. You will be redirected to the login page...',
+    },
+
     // Notifications
     notifications: {
       title: 'Notifications',
@@ -957,9 +1017,9 @@ export const translations = {
 
     // Under Development Modal
     underDevelopment: {
-      title: 'Under Development',
-      message: 'This feature is currently under development and will be launched soon. Thank you for your patience!',
-      button: 'Got It',
+      title: 'Đang Phát Triển',
+      message: 'Chức năng này đang trong quá trình phát triển và sẽ sớm được ra mắt. Cảm ơn bạn đã kiên nhẫn!',
+      button: 'Đã Hiểu',
     },
   },
 };
