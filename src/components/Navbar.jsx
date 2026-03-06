@@ -189,11 +189,11 @@ const Navbar = ({ showSearch = true }) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [companyLogo, setCompanyLogo] = useState(() => localStorage.getItem('companyLogo') || '/images/katinatlogo.jpg');
+  const [companyLogo, setCompanyLogo] = useState(() => localStorage.getItem('companyLogo') || '/OpPoReview/images/katinatlogo.jpg');
 
   useEffect(() => {
     const handleLogoChange = () => {
-      setCompanyLogo(localStorage.getItem('companyLogo') || '/images/katinatlogo.jpg');
+      setCompanyLogo(localStorage.getItem('companyLogo') || '/OpPoReview/images/katinatlogo.jpg');
     };
     window.addEventListener('logoChanged', handleLogoChange);
     return () => window.removeEventListener('logoChanged', handleLogoChange);
@@ -289,3 +289,4 @@ const Navbar = ({ showSearch = true }) => {
 };
 
 export default Navbar;
+

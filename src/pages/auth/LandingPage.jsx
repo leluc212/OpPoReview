@@ -2574,15 +2574,15 @@ const particleConfigs = [
 ];
 
 const companyLogos = [
-  { name: 'TRUNG NGUYÊN', logo: '/images/trungnguyen.jpg' },
-  { name: 'KATINAT', logo: '/images/katinat.png' },
-  { name: 'BAMOS COFFEE', logo: '/images/bamos.png' },
-  { name: 'STARBUCK', logo: '/images/starbuck.png' },
-  { name: 'PHUC LONG', logo: '/images/phuclong.jpg' },
-  { name: 'THE COFFEE HOUSE', logo: '/images/coffeehouse.jpg' },
-  { name: 'HỒNG TRÀ NGÔ GIA', logo: '/images/ngogia.png' },
-  { name: 'SUNCHA', logo: '/images/suncha.jpg' },
-  { name: 'HIGHLANDS', logo: '/images/highlands.jpg' },
+  { name: 'TRUNG NGUYÊN', logo: '/OpPoReview/images/trungnguyen.jpg' },
+  { name: 'KATINAT', logo: '/OpPoReview/images/katinat.png' },
+  { name: 'BAMOS COFFEE', logo: '/OpPoReview/images/bamos.png' },
+  { name: 'STARBUCK', logo: '/OpPoReview/images/starbuck.png' },
+  { name: 'PHUC LONG', logo: '/OpPoReview/images/phuclong.jpg' },
+  { name: 'THE COFFEE HOUSE', logo: '/OpPoReview/images/coffeehouse.jpg' },
+  { name: 'HỒNG TRÀ NGÔ GIA', logo: '/OpPoReview/images/ngogia.png' },
+  { name: 'SUNCHA', logo: '/OpPoReview/images/suncha.jpg' },
+  { name: 'HIGHLANDS', logo: '/OpPoReview/images/highlands.jpg' },
 ];
 
 const LandingPage = () => {
@@ -4191,4 +4191,5 @@ const LandingPage = () => {
 };
 
 export default LandingPage;
+
 
