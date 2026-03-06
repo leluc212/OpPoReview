@@ -96,7 +96,7 @@ const Root = styled.div`
   min-height: 100vh;
   display: flex;
   background: #f0f4ff;
-  font-family: "Grandstander", 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   color-scheme: light;
 
   * {

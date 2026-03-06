@@ -489,7 +489,7 @@ const EmployerDashboard = () => {
               </ActionButton>
               <ActionButton
                 as={Link}
-                to="/employer/applications"
+                to="/employer/profile"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
               >

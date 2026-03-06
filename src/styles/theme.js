@@ -12,7 +12,7 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   body {
-    font-family: "Grandstander";
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
     background: ${props => props.theme.colors.bgDark};
     background-attachment: fixed;
     color: ${props => props.theme.colors.text};
