@@ -20,48 +20,88 @@ const fadeIn = keyframes`
   }
 `;
 
-const JobManagementContainer = styled.div`
-  animation: ${fadeIn} 0.5s ease-in;
-`;
+const JobManagementContainer = styled(motion.div)``;
 
 const PageHeader = styled.div`
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  gap: 16px;
+`;
+
+const PageTitleGroup = styled.div`
+  display: flex;
   align-items: center;
-  margin-bottom: 32px;
-  
+  gap: 16px;
+`;
+
+const PageIconBox = styled.div`
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  background: #EFF6FF;
+  border: 1.5px solid #BFDBFE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  svg { width: 22px; height: 22px; color: #1e40af; }
+`;
+
+const PageTitleText = styled.div`
   h1 {
-    font-size: 32px;
+    font-size: 26px;
     font-weight: 800;
-    background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: ${props => props.theme.colors.text};
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+  p {
+    color: ${props => props.theme.colors.textLight};
+    font-size: 13.5px;
+    font-weight: 500;
   }
 `;
 
+const CountBadge = styled.div`
+  align-self: flex-start;
+  padding: 6px 16px;
+  background: #EFF6FF;
+  border: 1.5px solid #BFDBFE;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e40af;
+  white-space: nowrap;
+`;
+
 const CreateButton = styled(motion.button)`
-  padding: 14px 28px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
+  padding: 10px 18px;
+  border-radius: 10px;
+  background: #1e40af;
   color: white;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 13.5px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   border: none;
-  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.35);
-  transition: all 0.3s ease;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(30, 64, 175, 0.28);
+  transition: all 0.2s ease;
+  white-space: nowrap;
   
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(30, 64, 175, 0.45);
+    filter: brightness(1.08);
+    box-shadow: 0 6px 18px rgba(30, 64, 175, 0.38);
+    transform: translateY(-1px);
   }
   
   svg {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
   }
 `;
 
@@ -475,18 +515,30 @@ const JobManagement = () => {
 
   return (
     <DashboardLayout role="employer">
-      <JobManagementContainer>
+      <JobManagementContainer
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+      >
         <PageHeader>
-          <h1>{language === 'vi' ? 'Quản Lý Tin Tuyển Dụng' : 'Job Management'}</h1>
-          <CreateButton
-            as={Link}
-            to="/employer/post-job"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Plus />
-            {language === 'vi' ? 'Đăng Tin Mới' : 'Post New Job'}
-          </CreateButton>
+          <PageTitleGroup>
+            <PageIconBox><BarChart3 /></PageIconBox>
+            <PageTitleText>
+              <h1>{language === 'vi' ? 'Quản Lý Tin Tuyển Dụng' : 'Job Management'}</h1>
+              <p>{language === 'vi' ? 'Quản lý và theo dõi các tin tuyển dụng' : 'Manage and track your job postings'}</p>
+            </PageTitleText>
+          </PageTitleGroup>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <CountBadge>{filteredJobs.length} {language === 'vi' ? 'tin đăng' : 'jobs'}</CountBadge>
+            <CreateButton
+              as={Link}
+              to="/employer/post-job"
+              whileTap={{ scale: 0.97 }}
+            >
+              <Plus />
+              {language === 'vi' ? 'Đăng Tin Mới' : 'Post New Job'}
+            </CreateButton>
+          </div>
         </PageHeader>
 
         <TableFilter 
