@@ -4,6 +4,7 @@ import styled, { keyframes, css } from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
+import UnderDevelopmentModal from '../../components/UnderDevelopmentModal';
 
 /* ═══════════════════════════════════════════════════
    KEYFRAMES
@@ -95,7 +96,7 @@ const Root = styled.div`
   min-height: 100vh;
   display: flex;
   background: #f0f4ff;
-  font-family: 'Inter', sans-serif !important;
+  font-family: "Grandstander", 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color-scheme: light;
 
   * {
@@ -375,12 +376,13 @@ const FLabel = styled.label`
   background: transparent; line-height: 1;
 
   ${p => p.$up && css`
-    top: 0; left: ${p.$ic ? '38px' : '12px'};
-    font-size: 10px; font-weight: 700;
+    top: 7px; left: ${p.$ic ? '38px' : '12px'};
+    font-size: 11px; font-weight: 600;
     color: ${p.$err ? '#ef4444' : p.$ac || '#0E3995'};
-    background: #fff; padding: 0 4px;
-    transform: translateY(-50%);
-    text-transform: uppercase; letter-spacing: 0.5px;
+    background: transparent; padding: 0;
+    transform: translateY(0);
+    text-transform: uppercase; letter-spacing: 0.8px;
+    opacity: 0.85;
   `}
 `;
 const FIconL = styled.div`
@@ -396,7 +398,7 @@ const FIconR = styled.button`
 `;
 const FInput = styled.input`
   width: 100%; height: 50px;
-  padding: ${p => p.$ic ? '14px 44px 0 44px' : '14px 15px 0 15px'};
+  padding: ${p => p.$ic ? '23px 44px 7px 44px' : '23px 15px 7px 15px'};
   ${p => p.$ir && 'padding-right: 42px;'}
   font-size: 14px; font-weight: 600; font-family: inherit; color: #0f172a;
   border: 1.5px solid ${p => p.$err ? '#ef4444' : p.$on ? p.$ac || '#0E3995' : '#eaeff4'};
@@ -500,6 +502,7 @@ const LoginPage = () => {
   const [form, setForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   /* Sync i18n labels */
   ROLES.candidate.label = t.login.roleCandidate;
@@ -550,7 +553,7 @@ const LoginPage = () => {
     navigate(role === 'admin' ? '/admin/dashboard' : role === 'employer' ? '/employer/dashboard' : '/candidate/dashboard');
   };
 
-  const handleSocial = p => alert(`Đăng nhập bằng ${p} (đang phát triển)`);
+  const handleSocial = p => setShowModal(true);
 
   const panelVariants = {
     initial: { opacity: 0, x: -40 },
@@ -745,6 +748,12 @@ const LoginPage = () => {
           </FootRow>
         </Card>
       </Right>
+
+      {/* Development Modal */}
+      <UnderDevelopmentModal 
+        isOpen={showModal} 
+        onClose={() => setShowModal(false)} 
+      />
     </Root>
   );
 };

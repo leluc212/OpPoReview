@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
-import Modal from '../../components/Modal';
+import UnderDevelopmentModal from '../../components/UnderDevelopmentModal';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
 import { Button } from '../../components/FormElements';
@@ -26,8 +26,7 @@ import {
   Key,
   Download,
   ChevronRight,
-  Check,
-  Construction
+  Check
 } from 'lucide-react';
 
 const SettingsContainer = styled.div`
@@ -912,37 +911,10 @@ function CandidateSettings() {
         </ContentGrid>
       </SettingsContainer>
 
-      {/* In Development Modal */}
-      <Modal
+      <UnderDevelopmentModal
         isOpen={isDevModalOpen}
         onClose={() => setIsDevModalOpen(false)}
-        title=""
-        size="small"
-      >
-        <DevMessage
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="icon-wrapper">
-            <Construction />
-          </div>
-          <h3>{language === 'vi' ? 'Đang Phát Triển' : 'Under Development'}</h3>
-          <p>
-            {language === 'vi'
-              ? 'Chức năng này đang trong quá trình phát triển và sẽ sớm được ra mắt. Cảm ơn bạn đã kiên nhẫn!'
-              : 'This feature is currently under development and will be launched soon. Thank you for your patience!'}
-          </p>
-          <Button
-            type="button"
-            $variant="primary"
-            onClick={() => setIsDevModalOpen(false)}
-            style={{ marginTop: '16px', width: '100%' }}
-          >
-            {language === 'vi' ? 'Đã Hiểu' : 'Got It'}
-          </Button>
-        </DevMessage>
-      </Modal>
+      />
     </DashboardLayout>
   );
 }

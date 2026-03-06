@@ -966,13 +966,14 @@ const FloatingShape = styled(motion.div)`
 const HeroContent = styled.div`
   position: relative;
   z-index: 10;
+  margin-top: 80px;
 `;
 
 const HeroTitle = styled(motion.h1)`
   font-size: 56px;
   font-weight: 900;
   line-height: 1.2;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   color: #ffffff;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   letter-spacing: -2px;
@@ -1012,7 +1013,7 @@ const HeroSubtitle = styled(motion.p)`
   font-size: 20px;
   color: #ffffff;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  margin-bottom: 48px;
+  margin-bottom: 40px;
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
@@ -2764,7 +2765,8 @@ const LandingPage = () => {
         
         <StickyIconButton
           $isDark={isDarkMode}
-          href="#"
+          as="button"
+          onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}
           data-tooltip="Góp ý"
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -2776,7 +2778,8 @@ const LandingPage = () => {
         
         <StickyIconButton
           $isDark={isDarkMode}
-          href="#"
+          as="button"
+          onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}
           data-tooltip="Hỗ trợ"
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -4186,12 +4189,12 @@ const LandingPage = () => {
           © 2026 Ốp Pờ. Tất cả quyền được bảo lưu.
         </Copyright>
       </Footer>
+      </ScrollContainer>
 
       <UnderDevelopmentModal
         isOpen={isDevModalOpen}
         onClose={() => setIsDevModalOpen(false)}
       />
-      </ScrollContainer>
     </LandingContainer>
   );
 };
