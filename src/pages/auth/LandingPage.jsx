@@ -80,7 +80,7 @@ const ScrollContainer = styled.div`
 `;
 
 const Header = styled(motion.header)`
-  padding: 4px 90px;
+  padding: 8px 90px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -100,22 +100,67 @@ const Header = styled(motion.header)`
   box-shadow: ${props => props.$isDark 
     ? '0 4px 24px rgba(0, 0, 0, 0.3)' 
     : '0 4px 24px #a4ddf8'};
+  min-height: 70px;
+  
+  @media (max-width: 1024px) {
+    padding: 8px 40px;
+    min-height: 65px;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 8px 16px;
+    min-height: 60px;
+  }
 `;
 
 const Logo = styled(Link)`
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  font-size: 28px;
-  font-weight: 900;
+  gap: 4px;
+  font-size: 16px;
+  font-weight: 700;
   color: #002e9d;
   text-decoration: none;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  img {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+    filter: none;
+    mix-blend-mode: normal;
+  }
   
   &:hover {
     transform: scale(1.05);
     color: #002e9d;
+  }
+  
+  @media (max-width: 1024px) {
+    font-size: 14px;
+    
+    img {
+      height: 45px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 13px;
+    gap: 3px;
+    
+    img {
+      height: 40px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 12px;
+    
+    img {
+      height: 35px;
+    }
   }
 `;
 
@@ -123,12 +168,32 @@ const LeftSection = styled.div`
   display: flex;
   align-items: center;
   gap: 40px;
+  
+  @media (max-width: 1024px) {
+    gap: 20px;
+  }
+  
+  @media (max-width: 768px) {
+    gap: 0;
+  }
 `;
 
 const RightSection = styled.div`
   display: flex;
   align-items: center;
   gap: 16px;
+  
+  @media (max-width: 1024px) {
+    gap: 12px;
+  }
+  
+  @media (max-width: 768px) {
+    gap: 8px;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 6px;
+  }
 `;
 
 const NavLinks = styled.div`
@@ -147,6 +212,18 @@ const NavLinks = styled.div`
       transform: translateY(-2px);
     }
   }
+  
+  @media (max-width: 1024px) {
+    gap: 4px;
+    
+    a {
+      font-size: 14px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const NavLinkItem = styled(Link)`
@@ -161,6 +238,16 @@ const NavLinkItem = styled(Link)`
   &:hover {
     color: #0EA5E9;
     background: rgba(14, 165, 233, 0.05);
+  }
+  
+  @media (max-width: 1024px) {
+    font-size: 14px;
+    padding: 7px 10px;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 13px;
+    padding: 6px 8px;
   }
 `;
 
@@ -195,6 +282,28 @@ const DropdownButton = styled.button`
     height: 16px;
     transition: transform 0.3s;
     transform: ${props => props.$isOpen ? 'rotate(180deg)' : 'rotate(0deg)'};
+  }
+  
+  @media (max-width: 1024px) {
+    font-size: 14px;
+    padding: 7px 10px;
+    gap: 5px;
+    
+    svg {
+      width: 15px;
+      height: 15px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 13px;
+    padding: 6px 8px;
+    gap: 4px;
+    
+    svg {
+      width: 14px;
+      height: 14px;
+    }
   }
 `;
 
@@ -236,6 +345,19 @@ const LargeDropdownMenu = styled(motion.div)`
   gap: 20px;
   backdrop-filter: blur(20px);
   transition: background 0.3s ease;
+  
+  @media (max-width: 1024px) {
+    min-width: 600px;
+    padding: 12px;
+    gap: 16px;
+  }
+  
+  @media (max-width: 768px) {
+    min-width: 90vw;
+    left: 50%;
+    transform: translateX(-50%);
+    flex-direction: column;
+  }
 `;
 
 const DropdownSection = styled.div`
@@ -321,6 +443,10 @@ const JobCategoriesGrid = styled.div`
   grid-template-columns: repeat(2, 1fr);
   gap: 6px;
   margin-top: 6px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const DropdownItem = styled(motion.div)`
@@ -398,6 +524,25 @@ const LanguageToggle = styled.button`
   backdrop-filter: blur(15px);
   box-shadow: 0 4px 16px rgba(147, 197, 253, 0.2);
   
+  @media (max-width: 1024px) {
+    padding: 8px 14px;
+    font-size: 13px;
+    gap: 5px;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 7px 12px;
+    font-size: 12px;
+    gap: 4px;
+    border-radius: 8px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 6px 10px;
+    font-size: 11px;
+    gap: 3px;
+    border-width: 1.5px;
+  }
   &:hover {
     background: ${props => props.$isDark ? 'rgba(30, 41, 59, 1)' : 'rgba(255, 255, 255, 1)'};
     border-color: #0EA5E9;
@@ -424,6 +569,20 @@ const HeroSection = styled(motion.section)`
   justify-content: center;
   scroll-snap-align: start;
   scroll-snap-stop: always;
+  
+  @media (max-width: 1024px) {
+    padding: 90px 40px 80px;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 80px 20px 60px;
+    height: auto;
+    min-height: 100vh;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 70px 16px 50px;
+  }
 `;
 
 const AnimatedBackground = styled.div`
@@ -824,9 +983,19 @@ const HeroTitle = styled(motion.h1)`
     white-space: normal;
   }
   
+  @media (max-width: 1024px) {
+    font-size: 42px;
+    letter-spacing: -1.5px;
+  }
+  
   @media (max-width: 768px) {
-    font-size: 36px;
+    font-size: 32px;
     white-space: normal;
+    letter-spacing: -1px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 28px;
   }
 `;
 
@@ -849,6 +1018,20 @@ const HeroSubtitle = styled(motion.p)`
   @keyframes blink {
     0%, 50% { opacity: 1; }
     51%, 100% { opacity: 0; }
+  }
+  
+  @media (max-width: 1024px) {
+    font-size: 18px;
+    margin-bottom: 40px;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 16px;
+    margin-bottom: 32px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 14px;
   }
 `;
 
@@ -880,6 +1063,36 @@ const SearchContainer = styled(motion.div)`
     border-radius: 0 14px 14px 0;
     padding: 16px 32px;
     flex-shrink: 0;
+  }
+  
+  @media (max-width: 1024px) {
+    max-width: 90%;
+    
+    button {
+      padding: 14px 24px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    max-width: 90%;
+    
+    button {
+      border-radius: 0 0 14px 14px;
+      width: 100%;
+      padding: 14px 24px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    max-width: 95%;
+    border-radius: 12px;
+    
+    button {
+      border-radius: 0 0 10px 10px;
+      padding: 12px 20px;
+      font-size: 14px;
+    }
   }
 `;
 
@@ -939,6 +1152,44 @@ const SearchInput = styled.div`
       outline: none;
     }
   }
+  
+  @media (max-width: 1024px) {
+    padding: 12px 16px;
+    
+    input {
+      font-size: 14px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    flex: 1;
+    
+    &:first-of-type {
+      border-radius: 12px 12px 0 0;
+      
+      &::after {
+        display: none;
+      }
+    }
+    
+    &:nth-of-type(2) {
+      border-top: 1px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.5)' : 'rgba(100, 116, 139, 0.3)'};
+    }
+  }
+  
+  @media (max-width: 480px) {
+    padding: 10px 14px;
+    gap: 8px;
+    
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    input {
+      font-size: 13px;
+    }
+  }
 `;
 
 const BannerContainer = styled.div`
@@ -951,10 +1202,18 @@ const BannerContainer = styled.div`
   max-width: 1200px;
   padding: 0;
   
+  @media (max-width: 1024px) {
+    gap: 16px;
+  }
+  
   @media (max-width: 968px) {
     flex-direction: column;
     gap: 20px;
     width: 100%;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 16px;
   }
 `;
 
@@ -971,10 +1230,22 @@ const StatsCard = styled(motion.div)`
   height: 300px;
   align-self: flex-start;
   
+  @media (max-width: 1024px) {
+    min-width: 320px;
+    max-width: 380px;
+    padding: 18px 20px;
+  }
+  
   @media (max-width: 968px) {
     width: 100%;
     min-width: auto;
     max-width: none;
+    height: auto;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 16px 18px;
+    border-radius: 12px;
   }
 `;
 
@@ -992,6 +1263,25 @@ const StatsHeader = styled.div`
     width: 17px;
     height: 17px;
     flex-shrink: 0;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 12px;
+    gap: 6px;
+    
+    svg {
+      width: 15px;
+      height: 15px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 11px;
+    
+    svg {
+      width: 14px;
+      height: 14px;
+    }
   }
 `;
 
@@ -1015,6 +1305,14 @@ const StatLabel = styled.div`
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
+  
+  @media (max-width: 768px) {
+    font-size: 11px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 10px;
+  }
 `;
 
 const StatValue = styled.div`
@@ -1031,6 +1329,25 @@ const StatValue = styled.div`
     height: 17px;
     color: #a3f7a3;
     flex-shrink: 0;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 18px;
+    gap: 5px;
+    
+    svg {
+      width: 15px;
+      height: 15px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 16px;
+    
+    svg {
+      width: 14px;
+      height: 14px;
+    }
   }
 `;
 
@@ -1110,6 +1427,18 @@ const CompaniesSection = styled.section`
   padding: 100px 80px;
   text-align: center;
   position: relative;
+  
+  @media (max-width: 1024px) {
+    padding: 80px 40px;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 60px 20px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 40px 16px;
+  }
 `;
 
 const SectionTitle = styled.h2`
@@ -1119,6 +1448,17 @@ const SectionTitle = styled.h2`
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-bottom: 16px;
+  
+  @media (max-width: 768px) {
+    font-size: 11px;
+    letter-spacing: 0.8px;
+    margin-bottom: 12px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 10px;
+    letter-spacing: 0.6px;
+  }
 `;
 
 const LogosGrid = styled.div`
@@ -1127,6 +1467,18 @@ const LogosGrid = styled.div`
   align-items: center;
   gap: 64px;
   flex-wrap: wrap;
+  
+  @media (max-width: 1024px) {
+    gap: 48px;
+  }
+  
+  @media (max-width: 768px) {
+    gap: 32px;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 24px;
+  }
 `;
 
 const CompanyLogo = styled(motion.div)`
@@ -1163,6 +1515,18 @@ const CategoriesSection = styled.section`
   margin: 0 auto;
   padding: 120px 80px;
   position: relative;
+  
+  @media (max-width: 1024px) {
+    padding: 80px 40px;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 60px 20px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 40px 16px;
+  }
 `;
 
 const CategoriesGrid = styled.div`
@@ -1170,6 +1534,26 @@ const CategoriesGrid = styled.div`
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
   margin-top: 48px;
+  
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-top: 32px;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 12px;
+    margin-top: 24px;
+  }
 `;
 
 const CategoryCard = styled(motion.div)`
@@ -1182,6 +1566,20 @@ const CategoryCard = styled(motion.div)`
   text-align: center;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  @media (max-width: 1024px) {
+    padding: 28px 20px;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 24px 18px;
+    border-radius: 12px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 20px 16px;
+    border-radius: 10px;
+  }
   box-shadow: ${props => props.$isDark 
     ? '0 2px 8px rgba(0, 0, 0, 0.3)' 
     : '0 2px 8px rgba(0, 0, 0, 0.04)'};
@@ -1229,12 +1627,33 @@ const CategoryTitle = styled.h3`
   ${CategoryCard}:hover & {
     color: #1e40af;
   }
+  
+  @media (max-width: 1024px) {
+    font-size: 17px;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 15px;
+  }
 `;
 
 const CategoryCount = styled.p`
   font-size: 14px;
   color: ${props => props.$isDark ? '#94A3B8' : '#64748B'};
   font-weight: 400;
+  
+  @media (max-width: 768px) {
+    font-size: 13px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 12px;
+  }
 `;
 
 const TechBannerSection = styled(motion.section)`
@@ -1348,6 +1767,20 @@ const CTATitle = styled.h2`
   margin-bottom: 16px;
   color: ${props => props.$isDark ? '#f1f5f9' : '#0F172A'};
   letter-spacing: -1px;
+  
+  @media (max-width: 1024px) {
+    font-size: 40px;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 28px;
+    letter-spacing: -0.5px;
+  }
 `;
 
 const CTAText = styled.p`
@@ -1355,6 +1788,20 @@ const CTAText = styled.p`
   color: ${props => props.$isDark ? '#94A3B8' : '#64748B'};
   margin-bottom: 32px;
   font-weight: 400;
+  
+  @media (max-width: 1024px) {
+    font-size: 17px;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
 `;
 
 const DownloadAppSection = styled(motion.section)`
@@ -1371,6 +1818,20 @@ const DownloadAppSection = styled(motion.section)`
   scroll-snap-stop: always;
   transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  
+  @media (max-width: 1024px) {
+    padding: 50px 40px;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 40px 20px;
+    height: auto;
+    min-height: 100vh;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 30px 16px;
+  }
   
   &::before {
     content: '';
@@ -1431,8 +1892,17 @@ const DownloadAppTitle = styled(motion.h2)`
   line-height: 1.1;
   transition: color 0.4s ease;
   
+  @media (max-width: 1024px) {
+    font-size: 38px;
+  }
+  
   @media (max-width: 768px) {
-    font-size: 36px;
+    font-size: 32px;
+    text-align: center;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 28px;
   }
 `;
 
@@ -1442,6 +1912,21 @@ const DownloadAppSubtitle = styled(motion.p)`
   margin-bottom: 32px;
   font-weight: 500;
   transition: color 0.4s ease;
+  
+  @media (max-width: 1024px) {
+    font-size: 17px;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 16px;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
 `;
 
 const DownloadOptions = styled.div`
@@ -1550,8 +2035,18 @@ const DownloadAppStats = styled.div`
   justify-content: center;
   margin-top: 16px;
   
+  @media (max-width: 1024px) {
+    gap: 40px;
+  }
+  
   @media (max-width: 768px) {
     justify-content: center;
+    flex-wrap: wrap;
+    gap: 30px;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 24px;
   }
 `;
 
@@ -1707,6 +2202,19 @@ const Footer = styled(motion.footer)`
   scroll-snap-align: start;
   scroll-snap-stop: always;
   transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  @media (max-width: 1024px) {
+    padding: 50px 40px 24px;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 40px 20px 24px;
+    min-height: auto;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 30px 16px 20px;
+  }
 `;
 
 const FooterGrid = styled.div`
@@ -1714,6 +2222,21 @@ const FooterGrid = styled.div`
   grid-template-columns: 2fr 1fr 1fr 1fr;
   gap: 64px;
   margin-bottom: 48px;
+  
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    margin-bottom: 32px;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 24px;
+  }
 `;
 
 const FooterSection = styled.div`
@@ -1850,12 +2373,32 @@ const SectionHeading = styled(motion.div)`
     margin-bottom: 12px;
     letter-spacing: -1px;
     line-height: 1.2;
+    
+    @media (max-width: 1024px) {
+      font-size: 40px;
+    }
+    
+    @media (max-width: 768px) {
+      font-size: 32px;
+    }
+    
+    @media (max-width: 480px) {
+      font-size: 28px;
+    }
   }
   
   p {
     font-size: 18px;
     color: #64748B;
     font-weight: 400;
+    
+    @media (max-width: 768px) {
+      font-size: 16px;
+    }
+    
+    @media (max-width: 480px) {
+      font-size: 14px;
+    }
   }
 `;
 
@@ -1873,6 +2416,23 @@ const CompanyBannerSection = styled(motion.section)`
   scroll-snap-align: start;
   scroll-snap-stop: always;
   transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  @media (max-width: 1024px) {
+    padding: 50px 40px;
+    height: auto;
+    min-height: 80vh;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 40px 20px;
+    height: auto;
+    min-height: 60vh;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 30px 16px;
+    min-height: 50vh;
+  }
   
   &::before {
     content: '';
