@@ -5,7 +5,7 @@ const ThemeContext = createContext();
 export const ThemeProvider = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
-    return saved ? saved === 'true' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return saved ? saved === 'true' : false; // Luôn mặc định là sáng (false) nếu chưa lưu
   });
 
   useEffect(() => {
