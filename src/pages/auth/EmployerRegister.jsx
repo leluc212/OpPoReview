@@ -129,7 +129,7 @@ const BrandName = styled.span`
 const Headline = styled.h1`
   font-size: clamp(32px, 3.2vw, 44px);
   font-weight: 900;
-  line-height: 1.15;
+  line-height: 1.35;
   letter-spacing: -1.5px;
   color: #fff;
   margin-bottom: 18px;
@@ -144,6 +144,8 @@ const Headline = styled.h1`
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    padding-top: 14px;
+    padding-bottom: 8px;
   }
 `;
 
@@ -336,138 +338,7 @@ const CardHead = styled.div`
   margin-bottom: 26px;
 `;
 
-<<<<<<< HEAD
 const CardLogoRow = styled.div`
-=======
-const RegisterRight = styled(motion.div)`
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 30px 20px;
-  position: relative;
-  z-index: 1;
-
-  @media (max-width: 1024px) {
-    flex: 1;
-    width: 100%;
-  }
-`;
-
-const HeroContent = styled.div`
-  max-width: 500px;
-
-  h1 {
-    font-size: 38px;
-    font-weight: 800;
-    line-height: 1.2;
-    margin-bottom: 16px;
-    letter-spacing: -1px;
-  }
-
-  p {
-    font-size: 16px;
-    line-height: 1.6;
-    margin-bottom: 20px;
-    opacity: 0.95;
-  }
-
-  .features {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-
-    .feature-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 16px;
-      font-weight: 500;
-
-      svg {
-        width: 24px;
-        height: 24px;
-        color: #10B981;
-        flex-shrink: 0;
-      }
-    }
-  }
-`;
-
-const RegisterForm = styled.div`
-  background: white;
-  border-radius: 24px;
-  padding: 40px;
-  width: 100%;
-  height: 700px;
-  max-width: 450px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-`;
-
-const FormHeader = styled.div`
-  text-align: center;
-  margin-bottom: 15px;
-
-  .logo-section {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 10px;
-    gap: 10px;
-
-    img {
-      height: 52px;
-    }
-
-    .logo-text {
-      font-size: 32px;
-      font-weight: 800;
-      background: #002e9d;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-  }
-
-  h2 {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: #1E293B;
-  }
-
-  p {
-    font-size: 14px;
-    color: #64748B;
-
-    a {
-      color: #1e40af;
-      font-weight: 600;
-      text-decoration: none;
-      
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
-`;
-
-const SocialButtons = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
-`;
-
-const SocialButton = styled(motion.button)`
-  padding: 14px 20px;
-  border-radius: 12px;
-  border: 1px solid #E2E8F0;
-  background: white;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
->>>>>>> 8ed761b33c0c943034121fbd278c350e649e5007
   display: flex;
   align-items: center;
   justify-content: center;
@@ -546,7 +417,6 @@ const PillDot = styled.div`
     color: #fff;
     box-shadow: 0 3px 12px rgba(14,57,149,0.45);
 
-<<<<<<< HEAD
     &::after {
       content: '';
       position: absolute;
@@ -554,28 +424,6 @@ const PillDot = styled.div`
       border-radius: 50%;
       border: 2px solid rgba(14,57,149,0.25);
       animation: ${inputFocusGlow} 2s ease infinite;
-=======
-  input {
-    padding-left: 44px;
-  }
-
-  .password-toggle {
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-    color: #94A3B8;
-    transition: color 0.3s;
-
-    &:hover {
-      color: #1e40af;
->>>>>>> 8ed761b33c0c943034121fbd278c350e649e5007
     }
   `}
   ${p => !p.$done && !p.$active && css`
@@ -621,7 +469,6 @@ const SocialBtn = styled(motion.button)`
   align-items: center;
   justify-content: center;
   gap: 8px;
-<<<<<<< HEAD
   font-family: inherit;
   transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
 
@@ -629,25 +476,6 @@ const SocialBtn = styled(motion.button)`
     border-color: ${p => p.$c};
     background: ${p => p.$c}0e;
     box-shadow: 0 3px 12px ${p => p.$c}22;
-=======
-  margin-top: 24px;
-  margin-bottom: 16px;
-  background: linear-gradient(135deg, #1e40af 0%, #1e40af 100%);
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.4);
-  }
-
-  svg {
-    width: 18px;
-    height: 18px;
-    transition: transform 0.3s;
-  }
-
-  &:hover svg {
-    transform: translateX(4px);
->>>>>>> 8ed761b33c0c943034121fbd278c350e649e5007
   }
 `;
 
@@ -655,7 +483,6 @@ const SocialBtn = styled(motion.button)`
 const Or = styled.div`
   display: flex;
   align-items: center;
-<<<<<<< HEAD
   gap: 10px;
   margin-bottom: 18px;
 
@@ -666,19 +493,6 @@ const Or = styled.div`
     text-transform: uppercase;
     letter-spacing: 0.5px;
     white-space: nowrap;
-=======
-  gap: 6px;
-  color: #1e40af;
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 16px;
-  text-decoration: none;
-  transition: all 0.3s;
-
-  &:hover {
-    gap: 8px;
-    color: #1e40af;
->>>>>>> 8ed761b33c0c943034121fbd278c350e649e5007
   }
 
   &::before, &::after {

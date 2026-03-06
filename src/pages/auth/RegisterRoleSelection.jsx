@@ -129,10 +129,10 @@ const BrandLink = styled(Link)`
   align-items: center;
   justify-content: center;
   background: #ffffff;
-  padding: 12px 28px;
+  padding: 8px 18px;
   border-radius: 18px;
   text-decoration: none;
-  margin-bottom: 40px;
+  margin-bottom: 4px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.15);
   transition: transform 0.25s, box-shadow 0.25s;
 
@@ -142,7 +142,7 @@ const BrandLink = styled(Link)`
   }
 `;
 const BrandImg = styled.img`
-  height: 52px;
+  height: 65px;
   object-fit: contain;
 `;
 
@@ -150,7 +150,7 @@ const BrandImg = styled.img`
 const Eyebrow = styled.div`
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 4px;
   background: rgba(255,255,255,0.1);
   border: 1px solid rgba(255,255,255,0.18);
   border-radius: 999px;
@@ -165,23 +165,26 @@ const Eyebrow = styled.div`
 
 /* headline */
 const H1 = styled.h1`
-  font-size: clamp(34px, 5vw, 58px);
-  font-weight: 900;
+  font-size: clamp(20px, 6vw, 65px);
+  font-weight: 1000;
   letter-spacing: -2px;
-  line-height: 1.3;
+  line-height: 1;
   padding: 8px 0;
   color: #fff;
   text-align: center;
-  margin-top: 16px;
-  margin-bottom: 14px;
+  margin-top: 20px;
+  margin-bottom: 20px;
 
   .shine {
     background: linear-gradient(90deg, #93c5fd, #c4b5fd, #fbcfe8, #93c5fd);
-    background-size: 300%;
+    background-size: 400%;
     animation: ${gradShift} 5s ease infinite;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    padding-top: 16px;
+    padding-bottom: 5px;
+    display: inline-block;
   }
 `;
 
@@ -260,7 +263,6 @@ const IconWrap = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-<<<<<<< HEAD
   margin-bottom: 24px;
   font-size: 32px;
   flex-shrink: 0;
@@ -268,14 +270,6 @@ const IconWrap = styled.div`
 
   ${RoleCard}:hover & {
     transform: scale(1.08) rotate(-4deg);
-=======
-  color: white;
-  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.4);
-  
-  svg {
-    width: 40px;
-    height: 40px;
->>>>>>> 8ed761b33c0c943034121fbd278c350e649e5007
   }
 `;
 
@@ -294,7 +288,6 @@ const CardDesc = styled.p`
   margin-bottom: 24px;
 `;
 
-<<<<<<< HEAD
 const FeatureList = styled.ul`
   list-style: none;
   margin: 0 0 32px;
@@ -326,28 +319,6 @@ const FeatureItem = styled.li`
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-=======
-const RoleFeatures = styled.ul`
-  text-align: left;
-  margin-bottom: 32px;
-  
-  li {
-    color: #64748B;
-    margin-bottom: 12px;
-    padding-left: 28px;
-    position: relative;
-    font-size: 15px;
-    line-height: 1.5;
-    
-    &::before {
-      content: '✓';
-      position: absolute;
-      left: 0;
-      color: #1e40af;
-      font-weight: 700;
-      font-size: 16px;
-    }
->>>>>>> 8ed761b33c0c943034121fbd278c350e649e5007
   }
 `;
 
@@ -369,7 +340,6 @@ const SelectBtn = styled(motion.button)`
   align-items: center;
   justify-content: center;
   gap: 8px;
-<<<<<<< HEAD
   transition: box-shadow 0.25s, opacity 0.25s;
   position: relative;
   overflow: hidden;
@@ -384,15 +354,6 @@ const SelectBtn = styled(motion.button)`
   &:hover {
     box-shadow: 0 8px 28px ${p => p.$shadow};
     opacity: 0.93;
-=======
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
-  cursor: pointer;
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.4);
->>>>>>> 8ed761b33c0c943034121fbd278c350e649e5007
   }
 
   .arrow {
@@ -564,7 +525,7 @@ const RegisterRoleSelection = () => {
   };
   const item = {
     hidden: { opacity: 0, y: 28 },
-    show:   { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22,1,0.36,1] } },
+    show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
   };
 
   return (
@@ -573,17 +534,17 @@ const RegisterRoleSelection = () => {
       <Scan />
 
       {/* orbs */}
-      <Orb $s={600} $t="-18%" $r="-12%" $c="rgba(30,95,210,0.5)"  $dur={22} $blur={30} />
-      <Orb $s={400} $b="-14%" $l="-8%"  $c="rgba(14,57,149,0.6)"  $dur={17} $d={-4} $blur={20} />
-      <Orb $s={200} $t="42%"  $l="5%"   $c="rgba(96,165,250,0.35)" $dur={13} $d={-7} $blur={10} />
-      <Orb $s={150} $b="18%"  $r="4%"   $c="rgba(167,139,250,0.3)" $dur={19} $d={-2} $blur={8} />
+      <Orb $s={600} $t="-18%" $r="-12%" $c="rgba(30,95,210,0.5)" $dur={22} $blur={30} />
+      <Orb $s={400} $b="-14%" $l="-8%" $c="rgba(14,57,149,0.6)" $dur={17} $d={-4} $blur={20} />
+      <Orb $s={200} $t="42%" $l="5%" $c="rgba(96,165,250,0.35)" $dur={13} $d={-7} $blur={10} />
+      <Orb $s={150} $b="18%" $r="4%" $c="rgba(167,139,250,0.3)" $dur={19} $d={-2} $blur={8} />
 
       {/* sparkles */}
-      <Star $s={16} $t="8%"  $l="6%"  $dur={2.8} $d={0}>✦</Star>
+      <Star $s={16} $t="8%" $l="6%" $dur={2.8} $d={0}>✦</Star>
       <Star $s={12} $t="18%" $l="92%" $dur={3.5} $d={1}>✦</Star>
-      <Star $s={10} $t="72%" $l="4%"  $dur={4}   $d={0.5}>✦</Star>
+      <Star $s={10} $t="72%" $l="4%" $dur={4} $d={0.5}>✦</Star>
       <Star $s={14} $t="85%" $l="88%" $dur={2.4} $d={1.5}>✦</Star>
-      <Star $s={8}  $t="48%" $l="97%" $dur={3.2} $d={0.8}>✦</Star>
+      <Star $s={8} $t="48%" $l="97%" $dur={3.2} $d={0.8}>✦</Star>
 
       <Wrap
         variants={container}
@@ -593,22 +554,22 @@ const RegisterRoleSelection = () => {
         {/* brand */}
         <motion.div variants={item}>
           <BrandLink to="/">
-            <BrandImg src="/images/logo.png" alt="Ốp Pờ" onError={e => { e.target.style.display='none'; }} />
+            <BrandImg src="/images/logo.png" alt="Ốp Pờ" onError={e => { e.target.style.display = 'none'; }} />
           </BrandLink>
         </motion.div>
 
         {/* headline */}
-        <motion.div variants={item} style={{ textAlign:'center' }}>
+        <motion.div variants={item} style={{ textAlign: 'center' }}>
 
           <H1>
-            {t.register.joinTitle.split(' ').slice(0,2).join(' ')}{' '}
+            {t.register.joinTitle.split(' ').slice(0, 2).join(' ')}{' '}
             <span className="shine">{t.register.joinTitle.split(' ').slice(2).join(' ')}</span>
           </H1>
           <Sub>{t.register.joinSubtitle}</Sub>
         </motion.div>
 
         {/* ticker */}
-        <motion.div variants={item} style={{ width:'100%' }}>
+        <motion.div variants={item} style={{ width: '100%' }}>
           <TickerOuter>
             <TickerTrack>
               {chips.map((c, i) => <TickerChip key={i}>{c}</TickerChip>)}
@@ -627,7 +588,7 @@ const RegisterRoleSelection = () => {
                 onClick={() => navigate(r.path)}
                 onHoverStart={() => setHovered(r.key)}
                 onHoverEnd={() => setHovered(null)}
-                whileHover={{ y: -8, transition: { duration: 0.28, ease: [0.22,1,0.36,1] } }}
+                whileHover={{ y: -8, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } }}
                 whileTap={{ scale: 0.985 }}
               >
                 {r.popular && <Popular>🔥 Phổ biến</Popular>}
