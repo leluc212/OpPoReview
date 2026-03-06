@@ -208,7 +208,7 @@ const QRCodeSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 `;
 
 const QRCode = styled.div`
@@ -238,7 +238,8 @@ const QRText = styled.p`
 const StoreButtons = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
+  justify-content: center;
 `;
 
 const StoreButton = styled.a`
@@ -246,7 +247,7 @@ const StoreButton = styled.a`
   transition: transform 0.2s;
   cursor: pointer;
   width: 150px;
-  height: 44px;
+  height: 50px;
   
   &:hover {
     transform: translateY(-2px);
@@ -435,7 +436,6 @@ const DownloadApp = () => {
       <Header>
         <Logo to="/">
           <LogoIcon>ÓP</LogoIcon>
-          <LogoText>Óp Pò</LogoText>
         </Logo>
         
         <Nav>
