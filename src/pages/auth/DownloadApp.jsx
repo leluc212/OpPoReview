@@ -193,13 +193,14 @@ const Subtitle = styled(motion.p)`
 
 const DownloadOptions = styled.div`
   display: flex;
-  gap: 40px;
+  gap: 32px;
   align-items: center;
   margin-bottom: 48px;
   
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 24px;
+    align-items: center;
   }
 `;
 
@@ -211,16 +212,16 @@ const QRCodeSection = styled.div`
 `;
 
 const QRCode = styled.div`
-  width: 140px;
-  height: 140px;
+  width: 150px;
+  height: 150px;
   background: white;
   border: 2px solid #e5e7eb;
-  border-radius: 12px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  padding: 12px;
+  padding: 16px;
   
   img {
     width: 100%;
@@ -229,31 +230,33 @@ const QRCode = styled.div`
 `;
 
 const QRText = styled.p`
-  font-size: 13px;
-  color: #6b7280;
-  font-weight: 500;
+  font-size: 14px;
+  color: #0066cc;
+  font-weight: 600;
 `;
 
 const StoreButtons = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 `;
 
 const StoreButton = styled.a`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 24px;
-  background: #1f2937;
-  border-radius: 10px;
-  text-decoration: none;
-  transition: transform 0.2s, box-shadow 0.2s;
+  display: block;
+  transition: transform 0.2s;
   cursor: pointer;
+  width: 150px;
+  height: 44px;
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
   }
 `;
 
@@ -528,19 +531,11 @@ const DownloadApp = () => {
             
             <StoreButtons>
               <StoreButton href="https://apps.apple.com" target="_blank">
-                <AppleIcon></AppleIcon>
-                <StoreButtonText>
-                  <StoreButtonLabel>Download on the</StoreButtonLabel>
-                  <StoreButtonName>App Store</StoreButtonName>
-                </StoreButtonText>
+                <img src="/images/appstore1.jpg" alt="App Store" />
               </StoreButton>
               
               <StoreButton href="https://play.google.com" target="_blank">
-                <GoogleIcon>▶</GoogleIcon>
-                <StoreButtonText>
-                  <StoreButtonLabel>Get it on</StoreButtonLabel>
-                  <StoreButtonName>Google Play</StoreButtonName>
-                </StoreButtonText>
+                <img src="/images/chplay.jpg" alt="Google Play" />
               </StoreButton>
             </StoreButtons>
           </DownloadOptions>

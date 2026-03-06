@@ -957,13 +957,14 @@ const FloatingShape = styled(motion.div)`
 const HeroContent = styled.div`
   position: relative;
   z-index: 10;
+  margin-top: 80px;
 `;
 
 const HeroTitle = styled(motion.h1)`
   font-size: 56px;
   font-weight: 900;
   line-height: 1.2;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   color: #ffffff;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   letter-spacing: -2px;
@@ -1003,7 +1004,7 @@ const HeroSubtitle = styled(motion.p)`
   font-size: 20px;
   color: #ffffff;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  margin-bottom: 48px;
+  margin-bottom: 40px;
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
