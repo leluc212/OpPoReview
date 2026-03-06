@@ -3,8 +3,10 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
+import Modal from '../../components/Modal';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
+import { Button } from '../../components/FormElements';
 import { 
   Bell, 
   Mail, 
@@ -24,7 +26,8 @@ import {
   Key,
   Download,
   ChevronRight,
-  Check
+  Check,
+  Construction
 } from 'lucide-react';
 
 const SettingsContainer = styled.div`
@@ -434,6 +437,54 @@ const StatItem = styled.div`
   }
 `;
 
+const DevMessage = styled(motion.div)`
+  text-align: center;
+  padding: 32px 24px;
+  
+  .icon-wrapper {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 24px;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(251, 146, 60, 0.15) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2s ease-in-out infinite;
+    
+    svg {
+      width: 40px;
+      height: 40px;
+      color: #F59E0B;
+    }
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+    }
+    50% {
+      transform: scale(1.05);
+      box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+    }
+  }
+  
+  h3 {
+    font-size: 24px;
+    font-weight: 700;
+    color: ${props => props.theme.colors.text};
+    margin-bottom: 12px;
+  }
+  
+  p {
+    font-size: 15px;
+    color: ${props => props.theme.colors.textLight};
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+`;
+
 function CandidateSettings() {
   const { language, changeLanguage, t } = useLanguage();
   const { isDarkMode, toggleTheme } = useTheme();
@@ -448,6 +499,8 @@ function CandidateSettings() {
     showEmail: false,
     showPhone: false
   });
+  
+  const [isDevModalOpen, setIsDevModalOpen] = useState(false);
   
   const navigate = useNavigate();
 
@@ -783,7 +836,7 @@ function CandidateSettings() {
                 $color="#1e40af"
                 whileHover={{ scale: 1.01 }}
                 transition={{ duration: 0.2 }}
-                onClick={() => window.open('/terms', '_blank')}
+                onClick={() => setIsDevModalOpen(true)}
               >
                 <div className="policy-left">
                   <div className="icon">
@@ -801,7 +854,7 @@ function CandidateSettings() {
                 $color="#10B981"
                 whileHover={{ scale: 1.01 }}
                 transition={{ duration: 0.2 }}
-                onClick={() => window.open('/privacy', '_blank')}
+                onClick={() => setIsDevModalOpen(true)}
               >
                 <div className="policy-left">
                   <div className="icon">
@@ -819,7 +872,7 @@ function CandidateSettings() {
                 $color="#F59E0B"
                 whileHover={{ scale: 1.01 }}
                 transition={{ duration: 0.2 }}
-                onClick={() => window.open('/cookies', '_blank')}
+                onClick={() => setIsDevModalOpen(true)}
               >
                 <div className="policy-left">
                   <div className="icon">
@@ -837,6 +890,7 @@ function CandidateSettings() {
                 $color="#1e40af"
                 whileHover={{ scale: 1.01 }}
                 transition={{ duration: 0.2 }}
+                onClick={() => setIsDevModalOpen(true)}
               >
                 <div className="policy-left">
                   <div className="icon">
@@ -857,6 +911,38 @@ function CandidateSettings() {
           </Sidebar>
         </ContentGrid>
       </SettingsContainer>
+
+      {/* In Development Modal */}
+      <Modal
+        isOpen={isDevModalOpen}
+        onClose={() => setIsDevModalOpen(false)}
+        title=""
+        size="small"
+      >
+        <DevMessage
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="icon-wrapper">
+            <Construction />
+          </div>
+          <h3>{language === 'vi' ? 'Đang Phát Triển' : 'Under Development'}</h3>
+          <p>
+            {language === 'vi'
+              ? 'Chức năng này đang trong quá trình phát triển và sẽ sớm được ra mắt. Cảm ơn bạn đã kiên nhẫn!'
+              : 'This feature is currently under development and will be launched soon. Thank you for your patience!'}
+          </p>
+          <Button
+            type="button"
+            $variant="primary"
+            onClick={() => setIsDevModalOpen(false)}
+            style={{ marginTop: '16px', width: '100%' }}
+          >
+            {language === 'vi' ? 'Đã Hiểu' : 'Got It'}
+          </Button>
+        </DevMessage>
+      </Modal>
     </DashboardLayout>
   );
 }

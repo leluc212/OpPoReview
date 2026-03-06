@@ -16,7 +16,7 @@ export const translations = {
       account: 'TÀI KHOẢN',
       platform: 'NỀN TẢNG',
       utilities: 'TIỆN ÍCH',
-      dashboard: 'Bảng Điều Khiển',
+      dashboard: 'Trang chủ',
       findJobs: 'Bài đăng',
       savedJobs: 'Việc Đã Lưu',
       messages: 'Tin Nhắn',
@@ -106,7 +106,7 @@ export const translations = {
     // Dashboard
     dashboard: {
       candidate: {
-        title: 'Bảng Điều Khiển',
+        title: 'Trang chủ',
         welcome: 'Chào mừng trở lại',
         stats: {
           applications: 'Hồ Sơ Đã Nộp',
@@ -122,7 +122,7 @@ export const translations = {
         viewAll: 'Xem Tất Cả',
       },
       employer: {
-        title: 'Bảng Điều Khiển',
+        title: 'Trang chủ',
         welcome: 'Chào mừng trở lại',
         stats: {
           activeJobs: 'Tin Đang Tuyển',
@@ -489,6 +489,13 @@ export const translations = {
       previous: 'Trước',
       submit: 'Gửi',
       close: 'Đóng',
+    },
+
+    // Under Development Modal
+    underDevelopment: {
+      title: 'Đang Phát Triển',
+      message: 'Chức năng này đang trong quá trình phát triển và sẽ sớm được ra mắt. Cảm ơn bạn đã kiên nhẫn!',
+      button: 'Đã Hiểu',
     },
   },
 
@@ -946,6 +953,13 @@ export const translations = {
       previous: 'Previous',
       submit: 'Submit',
       close: 'Close',
+    },
+
+    // Under Development Modal
+    underDevelopment: {
+      title: 'Under Development',
+      message: 'This feature is currently under development and will be launched soon. Thank you for your patience!',
+      button: 'Got It',
     },
   },
 };

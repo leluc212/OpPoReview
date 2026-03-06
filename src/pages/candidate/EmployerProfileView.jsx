@@ -307,7 +307,7 @@ const EmployerProfileView = () => {
     {
       id: 2,
       title: 'Backend Engineer (Node.js)',
-      location: 'Hà Nội',
+      location: 'Quận 1, TP.HCM',
       type: 'Full-time',
       salary: '100 - 130 triệu VND',
       postedAt: '1 week ago',

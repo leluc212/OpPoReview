@@ -556,7 +556,7 @@ const EmployerWallet = () => {
                     </TransactionDetails>
                   </TransactionInfo>
                   <TransactionAmount $type={transaction.type}>
-                    {transaction.type === 'income' ? '+' : ''}
+                    {transaction.type === 'income' ? '+' : '-'}
                     {formatCurrency(Math.abs(transaction.amount))}
                   </TransactionAmount>
                 </TransactionItem>

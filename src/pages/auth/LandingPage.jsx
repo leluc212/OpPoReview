@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { motion, useInView } from 'framer-motion';
 import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package, Heart, UserPlus, Shield, MessageCircle, Headphones, Moon, Sun, Clock, Mail, Send, Award, Zap, Target, Calendar, Download } from 'lucide-react';
 import { Button } from '../../components/FormElements';
+import UnderDevelopmentModal from '../../components/UnderDevelopmentModal';
 import { useTheme } from '../../context/ThemeContext';
 
 const LandingContainer = styled.div`
@@ -269,7 +270,7 @@ const GreenSectionTitle = styled.h3`
   }
 `;
 
-const CVTemplateItem = styled(Link)`
+const CVTemplateItem = styled(motion.div)`
   display: flex;
   align-items: center;
   gap: 8px;
@@ -280,6 +281,7 @@ const CVTemplateItem = styled(Link)`
   font-weight: 600;
   font-size: 13px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
   
   &:hover {
     background: rgba(14, 165, 233, 0.1);
@@ -321,13 +323,14 @@ const JobCategoriesGrid = styled.div`
   margin-top: 6px;
 `;
 
-const DropdownItem = styled(Link)`
+const DropdownItem = styled(motion.div)`
   display: flex;
   align-items: center;
   justify-content: flex-start;
   padding: 6px 15px;
   color: ${props => props.$isDark ? '#e2e8f0' : '#0F172A'};
   text-decoration: none;
+  cursor: pointer;
   border-radius: 6px;
   font-weight: 600;
   font-size: 13px;
@@ -2025,6 +2028,7 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const { isDarkMode, toggleTheme } = useTheme();
   const [language, setLanguage] = useState('vi');
+  const [isDevModalOpen, setIsDevModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [location, setLocation] = useState('');
   const [titleText, setTitleText] = useState('');
@@ -2161,7 +2165,6 @@ const LandingPage = () => {
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          whileHover={{ scale: 1.05 }}
         >
           <Heart />
         </StickyIconButton>
@@ -2174,7 +2177,6 @@ const LandingPage = () => {
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          whileHover={{ scale: 1.05 }}
         >
           <UserPlus />
         </StickyIconButton>
@@ -2187,7 +2189,6 @@ const LandingPage = () => {
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          whileHover={{ scale: 1.05 }}
         >
           <Shield />
         </StickyIconButton>
@@ -2199,7 +2200,6 @@ const LandingPage = () => {
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.5 }}
-          whileHover={{ scale: 1.05 }}
         >
           <MessageCircle />
           <NotificationBadge>3</NotificationBadge>
@@ -2212,7 +2212,6 @@ const LandingPage = () => {
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.6 }}
-          whileHover={{ scale: 1.05 }}
         >
           <Headphones />
         </StickyIconButton>
@@ -2327,11 +2326,11 @@ const LandingPage = () => {
                       Mẫu CV theo style
                       <ArrowRight />
                     </GreenSectionTitle>
-                    <CVTemplateItem to="/cv/templates/simple">
+                    <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
                       <Package />
                       Mẫu CV Đơn giản
                     </CVTemplateItem>
-                    <CVTemplateItem to="/cv/templates/impressive">
+                    <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
                       <Star />
                       Mẫu CV Ấn tượng
                     </CVTemplateItem>
@@ -2342,19 +2341,19 @@ const LandingPage = () => {
                       Tạo CV bằng AI
                       <ArrowRight />
                     </GreenSectionTitle>
-                    <CVTemplateItem to="/cv/templates/sales">
+                    <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
                       <Briefcase />
                       Nhân viên pha chế
                     </CVTemplateItem>
-                    <CVTemplateItem to="/cv/templates/programmer">
+                    <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
                       <Briefcase />
                       Lập trình viên
                     </CVTemplateItem>
-                    <CVTemplateItem to="/cv/templates/accountant">
+                    <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
                       <Briefcase />
                       Nhân viên kế toán
                     </CVTemplateItem>
-                    <CVTemplateItem to="/cv/templates/marketing">
+                    <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
                       <Briefcase />
                       Chuyên viên marketing
                     </CVTemplateItem>
@@ -2363,19 +2362,19 @@ const LandingPage = () => {
                 
                 <DropdownRightColumn>
                   <DropdownSection>
-                    <DropdownItem to="/candidate/cv/manage">
+                    <DropdownItem onClick={() => setIsDevModalOpen(true)}>
                       <Folder />
                       Quản lý CV
                     </DropdownItem>
-                    <DropdownItem to="/candidate/cv/upload">
+                    <DropdownItem onClick={() => setIsDevModalOpen(true)}>
                       <Upload />
                       Tải CV lên
                     </DropdownItem>
-                    <DropdownItem to="/candidate/cover-letter/manage">
+                    <DropdownItem onClick={() => setIsDevModalOpen(true)}>
                       <Edit3 />
                       Quản lý Cover Letter
                     </DropdownItem>
-                    <DropdownItem to="/cover-letter/templates">
+                    <DropdownItem onClick={() => setIsDevModalOpen(true)}>
                       <FileText />
                       Mẫu Cover Letter
                     </DropdownItem>
@@ -3585,32 +3584,32 @@ const LandingPage = () => {
           
           <FooterSection $isDark={isDarkMode}>
             <h3>Dành Cho Ứng Viên</h3>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Tìm việc làm</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Việc làm đã lưu</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Việc làm đã ứng tuyển</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Tạo CV trực tuyến</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Quản lý hồ sơ</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Tải ứng dụng</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Tìm việc làm</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Việc làm đã lưu</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Việc làm đã ứng tuyển</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Tạo CV trực tuyến</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Quản lý hồ sơ</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Tải ứng dụng</a>
           </FooterSection>
           
           <FooterSection $isDark={isDarkMode}>
             <h3>Dành Cho Nhà Tuyển Dụng</h3>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Đăng tin tuyển dụng</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Quản lý ứng viên</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Gói dịch vụ</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Tìm ứng viên</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Phân tích & Báo cáo</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Quản lý HR</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Đăng tin tuyển dụng</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Quản lý ứng viên</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Gói dịch vụ</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Tìm ứng viên</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Phân tích & Báo cáo</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Quản lý HR</a>
           </FooterSection>
           
           <FooterSection $isDark={isDarkMode}>
             <h3>Hỗ Trợ</h3>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Trung tâm trợ giúp</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Liên hệ</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Câu hỏi thường gặp</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Điều khoản sử dụng</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Chính sách bảo mật</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Tính năng đang phát triển'); }}>Về chúng tôi</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Trung tâm trợ giúp</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Liên hệ</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Câu hỏi thường gặp</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Điều khoản sử dụng</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Chính sách bảo mật</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Về chúng tôi</a>
           </FooterSection>
         </FooterGrid>
         
@@ -3618,6 +3617,11 @@ const LandingPage = () => {
           © 2026 Ốp Pờ. Tất cả quyền được bảo lưu.
         </Copyright>
       </Footer>
+
+      <UnderDevelopmentModal
+        isOpen={isDevModalOpen}
+        onClose={() => setIsDevModalOpen(false)}
+      />
       </ScrollContainer>
     </LandingContainer>
   );

@@ -5,6 +5,7 @@ import { GlobalStyles, theme, darkTheme } from './styles/theme';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { ThemeProvider as CustomThemeProvider, useTheme } from './context/ThemeContext';
+import ScrollToTop from './components/ScrollToTop';
 
 // Auth Pages
 import LandingPage from './pages/auth/LandingPage';
@@ -307,6 +308,7 @@ function ThemedApp() {
     <ThemeProvider theme={isDarkMode ? darkTheme : theme}>
       <GlobalStyles />
       <Router>
+        <ScrollToTop />
         <AppRoutes />
       </Router>
     </ThemeProvider>

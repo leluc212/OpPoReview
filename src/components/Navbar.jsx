@@ -224,6 +224,16 @@ const Navbar = ({ showSearch = true }) => {
     }
   };
   
+  const handleProfileClick = () => {
+    if (user?.role === 'candidate') {
+      navigate('/candidate/profile');
+    } else if (user?.role === 'employer') {
+      navigate('/employer/profile');
+    } else if (user?.role === 'admin') {
+      navigate('/admin/profile');
+    }
+  };
+  
   return (
     <NavbarContainer>
       <NavLeft>
@@ -247,7 +257,7 @@ const Navbar = ({ showSearch = true }) => {
           <Badge>3</Badge>
         </IconButton>
         
-        <UserMenu>
+        <UserMenu onClick={handleProfileClick}>
           <Avatar>
             {user?.name?.charAt(0).toUpperCase() || 'U'}
           </Avatar>

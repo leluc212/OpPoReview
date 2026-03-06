@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
+import UnderDevelopmentModal from '../../components/UnderDevelopmentModal';
 import { useLanguage } from '../../context/LanguageContext';
 import { 
   Wallet as WalletIcon, 
@@ -632,6 +633,7 @@ const Wallet = () => {
   const [balance] = useState(15750000);
   const [showBalance, setShowBalance] = useState(false);
   const [filterType, setFilterType] = useState('all');
+  const [isDevModalOpen, setIsDevModalOpen] = useState(false);
 
   const stats = [
     {
@@ -731,11 +733,19 @@ const Wallet = () => {
             {language === 'vi' ? 'Ví Điện Tử' : 'E-Wallet'}
           </h1>
           <div className="header-actions">
-            <Button $variant="secondary" $size="small">
+            <Button 
+              $variant="secondary" 
+              $size="small"
+              onClick={() => setIsDevModalOpen(true)}
+            >
               <Settings style={{ width: '18px', height: '18px' }} />
               {language === 'vi' ? 'Cài Đặt' : 'Settings'}
             </Button>
-            <Button $variant="primary" $size="small">
+            <Button 
+              $variant="primary" 
+              $size="small"
+              onClick={() => setIsDevModalOpen(true)}
+            >
               <Download style={{ width: '18px', height: '18px' }} />
               {language === 'vi' ? 'Xuất Báo Cáo' : 'Export Report'}
             </Button>
@@ -772,6 +782,7 @@ const Wallet = () => {
             <ActionButton
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => setIsDevModalOpen(true)}
             >
               <ArrowUpRight />
               {language === 'vi' ? 'Rút Tiền' : 'Withdraw'}
@@ -779,6 +790,7 @@ const Wallet = () => {
             <ActionButton
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => setIsDevModalOpen(true)}
             >
               <CreditCard />
               {language === 'vi' ? 'Liên Kết Ngân Hàng' : 'Link Bank'}
@@ -828,7 +840,11 @@ const Wallet = () => {
                   {language === 'vi' ? 'Lịch Sử Giao Dịch' : 'Transaction History'}
                 </h2>
                 <div className="header-action">
-                  <Button $variant="secondary" $size="small">
+                  <Button 
+                    $variant="secondary" 
+                    $size="small"
+                    onClick={() => setIsDevModalOpen(true)}
+                  >
                     <Download style={{ width: '16px', height: '16px' }} />
                     {language === 'vi' ? 'Xuất' : 'Export'}
                   </Button>
@@ -951,6 +967,11 @@ const Wallet = () => {
           </div>
         </ContentSection>
       </WalletContainer>
+
+      <UnderDevelopmentModal
+        isOpen={isDevModalOpen}
+        onClose={() => setIsDevModalOpen(false)}
+      />
     </DashboardLayout>
   );
 };
