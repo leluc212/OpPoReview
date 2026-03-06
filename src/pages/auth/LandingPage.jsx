@@ -117,20 +117,27 @@ const Logo = styled(Link)`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  font-size: 16px;
+  justify-content: center;
+  gap: 2px;
+  font-size: 14px;
   font-weight: 700;
   color: #002e9d;
   text-decoration: none;
   letter-spacing: -0.3px;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 4px 0;
   
   img {
-    height: 50px;
+    height: 45px;
     width: auto;
     object-fit: contain;
     filter: none;
     mix-blend-mode: normal;
+  }
+  
+  span {
+    line-height: 1;
+    margin-top: 2px;
   }
   
   &:hover {
@@ -139,24 +146,25 @@ const Logo = styled(Link)`
   }
   
   @media (max-width: 1024px) {
-    font-size: 14px;
+    font-size: 13px;
+    gap: 2px;
     
     img {
-      height: 45px;
+      height: 42px;
     }
   }
   
   @media (max-width: 768px) {
-    font-size: 13px;
-    gap: 3px;
+    font-size: 12px;
+    gap: 1px;
     
     img {
-      height: 40px;
+      height: 38px;
     }
   }
   
   @media (max-width: 480px) {
-    font-size: 12px;
+    font-size: 11px;
     
     img {
       height: 35px;
@@ -181,10 +189,11 @@ const LeftSection = styled.div`
 const RightSection = styled.div`
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  height: 100%;
   
   @media (max-width: 1024px) {
-    gap: 12px;
+    gap: 10px;
   }
   
   @media (max-width: 768px) {
