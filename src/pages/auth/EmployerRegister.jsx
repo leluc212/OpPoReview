@@ -882,7 +882,7 @@ const EmployerRegister = () => {
         <Circle $s={80} $b="20%" $r="8%" $op={0.12} $dur={9} $delay={1} $rev />
 
         <BrandRow>
-          <LogoImg src="/images/logo.png" alt="Ốp Pờ"
+          <LogoImg src="/OpPoReview/images/logo.png" alt="Ốp Pờ"
             onError={e => { e.target.style.display = 'none'; }} />
           <BrandName>Ốp Pờ</BrandName>
         </BrandRow>
@@ -954,7 +954,7 @@ const EmployerRegister = () => {
           {/* Header */}
           <CardHead>
             <CardLogoRow>
-              <MiniLogo src="/images/logo.png" alt="Ốp Pờ"
+              <MiniLogo src="/OpPoReview/images/logo.png" alt="Ốp Pờ"
                 onError={e => { e.target.style.display = 'none'; }} />
               <MiniName>Ốp Pờ</MiniName>
             </CardLogoRow>
@@ -1127,3 +1127,4 @@ const EmployerRegister = () => {
 };
 
 export default EmployerRegister;
+

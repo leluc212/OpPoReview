@@ -2788,7 +2788,7 @@ const LandingPage = () => {
       >
         <LeftSection>
           <Logo to="/">
-            <img src="/images/logo.png" alt="Ốp Pờ" style={{ height: '60px', marginRight: '5px' }} />
+            <img src="/OpPoReview/images/logo.png" alt="Ốp Pờ" style={{ height: '60px', marginRight: '5px' }} />
            
           </Logo>
           <NavLinks $isDark={isDarkMode}>
@@ -3692,14 +3692,14 @@ const LandingPage = () => {
             transition={{ duration: 0.6, delay: 0.5 }}
           >
             <SecondaryBanner
-              src="/images/phache.png"
+              src="/OpPoReview/images/phache.png"
               alt="Phache"
               initial={{ opacity: 0, y: 30, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.7, delay: 0.7 }}
             />
             <MainBanner
-              src="/images/poster.png"
+              src="/OpPoReview/images/poster.png"
               alt="Poster"
               initial={{ opacity: 0, y: 30, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -3779,7 +3779,7 @@ const LandingPage = () => {
       >
         <TechBannerContent>
           <TechBannerImage
-            src="/images/lemoments.png"
+            src="/OpPoReview/images/lemoments.png"
             alt="Le Moments Technology"
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -3911,7 +3911,7 @@ const LandingPage = () => {
               <StoreButtons>
                 <StoreButton href="https://apps.apple.com" target="_blank">
                   <img 
-                    src="/images/appstore1.jpg" 
+                    src="/OpPoReview/images/appstore1.jpg" 
                     alt="App Store"
                     style={{ 
                       width: '120px', 
@@ -3923,7 +3923,7 @@ const LandingPage = () => {
                 
                 <StoreButton href="https://play.google.com" target="_blank">
                   <img 
-                    src="/images/chplay.jpg" 
+                    src="/OpPoReview/images/chplay.jpg" 
                     alt="Google Play"
                     style={{ 
                       width: '120px', 
@@ -3986,7 +3986,7 @@ const LandingPage = () => {
                           transition={{ duration: 0.4, delay: 0.2 }}
                         >
                           <img 
-                            src="/images/logo.png" 
+                            src="/OpPoReview/images/logo.png" 
                             alt="Ốp Pờ"
                             style={{ 
                               width: '100%',
@@ -4191,3 +4191,4 @@ const LandingPage = () => {
 };
 
 export default LandingPage;
+

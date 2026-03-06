@@ -718,7 +718,7 @@ const CandidateRegister = () => {
         <Star $s={6} $top="80%" $left="88%" $dur={2.8} $d={1.5} />
 
         <Brand>
-          <BrandLogo src="/images/logo.png" alt="Ốp Pờ" onError={e => { e.target.style.display = 'none'; }} />
+          <BrandLogo src="/OpPoReview/images/logo.png" alt="Ốp Pờ" onError={e => { e.target.style.display = 'none'; }} />
           <BrandText>Ốp Pờ</BrandText>
         </Brand>
 
@@ -778,7 +778,7 @@ const CandidateRegister = () => {
           {/* Header */}
           <CardTop>
             <LogoRow>
-              <LogoImg src="/images/logo.png" alt="Ốp Pờ" onError={e => { e.target.style.display = 'none'; }} />
+              <LogoImg src="/OpPoReview/images/logo.png" alt="Ốp Pờ" onError={e => { e.target.style.display = 'none'; }} />
               <LogoTxt>Ốp Pờ</LogoTxt>
             </LogoRow>
             <CardTitle>Tạo tài khoản ứng viên</CardTitle>
@@ -886,3 +886,4 @@ const CandidateRegister = () => {
 };
 
 export default CandidateRegister;
+
