@@ -233,6 +233,16 @@ const Navbar = ({ showSearch = true }) => {
     }
   };
   
+  const handleProfileClick = () => {
+    if (user?.role === 'candidate') {
+      navigate('/candidate/profile');
+    } else if (user?.role === 'employer') {
+      navigate('/employer/profile');
+    } else if (user?.role === 'admin') {
+      navigate('/admin/profile');
+    }
+  };
+  
   return (
     <NavbarContainer>
       <NavLeft>
@@ -256,7 +266,7 @@ const Navbar = ({ showSearch = true }) => {
           <Badge>3</Badge>
         </IconButton>
         
-        <UserMenu>
+        <UserMenu onClick={handleProfileClick}>
           <Avatar>
             {user?.role === 'employer' ? (
               <img src={companyLogo} alt="Logo" style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />

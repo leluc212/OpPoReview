@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
+import Modal from '../../components/Modal';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
 import { Button } from '../../components/FormElements';
-import { Settings as SettingsIcon, Bell, FileText, Globe, Shield } from 'lucide-react';
+import { Settings as SettingsIcon, Bell, FileText, Globe, Shield, Construction } from 'lucide-react';
 
 // ─── Page wrapper ────────────────────────────────────────────
 const PageContainer = styled(motion.div)`
@@ -239,6 +240,54 @@ const PolicyBtn = styled(motion.button)`
   }
 `;
 
+const DevMessage = styled(motion.div)`
+  text-align: center;
+  padding: 32px 24px;
+  
+  .icon-wrapper {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 24px;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(251, 146, 60, 0.15) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2s ease-in-out infinite;
+    
+    svg {
+      width: 40px;
+      height: 40px;
+      color: #F59E0B;
+    }
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+    }
+    50% {
+      transform: scale(1.05);
+      box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+    }
+  }
+  
+  h3 {
+    font-size: 24px;
+    font-weight: 700;
+    color: ${props => props.theme.colors.text};
+    margin-bottom: 12px;
+  }
+  
+  p {
+    font-size: 15px;
+    color: ${props => props.theme.colors.textLight};
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+`;
+
 // ─── Component ────────────────────────────────────────────────
 const EmployerSettings = () => {
   const { language, changeLanguage, t } = useLanguage();
@@ -248,6 +297,7 @@ const EmployerSettings = () => {
     messages: true,
     system: false
   });
+  const [isDevModalOpen, setIsDevModalOpen] = useState(false);
 
   return (
     <DashboardLayout role="employer">
@@ -373,17 +423,67 @@ const EmployerSettings = () => {
             </SectionHeader>
 
             <PolicyButtons>
-              <PolicyBtn whileTap={{ scale: 0.97 }}>
+              <PolicyBtn whileTap={{ scale: 0.97 }} onClick={() => setIsDevModalOpen(true)}>
                 <FileText />{language === 'vi' ? 'Điều khoản dịch vụ' : 'Terms of Service'}
               </PolicyBtn>
-              <PolicyBtn whileTap={{ scale: 0.97 }}>
+              <PolicyBtn whileTap={{ scale: 0.97 }} onClick={() => setIsDevModalOpen(true)}>
                 <Shield />{language === 'vi' ? 'Chính sách bảo mật' : 'Privacy Policy'}
               </PolicyBtn>
             </PolicyButtons>
           </SettingCard>
 
+          {/* Danger Zone - Hidden */}
+          {/* <SettingCard>
+            <DangerZone>
+              <h4>{language === 'vi' ? 'Vùng nguy hiểm' : 'Danger Zone'}</h4>
+              <p>{language === 'vi' ? 'Các hành động này không thể hoàn tác. Vui lòng cân nhắc kỹ trước khi thực hiện.' : 'These actions cannot be undone. Please proceed with caution.'}</p>
+              
+              <ButtonGroup>
+                <Button variant="outline" onClick={handleDeactivateAccount}>
+                  <Trash2 size={18} />
+                  {language === 'vi' ? 'Vô hiệu hóa tài khoản' : 'Deactivate Account'}
+                </Button>
+                <Button variant="danger" onClick={handleDeleteAccount}>
+                  <Trash2 size={18} />
+                  {language === 'vi' ? 'Xóa tài khoản vĩnh viễn' : 'Delete Account Permanently'}
+                </Button>
+              </ButtonGroup>
+            </DangerZone>
+          </SettingCard> */}
         </SettingsGrid>
       </PageContainer>
+
+      {/* In Development Modal */}
+      <Modal
+        isOpen={isDevModalOpen}
+        onClose={() => setIsDevModalOpen(false)}
+        title=""
+        size="small"
+      >
+        <DevMessage
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="icon-wrapper">
+            <Construction />
+          </div>
+          <h3>{language === 'vi' ? 'Đang Phát Triển' : 'Under Development'}</h3>
+          <p>
+            {language === 'vi'
+              ? 'Chức năng này đang trong quá trình phát triển và sẽ sớm được ra mắt. Cảm ơn bạn đã kiên nhẫn!'
+              : 'This feature is currently under development and will be launched soon. Thank you for your patience!'}
+          </p>
+          <Button
+            type="button"
+            $variant="primary"
+            onClick={() => setIsDevModalOpen(false)}
+            style={{ marginTop: '16px', width: '100%' }}
+          >
+            {language === 'vi' ? 'Đã Hiểu' : 'Got It'}
+          </Button>
+        </DevMessage>
+      </Modal>
     </DashboardLayout>
   );
 };

@@ -528,49 +528,34 @@ const CandidatePosts = () => {
       author: 'Trần Thị Bình',
       avatar: 'TTB',
       position: 'Nhân viên phục vụ',
-      location: 'Quận 1, TP.HCM',
+      location: 'Hà Nội',
       time: '5 giờ trước',
       title: 'Tìm việc bán thời gian - Nhân viên phục vụ',
       content: 'Sinh viên năm 3, muốn tìm công việc bán thời gian vào buổi tối và cuối tuần. Có kinh nghiệm 6 tháng làm việc tại nhà hàng, nhiệt tình, thân thiện.',
-      tags: ['Phục vụ', 'Bán thời gian', 'Nhà hàng', 'Quận 1'],
-      likes: 15, comments: 5, shares: 2
+      tags: ['Phục vụ', 'Bán thời gian', 'Nhà hàng', 'Hà Nội'],
+      likes: 15,
+      comments: 5,
+      shares: 2,
+      isLiked: true,
+      isSaved: true
     },
     {
       id: 3,
       author: 'Lê Minh Châu',
       avatar: 'LMC',
       position: 'Nhân viên kho',
-      location: 'Quận 3, TP.HCM',
+      location: 'Đà Nẵng',
       time: '1 ngày trước',
       title: 'Tìm việc nhân viên kho - Có bằng lái xe máy',
       content: 'Có kinh nghiệm làm việc tại kho hàng, sắp xếp hàng hóa, kiểm kê. Có bằng lái xe máy, có thể giao hàng. Sẵn sàng làm ca tối và cuối tuần.',
-      tags: ['Kho hàng', 'Giao hàng', 'Ca tối', 'Quận 3'],
-      likes: 32, comments: 12, shares: 5
+      tags: ['Kho hàng', 'Giao hàng', 'Ca tối', 'Đà Nẵng'],
+      likes: 32,
+      comments: 12,
+      shares: 5,
+      isLiked: false,
+      isSaved: false
     }
   ];
-
-  const toggleLike = (id) => {
-    setLikedPosts(prev => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  };
-
-  const toggleSave = (id) => {
-    setSavedPosts(prev => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  };
-
-  const filtered = posts.filter(p =>
-    !searchQuery ||
-    p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
 
   return (
     <DashboardLayout>
