@@ -8,9 +8,46 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+      /* Auto-scale cho mọi máy tính có màn hình nhỏ hơn 1440px */
+      @media screen and (max-width: 1439px) {
+        html {
+          zoom: calc(100vw / 1440);
+        }
+      }
+      /* Đảm bảo không tràn ngang */
+      body {
+        overflow-x: hidden !important;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      // Fallback cho Firefox (không hỗ trợ CSS zoom)
+      (function() {
+        var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+        if (isFirefox) {
+          function scaleForFirefox() {
+            var w = window.innerWidth;
+            if (w < 1440) {
+              var scale = w / 1440;
+              document.documentElement.style.transform = 'scale(' + scale + ')';
+              document.documentElement.style.transformOrigin = 'top left';
+              document.documentElement.style.width = '1440px';
+              document.documentElement.style.minHeight = (100 / scale) + 'vh';
+            } else {
+              document.documentElement.style.transform = '';
+              document.documentElement.style.transformOrigin = '';
+              document.documentElement.style.width = '';
+              document.documentElement.style.minHeight = '';
+            }
+          }
+          scaleForFirefox();
+          window.addEventListener('resize', scaleForFirefox);
+        }
+      })();
+    </script>
   </body>
 </html>
