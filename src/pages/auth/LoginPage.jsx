@@ -310,12 +310,16 @@ const CardSub = styled.p`
 /* Role tabs */
 const RoleTabs = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: ${({ $count }) => `repeat(${$count}, 1fr)`};
   gap: 0;
   background: #f1f5f9;
   border-radius: 14px;
   padding: 4px;
   margin-bottom: 20px;
+  min-width: 180px;
+  max-width: 340px;
+  margin-left: auto;
+  margin-right: auto;
 `;
 
 const RoleTab = styled(motion.button)`
@@ -525,7 +529,15 @@ const LoginPage = () => {
   const validate = () => {
     const e = {};
     if (!form.email) e.email = t.login.requiredEmail;
-    else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = 'Email không hợp lệ';
+    else if (form.email.trim().toLowerCase().endsWith('@admin')) {
+      // emails ending with @admin are allowed and considered admin emails
+    } else if (role === 'admin') {
+      if (!form.email.trim().toLowerCase().endsWith('@admin')) {
+        e.email = 'Email admin phải kết thúc bằng @admin';
+      }
+    } else {
+      if (!/\S+@\S+\.\S+/.test(form.email)) e.email = 'Email không hợp lệ';
+    }
     if (!form.password) e.password = t.login.requiredPassword;
     else if (form.password.length < 6) e.password = 'Mật khẩu phải có ít nhất 6 ký tự';
     return e;
@@ -536,21 +548,31 @@ const LoginPage = () => {
     const errs = validate();
     if (Object.keys(errs).length) { setErrors(errs); return; }
 
+    // Nếu email kết thúc bằng @admin thì tự động coi là admin
+    const emailIsAdmin = form.email.trim().toLowerCase().endsWith('@admin');
+    if (role === 'admin' && !emailIsAdmin) {
+      setErrors(p => ({ ...p, email: 'Email admin phải kết thúc bằng @admin' }));
+      return;
+    }
+
     setLoading(true);
     await new Promise(r => setTimeout(r, 600)); // simulate
 
-    login({ name: role === 'admin' ? 'Quản Trị Viên' : form.email.split('@')[0], email: form.email, role, approved: true });
+    // Nếu email có hậu tố @admin, coi đó là admin bất kể tab đang chọn
+    const roleToUse = form.email.trim().toLowerCase().endsWith('@admin') ? 'admin' : role;
+
+    login({ name: roleToUse === 'admin' ? 'Quản Trị Viên' : form.email.split('@')[0], email: form.email, role: roleToUse, approved: true });
 
     const sp = new URLSearchParams(location.search);
     const rd = sp.get('redirect');
     if (rd) {
-      if ((role === 'candidate' && rd.startsWith('/candidate/')) ||
-        (role === 'employer' && rd.startsWith('/employer/')) ||
-        (role === 'admin' && rd.startsWith('/admin/'))) {
+      if ((roleToUse === 'candidate' && rd.startsWith('/candidate/')) ||
+        (roleToUse === 'employer' && rd.startsWith('/employer/')) ||
+        (roleToUse === 'admin' && rd.startsWith('/admin/'))) {
         navigate(rd); return;
       }
     }
-    navigate(role === 'admin' ? '/admin/dashboard' : role === 'employer' ? '/employer/dashboard' : '/candidate/dashboard');
+    navigate(roleToUse === 'admin' ? '/admin/dashboard' : roleToUse === 'employer' ? '/employer/dashboard' : '/candidate/dashboard');
   };
 
   const handleSocial = p => setShowModal(true);
@@ -627,21 +649,29 @@ const LoginPage = () => {
           </CardSub>
 
           {/* Role tabs */}
-          <RoleTabs>
-            {Object.entries(ROLES).map(([key, r]) => (
-              <RoleTab
-                key={key}
-                type="button"
-                $on={role === key}
-                $c={r.color}
-                onClick={() => { setRole(key); setErrors({}); }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <span className="emoji">{r.emoji}</span>
-                {r.label}
-              </RoleTab>
-            ))}
-          </RoleTabs>
+          {(() => {
+            const roleTabs = Object.entries(ROLES).filter(([key]) => key !== 'admin');
+            if (roleTabs.length > 1) {
+              return (
+                <RoleTabs $count={roleTabs.length}>
+                  {roleTabs.map(([key, r]) => (
+                    <RoleTab
+                      key={key}
+                      type="button"
+                      $on={role === key}
+                      $c={r.color}
+                      onClick={() => { setRole(key); setErrors({}); }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <span className="emoji">{r.emoji}</span>
+                      {r.label}
+                    </RoleTab>
+                  ))}
+                </RoleTabs>
+              );
+            }
+            return null;
+          })()}
 
           {/* Social — only for candidate & employer */}
           {role !== 'admin' && (

@@ -2789,7 +2789,7 @@ const LandingPage = () => {
         <LeftSection>
           <Logo to="/">
             <img src="/images/logo.png" alt="Ốp Pờ" style={{ height: '60px', marginRight: '5px' }} />
-            Ốp Pờ
+           
           </Logo>
           <NavLinks $isDark={isDarkMode}>
           <DropdownContainer ref={jobDropdownRef}>
