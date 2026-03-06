@@ -1,556 +1,884 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import { motion } from 'framer-motion';
-import { Button, Input, FormGroup, Label, ErrorText } from '../../components/FormElements';
-import { Mail, Lock, Eye, EyeOff, CheckCircle, ArrowRight, User } from 'lucide-react';
+import styled, { keyframes, css } from 'styled-components';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const RegisterContainer = styled.div`
+/* ═══════════════════════════════════════════════════════════════
+   KEYFRAMES
+═══════════════════════════════════════════════════════════════ */
+const floatUp = keyframes`
+  0%,100% { transform: translateY(0) rotate(-1deg); }
+  50%      { transform: translateY(-18px) rotate(2deg); }
+`;
+const floatDown = keyframes`
+  0%,100% { transform: translateY(0) rotate(1deg); }
+  50%      { transform: translateY(14px) rotate(-2deg); }
+`;
+const gradMove = keyframes`
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+`;
+const twinkle = keyframes`
+  0%,100% { opacity: 0.2; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.3); }
+`;
+const glowPulse = keyframes`
+  0%,100% { box-shadow: 0 0 0 0 rgba(14,57,149,0.3); }
+  50%      { box-shadow: 0 0 0 10px rgba(14,57,149,0); }
+`;
+const shimmerAnim = keyframes`
+  0%   { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+`;
+const tickerMove = keyframes`
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+`;
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE SHELL
+═══════════════════════════════════════════════════════════════ */
+const Shell = styled.div`
   min-height: 100vh;
   display: flex;
-  background: #002e9d;
+  background: #f0f4ff;
+  font-family: 'Grandstander', 'Inter', sans-serif;
+  color-scheme: light;
+  overflow: hidden;
+  position: relative;
+`;
+
+/* ═══════════════════════════════════════════════════════════════
+   LEFT  ─ Candidate Hero Panel
+═══════════════════════════════════════════════════════════════ */
+const LeftPanel = styled.div`
+  width: 46%;
+  min-height: 100vh;
+  background: linear-gradient(150deg, #07195c 0%, #0E3995 40%, #1648c8 75%, #2563eb 100%);
+  background-size: 220% 220%;
+  animation: ${gradMove} 10s ease infinite;
+  display: flex;
+  flex-direction: column;
+  padding: 52px 52px 40px;
   position: relative;
   overflow: hidden;
-  color-scheme: light;
-  
+
+  @media (max-width: 960px) { display: none; }
+`;
+
+/* dot grid */
+const DotGrid = styled.div`
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.12) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+`;
+
+/* glow orb */
+const Orb = styled.div`
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, ${p => p.$c || 'rgba(96,165,250,0.35)'} 0%, transparent 70%);
+  width:  ${p => p.$s}px;
+  height: ${p => p.$s}px;
+  top:  ${p => p.$top || 'auto'};
+  left: ${p => p.$left || 'auto'};
+  right:  ${p => p.$right || 'auto'};
+  bottom: ${p => p.$bottom || 'auto'};
+  animation: ${p => p.$flip ? floatDown : floatUp} ${p => p.$dur || 14}s ease-in-out infinite;
+  animation-delay: ${p => p.$d || 0}s;
+  pointer-events: none;
+`;
+
+/* star dots */
+const Star = styled.div`
+  position: absolute;
+  width: ${p => p.$s || 4}px;
+  height: ${p => p.$s || 4}px;
+  border-radius: 50%;
+  background: #fff;
+  top:  ${p => p.$top};
+  left: ${p => p.$left};
+  animation: ${twinkle} ${p => p.$dur || 3}s ease-in-out infinite;
+  animation-delay: ${p => p.$d || 0}s;
+`;
+
+/* brand */
+const Brand = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 48px;
+  position: relative;
+  z-index: 2;
+`;
+const BrandLogo = styled.img`
+  height: 38px;
+  filter: brightness(0) invert(1);
+`;
+const BrandText = styled.span`
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.4px;
+`;
+
+/* headline */
+const Hero = styled.div`
+  position: relative;
+  z-index: 2;
+  flex: 1;
+`;
+
+const HeroEyebrow = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #bfdbfe;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 22px;
+`;
+
+const HeroH1 = styled.h1`
+  font-size: clamp(30px, 3vw, 42px);
+  font-weight: 900;
+  line-height: 1.14;
+  letter-spacing: -1.5px;
+  color: #fff;
+  margin-bottom: 16px;
+
+  .grad {
+    background: linear-gradient(90deg, #fbbf24, #fb923c, #f472b6);
+    background-size: 200%;
+    animation: ${gradMove} 4s ease infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+`;
+
+const HeroSub = styled.p`
+  font-size: 14.5px;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.75;
+  max-width: 360px;
+  margin-bottom: 36px;
+`;
+
+/* job preview cards */
+const JobCards = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+`;
+
+const JobCard = styled(motion.div)`
+  background: rgba(255,255,255,0.09);
+  border: 1px solid rgba(255,255,255,0.14);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: default;
+  transition: background 0.25s;
+
+  &:hover { background: rgba(255,255,255,0.14); }
+`;
+
+const JobEmoji = styled.div`
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  background: ${p => p.$bg};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+`;
+
+const JobInfo = styled.div`
+  flex: 1;
+  .title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 3px; }
+  .meta  { font-size: 12px; color: rgba(255,255,255,0.5); }
+`;
+
+const JobBadge = styled.div`
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: ${p => p.$bg || 'rgba(52,211,153,0.2)'};
+  color:       ${p => p.$c || '#34d399'};
+`;
+
+/* ticker */
+const TickerWrap = styled.div`
+  overflow: hidden;
+  position: relative;
+  margin-top: 4px;
+
+  &::before, &::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 32px;
+    z-index: 2;
+  }
+  &::before { left: 0;  background: linear-gradient(90deg, rgba(14,57,149,0.8), transparent); }
+  &::after  { right: 0; background: linear-gradient(-90deg, rgba(14,57,149,0.8), transparent); }
+`;
+
+const TickerTrack = styled.div`
+  display: flex;
+  gap: 28px;
+  white-space: nowrap;
+  animation: ${tickerMove} 22s linear infinite;
+`;
+
+const TickerItem = styled.span`
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.55);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+`;
+
+/* ═══════════════════════════════════════════════════════════════
+   RIGHT ─ Form Panel
+═══════════════════════════════════════════════════════════════ */
+const RightPanel = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+  position: relative;
+  overflow-y: auto;
+
+  &::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 15% 85%, rgba(14,57,149,0.07) 0%, transparent 50%),
+      radial-gradient(ellipse at 82% 5%,  rgba(59,130,246,0.06) 0%, transparent 45%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @media (max-width: 960px) {
+    background: linear-gradient(145deg, #07195c 0%, #0E3995 100%);
+    &::before { display: none; }
+  }
+`;
+
+/* ═══════════════════════════════════════════════════════════════
+   CARD
+═══════════════════════════════════════════════════════════════ */
+const Card = styled(motion.div)`
+  background: #fff;
+  border-radius: 28px;
+  padding: 40px 38px 34px;
+  width: 100%;
+  max-width: 430px;
+  position: relative;
+  z-index: 1;
+  box-shadow:
+    0 1px 3px rgba(0,0,0,0.04),
+    0 8px 24px rgba(14,57,149,0.09),
+    0 28px 56px rgba(14,57,149,0.11);
+
+  /* rainbow top bar */
   &::before {
     content: '';
     position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 800px;
-    height: 800px;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-    border-radius: 50%;
-    animation: float 20s ease-in-out infinite;
-  }
-  
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -30%;
-    left: -20%;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
-    border-radius: 50%;
-    animation: float 15s ease-in-out infinite reverse;
-  }
-  
-  @keyframes float {
-    0%, 100% {
-      transform: translate(0, 0) rotate(0deg);
-    }
-    50% {
-      transform: translate(30px, -30px) rotate(5deg);
-    }
+    top: 0; left: 30px; right: 30px;
+    height: 3px;
+    background: linear-gradient(90deg, #0E3995, #3b82f6, #60a5fa, #38bdf8);
+    border-radius: 0 0 6px 6px;
   }
 `;
 
-const RegisterLeft = styled(motion.div)`
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-  color: white;
-  position: relative;
-  z-index: 1;
-
-  @media (max-width: 1024px) {
-    display: none;
-  }
-`;
-
-const RegisterRight = styled(motion.div)`
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 30px 20px;
-  position: relative;
-  z-index: 1;
-
-  @media (max-width: 1024px) {
-    flex: 1;
-    width: 100%;
-  }
-`;
-
-const HeroContent = styled.div`
-  max-width: 500px;
-
-  h1 {
-    font-size: 38px;
-    font-weight: 800;
-    line-height: 1.2;
-    margin-bottom: 16px;
-    letter-spacing: -1px;
-  }
-
-  p {
-    font-size: 16px;
-    line-height: 1.6;
-    margin-bottom: 20px;
-    opacity: 0.95;
-  }
-
-  .features {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-
-    .feature-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 16px;
-      font-weight: 500;
-
-      svg {
-        width: 24px;
-        height: 24px;
-        color: #10B981;
-        flex-shrink: 0;
-      }
-    }
-  }
-`;
-
-const RegisterForm = styled.div`
-  background: white;
-  border-radius: 24px;
-  padding: 40px;
-  width: 100%;
-  height: 700px;
-  max-width: 450px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-`;
-
-const FormHeader = styled.div`
+/* card header */
+const CardTop = styled.div`
   text-align: center;
-  margin-bottom: 15px;
-
-  .logo-section {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 10px;
-    gap: 10px;
-
-    img {
-      height: 52px;
-    }
-
-    .logo-text {
-      font-size: 32px;
-      font-weight: 800;
-      background: #002e9d;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-  }
-
-  h2 {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: #1E293B;
-  }
-
-  p {
-    font-size: 14px;
-    color: #64748B;
-
-    a {
-      color: #667eea;
-      font-weight: 600;
-      text-decoration: none;
-      
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
-`;
-
-const SocialButtons = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
   margin-bottom: 24px;
 `;
 
-const SocialButton = styled(motion.button)`
-  padding: 14px 20px;
+const LogoRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-bottom: 18px;
+`;
+const LogoImg = styled.img` height: 32px; `;
+const LogoTxt = styled.span`
+  font-size: 19px;
+  font-weight: 800;
+  color: #0E3995;
+  letter-spacing: -0.3px;
+`;
+
+const CardTitle = styled.h2`
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 5px;
+  letter-spacing: -0.4px;
+`;
+
+const CardSub = styled.p`
+  font-size: 13px;
+  color: #94a3b8;
+
+  a { color: #0E3995; font-weight: 700; text-decoration: none;
+      &:hover { text-decoration: underline; } }
+`;
+
+/* ─ Tab toggle: Đăng ký / Đăng nhập ─ */
+const Tabs = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #f1f5f9;
   border-radius: 12px;
-  border: 1px solid #E2E8F0;
-  background: white;
+  padding: 4px;
+  margin-bottom: 22px;
+`;
+
+const Tab = styled.div`
+  padding: 9px;
+  border-radius: 9px;
+  font-size: 13.5px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  color: ${p => p.$active ? '#0E3995' : '#94a3b8'};
+  background: ${p => p.$active ? '#fff' : 'transparent'};
+  box-shadow: ${p => p.$active ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'};
+`;
+
+/* ─ Social ─ */
+const SocialRow = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-bottom: 16px;
+`;
+
+const SocialBtn = styled(motion.button)`
+  padding: 10px 14px;
+  border-radius: 11px;
+  border: 1.5px solid #e8edf2;
+  background: #fafafa;
+  font-size: 13px;
   font-weight: 600;
-  font-size: 14px;
+  color: #334155;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  transition: all 0.3s;
-  color: #334155;
+  gap: 8px;
+  font-family: inherit;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
 
   &:hover {
-    border-color: ${props => props.$color};
-    background: ${props => props.$color}05;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px ${props => props.$color}30;
-  }
-
-  svg, img {
-    width: 20px;
-    height: 20px;
+    border-color: ${p => p.$c};
+    background: ${p => p.$c}0a;
+    box-shadow: 0 3px 10px ${p => p.$c}20;
   }
 `;
 
-const Divider = styled.div`
+/* ─ Or divider ─ */
+const OrDivider = styled.div`
   display: flex;
   align-items: center;
-  text-align: center;
-  color: #94A3B8;
-  margin: 24px 0;
-  font-weight: 500;
-  font-size: 13px;
+  gap: 10px;
+  margin-bottom: 16px;
 
-  &::before,
-  &::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px solid #E2E8F0;
-  }
-
-  &::before {
-    margin-right: 16px;
-  }
-
-  &::after {
-    margin-left: 16px;
-  }
+  span { font-size: 11px; font-weight: 700; color: #d1d9e0;
+    text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+  &::before, &::after { content: ''; flex: 1; height: 1px; background: #f0f4f8; }
 `;
 
-const InputWrapper = styled.div`
+/* ─ Floating input ─ */
+const FieldWrap = styled.div`
   position: relative;
-
-  svg {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 18px;
-    height: 18px;
-    color: #94A3B8;
-    pointer-events: none;
-  }
-
-  input {
-    padding-left: 44px;
-  }
-
-  .password-toggle {
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-    color: #94A3B8;
-    transition: color 0.3s;
-
-    &:hover {
-      color: #667eea;
-    }
-
-    svg {
-      position: static;
-      transform: none;
-      width: 18px;
-      height: 18px;
-    }
-  }
+  margin-bottom: 13px;
 `;
 
-const SubmitButton = styled(Button)`
+const FLabel = styled.label`
+  position: absolute;
+  left: ${p => p.$ic ? '44px' : '15px'};
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #b8c4ce;
+  font-weight: 500;
+  pointer-events: none;
+  transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+  background: transparent;
+  line-height: 1;
+
+  ${p => p.$up && css`
+    top: 0px;
+    left: ${p.$ic ? '38px' : '12px'};
+    font-size: 10px;
+    font-weight: 700;
+    color: ${p.$err ? '#ef4444' : '#0E3995'};
+    background: #fff;
+    padding: 0 4px;
+    transform: translateY(-50%);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  `}
+`;
+
+const FIconL = styled.div`
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  display: flex;
+  color: ${p => p.$on ? '#0E3995' : '#c4cdd5'};
+  transition: color 0.22s;
+  svg { width: 17px; height: 17px; }
+`;
+
+const FIconR = styled.button`
+  position: absolute;
+  right: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  color: #b8c4ce;
+  transition: color 0.2s;
+  &:hover { color: #0E3995; }
+  svg { width: 16px; height: 16px; }
+`;
+
+const FInput = styled.input`
+  width: 100%;
+  height: 50px;
+  padding: ${p => p.$ic ? '14px 44px 0 44px' : '14px 15px 0 15px'};
+  ${p => p.$ir && 'padding-right: 42px;'}
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #0f172a;
+  border: 1.5px solid ${p => p.$err ? '#ef4444' : p.$on ? '#0E3995' : '#eaeff4'};
+  border-radius: 12px;
+  background: ${p => p.$on ? '#f8faff' : '#fafbfc'};
+  outline: none;
+  transition: border-color 0.22s, background 0.22s, box-shadow 0.22s;
+
+  ${p => p.$on && !p.$err && css`
+    box-shadow: 0 0 0 3px rgba(14,57,149,0.09);
+  `}
+  ${p => p.$err && css`
+    box-shadow: 0 0 0 3px rgba(239,68,68,0.1);
+  `}
+  &::placeholder { color: transparent; }
+`;
+
+const FErr = styled.p`
+  font-size: 11.5px;
+  color: #ef4444;
+  margin-top: 4px;
+  font-weight: 500;
+`;
+
+/* ─ Password strength ─ */
+const PwWrap = styled.div` margin: -5px 0 11px; `;
+const PwBars = styled.div` display: flex; gap: 4px; margin-bottom: 3px; `;
+const PwSeg = styled.div`
+  flex: 1; height: 3px; border-radius: 999px;
+  background: ${p => p.$on ? p.$c : '#eaeff4'};
+  transition: background 0.35s;
+`;
+const PwLbl = styled.div`
+  font-size: 11px; font-weight: 700;
+  color: ${p => p.$c}; text-align: right;
+`;
+
+/* ─ Checkbox ─ */
+const ChkRow = styled.label`
+  display: flex; align-items: flex-start; gap: 10px;
+  cursor: pointer; margin-bottom: 14px;
+`;
+const Chk = styled.div`
+  width: 17px; height: 17px; border-radius: 5px; flex-shrink: 0; margin-top: 2px;
+  border: 1.5px solid ${p => p.$on ? '#0E3995' : '#d1d9e0'};
+  background: ${p => p.$on ? '#0E3995' : '#fff'};
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  svg { width: 10px; height: 10px; color: #fff; opacity: ${p => p.$on ? 1 : 0}; transition: opacity 0.2s; }
+`;
+const ChkTxt = styled.span`
+  font-size: 12.5px; color: #64748b; line-height: 1.55;
+  a { color: #0E3995; font-weight: 700; text-decoration: none; &:hover { text-decoration: underline; } }
+`;
+
+/* ─ Submit ─ */
+const SubmitBtn = styled(motion.button)`
+  width: 100%;
+  height: 50px;
+  border: none;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #07195c 0%, #0E3995 55%, #2563eb 100%);
+  background-size: 200%;
+  animation: ${gradMove} 6s ease infinite;
+  color: #fff;
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  cursor: pointer;
+  font-family: inherit;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-top: 24px;
-  margin-bottom: 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.25s;
+
+  &::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+    pointer-events: none;
   }
 
-  svg {
-    width: 18px;
-    height: 18px;
-    transition: transform 0.3s;
-  }
+  &:hover:not(:disabled) { box-shadow: 0 8px 28px rgba(14,57,149,0.45); }
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
 
-  &:hover svg {
-    transform: translateX(4px);
-  }
+  svg { width: 17px; height: 17px; transition: transform 0.25s; }
+  &:hover:not(:disabled) svg { transform: translateX(4px); }
 `;
 
-const BackLink = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #667eea;
+const SecondaryBtn = styled.button`
+  width: 100%;
+  height: 44px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 11px;
+  background: transparent;
+  color: #64748b;
   font-size: 13px;
   font-weight: 600;
-  margin-bottom: 16px;
-  text-decoration: none;
-  transition: all 0.3s;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.2s, color 0.2s;
+  margin-bottom: 14px;
 
-  &:hover {
-    gap: 8px;
-    color: #764ba2;
-  }
-
-  svg {
-    width: 16px;
-    height: 16px;
-  }
+  &:hover { border-color: #0E3995; color: #0E3995; }
 `;
 
+const FootNote = styled.p`
+  font-size: 11.5px; color: #c0cad4; text-align: center; line-height: 1.6;
+  a { color: #0E3995; font-weight: 600; text-decoration: none; }
+`;
+
+/* ═══════════════════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════════════════ */
+function getPwStrength(pw) {
+  if (!pw) return null;
+  let s = 0;
+  if (pw.length >= 6) s++;
+  if (pw.length >= 10) s++;
+  if (/[A-Z]/.test(pw)) s++;
+  if (/[0-9]/.test(pw)) s++;
+  if (/[^a-zA-Z0-9]/.test(pw)) s++;
+  if (s <= 1) return { n: 1, label: 'Yếu', color: '#ef4444' };
+  if (s <= 2) return { n: 2, label: 'Trung bình', color: '#f59e0b' };
+  if (s <= 3) return { n: 3, label: 'Khá mạnh', color: '#3b82f6' };
+  return { n: 4, label: 'Rất mạnh', color: '#10b981' };
+}
+
+/* inline icon SVGs */
+const IcoMail = () => <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>;
+const IcoLock = () => <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>;
+const IcoUser = () => <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>;
+const IcoEye = () => <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>;
+const IcoEyeOff = () => <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>;
+const IcoArrow = () => <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>;
+const IcoCheck = () => <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>;
+
+/* floating input component */
+function FloatInput({ id, name, type = 'text', label, value, onChange, error, iconL, iconR, onToggle }) {
+  const [focused, setFocused] = useState(false);
+  const up = focused || !!value;
+  return (
+    <FieldWrap>
+      {iconL && <FIconL $on={focused}>{iconL}</FIconL>}
+      <FInput
+        id={id} name={name} type={type}
+        value={value} onChange={onChange}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        $ic={!!iconL} $ir={!!iconR}
+        $on={focused} $err={!!error}
+        autoComplete="off"
+      />
+      <FLabel htmlFor={id} $up={up} $ic={!!iconL} $err={!!error}>{label}</FLabel>
+      {iconR && <FIconR type="button" onClick={onToggle}>{iconR}</FIconR>}
+      {error && <FErr>{error}</FErr>}
+    </FieldWrap>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMPONENT
+═══════════════════════════════════════════════════════════════ */
 const CandidateRegister = () => {
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-  });
+  const [showPw, setShowPw] = useState(false);
+  const [showCpw, setShowCpw] = useState(false);
+  const [agreed, setAgreed] = useState(false);
+  const [form, setForm] = useState({ fullName: '', email: '', password: '', confirmPassword: '' });
   const [errors, setErrors] = useState({});
 
-  const handleChange = (e) => {
+  const pw = getPwStrength(form.password);
+
+  const onChange = e => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors({
-        ...errors,
-        [name]: ''
-      });
-    }
+    setForm(p => ({ ...p, [name]: value }));
+    if (errors[name]) setErrors(p => ({ ...p, [name]: '' }));
   };
 
   const validate = () => {
-    const newErrors = {};
-    if (!formData.email) {
-      newErrors.email = 'Vui lòng nhập email';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email không hợp lệ';
-    }
-    if (!formData.password) {
-      newErrors.password = 'Vui lòng nhập mật khẩu';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
-    }
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Vui lòng xác nhận mật khẩu';
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Mật khẩu không khớp';
-    }
-    return newErrors;
+    const e = {};
+    if (!form.fullName) e.fullName = 'Vui lòng nhập họ tên';
+    if (!form.email) e.email = 'Vui lòng nhập email';
+    else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = 'Email không đúng định dạng';
+    if (!form.password) e.password = 'Vui lòng nhập mật khẩu';
+    else if (form.password.length < 6) e.password = 'Mật khẩu ít nhất 6 ký tự';
+    if (!form.confirmPassword) e.confirmPassword = 'Vui lòng xác nhận mật khẩu';
+    else if (form.password !== form.confirmPassword) e.confirmPassword = 'Mật khẩu không khớp';
+    if (!agreed) e.agreed = 'Bạn cần đồng ý điều khoản';
+    return e;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     e.preventDefault();
-    const newErrors = validate();
-    
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    // Navigate to OTP verification
-    navigate('/verify-otp', { state: { email: formData.email, role: 'candidate' } });
+    const errs = validate();
+    if (Object.keys(errs).length) { setErrors(errs); return; }
+    navigate('/verify-otp', { state: { email: form.email, role: 'candidate' } });
   };
 
-  const handleSocialRegister = (provider) => {
-    // Mock social registration
-    alert(`Đăng ký bằng ${provider} (chức năng đang phát triển)`);
-  };
+  const handleSocial = p => alert(`Đăng ký bằng ${p} (đang phát triển)`);
+
+  /* job previews */
+  const jobs = [
+    { emoji: '☕', bg: 'rgba(251,191,36,0.25)', title: 'Barista bán thời gian', meta: 'TP.HCM · 35K/giờ', badge: 'Mới đăng', bc: 'rgba(96,165,250,0.2)', tc: '#93c5fd' },
+    { emoji: '💼', bg: 'rgba(167,139,250,0.25)', title: 'Nhân viên văn phòng', meta: 'Hà Nội · 40K/giờ', badge: 'Hot 🔥', bc: 'rgba(249,115,22,0.2)', tc: '#fb923c' },
+    { emoji: '🎧', bg: 'rgba(52,211,153,0.25)', title: 'CSKH online (remote)', meta: 'Remote · 30K/giờ', badge: 'Urgent', bc: 'rgba(239,68,68,0.2)', tc: '#f87171' },
+  ];
+
+  const tickerItems = ['☕ Barista', '🛵 Shipper', '💻 Remote', '🎨 Designer', '📚 Gia sư', '💆 Spa', '📦 Kho vận', '☕ Barista', '🛵 Shipper', '💻 Remote', '🎨 Designer', '📚 Gia sư', '💆 Spa', '📦 Kho vận'];
 
   return (
-    <RegisterContainer>
-      <RegisterLeft
-        initial={{ opacity: 0, x: -50 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8 }}
-      >
-        <HeroContent>
-          <h1>Bắt đầu tìm việc mơ ước cùng Ốp Pờ</h1>
-          <p>Tạo tài khoản ứng viên miễn phí và khám phá hàng ngàn cơ hội việc làm hấp dẫn từ các công ty hàng đầu.</p>
-          
-          <div className="features">
-            <div className="feature-item">
-              <CheckCircle />
-              <span>Tìm kiếm và ứng tuyển việc làm miễn phí</span>
-            </div>
-            <div className="feature-item">
-              <CheckCircle />
-              <span>Kết nối trực tiếp với nhà tuyển dụng</span>
-            </div>
-            <div className="feature-item">
-              <CheckCircle />
-              <span>Quản lý hồ sơ và theo dõi đơn ứng tuyển</span>
-            </div>
-            <div className="feature-item">
-              <CheckCircle />
-              <span>Nhận gợi ý việc làm phù hợp với bạn</span>
-            </div>
-          </div>
-        </HeroContent>
-      </RegisterLeft>
+    <Shell>
+      {/* ══ LEFT ══ */}
+      <LeftPanel>
+        <DotGrid />
+        <Orb $s={500} $top="-20%" $right="-15%" $c="rgba(37,99,235,0.4)" $dur={20} />
+        <Orb $s={320} $bottom="-12%" $left="-8%" $c="rgba(14,57,149,0.5)" $dur={16} $flip $d={-3} />
+        <Orb $s={160} $top="45%" $left="12%" $c="rgba(96,165,250,0.3)" $dur={11} $d={-5} />
+        <Star $s={5} $top="15%" $left="22%" $dur={2.5} />
+        <Star $s={3} $top="35%" $left="78%" $dur={4} $d={1} />
+        <Star $s={4} $top="62%" $left="55%" $dur={3.2} $d={0.5} />
+        <Star $s={6} $top="80%" $left="88%" $dur={2.8} $d={1.5} />
 
-      <RegisterRight
-        initial={{ opacity: 0, x: 50 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8 }}
-      >
-        <RegisterForm>
-          <FormHeader>
-            <div className="logo-section">
-              <img src="/images/logo.png" alt="Ốp Pờ" />
-              <div className="logo-text">Ốp Pờ</div>
-            </div>
-            <h2>Tạo Tài Khoản Ứng Viên</h2>
-            <p>
-              Đã có tài khoản? <Link to="/login">Đăng nhập ngay</Link>
-            </p>
-          </FormHeader>
+        <Brand>
+          <BrandLogo src="/images/logo.png" alt="Ốp Pờ" onError={e => { e.target.style.display = 'none'; }} />
+          <BrandText>Ốp Pờ</BrandText>
+        </Brand>
 
-          <SocialButtons>
-            <SocialButton
-              type="button"
-              onClick={() => handleSocialRegister('Google')}
-              $color="#EA4335"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <svg viewBox="0 0 24 24" width="20" height="20">
-                <path fill="#EA4335" d="M5.26620003,9.76452941 C6.19878754,6.93863203 8.85444915,4.90909091 12,4.90909091 C13.6909091,4.90909091 15.2181818,5.50909091 16.4181818,6.49090909 L19.9090909,3 C17.7818182,1.14545455 15.0545455,0 12,0 C7.27006974,0 3.1977497,2.69829785 1.23999023,6.65002441 L5.26620003,9.76452941 Z"/>
-                <path fill="#34A853" d="M16.0407269,18.0125889 C14.9509167,18.7163016 13.5660892,19.0909091 12,19.0909091 C8.86648613,19.0909091 6.21911939,17.076871 5.27698177,14.2678769 L1.23746264,17.3349879 C3.19279051,21.2936293 7.26500293,24 12,24 C14.9328362,24 17.7353462,22.9573905 19.834192,20.9995801 L16.0407269,18.0125889 Z"/>
-                <path fill="#4A90E2" d="M19.834192,20.9995801 C22.0291676,18.9520994 23.4545455,15.903663 23.4545455,12 C23.4545455,11.2909091 23.3454545,10.5272727 23.1818182,9.81818182 L12,9.81818182 L12,14.4545455 L18.4363636,14.4545455 C18.1187732,16.013626 17.2662994,17.2212117 16.0407269,18.0125889 L19.834192,20.9995801 Z"/>
-                <path fill="#FBBC05" d="M5.27698177,14.2678769 C5.03832634,13.556323 4.90909091,12.7937589 4.90909091,12 C4.90909091,11.2182781 5.03443647,10.4668121 5.26620003,9.76452941 L1.23999023,6.65002441 C0.43658717,8.26043162 0,10.0753848 0,12 C0,13.9195484 0.444780743,15.7301709 1.23746264,17.3349879 L5.27698177,14.2678769 Z"/>
+        <Hero>
+          <HeroEyebrow>
+            ✦ Nền tảng việc làm part-time #1
+          </HeroEyebrow>
+
+          <HeroH1>
+            Tìm việc<br />
+            <span className="grad">phù hợp</span><br />
+            trong 60 giây
+          </HeroH1>
+
+          <HeroSub>
+            Hàng ngàn công việc part-time linh hoạt đang chờ bạn.
+            Đăng ký miễn phí — ứng tuyển ngay hôm nay.
+          </HeroSub>
+
+          {/* Job preview cards */}
+          <JobCards>
+            {jobs.map((j, i) => (
+              <JobCard
+                key={i}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 + i * 0.12 }}
+              >
+                <JobEmoji $bg={j.bg}>{j.emoji}</JobEmoji>
+                <JobInfo>
+                  <div className="title">{j.title}</div>
+                  <div className="meta">{j.meta}</div>
+                </JobInfo>
+                <JobBadge $bg={j.bc} $c={j.tc}>{j.badge}</JobBadge>
+              </JobCard>
+            ))}
+          </JobCards>
+
+          {/* Scrolling ticker */}
+          <TickerWrap>
+            <TickerTrack>
+              {tickerItems.map((t, i) => (
+                <TickerItem key={i}>● {t}</TickerItem>
+              ))}
+            </TickerTrack>
+          </TickerWrap>
+        </Hero>
+      </LeftPanel>
+
+      {/* ══ RIGHT ══ */}
+      <RightPanel>
+        <Card
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {/* Header */}
+          <CardTop>
+            <LogoRow>
+              <LogoImg src="/images/logo.png" alt="Ốp Pờ" onError={e => { e.target.style.display = 'none'; }} />
+              <LogoTxt>Ốp Pờ</LogoTxt>
+            </LogoRow>
+            <CardTitle>Tạo tài khoản ứng viên</CardTitle>
+            <CardSub style={{ marginTop: 5 }}>
+              Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
+            </CardSub>
+          </CardTop>
+
+          {/* Tab switcher */}
+          <Tabs>
+            <Tab $active>Đăng ký</Tab>
+            <Tab as={Link} to="/login" style={{ textDecoration: 'none', color: '#94a3b8', fontWeight: 700, fontSize: 13.5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              Đăng nhập
+            </Tab>
+          </Tabs>
+
+          {/* Social */}
+          <SocialRow>
+            <SocialBtn type="button" $c="#EA4335"
+              onClick={() => handleSocial('Google')}
+              whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <svg viewBox="0 0 24 24" width="17" height="17">
+                <path fill="#EA4335" d="M5.266 9.765C6.199 6.939 8.854 4.91 12 4.91c1.69 0 3.218.6 4.418 1.582l3.491-3.491C17.782 1.146 15.055 0 12 0 7.27 0 3.198 2.698 1.24 6.65l4.026 3.115z" />
+                <path fill="#34A853" d="M16.04 18.013C14.951 18.716 13.566 19.09 12 19.09c-3.134 0-5.78-2.014-6.723-4.823l-4.04 3.067C3.193 21.294 7.265 24 12 24c2.933 0 5.735-1.043 7.834-3.001l-3.794-2.986z" />
+                <path fill="#4A90E2" d="M19.834 21C22.03 18.952 23.455 15.904 23.455 12c0-.71-.091-1.472-.273-2.182H12v4.636h6.436c-.319 1.56-1.17 2.767-2.396 3.559L19.834 21z" />
+                <path fill="#FBBC05" d="M5.277 14.268A7.12 7.12 0 014.91 12c0-.782.135-1.533.367-2.235L1.24 6.65A11.945 11.945 0 000 12c0 1.92.444 3.73 1.237 5.335l4.04-3.067z" />
               </svg>
               Google
-            </SocialButton>
-            
-            <SocialButton
-              type="button"
-              onClick={() => handleSocialRegister('Facebook')}
-              $color="#1877F2"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="#1877F2">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            </SocialBtn>
+            <SocialBtn type="button" $c="#1877F2"
+              onClick={() => handleSocial('Facebook')}
+              whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="#1877F2">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
               </svg>
               Facebook
-            </SocialButton>
-          </SocialButtons>
+            </SocialBtn>
+          </SocialRow>
 
-          <Divider>hoặc đăng ký bằng email</Divider>
+          <OrDivider><span>hoặc dùng email</span></OrDivider>
 
+          {/* Form */}
           <form onSubmit={handleSubmit}>
-            <FormGroup>
-              <Label htmlFor="email">Địa chỉ Email *</Label>
-              <InputWrapper>
-                <Mail />
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="lucltse184288@fpt.edu.vn"
-                  value={formData.email}
-                  onChange={handleChange}
-                  $error={errors.email}
-                />
-              </InputWrapper>
-              {errors.email && <ErrorText>{errors.email}</ErrorText>}
-            </FormGroup>
+            <FloatInput id="fullName" name="fullName" label="Họ và tên *"
+              value={form.fullName} onChange={onChange} error={errors.fullName}
+              iconL={<IcoUser />} />
 
-            <FormGroup>
-              <Label htmlFor="password">Mật khẩu *</Label>
-              <InputWrapper>
-                <Lock />
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Tối thiểu 6 ký tự"
-                  value={formData.password}
-                  onChange={handleChange}
-                  $error={errors.password}
-                />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <EyeOff /> : <Eye />}
-                </button>
-              </InputWrapper>
-              {errors.password && <ErrorText>{errors.password}</ErrorText>}
-            </FormGroup>
+            <FloatInput id="email" name="email" type="email" label="Email *"
+              value={form.email} onChange={onChange} error={errors.email}
+              iconL={<IcoMail />} />
 
-            <FormGroup>
-              <Label htmlFor="confirmPassword">Xác nhận mật khẩu *</Label>
-              <InputWrapper>
-                <Lock />
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Nhập lại mật khẩu"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  $error={errors.confirmPassword}
-                />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? <EyeOff /> : <Eye />}
-                </button>
-              </InputWrapper>
-              {errors.confirmPassword && <ErrorText>{errors.confirmPassword}</ErrorText>}
-            </FormGroup>
+            <FloatInput id="password" name="password"
+              type={showPw ? 'text' : 'password'} label="Mật khẩu *"
+              value={form.password} onChange={onChange} error={errors.password}
+              iconL={<IcoLock />}
+              iconR={showPw ? <IcoEyeOff /> : <IcoEye />}
+              onToggle={() => setShowPw(p => !p)} />
 
-            <SubmitButton type="submit" $variant="primary" $fullWidth $size="large">
-              Tạo Tài Khoản
-              <ArrowRight />
-            </SubmitButton>
+            {form.password && pw && (
+              <PwWrap>
+                <PwBars>
+                  {[1, 2, 3, 4].map(i => <PwSeg key={i} $on={pw.n >= i} $c={pw.color} />)}
+                </PwBars>
+                <PwLbl $c={pw.color}>{pw.label}</PwLbl>
+              </PwWrap>
+            )}
 
-            <BackLink to="/register">
-              ← Quay lại chọn vai trò
-            </BackLink>
+            <FloatInput id="confirmPassword" name="confirmPassword"
+              type={showCpw ? 'text' : 'password'} label="Xác nhận mật khẩu *"
+              value={form.confirmPassword} onChange={onChange} error={errors.confirmPassword}
+              iconL={<IcoLock />}
+              iconR={showCpw ? <IcoEyeOff /> : <IcoEye />}
+              onToggle={() => setShowCpw(p => !p)} />
+
+            <ChkRow onClick={() => setAgreed(p => !p)}>
+              <Chk $on={agreed}><IcoCheck /></Chk>
+              <ChkTxt>
+                Tôi đồng ý với <a href="#" onClick={e => e.stopPropagation()}>Điều khoản</a>
+                {' '}và <a href="#" onClick={e => e.stopPropagation()}>Chính sách bảo mật</a> của Ốp Pờ.
+              </ChkTxt>
+            </ChkRow>
+            {errors.agreed && <FErr style={{ marginTop: -8, marginBottom: 10 }}>{errors.agreed}</FErr>}
+
+            <SubmitBtn
+              type="submit"
+              disabled={!agreed}
+              whileHover={agreed ? { scale: 1.02 } : {}}
+              whileTap={agreed ? { scale: 0.98 } : {}}>
+              Tạo tài khoản miễn phí <IcoArrow />
+            </SubmitBtn>
           </form>
-        </RegisterForm>
-      </RegisterRight>
-    </RegisterContainer>
+
+          <SecondaryBtn type="button" onClick={() => navigate('/register')}>
+            ← Quay lại chọn vai trò
+          </SecondaryBtn>
+
+          <FootNote>
+            Bằng cách đăng ký, bạn sẽ nhận thông báo việc làm mới từ Ốp Pờ.{' '}
+            <a href="#">Huỷ bất cứ lúc nào.</a>
+          </FootNote>
+        </Card>
+      </RightPanel>
+    </Shell>
   );
 };
 

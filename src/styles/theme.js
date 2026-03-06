@@ -1,6 +1,10 @@
 import { createGlobalStyle } from 'styled-components';
 
 export const GlobalStyles = createGlobalStyle`
+  @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Pacifico&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Chiron+GoRound+TC:wght@200..900&family=Pacifico&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Chiron+GoRound+TC:wght@200..900&family=Grandstander:ital,wght@0,100..900;1,100..900&family=Pacifico&display=swap');
+
   * {
     margin: 0;
     padding: 0;
@@ -8,7 +12,7 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-family: "Grandstander";
     background: ${props => props.theme.colors.bgDark};
     background-attachment: fixed;
     color: ${props => props.theme.colors.text};

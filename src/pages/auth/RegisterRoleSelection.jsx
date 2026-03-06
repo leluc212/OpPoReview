@@ -1,377 +1,637 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { keyframes, css } from 'styled-components';
 import { motion } from 'framer-motion';
-import { Users, Building2, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
-const SelectionContainer = styled.div`
+/* ═══════════════════════════════════════════════
+   KEYFRAMES
+═══════════════════════════════════════════════ */
+const gradShift = keyframes`
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+`;
+const orbFloat = keyframes`
+  0%,100% { transform: translate(0,0) scale(1); }
+  33%      { transform: translate(30px,-30px) scale(1.06); }
+  66%      { transform: translate(-20px,18px) scale(0.96); }
+`;
+const sparkle = keyframes`
+  0%,100% { opacity:0.15; transform:scale(0.8) rotate(0deg); }
+  50%      { opacity:1;    transform:scale(1.2) rotate(20deg); }
+`;
+const scanY = keyframes`
+  0%   { top: -2px; opacity: 0.7; }
+  100% { top: 100%; opacity: 0; }
+`;
+const ticker = keyframes`
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+`;
+const fadeUp = keyframes`
+  from { opacity:0; transform:translateY(24px); }
+  to   { opacity:1; transform:translateY(0); }
+`;
+const cardGlow = keyframes`
+  0%,100% { box-shadow: 0 0 0 0 rgba(14,57,149,0); }
+  50%      { box-shadow: 0 0 40px 4px rgba(14,57,149,0.18); }
+`;
+
+/* ═══════════════════════════════════════════════
+   PAGE ROOT
+═══════════════════════════════════════════════ */
+const Page = styled.div`
   min-height: 100vh;
+  background: linear-gradient(145deg, #060f3e 0%, #0d2778 30%, #0E3995 60%, #1648c8 100%);
+  background-size: 220% 220%;
+  animation: ${gradShift} 12s ease infinite;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #002e9d;
-  padding: 40px;
+  padding: 40px 24px;
   position: relative;
   overflow: hidden;
+  font-family: 'Inter', sans-serif !important;
   color-scheme: light;
 
-  @keyframes float {
-    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-    25% { transform: translate(20px, -20px) rotate(90deg); }
-    50% { transform: translate(-20px, 20px) rotate(180deg); }
-    75% { transform: translate(20px, 20px) rotate(270deg); }
-  }
-
-  &::before {
-    content: '';
-    position: absolute;
-    width: 900px;
-    height: 900px;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-    border-radius: 50%;
-    top: -450px;
-    right: -250px;
-    animation: float 20s infinite ease-in-out;
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    width: 700px;
-    height: 700px;
-    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
-    border-radius: 50%;
-    bottom: -350px;
-    left: -200px;
-    animation: float 15s infinite ease-in-out reverse;
+  * {
+    font-family: inherit !important;
   }
 `;
 
-const GridPattern = styled.div`
+/* grid */
+const Grid = styled.div`
   position: absolute;
   inset: 0;
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse at center, black 0%, transparent 75%);
-  -webkit-mask-image: radial-gradient(ellipse at center, black 0%, transparent 75%);
-  opacity: 0.3;
-  z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 52px 52px;
   pointer-events: none;
 `;
 
-const GradientGlow = styled(motion.div)`
+/* orbs */
+const Orb = styled.div`
   position: absolute;
-  top: 30%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 30%, transparent 70%);
-  filter: blur(60px);
-  animation: glowPulse 8s ease-in-out infinite;
+  border-radius: 50%;
+  background: radial-gradient(circle, ${p => p.$c} 0%, transparent 70%);
+  width:  ${p => p.$s}px;
+  height: ${p => p.$s}px;
+  top:    ${p => p.$t || 'auto'};
+  left:   ${p => p.$l || 'auto'};
+  right:  ${p => p.$r || 'auto'};
+  bottom: ${p => p.$b || 'auto'};
+  animation: ${orbFloat} ${p => p.$dur}s ease-in-out infinite;
+  animation-delay: ${p => p.$d || 0}s;
   pointer-events: none;
-  z-index: 1;
-  
-  @keyframes glowPulse {
-    0%, 100% {
-      opacity: 0.4;
-      transform: translate(-50%, -50%) scale(1);
-    }
-    50% {
-      opacity: 0.6;
-      transform: translate(-50%, -50%) scale(1.1);
-    }
-  }
+  filter: blur(${p => p.$blur || 0}px);
 `;
 
-const ContentWrapper = styled(motion.div)`
-  max-width: 1100px;
+/* scan */
+const Scan = styled.div`
+  position: absolute;
+  left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(96,165,250,0.5), rgba(255,255,255,0.3), rgba(96,165,250,0.5), transparent);
+  animation: ${scanY} 7s linear infinite;
+  pointer-events: none;
+`;
+
+/* sparkle stars */
+const Star = styled.div`
+  position: absolute;
+  color: rgba(255,255,255,0.7);
+  font-size: ${p => p.$s || 14}px;
+  top:  ${p => p.$t};
+  left: ${p => p.$l};
+  animation: ${sparkle} ${p => p.$dur || 3}s ease-in-out infinite;
+  animation-delay: ${p => p.$d || 0}s;
+  pointer-events: none;
+`;
+
+/* ═══════════════════════════════════════════════
+   CONTENT
+═══════════════════════════════════════════════ */
+const Wrap = styled(motion.div)`
   width: 100%;
-  text-align: center;
+  max-width: 1060px;
   position: relative;
   z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
-const Logo = styled(Link)`
+/* brand */
+const BrandLink = styled(Link)`
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  font-size: 28px;
-  font-weight: 800;
-  color: #002e9d;
+  justify-content: center;
+  background: #ffffff;
+  padding: 12px 28px;
+  border-radius: 18px;
   text-decoration: none;
-  letter-spacing: -0.5px;
-  margin-bottom: 48px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px);
-  padding: 16px 32px;
-  border-radius: 16px;
-  border: 2px solid rgba(55, 69, 219, 0.55);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.3) inset;
-  
+  margin-bottom: 40px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  transition: transform 0.25s, box-shadow 0.25s;
+
   &:hover {
-    transform: scale(1.05);
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.35);
-    box-shadow: 
-      0 12px 48px rgba(0, 0, 0, 0.2),
-      0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+    transform: translateY(-3px);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.2);
   }
-  
-  img {
-    height: 52px;
+`;
+const BrandImg = styled.img`
+  height: 52px;
+  object-fit: contain;
+`;
+
+/* eyebrow pill */
+const Eyebrow = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 999px;
+  padding: 7px 16px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #93c5fd;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+`;
+
+/* headline */
+const H1 = styled.h1`
+  font-size: clamp(34px, 5vw, 58px);
+  font-weight: 900;
+  letter-spacing: -2px;
+  line-height: 1.3;
+  padding: 8px 0;
+  color: #fff;
+  text-align: center;
+  margin-top: 16px;
+  margin-bottom: 14px;
+
+  .shine {
+    background: linear-gradient(90deg, #93c5fd, #c4b5fd, #fbcfe8, #93c5fd);
+    background-size: 300%;
+    animation: ${gradShift} 5s ease infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 `;
 
-const Header = styled.div`
-  margin-bottom: 64px;
-  
-  h1 {
-    font-size: 56px;
-    font-weight: 800;
-    margin-bottom: 16px;
-    color: white;
-    letter-spacing: -2px;
-    line-height: 1.1;
-    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-  }
-  
-  p {
-    font-size: 20px;
-    color: rgba(255, 255, 255, 0.9);
-    font-weight: 400;
-    line-height: 1.6;
-  }
+const Sub = styled.p`
+  font-size: 16px;
+  color: rgba(255,255,255,0.65);
+  text-align: center;
+  line-height: 1.7;
+  max-width: 520px;
+  margin-bottom: 52px;
 `;
 
-const RoleCards = styled.div`
+/* ═══════════════════════════════════════════════
+   ROLE CARDS
+═══════════════════════════════════════════════ */
+const CardGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 32px;
+  gap: 28px;
+  width: 100%;
   margin-bottom: 40px;
-  
-  @media (max-width: 768px) {
+
+  @media (max-width: 720px) {
     grid-template-columns: 1fr;
+    max-width: 440px;
   }
 `;
 
 const RoleCard = styled(motion.div)`
-  background: white;
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  padding: 48px 36px;
+  background: #fff;
+  border-radius: 26px;
+  padding: 40px 36px 36px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-  
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12), 0 20px 48px rgba(14,57,149,0.15);
+  border: 2px solid transparent;
+  transition: border-color 0.3s, box-shadow 0.3s;
+
+  /* top accent */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: ${p => p.$grad};
+    border-radius: 0;
+  }
+
+  /* shimmer on hover */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.0) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 100%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
   &:hover {
-    border-color: rgba(255, 255, 255, 0.4);
-    transform: translateY(-8px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    border-color: ${p => p.$accent};
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1), 0 24px 64px ${p => p.$shadow};
+
+    &::after { opacity: 1; }
   }
 `;
 
-const RoleIcon = styled.div`
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 24px;
-  background: #002e9d;
-  border-radius: 16px;
+/* icon wrapper */
+const IconWrap = styled.div`
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: ${p => p.$bg};
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
-  
-  svg {
-    width: 40px;
-    height: 40px;
+  margin-bottom: 24px;
+  font-size: 32px;
+  flex-shrink: 0;
+  transition: transform 0.3s;
+
+  ${RoleCard}:hover & {
+    transform: scale(1.08) rotate(-4deg);
   }
 `;
 
-const RoleTitle = styled.h2`
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 12px;
-  color: #1E293B;
+const CardTitle = styled.h2`
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
   letter-spacing: -0.5px;
+  margin-bottom: 10px;
 `;
 
-const RoleDescription = styled.p`
-  font-size: 16px;
-  color: #64748B;
-  margin-bottom: 28px;
-  line-height: 1.6;
-  font-weight: 400;
+const CardDesc = styled.p`
+  font-size: 14px;
+  color: #64748b;
+  line-height: 1.65;
+  margin-bottom: 24px;
 `;
 
-const RoleFeatures = styled.ul`
-  text-align: left;
-  margin-bottom: 32px;
-  
-  li {
-    color: #64748B;
-    margin-bottom: 12px;
-    padding-left: 28px;
-    position: relative;
-    font-size: 15px;
-    line-height: 1.5;
-    
-    &::before {
-      content: '✓';
-      position: absolute;
-      left: 0;
-      color: #667eea;
-      font-weight: 700;
-      font-size: 16px;
-    }
+const FeatureList = styled.ul`
+  list-style: none;
+  margin: 0 0 32px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+`;
+
+const FeatureItem = styled.li`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  color: #475569;
+  font-weight: 500;
+
+  &::before {
+    content: '✓';
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    background: ${p => p.$bg};
+    color: ${p => p.$c};
+    font-weight: 800;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
 `;
 
-const SelectButton = styled.button`
+const SelectBtn = styled(motion.button)`
   width: 100%;
-  padding: 16px 32px;
-  background: #002e9d;
-  color: white;
+  height: 52px;
   border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: 14px;
+  background: ${p => p.$grad};
+  background-size: 200%;
+  animation: ${gradShift} 6s ease infinite;
+  color: #fff;
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  cursor: pointer;
+  font-family: inherit;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-  cursor: pointer;
-  
+  transition: box-shadow 0.25s, opacity 0.25s;
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 28px ${p => p.$shadow};
+    opacity: 0.93;
   }
-  
-  &:active {
-    transform: translateY(0);
+
+  .arrow {
+    font-size: 18px;
+    transition: transform 0.25s;
   }
-  
-  svg {
-    width: 20px;
-    height: 20px;
-    transition: transform 0.3s;
+  &:hover .arrow { transform: translateX(5px); }
+`;
+
+/* popular badge */
+const Popular = styled.div`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #f59e0b, #fb923c);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+`;
+
+/* ═══════════════════════════════════════════════
+   TICKER
+═══════════════════════════════════════════════ */
+const TickerOuter = styled.div`
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 36px;
+  position: relative;
+
+  &::before, &::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 60px;
+    z-index: 2;
   }
-  
-  &:hover svg {
-    transform: translateX(4px);
+  &::before { left: 0; background: linear-gradient(90deg, rgba(10,30,100,0.9), transparent); }
+  &::after  { right: 0; background: linear-gradient(-90deg, rgba(10,30,100,0.9), transparent); }
+`;
+
+const TickerTrack = styled.div`
+  display: flex;
+  gap: 32px;
+  white-space: nowrap;
+  animation: ${ticker} 28s linear infinite;
+`;
+
+const TickerChip = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.55);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 999px;
+  padding: 5px 13px;
+  flex-shrink: 0;
+`;
+
+/* ═══════════════════════════════════════════════
+   BOTTOM ROW
+═══════════════════════════════════════════════ */
+const BottomRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 28px;
+
+  @media (max-width: 520px) {
+    flex-direction: column;
+    gap: 12px;
   }
 `;
 
-const LoginPrompt = styled.div`
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 15px;
-  
+const LoginNote = styled.p`
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+  text-align: center;
+
   a {
-    color: white;
-    font-weight: 600;
+    color: #93c5fd;
+    font-weight: 700;
     text-decoration: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    padding: 4px 8px;
+    padding: 3px 8px;
     border-radius: 6px;
-    
-    &:hover {
-      background: rgba(255, 255, 255, 0.35);
-      text-decoration: none;
-    }
+    transition: background 0.2s;
+
+    &:hover { background: rgba(147,197,253,0.15); }
   }
 `;
 
+const DividerDot = styled.span`
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+
+  @media (max-width: 520px) { display: none; }
+`;
+
+/* ═══════════════════════════════════════════════
+   COMPONENT
+═══════════════════════════════════════════════ */
 const RegisterRoleSelection = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const [hovered, setHovered] = useState(null);
+
+  const roles = [
+    {
+      key: 'candidate',
+      emoji: '🎯',
+      iconBg: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
+      grad: 'linear-gradient(135deg, #0E3995 0%, #2563eb 50%, #3b82f6 100%)',
+      accent: '#3b82f6',
+      shadow: 'rgba(59,130,246,0.45)',
+      fBg: '#eff6ff',
+      fC: '#2563eb',
+      path: '/register/candidate',
+      popular: false,
+      title: t.register.candidateTitle,
+      desc: t.register.candidateDescription,
+      features: [
+        t.register.candidateFeature1,
+        t.register.candidateFeature2,
+        t.register.candidateFeature3,
+        t.register.candidateFeature4,
+      ],
+      btn: t.register.candidateButton,
+    },
+    {
+      key: 'employer',
+      emoji: '🏢',
+      iconBg: 'linear-gradient(135deg, #f0f9ff 0%, #bae6fd 100%)',
+      grad: 'linear-gradient(135deg, #0369a1 0%, #0E3995 50%, #1d4ed8 100%)',
+      accent: '#0E3995',
+      shadow: 'rgba(14,57,149,0.45)',
+      fBg: '#eff6ff',
+      fC: '#0E3995',
+      path: '/register/employer',
+      popular: true,
+      title: t.register.employerTitle,
+      desc: t.register.employerDescription,
+      features: [
+        t.register.employerFeature1,
+        t.register.employerFeature2,
+        t.register.employerFeature3,
+        t.register.employerFeature4,
+      ],
+      btn: t.register.employerButton,
+    },
+  ];
+
+  const chips = [
+    '☕ Barista', '🛵 Shipper', '📚 Gia sư', '🎨 Designer', '💻 Dev freelance',
+    '🏪 Bán hàng', '📦 Kho vận', '💆 Spa', '🎤 MC sự kiện', '🍜 Phục vụ',
+    '☕ Barista', '🛵 Shipper', '📚 Gia sư', '🎨 Designer', '💻 Dev freelance',
+    '🏪 Bán hàng', '📦 Kho vận', '💆 Spa', '🎤 MC sự kiện', '🍜 Phục vụ',
+  ];
+
+  /* stagger */
+  const container = {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.13 } },
+  };
+  const item = {
+    hidden: { opacity: 0, y: 28 },
+    show:   { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22,1,0.36,1] } },
+  };
 
   return (
-    <SelectionContainer>
-      <GridPattern />
-      <GradientGlow
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.5, ease: "easeOut" }}
-      />
-      
-      <ContentWrapper
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+    <Page>
+      <Grid />
+      <Scan />
+
+      {/* orbs */}
+      <Orb $s={600} $t="-18%" $r="-12%" $c="rgba(30,95,210,0.5)"  $dur={22} $blur={30} />
+      <Orb $s={400} $b="-14%" $l="-8%"  $c="rgba(14,57,149,0.6)"  $dur={17} $d={-4} $blur={20} />
+      <Orb $s={200} $t="42%"  $l="5%"   $c="rgba(96,165,250,0.35)" $dur={13} $d={-7} $blur={10} />
+      <Orb $s={150} $b="18%"  $r="4%"   $c="rgba(167,139,250,0.3)" $dur={19} $d={-2} $blur={8} />
+
+      {/* sparkles */}
+      <Star $s={16} $t="8%"  $l="6%"  $dur={2.8} $d={0}>✦</Star>
+      <Star $s={12} $t="18%" $l="92%" $dur={3.5} $d={1}>✦</Star>
+      <Star $s={10} $t="72%" $l="4%"  $dur={4}   $d={0.5}>✦</Star>
+      <Star $s={14} $t="85%" $l="88%" $dur={2.4} $d={1.5}>✦</Star>
+      <Star $s={8}  $t="48%" $l="97%" $dur={3.2} $d={0.8}>✦</Star>
+
+      <Wrap
+        variants={container}
+        initial="hidden"
+        animate="show"
       >
-        <Logo to="/">
-          <img src="/images/logo.png" alt="Ốp Pờ" />
-          Ốp Pờ
-        </Logo>
-        
-        <Header>
-          <h1>{t.register.joinTitle}</h1>
-          <p>{t.register.joinSubtitle}</p>
-        </Header>
+        {/* brand */}
+        <motion.div variants={item}>
+          <BrandLink to="/">
+            <BrandImg src="/images/logo.png" alt="Ốp Pờ" onError={e => { e.target.style.display='none'; }} />
+          </BrandLink>
+        </motion.div>
 
-        <RoleCards>
-          <RoleCard
-            whileHover={{ scale: 1.02 }}
-            onClick={() => navigate('/register/candidate')}
-          >
-            <RoleIcon>
-              <Users />
-            </RoleIcon>
-            <RoleTitle>{t.register.candidateTitle}</RoleTitle>
-            <RoleDescription>
-              {t.register.candidateDescription}
-            </RoleDescription>
-            <RoleFeatures>
-              <li>{t.register.candidateFeature1}</li>
-              <li>{t.register.candidateFeature2}</li>
-              <li>{t.register.candidateFeature3}</li>
-              <li>{t.register.candidateFeature4}</li>
-            </RoleFeatures>
-            <SelectButton>
-              {t.register.candidateButton}
-              <ArrowRight />
-            </SelectButton>
-          </RoleCard>
+        {/* headline */}
+        <motion.div variants={item} style={{ textAlign:'center' }}>
 
-          <RoleCard
-            whileHover={{ scale: 1.02 }}
-            onClick={() => navigate('/register/employer')}
-          >
-            <RoleIcon>
-              <Building2 />
-            </RoleIcon>
-            <RoleTitle>{t.register.employerTitle}</RoleTitle>
-            <RoleDescription>
-              {t.register.employerDescription}
-            </RoleDescription>
-            <RoleFeatures>
-              <li>{t.register.employerFeature1}</li>
-              <li>{t.register.employerFeature2}</li>
-              <li>{t.register.employerFeature3}</li>
-              <li>{t.register.employerFeature4}</li>
-            </RoleFeatures>
-            <SelectButton>
-              {t.register.employerButton}
-              <ArrowRight />
-            </SelectButton>
-          </RoleCard>
-        </RoleCards>
+          <H1>
+            {t.register.joinTitle.split(' ').slice(0,2).join(' ')}{' '}
+            <span className="shine">{t.register.joinTitle.split(' ').slice(2).join(' ')}</span>
+          </H1>
+          <Sub>{t.register.joinSubtitle}</Sub>
+        </motion.div>
 
-        <LoginPrompt>
-          {t.register.haveAccount} <Link to="/login">{t.register.signIn}</Link>
-        </LoginPrompt>
-      </ContentWrapper>
-    </SelectionContainer>
+        {/* ticker */}
+        <motion.div variants={item} style={{ width:'100%' }}>
+          <TickerOuter>
+            <TickerTrack>
+              {chips.map((c, i) => <TickerChip key={i}>{c}</TickerChip>)}
+            </TickerTrack>
+          </TickerOuter>
+        </motion.div>
+
+        {/* cards */}
+        <CardGrid>
+          {roles.map((r, ri) => (
+            <motion.div key={r.key} variants={item}>
+              <RoleCard
+                $grad={r.grad}
+                $accent={r.accent}
+                $shadow={`rgba(14,57,149,0.25)`}
+                onClick={() => navigate(r.path)}
+                onHoverStart={() => setHovered(r.key)}
+                onHoverEnd={() => setHovered(null)}
+                whileHover={{ y: -8, transition: { duration: 0.28, ease: [0.22,1,0.36,1] } }}
+                whileTap={{ scale: 0.985 }}
+              >
+                {r.popular && <Popular>🔥 Phổ biến</Popular>}
+
+                <IconWrap $bg={r.iconBg}>{r.emoji}</IconWrap>
+
+                <CardTitle>{r.title}</CardTitle>
+                <CardDesc>{r.desc}</CardDesc>
+
+                <FeatureList>
+                  {r.features.map((f, i) => (
+                    <FeatureItem key={i} $bg={r.fBg} $c={r.fC}>{f}</FeatureItem>
+                  ))}
+                </FeatureList>
+
+                <SelectBtn
+                  type="button"
+                  $grad={r.grad}
+                  $shadow={r.shadow}
+                  onClick={e => { e.stopPropagation(); navigate(r.path); }}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  {r.btn}
+                  <span className="arrow">→</span>
+                </SelectBtn>
+              </RoleCard>
+            </motion.div>
+          ))}
+        </CardGrid>
+
+        {/* footer */}
+        <motion.div variants={item}>
+          <BottomRow>
+            <LoginNote>
+              {t.register.haveAccount}{' '}
+              <Link to="/login">{t.register.signIn}</Link>
+            </LoginNote>
+            <DividerDot />
+            <LoginNote>
+              <Link to="/">← Về trang chủ</Link>
+            </LoginNote>
+          </BottomRow>
+        </motion.div>
+      </Wrap>
+    </Page>
   );
 };
 
