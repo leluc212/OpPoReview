@@ -24,34 +24,6 @@ export const GlobalStyles = createGlobalStyle`
 
   #root {
     min-height: 100vh;
-    zoom: calc(100vw / 1440);
-  }
-  
-  @media (max-width: 1440px) {
-    #root {
-      zoom: calc(100vw / 1440);
-    }
-  }
-
-  @media (min-width: 1441px) {
-    #root {
-      zoom: 1;
-    }
-  }
-  
-  /* Fallback cho Firefox (không hỗ trợ zoom) */
-  @-moz-document url-prefix() {
-    #root {
-      transform-origin: top left;
-      transform: scale(calc(100vw / 1440));
-      width: 1440px;
-    }
-    @media (min-width: 1441px) {
-      #root {
-        transform: none;
-        width: 100%;
-      }
-    }
   }
 
   h1, h2, h3, h4, h5, h6 {
