@@ -558,8 +558,7 @@ const LanguageToggle = styled.button`
 `;
 
 const HeroSection = styled(motion.section)`
-  max-width: 1280px;
-  margin: 0 auto;
+  width: 100%;
   padding: 100px 50px 100px;
   text-align: center;
   position: relative;
@@ -570,6 +569,7 @@ const HeroSection = styled(motion.section)`
   justify-content: center;
   scroll-snap-align: start;
   scroll-snap-stop: always;
+  overflow: hidden;
   
   @media (max-width: 1024px) {
     padding: 90px 40px 80px;
@@ -589,8 +589,8 @@ const HeroSection = styled(motion.section)`
 const AnimatedBackground = styled.div`
   position: absolute;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
   width: 100%;
   height: 100%;
   z-index: 0;
@@ -959,6 +959,10 @@ const HeroContent = styled.div`
   position: relative;
   z-index: 10;
   margin-top: 80px;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
 `;
 
 const HeroTitle = styled(motion.h1)`
