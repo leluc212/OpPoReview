@@ -332,7 +332,31 @@ const SavedJobs = () => {
   };
 
   const handleJobClick = (jobId) => {
-    // Navigate to job details or apply
+    // Check KYC completion before allowing application
+    const savedKYC = localStorage.getItem('candidateKYC');
+    let kycCompleted = false;
+    
+    if (savedKYC) {
+      const kycData = JSON.parse(savedKYC);
+      kycCompleted = kycData.completed === true;
+    }
+    
+    if (!kycCompleted) {
+      alert(
+        language === 'vi' 
+          ? '⚠️ Bạn cần hoàn thành xác minh KYC trước khi ứng tuyển!\n\nVui lòng vào trang Hồ Sơ để hoàn tất xác minh.'
+          : '⚠️ You need to complete KYC verification before applying!\n\nPlease go to Profile page to complete verification.'
+      );
+      navigate('/candidate/profile');
+      return;
+    }
+    
+    // If KYC completed, show success message
+    alert(
+      language === 'vi'
+        ? '✅ Ứng tuyển thành công! Nhà tuyển dụng sẽ liên hệ với bạn sớm.'
+        : '✅ Application submitted successfully! The employer will contact you soon.'
+    );
   };
 
   const getCompanyInitial = (company) => {

@@ -600,22 +600,22 @@ const CandidateDashboard = () => {
   const recentApplications = [
     { 
       id: 1, 
-      title: 'Product Designer', 
-      company: 'Shopee', 
+      title: 'Nhân viên Chăm Sóc Khách Hàng', 
+      company: 'FPT Telecom', 
       appliedDate: '2 ngày trước', 
       status: 'reviewed' 
     },
     { 
       id: 2, 
-      title: 'Backend Developer', 
-      company: 'Grab', 
+      title: 'Nhân viên Pha Chế', 
+      company: 'Phúc Long', 
       appliedDate: '5 ngày trước', 
       status: 'pending' 
     },
     { 
       id: 3, 
-      title: 'Full Stack Engineer', 
-      company: 'Sendo', 
+      title: 'Nhân viên Bảo Vệ', 
+      company: 'Vincom Center', 
       appliedDate: '1 tuần trước', 
       status: 'approved' 
     },
