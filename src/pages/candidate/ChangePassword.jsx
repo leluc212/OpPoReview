@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
 import { Button, FormGroup, Label, Input } from '../../components/FormElements';
-import { Lock, ArrowLeft, Check, Eye, EyeOff, Shield } from 'lucide-react';
+import { Lock, ArrowLeft, Check, Eye, EyeOff, Shield, X, CheckCircle, XCircle } from 'lucide-react';
 
 const PageContainer = styled.div`
   max-width: 600px;
@@ -139,6 +139,53 @@ const ButtonGroup = styled.div`
   margin-top: 24px;
 `;
 
+const ErrorMessage = styled(motion.div)`
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #EF4444;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-top: 8px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+`;
+
+const RequirementsList = styled.div`
+  margin-top: 12px;
+  padding: 16px;
+  background: ${props => props.theme.colors.bgDark};
+  border-radius: 8px;
+  border: 1px solid ${props => props.theme.colors.border};
+`;
+
+const RequirementItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: ${props => props.$met ? '#10B981' : props.theme.colors.textLight};
+  font-weight: ${props => props.$met ? '600' : '400'};
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  svg {
+    width: 18px;
+    height: 18px;
+    color: ${props => props.$met ? '#10B981' : '#94A3B8'};
+  }
+`;
+
 function ChangePassword() {
   const { language } = useLanguage();
   const navigate = useNavigate();
@@ -153,13 +200,45 @@ function ChangePassword() {
     confirm: false
   });
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
+  const [passwordRequirements, setPasswordRequirements] = useState({
+    minLength: false,
+    hasUppercase: false,
+    hasNumber: false,
+    hasSpecial: false
+  });
+
+  const validatePassword = (password) => {
+    return {
+      minLength: password.length >= 8,
+      hasUppercase: /[A-Z]/.test(password),
+      hasNumber: /[0-9]/.test(password),
+      hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    };
+  };
+
+  const isPasswordValid = () => {
+    return passwordRequirements.minLength && 
+           passwordRequirements.hasUppercase && 
+           passwordRequirements.hasNumber && 
+           passwordRequirements.hasSpecial;
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setError('');
+    
+    // Validate password requirements
+    if (!isPasswordValid()) {
+      setError(language === 'vi' 
+        ? 'Mật khẩu mới không đáp ứng đủ yêu cầu!' 
+        : 'New password does not meet all requirements!');
+      return;
+    }
     
     // Validate passwords match
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert(language === 'vi' 
+      setError(language === 'vi' 
         ? 'Mật khẩu xác nhận không khớp!' 
         : 'Passwords do not match!');
       return;
@@ -228,14 +307,37 @@ function ChangePassword() {
             <Shield />
             <div className="content">
               <h3>{language === 'vi' ? 'Yêu cầu mật khẩu' : 'Password Requirements'}</h3>
-              <ul>
-                <li>{language === 'vi' ? 'Tối thiểu 8 ký tự' : 'Minimum 8 characters'}</li>
-                <li>{language === 'vi' ? 'Ít nhất một chữ hoa' : 'At least one uppercase letter'}</li>
-                <li>{language === 'vi' ? 'Ít nhất một chữ số' : 'At least one number'}</li>
-                <li>{language === 'vi' ? 'Ít nhất một ký tự đặc biệt' : 'At least one special character'}</li>
-              </ul>
             </div>
           </InfoBox>
+
+          <RequirementsList>
+            <RequirementItem $met={passwordRequirements.minLength}>
+              {passwordRequirements.minLength ? <CheckCircle /> : <XCircle />}
+              <span>{language === 'vi' ? 'Tối thiểu 8 ký tự' : 'Minimum 8 characters'}</span>
+            </RequirementItem>
+            <RequirementItem $met={passwordRequirements.hasUppercase}>
+              {passwordRequirements.hasUppercase ? <CheckCircle /> : <XCircle />}
+              <span>{language === 'vi' ? 'Ít nhất một chữ hoa' : 'At least one uppercase letter'}</span>
+            </RequirementItem>
+            <RequirementItem $met={passwordRequirements.hasNumber}>
+              {passwordRequirements.hasNumber ? <CheckCircle /> : <XCircle />}
+              <span>{language === 'vi' ? 'Ít nhất một chữ số' : 'At least one number'}</span>
+            </RequirementItem>
+            <RequirementItem $met={passwordRequirements.hasSpecial}>
+              {passwordRequirements.hasSpecial ? <CheckCircle /> : <XCircle />}
+              <span>{language === 'vi' ? 'Ít nhất một ký tự đặc biệt' : 'At least one special character'}</span>
+            </RequirementItem>
+          </RequirementsList>
+
+          {error && (
+            <ErrorMessage
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <XCircle />
+              <span>{error}</span>
+            </ErrorMessage>
+          )}
 
           <form onSubmit={handleSubmit}>
             <FormGroup>
@@ -263,7 +365,12 @@ function ChangePassword() {
                 <Input
                   type={showPassword.new ? 'text' : 'password'}
                   value={passwordData.newPassword}
-                  onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                  onChange={(e) => {
+                    const newPassword = e.target.value;
+                    setPasswordData({...passwordData, newPassword});
+                    setPasswordRequirements(validatePassword(newPassword));
+                    setError('');
+                  }}
                   placeholder={language === 'vi' ? 'Nhập mật khẩu mới' : 'Enter new password'}
                   required
                   minLength="8"
