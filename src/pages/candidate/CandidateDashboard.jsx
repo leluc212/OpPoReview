@@ -873,12 +873,8 @@ const CandidateDashboard = () => {
           <SectionHeader>
             <h2>
               <FileText />
-              {language === 'vi' ? 'Đơn Ứng Tuyển Gần Đây' : 'Recent Applications'}
+              {language === 'vi' ? 'Đơn Ứng Tuyển Của Bạn Gần Đây' : 'Your Recent Applications'}
             </h2>
-            <Link to="/candidate/applications">
-              {language === 'vi' ? 'Xem tất cả' : 'View all'}
-              <ArrowUpRight />
-            </Link>
           </SectionHeader>
 
           {recentApplications.map((app, index) => (
