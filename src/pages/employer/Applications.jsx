@@ -6,7 +6,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
 import TableFilter from '../../components/TableFilter';
 import Modal from '../../components/Modal';
-import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText, Clock, Users, Newspaper, DollarSign, Edit, Trash2, TrendingUp, Plus, X, Wallet } from 'lucide-react';
+import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText, Clock, Users, Newspaper, DollarSign, Edit, Trash2, TrendingUp, Plus, X, Wallet, AlertCircle } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 // Mock job posts data
@@ -1454,16 +1454,161 @@ const WalletModalButton = styled(motion.button)`
   }
 `;
 
+// ─── Delete Confirmation Modal ─────────────────────────────
+const DeleteModalOverlay = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+  padding: 20px;
+`;
+
+const DeleteModalContainer = styled(motion.div)`
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 480px;
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  text-align: center;
+`;
+
+const DeleteModalIcon = styled.div`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+
+  svg {
+    width: 40px;
+    height: 40px;
+    color: #EF4444;
+  }
+`;
+
+const DeleteModalTitle = styled.h2`
+  font-size: 24px;
+  font-weight: 800;
+  color: ${props => props.theme.colors.text};
+  margin-bottom: 12px;
+`;
+
+const DeleteModalMessage = styled.p`
+  font-size: 15px;
+  color: ${props => props.theme.colors.textLight};
+  line-height: 1.6;
+  margin-bottom: 8px;
+`;
+
+const DeleteModalJobTitle = styled.p`
+  font-size: 16px;
+  font-weight: 700;
+  color: ${props => props.theme.colors.text};
+  background: #F8FAFC;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin: 16px 0 24px;
+  border: 2px solid #E2E8F0;
+`;
+
+const DeleteModalActions = styled.div`
+  display: flex;
+  gap: 12px;
+`;
+
+const DeleteModalButton = styled(motion.button)`
+  flex: 1;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid;
+
+  ${props => props.$variant === 'danger' ? `
+    background: #EF4444;
+    color: white;
+    border-color: #EF4444;
+    &:hover:not(:disabled) {
+      background: #DC2626;
+      border-color: #DC2626;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
+    }
+  ` : `
+    background: white;
+    color: ${props.theme.colors.text};
+    border-color: #E2E8F0;
+    &:hover:not(:disabled) {
+      background: #F8FAFC;
+      border-color: #CBD5E1;
+    }
+  `}
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+`;
+
+// ─── Success Toast ─────────────────────────────────────────
+const SuccessToast = styled(motion.div)`
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+  padding: 16px 24px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
+  z-index: 1002;
+  font-weight: 600;
+  font-size: 15px;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+`;
+
 const Applications = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState('applications');
+  const [activeSection, setActiveSection] = useState('posts');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilters, setStatusFilters] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [applications, setApplications] = useState(() => getInitialApplications(language));
-  const [jobPosts] = useState(() => getJobPosts(language));
+  const [jobPosts, setJobPosts] = useState(() => getJobPosts(language));
   const [showWalletModal, setShowWalletModal] = useState(false);
+  const [deleteJobId, setDeleteJobId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   // Mock wallet connection status - in real app, get from user context or API
   const [isWalletConnected] = useState(() => {
@@ -1517,6 +1662,39 @@ const Applications = () => {
   const handleCloseProfile = useCallback(() => {
     setSelectedCandidate(null);
   }, []);
+
+  // Open delete confirmation modal
+  const handleDeleteJob = (jobId) => {
+    setDeleteJobId(jobId);
+  };
+
+  // Confirm and delete job post
+  const confirmDeleteJob = async () => {
+    if (!deleteJobId) return;
+    
+    setIsDeleting(true);
+    
+    // Simulate async operation for better UX
+    await new Promise(resolve => setTimeout(resolve, 600));
+
+    // Remove job from state
+    setJobPosts(prev => prev.filter(job => job.id !== deleteJobId));
+    
+    // Show success toast
+    setShowSuccessToast(true);
+    setTimeout(() => setShowSuccessToast(false), 3000);
+    
+    setIsDeleting(false);
+    setDeleteJobId(null);
+  };
+
+  // Cancel delete
+  const cancelDelete = () => {
+    setDeleteJobId(null);
+  };
+
+  // Get job title for delete confirmation
+  const jobToDelete = deleteJobId ? jobPosts.find(job => job.id === deleteJobId) : null;
 
   return (
     <DashboardLayout role="employer" key={language}>
@@ -1655,6 +1833,7 @@ const Applications = () => {
                       $variant="danger"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
+                      onClick={() => handleDeleteJob(post.id)}
                     >
                       <Trash2 />
                     </JobPostButton>
@@ -1708,6 +1887,85 @@ const Applications = () => {
           />
         </Modal>
       )}
+
+      <AnimatePresence>
+        {deleteJobId && jobToDelete && (
+          <DeleteModalOverlay
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={cancelDelete}
+          >
+            <DeleteModalContainer
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <DeleteModalIcon>
+                <AlertCircle />
+              </DeleteModalIcon>
+              <DeleteModalTitle>
+                {language === 'vi' ? 'Xác nhận xóa bài đăng' : 'Confirm Delete Post'}
+              </DeleteModalTitle>
+              <DeleteModalMessage>
+                {language === 'vi'
+                  ? 'Bạn có chắc chắn muốn xóa bài đăng này? Hành động này không thể hoàn tác.'
+                  : 'Are you sure you want to delete this post? This action cannot be undone.'}
+              </DeleteModalMessage>
+              <DeleteModalJobTitle>
+                {jobToDelete.title}
+              </DeleteModalJobTitle>
+              <DeleteModalActions>
+                <DeleteModalButton
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={cancelDelete}
+                  disabled={isDeleting}
+                >
+                  <X />
+                  {language === 'vi' ? 'Hủy' : 'Cancel'}
+                </DeleteModalButton>
+                <DeleteModalButton
+                  $variant="danger"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={confirmDeleteJob}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? (
+                    <>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      >
+                        <Trash2 />
+                      </motion.div>
+                      {language === 'vi' ? 'Đang xóa...' : 'Deleting...'}
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 />
+                      {language === 'vi' ? 'Xóa bài đăng' : 'Delete Post'}
+                    </>
+                  )}
+                </DeleteModalButton>
+              </DeleteModalActions>
+            </DeleteModalContainer>
+          </DeleteModalOverlay>
+        )}
+
+        {showSuccessToast && (
+          <SuccessToast
+            initial={{ opacity: 0, y: -20, x: 100 }}
+            animate={{ opacity: 1, y: 0, x: 0 }}
+            exit={{ opacity: 0, x: 100 }}
+          >
+            <CheckCircle />
+            {language === 'vi' ? 'Đã xóa bài đăng thành công!' : 'Post deleted successfully!'}
+          </SuccessToast>
+        )}
+      </AnimatePresence>
     </DashboardLayout>
   );
 };
