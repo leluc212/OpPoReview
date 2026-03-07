@@ -449,6 +449,18 @@ function CandidateNotifications() {
         : 'You completed your profile. Your hiring chances increased by 70%',
       time: language === 'vi' ? '3 ngày trước' : '3 days ago',
       unread: false
+    },
+    {
+      id: 5,
+      type: 'application',
+      icon: Eye,
+      color: '#F59E0B',
+      title: language === 'vi' ? 'Đề xuất: Hồ sơ của bạn đang được quan tâm!' : 'Suggestion: Your profile is getting attention!',
+      message: language === 'vi'
+        ? 'Bạn có 12 nhà tuyển dụng đã xem hồ sơ và 5 công việc mới phù hợp với bạn. Hãy cập nhật hồ sơ để tăng cơ hội!'
+        : 'You have 12 employers who viewed your profile and 5 new matching jobs. Update your profile to increase your chances!',
+      time: language === 'vi' ? 'Hôm nay' : 'Today',
+      unread: true
     }
   ];
 
