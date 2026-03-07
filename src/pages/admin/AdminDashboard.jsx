@@ -649,7 +649,7 @@ const AdminDashboard = () => {
             title={language === 'vi' ? 'Tổng Người Dùng' : 'Total Users'}
             value="2,458"
             change="+12%"
-            changeText={language === 'vi' ? 'sơ với tháng trước' : 'vs last month'}
+            changeText={language === 'vi' ? 'so với tháng trước' : 'vs last month'}
             icon={Users}
             color="linear-gradient(135deg, #1e40af 0%, #1e40af 100%)"
             positive
@@ -658,7 +658,7 @@ const AdminDashboard = () => {
             title={language === 'vi' ? 'Tin Đang Tuyển' : 'Active Jobs'}
             value="345"
             change="+8%"
-            changeText={language === 'vi' ? 'sơ với tuần trước' : 'vs last week'}
+            changeText={language === 'vi' ? 'so với tuần trước' : 'vs last week'}
             icon={Briefcase}
             color="linear-gradient(135deg, #F093FB 0%, #F5576C 100%)"
             positive
@@ -676,7 +676,7 @@ const AdminDashboard = () => {
             title={language === 'vi' ? 'Doanh Thu' : 'Revenue'}
             value={language === 'vi' ? '24.5 tỷ VND' : '$1.05M USD'}
             change="+23%"
-            changeText={language === 'vi' ? 'sơ với tháng trước' : 'vs last month'}
+            changeText={language === 'vi' ? 'so với tháng trước' : 'vs last month'}
             icon={DollarSign}
             color="linear-gradient(135deg, #43E97B 0%, #38F9D7 100%)"
             positive

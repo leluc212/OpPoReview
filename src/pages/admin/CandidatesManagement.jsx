@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
@@ -611,6 +612,7 @@ const ActivityTime = styled.div`
 
 const CandidatesManagement = () => {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -795,7 +797,11 @@ const CandidatesManagement = () => {
             </thead>
             <tbody>
               {filteredCandidates.map((candidate) => (
-                <tr key={candidate.id}>
+                <tr 
+                  key={candidate.id} 
+                  onClick={() => navigate(`/admin/candidates/${candidate.id}`)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <td style={{ fontWeight: 600 }}>{candidate.name}</td>
                   <td>{candidate.email}</td>
                   <td>
@@ -830,9 +836,12 @@ const CandidatesManagement = () => {
                       </span>
                     )}
                   </td>
-                  <td>
+                  <td onClick={(e) => e.stopPropagation()}>
                     <ActionButtons>
-                      <ActionButton $variant="view">
+                      <ActionButton 
+                        $variant="view"
+                        onClick={() => navigate(`/admin/candidates/${candidate.id}`)}
+                      >
                         <Eye />
                         {language === 'vi' ? 'Xem' : 'View'}
                       </ActionButton>

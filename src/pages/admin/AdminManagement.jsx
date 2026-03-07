@@ -595,7 +595,7 @@ const AdminManagement = () => {
     },
     {
       id: 2,
-      name: 'Trần Thị Ngọc Minh',
+      name: 'Nguyễn Hoàng Ngọc Minh',
       email: 'admin2@opcareer.vn',
       phone: '0912345678',
       role: 'moderator',

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
@@ -537,6 +538,7 @@ const ActivityTime = styled.div`
 
 const EmployersManagement = () => {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -706,7 +708,11 @@ const EmployersManagement = () => {
             </thead>
             <tbody>
               {filteredEmployers.map((employer) => (
-                <tr key={employer.id}>
+                <tr 
+                  key={employer.id}
+                  onClick={() => navigate(`/admin/employers/${employer.id}`)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <td style={{ fontWeight: 600 }}>{employer.name}</td>
                   <td>{employer.email}</td>
                   <td>
@@ -721,18 +727,6 @@ const EmployersManagement = () => {
                     </DateText>
                   </td>
                   <td>
-                    {employer.confirmDate ? (
-                      <DateText>
-                        <Calendar size={14} />
-                        {employer.confirmDate}
-                      </DateText>
-                    ) : (
-                      <span style={{ color: '#94a3b8', fontSize: '13px' }}>
-                        {language === 'vi' ? 'Chưa có' : 'Not set'}
-                      </span>
-                    )}
-                  </td>
-                  <td>
                     <VerificationBadge $verified={employer.verified}>
                       {employer.verified ? <Shield /> : <XSquare />}
                       {employer.verified 
@@ -741,9 +735,12 @@ const EmployersManagement = () => {
                       }
                     </VerificationBadge>
                   </td>
-                  <td>
+                  <td onClick={(e) => e.stopPropagation()}>
                     <ActionButtons>
-                      <ActionButton $variant="view">
+                      <ActionButton 
+                        $variant="view"
+                        onClick={() => navigate(`/admin/employers/${employer.id}`)}
+                      >
                         <Eye />
                         {language === 'vi' ? 'Xem' : 'View'}
                       </ActionButton>

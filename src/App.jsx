@@ -53,7 +53,9 @@ import EmployerWallet from './pages/employer/EmployerWallet';
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
 import CandidatesManagement from './pages/admin/CandidatesManagement';
+import CandidateDetail from './pages/admin/CandidateDetail';
 import EmployersManagement from './pages/admin/EmployersManagement';
+import EmployerDetail from './pages/admin/EmployerDetail';
 import PackagesManagement from './pages/admin/PackagesManagement';
 import Reports from './pages/admin/Reports';
 import AdminSettings from './pages/admin/AdminSettings';
@@ -249,9 +251,19 @@ function AppRoutes() {
           <CandidatesManagement />
         </ProtectedRoute>
       } />
+      <Route path="/admin/candidates/:id" element={
+        <ProtectedRoute allowedRoles={['admin']}>
+          <CandidateDetail />
+        </ProtectedRoute>
+      } />
       <Route path="/admin/employers" element={
         <ProtectedRoute allowedRoles={['admin']}>
           <EmployersManagement />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/employers/:id" element={
+        <ProtectedRoute allowedRoles={['admin']}>
+          <EmployerDetail />
         </ProtectedRoute>
       } />
       <Route path="/admin/packages" element={
