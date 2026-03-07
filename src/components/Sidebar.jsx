@@ -402,13 +402,11 @@ const Sidebar = ({ role }) => {
       { to: '/admin/dashboard', icon: LayoutDashboard, label: t.sidebar.dashboard },
       { to: '/admin/candidates', icon: Users, label: language === 'vi' ? 'Ứng Viên' : 'Candidates' },
       { to: '/admin/employers', icon: Building2, label: language === 'vi' ? 'Nhà Tuyển Dụng' : 'Employers' },
+      { to: '/admin/management', icon: ShieldCheck, label: language === 'vi' ? 'Quản Lý Admin' : 'Admin Management' },
     ]},
     { section: t.sidebar.platform || 'Management', items: [
       { to: '/admin/posts', icon: FileText, label: t.sidebar.posts || 'Posts Management' },
       { to: '/admin/packages', icon: Package, label: t.sidebar.packages },
-    ]},
-    { section: t.sidebar.platform || 'Analytics', items: [
-      { to: '/admin/analytics', icon: BarChart3, label: 'Data Analysis' },
       { to: '/admin/reports', icon: BarChart3, label: t.sidebar.reports },
     ]},
     { section: t.sidebar.utilities || 'Utilities', items: [

@@ -37,6 +37,10 @@ const StatsGrid = styled.div`
 
 const Section = styled.section`
   margin-bottom: 40px;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 24px;
+  }
 `;
 
 const SectionHeader = styled.div`
@@ -44,6 +48,12 @@ const SectionHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 16px;
+  }
   
   h2 {
     font-size: 24px;
@@ -51,6 +61,11 @@ const SectionHeader = styled.div`
     color: ${props => props.theme.colors.text};
     position: relative;
     padding-left: 16px;
+    
+    @media (max-width: 768px) {
+      font-size: 20px;
+      padding-left: 12px;
+    }
     
     &::before {
       content: '';
@@ -62,6 +77,11 @@ const SectionHeader = styled.div`
       height: 28px;
       background: ${props => props.theme.colors.gradientPrimary};
       border-radius: 3px;
+      
+      @media (max-width: 768px) {
+        width: 4px;
+        height: 22px;
+      }
     }
   }
 `;
@@ -80,6 +100,11 @@ const ViewAllButton = styled.button`
   cursor: pointer;
   transition: all 0.2s;
   
+  @media (max-width: 768px) {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
   &:hover {
     opacity: 0.9;
     transform: translateX(4px);
@@ -88,6 +113,11 @@ const ViewAllButton = styled.button`
   svg {
     width: 16px;
     height: 16px;
+    
+    @media (max-width: 768px) {
+      width: 14px;
+      height: 14px;
+    }
   }
 `;
 
@@ -95,13 +125,22 @@ const TableWrapper = styled.div`
   background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.lg};
   border: 2px solid ${props => props.theme.colors.border};
-  overflow: hidden;
+  overflow-x: auto;
   box-shadow: ${props => props.theme.shadows.card};
+  
+  @media (max-width: 768px) {
+    border-radius: ${props => props.theme.borderRadius.md};
+  }
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
+  min-width: 800px;
+  
+  @media (max-width: 768px) {
+    min-width: 600px;
+  }
   
   th {
     text-align: left;
@@ -113,12 +152,23 @@ const Table = styled.table`
     text-transform: uppercase;
     letter-spacing: 0.5px;
     border-bottom: 2px solid ${props => props.theme.colors.border};
+    white-space: nowrap;
+    
+    @media (max-width: 768px) {
+      padding: 12px 10px;
+      font-size: 11px;
+    }
   }
   
   td {
     padding: 16px 20px;
     border-bottom: 1px solid ${props => props.theme.colors.border};
     font-size: 14px;
+    
+    @media (max-width: 768px) {
+      padding: 12px 10px;
+      font-size: 12px;
+    }
   }
   
   tbody tr:last-child td {

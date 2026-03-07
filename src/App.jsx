@@ -56,12 +56,12 @@ import EmployersManagement from './pages/admin/EmployersManagement';
 import PackagesManagement from './pages/admin/PackagesManagement';
 import Reports from './pages/admin/Reports';
 import AdminSettings from './pages/admin/AdminSettings';
-import DataAnalysis from './pages/admin/DataAnalysis';
 import AdminWallet from './pages/admin/AdminWallet';
 import PostsManagement from './pages/admin/PostsManagement';
 import AdminSupport from './pages/admin/AdminSupport';
 import AdminNotifications from './pages/admin/AdminNotifications';
 import AdminProfile from './pages/admin/AdminProfile';
+import AdminManagement from './pages/admin/AdminManagement';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -263,11 +263,6 @@ function AppRoutes() {
           <AdminSettings />
         </ProtectedRoute>
       } />
-      <Route path="/admin/analytics" element={
-        <ProtectedRoute allowedRoles={['admin']}>
-          <DataAnalysis />
-        </ProtectedRoute>
-      } />
       <Route path="/admin/wallet" element={
         <ProtectedRoute allowedRoles={['admin']}>
           <AdminWallet />
@@ -291,6 +286,11 @@ function AppRoutes() {
       <Route path="/admin/profile" element={
         <ProtectedRoute allowedRoles={['admin']}>
           <AdminProfile />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/management" element={
+        <ProtectedRoute allowedRoles={['admin']}>
+          <AdminManagement />
         </ProtectedRoute>
       } />
     </Routes>

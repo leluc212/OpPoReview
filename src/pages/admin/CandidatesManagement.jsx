@@ -41,16 +41,29 @@ const PageContainer = styled.div`
 const PageHeader = styled.div`
   margin-bottom: 32px;
   
+  @media (max-width: 768px) {
+    margin-bottom: 20px;
+  }
+  
   h1 {
     font-size: 32px;
     font-weight: 700;
     margin-bottom: 8px;
     color: ${props => props.theme.colors.text};
+    
+    @media (max-width: 768px) {
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
   }
   
   p {
     color: ${props => props.theme.colors.textLight};
     font-size: 16px;
+    
+    @media (max-width: 768px) {
+      font-size: 14px;
+    }
   }
 `;
 
@@ -79,12 +92,21 @@ const FilterSection = styled.div`
   gap: 16px;
   flex-wrap: wrap;
   align-items: center;
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+    gap: 12px;
+  }
 `;
 
 const SearchBox = styled.div`
   flex: 1;
   min-width: 250px;
   position: relative;
+  
+  @media (max-width: 768px) {
+    min-width: 100%;
+  }
   
   svg {
     position: absolute;
@@ -94,6 +116,11 @@ const SearchBox = styled.div`
     color: ${props => props.theme.colors.textLight};
     width: 18px;
     height: 18px;
+    
+    @media (max-width: 768px) {
+      width: 16px;
+      height: 16px;
+    }
   }
   
   input {
@@ -105,6 +132,11 @@ const SearchBox = styled.div`
     background: ${props => props.theme.colors.bgDark};
     color: ${props => props.theme.colors.text};
     transition: all 0.2s;
+    
+    @media (max-width: 768px) {
+      padding: 8px 10px 8px 36px;
+      font-size: 13px;
+    }
     
     &:focus {
       outline: none;
@@ -121,6 +153,12 @@ const FilterGroup = styled.div`
   display: flex;
   gap: 12px;
   align-items: center;
+  flex-wrap: wrap;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    gap: 8px;
+  }
 `;
 
 const FilterButton = styled.button`
@@ -136,6 +174,14 @@ const FilterButton = styled.button`
   display: flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
+  
+  @media (max-width: 768px) {
+    padding: 8px 12px;
+    font-size: 12px;
+    flex: 1;
+    justify-content: center;
+  }
   
   &:hover {
     border-color: ${props => props.theme.colors.primary};
@@ -145,6 +191,11 @@ const FilterButton = styled.button`
   svg {
     width: 16px;
     height: 16px;
+    
+    @media (max-width: 768px) {
+      width: 14px;
+      height: 14px;
+    }
   }
 `;
 
@@ -152,13 +203,22 @@ const TableWrapper = styled.div`
   background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.lg};
   border: 2px solid ${props => props.theme.colors.border};
-  overflow: hidden;
+  overflow-x: auto;
   box-shadow: ${props => props.theme.shadows.card};
+  
+  @media (max-width: 768px) {
+    border-radius: ${props => props.theme.borderRadius.md};
+  }
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
+  min-width: 900px;
+  
+  @media (max-width: 768px) {
+    min-width: 700px;
+  }
   
   th {
     text-align: left;
@@ -170,6 +230,12 @@ const Table = styled.table`
     text-transform: uppercase;
     letter-spacing: 0.5px;
     border-bottom: 2px solid ${props => props.theme.colors.border};
+    white-space: nowrap;
+    
+    @media (max-width: 768px) {
+      padding: 12px 10px;
+      font-size: 11px;
+    }
   }
   
   td {
@@ -177,6 +243,11 @@ const Table = styled.table`
     border-bottom: 1px solid ${props => props.theme.colors.border};
     font-size: 14px;
     color: ${props => props.theme.colors.text};
+    
+    @media (max-width: 768px) {
+      padding: 12px 10px;
+      font-size: 12px;
+    }
   }
   
   tbody tr:last-child td {
@@ -293,16 +364,30 @@ const CardHeader = styled.div`
   gap: 12px;
   margin-bottom: 20px;
   
+  @media (max-width: 768px) {
+    margin-bottom: 16px;
+    gap: 10px;
+  }
+  
   svg {
     width: 24px;
     height: 24px;
     color: ${props => props.$color || props.theme.colors.primary};
+    
+    @media (max-width: 768px) {
+      width: 20px;
+      height: 20px;
+    }
   }
   
   h3 {
     font-size: 18px;
     font-weight: 700;
     color: ${props => props.theme.colors.text};
+    
+    @media (max-width: 768px) {
+      font-size: 16px;
+    }
   }
 `;
 
@@ -311,6 +396,10 @@ const UrgentJobsBox = styled.div`
   padding: 20px;
   border-radius: ${props => props.theme.borderRadius.lg};
   margin-bottom: 16px;
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
 `;
 
 const UrgentJobsTitle = styled.div`
@@ -321,18 +410,32 @@ const UrgentJobsTitle = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+  
+  @media (max-width: 768px) {
+    font-size: 22px;
+    gap: 6px;
+  }
 `;
 
 const UrgentJobsSubtitle = styled.div`
   font-size: 14px;
   color: #78350f;
   font-weight: 600;
+  
+  @media (max-width: 768px) {
+    font-size: 12px;
+  }
 `;
 
 const BoostGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  
+  @media (max-width: 768px) {
+    gap: 8px;
+  }
 `;
 
 const BoostItem = styled.div`
@@ -344,6 +447,13 @@ const BoostItem = styled.div`
   justify-content: space-between;
   transition: all 0.2s;
   
+  @media (max-width: 768px) {
+    padding: 12px;
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+  
   &:hover {
     transform: translateY(-2px);
     box-shadow: ${props => props.theme.shadows.md};
@@ -354,6 +464,10 @@ const BoostInfo = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
+  
+  @media (max-width: 768px) {
+    gap: 8px;
+  }
 `;
 
 const BoostIcon = styled.div`
@@ -364,11 +478,22 @@ const BoostIcon = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  
+  @media (max-width: 768px) {
+    width: 32px;
+    height: 32px;
+  }
   
   svg {
     width: 20px;
     height: 20px;
     color: white;
+    
+    @media (max-width: 768px) {
+      width: 18px;
+      height: 18px;
+    }
   }
 `;
 
@@ -376,22 +501,40 @@ const BoostLabel = styled.div`
   font-size: 13px;
   font-weight: 600;
   color: ${props => props.theme.colors.text};
+  
+  @media (max-width: 768px) {
+    font-size: 11px;
+  }
 `;
 
 const BoostValue = styled.div`
   font-size: 20px;
   font-weight: 800;
   color: ${props => props.theme.colors.text};
+  
+  @media (max-width: 768px) {
+    font-size: 18px;
+  }
 `;
 
 const ChartContainer = styled.div`
   height: 280px;
   margin-top: 20px;
+  
+  @media (max-width: 768px) {
+    height: 220px;
+    margin-top: 16px;
+    overflow-x: auto;
+  }
 `;
 
 const ChartSVG = styled.svg`
   width: 100%;
   height: 100%;
+  
+  @media (max-width: 768px) {
+    min-width: 500px;
+  }
 `;
 
 const ChartLegend = styled.div`
