@@ -1,19 +1,42 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
+import StatsCard from '../../components/StatsCard';
 import { useLanguage } from '../../context/LanguageContext';
 import { 
   Building2, 
+  CheckCircle,
+  XCircle,
+  Clock,
+  Search,
+  Filter,
+  Shield,
+  XSquare,
+  Calendar,
+  Eye,
+  Trash2,
   Briefcase,
   TrendingUp,
-  Clock,
-  DollarSign,
-  FileText,
-  Activity,
-  Package
+  Zap,
+  Target,
+  Flame,
+  Star
 } from 'lucide-react';
 
-const PageContainer = styled.div``;
+const PageContainer = styled.div`
+  animation: fadeIn 0.5s ease-in;
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
 
 const PageHeader = styled.div`
   margin-bottom: 32px;
@@ -22,6 +45,7 @@ const PageHeader = styled.div`
     font-size: 32px;
     font-weight: 700;
     margin-bottom: 8px;
+    color: ${props => props.theme.colors.text};
   }
   
   p {
@@ -33,83 +57,220 @@ const PageHeader = styled.div`
 const StatsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  gap: 16px;
   margin-bottom: 32px;
   
-  @media (max-width: 1200px) {
+  @media (max-width: 1400px) {
     grid-template-columns: repeat(2, 1fr);
   }
   
-  @media (max-width: 640px) {
+  @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
 `;
 
-const StatCard = styled.div`
+const FilterSection = styled.div`
   background: ${props => props.theme.colors.bgLight};
-  padding: 24px;
+  padding: 20px;
   border-radius: ${props => props.theme.borderRadius.lg};
-  box-shadow: ${props => props.theme.shadows.sm};
-  border: 1px solid ${props => props.theme.colors.border};
-  position: relative;
-  overflow: hidden;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background: ${props => props.$color || props.theme.colors.primary};
-  }
+  margin-bottom: 24px;
+  border: 2px solid ${props => props.theme.colors.border};
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
 `;
 
-const StatIcon = styled.div`
-  width: 48px;
-  height: 48px;
-  border-radius: ${props => props.theme.borderRadius.lg};
-  background: ${props => props.$color}15;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
+const SearchBox = styled.div`
+  flex: 1;
+  min-width: 250px;
+  position: relative;
   
   svg {
-    width: 24px;
-    height: 24px;
-    color: ${props => props.$color};
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: ${props => props.theme.colors.textLight};
+    width: 18px;
+    height: 18px;
+  }
+  
+  input {
+    width: 100%;
+    padding: 10px 12px 10px 40px;
+    border: 2px solid ${props => props.theme.colors.border};
+    border-radius: ${props => props.theme.borderRadius.md};
+    font-size: 14px;
+    background: ${props => props.theme.colors.bgDark};
+    color: ${props => props.theme.colors.text};
+    transition: all 0.2s;
+    
+    &:focus {
+      outline: none;
+      border-color: ${props => props.theme.colors.primary};
+    }
+    
+    &::placeholder {
+      color: ${props => props.theme.colors.textLight};
+    }
   }
 `;
 
-const StatValue = styled.div`
-  font-size: 32px;
-  font-weight: 700;
-  color: ${props => props.theme.colors.text};
-  margin-bottom: 4px;
+const FilterGroup = styled.div`
   display: flex;
+  gap: 12px;
   align-items: center;
-  gap: 8px;
 `;
 
-const StatLabel = styled.div`
-  font-size: 14px;
-  color: ${props => props.theme.colors.textLight};
-  font-weight: 500;
-`;
-
-const StatChange = styled.span`
+const FilterButton = styled.button`
+  padding: 10px 16px;
+  border: 2px solid ${props => props.$active ? props.theme.colors.primary : props.theme.colors.border};
+  background: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.bgDark};
+  color: ${props => props.$active ? 'white' : props.theme.colors.text};
+  border-radius: ${props => props.theme.borderRadius.md};
   font-size: 14px;
   font-weight: 600;
-  color: ${props => props.$positive ? '#10b981' : '#ef4444'};
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  
+  &:hover {
+    border-color: ${props => props.theme.colors.primary};
+    transform: translateY(-2px);
+  }
+  
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
+const TableWrapper = styled.div`
+  background: ${props => props.theme.colors.bgLight};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  border: 2px solid ${props => props.theme.colors.border};
+  overflow: hidden;
+  box-shadow: ${props => props.theme.shadows.card};
+`;
+
+const Table = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  
+  th {
+    text-align: left;
+    padding: 16px 20px;
+    background: ${props => props.theme.colors.bgDark};
+    font-weight: 700;
+    font-size: 13px;
+    color: ${props => props.theme.colors.textLight};
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid ${props => props.theme.colors.border};
+  }
+  
+  td {
+    padding: 16px 20px;
+    border-bottom: 1px solid ${props => props.theme.colors.border};
+    font-size: 14px;
+    color: ${props => props.theme.colors.text};
+  }
+  
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  tbody tr {
+    transition: all 0.2s;
+    
+    &:hover {
+      background: ${props => props.theme.colors.bgDark};
+    }
+  }
+`;
+
+const VerificationBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: ${props => props.theme.borderRadius.full};
+  font-size: 12px;
+  font-weight: 600;
+  background: ${props => props.$verified ? '#dcfce7' : '#fee2e2'};
+  color: ${props => props.$verified ? '#15803d' : '#dc2626'};
+  
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+`;
+
+const StatusBadge = styled.span`
+  padding: 4px 12px;
+  border-radius: ${props => props.theme.borderRadius.full};
+  font-size: 12px;
+  font-weight: 600;
+  background: ${props => {
+    if (props.$status === 'success') return '#dcfce7';
+    if (props.$status === 'danger') return '#fee2e2';
+    return '#fef3c7';
+  }};
+  color: ${props => {
+    if (props.$status === 'success') return '#15803d';
+    if (props.$status === 'danger') return '#dc2626';
+    return '#ca8a04';
+  }};
+`;
+
+const DateText = styled.span`
+  color: ${props => props.theme.colors.text};
+  font-size: 14px;
   display: flex;
   align-items: center;
   gap: 4px;
 `;
 
-const ContentGrid = styled.div`
+const ActionButtons = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
+const ActionButton = styled.button`
+  padding: 6px 10px;
+  border: none;
+  border-radius: ${props => props.theme.borderRadius.md};
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: ${props => {
+    if (props.$variant === 'view') return '#3b82f6';
+    if (props.$variant === 'delete') return '#ef4444';
+    return '#6b7280';
+  }};
+  color: white;
+  
+  &:hover {
+    opacity: 0.8;
+    transform: translateY(-2px);
+  }
+  
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+`;
+
+const OverviewSection = styled.div`
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 24px;
   margin-bottom: 32px;
   
@@ -118,35 +279,114 @@ const ContentGrid = styled.div`
   }
 `;
 
-const Card = styled.div`
+const InfoCard = styled.div`
   background: ${props => props.theme.colors.bgLight};
   padding: 24px;
   border-radius: ${props => props.theme.borderRadius.lg};
-  box-shadow: ${props => props.theme.shadows.sm};
-  border: 1px solid ${props => props.theme.colors.border};
+  border: 2px solid ${props => props.theme.colors.border};
+  box-shadow: ${props => props.theme.shadows.card};
 `;
 
 const CardHeader = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid ${props => props.theme.colors.border};
+  gap: 12px;
+  margin-bottom: 20px;
+  
+  svg {
+    width: 24px;
+    height: 24px;
+    color: ${props => props.$color || props.theme.colors.primary};
+  }
+  
+  h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: ${props => props.theme.colors.text};
+  }
 `;
 
-const CardTitle = styled.h3`
-  font-size: 18px;
-  font-weight: 600;
-  color: ${props => props.theme.colors.text};
+const UrgentJobsBox = styled.div`
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  padding: 20px;
+  border-radius: ${props => props.theme.borderRadius.lg};
+  margin-bottom: 16px;
+`;
+
+const UrgentJobsTitle = styled.div`
+  font-size: 28px;
+  font-weight: 800;
+  color: #92400e;
+  margin-bottom: 4px;
   display: flex;
   align-items: center;
   gap: 8px;
 `;
 
+const UrgentJobsSubtitle = styled.div`
+  font-size: 14px;
+  color: #78350f;
+  font-weight: 600;
+`;
+
+const BoostGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+`;
+
+const BoostItem = styled.div`
+  background: ${props => props.$bgColor || '#f3f4f6'};
+  padding: 16px;
+  border-radius: ${props => props.theme.borderRadius.md};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${props => props.theme.shadows.md};
+  }
+`;
+
+const BoostInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+
+const BoostIcon = styled.div`
+  width: 36px;
+  height: 36px;
+  border-radius: ${props => props.theme.borderRadius.md};
+  background: ${props => props.$color || '#fff'};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  svg {
+    width: 20px;
+    height: 20px;
+    color: white;
+  }
+`;
+
+const BoostLabel = styled.div`
+  font-size: 13px;
+  font-weight: 600;
+  color: ${props => props.theme.colors.text};
+`;
+
+const BoostValue = styled.div`
+  font-size: 20px;
+  font-weight: 800;
+  color: ${props => props.theme.colors.text};
+`;
+
 const ChartContainer = styled.div`
-  height: 300px;
-  position: relative;
+  height: 280px;
+  margin-top: 20px;
 `;
 
 const ChartSVG = styled.svg`
@@ -167,6 +407,7 @@ const LegendItem = styled.div`
   gap: 8px;
   font-size: 13px;
   color: ${props => props.theme.colors.text};
+  font-weight: 600;
 `;
 
 const LegendDot = styled.div`
@@ -176,284 +417,305 @@ const LegendDot = styled.div`
   background: ${props => props.$color};
 `;
 
-const ActivityList = styled.div`
+const ActivityTable = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
+  margin-top: 20px;
 `;
 
-const ActivityItem = styled.div`
-  display: flex;
-  gap: 12px;
-  padding: 16px;
+const ActivityRow = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 2fr 1fr;
+  gap: 16px;
+  padding: 14px;
   background: ${props => props.theme.colors.bgDark};
   border-radius: ${props => props.theme.borderRadius.md};
+  align-items: center;
   transition: all 0.2s;
   
   &:hover {
-    transform: translateX(4px);
-    box-shadow: ${props => props.theme.shadows.sm};
+    background: ${props => props.theme.colors.border};
   }
-`;
-
-const ActivityIcon = styled.div`
-  width: 40px;
-  height: 40px;
-  border-radius: ${props => props.theme.borderRadius.md};
-  background: ${props => props.$color}15;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
   
-  svg {
-    width: 20px;
-    height: 20px;
-    color: ${props => props.$color};
-  }
-`;
-
-const ActivityContent = styled.div`
-  flex: 1;
-`;
-
-const ActivityTitle = styled.div`
-  font-size: 14px;
-  font-weight: 600;
-  color: ${props => props.theme.colors.text};
-  margin-bottom: 4px;
-`;
-
-const ActivityDescription = styled.div`
-  font-size: 13px;
-  color: ${props => props.theme.colors.textLight};
-`;
-
-const ActivityTime = styled.div`
-  font-size: 12px;
-  color: ${props => props.theme.colors.textLight};
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-`;
-
-const RecentActivityCard = styled(Card)``;
-
-const RecentActivityTable = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-`;
-
-const TableRow = styled.div`
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 16px;
-  padding: 12px;
-  background: ${props => props.theme.colors.bgDark};
-  border-radius: ${props => props.theme.borderRadius.md};
-  align-items: center;
-  
-  @media (max-width: 640px) {
+  @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
 `;
 
-const UserInfo = styled.div`
-  h4 {
-    font-size: 14px;
-    font-weight: 600;
-    color: ${props => props.theme.colors.text};
-    margin-bottom: 4px;
-  }
-  
-  p {
-    font-size: 13px;
-    color: ${props => props.theme.colors.textLight};
-  }
+const ActivityUser = styled.div`
+  font-weight: 600;
+  color: ${props => props.theme.colors.text};
+  font-size: 14px;
 `;
 
-const TimeInfo = styled.div`
-  font-size: 13px;
+const ActivityAction = styled.div`
   color: ${props => props.theme.colors.textLight};
+  font-size: 13px;
+`;
+
+const ActivityTime = styled.div`
+  color: ${props => props.theme.colors.textLight};
+  font-size: 12px;
   text-align: right;
   
-  @media (max-width: 640px) {
+  @media (max-width: 768px) {
     text-align: left;
   }
 `;
 
 const EmployersManagement = () => {
   const { language } = useLanguage();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
-  // Dữ liệu thống kê
+  // Sample data
+  const employers = [
+    { 
+      id: 1,
+      name: 'Highlands Coffee', 
+      email: 'hr@highlandscoffee.com', 
+      verified: true,
+      approvalStatus: 'approved',
+      joined: '2024-03-06',
+      confirmDate: '2024-03-14',
+    },
+    { 
+      id: 2,
+      name: 'Phúc Long Coffee & Tea', 
+      email: 'recruit@phuclong.com', 
+      verified: true,
+      approvalStatus: 'approved',
+      joined: '2024-03-05',
+      confirmDate: '2024-03-13',
+    },
+    { 
+      id: 3,
+      name: 'Katinat Saigon Kafe', 
+      email: 'hr@katinat.com', 
+      verified: true,
+      approvalStatus: 'pending',
+      joined: '2024-03-04',
+      confirmDate: null,
+    },
+    { 
+      id: 4,
+      name: 'The Coffee House', 
+      email: 'jobs@thecoffeehouse.com', 
+      verified: false,
+      approvalStatus: 'pending',
+      joined: '2024-03-03',
+      confirmDate: null,
+    },
+    { 
+      id: 5,
+      name: 'Starbucks Vietnam', 
+      email: 'careers@starbucks.vn', 
+      verified: true,
+      approvalStatus: 'approved',
+      joined: '2024-03-02',
+      confirmDate: '2024-03-07',
+    },
+    { 
+      id: 6,
+      name: 'Trung Nguyên Legend', 
+      email: 'hr@trungnguyen.com', 
+      verified: true,
+      approvalStatus: 'approved',
+      joined: '2024-03-01',
+      confirmDate: '2024-03-06',
+    },
+    { 
+      id: 7,
+      name: 'Gong Cha Vietnam', 
+      email: 'recruit@gongcha.vn', 
+      verified: false,
+      approvalStatus: 'pending',
+      joined: '2024-02-28',
+      confirmDate: null,
+    },
+    { 
+      id: 8,
+      name: 'Lotteria Vietnam', 
+      email: 'hr@lotteria.vn', 
+      verified: true,
+      approvalStatus: 'rejected',
+      joined: '2024-02-27',
+      confirmDate: '2024-03-05',
+    },
+  ];
+
+  const getApprovalStatusText = (status) => {
+    if (status === 'approved') return language === 'vi' ? 'Đã duyệt' : 'Approved';
+    if (status === 'rejected') return language === 'vi' ? 'Không duyệt' : 'Rejected';
+    if (status === 'pending') return language === 'vi' ? 'Chờ duyệt' : 'Pending';
+    return status;
+  };
+
+  const getApprovalStatusVariant = (status) => {
+    if (status === 'approved') return 'success';
+    if (status === 'rejected') return 'danger';
+    return 'warning';
+  };
+
+  const filteredEmployers = employers.filter(employer => {
+    const matchesSearch = employer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         employer.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || employer.approvalStatus === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
   const stats = {
-    total: { value: 345, change: 8, label: language === 'vi' ? 'Tin đăng tuyển' : 'Job Postings' },
-    active: { value: 156, change: 11, label: language === 'vi' ? 'Nhà tuyển dụng' : 'Employers' },
-    revenue: { value: '24.5ty', change: 23, label: language === 'vi' ? 'Doanh thu' : 'Revenue' },
-    packages: { value: 28, change: 47, label: language === 'vi' ? 'Gói đã bán' : 'Packages Sold' }
+    total: filteredEmployers.length,
+    approved: filteredEmployers.filter(e => e.approvalStatus === 'approved').length,
+    pending: filteredEmployers.filter(e => e.approvalStatus === 'pending').length,
+    rejected: filteredEmployers.filter(e => e.approvalStatus === 'rejected').length,
   };
 
-  // Dữ liệu biểu đồ hoạt động (7 ngày)
+  // Urgent jobs data
+  const urgentJobsData = {
+    total: 35,
+    change: '+52',
+    commission: '22,8 triệu VND',
+    commissionRate: '18%'
+  };
+
+  // Boost packages data
+  const boostPackages = [
+    { name: 'Quick Boost', count: 20, icon: Zap, color: '#3b82f6', bgColor: '#dbeafe' },
+    { name: 'Spongit Banner', count: 8, icon: Target, color: '#8b5cf6', bgColor: '#ede9fe' },
+    { name: 'Hot Search', count: 12, icon: Flame, color: '#ef4444', bgColor: '#fee2e2' },
+    { name: 'Top Spotlight', count: 6, icon: Star, color: '#f59e0b', bgColor: '#fef3c7' },
+  ];
+
+  // Chart data for platform activity
   const chartData = [
-    { day: 'T2', posts: 38, employers: 22 },
-    { day: 'T3', posts: 42, employers: 25 },
-    { day: 'T4', posts: 35, employers: 20 },
-    { day: 'T5', posts: 48, employers: 28 },
-    { day: 'T6', posts: 45, employers: 26 },
-    { day: 'T7', posts: 55, employers: 32 },
-    { day: 'CN', posts: 50, employers: 30 }
+    { day: 'T2', postings: 30, hires: 22 },
+    { day: 'T3', postings: 35, hires: 25 },
+    { day: 'T4', postings: 38, hires: 28 },
+    { day: 'T5', postings: 42, hires: 32 },
+    { day: 'T6', postings: 45, hires: 35 },
+    { day: 'T7', postings: 50, hires: 40 },
+    { day: 'CN', postings: 48, hires: 38 },
   ];
 
-  const maxValue = Math.max(...chartData.flatMap(d => [d.posts, d.employers]));
+  const maxValue = Math.max(...chartData.flatMap(d => [d.postings, d.hires]));
 
-  // Hoạt động gần đây
-  const recentActivities = [
-    { 
-      user: 'Highlands Coffee', 
-      action: language === 'vi' ? 'Đăng tin tuyển dụng' : 'Posted job listing',
-      time: language === 'vi' ? '15 phút trước' : '15 minutes ago',
-      type: 'post'
-    },
-    { 
-      user: 'The Coffee House', 
-      action: language === 'vi' ? 'Mua gói Hot Search' : 'Purchased Hot Search package',
-      time: language === 'vi' ? '45 phút trước' : '45 minutes ago',
-      type: 'package'
-    },
-    { 
-      user: 'Phúc Long Coffee', 
-      action: language === 'vi' ? 'Đăng tin tuyển dụng' : 'Posted job listing',
-      time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
-      type: 'post'
-    }
+  // Recent activity data
+  const recentActivity = [
+    { user: 'Highlands Coffee', action: language === 'vi' ? 'Đăng tin tuyển Barista' : 'Posted Barista job', time: language === 'vi' ? '45 phút trước' : '45 min ago' },
+    { user: 'Phúc Long', action: language === 'vi' ? 'Mua gói Quick Boost' : 'Purchased Quick Boost', time: language === 'vi' ? '2 giờ trước' : '2 hours ago' },
+    { user: 'Katinat', action: language === 'vi' ? 'Tuyển 3 ứng viên' : 'Hired 3 candidates', time: language === 'vi' ? '4 giờ trước' : '4 hours ago' },
   ];
-
-  const getActivityIcon = (type) => {
-    switch(type) {
-      case 'post': return <FileText />;
-      case 'package': return <Package />;
-      case 'payment': return <DollarSign />;
-      default: return <Building2 />;
-    }
-  };
-
-  const getActivityColor = (type) => {
-    switch(type) {
-      case 'post': return '#3b82f6';
-      case 'package': return '#8b5cf6';
-      case 'payment': return '#10b981';
-      default: return '#6b7280';
-    }
-  };
 
   return (
-    <DashboardLayout role="admin">
+    <DashboardLayout role="admin" key={language}>
       <PageContainer>
         <PageHeader>
           <h1>{language === 'vi' ? 'Quản Lý Nhà Tuyển Dụng' : 'Employers Management'}</h1>
-          <p>{language === 'vi' ? 'Theo dõi và quản lý hoạt động nhà tuyển dụng' : 'Monitor and manage employer activities'}</p>
+          <p>{language === 'vi' ? 'Quản lý thông tin và trạng thái của tất cả nhà tuyển dụng' : 'Manage information and status of all employers'}</p>
         </PageHeader>
 
         <StatsGrid>
-          <StatCard $color="#3b82f6">
-            <StatIcon $color="#3b82f6">
-              <Briefcase />
-            </StatIcon>
-            <StatValue>
-              {stats.total.value.toLocaleString()}
-              <StatChange $positive={stats.total.change > 0}>
-                <TrendingUp size={16} />
-                +{stats.total.change}%
-              </StatChange>
-            </StatValue>
-            <StatLabel>{stats.total.label}</StatLabel>
-          </StatCard>
-
-          <StatCard $color="#10b981">
-            <StatIcon $color="#10b981">
-              <Building2 />
-            </StatIcon>
-            <StatValue>
-              {stats.active.value.toLocaleString()}
-              <StatChange $positive={stats.active.change > 0}>
-                <TrendingUp size={16} />
-                +{stats.active.change}%
-              </StatChange>
-            </StatValue>
-            <StatLabel>{stats.active.label}</StatLabel>
-          </StatCard>
-
-          <StatCard $color="#10b981">
-            <StatIcon $color="#10b981">
-              <DollarSign />
-            </StatIcon>
-            <StatValue>
-              {stats.revenue.value}
-              <StatChange $positive={stats.revenue.change > 0}>
-                <TrendingUp size={16} />
-                +{stats.revenue.change}%
-              </StatChange>
-            </StatValue>
-            <StatLabel>{stats.revenue.label}</StatLabel>
-          </StatCard>
-
-          <StatCard $color="#f59e0b">
-            <StatIcon $color="#f59e0b">
-              <Package />
-            </StatIcon>
-            <StatValue>
-              {stats.packages.value.toLocaleString()}
-              <StatChange $positive={stats.packages.change > 0}>
-                <TrendingUp size={16} />
-                +{stats.packages.change}%
-              </StatChange>
-            </StatValue>
-            <StatLabel>{stats.packages.label}</StatLabel>
-          </StatCard>
+          <StatsCard
+            title={language === 'vi' ? 'Tổng NTD' : 'Total Employers'}
+            value={stats.total.toString()}
+            icon={Building2}
+            color="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+          />
+          <StatsCard
+            title={language === 'vi' ? 'Đã Duyệt' : 'Approved'}
+            value={stats.approved.toString()}
+            icon={CheckCircle}
+            color="linear-gradient(135deg, #10b981 0%, #059669 100%)"
+          />
+          <StatsCard
+            title={language === 'vi' ? 'Chờ Duyệt' : 'Pending'}
+            value={stats.pending.toString()}
+            icon={Clock}
+            color="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
+          />
+          <StatsCard
+            title={language === 'vi' ? 'Không Duyệt' : 'Rejected'}
+            value={stats.rejected.toString()}
+            icon={XCircle}
+            color="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
+          />
         </StatsGrid>
 
-        <ContentGrid>
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                <Activity size={20} />
-                {language === 'vi' ? 'Hoạt Động Nền Tảng' : 'Platform Activity'}
-              </CardTitle>
-              <div style={{ fontSize: '13px', color: '#94a3b8' }}>
-                {language === 'vi' ? '7 ngày qua' : 'Last 7 days'}
-              </div>
+        <OverviewSection>
+          <InfoCard>
+            <CardHeader $color="#f59e0b">
+              <Briefcase />
+              <h3>{language === 'vi' ? 'Bài Tuyển Gấp' : 'Urgent Jobs'}</h3>
+            </CardHeader>
+            <UrgentJobsBox>
+              <UrgentJobsTitle>
+                {urgentJobsData.total} {language === 'vi' ? 'Tin tuyển gấp' : 'Urgent jobs'}
+                <span style={{ fontSize: '16px', color: '#15803d' }}>{urgentJobsData.change}</span>
+              </UrgentJobsTitle>
+              <UrgentJobsSubtitle>
+                {language === 'vi' ? 'Hoa Hồng' : 'Commission'} {urgentJobsData.commissionRate}: {urgentJobsData.commission}
+              </UrgentJobsSubtitle>
+            </UrgentJobsBox>
+          </InfoCard>
+
+          <InfoCard>
+            <CardHeader $color="#8b5cf6">
+              <Zap />
+              <h3>{language === 'vi' ? 'Gói Boost' : 'Boost Packages'}</h3>
+            </CardHeader>
+            <BoostGrid>
+              {boostPackages.map((pkg, index) => (
+                <BoostItem key={index} $bgColor={pkg.bgColor}>
+                  <BoostInfo>
+                    <BoostIcon $color={pkg.color}>
+                      <pkg.icon />
+                    </BoostIcon>
+                    <BoostLabel>{pkg.name}</BoostLabel>
+                  </BoostInfo>
+                  <BoostValue>{pkg.count} {language === 'vi' ? 'Tin' : 'Jobs'}</BoostValue>
+                </BoostItem>
+              ))}
+            </BoostGrid>
+          </InfoCard>
+        </OverviewSection>
+
+        <OverviewSection>
+          <InfoCard>
+            <CardHeader $color="#3b82f6">
+              <TrendingUp />
+              <h3>{language === 'vi' ? 'Hoạt Động Nền Tảng' : 'Platform Activity'}</h3>
             </CardHeader>
             <ChartContainer>
-              <ChartSVG viewBox="0 0 700 300">
+              <ChartSVG viewBox="0 0 700 280">
                 {/* Grid lines */}
                 {[0, 1, 2, 3, 4].map((i) => (
                   <line
                     key={i}
                     x1="50"
-                    y1={50 + i * 50}
+                    y1={40 + i * 50}
                     x2="650"
-                    y2={50 + i * 50}
+                    y2={40 + i * 50}
                     stroke="#e5e7eb"
                     strokeWidth="1"
                   />
                 ))}
                 
-                {/* Posts line */}
+                {/* Postings line */}
                 <polyline
                   points={chartData.map((d, i) => 
-                    `${100 + i * 90},${250 - (d.posts / maxValue) * 180}`
+                    `${100 + i * 90},${240 - (d.postings / maxValue) * 180}`
                   ).join(' ')}
                   fill="none"
                   stroke="#3b82f6"
                   strokeWidth="3"
                 />
                 
-                {/* Employers line */}
+                {/* Hires line */}
                 <polyline
                   points={chartData.map((d, i) => 
-                    `${100 + i * 90},${250 - (d.employers / maxValue) * 180}`
+                    `${100 + i * 90},${240 - (d.hires / maxValue) * 180}`
                   ).join(' ')}
                   fill="none"
                   stroke="#10b981"
@@ -465,22 +727,23 @@ const EmployersManagement = () => {
                   <g key={i}>
                     <circle
                       cx={100 + i * 90}
-                      cy={250 - (d.posts / maxValue) * 180}
-                      r="4"
+                      cy={240 - (d.postings / maxValue) * 180}
+                      r="5"
                       fill="#3b82f6"
                     />
                     <circle
                       cx={100 + i * 90}
-                      cy={250 - (d.employers / maxValue) * 180}
-                      r="4"
+                      cy={240 - (d.hires / maxValue) * 180}
+                      r="5"
                       fill="#10b981"
                     />
                     <text
                       x={100 + i * 90}
-                      y="280"
+                      y="265"
                       textAnchor="middle"
-                      fontSize="12"
+                      fontSize="13"
                       fill="#6b7280"
+                      fontWeight="600"
                     >
                       {d.day}
                     </text>
@@ -491,61 +754,139 @@ const EmployersManagement = () => {
             <ChartLegend>
               <LegendItem>
                 <LegendDot $color="#3b82f6" />
-                {language === 'vi' ? 'Tin đăng tuyển' : 'Job Posts'}
+                {language === 'vi' ? 'Tin Đăng Tuyển' : 'Job Postings'}
               </LegendItem>
               <LegendItem>
                 <LegendDot $color="#10b981" />
-                {language === 'vi' ? 'Nhà tuyển dụng' : 'Employers'}
+                {language === 'vi' ? 'Tuyển Dụng' : 'Hires'}
               </LegendItem>
             </ChartLegend>
-          </Card>
+          </InfoCard>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                <Clock size={20} />
-                {language === 'vi' ? 'Hoạt Động Gần Đây' : 'Recent Activity'}
-              </CardTitle>
+          <InfoCard>
+            <CardHeader $color="#10b981">
+              <Clock />
+              <h3>{language === 'vi' ? 'Hoạt Động Gần Đây' : 'Recent Activity'}</h3>
             </CardHeader>
-            <ActivityList>
-              {recentActivities.map((activity, index) => (
-                <ActivityItem key={index}>
-                  <ActivityIcon $color={getActivityColor(activity.type)}>
-                    {getActivityIcon(activity.type)}
-                  </ActivityIcon>
-                  <ActivityContent>
-                    <ActivityTitle>{activity.user}</ActivityTitle>
-                    <ActivityDescription>{activity.action}</ActivityDescription>
-                  </ActivityContent>
-                  <ActivityTime>
-                    <Clock size={12} />
-                    {activity.time}
-                  </ActivityTime>
-                </ActivityItem>
+            <ActivityTable>
+              {recentActivity.map((activity, index) => (
+                <ActivityRow key={index}>
+                  <ActivityUser>{activity.user}</ActivityUser>
+                  <ActivityAction>{activity.action}</ActivityAction>
+                  <ActivityTime>{activity.time}</ActivityTime>
+                </ActivityRow>
               ))}
-            </ActivityList>
-          </Card>
-        </ContentGrid>
+            </ActivityTable>
+          </InfoCard>
+        </OverviewSection>
 
-        <RecentActivityCard>
-          <CardHeader>
-            <CardTitle>
-              <Building2 size={20} />
-              {language === 'vi' ? 'Hoạt Động Gần Đây' : 'Recent Activity'}
-            </CardTitle>
-          </CardHeader>
-          <RecentActivityTable>
-            {recentActivities.map((activity, index) => (
-              <TableRow key={index}>
-                <UserInfo>
-                  <h4>{activity.user}</h4>
-                  <p>{activity.action}</p>
-                </UserInfo>
-                <TimeInfo>{activity.time}</TimeInfo>
-              </TableRow>
-            ))}
-          </RecentActivityTable>
-        </RecentActivityCard>
+        <FilterSection>
+          <SearchBox>
+            <Search />
+            <input
+              type="text"
+              placeholder={language === 'vi' ? 'Tìm kiếm theo tên hoặc email...' : 'Search by name or email...'}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </SearchBox>
+          
+          <FilterGroup>
+            <Filter size={18} />
+            <FilterButton
+              $active={statusFilter === 'all'}
+              onClick={() => setStatusFilter('all')}
+            >
+              {language === 'vi' ? 'Tất cả' : 'All'}
+            </FilterButton>
+            <FilterButton
+              $active={statusFilter === 'approved'}
+              onClick={() => setStatusFilter('approved')}
+            >
+              {language === 'vi' ? 'Đã duyệt' : 'Approved'}
+            </FilterButton>
+            <FilterButton
+              $active={statusFilter === 'pending'}
+              onClick={() => setStatusFilter('pending')}
+            >
+              {language === 'vi' ? 'Chờ duyệt' : 'Pending'}
+            </FilterButton>
+            <FilterButton
+              $active={statusFilter === 'rejected'}
+              onClick={() => setStatusFilter('rejected')}
+            >
+              {language === 'vi' ? 'Không duyệt' : 'Rejected'}
+            </FilterButton>
+          </FilterGroup>
+        </FilterSection>
+
+        <TableWrapper>
+          <Table>
+            <thead>
+              <tr>
+                <th>{language === 'vi' ? 'Tên nhà tuyển dụng' : 'Employer Name'}</th>
+                <th>{language === 'vi' ? 'Email' : 'Email'}</th>
+                <th>{language === 'vi' ? 'Trạng thái phê duyệt' : 'Approval Status'}</th>
+                <th>{language === 'vi' ? 'Ngày tham gia' : 'Join Date'}</th>
+                <th>{language === 'vi' ? 'Ngày xác nhận' : 'Confirm Date'}</th>
+                <th>{language === 'vi' ? 'Đã xác thực' : 'Verified'}</th>
+                <th>{language === 'vi' ? 'Thao tác' : 'Actions'}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredEmployers.map((employer) => (
+                <tr key={employer.id}>
+                  <td style={{ fontWeight: 600 }}>{employer.name}</td>
+                  <td>{employer.email}</td>
+                  <td>
+                    <StatusBadge $status={getApprovalStatusVariant(employer.approvalStatus)}>
+                      {getApprovalStatusText(employer.approvalStatus)}
+                    </StatusBadge>
+                  </td>
+                  <td>
+                    <DateText>
+                      <Calendar size={14} />
+                      {employer.joined}
+                    </DateText>
+                  </td>
+                  <td>
+                    {employer.confirmDate ? (
+                      <DateText>
+                        <Calendar size={14} />
+                        {employer.confirmDate}
+                      </DateText>
+                    ) : (
+                      <span style={{ color: '#94a3b8', fontSize: '13px' }}>
+                        {language === 'vi' ? 'Chưa có' : 'Not set'}
+                      </span>
+                    )}
+                  </td>
+                  <td>
+                    <VerificationBadge $verified={employer.verified}>
+                      {employer.verified ? <Shield /> : <XSquare />}
+                      {employer.verified 
+                        ? (language === 'vi' ? 'Đã xác thực' : 'Verified')
+                        : (language === 'vi' ? 'Chưa xác thực' : 'Unverified')
+                      }
+                    </VerificationBadge>
+                  </td>
+                  <td>
+                    <ActionButtons>
+                      <ActionButton $variant="view">
+                        <Eye />
+                        {language === 'vi' ? 'Xem' : 'View'}
+                      </ActionButton>
+                      <ActionButton $variant="delete">
+                        <Trash2 />
+                        {language === 'vi' ? 'Xóa' : 'Delete'}
+                      </ActionButton>
+                    </ActionButtons>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </TableWrapper>
       </PageContainer>
     </DashboardLayout>
   );

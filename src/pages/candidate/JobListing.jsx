@@ -1004,7 +1004,7 @@ const translateJobTitle = (titleStr, language) => {
     'Ca Chiều - Nhân viên pha chế': 'Afternoon Shift - Barista',
     'Ca Tối - Thu ngân nhà hàng': 'Evening Shift - Restaurant Cashier',
     'Ca Sáng - Phục vụ nhà hàng': 'Morning Shift - Restaurant Server',
-    'Ca Linh Động - Giao đồ ăn': 'Flexible Shift - Food Delivery',
+    'Ca Linh Động - Giao đồ ăn nhanh': 'Flexible Shift - Fast Food Delivery',
     'Ca Chiều - Nhân viên bếp': 'Afternoon Shift - Kitchen Staff',
     'Ca Tối - Nhân viên Café': 'Evening Shift - Café Staff',
     'Ca Sáng - Phục vụ Quán ăn': 'Morning Shift - Eatery Server',
@@ -1020,7 +1020,7 @@ const translateJobTitle = (titleStr, language) => {
     'Ca Sáng - Pha chế': 'Morning Shift - Barista',
     'Ca Chiều - Phục vụ nhà hàng': 'Afternoon Shift - Restaurant Server',
     'Ca Tối - Thu ngân quán ăn': 'Evening Shift - Eatery Cashier',
-    'Ca Sáng - Nhân viên bếp': 'Morning Shift - Kitchen Staff',
+    'Ca Sáng - Nhân viên bếp sáng': 'Morning Shift - Kitchen Staff',
     'Ca Chiều - Barista': 'Afternoon Shift - Barista',
     'Ca Tối - Phục vụ Lẩu': 'Evening Shift - Hot Pot Server',
     'Ca Sáng - Nhân viên McDonald\'s': 'Morning Shift - McDonald\'s Staff',
@@ -1031,7 +1031,7 @@ const translateJobTitle = (titleStr, language) => {
     'Ca Sáng - Pha chế Katinat': 'Morning Shift - Katinat Barista',
     'Ca Chiều - Phục vụ Pizza': 'Afternoon Shift - Pizza Server',
     'Ca Linh Động - Giao đồ ăn': 'Flexible Shift - Food Delivery',
-    'Ca Đêm - Nhân viên bếp': 'Night Shift - Kitchen Staff',
+    'Ca Đêm - Nhân viên bếp đêm': 'Night Shift - Kitchen Staff',
     'Ca Sáng - Thu ngân Highlands': 'Morning Shift - Highlands Cashier'
   };
 

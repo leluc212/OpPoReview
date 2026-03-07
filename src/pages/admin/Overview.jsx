@@ -177,3 +177,4 @@ const LineChartContainer = styled.div`
   position: relative;
   height: 300px;
   padding: 20px; 
+`;

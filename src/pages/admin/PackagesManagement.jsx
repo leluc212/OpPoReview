@@ -16,7 +16,6 @@ import {
   Eye,
   BarChart3,
   PieChart as PieChartIcon,
-  DollarSign,
   Users,
   Activity
 } from 'lucide-react';
@@ -707,8 +706,7 @@ const PackagesManagement = () => {
                     </td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
-                        <DollarSign size={14} />
-                        {(purchase.price / 1000).toFixed(0)}K
+                        {(purchase.price / 1000).toFixed(0)}K VND
                       </div>
                     </td>
                     <td>
