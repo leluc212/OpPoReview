@@ -18,6 +18,9 @@ import PendingApproval from './pages/auth/PendingApproval';
 import DownloadApp from './pages/auth/DownloadApp';
 import ForgotPassword from './pages/auth/ForgotPassword';
 
+// Other Pages
+import TermsUrgentJobs from './pages/TermsUrgentJobs';
+
 // Candidate Pages
 import CandidateDashboard from './pages/candidate/CandidateDashboard';
 import JobListing from './pages/candidate/JobListing';
@@ -92,6 +95,7 @@ function AppRoutes() {
       <Route path="/register/employer" element={<EmployerRegister />} />
       <Route path="/verify-otp" element={<OTPVerification />} />
       <Route path="/pending-approval" element={<PendingApproval />} />
+      <Route path="/terms-urgent-jobs" element={<TermsUrgentJobs />} />
       
       {/* Candidate Routes */}
       <Route path="/candidate" element={<Navigate to="/candidate/dashboard" replace />} />

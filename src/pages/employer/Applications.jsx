@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
 import TableFilter from '../../components/TableFilter';
@@ -547,12 +547,12 @@ const AppCard = styled(motion.div)`
   background: #ffffff;
   border: 1.5px solid #E8EFFF;
   border-radius: 16px;
-  padding: 18px 24px;
+  padding: 20px 24px;
   display: flex;
   align-items: center;
   gap: 20px;
   box-shadow: 0 2px 8px rgba(30, 64, 175, 0.06);
-  transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 
@@ -572,16 +572,17 @@ const AppCard = styled(motion.div)`
       return '#F59E0B';
     }};
     opacity: 0.5;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.3s ease;
   }
 
   &:hover {
-    border-color: #BFDBFE;
-    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.13);
-    transform: translateY(-2px);
+    border-color: #1e40af;
+    box-shadow: 0 12px 32px rgba(30, 64, 175, 0.15);
+    transform: translateY(-4px);
 
     &::before {
       opacity: 1;
+      width: 5px;
     }
   }
 `;
@@ -1599,6 +1600,7 @@ const SuccessToast = styled(motion.div)`
 const Applications = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeSection, setActiveSection] = useState('posts');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilters, setStatusFilters] = useState([]);
@@ -1621,6 +1623,25 @@ const Applications = () => {
   useEffect(() => {
     setApplications(getInitialApplications(language));
   }, [language]);
+
+  // Auto-open profile modal if candidateId is passed via navigation state
+  useEffect(() => {
+    if (location.state?.candidateId) {
+      const candidate = applications.find(app => app.id === location.state.candidateId);
+      if (candidate) {
+        // First switch to applications tab
+        setActiveSection('applications');
+        
+        // Then open modal after a brief delay for smooth transition
+        setTimeout(() => {
+          setSelectedCandidate(candidate);
+        }, 300);
+        
+        // Clear the state after opening to prevent re-opening on refresh
+        navigate(location.pathname, { replace: true, state: {} });
+      }
+    }
+  }, [location.state, applications, navigate, location.pathname]);
 
   const filteredApplications = useMemo(() => {
     return applications.filter(app => {

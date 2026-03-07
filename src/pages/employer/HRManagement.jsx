@@ -1017,20 +1017,56 @@ const WalletModalButton = styled(motion.button)`
   cursor: pointer;
   transition: all 0.2s ease;
 
-  background: ${props => props.$variant === 'primary' ? '#1e40af' : '#F1F5F9'};
+  background: ${props => props.$variant === 'primary' ? (props.disabled ? '#94A3B8' : '#1e40af') : '#F1F5F9'};
   color: ${props => props.$variant === 'primary' ? 'white' : props.theme.colors.text};
-  border: 1.5px solid ${props => props.$variant === 'primary' ? '#1e40af' : '#E2E8F0'};
+  border: 1.5px solid ${props => props.$variant === 'primary' ? (props.disabled ? '#94A3B8' : '#1e40af') : '#E2E8F0'};
+  opacity: ${props => props.disabled ? 0.6 : 1};
+  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: ${props => props.$variant === 'primary'
+    transform: ${props => props.disabled ? 'none' : 'translateY(-2px)'};
+    box-shadow: ${props => props.disabled ? 'none' : (props.$variant === 'primary'
       ? '0 6px 20px rgba(30, 64, 175, 0.3)'
-      : '0 4px 12px rgba(0, 0, 0, 0.1)'};
+      : '0 4px 12px rgba(0, 0, 0, 0.1)')};
   }
 
   svg {
     width: 18px;
     height: 18px;
+  }
+`;
+
+const TermsCheckboxContainer = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 24px;
+  text-align: left;
+  
+  input[type="checkbox"] {
+    margin-top: 4px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #1e40af;
+  }
+  
+  label {
+    font-size: 14px;
+    color: ${props => props.theme.colors.text};
+    line-height: 1.6;
+    cursor: pointer;
+    user-select: none;
+    
+    a {
+      color: #1e40af;
+      font-weight: 600;
+      text-decoration: underline;
+      
+      &:hover {
+        color: #1e3a8a;
+      }
+    }
   }
 `;
 
@@ -1240,6 +1276,7 @@ const HRManagement = () => {
   const [isWalletConnected] = useState(() => {
     return localStorage.getItem('employer_wallet_connected') === 'true';
   });
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const activeChat = activeChatId
     ? chatConversations.find(chat => chat.id === activeChatId)
@@ -1313,18 +1350,19 @@ const HRManagement = () => {
     }
   };
 
+  const closeWalletModal = () => {
+    setShowWalletModal(false);
+    setAgreedToTerms(false);
+  };
+
   const handleConnectWallet = () => {
     // Simulate wallet connection success
     localStorage.setItem('employer_wallet_connected', 'true');
     setShowWalletModal(false);
+    setAgreedToTerms(false);
 
-    // Show success notification
-    alert(language === 'vi'
-      ? '✓ Liên kết ví thành công! Bạn có thể đăng bài ngay bây giờ.'
-      : '✓ Wallet connected successfully! You can now post jobs.');
-
-    // Navigate to post job page
-    navigate('/employer/post-job');
+    // Navigate to post quick job page
+    navigate('/employer/post-quick-job');
   };
 
   // Reload jobs from localStorage
@@ -1883,7 +1921,7 @@ const HRManagement = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setShowWalletModal(false)}
+              onClick={closeWalletModal}
             >
               <WalletModalContainer
                 initial={{ scale: 0.9, opacity: 0 }}
@@ -1902,20 +1940,35 @@ const HRManagement = () => {
                     ? 'Bạn cần liên kết ví ngân hàng trước khi có thể đăng tin tuyển dụng. Điều này giúp đảm bảo thanh toán an toàn và minh bạch.'
                     : 'You need to connect your bank wallet before posting job listings. This ensures secure and transparent payment processing.'}
                 </WalletModalMessage>
+                <TermsCheckboxContainer>
+                  <input 
+                    type="checkbox" 
+                    id="terms-checkbox"
+                    checked={agreedToTerms}
+                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  />
+                  <label htmlFor="terms-checkbox">
+                    {language === 'vi' 
+                      ? <>Tôi đã đồng ý <a href="/OpPoReview/terms-urgent-jobs" target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600 }}>điều khoản</a> sử dụng Job gấp này</>
+                      : <>I agree to the <a href="/OpPoReview/terms-urgent-jobs" target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600 }}>Terms of Service</a> for Urgent Jobs</>
+                    }
+                  </label>
+                </TermsCheckboxContainer>
                 <WalletModalActions>
                   <WalletModalButton
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => setShowWalletModal(false)}
+                    onClick={closeWalletModal}
                   >
                     <X />
                     {language === 'vi' ? 'Đóng' : 'Cancel'}
                   </WalletModalButton>
                   <WalletModalButton
                     $variant="primary"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleConnectWallet}
+                    disabled={!agreedToTerms}
+                    whileHover={{ scale: agreedToTerms ? 1.02 : 1 }}
+                    whileTap={{ scale: agreedToTerms ? 0.98 : 1 }}
+                    onClick={agreedToTerms ? handleConnectWallet : undefined}
                   >
                     <Wallet />
                     {language === 'vi' ? 'Liên kết ví' : 'Connect Wallet'}
