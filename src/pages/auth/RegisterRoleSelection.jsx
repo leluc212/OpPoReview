@@ -50,7 +50,7 @@ const Page = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 24px;
+  padding: 24px 24px;
   position: relative;
   overflow: hidden;
   font-family: 'Inter', sans-serif !important;
@@ -129,8 +129,8 @@ const BrandLink = styled(Link)`
   align-items: center;
   justify-content: center;
   background: #ffffff;
-  padding: 8px 18px;
-  border-radius: 18px;
+  padding: 6px 14px;
+  border-radius: 16px;
   text-decoration: none;
   margin-bottom: 4px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.15);
@@ -142,7 +142,7 @@ const BrandLink = styled(Link)`
   }
 `;
 const BrandImg = styled.img`
-  height: 65px;
+  height: 50px;
   object-fit: contain;
 `;
 
@@ -160,20 +160,20 @@ const Eyebrow = styled.div`
   color: #93c5fd;
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 `;
 
 /* headline */
 const H1 = styled.h1`
-  font-size: clamp(20px, 6vw, 65px);
+  font-size: clamp(18px, 5vw, 52px);
   font-weight: 1000;
   letter-spacing: -2px;
   line-height: 1;
-  padding: 8px 0;
+  padding: 6px 0;
   color: #fff;
   text-align: center;
-  margin-top: 20px;
-  margin-bottom: 20px;
+  margin-top: 0;
+  margin-bottom: 10px;
 
   .shine {
     background: linear-gradient(90deg, #93c5fd, #c4b5fd, #fbcfe8, #93c5fd);
@@ -189,12 +189,12 @@ const H1 = styled.h1`
 `;
 
 const Sub = styled.p`
-  font-size: 16px;
+  font-size: 14px;
   color: rgba(255,255,255,0.65);
   text-align: center;
-  line-height: 1.7;
+  line-height: 1.6;
   max-width: 520px;
-  margin-bottom: 52px;
+  margin-bottom: 20px;
 `;
 
 /* ═══════════════════════════════════════════════
@@ -203,9 +203,9 @@ const Sub = styled.p`
 const CardGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 36px;
+  gap: 24px;
   width: 100%;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   align-items: stretch;
 
   @media (max-width: 720px) {
@@ -216,8 +216,8 @@ const CardGrid = styled.div`
 
 const RoleCard = styled(motion.div)`
   background: #fff;
-  border-radius: 28px;
-  padding: 48px 44px 44px;
+  border-radius: 24px;
+  padding: 28px 32px 26px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -257,37 +257,37 @@ const RoleCard = styled(motion.div)`
 `;
 
 const CardTitle = styled.h2`
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 800;
   color: #0f172a;
-  letter-spacing: -0.8px;
+  letter-spacing: -0.6px;
   line-height: 1.2;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 `;
 
 const CardDesc = styled.p`
-  font-size: 16px;
+  font-size: 13.5px;
   color: #64748b;
-  line-height: 1.7;
+  line-height: 1.6;
   font-weight: 400;
-  margin-bottom: 28px;
+  margin-bottom: 16px;
 `;
 
 const FeatureList = styled.ul`
   list-style: none;
-  margin: 0 0 36px;
+  margin: 0 0 20px;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   flex: 1;
 `;
 
 const FeatureItem = styled.li`
   display: flex;
   align-items: center;
-  gap: 14px;
-  font-size: 15.5px;
+  gap: 10px;
+  font-size: 13.5px;
   color: #475569;
   font-weight: 500;
   line-height: 1.6;
@@ -310,9 +310,9 @@ const FeatureItem = styled.li`
 
 const SelectBtn = styled(motion.button)`
   width: 100%;
-  height: 56px;
+  height: 46px;
   border: none;
-  border-radius: 14px;
+  border-radius: 12px;
   background: ${p => p.$grad};
   background-size: 200%;
   animation: ${gradShift} 6s ease infinite;
@@ -355,7 +355,7 @@ const SelectBtn = styled(motion.button)`
 const TickerOuter = styled.div`
   width: 100%;
   overflow: hidden;
-  margin-bottom: 36px;
+  margin-bottom: 20px;
   position: relative;
 
   &::before, &::after {
@@ -478,9 +478,9 @@ const RegisterRoleSelection = () => {
   ];
 
   const chips = [
-    '🛒 Tư vấn sản phẩm', '🍳 Phụ bếp', '📦 Soạn hàng', '🌐 Phiên dịch', '🏨 Lễ tân', '📚 Gia sư',
-    '🛒 Tư vấn sản phẩm', '🍳 Phụ bếp', '📦 Soạn hàng', '🌐 Phiên dịch', '🏨 Lễ tân', '📚 Gia sư',
-    '🛒 Tư vấn sản phẩm', '🍳 Phụ bếp', '📦 Soạn hàng', '🌐 Phiên dịch', '🏨 Lễ tân', '📚 Gia sư',
+    '☕ Barista', '🍳 Phụ bếp', '🍽️ Phục vụ bàn', '🧁 Làm bánh', '🥤 Pha chế', '🛎️ Thu ngân quán ăn', '🍜 Nhân viên bếp', '🧹 Dọn dẹp nhà hàng', '📦 Soạn hàng bếp', '🏪 Nhân viên cửa hàng F&B',
+    '☕ Barista', '🍳 Phụ bếp', '🍽️ Phục vụ bàn', '🧁 Làm bánh', '🥤 Pha chế', '🛎️ Thu ngân quán ăn', '🍜 Nhân viên bếp', '🧹 Dọn dẹp nhà hàng', '📦 Soạn hàng bếp', '🏪 Nhân viên cửa hàng F&B',
+    '☕ Barista', '🍳 Phụ bếp', '🍽️ Phục vụ bàn', '🧁 Làm bánh', '🥤 Pha chế', '🛎️ Thu ngân quán ăn', '🍜 Nhân viên bếp', '🧹 Dọn dẹp nhà hàng', '📦 Soạn hàng bếp', '🏪 Nhân viên cửa hàng F&B',
   ];
 
   /* stagger */

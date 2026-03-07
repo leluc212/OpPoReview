@@ -68,7 +68,7 @@ const Left = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 60px 56px;
+  padding: 40px 48px;
   overflow: hidden;
 
   @media (max-width: 960px) { display: none; }
@@ -111,14 +111,14 @@ const BrandRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  margin-bottom: 48px;
+  margin-bottom: 24px;
   position: relative;
   z-index: 2;
 `;
 const BrandLogoBox = styled.div`
   background: #fff;
-  border-radius: 16px;
-  padding: 18px 26px;
+  border-radius: 14px;
+  padding: 12px 18px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -126,8 +126,8 @@ const BrandLogoBox = styled.div`
   margin-bottom: 0;
 `;
 const LogoImg = styled.img`
-  height: 46px;
-  width: 46px;
+  height: 36px;
+  width: 36px;
   object-fit: contain;
   display: block;
 `;
@@ -142,12 +142,12 @@ const BrandName = styled.span`
 
 /* Headline */
 const Headline = styled.h1`
-  font-size: clamp(32px, 3.2vw, 44px);
+  font-size: clamp(26px, 2.8vw, 38px);
   font-weight: 900;
-  line-height: 1.35;
-  letter-spacing: -1.5px;
+  line-height: 1.28;
+  letter-spacing: -1.2px;
   color: #fff;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
   position: relative;
   z-index: 2;
 
@@ -165,11 +165,11 @@ const Headline = styled.h1`
 `;
 
 const Sub = styled.p`
-  font-size: 15px;
+  font-size: 14px;
   color: rgba(255,255,255,0.68);
-  line-height: 1.75;
+  line-height: 1.65;
   max-width: 380px;
-  margin-bottom: 48px;
+  margin-bottom: 24px;
   position: relative;
   z-index: 2;
 `;
@@ -180,11 +180,11 @@ const FeatureCard = styled(motion.div)`
   border: 1px solid rgba(255,255,255,0.15);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-radius: 20px;
-  padding: 28px 28px 24px;
+  border-radius: 18px;
+  padding: 18px 22px 16px;
   position: relative;
   z-index: 2;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 `;
 
 const CardTag = styled.div`
@@ -199,22 +199,22 @@ const CardTag = styled.div`
 const FeatureRow = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 `;
 
 const FeatureItem = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   color: rgba(255,255,255,0.9);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
 `;
 
 const FeatureIcon = styled.div`
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   background: ${p => p.$bg || 'rgba(96,165,250,0.25)'};
   display: flex;
   align-items: center;
@@ -227,8 +227,8 @@ const FeatureIcon = styled.div`
 const StatsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-top: 24px;
+  gap: 10px;
+  margin-top: 16px;
   position: relative;
   z-index: 2;
 `;
@@ -236,8 +236,8 @@ const StatsGrid = styled.div`
 const StatBox = styled.div`
   background: rgba(255,255,255,0.07);
   border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 14px;
-  padding: 16px 12px;
+  border-radius: 12px;
+  padding: 12px 10px;
   text-align: center;
 `;
 

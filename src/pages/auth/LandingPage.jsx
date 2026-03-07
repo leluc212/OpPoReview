@@ -585,13 +585,13 @@ const HeroSection = styled(motion.section)`
   }
   
   @media (max-width: 768px) {
-    padding: 80px 20px 60px;
+    padding: 70px 20px 40px;
     height: auto;
-    min-height: 100vh;
+    min-height: auto;
   }
   
   @media (max-width: 480px) {
-    padding: 70px 16px 50px;
+    padding: 62px 16px 30px;
   }
 `;
 
@@ -972,6 +972,10 @@ const HeroContent = styled.div`
   margin-left: auto;
   margin-right: auto;
   width: 100%;
+  
+  @media (max-width: 768px) {
+    margin-top: 0;
+  }
 `;
 
 const HeroTitle = styled(motion.h1)`
@@ -1042,17 +1046,26 @@ const HeroSubtitle = styled(motion.p)`
   
   @media (max-width: 768px) {
     font-size: 16px;
-    margin-bottom: 32px;
+    margin-bottom: 20px;
   }
   
   @media (max-width: 480px) {
     font-size: 14px;
+    margin-bottom: 16px;
   }
 `;
 
 const SearchContainer = styled(motion.div)`
   max-width: 800px;
   margin: 0 auto 40px;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 20px;
+  }
+  
+  @media (max-width: 480px) {
+    margin-bottom: 14px;
+  }
   background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.98)'};
   backdrop-filter: blur(30px);
   border: 2px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.4)' : 'rgba(147, 197, 253, 0.4)'};
@@ -1227,8 +1240,13 @@ const BannerContainer = styled.div`
     width: 100%;
   }
   
+  @media (max-width: 768px) {
+    margin-top: 16px;
+  }
+  
   @media (max-width: 480px) {
-    gap: 16px;
+    gap: 12px;
+    margin-top: 12px;
   }
 `;
 
@@ -1377,6 +1395,10 @@ const BannerWrapper = styled(motion.div)`
   @media (max-width: 968px) {
     flex-direction: column;
     justify-content: center;
+  }
+  
+  @media (max-width: 768px) {
+    display: none;
   }
 `;
 
