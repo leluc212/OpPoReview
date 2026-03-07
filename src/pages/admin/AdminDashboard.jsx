@@ -305,9 +305,9 @@ const AdminDashboard = () => {
     },
     { 
       id: 3,
-      name: 'Katinat Saigon Kafe', 
+      name: 'Katinat chi nhánh quận 8', 
       email: 'hr@katinat.com', 
-      verified: true,
+      verified: false,
       approvalStatus: 'pending',
       joined: '2024-03-04',
       interviewDate: '2024-03-11',
