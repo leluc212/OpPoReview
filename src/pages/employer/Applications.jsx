@@ -6,7 +6,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
 import TableFilter from '../../components/TableFilter';
 import Modal from '../../components/Modal';
-import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText, Clock, Users, Newspaper, DollarSign, Edit, Trash2, TrendingUp, Plus, X, Wallet } from 'lucide-react';
+import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText, Clock, Users, Newspaper, DollarSign, Edit, Trash2, TrendingUp, Plus, X, Wallet, AlertCircle, Save } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 // Mock job posts data
@@ -1454,16 +1454,164 @@ const WalletModalButton = styled(motion.button)`
   }
 `;
 
+// ─── Delete Confirmation Modal ─────────────────────────────
+const DeleteModalOverlay = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+  padding: 20px;
+`;
+
+const DeleteModalContainer = styled(motion.div)`
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 480px;
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  text-align: center;
+`;
+
+const DeleteModalIcon = styled.div`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+
+  svg {
+    width: 40px;
+    height: 40px;
+    color: #EF4444;
+  }
+`;
+
+const DeleteModalTitle = styled.h2`
+  font-size: 24px;
+  font-weight: 800;
+  color: ${props => props.theme.colors.text};
+  margin-bottom: 12px;
+`;
+
+const DeleteModalMessage = styled.p`
+  font-size: 15px;
+  color: ${props => props.theme.colors.textLight};
+  line-height: 1.6;
+  margin-bottom: 8px;
+`;
+
+const DeleteModalJobTitle = styled.p`
+  font-size: 16px;
+  font-weight: 700;
+  color: ${props => props.theme.colors.text};
+  background: #F8FAFC;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin: 16px 0 24px;
+  border: 2px solid #E2E8F0;
+`;
+
+const DeleteModalActions = styled.div`
+  display: flex;
+  gap: 12px;
+`;
+
+const DeleteModalButton = styled(motion.button)`
+  flex: 1;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid;
+
+  ${props => props.$variant === 'danger' ? `
+    background: #EF4444;
+    color: white;
+    border-color: #EF4444;
+    &:hover:not(:disabled) {
+      background: #DC2626;
+      border-color: #DC2626;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
+    }
+  ` : `
+    background: white;
+    color: ${props.theme.colors.text};
+    border-color: #E2E8F0;
+    &:hover:not(:disabled) {
+      background: #F8FAFC;
+      border-color: #CBD5E1;
+    }
+  `}
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+`;
+
+// ─── Success Toast ─────────────────────────────────────────
+const SuccessToast = styled(motion.div)`
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+  padding: 16px 24px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
+  z-index: 1002;
+  font-weight: 600;
+  font-size: 15px;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+`;
+
 const Applications = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState('applications');
+  const [activeSection, setActiveSection] = useState('posts');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilters, setStatusFilters] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [applications, setApplications] = useState(() => getInitialApplications(language));
-  const [jobPosts] = useState(() => getJobPosts(language));
+  const [jobPosts, setJobPosts] = useState(() => getJobPosts(language));
   const [showWalletModal, setShowWalletModal] = useState(false);
+  const [deleteJobId, setDeleteJobId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [selectedJobView, setSelectedJobView] = useState(null);
+  const [editJobId, setEditJobId] = useState(null);
+  const [editJobData, setEditJobData] = useState(null);
 
   // Mock wallet connection status - in real app, get from user context or API
   const [isWalletConnected] = useState(() => {
@@ -1517,6 +1665,77 @@ const Applications = () => {
   const handleCloseProfile = useCallback(() => {
     setSelectedCandidate(null);
   }, []);
+
+  // Open delete confirmation modal
+  const handleDeleteJob = (jobId) => {
+    setDeleteJobId(jobId);
+  };
+
+  // Confirm and delete job post
+  const confirmDeleteJob = async () => {
+    if (!deleteJobId) return;
+    
+    setIsDeleting(true);
+    
+    // Simulate async operation for better UX
+    await new Promise(resolve => setTimeout(resolve, 600));
+
+    // Remove job from state
+    setJobPosts(prev => prev.filter(job => job.id !== deleteJobId));
+    
+    // Show success toast
+    setShowSuccessToast(true);
+    setTimeout(() => setShowSuccessToast(false), 3000);
+    
+    setIsDeleting(false);
+    setDeleteJobId(null);
+  };
+
+  // Cancel delete
+  const cancelDelete = () => {
+    setDeleteJobId(null);
+  };
+
+  // Get job title for delete confirmation
+  const jobToDelete = deleteJobId ? jobPosts.find(job => job.id === deleteJobId) : null;
+
+  // View job details
+  const handleViewJob = (jobId) => {
+    const job = jobPosts.find(j => j.id === jobId);
+    if (job) setSelectedJobView(job);
+  };
+
+  // Edit job
+  const handleEditJob = (jobId) => {
+    const job = jobPosts.find(j => j.id === jobId);
+    if (job) {
+      setEditJobId(jobId);
+      setEditJobData({ ...job });
+    }
+  };
+
+  // Save edited job
+  const handleSaveEdit = () => {
+    if (!editJobData) return;
+
+    // Update job in state
+    setJobPosts(prev => prev.map(job => 
+      job.id === editJobId ? { ...job, ...editJobData } : job
+    ));
+    
+    // Show success toast
+    setShowSuccessToast(true);
+    setTimeout(() => setShowSuccessToast(false), 3000);
+    
+    setEditJobId(null);
+    setEditJobData(null);
+  };
+
+  // Cancel edit
+  const handleCancelEdit = () => {
+    setEditJobId(null);
+    setEditJobData(null);
+  };
 
   return (
     <DashboardLayout role="employer" key={language}>
@@ -1641,6 +1860,7 @@ const Applications = () => {
                     <JobPostButton
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
+                      onClick={() => handleViewJob(post.id)}
                     >
                       <Eye />{language === 'vi' ? 'Xem' : 'View'}
                     </JobPostButton>
@@ -1648,6 +1868,7 @@ const Applications = () => {
                       $variant="primary"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
+                      onClick={() => handleEditJob(post.id)}
                     >
                       <Edit />{language === 'vi' ? 'Sửa' : 'Edit'}
                     </JobPostButton>
@@ -1655,6 +1876,7 @@ const Applications = () => {
                       $variant="danger"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
+                      onClick={() => handleDeleteJob(post.id)}
                     >
                       <Trash2 />
                     </JobPostButton>
@@ -1706,6 +1928,246 @@ const Applications = () => {
             candidate={selectedCandidate}
             onClose={handleCloseProfile}
           />
+        </Modal>
+      )}
+
+      <AnimatePresence>
+        {deleteJobId && jobToDelete && (
+          <DeleteModalOverlay
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={cancelDelete}
+          >
+            <DeleteModalContainer
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <DeleteModalIcon>
+                <AlertCircle />
+              </DeleteModalIcon>
+              <DeleteModalTitle>
+                {language === 'vi' ? 'Xác nhận xóa bài đăng' : 'Confirm Delete Post'}
+              </DeleteModalTitle>
+              <DeleteModalMessage>
+                {language === 'vi'
+                  ? 'Bạn có chắc chắn muốn xóa bài đăng này? Hành động này không thể hoàn tác.'
+                  : 'Are you sure you want to delete this post? This action cannot be undone.'}
+              </DeleteModalMessage>
+              <DeleteModalJobTitle>
+                {jobToDelete.title}
+              </DeleteModalJobTitle>
+              <DeleteModalActions>
+                <DeleteModalButton
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={cancelDelete}
+                  disabled={isDeleting}
+                >
+                  <X />
+                  {language === 'vi' ? 'Hủy' : 'Cancel'}
+                </DeleteModalButton>
+                <DeleteModalButton
+                  $variant="danger"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={confirmDeleteJob}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? (
+                    <>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      >
+                        <Trash2 />
+                      </motion.div>
+                      {language === 'vi' ? 'Đang xóa...' : 'Deleting...'}
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 />
+                      {language === 'vi' ? 'Xóa bài đăng' : 'Delete Post'}
+                    </>
+                  )}
+                </DeleteModalButton>
+              </DeleteModalActions>
+            </DeleteModalContainer>
+          </DeleteModalOverlay>
+        )}
+
+        {showSuccessToast && (
+          <SuccessToast
+            initial={{ opacity: 0, y: -20, x: 100 }}
+            animate={{ opacity: 1, y: 0, x: 0 }}
+            exit={{ opacity: 0, x: 100 }}
+          >
+            <CheckCircle />
+            {language === 'vi' ? (editJobId ? 'Đã cập nhật bài đăng!' : 'Đã xóa bài đăng thành công!') : (editJobId ? 'Post updated!' : 'Post deleted successfully!')}
+          </SuccessToast>
+        )}
+      </AnimatePresence>
+
+      {/* View Job Modal */}
+      {selectedJobView && (
+        <Modal
+          isOpen={true}
+          onClose={() => setSelectedJobView(null)}
+          title={language === 'vi' ? 'Chi tiết bài đăng' : 'Job Post Details'}
+          size="large"
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div>
+              <h3 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '16px', color: '#1e293b' }}>
+                {selectedJobView.title}
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
+                  <MapPin size={16} />
+                  <span>{selectedJobView.location}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
+                  <DollarSign size={16} />
+                  <span>{selectedJobView.salary}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
+                  <Briefcase size={16} />
+                  <span>{selectedJobView.type}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
+                  <Calendar size={16} />
+                  <span>{language === 'vi' ? 'Hạn nộp: ' : 'Deadline: '}{selectedJobView.deadline}</span>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', padding: '20px', background: '#f8fafc', borderRadius: '12px' }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '24px', fontWeight: '700', color: '#1e40af', marginBottom: '4px' }}>
+                  {selectedJobView.applicants}
+                </div>
+                <div style={{ fontSize: '13px', color: '#64748b' }}>
+                  {language === 'vi' ? 'Ứng viên' : 'Applicants'}
+                </div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '24px', fontWeight: '700', color: '#1e40af', marginBottom: '4px' }}>
+                  {selectedJobView.views}
+                </div>
+                <div style={{ fontSize: '13px', color: '#64748b' }}>
+                  {language === 'vi' ? 'Lượt xem' : 'Views'}
+                </div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '11px', fontWeight: '600', color: '#10b981', background: '#d1fae5', padding: '4px 12px', borderRadius: '20px', display: 'inline-block', marginBottom: '4px' }}>
+                  {selectedJobView.status === 'active' ? (language === 'vi' ? 'Đang tuyển' : 'Active') : (language === 'vi' ? 'Đóng' : 'Closed')}
+                </div>
+                <div style={{ fontSize: '13px', color: '#64748b' }}>
+                  {language === 'vi' ? 'Trạng thái' : 'Status'}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ fontSize: '13px', color: '#94a3b8', borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
+              {language === 'vi' ? 'Đăng ' : 'Posted '}{selectedJobView.postedDate}
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Edit Job Modal */}
+      {editJobId && editJobData && (
+        <Modal
+          isOpen={true}
+          onClose={handleCancelEdit}
+          title={language === 'vi' ? 'Chỉnh sửa bài đăng' : 'Edit Job Post'}
+          size="large"
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
+                {language === 'vi' ? 'Tiêu đề' : 'Title'}
+              </label>
+              <input
+                type="text"
+                value={editJobData.title || ''}
+                onChange={(e) => setEditJobData({ ...editJobData, title: e.target.value })}
+                style={{ width: '100%', padding: '12px 16px', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '14px' }}
+              />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
+                  {language === 'vi' ? 'Địa điểm' : 'Location'}
+                </label>
+                <input
+                  type="text"
+                  value={editJobData.location || ''}
+                  onChange={(e) => setEditJobData({ ...editJobData, location: e.target.value })}
+                  style={{ width: '100%', padding: '12px 16px', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '14px' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
+                  {language === 'vi' ? 'Mức lương' : 'Salary'}
+                </label>
+                <input
+                  type="text"
+                  value={editJobData.salary || ''}
+                  onChange={(e) => setEditJobData({ ...editJobData, salary: e.target.value })}
+                  style={{ width: '100%', padding: '12px 16px', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '14px' }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
+                  {language === 'vi' ? 'Loại hình' : 'Type'}
+                </label>
+                <input
+                  type="text"
+                  value={editJobData.type || ''}
+                  onChange={(e) => setEditJobData({ ...editJobData, type: e.target.value })}
+                  style={{ width: '100%', padding: '12px 16px', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '14px' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
+                  {language === 'vi' ? 'Hạn nộp' : 'Deadline'}
+                </label>
+                <input
+                  type="text"
+                  value={editJobData.deadline || ''}
+                  onChange={(e) => setEditJobData({ ...editJobData, deadline: e.target.value })}
+                  style={{ width: '100%', padding: '12px 16px', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '14px' }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleCancelEdit}
+                style={{ padding: '12px 24px', borderRadius: '12px', border: '2px solid #e2e8f0', background: 'white', color: '#334155', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}
+              >
+                {language === 'vi' ? 'Hủy' : 'Cancel'}
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleSaveEdit}
+                style={{ padding: '12px 24px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)', color: 'white', fontSize: '14px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+              >
+                <Save size={16} />
+                {language === 'vi' ? 'Lưu thay đổi' : 'Save Changes'}
+              </motion.button>
+            </div>
+          </div>
         </Modal>
       )}
     </DashboardLayout>

@@ -93,7 +93,7 @@ const SearchContainer = styled.div`
 `;
 
 const SearchInput = styled.div`
-  flex: 1;
+  flex: ${props => props.$narrow ? '0 0 220px' : '2'};
   display: flex;
   align-items: center;
   gap: 12px;
@@ -343,6 +343,118 @@ const ToggleButton = styled(motion.button)`
   svg {
     width: 14px;
     height: 14px;
+  }
+`;
+
+const ApplyModalWrap = styled.div`
+  padding: 32px 28px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+
+  .apply-emoji {
+    font-size: 52px;
+    line-height: 1;
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: ${props => props.theme.colors.text};
+    margin: 0;
+    letter-spacing: -0.2px;
+  }
+
+  .apply-desc {
+    font-size: 14px;
+    color: ${props => props.theme.colors.textLight};
+    line-height: 1.65;
+    margin: 0;
+    max-width: 340px;
+
+    strong {
+      color: ${props => props.theme.colors.text};
+      font-weight: 700;
+    }
+  }
+
+  .apply-info-card {
+    width: 100%;
+    background: ${props => props.theme.colors.bgDark};
+    border: 1px solid ${props => props.theme.colors.border};
+    border-radius: 12px;
+    overflow: hidden;
+    text-align: left;
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 11px 16px;
+
+      &:not(:last-child) {
+        border-bottom: 1px solid ${props => props.theme.colors.border};
+      }
+
+      .info-label {
+        font-size: 13px;
+        color: ${props => props.theme.colors.textLight};
+      }
+
+      .info-value {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: ${props => props.theme.colors.text};
+        text-align: right;
+        max-width: 60%;
+
+        &.salary { color: #10b981; }
+      }
+    }
+  }
+
+  .apply-buttons {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+
+    button {
+      flex: 1;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .btn-cancel {
+      background: ${props => props.theme.colors.bgDark};
+      color: ${props => props.theme.colors.textLight};
+      border: 1.5px solid ${props => props.theme.colors.border};
+
+      &:hover {
+        background: ${props => props.theme.colors.border};
+        color: ${props => props.theme.colors.text};
+      }
+    }
+
+    .btn-confirm {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      color: white;
+      box-shadow: 0 4px 14px rgba(59,130,246,0.35);
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(59,130,246,0.45);
+      }
+
+      &:active { transform: translateY(0); }
+    }
   }
 `;
 
@@ -928,18 +1040,10 @@ const translateSalary = (salaryStr, language) => {
     .replace(/\/tiếng/g, '/hrs');
 };
 
-// Calculate per-shift salary for shift jobs
+// Calculate per-shift salary for jobs with hourly rate
 const calculateShiftSalary = (job) => {
-  if (job.category !== 'shift') return job.salary;
-  
-  // Parse hours from type like 'Ca sáng (06:00 - 14:00)'
-  const timeMatch = job.type.match(/(\d{2}):(\d{2})\s*-\s*(\d{2}):(\d{2})/);
-  if (!timeMatch) return job.salary;
-  
-  const startH = parseInt(timeMatch[1]);
-  const endH = parseInt(timeMatch[3]);
-  let hours = endH - startH;
-  if (hours <= 0) hours += 24; // overnight shift
+  // Only convert if salary is in VNĐ/giờ format
+  if (!job.salary.includes('VNĐ/giờ')) return job.salary;
   
   // Parse original hourly rate - "28.000" means 28000 VND
   const rateMatch = job.salary.match(/([\d.]+)/);
@@ -948,12 +1052,23 @@ const calculateShiftSalary = (job) => {
   
   // Min hourly rate is 28,050
   const hourlyRate = Math.max(originalRate, 28050);
+  
+  // For shift jobs, parse actual hours from type like 'Ca sáng (06:00 - 14:00)'
+  let hours = 8; // default 8 hours per shift
+  const timeMatch = job.type.match(/(\d{2}):(\d{2})\s*-\s*(\d{2}):(\d{2})/);
+  if (timeMatch) {
+    const startH = parseInt(timeMatch[1]);
+    const endH = parseInt(timeMatch[3]);
+    hours = endH - startH;
+    if (hours <= 0) hours += 24; // overnight shift
+  }
+  
   const totalSalary = hourlyRate * hours;
   
   // Format number with dots: 224400 -> 224.400
   const formatted = totalSalary.toLocaleString('vi-VN').replace(/,/g, '.');
   
-  return `${formatted} VNĐ/${hours} tiếng`;
+  return `${formatted} VNĐ/${hours}h`;
 };
 
 // Translate location string based on language
@@ -1373,7 +1488,7 @@ const JOBS_DATA = [
   {
     id: 17,
     title: 'Barista - Part-time',
-    company: 'Katinat chi nhán quận 8',
+    company: 'Katinat chi nhánh quận 8',
     location: 'Quận 3, TP.HCM',
     lat: 10.7830,
     lng: 106.6920,
@@ -2035,14 +2150,12 @@ const JobListing = () => {
   const [viewMode, setViewMode] = useState('list');
   const [expandedFilters, setExpandedFilters] = useState({
     jobType: true,
-    experience: true,
     salary: true,
     company: true
   });
 
   // Filter states
   const [selectedJobTypes, setSelectedJobTypes] = useState([]);
-  const [selectedExperience, setSelectedExperience] = useState([]);
   const [selectedSalaryRanges, setSelectedSalaryRanges] = useState([]);
   const [selectedCompanies, setSelectedCompanies] = useState([]);
 
@@ -2056,6 +2169,8 @@ const JobListing = () => {
   // Job search status states
   const [isAvailable, setIsAvailable] = useState(true);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [applyModal, setApplyModal] = useState(null); // { job } or null
+  const [applySuccess, setApplySuccess] = useState(false);
 
   const handleToggleAvailability = () => {
     setShowConfirmModal(true);
@@ -2106,11 +2221,11 @@ const JobListing = () => {
 
   // Auto scroll when filters change
   useEffect(() => {
-    if (selectedJobTypes.length > 0 || selectedExperience.length > 0 ||
+    if (selectedJobTypes.length > 0 ||
       selectedSalaryRanges.length > 0 || selectedCompanies.length > 0) {
       scrollToResults();
     }
-  }, [selectedJobTypes, selectedExperience, selectedSalaryRanges, selectedCompanies]);
+  }, [selectedJobTypes, selectedSalaryRanges, selectedCompanies]);
 
   // Reset nearby jobs when switching from shift to standard category
   useEffect(() => {
@@ -2180,31 +2295,17 @@ const JobListing = () => {
   };
 
   const handleJobClick = (jobId) => {
-    // Check KYC completion before allowing application
-    const savedKYC = localStorage.getItem('candidateKYC');
-    let kycCompleted = false;
+    // Just view the job — no application triggered
+  };
 
-    if (savedKYC) {
-      const kycData = JSON.parse(savedKYC);
-      kycCompleted = kycData.completed === true;
-    }
+  const handleApplyJob = (job) => {
+    if (job) setApplyModal({ job });
+  };
 
-    if (!kycCompleted) {
-      alert(
-        language === 'vi'
-          ? '⚠️ Bạn cần hoàn thành xác minh eKYC trước khi ứng tuyển!\n\nVui lòng hoàn tất xác minh eKYC.'
-          : '⚠️ You need to complete eKYC verification before applying!\n\nPlease complete eKYC verification.'
-      );
-      navigate('/candidate/ekyc');
-      return;
-    }
-
-    // If eKYC completed, show success message
-    alert(
-      language === 'vi'
-        ? '✅ Ứng tuyển thành công! Nhà tuyển dụng sẽ liên hệ với bạn sớm.'
-        : '✅ Application submitted successfully! The employer will contact you soon.'
-    );
+  const confirmApply = () => {
+    setApplyModal(null);
+    setApplySuccess(true);
+    setTimeout(() => setApplySuccess(false), 3000);
   };
 
   const toggleFilter = (filterName) => {
@@ -2218,12 +2319,6 @@ const JobListing = () => {
   const toggleJobType = (type) => {
     setSelectedJobTypes(prev =>
       prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
-    );
-  };
-
-  const toggleExperience = (level) => {
-    setSelectedExperience(prev =>
-      prev.includes(level) ? prev.filter(l => l !== level) : [...prev, level]
     );
   };
 
@@ -2243,7 +2338,6 @@ const JobListing = () => {
     setSearchKeyword('');
     setSelectedLocation('');
     setSelectedJobTypes([]);
-    setSelectedExperience([]);
     setSelectedSalaryRanges([]);
     setSelectedCompanies([]);
     setQuickFilter('all');
@@ -2262,9 +2356,9 @@ const JobListing = () => {
       const isHourly = salary.toLowerCase().includes('giờ') || salary.toLowerCase().includes('hour');
       switch (range) {
         case 'hourly': return isHourly;
-        case 'under-10m': return !isHourly && value < 10;
-        case '10m-20m': return !isHourly && value >= 10 && value <= 20;
-        case 'over-20m': return !isHourly && value > 20;
+        case 'under-10m': return !isHourly && value < 5;
+        case '10m-20m': return !isHourly && value >= 5 && value <= 10;
+        case 'over-20m': return !isHourly && value > 10;
         default: return true;
       }
     } else {
@@ -2275,14 +2369,6 @@ const JobListing = () => {
         default: return true;
       }
     }
-  };
-
-  const getExperienceLevel = (jobTitle) => {
-    const title = jobTitle.toLowerCase();
-    if (title.includes('intern') || title.includes('thực tập')) return 'intern';
-    if (title.includes('junior') || title.includes('fresher')) return 'junior';
-    if (title.includes('senior')) return 'senior';
-    return 'mid';
   };
 
   // Get nearby jobs
@@ -2365,13 +2451,6 @@ const JobListing = () => {
       );
     }
 
-    // Filter by experience (standard jobs only)
-    if (selectedExperience.length > 0 && jobCategory === 'standard') {
-      result = result.filter(job =>
-        selectedExperience.includes(getExperienceLevel(job.title))
-      );
-    }
-
     // Filter by salary range
     if (selectedSalaryRanges.length > 0) {
       result = result.filter(job =>
@@ -2409,7 +2488,7 @@ const JobListing = () => {
 
     return result;
   }, [jobCategory, searchKeyword, selectedLocation, selectedJobTypes,
-    selectedExperience, selectedSalaryRanges, selectedCompanies,
+    selectedSalaryRanges, selectedCompanies,
     quickFilter, savedJobs, sortBy, userLocation, showNearbyJobs, nearbyJobs, allJobs, showSavedJobsOnly]);
 
   const categoryJobs = allJobs.filter(job => job.category === jobCategory);
@@ -2461,7 +2540,7 @@ const JobListing = () => {
                 />
               </SearchInput>
 
-              <SearchInput>
+              <SearchInput $narrow>
                 <MapPin />
                 <input
                   type="text"
@@ -2726,53 +2805,6 @@ const JobListing = () => {
               )}
             </FilterSection>
 
-            {jobCategory === 'standard' && (
-              <FilterSection>
-                <FilterTitle onClick={() => toggleFilter('experience')} $expanded={expandedFilters.experience}>
-                  <h4>{language === 'vi' ? 'Kinh nghiệm' : 'Experience'}</h4>
-                  <ChevronDown />
-                </FilterTitle>
-                {expandedFilters.experience && (
-                  <FilterOptions
-                    initial={{ height: 0 }}
-                    animate={{ height: 'auto' }}
-                    exit={{ height: 0 }}
-                  >
-                    <FilterOption>
-                      <input
-                        type="checkbox"
-                        id="intern"
-                        checked={selectedExperience.includes('intern')}
-                        onChange={() => toggleExperience('intern')}
-                      />
-                      <span>{language === 'vi' ? 'Thực tập sinh' : 'Intern'}</span>
-                      <small>35</small>
-                    </FilterOption>
-                    <FilterOption>
-                      <input
-                        type="checkbox"
-                        id="junior"
-                        checked={selectedExperience.includes('junior')}
-                        onChange={() => toggleExperience('junior')}
-                      />
-                      <span>{language === 'vi' ? 'Junior (0-2 năm)' : 'Junior (0-2 years)'}</span>
-                      <small>28</small>
-                    </FilterOption>
-                    <FilterOption>
-                      <input
-                        type="checkbox"
-                        id="mid"
-                        checked={selectedExperience.includes('mid')}
-                        onChange={() => toggleExperience('mid')}
-                      />
-                      <span>{language === 'vi' ? 'Middle (2-5 năm)' : 'Middle (2-5 years)'}</span>
-                      <small>32</small>
-                    </FilterOption>
-                  </FilterOptions>
-                )}
-              </FilterSection>
-            )}
-
             <FilterSection>
               <FilterTitle onClick={() => toggleFilter('salary')} $expanded={expandedFilters.salary}>
                 <h4>{jobCategory === 'standard'
@@ -2805,7 +2837,7 @@ const JobListing = () => {
                           checked={selectedSalaryRanges.includes('under-10m')}
                           onChange={() => toggleSalaryRange('under-10m')}
                         />
-                        <span>{language === 'vi' ? 'Dưới 10 triệu' : 'Under 10 million'}</span>
+                        <span>{language === 'vi' ? 'Dưới 5 triệu' : 'Under 5 million'}</span>
                         <small>4</small>
                       </FilterOption>
                       <FilterOption>
@@ -2815,7 +2847,7 @@ const JobListing = () => {
                           checked={selectedSalaryRanges.includes('10m-20m')}
                           onChange={() => toggleSalaryRange('10m-20m')}
                         />
-                        <span>{language === 'vi' ? '10 - 20 triệu' : '10 - 20 million'}</span>
+                        <span>{language === 'vi' ? '5 - 10 triệu' : '5 - 10 million'}</span>
                         <small>0</small>
                       </FilterOption>
                       <FilterOption>
@@ -2825,7 +2857,7 @@ const JobListing = () => {
                           checked={selectedSalaryRanges.includes('over-20m')}
                           onChange={() => toggleSalaryRange('over-20m')}
                         />
-                        <span>{language === 'vi' ? 'Trên 20 triệu' : 'Over 20 million'}</span>
+                        <span>{language === 'vi' ? 'Trên 10 triệu' : 'Over 10 million'}</span>
                         <small>0</small>
                       </FilterOption>
                     </>
@@ -2911,6 +2943,7 @@ const JobListing = () => {
                     saved={savedJobs.includes(job.id)}
                     onSave={handleSaveJob}
                     onClick={handleJobClick}
+                    onApply={handleApplyJob}
                     delay={index * 0.05}
                     showDistance={jobCategory === 'shift' && showNearbyJobs}
                     language={language}
@@ -3008,6 +3041,70 @@ const JobListing = () => {
           </div>
         </ConfirmationContent>
       </Modal>
+
+      {/* Apply Confirmation Modal */}
+      <Modal
+        isOpen={!!applyModal}
+        onClose={() => setApplyModal(null)}
+        title=""
+      >
+        {applyModal && (
+          <ApplyModalWrap onClick={e => e.stopPropagation()}>
+            <div className="apply-emoji">📋</div>
+
+            <h3>{language === 'vi' ? 'Xác nhận ứng tuyển' : 'Confirm Application'}</h3>
+
+            <p className="apply-desc">
+              {language === 'vi'
+                ? <>Bạn muốn gửi CV ứng tuyển vào vị trí <strong>{applyModal.job.title}</strong> tại <strong>{applyModal.job.company}</strong>?</>
+                : <>Send your CV for <strong>{applyModal.job.title}</strong> at <strong>{applyModal.job.company}</strong>?</>
+              }
+            </p>
+
+            <div className="apply-info-card">
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Vị trí' : 'Position'}:</span>
+                <span className="info-value">{translateJobTitle(applyModal.job.title, language)}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Công ty' : 'Company'}:</span>
+                <span className="info-value">{applyModal.job.company}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Địa điểm' : 'Location'}:</span>
+                <span className="info-value">{applyModal.job.location}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Mức lương' : 'Salary'}:</span>
+                <span className="info-value salary">{translateSalary(applyModal.job.category === 'shift' ? calculateShiftSalary(applyModal.job) : applyModal.job.salary, language)}</span>
+              </div>
+            </div>
+
+            <div className="apply-buttons">
+              <button className="btn-cancel" onClick={() => setApplyModal(null)}>
+                {language === 'vi' ? 'Hủy' : 'Cancel'}
+              </button>
+              <button className="btn-confirm" onClick={confirmApply}>
+                {language === 'vi' ? 'Gửi CV ngay' : 'Send CV'}
+              </button>
+            </div>
+          </ApplyModalWrap>
+        )}
+      </Modal>
+
+      {/* Apply Success Toast */}
+      {applySuccess && (
+        <div style={{
+          position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
+          background: '#10b981', color: 'white', padding: '14px 28px', borderRadius: '50px',
+          fontWeight: '600', fontSize: '15px', zIndex: 9999,
+          boxShadow: '0 8px 24px rgba(16,185,129,0.4)',
+          display: 'flex', alignItems: 'center', gap: '10px'
+        }}>
+          ✅ {language === 'vi' ? 'Gửi CV thành công! Nhà tuyển dụng sẽ liên hệ sớm.' : 'CV sent! The employer will contact you soon.'}
+        </div>
+      )}
+
     </DashboardLayout>
   );
 };
@@ -3028,7 +3125,7 @@ if (typeof document !== 'undefined') {
 }
 
 // Job Card Component
-const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0, showDistance = false, language }) => {
+const JobCardComponent = ({ job, saved, onSave, onClick, onApply, delay = 0, showDistance = false, language }) => {
   const getCompanyInitial = (company) => {
     return company.charAt(0).toUpperCase();
   };
@@ -3089,7 +3186,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0, showDistance
 
         <JobSalary>
           <DollarSign />
-          <span>{translateSalary(calculateShiftSalary(job), language)}</span>
+          <span>{translateSalary(job.category === 'shift' ? calculateShiftSalary(job) : job.salary, language)}</span>
         </JobSalary>
       </JobCardBody>
 
@@ -3106,7 +3203,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0, showDistance
             whileTap={{ scale: 0.95 }}
             onClick={(e) => {
               e.stopPropagation();
-              onClick(job.id);
+              onApply(job);
             }}
           >
             {language === 'vi' ? 'Ứng tuyển ngay' : 'Apply Now'}

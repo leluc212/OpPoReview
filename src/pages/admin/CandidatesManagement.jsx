@@ -288,11 +288,13 @@ const StatusBadge = styled.span`
   background: ${props => {
     if (props.$status === 'success') return '#dcfce7';
     if (props.$status === 'danger') return '#fee2e2';
+    if (props.$status === 'info') return '#dbeafe';
     return '#fef3c7';
   }};
   color: ${props => {
     if (props.$status === 'success') return '#15803d';
     if (props.$status === 'danger') return '#dc2626';
+    if (props.$status === 'info') return '#2563eb';
     return '#ca8a04';
   }};
 `;
@@ -664,13 +666,15 @@ const CandidatesManagement = () => {
   const getApprovalStatusText = (status) => {
     if (status === 'approved') return language === 'vi' ? 'Đã duyệt' : 'Approved';
     if (status === 'rejected') return language === 'vi' ? 'Không duyệt' : 'Rejected';
-    if (status === 'pending') return language === 'vi' ? 'Chờ duyệt' : 'Pending';
+    if (status === 'unseen') return language === 'vi' ? 'Chưa xem' : 'Not Viewed';
+    if (status === 'seen') return language === 'vi' ? 'Đã xem' : 'Viewed';
     return status;
   };
 
   const getApprovalStatusVariant = (status) => {
     if (status === 'approved') return 'success';
     if (status === 'rejected') return 'danger';
+    if (status === 'seen') return 'info';
     return 'warning';
   };
 
@@ -684,7 +688,8 @@ const CandidatesManagement = () => {
   const stats = {
     total: filteredCandidates.length,
     approved: filteredCandidates.filter(c => c.approvalStatus === 'approved').length,
-    pending: filteredCandidates.filter(c => c.approvalStatus === 'pending').length,
+    unseen: filteredCandidates.filter(c => c.approvalStatus === 'unseen').length,
+    seen: filteredCandidates.filter(c => c.approvalStatus === 'seen').length,
     rejected: filteredCandidates.filter(c => c.approvalStatus === 'rejected').length,
   };
 
@@ -710,10 +715,16 @@ const CandidatesManagement = () => {
             color="linear-gradient(135deg, #10b981 0%, #059669 100%)"
           />
           <StatsCard
-            title={language === 'vi' ? 'Chờ Duyệt' : 'Pending'}
-            value={stats.pending.toString()}
+            title={language === 'vi' ? 'Chưa Xem' : 'Not Viewed'}
+            value={stats.unseen.toString()}
             icon={Clock}
             color="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
+          />
+          <StatsCard
+            title={language === 'vi' ? 'Đã Xem' : 'Viewed'}
+            value={stats.seen.toString()}
+            icon={Eye}
+            color="linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
           />
           <StatsCard
             title={language === 'vi' ? 'Không Duyệt' : 'Rejected'}
@@ -749,10 +760,16 @@ const CandidatesManagement = () => {
               {language === 'vi' ? 'Đã duyệt' : 'Approved'}
             </FilterButton>
             <FilterButton
-              $active={statusFilter === 'pending'}
-              onClick={() => setStatusFilter('pending')}
+              $active={statusFilter === 'unseen'}
+              onClick={() => setStatusFilter('unseen')}
             >
-              {language === 'vi' ? 'Chờ duyệt' : 'Pending'}
+              {language === 'vi' ? 'Chưa xem' : 'Not Viewed'}
+            </FilterButton>
+            <FilterButton
+              $active={statusFilter === 'seen'}
+              onClick={() => setStatusFilter('seen')}
+            >
+              {language === 'vi' ? 'Đã xem' : 'Viewed'}
             </FilterButton>
             <FilterButton
               $active={statusFilter === 'rejected'}

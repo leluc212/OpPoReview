@@ -4170,7 +4170,7 @@ const LandingPage = () => {
           </FooterSection>
           
           <FooterSection $isDark={isDarkMode}>
-            <h3>Dành Cho Nhà Tuyển Dụng</h3>
+            <h3>Chào Mừng Nhà Tuyển Dụng</h3>
             <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Đăng tin tuyển dụng</a>
             <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Quản lý ứng viên</a>
             <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Gói dịch vụ</a>

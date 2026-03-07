@@ -453,15 +453,15 @@ const EmployerDashboard = () => {
                 $variant="primary"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => navigate('/OpPoReview/employer/quick-jobs')}
+                onClick={() => navigate('/employer/quick-jobs')}
               >
                 <Plus />
-                {language === 'vi' ? 'Quản lý HR' : 'HR Management'}
+                {language === 'vi' ? 'Quản lý' : 'HR Management'}
               </ActionButton>
               <ActionButton
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => navigate('/OpPoReview/employer/profile')}
+                onClick={() => navigate('/employer/profile')}
               >
                 <FileText />
                 {language === 'vi' ? 'Xem Hồ Sơ' : 'View Applications'}
