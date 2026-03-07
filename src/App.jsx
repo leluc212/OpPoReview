@@ -37,6 +37,7 @@ import CandidateKYC from './pages/candidate/CandidateKYC';
 // Employer Pages
 import EmployerDashboard from './pages/employer/EmployerDashboard';
 import PostJob from './pages/employer/PostJob';
+import PostQuickJob from './pages/employer/PostQuickJob';
 import CompanyVerification from './pages/employer/CompanyVerification';
 import JobManagement from './pages/employer/JobManagement';
 import Applications from './pages/employer/Applications';
@@ -176,16 +177,21 @@ function AppRoutes() {
           <PostJob />
         </ProtectedRoute>
       } />
+      <Route path="/employer/post-quick-job" element={
+        <ProtectedRoute allowedRoles={['employer']}>
+          <PostQuickJob />
+        </ProtectedRoute>
+      } />
       <Route path="/employer/verification" element={
         <ProtectedRoute allowedRoles={['employer']}>
           <CompanyVerification />
         </ProtectedRoute>
       } />
-      <Route path="/employer/jobs" element={
+      {/* <Route path="/employer/jobs" element={
         <ProtectedRoute allowedRoles={['employer']}>
           <JobManagement />
         </ProtectedRoute>
-      } />
+      } /> */}
       <Route path="/employer/standard-jobs" element={
         <ProtectedRoute allowedRoles={['employer']}>
           <Applications />

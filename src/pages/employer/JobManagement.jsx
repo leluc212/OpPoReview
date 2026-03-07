@@ -137,7 +137,9 @@ const JobCard = styled(motion.div)`
     right: 0;
     height: 6px;
     background: ${props => {
-      if (props.$status === 'active') return 'linear-gradient(90deg, #10B981 0%, #059669 100%)';
+      if (props.$status === 'recruiting') return 'linear-gradient(90deg, #10B981 0%, #059669 100%)';
+      if (props.$status === 'displayed') return 'linear-gradient(90deg, #3B82F6 0%, #2563EB 100%)';
+      if (props.$status === 'expired') return 'linear-gradient(90deg, #94A3B8 0%, #64748B 100%)';
       return 'linear-gradient(90deg, #94A3B8 0%, #64748B 100%)';
     }};
   }
@@ -420,7 +422,7 @@ const JobManagement = () => {
       id: 1, 
       title: language === 'vi' ? 'Cửa hàng trưởng' : 'Store Manager', 
       applicants: 45, 
-      status: 'active', 
+      status: 'recruiting', 
       posted: language === 'vi' ? '2 ngày trước' : '2 days ago',
       views: 234,
       responseRate: 85,
@@ -432,7 +434,7 @@ const JobManagement = () => {
       id: 2, 
       title: language === 'vi' ? 'Thu ngân' : 'Cashier', 
       applicants: 32, 
-      status: 'active', 
+      status: 'displayed', 
       posted: language === 'vi' ? '1 tuần trước' : '1 week ago',
       views: 156,
       responseRate: 72,
@@ -444,7 +446,7 @@ const JobManagement = () => {
       id: 3, 
       title: language === 'vi' ? 'Nhân viên pha chế' : 'Barista', 
       applicants: 28, 
-      status: 'inactive', 
+      status: 'expired', 
       posted: language === 'vi' ? '2 tuần trước' : '2 weeks ago',
       views: 98,
       responseRate: 65,
@@ -470,8 +472,9 @@ const JobManagement = () => {
   }, [language]);
 
   const filterOptions = [
-    { value: 'active', label: language === 'vi' ? 'Hoạt động' : 'Active' },
-    { value: 'inactive', label: language === 'vi' ? 'Không hoạt động' : 'Inactive' },
+    { value: 'recruiting', label: language === 'vi' ? 'Đang tuyển dụng' : 'Recruiting' },
+    { value: 'displayed', label: language === 'vi' ? 'Hiển thị' : 'Displayed' },
+    { value: 'expired', label: language === 'vi' ? 'Hết hạn' : 'Expired' },
   ];
 
   const filteredJobs = useMemo(() => {

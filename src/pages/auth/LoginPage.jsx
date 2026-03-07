@@ -119,8 +119,7 @@ const Left = styled(motion.div)`
   flex-direction: column;
   justify-content: center;
   padding: 56px 52px;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   transition: background 0.6s ease;
 
   @media (max-width: 960px) { display: none; }
@@ -255,8 +254,9 @@ const Right = styled.div`
   flex: 1;
   margin-left: 47%;
   display: flex; align-items: center; justify-content: center;
-  padding: 40px 28px; position: relative; overflow-y: auto;
-  min-height: 100vh;
+  padding: 40px 28px; position: relative;
+  height: 100vh;
+  overflow: hidden;
 
   &::before {
     content: '';

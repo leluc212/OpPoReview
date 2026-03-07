@@ -417,7 +417,7 @@ const Subscription = () => {
   );
 
   return (
-    <DashboardLayout role="employer" showSearch={false} key={language}>
+    <DashboardLayout role="employer" showSearch={false} key={lang}>
       <OrbBlue /><OrbGreen />
       <PageContainer
         initial={{ opacity: 0, y: 16 }}

@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
 import StatusBadge from '../../components/StatusBadge';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
-import { 
-  Briefcase, 
-  Users, 
-  Eye, 
-  TrendingUp, 
-  Plus, 
-  FileText, 
-  Calendar, 
+import {
+  Briefcase,
+  Users,
+  Eye,
+  TrendingUp,
+  Plus,
+  FileText,
+  Calendar,
   MessageSquare,
   BarChart3,
   Landmark,
@@ -26,7 +27,6 @@ import {
   ArrowUpRight,
   Download
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 const fadeIn = keyframes`
   from {
@@ -390,6 +390,7 @@ const PerformanceLabel = styled.div`
 const EmployerDashboard = () => {
   const { language } = useLanguage();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
 
   const getRecentApplications = () => [
@@ -478,20 +479,18 @@ const EmployerDashboard = () => {
             <p>{language === 'vi' ? 'Hôm nay bạn có 3 ứng viên mới và 5 thông báo cần xem' : 'You have 3 new candidates and 5 notifications to review'}</p>
             <QuickActions>
               <ActionButton
-                as={Link}
-                to="/employer/jobs"
                 $variant="primary"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => navigate('/OpPoReview/employer/quick-jobs')}
               >
                 <Plus />
-                {language === 'vi' ? 'Đăng Tin Mới' : 'Post Job'}
+                {language === 'vi' ? 'Quản lý HR' : 'HR Management'}
               </ActionButton>
               <ActionButton
-                as={Link}
-                to="/employer/profile"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => navigate('/OpPoReview/employer/profile')}
               >
                 <FileText />
                 {language === 'vi' ? 'Xem Hồ Sơ' : 'View Applications'}
@@ -556,10 +555,10 @@ const EmployerDashboard = () => {
                 <Briefcase />
                 {language === 'vi' ? 'Công việc tiêu chuẩn' : 'Standard Jobs'}
               </h2>
-              <Link to="/employer/standard-jobs">
+              <a onClick={() => navigate('/OpPoReview/employer/standard-jobs')} style={{ cursor: 'pointer' }}>
                 {language === 'vi' ? 'Xem tất cả' : 'View all'}
                 <ArrowUpRight />
-              </Link>
+              </a>
             </SectionHeader>
             
             {recentApplications.map((app, index) => (
