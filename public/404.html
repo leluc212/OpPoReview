@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <title>Ốp Pờ - Đang tải...</title>
+    <script>
+      // Single Page Apps for GitHub Pages
+      // https://github.com/rafgraph/spa-github-pages
+      // Lưu location hiện tại vào sessionStorage trước khi redirect về index.html
+      
+      var pathSegmentsToKeep = 1; // Số segments trong base path (OpPoReview = 1)
+      
+      var l = window.location;
+      l.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
+        l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+        l.hash
+      );
+    </script>
+  </head>
+  <body>
+    <div style="font-family: 'Inter', sans-serif; text-align: center; padding: 100px 20px;">
+      <h1 style="color: #1e40af; font-size: 24px; margin-bottom: 16px;">Đang chuyển hướng...</h1>
+      <p style="color: #64748b; font-size: 16px;">Vui lòng chờ trong giây lát.</p>
+    </div>
+  </body>
+</html>
