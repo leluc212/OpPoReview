@@ -413,7 +413,7 @@ const AdminNotifications = () => {
       icon: Info,
       color: '#1e40af',
       title: language === 'vi' ? 'Cập nhật hệ thống' : 'System update',
-      message: language === 'vi' ? 'Hệ thống sẽ bảo trì vào 23:00 ngày 16/02/2024. Thời gian dự kiến: 2 giờ.' : 'System maintenance is scheduled at 23:00 on 16/02/2024. Estimated duration: 2 hours.',
+      message: language === 'vi' ? 'Hệ thống sẽ bảo trì vào 23:00 ngày 16/02/2025. Thời gian dự kiến: 2 giờ.' : 'System maintenance is scheduled at 23:00 on 16/02/2025. Estimated duration: 2 hours.',
       time: language === 'vi' ? '2 ngày trước' : '2 days ago',
       unread: false,
       actionRequired: false
@@ -656,3 +656,4 @@ const AdminNotifications = () => {
 };
 
 export default AdminNotifications;
+

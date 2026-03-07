@@ -427,36 +427,7 @@ const EmployerDashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language]);
 
-  const getActivities = () => [
-    {
-      type: 'application',
-      icon: Users,
-      color: '#1e40af',
-      title: language === 'vi' ? '3 ứng viên mới ứng tuyển' : '3 new candidates applied',
-      time: language === 'vi' ? '30 phút trước' : '30 minutes ago'
-    },
-    {
-      type: 'job',
-      icon: Briefcase,
-      color: '#10B981',
-      title: language === 'vi' ? 'Tin "Cửa hàng trưởng" đã được duyệt' : 'Job "Store Manager" approved',
-      time: language === 'vi' ? '2 giờ trước' : '2 hours ago'
-    },
-    {
-      type: 'hired',
-      icon: CheckCircle,
-      color: '#10B981',
-      title: language === 'vi' ? 'Đã tuyển thành công "Thu ngân"' : 'Successfully hired "Cashier"',
-      time: language === 'vi' ? '1 ngày trước' : '1 day ago'
-    },
-  ];
 
-  const [activities, setActivities] = useState(getActivities());
-  
-  useEffect(() => {
-    setActivities(getActivities());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [language]);
 
   const getGreeting = () => {
     const hour = currentTime.getHours();
@@ -542,91 +513,51 @@ const EmployerDashboard = () => {
           />
         </StatsGrid>
 
-        {/* Main Content Grid */}
-        <ContentGrid>
-          {/* Recent Applications */}
-          <Section
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <SectionHeader>
-              <h2>
-                <Briefcase />
-                {language === 'vi' ? 'Công việc tiêu chuẩn' : 'Standard Jobs'}
-              </h2>
-              <a onClick={() => navigate('/OpPoReview/employer/standard-jobs')} style={{ cursor: 'pointer' }}>
-                {language === 'vi' ? 'Xem tất cả' : 'View all'}
-                <ArrowUpRight />
-              </a>
-            </SectionHeader>
-            
-            {recentApplications.map((app, index) => (
-              <ApplicationCard
-                key={app.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + index * 0.1 }}
-                whileHover={{ scale: 1.02 }}
-              >
-                <ApplicationHeader>
-                  <CandidateInfo>
-                    <h4>{app.candidate}</h4>
-                    <p>{app.job}</p>
-                  </CandidateInfo>
-                  <StatusBadge status={app.status} />
-                </ApplicationHeader>
-                <ApplicationMeta>
-                  <span>
-                    <Clock />
-                    {app.applied}
-                  </span>
-                  <span>
-                    <Download />
-                    {language === 'vi' ? 'Tải CV' : 'Download CV'}
-                  </span>
-                </ApplicationMeta>
-              </ApplicationCard>
-            ))}
-          </Section>
-
-          {/* Activity Feed */}
-          <Section
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <SectionHeader>
-              <h2>
-                <Calendar />
-                {language === 'vi' ? 'Hoạt Động Gần Đây' : 'Recent Activity'}
-              </h2>
-            </SectionHeader>
-            
-            <ActivityFeed>
-              {activities.map((activity, index) => {
-                const IconComponent = activity.icon;
-                return (
-                  <ActivityItem
-                    key={index}
-                    $color={activity.color}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4 + index * 0.1 }}
-                  >
-                    <ActivityIcon $color={activity.color}>
-                      <IconComponent />
-                    </ActivityIcon>
-                    <ActivityContent>
-                      <h5>{activity.title}</h5>
-                      <p>{activity.time}</p>
-                    </ActivityContent>
-                  </ActivityItem>
-                );
-              })}
-            </ActivityFeed>
-          </Section>
-        </ContentGrid>
+        {/* Recent Applications - Full Width */}
+        <Section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <SectionHeader>
+            <h2>
+              <Briefcase />
+              {language === 'vi' ? 'Công việc tiêu chuẩn' : 'Standard Jobs'}
+            </h2>
+            <a onClick={() => navigate('/OpPoReview/employer/standard-jobs')} style={{ cursor: 'pointer' }}>
+              {language === 'vi' ? 'Xem tất cả' : 'View all'}
+              <ArrowUpRight />
+            </a>
+          </SectionHeader>
+          
+          {recentApplications.map((app, index) => (
+            <ApplicationCard
+              key={app.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + index * 0.1 }}
+              whileHover={{ scale: 1.02 }}
+            >
+              <ApplicationHeader>
+                <CandidateInfo>
+                  <h4>{app.candidate}</h4>
+                  <p>{app.job}</p>
+                </CandidateInfo>
+                <StatusBadge status={app.status} />
+              </ApplicationHeader>
+              <ApplicationMeta>
+                <span>
+                  <Clock />
+                  {app.applied}
+                </span>
+                <span>
+                  <Download />
+                  {language === 'vi' ? 'Tải CV' : 'Download CV'}
+                </span>
+              </ApplicationMeta>
+            </ApplicationCard>
+          ))}
+        </Section>
 
         {/* Performance Metrics */}
         <Section
