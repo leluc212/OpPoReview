@@ -277,7 +277,7 @@ const EmployerApproval = () => {
   };
 
   return (
-    <DashboardLayout role="admin">
+    <DashboardLayout role="admin" key={language}>
       <EmployerApprovalContainer>
         <PageHeader>
           <h1>{t.adminEmployerApproval.title}</h1>

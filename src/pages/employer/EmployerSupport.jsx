@@ -1,61 +1,33 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
-import { Input, TextArea, Label, Button } from '../../components/FormElements';
-import { HelpCircle, Mail, Phone, Clock, MessageSquare, ChevronDown, ChevronUp, LifeBuoy } from 'lucide-react';
+import Modal from '../../components/Modal';
+import { Input, TextArea, Label, Button, FormGroup } from '../../components/FormElements';
+import { HelpCircle, Mail, Phone, Clock, MessageSquare, ChevronDown, ChevronUp, FileQuestion, AlertCircle, Send, X } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
-const PageContainer = styled(motion.div)`
-  width: 100%;
+const PageContainer = styled.div`
+  animation: fadeIn 0.5s ease-in;
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 `;
 
 const PageHeader = styled.div`
-  margin-bottom: 28px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-`;
-
-const PageTitleGroup = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 16px;
-`;
-
-const PageIconBox = styled.div`
-  width: 52px;
-  height: 52px;
-  border-radius: 15px;
-  background: #EFF6FF;
-  border: 1.5px solid #BFDBFE;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-
-  svg {
-    width: 24px;
-    height: 24px;
-    color: #1e40af;
-  }
-`;
-
-const PageTitleText = styled.div`
+  margin-bottom: 32px;
+  
   h1 {
-    font-size: 26px;
+    font-size: 32px;
     font-weight: 800;
-    color: ${props => props.theme.colors.text};
-    letter-spacing: -0.5px;
-    line-height: 1.2;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
+    color: ${props => props.theme.colors.primary};
   }
-
+  
   p {
     color: ${props => props.theme.colors.textLight};
-    font-size: 13.5px;
-    font-weight: 500;
+    font-size: 16px;
   }
 `;
 
@@ -75,17 +47,15 @@ const MainContent = styled.div`
   gap: 24px;
 `;
 
-const Card = styled(motion.div)`
-  background: #ffffff;
-  border: 1.5px solid #E8EFFF;
-  border-radius: 16px;
+const Card = styled.div`
+  background: ${props => props.theme.colors.bgLight};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.lg};
   padding: 28px;
-  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.04);
-  transition: all 0.22s ease;
+  transition: all ${props => props.theme.transitions.normal};
   
   &:hover {
-    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.12);
-    border-color: #BFDBFE;
+    box-shadow: ${props => props.theme.shadows.md};
   }
 `;
 
@@ -95,29 +65,28 @@ const CardHeader = styled.div`
   gap: 16px;
   margin-bottom: 24px;
   padding-bottom: 20px;
-  border-bottom: 1.5px solid #E8EFFF;
+  border-bottom: 1px solid ${props => props.theme.colors.border};
   
   .icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    background: #EFF6FF;
-    border: 1.5px solid #BFDBFE;
+    width: 48px;
+    height: 48px;
+    border-radius: ${props => props.theme.borderRadius.md};
+    background: ${props => props.theme.colors.gradientPrimary};
     display: flex;
     align-items: center;
     justify-content: center;
     
     svg {
-      width: 20px;
-      height: 20px;
-      color: #1e40af;
+      width: 24px;
+      height: 24px;
+      color: white;
     }
   }
   
   h2 {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
-    color: #1E293B;
+    color: ${props => props.theme.colors.text};
   }
 `;
 
@@ -128,15 +97,13 @@ const FAQList = styled.div`
 `;
 
 const FAQItem = styled.div`
-  border: 1.5px solid ${props => props.$isOpen ? '#BFDBFE' : '#E8EFFF'};
-  border-radius: 12px;
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.md};
   overflow: hidden;
-  transition: all 0.22s ease;
-  background: ${props => props.$isOpen ? '#FAFBFF' : '#ffffff'};
+  transition: all ${props => props.theme.transitions.normal};
   
   &:hover {
-    border-color: #BFDBFE;
-    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.05);
+    border-color: ${props => props.theme.colors.primary};
   }
 `;
 
@@ -146,35 +113,96 @@ const FAQQuestion = styled.div`
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  background: transparent;
-  transition: all 0.22s ease;
+  background: ${props => props.$isOpen ? props.theme.colors.bgDark : props.theme.colors.bgLight};
+  transition: all ${props => props.theme.transitions.fast};
   
   h4 {
     font-size: 15px;
-    font-weight: 700;
-    color: #1E293B;
+    font-weight: 600;
+    color: ${props => props.theme.colors.text};
   }
   
   svg {
     width: 20px;
     height: 20px;
-    color: #1e40af;
-    transition: transform 0.2s ease;
+    color: ${props => props.theme.colors.primary};
+    transition: transform ${props => props.theme.transitions.fast};
+  }
+  
+  &:hover {
+    background: ${props => props.theme.colors.bgLight};
   }
 `;
 
 const FAQAnswer = styled.div`
-  padding: ${props => props.$isOpen ? '0 20px 20px 20px' : '0 20px'};
+  padding: ${props => props.$isOpen ? '16px 20px' : '0 20px'};
   max-height: ${props => props.$isOpen ? '500px' : '0'};
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  color: #475569;
+  transition: all ${props => props.theme.transitions.normal};
+  color: ${props => props.theme.colors.textLight};
   font-size: 14px;
   line-height: 1.6;
+  border-top: ${props => props.$isOpen ? `1px solid ${props.theme.colors.border}` : 'none'};
 `;
 
-const FormGroup = styled.div`
-  margin-bottom: 20px;
+const Select = styled.select`
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.md};
+  background: ${props => props.theme.colors.bgDark};
+  color: ${props => props.theme.colors.text};
+  font-size: 15px;
+  font-family: inherit;
+  transition: all ${props => props.theme.transitions.normal};
+  
+  &:focus {
+    outline: none;
+    border-color: ${props => props.theme.colors.success};
+    box-shadow: 0 0 0 3px ${props => props.theme.colors.success}20;
+  }
+  
+  option {
+    padding: 10px;
+  }
+`;
+
+const ReportForm = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+`;
+
+const ReportButton = styled.button`
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: white;
+  border: none;
+  border-radius: ${props => props.theme.borderRadius.md};
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all ${props => props.theme.transitions.normal};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${props => props.theme.shadows.md};
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
 `;
 
 const Sidebar = styled.div`
@@ -194,48 +222,38 @@ const ContactItem = styled.div`
   padding: 16px 0;
   
   &:not(:last-child) {
-    border-bottom: 1.5px dashed #E8EFFF;
+    border-bottom: 1px solid ${props => props.theme.colors.borderLight};
   }
   
   .icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    background: #EFF6FF;
-    border: 1.5px solid #BFDBFE;
+    width: 40px;
+    height: 40px;
+    border-radius: ${props => props.theme.borderRadius.md};
+    background: ${props => props.theme.colors.bgLight};
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    transition: all 0.2s ease;
     
     svg {
       width: 20px;
       height: 20px;
-      color: #1e40af;
+      color: ${props => props.theme.colors.primary};
     }
   }
   
   .info {
-    flex: 1;
     h4 {
       font-size: 14px;
-      font-weight: 700;
-      color: #1E293B;
+      font-weight: 600;
+      color: ${props => props.theme.colors.text};
       margin-bottom: 4px;
     }
     
     p {
-      font-size: 13.5px;
-      color: #475569;
-      line-height: 1.5;
+      font-size: 14px;
+      color: ${props => props.theme.colors.textLight};
     }
-  }
-  
-  &:hover .icon {
-    background: #1e40af;
-    border-color: #1e40af;
-    svg { color: white; }
   }
 `;
 
@@ -249,6 +267,13 @@ const EmployerSupport = () => {
   });
   
   const [openFAQ, setOpenFAQ] = useState(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [reportData, setReportData] = useState({
+    issueType: '',
+    subject: '',
+    description: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const faqs = [
     {
@@ -284,23 +309,38 @@ const EmployerSupport = () => {
     setOpenFAQ(openFAQ === index ? null : index);
   };
 
+  const handleReportSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    console.log('Report submitted:', reportData);
+    
+    setIsSubmitting(false);
+    
+    alert(language === 'vi' 
+      ? '✅ Báo cáo của bạn đã được gửi thành công! Chúng tôi sẽ xem xét và phản hồi trong vòng 24 giờ.'
+      : '✅ Your report has been submitted successfully! We will review and respond within 24 hours.');
+    
+    setReportData({
+      issueType: '',
+      subject: '',
+      description: ''
+    });
+    setIsReportModalOpen(false);
+  };
+
+  const handleReportChange = (field, value) => {
+    setReportData(prev => ({ ...prev, [field]: value }));
+  };
+
   return (
-    <DashboardLayout role="employer">
-      <PageContainer
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-      >
+    <DashboardLayout role="employer" key={language}>
+      <PageContainer>
         <PageHeader>
-          <PageTitleGroup>
-            <PageIconBox>
-              <LifeBuoy />
-            </PageIconBox>
-            <PageTitleText>
-              <h1>{language === 'vi' ? 'Trung tâm hỗ trợ' : 'Support Center'}</h1>
-              <p>{language === 'vi' ? 'Chúng tôi luôn sẵn sàng hỗ trợ bạn' : 'We are always ready to support you'}</p>
-            </PageTitleText>
-          </PageTitleGroup>
+          <h1>{language === 'vi' ? 'Trung tâm hỗ trợ' : 'Support Center'}</h1>
+          <p>{language === 'vi' ? 'Chúng tôi luôn sẵn sàng hỗ trợ bạn' : 'We are always ready to support you'}</p>
         </PageHeader>
 
         <ContentGrid>
@@ -431,10 +471,99 @@ const EmployerSupport = () => {
                   <p>{language === 'vi' ? 'T7: 8:00 - 12:00' : 'Sat: 8:00 - 12:00'}</p>
                 </div>
               </ContactItem>
+
+              <ReportButton onClick={() => setIsReportModalOpen(true)}>
+                <FileQuestion />
+                {language === 'vi' ? 'Báo Cáo Sự Cố' : 'Report Issue'}
+              </ReportButton>
             </ContactCard>
           </Sidebar>
         </ContentGrid>
       </PageContainer>
+
+      {/* Report Issue Modal */}
+      <Modal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        title={language === 'vi' ? 'Báo Cáo Sự Cố' : 'Report Issue'}
+        size="medium"
+      >
+        <ReportForm onSubmit={handleReportSubmit}>
+          <FormGroup>
+            <Label>{language === 'vi' ? 'Loại Sự Cố' : 'Issue Type'} *</Label>
+            <Select
+              value={reportData.issueType}
+              onChange={(e) => handleReportChange('issueType', e.target.value)}
+              required
+              style={{ fontWeight: '500' }}
+            >
+              <option value="">{language === 'vi' ? 'Chọn loại sự cố' : 'Select issue type'}</option>
+              <option value="posting">{language === 'vi' ? 'Vấn đề đăng tin tuyển dụng' : 'Job Posting Issue'}</option>
+              <option value="candidates">{language === 'vi' ? 'Quản lý ứng viên' : 'Candidate Management'}</option>
+              <option value="payment">{language === 'vi' ? 'Thanh toán & Gói dịch vụ' : 'Payment & Subscription'}</option>
+              <option value="account">{language === 'vi' ? 'Tài khoản công ty' : 'Company Account'}</option>
+              <option value="hr">{language === 'vi' ? 'Quản lý nhân viên HR' : 'HR Staff Management'}</option>
+              <option value="performance">{language === 'vi' ? 'Vấn đề hiệu suất' : 'Performance Issue'}</option>
+              <option value="ui">{language === 'vi' ? 'Lỗi giao diện' : 'UI Issue'}</option>
+              <option value="data">{language === 'vi' ? 'Lỗi dữ liệu' : 'Data Issue'}</option>
+              <option value="feature">{language === 'vi' ? 'Đề xuất tính năng' : 'Feature Request'}</option>
+              <option value="other">{language === 'vi' ? 'Khác' : 'Other'}</option>
+            </Select>
+          </FormGroup>
+
+          <FormGroup>
+            <Label>{language === 'vi' ? 'Tiêu Đề' : 'Subject'} *</Label>
+            <Input
+              type="text"
+              placeholder={language === 'vi' ? 'Mô tả ngắn gọn vấn đề...' : 'Brief description of the issue...'}
+              value={reportData.subject}
+              onChange={(e) => handleReportChange('subject', e.target.value)}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label>{language === 'vi' ? 'Mô Tả Chi Tiết' : 'Detailed Description'} *</Label>
+            <TextArea
+              placeholder={language === 'vi' 
+                ? 'Vui lòng mô tả chi tiết vấn đề:\n• Bạn đang thực hiện thao tác gì?\n• Sự cố xảy ra như thế nào?\n• Có ảnh hưởng đến công việc tuyển dụng không?\n• Có thông báo lỗi nào không?'
+                : 'Please describe the issue in detail:\n• What were you doing?\n• How did the issue occur?\n• Does it affect your recruitment work?\n• Were there any error messages?'}
+              value={reportData.description}
+              onChange={(e) => handleReportChange('description', e.target.value)}
+              rows={8}
+              required
+            />
+          </FormGroup>
+
+          <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+            <Button
+              type="button"
+              $variant="secondary"
+              onClick={() => setIsReportModalOpen(false)}
+              style={{ flex: 1 }}
+              disabled={isSubmitting}
+            >
+              <X style={{ width: '18px', height: '18px', marginRight: '8px' }} />
+              {language === 'vi' ? 'Hủy' : 'Cancel'}
+            </Button>
+            <Button
+              type="submit"
+              $variant="primary"
+              style={{ flex: 1 }}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>⏳ {language === 'vi' ? 'Đang gửi...' : 'Submitting...'}</>
+              ) : (
+                <>
+                  <Send style={{ width: '18px', height: '18px', marginRight: '8px' }} />
+                  {language === 'vi' ? 'Gửi Báo Cáo' : 'Submit Report'}
+                </>
+              )}
+            </Button>
+          </div>
+        </ReportForm>
+      </Modal>
     </DashboardLayout>
   );
 };

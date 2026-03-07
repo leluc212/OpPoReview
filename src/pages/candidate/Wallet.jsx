@@ -725,7 +725,7 @@ const Wallet = () => {
     : transactions.filter(t => t.type === filterType);
 
   return (
-    <DashboardLayout role="candidate" showSearch={false}>
+    <DashboardLayout role="candidate" showSearch={false} key={language}>
       <WalletContainer>
         <Header>
           <h1>

@@ -478,7 +478,7 @@ function CandidateNotifications() {
   const unreadCount = notifications.filter(n => n.unread).length;
 
   return (
-    <DashboardLayout role="candidate" showSearch={false}>
+    <DashboardLayout role="candidate" showSearch={false} key={language}>
       <NotificationsContainer>
         <PageHeader
           initial={{ opacity: 0, y: -20 }}

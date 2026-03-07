@@ -133,7 +133,7 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <DashboardLayout role="admin">
+    <DashboardLayout role="admin" key={language}>
       <DashboardContainer>
         <StatsGrid>
           <StatsCard

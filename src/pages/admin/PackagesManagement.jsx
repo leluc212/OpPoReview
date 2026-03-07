@@ -6,7 +6,7 @@ const PackagesManagement = () => {
   const { t } = useLanguage();
   
   return (
-    <DashboardLayout role="admin" showSearch={false}>
+    <DashboardLayout role="admin" showSearch={false} key={language}>
       <div>
         <h1>{t.adminPackages.title}</h1>
         <p>{t.adminPackages.subtitle}</p>

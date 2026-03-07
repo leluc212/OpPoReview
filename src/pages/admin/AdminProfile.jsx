@@ -631,7 +631,7 @@ const AdminProfile = () => {
   };
 
   return (
-    <DashboardLayout role="admin">
+    <DashboardLayout role="admin" key={language}>
       <PageContainer>
         <PageHeader>
           <div>

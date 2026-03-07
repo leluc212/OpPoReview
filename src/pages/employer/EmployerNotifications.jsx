@@ -497,7 +497,7 @@ const EmployerNotifications = () => {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <DashboardLayout role="employer">
+    <DashboardLayout role="employer" key={language}>
       <NotificationsContainer>
         <PageHeader>
           <PageTitleGroup>

@@ -261,7 +261,7 @@ function ChangePassword() {
   };
 
   return (
-    <DashboardLayout role="candidate" showSearch={false}>
+    <DashboardLayout role="candidate" showSearch={false} key={language}>
       <PageContainer>
         <BackButton
           onClick={() => navigate('/candidate/settings')}

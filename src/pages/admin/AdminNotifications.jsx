@@ -469,7 +469,7 @@ const AdminNotifications = () => {
     });
 
   return (
-    <DashboardLayout role="admin">
+    <DashboardLayout role="admin" key={language}>
       <PageContainer>
         <PageHeader>
           <HeaderLeft>

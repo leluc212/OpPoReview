@@ -300,7 +300,7 @@ const EmployerSettings = () => {
   const [isDevModalOpen, setIsDevModalOpen] = useState(false);
 
   return (
-    <DashboardLayout role="employer">
+    <DashboardLayout role="employer" key={language}>
       <PageContainer
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}

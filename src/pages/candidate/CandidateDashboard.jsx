@@ -656,7 +656,7 @@ const CandidateDashboard = () => {
   };
 
   return (
-    <DashboardLayout role="candidate">
+    <DashboardLayout role="candidate" key={language}>
       <DashboardContainer>
         {/* Welcome Banner */}
         <WelcomeBanner

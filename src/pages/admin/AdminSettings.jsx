@@ -140,7 +140,7 @@ const AdminSettings = () => {
   };
 
   return (
-    <DashboardLayout role="admin" showSearch={false}>
+    <DashboardLayout role="admin" showSearch={false} key={language}>
       <SettingsContainer>
         <h1 style={{ fontSize: '32px', fontWeight: '700', marginBottom: '32px' }}>{t.settings.title}</h1>
 

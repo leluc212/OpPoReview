@@ -2386,7 +2386,7 @@ const JobListing = () => {
   const categoryJobs = allJobs.filter(job => job.category === jobCategory);
 
   return (
-    <DashboardLayout role="candidate">
+    <DashboardLayout role="candidate" key={language}>
       <Container>
         {/* Hero Search Section */}
         <HeroSection

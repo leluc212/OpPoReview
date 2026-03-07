@@ -465,7 +465,7 @@ const EmployerDashboard = () => {
   };
 
   return (
-    <DashboardLayout role="employer">
+    <DashboardLayout role="employer" key={language}>
       <DashboardContainer>
         {/* Welcome Banner */}
         <WelcomeBanner
@@ -475,7 +475,7 @@ const EmployerDashboard = () => {
         >
           <WelcomeContent>
             <h1>{getGreeting()}, {user?.role === 'employer' ? (language === 'vi' ? 'Katinat Quận 8' : 'Katinat District 8') : (user?.name || 'User')}! 👋</h1>
-            <p>{language === 'vi' ? 'Hôm nay bạn có 3 ứng viên mới và 5 tin nhắn cần xem' : 'You have 3 new candidates and 5 messages to review'}</p>
+            <p>{language === 'vi' ? 'Hôm nay bạn có 3 ứng viên mới và 5 thông báo cần xem' : 'You have 3 new candidates and 5 notifications to review'}</p>
             <QuickActions>
               <ActionButton
                 as={Link}
@@ -553,10 +553,10 @@ const EmployerDashboard = () => {
           >
             <SectionHeader>
               <h2>
-                <Users />
-                {language === 'vi' ? 'Hồ Sơ Ứng Tuyển Mới Nhất' : 'Recent Applications'}
+                <Briefcase />
+                {language === 'vi' ? 'Công việc tiêu chuẩn' : 'Standard Jobs'}
               </h2>
-              <Link to="/employer/applications">
+              <Link to="/employer/standard-jobs">
                 {language === 'vi' ? 'Xem tất cả' : 'View all'}
                 <ArrowUpRight />
               </Link>
@@ -673,7 +673,7 @@ const EmployerDashboard = () => {
                 <Zap />
               </PerformanceIcon>
               <PerformanceValue>{language === 'vi' ? '12 ngày' : '12 days'}</PerformanceValue>
-              <PerformanceLabel>{language === 'vi' ? 'Thời Gian Tuyển TB' : 'Avg. Hiring Time'}</PerformanceLabel>
+              <PerformanceLabel>{language === 'vi' ? 'Thời gian trung bình' : 'Avg Hiring Time'}</PerformanceLabel>
             </PerformanceCard>
 
             <PerformanceCard

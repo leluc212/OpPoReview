@@ -637,7 +637,7 @@ const Availability = () => {
   ];
 
   return (
-    <DashboardLayout role="candidate" showSearch={false}>
+    <DashboardLayout role="candidate" showSearch={false} key={language}>
       <AvailabilityContainer>
         <StatusCard 
           $active={isAvailable}
