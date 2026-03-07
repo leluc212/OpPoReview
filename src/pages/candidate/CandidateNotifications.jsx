@@ -441,6 +441,18 @@ function CandidateNotifications() {
     {
       id: 4,
       type: 'success',
+      icon: CheckCircle,
+      color: '#10B981',
+      title: language === 'vi' ? 'CV ứng tuyển được duyệt' : 'Application CV approved',
+      message: language === 'vi'
+        ? 'Katinat quận 8 đã duyệt CV ứng tuyển gấp của bạn. Bạn có thể liên hệ với nhà tuyển dụng qua tin nhắn'
+        : 'Katinat District 8 approved your urgent job application CV. You can contact the employer via message',
+      time: language === 'vi' ? '3 ngày trước' : '3 days ago',
+      unread: false
+    },
+    {
+      id: 5,
+      type: 'success',
       icon: Award,
       color: '#10B981',
       title: language === 'vi' ? 'Chúc mừng! Hồ sơ hoàn thiện 100%' : 'Congratulations! Profile 100% complete',
@@ -451,7 +463,7 @@ function CandidateNotifications() {
       unread: false
     },
     {
-      id: 5,
+      id: 6,
       type: 'application',
       icon: Eye,
       color: '#F59E0B',
