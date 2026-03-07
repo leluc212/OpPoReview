@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
@@ -1762,6 +1762,7 @@ const HRManagement = () => {
   const { language } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeSection, setActiveSection] = useState('hr');
   const [hrStaff] = useState(() => getHRStaff(language));
   const [selectedStaff, setSelectedStaff] = useState(null);
@@ -1824,6 +1825,15 @@ const HRManagement = () => {
     return localStorage.getItem('employer_wallet_connected') === 'true';
   });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+
+  // Reopen wallet modal when returning from terms page
+  useEffect(() => {
+    if (location.state?.fromTermsPage) {
+      setShowWalletModal(true);
+      // Clear the state to prevent reopening on subsequent renders
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   const activeChat = activeChatId
     ? chatConversations.find(chat => chat.id === activeChatId)
@@ -2511,8 +2521,8 @@ const HRManagement = () => {
                   />
                   <label htmlFor="terms-checkbox">
                     {language === 'vi' 
-                      ? <>Tôi đã đồng ý <a href="/OpPoReview/terms-urgent-jobs" target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600 }}>điều khoản</a> sử dụng Job gấp này</>
-                      : <>I agree to the <a href="/OpPoReview/terms-urgent-jobs" target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600 }}>Terms of Service</a> for Urgent Jobs</>
+                      ? <>Tôi đã đồng ý <a href="/OpPoReview/terms-urgent-jobs" style={{ fontWeight: 600, cursor: 'pointer' }} onClick={(e) => { e.preventDefault(); setShowWalletModal(false); navigate('/terms-urgent-jobs', { state: { returnToWallet: true } }); }}>điều khoản</a> sử dụng Job gấp này</>
+                      : <>I agree to the <a href="/OpPoReview/terms-urgent-jobs" style={{ fontWeight: 600, cursor: 'pointer' }} onClick={(e) => { e.preventDefault(); setShowWalletModal(false); navigate('/terms-urgent-jobs', { state: { returnToWallet: true } }); }}>Terms of Service</a> for Urgent Jobs</>
                     }
                   </label>
                 </TermsCheckboxContainer>

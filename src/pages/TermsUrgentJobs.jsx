@@ -2,11 +2,39 @@ import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 
 const Container = styled.div`
   min-height: 100vh;
   background: #f8f9fa;
   padding: 40px 20px;
+`;
+
+const BackButton = styled(motion.button)`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  color: #333;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 24px;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #f5f5f5;
+    border-color: #d0d0d0;
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
 `;
 
 const ContentWrapper = styled(motion.div)`
@@ -88,6 +116,17 @@ const Highlight = styled.div`
 
 const TermsUrgentJobs = () => {
   const { language } = useLanguage();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleBackClick = () => {
+    if (location.state?.returnToWallet) {
+      // Return to HR Management page with state to reopen modal
+      navigate('/employer/quick-jobs', { state: { fromTermsPage: true } });
+    } else {
+      navigate(-1);
+    }
+  };
 
   return (
     <Container>
@@ -96,6 +135,15 @@ const TermsUrgentJobs = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
+        <BackButton
+          onClick={handleBackClick}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <ArrowLeft />
+          {language === 'vi' ? 'Quay lại' : 'Go Back'}
+        </BackButton>
+        
         <Title>
           {language === 'vi' ? 'Điều khoản sử dụng Job Gấp - Ốp Pờ Nhà Tuyển Dụng' : 'Urgent Jobs Terms of Service - Employer'}
         </Title>

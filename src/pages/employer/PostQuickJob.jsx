@@ -370,6 +370,17 @@ const PostQuickJob = () => {
   const [salaryError, setSalaryError] = useState(false);
   const [paymentInfo, setPaymentInfo] = useState(null);
 
+  const parseHourlyRateInput = (input) => {
+    const rawValue = String(input ?? '').trim();
+    if (!rawValue) return NaN;
+
+    // Interpret separators as thousand delimiters: 32.000 / 32,000 => 32000
+    const normalizedValue = rawValue.replace(/[.,\s]/g, '');
+    const parsedValue = Number(normalizedValue);
+
+    return Number.isFinite(parsedValue) ? parsedValue : NaN;
+  };
+
   const [formData, setFormData] = useState(() => {
     // Load draft from localStorage on mount
     const savedDraft = localStorage.getItem('quickJobDraft');
@@ -393,11 +404,11 @@ const PostQuickJob = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
-    // Validate hourly rate for display only (still allow input)
+
+    // Parse hourly rate internally while keeping what user typed
     if (name === 'hourlyRate') {
-      const numValue = parseFloat(value);
-      
+      const numValue = parseHourlyRateInput(value);
+
       // Show error if value is entered and <= 31875
       if (value !== '' && !isNaN(numValue) && numValue <= 31875) {
         setSalaryError(true);
@@ -405,7 +416,7 @@ const PostQuickJob = () => {
         setSalaryError(false);
       }
     }
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -420,7 +431,7 @@ const PostQuickJob = () => {
       return null;
     }
 
-    const rate = parseFloat(hourlyRate);
+    const rate = parseHourlyRateInput(hourlyRate);
     if (isNaN(rate) || rate <= 31875) {
       return null;
     }
@@ -480,7 +491,7 @@ const PostQuickJob = () => {
     }
 
     // Validate hourly rate must be > 31875
-    const rate = parseFloat(formData.hourlyRate);
+    const rate = parseHourlyRateInput(formData.hourlyRate);
     if (isNaN(rate) || rate <= 31875) {
       setSalaryError(true);
       setModalType('error');
@@ -544,8 +555,8 @@ const PostQuickJob = () => {
       type: 'debit',
       amount: totalFee,
       description: language === 'vi' 
-        ? `Đăng bài: ${formData.title} (${calculation.hours.toFixed(1)}h x ${parseInt(formData.hourlyRate).toLocaleString('vi-VN')} VNĐ)`
-        : `Post job: ${formData.title} (${calculation.hours.toFixed(1)}h x ${parseInt(formData.hourlyRate).toLocaleString('vi-VN')} VND)`,
+        ? `Đăng bài: ${formData.title} (${calculation.hours.toFixed(1)}h x ${rate.toLocaleString('vi-VN')} VNĐ)`
+        : `Post job: ${formData.title} (${calculation.hours.toFixed(1)}h x ${rate.toLocaleString('vi-VN')} VND)`,
       date: new Date().toISOString(),
       balanceAfter: newBalance
     };
@@ -557,6 +568,7 @@ const PostQuickJob = () => {
     // Save to posted jobs list in localStorage
     const jobData = {
       ...formData,
+      hourlyRate: rate,
       id: Date.now(),
       createdAt: new Date().toISOString(),
       type: 'quick',
@@ -577,7 +589,7 @@ const PostQuickJob = () => {
     setPaymentInfo({
       fee: totalFee,
       hours: calculation.hours,
-      hourlyRate: parseInt(formData.hourlyRate),
+      hourlyRate: rate,
       previousBalance: currentBalance,
       newBalance: newBalance
     });
@@ -611,7 +623,7 @@ const PostQuickJob = () => {
       locationPlaceholder: 'VD: Quận 1, TP.HCM',
       hourlyRate: 'Lương (VND)',
       hourlyRatePlaceholder: '',
-      hourlyRateMin: 'Phải lớn hơn 31,875 VNĐ',
+      hourlyRateMin: 'Phải lớn hơn 31.875 VNĐ',
       workingHours: 'Khung giờ làm việc',
       startTime: 'Từ',
       endTime: 'Đến',
@@ -638,7 +650,7 @@ const PostQuickJob = () => {
       paymentDeducted: 'Đã trừ phí đăng bài',
       remainingBalance: 'Số dư còn lại',
       errorTitle: 'Có lỗi xảy ra',
-      errorMessage: 'Vui lòng điền đầy đủ các thông tin bắt buộc và đảm bảo lương theo giờ tối thiểu 31,875 VNĐ.',
+      errorMessage: 'Vui lòng điền đầy đủ các thông tin bắt buộc và đảm bảo lương theo giờ tối thiểu 31.875 VNĐ.',
       closeButton: 'Đóng'
     },
     en: {
@@ -656,7 +668,7 @@ const PostQuickJob = () => {
       locationPlaceholder: 'e.g., District 1, HCMC',
       hourlyRate: 'Salary (VND)',
       hourlyRatePlaceholder: '',
-      hourlyRateMin: 'Must be greater than 31,875 VND',
+      hourlyRateMin: 'Must be greater than 31.875 VND',
       workingHours: 'Working Hours',
       startTime: 'From',
       endTime: 'To',
@@ -683,7 +695,7 @@ const PostQuickJob = () => {
       paymentDeducted: 'Posting fee deducted',
       remainingBalance: 'Remaining balance',
       errorTitle: 'Error Occurred',
-      errorMessage: 'Please fill in all required fields and ensure hourly rate is at least 31,875 VND.',
+      errorMessage: 'Please fill in all required fields and ensure hourly rate is at least 31.875 VND.',
       closeButton: 'Close'
     }
   };
@@ -752,8 +764,8 @@ const PostQuickJob = () => {
                 <Input
                   name="hourlyRate"
                   type="number"
-                  min="31876"
-                  step="1"
+                  min="0"
+                  step="any"
                   value={formData.hourlyRate}
                   onChange={handleChange}
                   placeholder={t.hourlyRatePlaceholder}
@@ -765,7 +777,7 @@ const PostQuickJob = () => {
                 />
                 {salaryError ? (
                   <small style={{ color: '#DC2626', fontSize: '12px', marginTop: '4px', display: 'block', fontWeight: '600' }}>
-                    ⚠️ {language === 'vi' ? 'Lương phải lớn hơn 31,875 VNĐ' : 'Salary must be greater than 31,875 VND'}
+                    ⚠️ {language === 'vi' ? 'Lương phải lớn hơn 31.875 VNĐ' : 'Salary must be greater than 31.875 VND'}
                   </small>
                 ) : (
                   <small style={{ color: '#000000', fontSize: '12px', marginTop: '4px', display: 'block' }}>
@@ -955,9 +967,37 @@ const PostQuickJob = () => {
               </div>
             </div>
           )}
-          <Button onClick={handleModalClose}>
-            {t.closeButton}
-          </Button>
+          {modalType === 'error' && (paymentInfo?.message?.includes('Số dư không đủ') || paymentInfo?.message?.includes('Insufficient balance')) ? (
+            <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
+              <Button 
+                onClick={handleModalClose}
+                style={{ 
+                  flex: 1,
+                  background: '#E5E7EB',
+                  color: '#374151'
+                }}
+              >
+                {language === 'vi' ? 'Đóng' : 'Close'}
+              </Button>
+              <Button 
+                onClick={() => {
+                  setShowModal(false);
+                  navigate('/employer/wallet');
+                }}
+                style={{ 
+                  flex: 1,
+                  background: '#3B82F6',
+                  color: 'white'
+                }}
+              >
+                {language === 'vi' ? '💰 Nạp tiền' : '💰 Add Funds'}
+              </Button>
+            </div>
+          ) : (
+            <Button onClick={handleModalClose}>
+              {t.closeButton}
+            </Button>
+          )}
         </ModalContent>
       </Modal>
     </DashboardLayout>

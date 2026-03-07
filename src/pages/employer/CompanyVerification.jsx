@@ -426,10 +426,18 @@ const CompanyVerification = () => {
       // Compress image before storing
       const compressedDataUrl = await compressImage(file);
       
+      // Store both file name and compressed data
+      const fileData = {
+        name: file.name,
+        data: compressedDataUrl,
+        size: file.size,
+        type: file.type
+      };
+      
       if (step === 0) {
-        setStep1Data({ ...step1Data, [field]: compressedDataUrl });
+        setStep1Data({ ...step1Data, [field]: fileData });
       } else if (step === 2) {
-        setStep3Data({ ...step3Data, [field]: compressedDataUrl });
+        setStep3Data({ ...step3Data, [field]: fileData });
       }
       
       // Show success message for this specific field
@@ -639,7 +647,7 @@ const CompanyVerification = () => {
                 >
                   <Upload className="upload-icon" />
                   <div className="upload-text">
-                    {step1Data.businessLicense 
+                    {step1Data.businessLicense?.name
                       ? `✓ ${step1Data.businessLicense.name}`
                       : (language === 'vi' ? 'Nhấn để chọn file' : 'Click to select file')}
                   </div>
@@ -914,7 +922,7 @@ const CompanyVerification = () => {
                 >
                   <Upload className="upload-icon" />
                   <div className="upload-text">
-                    {step3Data.idFrontImage 
+                    {step3Data.idFrontImage?.name
                       ? `✓ ${step3Data.idFrontImage.name}`
                       : (language === 'vi' ? 'Tải lên mặt trước CMND/CCCD' : 'Upload ID card front')}
                   </div>
@@ -948,7 +956,7 @@ const CompanyVerification = () => {
                 >
                   <Upload className="upload-icon" />
                   <div className="upload-text">
-                    {step3Data.idBackImage 
+                    {step3Data.idBackImage?.name
                       ? `✓ ${step3Data.idBackImage.name}`
                       : (language === 'vi' ? 'Tải lên mặt sau CMND/CCCD' : 'Upload ID card back')}
                   </div>
@@ -982,7 +990,7 @@ const CompanyVerification = () => {
                 >
                   <Upload className="upload-icon" />
                   <div className="upload-text">
-                    {step3Data.authorizationLetter 
+                    {step3Data.authorizationLetter?.name
                       ? `✓ ${step3Data.authorizationLetter.name}`
                       : (language === 'vi' ? 'Tải lên giấy ủy quyền' : 'Upload authorization letter')}
                   </div>
