@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
-import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Trash2, Eye, CheckCircle, Send, Search, Calendar, DollarSign, Newspaper, TrendingUp, AlertCircle, User, Plus, X, Wallet, Save } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Trash2, Eye, CheckCircle, Send, Search, Calendar, DollarSign, Newspaper, TrendingUp, AlertCircle, User, Plus, X, Wallet, Save, Award, Star, Briefcase } from 'lucide-react';
 import Modal from '../../components/Modal';
 
 // Mock HR Staff Data
@@ -21,7 +22,15 @@ const getHRStaff = (language) => [
     shift: '06:00 - 14:00',
     confirmedAt: language === 'vi' ? '15/01/2024 - 09:30' : '01/15/2024 - 09:30',
     canRequestChange: true,
-    isWithinTimeWindow: true
+    isWithinTimeWindow: true,
+    // Additional profile data
+    experience: language === 'vi' ? '3 năm' : '3 years',
+    education: language === 'vi' ? 'Trung cấp Pha chế' : 'Vocational Barista Training',
+    skills: language === 'vi' ? ['Pha chế', 'Latte Art', 'Dọn dẹp', 'Quản lý kho'] : ['Brewing', 'Latte Art', 'Cleaning', 'Inventory'],
+    bio: language === 'vi' ? 'Có kinh nghiệm 3 năm làm việc tại các quán cà phê lớn. Đam mê nghệ thuật pha chế và latte art.' : '3 years experience in major coffee shops. Passionate about brewing and latte art.',
+    reviews: [
+      { id: 1, employer: 'The Coffee House', position: language === 'vi' ? 'Nhân viên pha chế' : 'Barista', rating: 5, date: language === 'vi' ? 'Tháng 12/2024' : 'Dec 2024', comment: language === 'vi' ? 'Làm việc xuất sắc, nhiệt tình.' : 'Excellent work, very enthusiastic.' }
+    ]
   },
   {
     id: 2,
@@ -35,7 +44,15 @@ const getHRStaff = (language) => [
     shift: '14:00 - 22:00',
     confirmedAt: language === 'vi' ? '20/02/2024 - 14:15' : '02/20/2024 - 14:15',
     canRequestChange: true,
-    isWithinTimeWindow: false
+    isWithinTimeWindow: false,
+    // Additional profile data
+    experience: language === 'vi' ? '2 năm' : '2 years',
+    education: language === 'vi' ? 'Cao đẳng Kinh tế' : 'College of Economics',
+    skills: language === 'vi' ? ['Kế toán', 'Excel', 'Giao tiếp', 'Quản lý tiền mặt'] : ['Accounting', 'Excel', 'Communication', 'Cash handling'],
+    bio: language === 'vi' ? 'Có kinh nghiệm thu ngân tại các cửa hàng bán lẻ. Cẩn thận và chính xác.' : 'Experienced cashier in retail stores. Careful and accurate.',
+    reviews: [
+      { id: 1, employer: 'CoopMart', position: language === 'vi' ? 'Thu ngân' : 'Cashier', rating: 4, date: language === 'vi' ? 'Tháng 10/2024' : 'Oct 2024', comment: language === 'vi' ? 'Cẩn thận, ít sai sót.' : 'Careful, few errors.' }
+    ]
   },
   {
     id: 3,
@@ -49,7 +66,15 @@ const getHRStaff = (language) => [
     shift: '18:00 - 22:00',
     confirmedAt: language === 'vi' ? '10/03/2024 - 08:45' : '03/10/2024 - 08:45',
     canRequestChange: true,
-    isWithinTimeWindow: true
+    isWithinTimeWindow: true,
+    // Additional profile data
+    experience: language === 'vi' ? '1 năm' : '1 year',
+    education: language === 'vi' ? 'THPT' : 'High School',
+    skills: language === 'vi' ? ['Phục vụ khách hàng', 'Giao tiếp', 'Làm việc nhanh'] : ['Customer service', 'Communication', 'Fast worker'],
+    bio: language === 'vi' ? 'Sinh viên kiêm việc, nhiệt tình và nhanh nhẹn.' : 'Student with part-time work, enthusiastic and agile.',
+    reviews: [
+      { id: 1, employer: language === 'vi' ? 'Nhà hàng Hương Việt' : 'Huong Viet Restaurant', position: language === 'vi' ? 'Nhân viên phục vụ' : 'Server', rating: 4, date: language === 'vi' ? 'Tháng 11/2024' : 'Nov 2024', comment: language === 'vi' ? 'Nhanh nhẹn, thân thiện.' : 'Quick and friendly.' }
+    ]
   }
 ];
 
@@ -1017,20 +1042,56 @@ const WalletModalButton = styled(motion.button)`
   cursor: pointer;
   transition: all 0.2s ease;
 
-  background: ${props => props.$variant === 'primary' ? '#1e40af' : '#F1F5F9'};
+  background: ${props => props.$variant === 'primary' ? (props.disabled ? '#94A3B8' : '#1e40af') : '#F1F5F9'};
   color: ${props => props.$variant === 'primary' ? 'white' : props.theme.colors.text};
-  border: 1.5px solid ${props => props.$variant === 'primary' ? '#1e40af' : '#E2E8F0'};
+  border: 1.5px solid ${props => props.$variant === 'primary' ? (props.disabled ? '#94A3B8' : '#1e40af') : '#E2E8F0'};
+  opacity: ${props => props.disabled ? 0.6 : 1};
+  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: ${props => props.$variant === 'primary'
+    transform: ${props => props.disabled ? 'none' : 'translateY(-2px)'};
+    box-shadow: ${props => props.disabled ? 'none' : (props.$variant === 'primary'
       ? '0 6px 20px rgba(30, 64, 175, 0.3)'
-      : '0 4px 12px rgba(0, 0, 0, 0.1)'};
+      : '0 4px 12px rgba(0, 0, 0, 0.1)')};
   }
 
   svg {
     width: 18px;
     height: 18px;
+  }
+`;
+
+const TermsCheckboxContainer = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 24px;
+  text-align: left;
+  
+  input[type="checkbox"] {
+    margin-top: 4px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #1e40af;
+  }
+  
+  label {
+    font-size: 14px;
+    color: ${props => props.theme.colors.text};
+    line-height: 1.6;
+    cursor: pointer;
+    user-select: none;
+    
+    a {
+      color: #1e40af;
+      font-weight: 600;
+      text-decoration: underline;
+      
+      &:hover {
+        color: #1e3a8a;
+      }
+    }
   }
 `;
 
@@ -1176,12 +1237,534 @@ const SuccessToast = styled(motion.div)`
   }
 `;
 
+// ─── Profile Modal Styled Components ───────────────────────
+const ProfileHeader = styled.div`
+  position: relative;
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 45%, #1e40af 100%);
+  padding: 36px 36px 48px;
+  color: white;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 220px;
+    height: 220px;
+    background: radial-gradient(circle, rgba(96, 165, 250, 0.25) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -40px;
+    left: 30%;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+`;
+
+const ProfileAvatarRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  z-index: 1;
+`;
+
+const ProfileAvatar = styled.div`
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 100%);
+  border: 2.5px solid rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -1px;
+  backdrop-filter: blur(8px);
+  flex-shrink: 0;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.3);
+`;
+
+const ProfileHeaderInfo = styled.div`
+  h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+  }
+`;
+
+const ProfileJobBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
+  
+  svg {
+    width: 14px;
+    height: 14px;
+    opacity: 0.8;
+  }
+`;
+
+const HeaderRatingBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  padding: 5px 14px;
+  background: linear-gradient(135deg, rgba(245,158,11,0.25), rgba(252,211,77,0.18));
+  border: 1.5px solid rgba(252, 211, 77, 0.5);
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #FDE68A;
+  backdrop-filter: blur(4px);
+  
+  .stars {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+  }
+  
+  .star-char {
+    font-size: 13px;
+    line-height: 1;
+  }
+  
+  .rating-text {
+    margin-left: 2px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  
+  .count-text {
+    font-size: 11px;
+    font-weight: 500;
+    opacity: 0.8;
+  }
+`;
+
+const ProfileContent = styled.div`
+  padding: 0;
+  margin-top: -16px;
+  position: relative;
+  z-index: 2;
+`;
+
+const ProfileInner = styled.div`
+  background: ${props => props.theme.colors.bgLight};
+  border-radius: 16px 16px 0 0;
+  padding: 28px 28px 8px;
+`;
+
+const ProfileSection = styled.div`
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid ${props => props.theme.colors.border};
+  
+  &:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+  
+  h3 {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    color: ${props => props.theme.colors.textLight};
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    &::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: ${props => props.theme.colors.border};
+    }
+    
+    svg {
+      width: 14px;
+      height: 14px;
+      color: ${props => props.theme.colors.primary};
+    }
+  }
+`;
+
+const InfoGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+`;
+
+const InfoCard = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: ${props => props.theme.colors.bgDark};
+  border-radius: 12px;
+  border: 1px solid ${props => props.theme.colors.border};
+  transition: all 0.2s ease;
+  
+  &:hover {
+    border-color: ${props => props.theme.colors.primary}30;
+    background: #EFF6FF;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.08);
+  }
+`;
+
+const InfoIconBox = styled.div`
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1e40af15, #3b82f620);
+  border: 1px solid ${props => props.theme.colors.primary}20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  svg {
+    width: 16px;
+    height: 16px;
+    color: ${props => props.theme.colors.primary};
+  }
+`;
+
+const InfoItem = styled.div`
+  flex: 1;
+  min-width: 0;
+  
+  .label {
+    font-size: 11px;
+    font-weight: 600;
+    color: ${props => props.theme.colors.textLight};
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+  }
+  
+  .value {
+    font-size: 14px;
+    color: ${props => props.theme.colors.text};
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+`;
+
+const SkillsWrap = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+`;
+
+const SkillTag = styled.span`
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 16px;
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  color: #1e40af;
+  border: 1.5px solid #BFDBFE;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+    color: white;
+    border-color: #1e40af;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25);
+  }
+`;
+
+const BioText = styled.p`
+  font-size: 14px;
+  line-height: 1.7;
+  color: ${props => props.theme.colors.textLight};
+  background: ${props => props.theme.colors.bgDark};
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid ${props => props.theme.colors.border};
+  border-left: 3px solid #1e40af;
+  margin: 0;
+`;
+
+const ReviewList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+const ReviewCard = styled.div`
+  background: ${props => props.theme.colors.bgDark};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: 14px;
+  padding: 16px 18px;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(30, 64, 175, 0.09);
+    border-color: #BFDBFE;
+  }
+`;
+
+const ReviewHeader = styled.div`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 12px;
+`;
+
+const ReviewEmployerInfo = styled.div`
+  .employer-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: ${props => props.theme.colors.text};
+    margin-bottom: 2px;
+  }
+  .position-date {
+    font-size: 12px;
+    color: ${props => props.theme.colors.textLight};
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+`;
+
+const StarRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+`;
+
+const StarIcon = styled.span`
+  font-size: 16px;
+  line-height: 1;
+  color: ${props => props.$filled ? '#F59E0B' : '#E2E8F0'};
+  filter: ${props => props.$filled ? 'drop-shadow(0 1px 2px rgba(245,158,11,0.4))' : 'none'};
+`;
+
+const RatingLabel = styled.span`
+  font-size: 13px;
+  font-weight: 700;
+  color: #F59E0B;
+  margin-left: 4px;
+`;
+
+const ReviewComment = styled.p`
+  font-size: 13px;
+  line-height: 1.6;
+  color: ${props => props.theme.colors.textLight};
+  margin: 0;
+  font-style: italic;
+`;
+
+const EmptyReviews = styled.div`
+  text-align: center;
+  padding: 28px 16px;
+  color: ${props => props.theme.colors.textLight};
+  background: ${props => props.theme.colors.bgDark};
+  border-radius: 12px;
+  border: 1.5px dashed ${props => props.theme.colors.border};
+  
+  .icon { font-size: 28px; margin-bottom: 8px; }
+  p { font-size: 13px; margin: 0; }
+`;
+
+// Star rendering helper
+const StarRating = ({ rating }) => (
+  <StarRow>
+    {[1, 2, 3, 4, 5].map(i => (
+      <StarIcon key={i} $filled={i <= rating}>★</StarIcon>
+    ))}
+    <RatingLabel>{rating}/5</RatingLabel>
+  </StarRow>
+);
+
+// Profile Detail Modal Component
+const StaffProfileModal = React.memo(({ staff, onClose }) => {
+  const { language } = useLanguage();
+  const initials = staff.name
+    .split(' ')
+    .map(n => n[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+
+  const avgRating = staff.reviews && staff.reviews.length > 0
+    ? (staff.reviews.reduce((s, r) => s + r.rating, 0) / staff.reviews.length)
+    : null;
+
+  return (
+    <>
+      <ProfileHeader>
+        <ProfileAvatarRow>
+          <ProfileAvatar>{initials}</ProfileAvatar>
+          <ProfileHeaderInfo>
+            <h2>{staff.name}</h2>
+            <ProfileJobBadge>
+              <Briefcase />
+              {language === 'vi' ? 'Vị trí:' : 'Position:'} {staff.position}
+            </ProfileJobBadge>
+            {avgRating !== null && (
+              <HeaderRatingBadge>
+                <div className="stars">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <span key={i} className="star-char" style={{ color: i <= Math.round(avgRating) ? '#FCD34D' : 'rgba(255,255,255,0.25)' }}>★</span>
+                  ))}
+                </div>
+                <span className="rating-text">{avgRating.toFixed(1)}/5</span>
+                <span className="count-text">({staff.reviews.length} {language === 'vi' ? 'đánh giá' : 'reviews'})</span>
+              </HeaderRatingBadge>
+            )}
+          </ProfileHeaderInfo>
+        </ProfileAvatarRow>
+      </ProfileHeader>
+
+      <ProfileContent>
+        <ProfileInner>
+          <ProfileSection>
+            <h3><FileText /> {language === 'vi' ? 'Thông tin liên hệ' : 'Contact'}</h3>
+            <InfoGrid>
+              <InfoCard>
+                <InfoIconBox><Mail /></InfoIconBox>
+                <InfoItem>
+                  <div className="label">{language === 'vi' ? 'Email' : 'Email'}</div>
+                  <div className="value">{staff.email}</div>
+                </InfoItem>
+              </InfoCard>
+              <InfoCard>
+                <InfoIconBox><Phone /></InfoIconBox>
+                <InfoItem>
+                  <div className="label">{language === 'vi' ? 'Điện thoại' : 'Phone'}</div>
+                  <div className="value">{staff.phone}</div>
+                </InfoItem>
+              </InfoCard>
+              <InfoCard>
+                <InfoIconBox><MapPin /></InfoIconBox>
+                <InfoItem>
+                  <div className="label">{language === 'vi' ? 'Địa điểm' : 'Location'}</div>
+                  <div className="value">{staff.location}</div>
+                </InfoItem>
+              </InfoCard>
+              <InfoCard>
+                <InfoIconBox><Calendar /></InfoIconBox>
+                <InfoItem>
+                  <div className="label">{language === 'vi' ? 'Ngày bắt đầu' : 'Start Date'}</div>
+                  <div className="value">{staff.startDate}</div>
+                </InfoItem>
+              </InfoCard>
+            </InfoGrid>
+          </ProfileSection>
+
+          <ProfileSection>
+            <h3><Award /> {language === 'vi' ? 'Học vấn &  Kinh nghiệm' : 'Education & Experience'}</h3>
+            <InfoGrid>
+              <InfoCard>
+                <InfoIconBox><Award /></InfoIconBox>
+                <InfoItem>
+                  <div className="label">{language === 'vi' ? 'Trình độ học vấn' : 'Education'}</div>
+                  <div className="value">{staff.education}</div>
+                </InfoItem>
+              </InfoCard>
+              <InfoCard>
+                <InfoIconBox><Briefcase /></InfoIconBox>
+                <InfoItem>
+                  <div className="label">{language === 'vi' ? 'Kinh nghiệm' : 'Experience'}</div>
+                  <div className="value">{staff.experience}</div>
+                </InfoItem>
+              </InfoCard>
+            </InfoGrid>
+          </ProfileSection>
+
+          <ProfileSection>
+            <h3><Star /> {language === 'vi' ? 'Kỹ năng' : 'Skills'}</h3>
+            <SkillsWrap>
+              {staff.skills.map((skill, index) => (
+                <SkillTag key={index}>{skill}</SkillTag>
+              ))}
+            </SkillsWrap>
+          </ProfileSection>
+
+          <ProfileSection>
+            <h3><Star /> {language === 'vi' ? 'Lịch sử & Đánh giá' : 'History & Reviews'}</h3>
+            {staff.reviews && staff.reviews.length > 0 ? (
+              <ReviewList>
+                {staff.reviews.map(review => (
+                  <ReviewCard key={review.id}>
+                    <ReviewHeader>
+                      <ReviewEmployerInfo>
+                        <div className="employer-name">{review.employer}</div>
+                        <div className="position-date">
+                          <Briefcase size={11} />
+                          {review.position}
+                          <span>·</span>
+                          <Calendar size={11} />
+                          {review.date}
+                        </div>
+                      </ReviewEmployerInfo>
+                      <StarRating rating={review.rating} />
+                    </ReviewHeader>
+                    <ReviewComment>"{review.comment}"</ReviewComment>
+                  </ReviewCard>
+                ))}
+              </ReviewList>
+            ) : (
+              <EmptyReviews>
+                <div className="icon">📋</div>
+                <p>{language === 'vi' ? 'Chưa có đánh giá nào từ nhà tuyển dụng.' : 'No employer reviews yet.'}</p>
+              </EmptyReviews>
+            )}
+          </ProfileSection>
+
+          <ProfileSection>
+            <h3><FileText /> {language === 'vi' ? 'Giới thiệu bản thân' : 'About'}</h3>
+            <BioText>{staff.bio}</BioText>
+          </ProfileSection>
+        </ProfileInner>
+      </ProfileContent>
+    </>
+  );
+});
+
+StaffProfileModal.displayName = 'StaffProfileModal';
+
 // ─── Component ─────────────────────────────────────────────
 const HRManagement = () => {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('hr');
   const [hrStaff] = useState(() => getHRStaff(language));
+  const [selectedStaff, setSelectedStaff] = useState(null);
   
   // Load quick jobs from localStorage
   const [quickJobPosts, setQuickJobPosts] = useState(() => {
@@ -1240,6 +1823,7 @@ const HRManagement = () => {
   const [isWalletConnected] = useState(() => {
     return localStorage.getItem('employer_wallet_connected') === 'true';
   });
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const activeChat = activeChatId
     ? chatConversations.find(chat => chat.id === activeChatId)
@@ -1254,11 +1838,25 @@ const HRManagement = () => {
       } else {
         const chat = chatConversations.find(c => c.id === activeChatId);
         if (chat) {
-          setCurrentMessages(chat.messages);
+          // If no messages yet, add initial greeting message
+          if (chat.messages.length === 0) {
+            const companyName = user?.role === 'employer' ? (language === 'vi' ? 'Katinat Quận 8' : 'Katinat District 8') : (user?.name || 'Company');
+            const greetingMessage = {
+              id: Date.now(),
+              sender: 'me',
+              text: language === 'vi' 
+                ? `Xin chào! ${companyName} đã duyệt CV ứng tuyển công việc tuyển gấp của bạn. Bạn có thể liên hệ với chúng tôi qua đây nhé! 😊`
+                : `Hello! ${companyName} has approved your urgent job application. You can contact us here! 😊`,
+              time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+            };
+            setCurrentMessages([greetingMessage]);
+          } else {
+            setCurrentMessages(chat.messages);
+          }
         }
       }
     }
-  }, [activeChatId, chatConversations]);
+  }, [activeChatId, chatConversations, language, user]);
 
   // Save messages to localStorage whenever they change
   useEffect(() => {
@@ -1313,18 +1911,19 @@ const HRManagement = () => {
     }
   };
 
+  const closeWalletModal = () => {
+    setShowWalletModal(false);
+    setAgreedToTerms(false);
+  };
+
   const handleConnectWallet = () => {
     // Simulate wallet connection success
     localStorage.setItem('employer_wallet_connected', 'true');
     setShowWalletModal(false);
+    setAgreedToTerms(false);
 
-    // Show success notification
-    alert(language === 'vi'
-      ? '✓ Liên kết ví thành công! Bạn có thể đăng bài ngay bây giờ.'
-      : '✓ Wallet connected successfully! You can now post jobs.');
-
-    // Navigate to post job page
-    navigate('/employer/post-job');
+    // Navigate to post quick job page
+    navigate('/employer/post-quick-job');
   };
 
   // Reload jobs from localStorage
@@ -1598,6 +2197,7 @@ const HRManagement = () => {
                     <StaffButton
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
+                      onClick={() => setSelectedStaff(staff)}
                     >
                       <User />{language === 'vi' ? 'Xem hồ sơ' : 'View profile'}
                     </StaffButton>
@@ -1883,7 +2483,7 @@ const HRManagement = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setShowWalletModal(false)}
+              onClick={closeWalletModal}
             >
               <WalletModalContainer
                 initial={{ scale: 0.9, opacity: 0 }}
@@ -1902,20 +2502,35 @@ const HRManagement = () => {
                     ? 'Bạn cần liên kết ví ngân hàng trước khi có thể đăng tin tuyển dụng. Điều này giúp đảm bảo thanh toán an toàn và minh bạch.'
                     : 'You need to connect your bank wallet before posting job listings. This ensures secure and transparent payment processing.'}
                 </WalletModalMessage>
+                <TermsCheckboxContainer>
+                  <input 
+                    type="checkbox" 
+                    id="terms-checkbox"
+                    checked={agreedToTerms}
+                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  />
+                  <label htmlFor="terms-checkbox">
+                    {language === 'vi' 
+                      ? <>Tôi đã đồng ý <a href="/OpPoReview/terms-urgent-jobs" target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600 }}>điều khoản</a> sử dụng Job gấp này</>
+                      : <>I agree to the <a href="/OpPoReview/terms-urgent-jobs" target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600 }}>Terms of Service</a> for Urgent Jobs</>
+                    }
+                  </label>
+                </TermsCheckboxContainer>
                 <WalletModalActions>
                   <WalletModalButton
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => setShowWalletModal(false)}
+                    onClick={closeWalletModal}
                   >
                     <X />
                     {language === 'vi' ? 'Đóng' : 'Cancel'}
                   </WalletModalButton>
                   <WalletModalButton
                     $variant="primary"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleConnectWallet}
+                    disabled={!agreedToTerms}
+                    whileHover={{ scale: agreedToTerms ? 1.02 : 1 }}
+                    whileTap={{ scale: agreedToTerms ? 0.98 : 1 }}
+                    onClick={agreedToTerms ? handleConnectWallet : undefined}
                   >
                     <Wallet />
                     {language === 'vi' ? 'Liên kết ví' : 'Connect Wallet'}
@@ -2180,6 +2795,21 @@ const HRManagement = () => {
                 </motion.button>
               </div>
             </div>
+          </Modal>
+        )}
+
+        {/* Staff Profile Modal */}
+        {selectedStaff && (
+          <Modal
+            isOpen={true}
+            onClose={() => setSelectedStaff(null)}
+            size="large"
+            noPadding={true}
+          >
+            <StaffProfileModal
+              staff={selectedStaff}
+              onClose={() => setSelectedStaff(null)}
+            />
           </Modal>
         )}
       </PageContainer>
