@@ -1,44 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
-import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Trash2, Eye, CheckCircle, Send, Search, Calendar, DollarSign, Newspaper, TrendingUp } from 'lucide-react';
+import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Trash2, Eye, CheckCircle, Send, Search, Calendar, DollarSign, Newspaper, TrendingUp, AlertCircle, User, Plus, X, Wallet } from 'lucide-react';
 
 // Mock HR Staff Data
 const getHRStaff = (language) => [
   {
     id: 1,
-    name: language === 'vi' ? 'Nguyễn Văn A' : 'Nguyen Van A',
+    name: language === 'vi' ? 'Nguyễn Minh Tuấn' : 'Nguyen Minh Tuan',
     position: language === 'vi' ? 'Nhân viên pha chế' : 'Barista',
     location: language === 'vi' ? 'Quận 8' : 'District 8',
     phone: '0123 456 789',
-    email: 'nguyenvana@example.com',
+    email: 'nguyenminhtuan@example.com',
     startDate: language === 'vi' ? '15/01/2024' : '01/15/2024',
     status: 'active',
-    shift: language === 'vi' ? 'Ca sáng' : 'Morning shift'
+    shift: '06:00 - 14:00',
+    confirmedAt: language === 'vi' ? '15/01/2024 - 09:30' : '01/15/2024 - 09:30',
+    canRequestChange: true,
+    isWithinTimeWindow: true
   },
   {
     id: 2,
-    name: language === 'vi' ? 'Trần Thị B' : 'Tran Thi B',
+    name: language === 'vi' ? 'Phạm Thu Hương' : 'Pham Thu Huong',
     position: language === 'vi' ? 'Thu ngân' : 'Cashier',
     location: language === 'vi' ? 'Quận 1' : 'District 1',
     phone: '0987 654 321',
-    email: 'tranthib@example.com',
+    email: 'phamthuhuong@example.com',
     startDate: language === 'vi' ? '20/02/2024' : '02/20/2024',
     status: 'active',
-    shift: language === 'vi' ? 'Ca chiều' : 'Afternoon shift'
+    shift: '14:00 - 22:00',
+    confirmedAt: language === 'vi' ? '20/02/2024 - 14:15' : '02/20/2024 - 14:15',
+    canRequestChange: true,
+    isWithinTimeWindow: false
   },
   {
     id: 3,
-    name: language === 'vi' ? 'Lê Văn C' : 'Le Van C',
+    name: language === 'vi' ? 'Trần Quốc Bảo' : 'Tran Quoc Bao',
     position: language === 'vi' ? 'Nhân viên phục vụ' : 'Server',
     location: language === 'vi' ? 'Quận 7' : 'District 7',
     phone: '0909 111 222',
-    email: 'levanc@example.com',
+    email: 'tranquocbao@example.com',
     startDate: language === 'vi' ? '10/03/2024' : '03/10/2024',
     status: 'active',
-    shift: language === 'vi' ? 'Ca tối' : 'Night shift'
+    shift: '18:00 - 22:00',
+    confirmedAt: language === 'vi' ? '10/03/2024 - 08:45' : '03/10/2024 - 08:45',
+    canRequestChange: true,
+    isWithinTimeWindow: true
   }
 ];
 
@@ -83,33 +93,36 @@ const getQuickJobPosts = (language) => [
 const getChatConversations = (language) => [
   {
     id: 1,
-    name: language === 'vi' ? 'Hiếu sàn' : 'Hieu san',
-    role: language === 'vi' ? 'Ứng viên' : 'Candidate',
-    lastMessage: language === 'vi' ? 'Em có thể bắt đầu làm việc ngay ạ' : 'I can start working immediately',
-    time: language === 'vi' ? '5 phút trước' : '5 min ago',
-    unread: 2,
+    name: language === 'vi' ? 'Nguyễn Minh Tuấn' : 'Nguyen Minh Tuan',
+    role: language === 'vi' ? 'Nhân viên' : 'Employee',
+    lastMessage: language === 'vi' ? 'Chưa có tin nhắn' : 'No messages yet',
+    time: language === 'vi' ? '10 phút trước' : '10 min ago',
+    unread: 0,
     status: 'online',
-    position: language === 'vi' ? 'Pha chế' : 'Barista'
+    position: language === 'vi' ? 'Nhân viên pha chế' : 'Barista',
+    messages: []
   },
   {
     id: 2,
-    name: language === 'vi' ? 'Duy sàn' : 'Duy san',
-    role: language === 'vi' ? 'Ứng viên' : 'Candidate',
-    lastMessage: language === 'vi' ? 'Mức lương có thương lượng được không ạ?' : 'Is the salary negotiable?',
-    time: language === 'vi' ? '15 phút trước' : '15 min ago',
-    unread: 1,
+    name: language === 'vi' ? 'Phạm Thu Hương' : 'Pham Thu Huong',
+    role: language === 'vi' ? 'Nhân viên' : 'Employee',
+    lastMessage: language === 'vi' ? 'Chưa có tin nhắn' : 'No messages yet',
+    time: language === 'vi' ? '25 phút trước' : '25 min ago',
+    unread: 0,
     status: 'online',
-    position: language === 'vi' ? 'Thu ngân' : 'Cashier'
+    position: language === 'vi' ? 'Thu ngân' : 'Cashier',
+    messages: []
   },
   {
     id: 3,
-    name: language === 'vi' ? 'Nguyễn Văn A' : 'Nguyen Van A',
+    name: language === 'vi' ? 'Trần Quốc Bảo' : 'Tran Quoc Bao',
     role: language === 'vi' ? 'Nhân viên' : 'Employee',
-    lastMessage: language === 'vi' ? 'Hôm nay em xin nghỉ ạ' : 'I need to take leave today',
-    time: language === 'vi' ? '1 giờ trước' : '1 hour ago',
+    lastMessage: language === 'vi' ? 'Chưa có tin nhắn' : 'No messages yet',
+    time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
     unread: 0,
     status: 'offline',
-    position: language === 'vi' ? 'Pha chế' : 'Barista'
+    position: language === 'vi' ? 'Nhân viên phục vụ' : 'Server',
+    messages: []
   }
 ];
 
@@ -366,10 +379,23 @@ const StaffButton = styled(motion.button)`
   justify-content: center;
   gap: 6px;
   transition: all 0.2s ease;
+  cursor: pointer;
   
-  background: ${props => props.$variant === 'danger' ? '#EF4444' : '#EFF6FF'};
-  color: ${props => props.$variant === 'danger' ? 'white' : '#1e40af'};
-  border: 1.5px solid ${props => props.$variant === 'danger' ? '#EF4444' : '#BFDBFE'};
+  background: ${props => {
+    if (props.$variant === 'danger') return '#EF4444';
+    if (props.$variant === 'warning') return '#FEF3C7';
+    return '#EFF6FF';
+  }};
+  color: ${props => {
+    if (props.$variant === 'danger') return 'white';
+    if (props.$variant === 'warning') return '#D97706';
+    return '#1e40af';
+  }};
+  border: 1.5px solid ${props => {
+    if (props.$variant === 'danger') return '#EF4444';
+    if (props.$variant === 'warning') return '#FCD34D';
+    return '#BFDBFE';
+  }};
   
   svg {
     width: 14px;
@@ -378,11 +404,66 @@ const StaffButton = styled(motion.button)`
   
   &:hover {
     transform: translateY(-1px);
-    box-shadow: ${props => props.$variant === 'danger' ? '0 4px 12px rgba(239, 68, 68, 0.3)' : '0 4px 12px rgba(30, 64, 175, 0.15)'};
+    box-shadow: ${props => {
+      if (props.$variant === 'danger') return '0 4px 12px rgba(239, 68, 68, 0.3)';
+      if (props.$variant === 'warning') return '0 4px 12px rgba(245, 158, 11, 0.3)';
+      return '0 4px 12px rgba(30, 64, 175, 0.15)';
+    }};
   }
 `;
 
 // ─── Quick Job Posts Styles ────────────────────────────────
+const SectionHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 16px 0;
+  border-bottom: 2px solid #E8EFFF;
+`;
+
+const SectionTitle = styled.h2`
+  font-size: 20px;
+  font-weight: 700;
+  color: ${props => props.theme.colors.text};
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  
+  svg {
+    width: 20px;
+    height: 20px;
+    color: ${props => props.theme.colors.primary};
+  }
+`;
+
+const PostJobButton = styled(motion.button)`
+  padding: 10px 18px;
+  border-radius: 10px;
+  background: #1e40af;
+  color: white;
+  font-weight: 700;
+  font-size: 13.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(30, 64, 175, 0.28);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #1e3a8a;
+    box-shadow: 0 6px 18px rgba(30, 64, 175, 0.38);
+    transform: translateY(-1px);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
 const QuickJobPostsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
@@ -599,7 +680,7 @@ const ChatStatus = styled.div`
   box-shadow: ${props => props.$status === 'online' ? '0 0 0 2px #D1FAE5' : 'none'};
 `;
 
-const ChatMessage = styled.div`
+const ChatMessagePreview = styled.div`
   font-size: 13px;
   color: ${props => props.theme.colors.textLight};
   margin-bottom: 12px;
@@ -634,13 +715,550 @@ const ChatUnread = styled.div`
   border: 1px solid #BFDBFE;
 `;
 
+// ─── Chat Modal Styles ──────────────────────────
+const ChatModalOverlay = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+`;
+
+const ChatModalContainer = styled(motion.div)`
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 600px;
+  height: 80vh;
+  max-height: 700px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+`;
+
+const ChatModalHeader = styled.div`
+  padding: 20px 24px;
+  border-bottom: 2px solid #E8EFFF;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+`;
+
+const ChatModalHeaderInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
+
+const ChatModalAvatar = styled.div`
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+  font-weight: 700;
+  position: relative;
+`;
+
+const ChatModalOnlineStatus = styled.div`
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: ${props => props.$online ? '#10B981' : '#94A3B8'};
+  border: 2px solid white;
+`;
+
+const ChatModalHeaderText = styled.div`
+  h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: ${props => props.theme.colors.text};
+    margin-bottom: 2px;
+  }
+  p {
+    font-size: 13px;
+    color: ${props => props.theme.colors.textLight};
+    font-weight: 500;
+  }
+`;
+
+const ChatModalCloseButton = styled(motion.button)`
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: white;
+  color: ${props => props.theme.colors.text};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: #F1F5F9;
+  }
+  
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+`;
+
+const ChatModalMessages = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #F8FAFC;
+`;
+
+const ChatMessage = styled(motion.div)`
+  display: flex;
+  justify-content: ${props => props.$sender === 'me' ? 'flex-end' : 'flex-start'};
+  align-items: center;
+  gap: 8px;
+  position: relative;
+
+  &:hover .delete-button {
+    opacity: 1;
+  }
+`;
+
+const ChatMessageBubble = styled.div`
+  max-width: 70%;
+  padding: 12px 16px;
+  border-radius: ${props => props.$sender === 'me' ? '16px 16px 4px 16px' : '16px 16px 16px 4px'};
+  background: ${props => props.$sender === 'me' ? 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)' : 'white'};
+  color: ${props => props.$sender === 'me' ? 'white' : props.theme.colors.text};
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  .message-text {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 4px;
+  }
+
+  .message-time {
+    font-size: 11px;
+    opacity: 0.7;
+    text-align: right;
+  }
+`;
+
+const DeleteMessageButton = styled(motion.button)`
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: #EF4444;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  flex-shrink: 0;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover {
+    background: #DC2626;
+  }
+`;
+
+const ChatModalInput = styled.div`
+  padding: 20px 24px;
+  border-top: 2px solid #E8EFFF;
+  background: white;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+`;
+
+const ChatInputField = styled.input`
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #E8EFFF;
+  border-radius: 12px;
+  font-size: 14px;
+  color: ${props => props.theme.colors.text};
+  background: #F8FAFC;
+  transition: all 0.2s;
+  
+  &:focus {
+    outline: none;
+    border-color: #1e40af;
+    background: white;
+  }
+  
+  &::placeholder {
+    color: ${props => props.theme.colors.textLight};
+  }
+`;
+
+const ChatSendButton = styled(motion.button)`
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+// ─── Wallet Verification Modal ─────────────────────────────
+const WalletModalOverlay = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+`;
+
+const WalletModalContainer = styled(motion.div)`
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 500px;
+  padding: 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  text-align: center;
+`;
+
+const WalletModalIcon = styled.div`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+
+  svg {
+    width: 40px;
+    height: 40px;
+    color: #D97706;
+  }
+`;
+
+const WalletModalTitle = styled.h2`
+  font-size: 24px;
+  font-weight: 800;
+  color: ${props => props.theme.colors.text};
+  margin-bottom: 12px;
+`;
+
+const WalletModalMessage = styled.p`
+  font-size: 15px;
+  color: ${props => props.theme.colors.textLight};
+  line-height: 1.6;
+  margin-bottom: 32px;
+`;
+
+const WalletModalActions = styled.div`
+  display: flex;
+  gap: 12px;
+`;
+
+const WalletModalButton = styled(motion.button)`
+  flex: 1;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  background: ${props => props.$variant === 'primary' ? '#1e40af' : '#F1F5F9'};
+  color: ${props => props.$variant === 'primary' ? 'white' : props.theme.colors.text};
+  border: 1.5px solid ${props => props.$variant === 'primary' ? '#1e40af' : '#E2E8F0'};
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${props => props.$variant === 'primary'
+      ? '0 6px 20px rgba(30, 64, 175, 0.3)'
+      : '0 4px 12px rgba(0, 0, 0, 0.1)'};
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+`;
+
 // ─── Component ─────────────────────────────────────────────
 const HRManagement = () => {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('hr');
   const [hrStaff] = useState(() => getHRStaff(language));
-  const [quickJobPosts] = useState(() => getQuickJobPosts(language));
+  
+  // Load quick jobs from localStorage
+  const [quickJobPosts, setQuickJobPosts] = useState(() => {
+    const savedJobs = localStorage.getItem('quickJobs');
+    if (savedJobs) {
+      try {
+        const jobs = JSON.parse(savedJobs);
+        // Format jobs for display
+        return jobs.map(job => ({
+          id: job.id,
+          title: job.title,
+          location: job.location,
+          salary: job.hourlyRate 
+            ? `${parseInt(job.hourlyRate).toLocaleString('vi-VN')} VNĐ/giờ`
+            : (language === 'vi' ? 'Thỏa thuận' : 'Negotiable'),
+          shift: job.startTime && job.endTime ? `${job.startTime} - ${job.endTime}` : '',
+          type: language === 'vi' ? 'Tuyển gấp' : 'Urgent',
+          applicants: job.applicants || 0,
+          views: job.views || 0,
+          status: job.status || 'active',
+          deadline: (() => {
+            const created = new Date(job.createdAt);
+            const now = new Date();
+            const diffTime = 7 * 24 * 60 * 60 * 1000 - (now - created); // 7 days validity
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            if (diffDays > 0) {
+              return language === 'vi' ? `${diffDays} ngày nữa` : `${diffDays} days left`;
+            }
+            return language === 'vi' ? 'Hết hạn' : 'Expired';
+          })(),
+          contactPhone: job.contactPhone,
+          description: job.description,
+          createdAt: job.createdAt
+        }));
+      } catch (e) {
+        console.error('Error loading quick jobs:', e);
+      }
+    }
+    // Fallback to mock data if no saved jobs
+    return getQuickJobPosts(language);
+  });
+  
   const [chatConversations] = useState(() => getChatConversations(language));
+  const [activeChatId, setActiveChatId] = useState(null);
+  const [currentMessages, setCurrentMessages] = useState([]);
+  const [messageInput, setMessageInput] = useState('');
+  const [showWalletModal, setShowWalletModal] = useState(false);
+
+  // Mock wallet connection status - in real app, get from user context or API
+  const [isWalletConnected] = useState(() => {
+    return localStorage.getItem('employer_wallet_connected') === 'true';
+  });
+
+  const activeChat = activeChatId
+    ? chatConversations.find(chat => chat.id === activeChatId)
+    : null;
+
+  // Load messages from localStorage when opening a chat
+  useEffect(() => {
+    if (activeChatId) {
+      const savedMessages = localStorage.getItem(`chat_${activeChatId}`);
+      if (savedMessages) {
+        setCurrentMessages(JSON.parse(savedMessages));
+      } else {
+        const chat = chatConversations.find(c => c.id === activeChatId);
+        if (chat) {
+          setCurrentMessages(chat.messages);
+        }
+      }
+    }
+  }, [activeChatId, chatConversations]);
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    if (activeChatId && currentMessages.length > 0) {
+      localStorage.setItem(`chat_${activeChatId}`, JSON.stringify(currentMessages));
+    }
+  }, [currentMessages, activeChatId]);
+
+  const handleOpenChat = (chatId) => {
+    setActiveChatId(chatId);
+  };
+
+  const handleCloseChat = () => {
+    setActiveChatId(null);
+    setCurrentMessages([]);
+    setMessageInput('');
+  };
+
+  const handleSendMessage = () => {
+    if (!messageInput.trim()) return;
+
+    const newMessage = {
+      id: Date.now(), // Use timestamp for unique ID
+      sender: 'me',
+      text: messageInput,
+      time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setCurrentMessages([...currentMessages, newMessage]);
+    setMessageInput('');
+  };
+
+  const handleDeleteMessage = (messageId) => {
+    const updatedMessages = currentMessages.filter(msg => msg.id !== messageId);
+    setCurrentMessages(updatedMessages);
+
+    // Update localStorage after deletion
+    if (activeChatId) {
+      if (updatedMessages.length > 0) {
+        localStorage.setItem(`chat_${activeChatId}`, JSON.stringify(updatedMessages));
+      } else {
+        localStorage.removeItem(`chat_${activeChatId}`);
+      }
+    }
+  };
+
+  const handleCreatePost = () => {
+    if (!isWalletConnected) {
+      setShowWalletModal(true);
+    } else {
+      navigate('/employer/post-quick-job');
+    }
+  };
+
+  const handleConnectWallet = () => {
+    // Simulate wallet connection success
+    localStorage.setItem('employer_wallet_connected', 'true');
+    setShowWalletModal(false);
+
+    // Show success notification
+    alert(language === 'vi'
+      ? '✓ Liên kết ví thành công! Bạn có thể đăng bài ngay bây giờ.'
+      : '✓ Wallet connected successfully! You can now post jobs.');
+
+    // Navigate to post job page
+    navigate('/employer/post-job');
+  };
+
+  // Reload jobs from localStorage
+  const loadJobsFromLocalStorage = () => {
+    const savedJobs = localStorage.getItem('quickJobs');
+    if (savedJobs) {
+      try {
+        const jobs = JSON.parse(savedJobs);
+        const formattedJobs = jobs.map(job => ({
+          id: job.id,
+          title: job.title,
+          location: job.location,
+          salary: job.hourlyRate 
+            ? `${parseInt(job.hourlyRate).toLocaleString('vi-VN')} VNĐ/giờ`
+            : (language === 'vi' ? 'Thỏa thuận' : 'Negotiable'),
+          shift: job.startTime && job.endTime ? `${job.startTime} - ${job.endTime}` : '',
+          type: language === 'vi' ? 'Tuyển gấp' : 'Urgent',
+          applicants: job.applicants || 0,
+          views: job.views || 0,
+          status: job.status || 'active',
+          deadline: (() => {
+            const created = new Date(job.createdAt);
+            const now = new Date();
+            const diffTime = 7 * 24 * 60 * 60 * 1000 - (now - created);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            if (diffDays > 0) {
+              return language === 'vi' ? `${diffDays} ngày nữa` : `${diffDays} days left`;
+            }
+            return language === 'vi' ? 'Hết hạn' : 'Expired';
+          })(),
+          contactPhone: job.contactPhone,
+          description: job.description,
+          createdAt: job.createdAt
+        }));
+        setQuickJobPosts(formattedJobs);
+      } catch (e) {
+        console.error('Error loading quick jobs:', e);
+      }
+    }
+  };
+
+  // Delete job from localStorage
+  const handleDeleteJob = (jobId) => {
+    if (!confirm(language === 'vi' 
+      ? 'Bạn có chắc muốn xóa bài đăng này?' 
+      : 'Are you sure you want to delete this post?')) {
+      return;
+    }
+
+    const savedJobs = localStorage.getItem('quickJobs');
+    if (savedJobs) {
+      try {
+        const jobs = JSON.parse(savedJobs);
+        const updatedJobs = jobs.filter(job => job.id !== jobId);
+        localStorage.setItem('quickJobs', JSON.stringify(updatedJobs));
+        loadJobsFromLocalStorage();
+        alert(language === 'vi' ? '✓ Đã xóa bài đăng' : '✓ Post deleted');
+      } catch (e) {
+        console.error('Error deleting job:', e);
+      }
+    }
+  };
+
+  // Reload jobs when page becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        loadJobsFromLocalStorage();
+      }
+    };
+
+    const handleFocus = () => {
+      loadJobsFromLocalStorage();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [language]);
 
   return (
     <DashboardLayout role="employer" key={language}>
@@ -750,7 +1368,10 @@ const HRManagement = () => {
                       <Calendar />{language === 'vi' ? 'Bắt đầu:' : 'Started:'} {staff.startDate}
                     </div>
                     <div className="meta-row">
-                      <Clock />{staff.shift}
+                      <Clock />{language === 'vi' ? 'Giờ làm:' : 'Work hours:'} {staff.shift}
+                    </div>
+                    <div className="meta-row">
+                      <CheckCircle />{language === 'vi' ? 'Xác nhận:' : 'Confirmed:'} {staff.confirmedAt}
                     </div>
                   </StaffMeta>
                   
@@ -759,21 +1380,28 @@ const HRManagement = () => {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
-                      <Eye />{language === 'vi' ? 'Chi tiết' : 'Details'}
+                      <User />{language === 'vi' ? 'Xem hồ sơ' : 'View profile'}
                     </StaffButton>
-                    <StaffButton
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <Edit />{language === 'vi' ? 'Sửa' : 'Edit'}
-                    </StaffButton>
-                    <StaffButton
-                      $variant="danger"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <Trash2 />
-                    </StaffButton>
+                    {staff.canRequestChange && (
+                      <StaffButton
+                        $variant="warning"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => {
+                          if (staff.isWithinTimeWindow) {
+                            alert(language === 'vi' 
+                              ? '✓ Yêu cầu thay đổi của bạn đã được gửi!'
+                              : '✓ Your change request has been submitted!');
+                          } else {
+                            alert(language === 'vi' 
+                              ? '✗ Đã quá 1 giờ, không thể yêu cầu thay đổi!'
+                              : '✗ More than 1 hour passed, cannot request changes!');
+                          }
+                        }}
+                      >
+                        <AlertCircle />{language === 'vi' ? 'Yêu cầu thay đổi' : 'Request change'}
+                      </StaffButton>
+                    )}
                   </StaffActions>
                 </StaffCard>
               ))}
@@ -782,9 +1410,41 @@ const HRManagement = () => {
         )}
 
         {activeSection === 'posts' && (
-          <QuickJobPostsGrid>
-            <AnimatePresence>
-              {quickJobPosts.map((post, index) => (
+          <>
+            <SectionHeader>
+              <SectionTitle>
+                <FileText />
+                {language === 'vi' ? 'Quản lý bài đăng' : 'Post Management'}
+              </SectionTitle>
+              <PostJobButton
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleCreatePost}
+              >
+                <Plus />
+                {language === 'vi' ? 'Đăng bài mới' : 'Create Post'}
+              </PostJobButton>
+            </SectionHeader>
+            {quickJobPosts.length === 0 ? (
+              <div style={{
+                padding: '60px 20px',
+                textAlign: 'center',
+                color: '#64748B'
+              }}>
+                <FileText style={{ width: '48px', height: '48px', margin: '0 auto 16px', opacity: 0.3 }} />
+                <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px', color: '#334155' }}>
+                  {language === 'vi' ? 'Chưa có bài đăng nào' : 'No posts yet'}
+                </h3>
+                <p style={{ fontSize: '14px' }}>
+                  {language === 'vi' 
+                    ? 'Bắt đầu tuyển dụng bằng cách tạo bài đăng đầu tiên của bạn' 
+                    : 'Start hiring by creating your first job post'}
+                </p>
+              </div>
+            ) : (
+            <QuickJobPostsGrid>
+              <AnimatePresence>
+                {quickJobPosts.map((post, index) => (
                 <QuickJobPostCard
                   key={post.id}
                   $status={post.status}
@@ -802,8 +1462,13 @@ const HRManagement = () => {
                         <div className="meta-item">
                           <DollarSign />{post.salary}
                         </div>
+                        {post.shift && (
+                          <div className="meta-item">
+                            <Clock />{post.shift}
+                          </div>
+                        )}
                         <div className="meta-item">
-                          <Clock />{post.deadline}
+                          <Calendar />{post.deadline}
                         </div>
                       </QuickJobPostMeta>
                     </div>
@@ -843,14 +1508,17 @@ const HRManagement = () => {
                       $variant="danger"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
+                      onClick={() => handleDeleteJob(post.id)}
                     >
                       <Trash2 />
                     </QuickJobPostButton>
                   </QuickJobPostActions>
                 </QuickJobPostCard>
               ))}
-            </AnimatePresence>
-          </QuickJobPostsGrid>
+              </AnimatePresence>
+            </QuickJobPostsGrid>
+            )}
+          </>
         )}
 
         {activeSection === 'chat' && (
@@ -862,6 +1530,9 @@ const HRManagement = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
+                  onClick={() => handleOpenChat(chat.id)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   <ChatHeader>
                     <ChatInfo>
@@ -871,7 +1542,7 @@ const HRManagement = () => {
                     <ChatStatus $status={chat.status} />
                   </ChatHeader>
                   
-                  <ChatMessage>{chat.lastMessage}</ChatMessage>
+                  <ChatMessagePreview>{chat.lastMessage}</ChatMessagePreview>
                   
                   <ChatFooter>
                     <ChatTime>{chat.time}</ChatTime>
@@ -884,6 +1555,155 @@ const HRManagement = () => {
             </AnimatePresence>
           </ChatGrid>
         )}
+
+        {/* Chat Modal */}
+        <AnimatePresence>
+          {activeChatId && activeChat && (
+            <ChatModalOverlay
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={handleCloseChat}
+            >
+              <ChatModalContainer
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ChatModalHeader>
+                  <ChatModalHeaderInfo>
+                    <ChatModalAvatar>
+                      {activeChat.name.charAt(0)}
+                      <ChatModalOnlineStatus $online={activeChat.status === 'online'} />
+                    </ChatModalAvatar>
+                    <ChatModalHeaderText>
+                      <h3>{activeChat.name}</h3>
+                      <p>{activeChat.role} • {activeChat.position}</p>
+                    </ChatModalHeaderText>
+                  </ChatModalHeaderInfo>
+                  <ChatModalCloseButton
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={handleCloseChat}
+                  >
+                    <X />
+                  </ChatModalCloseButton>
+                </ChatModalHeader>
+
+                <ChatModalMessages>
+                  {currentMessages.map((msg, index) => (
+                    <ChatMessage
+                      key={msg.id}
+                      $sender={msg.sender}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      {msg.sender === 'me' && (
+                        <DeleteMessageButton
+                          className="delete-button"
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handleDeleteMessage(msg.id)}
+                        >
+                          <X />
+                        </DeleteMessageButton>
+                      )}
+                      <ChatMessageBubble $sender={msg.sender}>
+                        <div className="message-text">{msg.text}</div>
+                        <div className="message-time">{msg.time}</div>
+                      </ChatMessageBubble>
+                      {msg.sender === 'them' && (
+                        <DeleteMessageButton
+                          className="delete-button"
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handleDeleteMessage(msg.id)}
+                        >
+                          <X />
+                        </DeleteMessageButton>
+                      )}
+                    </ChatMessage>
+                  ))}
+                </ChatModalMessages>
+
+                <ChatModalInput>
+                  <ChatInputField
+                    type="text"
+                    placeholder={language === 'vi' ? 'Nhập tin nhắn...' : 'Type a message...'}
+                    value={messageInput}
+                    onChange={(e) => setMessageInput(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                  />
+                  <ChatSendButton
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleSendMessage}
+                    disabled={!messageInput.trim()}
+                  >
+                    <Send />
+                  </ChatSendButton>
+                </ChatModalInput>
+              </ChatModalContainer>
+            </ChatModalOverlay>
+          )}
+        </AnimatePresence>
+
+        {/* Wallet Verification Modal */}
+        <AnimatePresence>
+          {showWalletModal && (
+            <WalletModalOverlay
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowWalletModal(false)}
+            >
+              <WalletModalContainer
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <WalletModalIcon>
+                  <Wallet />
+                </WalletModalIcon>
+                <WalletModalTitle>
+                  {language === 'vi' ? 'Yêu cầu liên kết ví' : 'Wallet Connection Required'}
+                </WalletModalTitle>
+                <WalletModalMessage>
+                  {language === 'vi'
+                    ? 'Bạn cần liên kết ví ngân hàng trước khi có thể đăng tin tuyển dụng. Điều này giúp đảm bảo thanh toán an toàn và minh bạch.'
+                    : 'You need to connect your bank wallet before posting job listings. This ensures secure and transparent payment processing.'}
+                </WalletModalMessage>
+                <WalletModalActions>
+                  <WalletModalButton
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setShowWalletModal(false)}
+                  >
+                    <X />
+                    {language === 'vi' ? 'Đóng' : 'Cancel'}
+                  </WalletModalButton>
+                  <WalletModalButton
+                    $variant="primary"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleConnectWallet}
+                  >
+                    <Wallet />
+                    {language === 'vi' ? 'Liên kết ví' : 'Connect Wallet'}
+                  </WalletModalButton>
+                </WalletModalActions>
+              </WalletModalContainer>
+            </WalletModalOverlay>
+          )}
+        </AnimatePresence>
       </PageContainer>
     </DashboardLayout>
   );

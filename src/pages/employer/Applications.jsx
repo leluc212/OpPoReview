@@ -1,11 +1,12 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
 import TableFilter from '../../components/TableFilter';
 import Modal from '../../components/Modal';
-import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText, Clock, Users, Newspaper, DollarSign, Edit, Trash2, TrendingUp } from 'lucide-react';
+import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText, Clock, Users, Newspaper, DollarSign, Edit, Trash2, TrendingUp, Plus, X, Wallet } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 // Mock job posts data
@@ -474,6 +475,65 @@ const JobStatusBadge = styled.div`
   background: ${props => props.$status === 'active' ? '#D1FAE5' : '#F1F5F9'};
   color: ${props => props.$status === 'active' ? '#047857' : '#64748B'};
   border: 1px solid ${props => props.$status === 'active' ? '#10B981' : '#CBD5E1'};
+`;
+
+// --- Section Header for Posts ---
+const PostsSectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1.5px solid #E8EFFF;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.06);
+`;
+
+const PostsSectionTitle = styled.h2`
+  font-size: 18px;
+  font-weight: 700;
+  color: ${props => props.theme.colors.text};
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  
+  svg {
+    width: 20px;
+    height: 20px;
+    color: ${props => props.theme.colors.primary};
+  }
+`;
+
+const CreatePostButton = styled(motion.button)`
+  padding: 12px 24px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    box-shadow: 0 6px 20px rgba(30, 64, 175, 0.4);
+    transform: translateY(-2px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
 `;
 
 // --- Card Grid ---
@@ -1275,14 +1335,140 @@ const ApplicationRow = React.memo(({
 
 ApplicationRow.displayName = 'ApplicationRow';
 
+// ─── Post Job Button ───────────────────────────────────────
+const PostJobButton = styled(motion.button)`
+  padding: 10px 18px;
+  border-radius: 10px;
+  background: #1e40af;
+  color: white;
+  font-weight: 700;
+  font-size: 13.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(30, 64, 175, 0.28);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #1e3a8a;
+    box-shadow: 0 6px 18px rgba(30, 64, 175, 0.38);
+    transform: translateY(-1px);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
+// ─── Wallet Verification Modal ─────────────────────────────
+const WalletModalOverlay = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+`;
+
+const WalletModalContainer = styled(motion.div)`
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 500px;
+  padding: 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  text-align: center;
+`;
+
+const WalletModalIcon = styled.div`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+
+  svg {
+    width: 40px;
+    height: 40px;
+    color: #D97706;
+  }
+`;
+
+const WalletModalTitle = styled.h2`
+  font-size: 24px;
+  font-weight: 800;
+  color: ${props => props.theme.colors.text};
+  margin-bottom: 12px;
+`;
+
+const WalletModalMessage = styled.p`
+  font-size: 15px;
+  color: ${props => props.theme.colors.textLight};
+  line-height: 1.6;
+  margin-bottom: 32px;
+`;
+
+const WalletModalActions = styled.div`
+  display: flex;
+  gap: 12px;
+`;
+
+const WalletModalButton = styled(motion.button)`
+  flex: 1;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  background: ${props => props.$variant === 'primary' ? '#1e40af' : '#F1F5F9'};
+  color: ${props => props.$variant === 'primary' ? 'white' : props.theme.colors.text};
+  border: 1.5px solid ${props => props.$variant === 'primary' ? '#1e40af' : '#E2E8F0'};
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${props => props.$variant === 'primary'
+      ? '0 6px 20px rgba(30, 64, 175, 0.3)'
+      : '0 4px 12px rgba(0, 0, 0, 0.1)'};
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+`;
+
 const Applications = () => {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('applications');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilters, setStatusFilters] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [applications, setApplications] = useState(() => getInitialApplications(language));
   const [jobPosts] = useState(() => getJobPosts(language));
+  const [showWalletModal, setShowWalletModal] = useState(false);
+
+  // Mock wallet connection status - in real app, get from user context or API
+  const [isWalletConnected] = useState(() => {
+    return localStorage.getItem('employer_wallet_connected') === 'true';
+  });
 
   useEffect(() => {
     setApplications(getInitialApplications(language));
@@ -1388,9 +1574,25 @@ const Applications = () => {
 
         {/* Conditional Content */}
         {activeSection === 'posts' && (
-          <JobPostsGrid>
-            <AnimatePresence>
-              {jobPosts.map((post, index) => (
+          <>
+            <PostsSectionHeader>
+              <PostsSectionTitle>
+                <Newspaper />
+                {language === 'vi' ? 'Các bài đăng tuyển dụng' : 'Job Postings'}
+              </PostsSectionTitle>
+              <CreatePostButton
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate('/employer/post-job')}
+              >
+                <Plus />
+                {language === 'vi' ? 'Đăng bài mới' : 'Post New Job'}
+              </CreatePostButton>
+            </PostsSectionHeader>
+            
+            <JobPostsGrid>
+              <AnimatePresence>
+                {jobPosts.map((post, index) => (
                 <JobPostCard
                   key={post.id}
                   $status={post.status}
@@ -1461,6 +1663,7 @@ const Applications = () => {
               ))}
             </AnimatePresence>
           </JobPostsGrid>
+          </>
         )}
 
         {activeSection === 'applications' && (

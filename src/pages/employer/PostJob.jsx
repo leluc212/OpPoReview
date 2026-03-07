@@ -262,8 +262,8 @@ const PostJob = () => {
       localStorage.setItem('employerJobs', JSON.stringify(updatedJobs));
     }
     
-    // Navigate to jobs page
-    navigate('/employer/jobs');
+    // Navigate to quick jobs page
+    navigate('/employer/quick-jobs');
   };
 
   return (

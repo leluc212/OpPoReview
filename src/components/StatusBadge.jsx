@@ -77,6 +77,26 @@ const BadgeWrapper = styled.span`
     border: 2px solid ${props.theme.colors.error}40;
     box-shadow: 0 2px 8px ${props.theme.colors.error}20;
   `}
+  
+  ${props => props.$status === 'recruiting' && `
+    background: ${props.theme.colors.successBg};
+    color: ${props.theme.colors.success};
+    border: 2px solid ${props.theme.colors.success}40;
+    box-shadow: 0 2px 8px ${props.theme.colors.success}20;
+  `}
+  
+  ${props => props.$status === 'displayed' && `
+    background: ${props.theme.colors.infoBg};
+    color: ${props.theme.colors.info};
+    border: 2px solid ${props.theme.colors.info}40;
+    box-shadow: 0 2px 8px ${props.theme.colors.info}20;
+  `}
+  
+  ${props => props.$status === 'expired' && `
+    background: ${props.theme.colors.bgDark};
+    color: ${props.theme.colors.textLight};
+    border: 2px solid ${props.theme.colors.border};
+  `}
 `;
 
 const StatusDot = styled.span`
@@ -104,7 +124,10 @@ const StatusBadge = ({ status, showDot = true, children, size = 'md' }) => {
       'active': 'Hoạt động',
       'inactive': 'Không hoạt động',
       'completed': 'Hoàn thành',
-      'urgent': 'Tuyển gấp'
+      'urgent': 'Tuyển gấp',
+      'recruiting': 'Đang tuyển dụng',
+      'displayed': 'Hiển thị',
+      'expired': 'Hết hạn'
     },
     en: {
       'pending': 'Pending',
@@ -114,13 +137,16 @@ const StatusBadge = ({ status, showDot = true, children, size = 'md' }) => {
       'active': 'Active',
       'inactive': 'Inactive',
       'completed': 'Completed',
-      'urgent': 'Urgent'
+      'urgent': 'Urgent',
+      'recruiting': 'Recruiting',
+      'displayed': 'Displayed',
+      'expired': 'Expired'
     }
   };
   
   return (
     <BadgeWrapper $status={status} $size={size}>
-      {showDot && <StatusDot $pulse={status === 'urgent'} $size={size} />}
+      {showDot && <StatusDot $pulse={status === 'urgent' || status === 'recruiting'} $size={size} />}
       {children || statusText[language][status] || status}
     </BadgeWrapper>
   );

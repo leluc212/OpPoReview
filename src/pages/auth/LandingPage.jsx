@@ -2961,7 +2961,7 @@ const LandingPage = () => {
             )}
           </DropdownContainer>
           
-          <NavLinkItem to="/login?redirect=/employer/jobs&role=employer">
+          <NavLinkItem to="/login?redirect=/employer/quick-jobs&role=employer">
             Đăng tuyển
           </NavLinkItem>
           </NavLinks>

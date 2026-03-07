@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -458,46 +458,82 @@ const EmptyState = styled.div`
 
 const EmployerWallet = () => {
   const { language } = useLanguage();
-  const [balance] = useState(125500000); // 125,500,000 VND
+  
+  // Initialize wallet if not exists
+  const initializeWallet = () => {
+    const walletData = localStorage.getItem('employer_wallet');
+    if (!walletData) {
+      const initialWallet = {
+        balance: 500000, // 500,000 VNĐ số dư ban đầu
+        createdAt: new Date().toISOString()
+      };
+      localStorage.setItem('employer_wallet', JSON.stringify(initialWallet));
+      return initialWallet.balance;
+    }
+    return JSON.parse(walletData).balance;
+  };
+
+  const [balance, setBalance] = useState(() => initializeWallet());
   const [showBalance, setShowBalance] = useState(false);
 
-  const transactions = [
-    {
-      id: 1,
-      type: 'expense',
-      title: language === 'vi' ? 'Thanh toán gói Premium' : 'Premium plan payment',
-      date: '14/02/2026',
-      amount: -5000000
-    },
-    {
-      id: 2,
-      type: 'expense',
-      title: language === 'vi' ? 'Đăng tin tuyển dụng' : 'Job posting fee',
-      date: '12/02/2026',
-      amount: -2000000
-    },
-    {
-      id: 3,
-      type: 'income',
-      title: language === 'vi' ? 'Nạp tiền vào ví' : 'Wallet deposit',
-      date: '10/02/2026',
-      amount: 50000000
-    },
-    {
-      id: 4,
-      type: 'expense',
-      title: language === 'vi' ? 'Phí đăng tin urgent' : 'Urgent posting fee',
-      date: '08/02/2026',
-      amount: -3000000
-    },
-    {
-      id: 5,
-      type: 'income',
-      title: language === 'vi' ? 'Hoàn tiền dịch vụ' : 'Service refund',
-      date: '05/02/2026',
-      amount: 1500000
+  // Load transactions from localStorage
+  const [transactions, setTransactions] = useState(() => {
+    const saved = localStorage.getItem('employer_transactions');
+    if (saved) {
+      return JSON.parse(saved);
     }
-  ];
+    // Mock data fallback
+    return [
+      {
+        id: 1,
+        type: 'income',
+        description: language === 'vi' ? 'Nạp tiền ban đầu' : 'Initial deposit',
+        amount: 500000,
+        date: new Date().toISOString(),
+        balanceAfter: 500000
+      }
+    ];
+  });
+
+  // Reload balance from localStorage
+  const reloadBalance = () => {
+    const walletData = localStorage.getItem('employer_wallet');
+    if (walletData) {
+      const balance = JSON.parse(walletData).balance;
+      setBalance(balance);
+    }
+  };
+
+  // Reload transactions from localStorage
+  const reloadTransactions = () => {
+    const saved = localStorage.getItem('employer_transactions');
+    if (saved) {
+      setTransactions(JSON.parse(saved));
+    }
+  };
+
+  // Auto-reload when page becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        reloadBalance();
+        reloadTransactions();
+      }
+    };
+
+    const handleFocus = () => {
+      reloadBalance();
+      reloadTransactions();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []);
 
   const receipts = [
     { id: 1, title: language === 'vi' ? 'Hóa đơn #2026021401' : 'Invoice #2026021401', date: '14/02/2026' },
@@ -520,7 +556,42 @@ const EmployerWallet = () => {
   };
 
   const handleDeposit = () => {
-    alert(language === 'vi' ? 'Mở form nạp tiền' : 'Open deposit form');
+    const amountStr = prompt(language === 'vi' ? 'Nhập số tiền muốn nạp (VNĐ):' : 'Enter amount to deposit (VND):');
+    if (!amountStr) return;
+    
+    const amount = parseInt(amountStr);
+    if (isNaN(amount) || amount <= 0) {
+      alert(language === 'vi' ? 'Số tiền không hợp lệ!' : 'Invalid amount!');
+      return;
+    }
+
+    // Update balance
+    const walletData = JSON.parse(localStorage.getItem('employer_wallet') || '{"balance": 0}');
+    const newBalance = (walletData.balance || 0) + amount;
+    walletData.balance = newBalance;
+    localStorage.setItem('employer_wallet', JSON.stringify(walletData));
+
+    // Save transaction
+    const transaction = {
+      id: Date.now(),
+      type: 'credit',
+      amount: amount,
+      description: language === 'vi' ? 'Nạp tiền vào ví' : 'Wallet deposit',
+      date: new Date().toISOString(),
+      balanceAfter: newBalance
+    };
+
+    const transactions = JSON.parse(localStorage.getItem('employer_transactions') || '[]');
+    transactions.unshift(transaction);
+    localStorage.setItem('employer_transactions', JSON.stringify(transactions));
+
+    // Reload data
+    setBalance(newBalance);
+    reloadTransactions();
+    
+    alert(language === 'vi' 
+      ? `✓ Nạp thành công ${amount.toLocaleString('vi-VN')} VNĐ!` 
+      : `✓ Successfully deposited ${amount.toLocaleString('vi-VN')} VND!`);
   };
 
   const handleLinkBank = () => {
@@ -529,11 +600,11 @@ const EmployerWallet = () => {
 
   // Calculate stats
   const totalIncome = transactions
-    .filter(t => t.type === 'income')
-    .reduce((sum, t) => sum + t.amount, 0);
+    .filter(t => t.type === 'income' || t.type === 'credit')
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
     
   const totalExpense = transactions
-    .filter(t => t.type === 'expense')
+    .filter(t => t.type === 'expense' || t.type === 'debit')
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
   return (
@@ -611,26 +682,36 @@ const EmployerWallet = () => {
               {transactions.map((transaction, index) => (
                 <TransactionItem 
                   key={transaction.id}
-                  $type={transaction.type}
+                  $type={transaction.type === 'debit' ? 'expense' : (transaction.type === 'credit' ? 'income' : transaction.type)}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: 0.2 + (index * 0.05) }}
                 >
                   <TransactionInfo>
-                    <TransactionIcon $type={transaction.type}>
-                      {transaction.type === 'income' ? (
+                    <TransactionIcon $type={transaction.type === 'debit' ? 'expense' : (transaction.type === 'credit' ? 'income' : transaction.type)}>
+                      {(transaction.type === 'income' || transaction.type === 'credit') ? (
                         <ArrowDownLeft />
                       ) : (
                         <ArrowUpRight />
                       )}
                     </TransactionIcon>
                     <TransactionDetails>
-                      <div className="title">{transaction.title}</div>
-                      <div className="date">{transaction.date}</div>
+                      <div className="title">{transaction.description || transaction.title}</div>
+                      <div className="date">
+                        {transaction.date 
+                          ? new Date(transaction.date).toLocaleString(language === 'vi' ? 'vi-VN' : 'en-US', {
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })
+                          : ''}
+                      </div>
                     </TransactionDetails>
                   </TransactionInfo>
-                  <TransactionAmount $type={transaction.type}>
-                    {transaction.type === 'income' ? '+' : '-'}
+                  <TransactionAmount $type={transaction.type === 'debit' ? 'expense' : (transaction.type === 'credit' ? 'income' : transaction.type)}>
+                    {(transaction.type === 'income' || transaction.type === 'credit') ? '+' : '-'}
                     {formatCurrency(Math.abs(transaction.amount))}
                   </TransactionAmount>
                 </TransactionItem>

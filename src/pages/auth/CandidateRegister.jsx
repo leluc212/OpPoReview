@@ -45,7 +45,6 @@ const Shell = styled.div`
   background: #f8faff;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   color-scheme: light;
-  overflow: hidden;
   position: relative;
 `;
 
@@ -54,14 +53,16 @@ const Shell = styled.div`
 ═══════════════════════════════════════════════════════════════ */
 const LeftPanel = styled.div`
   width: 46%;
-  min-height: 100vh;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
   background: linear-gradient(150deg, #07195c 0%, #0E3995 40%, #1648c8 75%, #2563eb 100%);
   background-size: 220% 220%;
   animation: ${gradMove} 10s ease infinite;
   display: flex;
   flex-direction: column;
   padding: 52px 52px 40px;
-  position: relative;
   overflow: hidden;
 
   @media (max-width: 960px) { display: none; }
@@ -279,13 +280,15 @@ const TickerItem = styled.span`
 ═══════════════════════════════════════════════════════════════ */
 const RightPanel = styled.div`
   flex: 1;
+  margin-left: 46%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 48px 32px;
   position: relative;
-  overflow-y: auto;
+  height: 100vh;
+  overflow: hidden;
 
   &::before {
     content: '';
@@ -299,6 +302,7 @@ const RightPanel = styled.div`
   }
 
   @media (max-width: 960px) {
+    margin-left: 0;
     background: linear-gradient(145deg, #07195c 0%, #0E3995 100%);
     &::before { display: none; }
   }

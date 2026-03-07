@@ -378,7 +378,6 @@ const Sidebar = ({ role }) => {
   const employerLinks = [
     { section: t.sidebar.main, items: [
       { to: '/employer/dashboard', icon: LayoutDashboard, label: t.sidebar.dashboard },
-      { to: '/employer/jobs', icon: FileText, label: t.sidebar.myJobs },
       { to: '/employer/standard-jobs', icon: Briefcase, label: t.sidebar.applications },
       { to: '/employer/quick-jobs', icon: Clock, label: t.sidebar.userManagement || 'HR Management' },
     ]},

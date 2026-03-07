@@ -50,7 +50,6 @@ const Root = styled.div`
   background: #f0f4ff;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   color-scheme: light;
-  overflow: hidden;
   position: relative;
 `;
 
@@ -59,11 +58,13 @@ const Root = styled.div`
 ──────────────────────────────────────────────────────────────────── */
 const Left = styled.div`
   width: 48%;
-  min-height: 100vh;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
   background: linear-gradient(145deg, #0a2470 0%, #0e3995 45%, #1a56d6 100%);
   background-size: 200% 200%;
   animation: ${gradientShift} 8s ease infinite;
-  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -290,13 +291,15 @@ const Badge = styled(motion.div)`
 ──────────────────────────────────────────────────────────────────── */
 const Right = styled.div`
   flex: 1;
+  margin-left: 48%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 40px 32px;
   position: relative;
-  overflow-y: auto;
+  height: 100vh;
+  overflow: hidden;
 
   /* subtle bg pattern */
   &::before {
@@ -311,6 +314,7 @@ const Right = styled.div`
   }
 
   @media (max-width: 960px) {
+    margin-left: 0;
     background: linear-gradient(145deg, #0a2470 0%, #0e3995 100%);
     &::before { display: none; }
   }
