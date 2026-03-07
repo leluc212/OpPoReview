@@ -222,12 +222,14 @@ const SectionHeader = styled.div`
 `;
 
 const ApplicationCard = styled(motion.div)`
-  padding: 20px;
-  border: 2px solid ${props => props.theme.colors.border};
-  border-radius: ${props => props.theme.borderRadius.lg};
+  padding: 24px;
+  background: ${props => props.theme.colors.cardBg};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: 16px;
   margin-bottom: 16px;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   
   &:last-child {
     margin-bottom: 0;
@@ -235,16 +237,16 @@ const ApplicationCard = styled(motion.div)`
   
   &:hover {
     border-color: ${props => props.theme.colors.primary};
-    transform: translateX(8px);
-    box-shadow: ${props => props.theme.shadows.md};
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(30, 64, 175, 0.12);
   }
 `;
 
 const ApplicationHeader = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 12px;
+  align-items: center;
+  margin-bottom: 16px;
 `;
 
 const CandidateInfo = styled.div`
@@ -264,21 +266,60 @@ const CandidateInfo = styled.div`
   }
 `;
 
+const ViewProfileButton = styled.button`
+  padding: 10px 20px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+  color: white;
+  font-size: 13.5px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.2);
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
 const ApplicationMeta = styled.div`
   display: flex;
-  gap: 16px;
+  gap: 20px;
   align-items: center;
   font-size: 13px;
   color: ${props => props.theme.colors.textLight};
+  padding-top: 12px;
+  border-top: 1px solid ${props => props.theme.colors.border};
   
   span {
     display: flex;
     align-items: center;
     gap: 6px;
+    transition: color 0.2s ease;
     
     svg {
-      width: 14px;
-      height: 14px;
+      width: 15px;
+      height: 15px;
+    }
+
+    &:hover {
+      color: ${props => props.theme.colors.primary};
     }
   }
 `;
@@ -427,7 +468,32 @@ const EmployerDashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language]);
 
-
+  const activities = [
+    {
+      title: language === 'vi' ? 'Ứng viên "Hiếu sàn" đã ứng tuyển vào "Cửa hàng trưởng"' : 'Candidate "Hieu san" applied for "Store Manager"',
+      time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
+      icon: Users,
+      color: '#1e40af'
+    },
+    {
+      title: language === 'vi' ? 'Tin "Nhân viên pha chế" đã được duyệt' : 'Job "Barista" approved',
+      time: language === 'vi' ? '5 giờ trước' : '5 hours ago',
+      icon: CheckCircle,
+      color: '#10B981'
+    },
+    {
+      title: language === 'vi' ? 'Bạn có tin nhắn mới từ ứng viên' : 'New message from candidate',
+      time: language === 'vi' ? '1 ngày trước' : '1 day ago',
+      icon: MessageSquare,
+      color: '#F59E0B'
+    },
+    {
+      title: language === 'vi' ? 'Báo cáo tuần đã sẵn sàng xem' : 'Weekly report is ready',
+      time: language === 'vi' ? '2 ngày trước' : '2 days ago',
+      icon: BarChart3,
+      color: '#8B5CF6'
+    }
+  ];
 
   const getGreeting = () => {
     const hour = currentTime.getHours();
@@ -513,51 +579,94 @@ const EmployerDashboard = () => {
           />
         </StatsGrid>
 
-        {/* Recent Applications - Full Width */}
-        <Section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <SectionHeader>
-            <h2>
-              <Briefcase />
-              {language === 'vi' ? 'Công việc tiêu chuẩn' : 'Standard Jobs'}
-            </h2>
-            <a onClick={() => navigate('/OpPoReview/employer/standard-jobs')} style={{ cursor: 'pointer' }}>
-              {language === 'vi' ? 'Xem tất cả' : 'View all'}
-              <ArrowUpRight />
-            </a>
-          </SectionHeader>
-          
-          {recentApplications.map((app, index) => (
-            <ApplicationCard
-              key={app.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + index * 0.1 }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <ApplicationHeader>
-                <CandidateInfo>
-                  <h4>{app.candidate}</h4>
-                  <p>{app.job}</p>
-                </CandidateInfo>
-                <StatusBadge status={app.status} />
-              </ApplicationHeader>
-              <ApplicationMeta>
-                <span>
-                  <Clock />
-                  {app.applied}
-                </span>
-                <span>
-                  <Download />
-                  {language === 'vi' ? 'Tải CV' : 'Download CV'}
-                </span>
-              </ApplicationMeta>
-            </ApplicationCard>
-          ))}
-        </Section>
+        {/* Main Content Grid */}
+        <ContentGrid>
+          {/* Recent Applications */}
+          <Section
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <SectionHeader>
+              <h2>
+                <Briefcase />
+                {language === 'vi' ? 'Công việc tiêu chuẩn' : 'Standard Jobs'}
+              </h2>
+              <a onClick={() => navigate('/employer/standard-jobs')} style={{ cursor: 'pointer' }}>
+                {language === 'vi' ? 'Xem tất cả' : 'View all'}
+                <ArrowUpRight />
+              </a>
+            </SectionHeader>
+            
+            {recentApplications.map((app, index) => (
+              <ApplicationCard
+                key={app.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + index * 0.1 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <ApplicationHeader>
+                  <CandidateInfo>
+                    <h4>{app.candidate}</h4>
+                    <p>{app.job}</p>
+                  </CandidateInfo>
+                  <ViewProfileButton onClick={() => navigate('/employer/standard-jobs', { state: { candidateId: app.id } })}>
+                    <Eye />
+                    {language === 'vi' ? 'Xem hồ sơ' : 'View Profile'}
+                  </ViewProfileButton>
+                </ApplicationHeader>
+                <ApplicationMeta>
+                  <span>
+                    <Clock />
+                    {app.applied}
+                  </span>
+                  <span>
+                    <Download />
+                    {language === 'vi' ? 'Tải CV' : 'Download CV'}
+                  </span>
+                </ApplicationMeta>
+              </ApplicationCard>
+            ))}
+          </Section>
+
+          {/* Activity Feed */}
+          <Section
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <SectionHeader>
+              <h2>
+                <Calendar />
+                {language === 'vi' ? 'Hoạt Động Gần Đây' : 'Recent Activity'}
+              </h2>
+            </SectionHeader>
+            
+            <ActivityFeed>
+              {activities.map((activity, index) => {
+                const IconComponent = activity.icon;
+                return (
+                  <ActivityItem
+                    key={index}
+                    $color={activity.color}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4 + index * 0.1 }}
+                  >
+                    <ActivityIcon $color={activity.color}>
+                      <IconComponent />
+                    </ActivityIcon>
+                    <ActivityContent>
+                      <h5>{activity.title}</h5>
+                      <p>{activity.time}</p>
+                    </ActivityContent>
+                  </ActivityItem>
+                );
+              })}
+            </ActivityFeed>
+          </Section>
+        </ContentGrid>
 
         {/* Performance Metrics */}
         <Section
