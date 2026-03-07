@@ -3,18 +3,7 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import TableFilter from '../../components/TableFilter';
 import { useLanguage } from '../../context/LanguageContext';
-import { 
-  Users, 
-  Building2, 
-  CheckSquare, 
-  XSquare, 
-  Shield, 
-  Calendar, 
-  Eye, 
-  CheckCircle, 
-  Ban, 
-  Trash2
-} from 'lucide-react';
+import { Users, Building2, CheckSquare, XSquare, Shield, Calendar, Eye, CheckCircle, Ban, Trash2 } from 'lucide-react';
 
 const UserManagementContainer = styled.div``;
 
@@ -214,11 +203,155 @@ const DateText = styled.span`
   }
 `;
 
+const VerificationModal = styled.div`
+  padding: 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+`;
+
+const VerificationSection = styled.div`
+  margin-bottom: 24px;
+  padding: 20px;
+  background: ${props => props.theme.colors.bgDark};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  border-left: 4px solid ${props => props.theme.colors.primary};
+`;
+
+const SectionTitle = styled.h3`
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: ${props => props.theme.colors.text};
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const InfoGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const InfoItem = styled.div`
+  label {
+    display: block;
+    font-size: 12px;
+    color: ${props => props.theme.colors.textLight};
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  
+  p {
+    font-size: 14px;
+    color: ${props => props.theme.colors.text};
+    font-weight: 500;
+  }
+`;
+
+const DocumentLink = styled.a`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: ${props => props.theme.colors.primary};
+  color: white;
+  border-radius: ${props => props.theme.borderRadius.md};
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s;
+  
+  &:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+  }
+`;
+
+const RejectReasonBox = styled.div`
+  margin-top: 16px;
+  
+  label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: ${props => props.theme.colors.text};
+  }
+  
+  textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid ${props => props.theme.colors.border};
+    border-radius: ${props => props.theme.borderRadius.md};
+    background: ${props => props.theme.colors.bgLight};
+    color: ${props => props.theme.colors.text};
+    font-size: 14px;
+    resize: vertical;
+    min-height: 100px;
+    
+    &:focus {
+      outline: none;
+      border-color: ${props => props.theme.colors.primary};
+    }
+  }
+`;
+
+const ModalActions = styled.div`
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid ${props => props.theme.colors.border};
+`;
+
+const Button = styled.button`
+  padding: 10px 20px;
+  border: none;
+  border-radius: ${props => props.theme.borderRadius.md};
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  ${props => {
+    if (props.$variant === 'primary') {
+      return `
+        background: #10b981;
+        color: white;
+        &:hover { background: #059669; }
+      `;
+    }
+    if (props.$variant === 'danger') {
+      return `
+        background: #ef4444;
+        color: white;
+        &:hover { background: #dc2626; }
+      `;
+    }
+    return `
+      background: ${props.theme.colors.bgDark};
+      color: ${props.theme.colors.text};
+      &:hover { background: ${props.theme.colors.border}; }
+    `;
+  }}
+`;
+
 const UserManagement = () => {
   const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState('candidates');
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState([]);
+  const [selectedEmployer, setSelectedEmployer] = useState(null);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
 
   // Dữ liệu ứng viên
   const [candidates] = useState([
@@ -249,6 +382,24 @@ const UserManagement = () => {
       joined: '2023-12-05',
       interviewDate: null,
     },
+    { 
+      id: 4,
+      name: 'Phạm Thị D', 
+      email: 'phamthid@example.com', 
+      ekycVerified: true,
+      approvalStatus: 'approved',
+      joined: '2024-02-01',
+      interviewDate: '2024-03-05',
+    },
+    { 
+      id: 5,
+      name: 'Hoàng Văn E', 
+      email: 'hoangvane@example.com', 
+      ekycVerified: false,
+      approvalStatus: 'pending',
+      joined: '2024-02-10',
+      interviewDate: '2024-03-01',
+    },
   ]);
 
   // Dữ liệu nhà tuyển dụng
@@ -271,9 +422,34 @@ const UserManagement = () => {
       joined: '2024-01-05',
       interviewDate: '2024-02-18',
     },
+    { 
+      id: 3,
+      name: 'Công ty TNHH ABC', 
+      email: 'contact@abc.com', 
+      verified: false,
+      approvalStatus: 'pending',
+      joined: '2024-02-01',
+      interviewDate: '2024-03-10',
+    },
+    { 
+      id: 4,
+      name: 'VinGroup', 
+      email: 'hr@vingroup.com', 
+      verified: true,
+      approvalStatus: 'approved',
+      joined: '2023-12-20',
+      interviewDate: '2024-02-22',
+    },
+    { 
+      id: 5,
+      name: 'Shopee Vietnam', 
+      email: 'talent@shopee.vn', 
+      verified: false,
+      approvalStatus: 'rejected',
+      joined: '2024-01-25',
+      interviewDate: null,
+    },
   ]);
-
-
 
   const getApprovalStatusText = (status) => {
     if (status === 'approved') return language === 'vi' ? 'Đã duyệt' : 'Approved';
@@ -287,8 +463,6 @@ const UserManagement = () => {
     if (status === 'rejected') return 'danger';
     return 'warning';
   };
-
-
 
   const filterOptions = [
     { value: 'approved', label: language === 'vi' ? 'Đã duyệt' : 'Approved' },
@@ -328,8 +502,6 @@ const UserManagement = () => {
     });
   }, [employers, searchTerm, filters]);
 
-
-
   const handleFilterToggle = (filterValue) => {
     setFilters(prev => 
       prev.includes(filterValue) 
@@ -337,8 +509,6 @@ const UserManagement = () => {
         : [...prev, filterValue]
     );
   };
-
-
 
   const candidateStats = {
     total: candidates.length,
@@ -354,14 +524,56 @@ const UserManagement = () => {
     verified: employers.filter(e => e.verified).length,
   };
 
+  const pendingStats = {
+    total: pendingEmployers.length,
+    highScore: pendingEmployers.filter(e => e.verificationScore >= 80).length,
+    lowRisk: pendingEmployers.filter(e => e.riskLevel === 'low').length,
+    complete: pendingEmployers.filter(e => e.documentsComplete).length,
+  };
 
+  const handleViewVerification = (employer) => {
+    setSelectedEmployer(employer);
+    setShowVerificationModal(true);
+  };
+
+  const handleApprove = (employerId) => {
+    alert(`Đã phê duyệt nhà tuyển dụng ID: ${employerId}`);
+    setShowVerificationModal(false);
+  };
+
+  const handleReject = (employerId) => {
+    if (!rejectReason.trim()) {
+      alert('Vui lòng nhập lý do từ chối');
+      return;
+    }
+    alert(`Đã từ chối nhà tuyển dụng ID: ${employerId}\nLý do: ${rejectReason}`);
+    setShowVerificationModal(false);
+    setRejectReason('');
+  };
+
+  const handleRequestMoreInfo = (employerId) => {
+    alert(`Đã gửi yêu cầu bổ sung thông tin cho nhà tuyển dụng ID: ${employerId}`);
+    setShowVerificationModal(false);
+  };
+
+  const getRiskLevelColor = (level) => {
+    if (level === 'low') return '#10b981';
+    if (level === 'medium') return '#f59e0b';
+    return '#ef4444';
+  };
+
+  const getRiskLevelText = (level) => {
+    if (level === 'low') return language === 'vi' ? 'Thấp' : 'Low';
+    if (level === 'medium') return language === 'vi' ? 'Trung bình' : 'Medium';
+    return language === 'vi' ? 'Cao' : 'High';
+  };
 
   return (
     <DashboardLayout role="admin">
       <UserManagementContainer>
         <PageHeader>
           <h1>{language === 'vi' ? 'Quản Lý Người Dùng' : 'User Management'}</h1>
-          <p>{language === 'vi' ? 'Quản lý ứng viên và nhà tuyển dụng' : 'Manage candidates and employers'}</p>
+          <p>{language === 'vi' ? 'Quản lý ứng viên và nhà tuyển dụng trên nền tảng' : 'Manage candidates and employers on the platform'}</p>
         </PageHeader>
 
         <TabContainer>
@@ -407,6 +619,28 @@ const UserManagement = () => {
               fontWeight: '600'
             }}>
               {employers.length}
+            </span>
+          </Tab>
+          <Tab 
+            $active={activeTab === 'pending'} 
+            onClick={() => {
+              setActiveTab('pending');
+              setSearchTerm('');
+              setFilters([]);
+            }}
+          >
+            <Clock />
+            {language === 'vi' ? 'Duyệt NTD' : 'Approve Employers'}
+            <span style={{ 
+              marginLeft: '4px', 
+              padding: '2px 8px', 
+              background: activeTab === 'pending' ? '#f59e0b' : '#64748b',
+              color: 'white',
+              borderRadius: '12px',
+              fontSize: '12px',
+              fontWeight: '600'
+            }}>
+              {pendingEmployers.length}
             </span>
           </Tab>
         </TabContainer>
@@ -554,7 +788,7 @@ const UserManagement = () => {
                     <th>{language === 'vi' ? 'Email' : 'Email'}</th>
                     <th>{language === 'vi' ? 'Trạng thái phê duyệt' : 'Approval Status'}</th>
                     <th>{language === 'vi' ? 'Ngày tham gia' : 'Join Date'}</th>
-                    <th>{language === 'vi' ? 'Ngày hẹn PV' : 'Interview Date'}</th>
+                    <th>{language === 'vi' ? 'Ngày xét duyệt' : 'Approve Date'}</th>
                     <th>{language === 'vi' ? 'Đã xác thực' : 'Verified'}</th>
                     <th>{language === 'vi' ? 'Thao tác' : 'Actions'}</th>
                   </tr>

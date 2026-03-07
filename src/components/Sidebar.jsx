@@ -21,7 +21,8 @@ import {
   LogOut,
   UsersRound,
   User,
-  Bookmark
+  Bookmark,
+  Building2
 } from 'lucide-react';
 
 const SidebarContainer = styled.aside`
@@ -294,7 +295,7 @@ const NavLink = styled.div`
 `;
 
 const Sidebar = ({ role }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const navRef = useRef(null);
@@ -398,8 +399,8 @@ const Sidebar = ({ role }) => {
   const adminLinks = [
     { section: t.sidebar.main, items: [
       { to: '/admin/dashboard', icon: LayoutDashboard, label: t.sidebar.dashboard },
-      { to: '/admin/users', icon: Users, label: t.sidebar.userManagement },
-      { to: '/admin/employers', icon: CheckCircle, label: t.sidebar.employerApproval },
+      { to: '/admin/candidates', icon: Users, label: language === 'vi' ? 'Ứng Viên' : 'Candidates' },
+      { to: '/admin/employers', icon: Building2, label: language === 'vi' ? 'Nhà Tuyển Dụng' : 'Employers' },
     ]},
     { section: t.sidebar.platform || 'Management', items: [
       { to: '/admin/posts', icon: FileText, label: t.sidebar.posts || 'Posts Management' },

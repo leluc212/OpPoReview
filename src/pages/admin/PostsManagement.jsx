@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import TableFilter from '../../components/TableFilter';
+import Modal from '../../components/Modal';
 import { useLanguage } from '../../context/LanguageContext';
 import { 
   Briefcase, 
@@ -17,7 +18,11 @@ import {
   AlertTriangle,
   XCircle,
   BarChart3,
-  PieChart as PieChartIcon
+  PieChart as PieChartIcon,
+  Mail,
+  Phone,
+  Building2,
+  User
 } from 'lucide-react';
 
 const PageContainer = styled.div``;
@@ -330,63 +335,197 @@ const DateText = styled.span`
   display: block;
 `;
 
+const DetailModal = styled.div`
+  padding: 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+`;
+
+const DetailSection = styled.div`
+  margin-bottom: 24px;
+  padding: 20px;
+  background: ${props => props.theme.colors.bgDark};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  border-left: 4px solid ${props => props.theme.colors.primary};
+`;
+
+const SectionTitle = styled.h3`
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: ${props => props.theme.colors.text};
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const InfoGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const InfoItem = styled.div`
+  label {
+    display: block;
+    font-size: 12px;
+    color: ${props => props.theme.colors.textLight};
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  
+  p {
+    font-size: 14px;
+    color: ${props => props.theme.colors.text};
+    font-weight: 500;
+  }
+`;
+
+const CandidateList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+const CandidateCard = styled.div`
+  padding: 16px;
+  background: ${props => props.theme.colors.bgLight};
+  border-radius: ${props => props.theme.borderRadius.md};
+  border: 1px solid ${props => props.theme.colors.border};
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 12px;
+  align-items: center;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const CandidateInfo = styled.div`
+  h4 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: ${props => props.theme.colors.text};
+  }
+  
+  p {
+    font-size: 13px;
+    color: ${props => props.theme.colors.textLight};
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 2px;
+  }
+`;
+
+const CandidateDate = styled.div`
+  font-size: 13px;
+  color: ${props => props.theme.colors.textLight};
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+const CandidateStatus = styled.div`
+  display: flex;
+  justify-content: flex-end;
+`;
+
 const PostsManagement = () => {
   const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState('longterm');
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState([]);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   // Dữ liệu việc làm part-time lâu dài
   const [longtermJobs] = useState([
     {
       id: 1,
-      title: 'Nhân viên phục vụ nhà hàng',
-      employer: 'Nhà hàng ABC',
-      postDate: '2024-01-15',
-      endDate: '2024-06-15',
+      title: 'Nhân viên phục vụ',
+      employer: 'Katinat chi nhánh quận 8',
+      employerEmail: 'hr@katinat.vn',
+      employerPhone: '0901234567',
+      postDate: '2026-01-15',
+      endDate: '2026-06-15',
       applications: 45,
       cvSent: 38,
-      status: 'approved'
+      status: 'approved',
+      candidates: [
+        { name: 'Nguyễn Văn A', email: 'nguyenvana@example.com', phone: '0912345678', appliedDate: '2026-01-16', status: 'pending' },
+        { name: 'Trần Thị B', email: 'tranthib@example.com', phone: '0923456789', appliedDate: '2026-01-17', status: 'approved' },
+        { name: 'Lê Văn C', email: 'levanc@example.com', phone: '0934567890', appliedDate: '2026-01-18', status: 'rejected' },
+      ]
     },
     {
       id: 2,
-      title: 'Gia sư Toán - Lý',
-      employer: 'Trung tâm gia sư XYZ',
-      postDate: '2024-01-20',
-      endDate: '2024-12-31',
+      title: 'Nhân viên giữ xe',
+      employer: 'The Coffee House chi nhánh Bình Thạnh',
+      employerEmail: 'recruit@thecoffeehouse.vn',
+      employerPhone: '0902345678',
+      postDate: '2026-01-20',
+      endDate: '2025-12-31',
       applications: 67,
       cvSent: 52,
-      status: 'pending'
+      status: 'pending',
+      candidates: [
+        { name: 'Phạm Thị D', email: 'phamthid@example.com', phone: '0945678901', appliedDate: '2026-01-21', status: 'pending' },
+        { name: 'Hoàng Văn E', email: 'hoangvane@example.com', phone: '0956789012', appliedDate: '2026-01-22', status: 'pending' },
+      ]
     },
     {
       id: 3,
-      title: 'Nhân viên bán hàng part-time',
-      employer: 'Cửa hàng thời trang DEF',
-      postDate: '2024-02-01',
-      endDate: '2024-08-01',
+      title: 'Nhân viên phục vụ',
+      employer: 'D coffee',
+      employerEmail: 'hr@dcoffee.vn',
+      employerPhone: '0903456789',
+      postDate: '2026-02-01',
+      endDate: '2026-08-01',
       applications: 89,
       cvSent: 71,
-      status: 'approved'
+      status: 'approved',
+      candidates: [
+        { name: 'Vũ Thị F', email: 'vuthif@example.com', phone: '0967890123', appliedDate: '2026-02-02', status: 'approved' },
+        { name: 'Đỗ Văn G', email: 'dovang@example.com', phone: '0978901234', appliedDate: '2026-02-03', status: 'approved' },
+        { name: 'Bùi Thị H', email: 'buithih@example.com', phone: '0989012345', appliedDate: '2026-02-04', status: 'pending' },
+      ]
     },
     {
       id: 4,
-      title: 'Thư ký part-time',
-      employer: 'Công ty TNHH GHI',
+      title: 'Nhân viên chạy bàn',
+      employer: 'Quán lẩu 88',
+      employerEmail: 'contact@lau88.vn',
+      employerPhone: '0904567890',
       postDate: '2024-01-10',
       endDate: '2024-07-10',
       applications: 34,
       cvSent: 28,
-      status: 'warning'
+      status: 'warning',
+      candidates: [
+        { name: 'Ngô Văn I', email: 'ngovani@example.com', phone: '0990123456', appliedDate: '2024-01-11', status: 'pending' },
+      ]
     },
     {
       id: 5,
-      title: 'Nhân viên kho part-time',
-      employer: 'Kho vận JKL',
+      title: 'Nhân viên vận chuyển kho',
+      employer: 'Nhà hàng cưới Victory',
+      employerEmail: 'hr@victory.vn',
+      employerPhone: '0905678901',
       postDate: '2024-01-25',
       endDate: '2024-05-25',
       applications: 23,
       cvSent: 19,
-      status: 'rejected'
+      status: 'rejected',
+      candidates: [
+        { name: 'Đinh Thị K', email: 'dinhthik@example.com', phone: '0901234567', appliedDate: '2024-01-26', status: 'rejected' },
+      ]
     },
   ]);
 
@@ -396,51 +535,83 @@ const PostsManagement = () => {
       id: 6,
       title: 'Nhân viên phục vụ sự kiện',
       employer: 'Công ty tổ chức sự kiện MNO',
+      employerEmail: 'hr@mno.vn',
+      employerPhone: '0906789012',
       postDate: '2024-02-10',
       endDate: '2024-02-15',
       applications: 156,
       cvSent: 98,
-      status: 'approved'
+      status: 'approved',
+      candidates: [
+        { name: 'Trương Văn L', email: 'truongvanl@example.com', phone: '0912345678', appliedDate: '2024-02-10', status: 'approved' },
+        { name: 'Lý Thị M', email: 'lythim@example.com', phone: '0923456789', appliedDate: '2024-02-10', status: 'approved' },
+        { name: 'Mai Văn N', email: 'maivann@example.com', phone: '0934567890', appliedDate: '2024-02-11', status: 'pending' },
+      ]
     },
     {
       id: 7,
       title: 'Nhân viên bốc xếp',
       employer: 'Công ty vận tải PQR',
+      employerEmail: 'recruit@pqr.vn',
+      employerPhone: '0907890123',
       postDate: '2024-02-12',
       endDate: '2024-02-14',
       applications: 78,
       cvSent: 65,
-      status: 'pending'
+      status: 'pending',
+      candidates: [
+        { name: 'Cao Văn O', email: 'caovano@example.com', phone: '0945678901', appliedDate: '2024-02-12', status: 'pending' },
+        { name: 'Tô Thị P', email: 'tothip@example.com', phone: '0956789012', appliedDate: '2024-02-12', status: 'pending' },
+      ]
     },
     {
       id: 8,
       title: 'Nhân viên bán hàng cuối tuần',
       employer: 'Siêu thị STU',
+      employerEmail: 'hr@stu.vn',
+      employerPhone: '0908901234',
       postDate: '2024-02-11',
       endDate: '2024-02-13',
       applications: 234,
       cvSent: 187,
-      status: 'approved'
+      status: 'approved',
+      candidates: [
+        { name: 'Hồ Văn Q', email: 'hovanq@example.com', phone: '0967890123', appliedDate: '2024-02-11', status: 'approved' },
+        { name: 'Dương Thị R', email: 'duongthir@example.com', phone: '0978901234', appliedDate: '2024-02-11', status: 'approved' },
+        { name: 'Lâm Văn S', email: 'lamvans@example.com', phone: '0989012345', appliedDate: '2024-02-11', status: 'approved' },
+        { name: 'Võ Thị T', email: 'vothit@example.com', phone: '0990123456', appliedDate: '2024-02-12', status: 'pending' },
+      ]
     },
     {
       id: 9,
       title: 'Nhân viên giao hàng',
       employer: 'Công ty giao hàng VWX',
+      employerEmail: 'contact@vwx.vn',
+      employerPhone: '0909012345',
       postDate: '2024-02-09',
       endDate: '2024-02-12',
       applications: 145,
       cvSent: 112,
-      status: 'warning'
+      status: 'warning',
+      candidates: [
+        { name: 'Phan Văn U', email: 'phanvanu@example.com', phone: '0901234567', appliedDate: '2024-02-09', status: 'pending' },
+        { name: 'Đặng Thị V', email: 'dangthiv@example.com', phone: '0912345678', appliedDate: '2024-02-09', status: 'approved' },
+      ]
     },
     {
       id: 10,
       title: 'Nhân viên dọn dẹp',
       employer: 'Công ty vệ sinh YZ',
+      employerEmail: 'hr@yz.vn',
+      employerPhone: '0910123456',
       postDate: '2024-02-08',
       endDate: '2024-02-11',
       applications: 56,
       cvSent: 43,
-      status: 'rejected'
+      status: 'rejected',
+      candidates: [
+        { name: 'Tạ Văn W', email: 'tavanw@example.com', phone: '0923456789', appliedDate: '2024-02-08', status: 'rejected' },
+      ]
     },
   ]);
 
@@ -479,6 +650,18 @@ const PostsManagement = () => {
         ? prev.filter(f => f !== filterValue)
         : [...prev, filterValue]
     );
+  };
+
+  const handleViewDetails = (job) => {
+    setSelectedJob(job);
+    setShowDetailModal(true);
+  };
+
+  const getCandidateStatusText = (status) => {
+    if (status === 'approved') return language === 'vi' ? 'Đã duyệt' : 'Approved';
+    if (status === 'rejected') return language === 'vi' ? 'Đã từ chối' : 'Rejected';
+    if (status === 'pending') return language === 'vi' ? 'Chờ duyệt' : 'Pending';
+    return status;
   };
 
   const stats = {
@@ -733,7 +916,10 @@ const PostsManagement = () => {
                   </td>
                   <td>
                     <ActionButtons>
-                      <IconButton title={language === 'vi' ? 'Xem chi tiết' : 'View details'}>
+                      <IconButton 
+                        onClick={() => handleViewDetails(job)}
+                        title={language === 'vi' ? 'Xem chi tiết' : 'View details'}
+                      >
                         <Eye size={16} />
                       </IconButton>
                       {job.status === 'pending' && (
@@ -761,6 +947,131 @@ const PostsManagement = () => {
             </tbody>
           </Table>
         </TableWrapper>
+
+        {showDetailModal && selectedJob && (
+          <Modal
+            isOpen={showDetailModal}
+            onClose={() => setShowDetailModal(false)}
+            title={language === 'vi' ? 'Chi Tiết Bài Đăng' : 'Post Details'}
+          >
+            <DetailModal>
+              <DetailSection>
+                <SectionTitle>
+                  <Briefcase size={20} />
+                  {language === 'vi' ? 'Thông Tin Công Việc' : 'Job Information'}
+                </SectionTitle>
+                <InfoGrid>
+                  <InfoItem style={{ gridColumn: '1 / -1' }}>
+                    <label>{language === 'vi' ? 'Tiêu đề' : 'Title'}</label>
+                    <p style={{ fontSize: '16px', fontWeight: '600' }}>{selectedJob.title}</p>
+                  </InfoItem>
+                  <InfoItem>
+                    <label>{language === 'vi' ? 'Ngày đăng' : 'Post Date'}</label>
+                    <p>{selectedJob.postDate}</p>
+                  </InfoItem>
+                  <InfoItem>
+                    <label>{language === 'vi' ? 'Ngày kết thúc' : 'End Date'}</label>
+                    <p>{selectedJob.endDate}</p>
+                  </InfoItem>
+                  <InfoItem>
+                    <label>{language === 'vi' ? 'Số lượng ứng tuyển' : 'Applications'}</label>
+                    <p>{selectedJob.applications}</p>
+                  </InfoItem>
+                  <InfoItem>
+                    <label>{language === 'vi' ? 'CV đã gửi' : 'CV Sent'}</label>
+                    <p>{selectedJob.cvSent}</p>
+                  </InfoItem>
+                  <InfoItem>
+                    <label>{language === 'vi' ? 'Trạng thái' : 'Status'}</label>
+                    <StatusBadge $status={selectedJob.status}>
+                      {getStatusText(selectedJob.status)}
+                    </StatusBadge>
+                  </InfoItem>
+                </InfoGrid>
+              </DetailSection>
+
+              <DetailSection>
+                <SectionTitle>
+                  <Building2 size={20} />
+                  {language === 'vi' ? 'Thông Tin Nhà Tuyển Dụng' : 'Employer Information'}
+                </SectionTitle>
+                <InfoGrid>
+                  <InfoItem style={{ gridColumn: '1 / -1' }}>
+                    <label>{language === 'vi' ? 'Tên công ty' : 'Company Name'}</label>
+                    <p style={{ fontSize: '15px', fontWeight: '600' }}>{selectedJob.employer}</p>
+                  </InfoItem>
+                  <InfoItem>
+                    <label>Email</label>
+                    <p style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Mail size={14} />
+                      {selectedJob.employerEmail}
+                    </p>
+                  </InfoItem>
+                  <InfoItem>
+                    <label>{language === 'vi' ? 'Số điện thoại' : 'Phone'}</label>
+                    <p style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Phone size={14} />
+                      {selectedJob.employerPhone}
+                    </p>
+                  </InfoItem>
+                </InfoGrid>
+              </DetailSection>
+
+              <DetailSection>
+                <SectionTitle>
+                  <Users size={20} />
+                  {language === 'vi' ? 'Danh Sách Ứng Viên' : 'Candidates List'}
+                  <span style={{ 
+                    marginLeft: '8px', 
+                    padding: '2px 10px', 
+                    background: '#1e40af',
+                    color: 'white',
+                    borderRadius: '12px',
+                    fontSize: '13px',
+                    fontWeight: '600'
+                  }}>
+                    {selectedJob.candidates?.length || 0}
+                  </span>
+                </SectionTitle>
+                <CandidateList>
+                  {selectedJob.candidates && selectedJob.candidates.length > 0 ? (
+                    selectedJob.candidates.map((candidate, index) => (
+                      <CandidateCard key={index}>
+                        <CandidateInfo>
+                          <h4>
+                            <User size={14} style={{ display: 'inline', marginRight: '4px' }} />
+                            {candidate.name}
+                          </h4>
+                          <p>
+                            <Mail size={12} />
+                            {candidate.email}
+                          </p>
+                          <p>
+                            <Phone size={12} />
+                            {candidate.phone}
+                          </p>
+                        </CandidateInfo>
+                        <CandidateDate>
+                          <Calendar size={14} />
+                          {candidate.appliedDate}
+                        </CandidateDate>
+                        <CandidateStatus>
+                          <StatusBadge $status={candidate.status}>
+                            {getCandidateStatusText(candidate.status)}
+                          </StatusBadge>
+                        </CandidateStatus>
+                      </CandidateCard>
+                    ))
+                  ) : (
+                    <p style={{ textAlign: 'center', color: '#94a3b8', padding: '20px' }}>
+                      {language === 'vi' ? 'Chưa có ứng viên nào' : 'No candidates yet'}
+                    </p>
+                  )}
+                </CandidateList>
+              </DetailSection>
+            </DetailModal>
+          </Modal>
+        )}
       </PageContainer>
     </DashboardLayout>
   );
