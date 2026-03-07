@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -13,22 +14,10 @@ import {
   Phone, 
   MapPin, 
   Briefcase, 
-  Link as LinkIcon, 
-  Github, 
-  Linkedin,
-  Globe,
-  Award,
-  Calendar,
-  Edit2,
-  Camera,
-  CheckCircle,
-  FileText,
-  Star,
-  X,
-  Facebook,
-  Shield,
+  Link as LinkIcon,
   CreditCard,
-  ArrowRight
+  Camera,
+  // Đã loại bỏ các icon mạng xã hội khác ngoài Google
 } from 'lucide-react';
 
 // Custom Zalo Icon Component - Based on official Zalo logo
@@ -657,6 +646,7 @@ const ModalButtons = styled.div`
 
 const CandidateProfile = () => {
   const { language, t } = useLanguage();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [profileImage, setProfileImage] = useState(() => {
     return localStorage.getItem('profileImage') || null;
@@ -672,11 +662,7 @@ const CandidateProfile = () => {
     dateOfBirth: '',
     title: 'Senior React Developer',
     bio: 'Passionate developer with 5+ years of experience in building modern web applications. Specialized in React, Node.js, and cloud technologies.',
-    linkedin: '',
-    github: '',
-    website: '',
-    facebook: '',
-    zalo: ''
+    // Đã loại bỏ các trường mạng xã hội khác ngoài Google
   };
   
   const [formData, setFormData] = useState(() => {
@@ -772,11 +758,7 @@ const CandidateProfile = () => {
     if (profileImage) completion += 15;
     
     // Social links (not counted towards completion)
-    // if (formData.linkedin && formData.linkedin.trim()) completion += 0;
-    // if (formData.github && formData.github.trim()) completion += 0;
-    // if (formData.website && formData.website.trim()) completion += 0;
-    // if (formData.facebook && formData.facebook.trim()) completion += 0;
-    // if (formData.zalo && formData.zalo.trim()) completion += 0;
+    // Đã loại bỏ các completion mạng xã hội khác ngoài Google
     
     // Skills (5%)
     if (skills && skills.length >= 3) completion += 5;
@@ -927,7 +909,7 @@ const CandidateProfile = () => {
     
     setKycCompleted(true);
     setShowKYCModal(false);
-    alert(language === 'vi' ? '✅ Xác minh KYC hoàn tất!' : '✅ KYC verification completed!');
+    alert(language === 'vi' ? '✅ Xác minh eKYC hoàn tất!' : '✅ eKYC verification completed!');
   };
 
   const resetKYC = () => {
@@ -979,7 +961,7 @@ const CandidateProfile = () => {
   };
 
   return (
-    <DashboardLayout role="candidate" showSearch={false}>
+    <DashboardLayout role="candidate" showSearch={false} key={language}>
       <ProfileContainer>
         <ProfileHeader
           initial={{ opacity: 0, y: 20 }}
@@ -1259,68 +1241,13 @@ const CandidateProfile = () => {
 
               {isEditing ? (
                 <FormGrid>
-                  <FormGroup>
-                    <Label>LinkedIn</Label>
-                    <Input name="linkedin" value={formData.linkedin || ''} onChange={handleChange} placeholder="linkedin.com/in/yourusername" />
-                  </FormGroup>
-
-                  <FormGroup>
-                    <Label>GitHub</Label>
-                    <Input name="github" value={formData.github || ''} onChange={handleChange} placeholder="github.com/yourusername" />
-                  </FormGroup>
-
-                  <FormGroup>
-                    <Label>Facebook</Label>
-                    <Input name="facebook" value={formData.facebook || ''} onChange={handleChange} placeholder="facebook.com/yourusername" />
-                  </FormGroup>
-
-                  <FormGroup>
-                    <Label>Zalo</Label>
-                    <Input name="zalo" value={formData.zalo || ''} onChange={handleChange} placeholder="0379784509" />
-                  </FormGroup>
-
-                  <FormGroup className="full-width">
-                    <Label>Website</Label>
-                    <Input name="website" value={formData.website || ''} onChange={handleChange} placeholder="yourwebsite.com" />
-                  </FormGroup>
+                  {/* Đã loại bỏ các trường mạng xã hội khác ngoài Google */}
                 </FormGrid>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {formData.linkedin && formData.linkedin.trim() && (
-                    <InfoCard $color="#0077B5" whileHover={{ scale: 1.01 }}>
-                      <div className="info-header">
-                        <div className="icon">
-                          <Linkedin />
-                        </div>
-                        <div className="label">LinkedIn</div>
-                      </div>
-                      <div className="value">{formData.linkedin}</div>
-                    </InfoCard>
-                  )}
+                  {/* Đã loại bỏ các InfoCard mạng xã hội khác ngoài Google */}
 
-                  {formData.github && formData.github.trim() && (
-                    <InfoCard $color="#333" whileHover={{ scale: 1.01 }}>
-                      <div className="info-header">
-                        <div className="icon">
-                          <Github />
-                        </div>
-                        <div className="label">GitHub</div>
-                      </div>
-                      <div className="value">{formData.github}</div>
-                    </InfoCard>
-                  )}
-
-                  {formData.facebook && formData.facebook.trim() && (
-                    <InfoCard $color="#1877F2" whileHover={{ scale: 1.01 }}>
-                      <div className="info-header">
-                        <div className="icon">
-                          <Facebook />
-                        </div>
-                        <div className="label">Facebook</div>
-                      </div>
-                      <div className="value">{formData.facebook}</div>
-                    </InfoCard>
-                  )}
+                  {/* Đã loại bỏ Facebook */}
 
                   {formData.zalo && formData.zalo.trim() && (
                     <InfoCard $color="#0068FF" whileHover={{ scale: 1.01 }}>
@@ -1346,7 +1273,7 @@ const CandidateProfile = () => {
                     </InfoCard>
                   )}
 
-                  {!formData.linkedin?.trim() && !formData.github?.trim() && !formData.facebook?.trim() && !formData.zalo?.trim() && !formData.website?.trim() && (
+                  {!formData.linkedin?.trim() && !formData.github?.trim() && !formData.zalo?.trim() && !formData.website?.trim() && (
                     <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94A3B8' }}>
                       <LinkIcon size={48} style={{ marginBottom: '12px', opacity: 0.5 }} />
                       <p style={{ fontSize: '14px', fontWeight: '600' }}>
@@ -1368,7 +1295,7 @@ const CandidateProfile = () => {
               <div className="card-header">
                 <h2>
                   <Shield />
-                  {language === 'vi' ? 'Xác Minh KYC' : 'KYC Verification'}
+                  {language === 'vi' ? 'Xác Minh eKYC' : 'eKYC Verification'}
                 </h2>
               </div>
 
@@ -1393,7 +1320,7 @@ const CandidateProfile = () => {
                 <KYCButton
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={openKYCModal}
+                  onClick={() => navigate('/candidate/kyc')}
                 >
                   <Shield size={18} />
                   {language === 'vi' ? 'Bắt Đầu Xác Minh' : 'Start Verification'}
@@ -1512,13 +1439,13 @@ const CandidateProfile = () => {
 
               <div style={{ fontSize: '14px', color: 'black', lineHeight: '1.8' }}>
                 <div style={{ padding: '12px 0', borderBottom: '1px solid #77ace8' }}>
-                  ✅ {language === 'vi' ? 'Hoàn thành việc tuyển gấp cho Katinat' : 'Completed project for FPT Software'}
+                  ✅ {language === 'vi' ? 'Hoàn thành việc tuyển gấp cho Katinat' : 'Completed urgent hiring for Katinat'}
                 </div>
                 <div style={{ padding: '12px 0', borderBottom: '1px solid #77ace8' }}>
                   📝 {language === 'vi' ? 'Cập nhật hồ sơ' : 'Updated profile'}
                 </div>
                 <div style={{ padding: '12px 0' }}>
-                  ⭐ {language === 'vi' ? 'Nhận đánh giá 5 sao từ Viettel' : 'Received 5-star rating from Viettel'}
+                  ⭐ {language === 'vi' ? 'Nhận đánh giá 5 sao từ Highlands Coffee' : 'Received 5-star rating from Highlands Coffee'}
                 </div>
               </div>
             </Card>
@@ -1556,7 +1483,7 @@ const CandidateProfile = () => {
         <Modal
           isOpen={showKYCModal}
           onClose={() => setShowKYCModal(false)}
-          title={language === 'vi' ? 'Xác Minh KYC' : 'KYC Verification'}
+          title={language === 'vi' ? 'Xác Minh eKYC' : 'eKYC Verification'}
           size="large"
         >
           <div style={{ maxHeight: '70vh', overflowY: 'auto', paddingRight: '8px' }}>

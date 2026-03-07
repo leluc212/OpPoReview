@@ -3,8 +3,8 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import Modal from '../../components/Modal';
-import { 
-  Search, MapPin, Briefcase, DollarSign, Clock, Star, TrendingUp, 
+import {
+  Search, MapPin, Briefcase, DollarSign, Clock, Star, TrendingUp,
   ChevronDown, Building2, Bookmark, Eye, ArrowUpRight, Filter,
   X, SlidersHorizontal, Grid, List, Sparkles, Zap, Navigation, Target,
   Power, XCircle, AlertCircle, CheckCircle
@@ -179,8 +179,8 @@ const CategoryTabs = styled.div`
 const CategoryTab = styled(motion.button)`
   flex: 1;
   padding: 16px 24px;
-  background: ${props => props.$active 
-    ? `linear-gradient(135deg, ${props.theme.colors.primary}, ${props.theme.colors.secondary})` 
+  background: ${props => props.$active
+    ? `linear-gradient(135deg, ${props.theme.colors.primary}, ${props.theme.colors.secondary})`
     : props.theme.colors.bgLight};
   color: ${props => props.$active ? 'white' : props.theme.colors.text};
   border: 2px solid ${props => props.$active ? 'transparent' : props.theme.colors.border};
@@ -202,18 +202,18 @@ const CategoryTab = styled(motion.button)`
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 32px ${props => props.$active 
-      ? `${props.theme.colors.primary}40` 
-      : 'rgba(0,0,0,0.08)'};
+    box-shadow: 0 12px 32px ${props => props.$active
+    ? `${props.theme.colors.primary}40`
+    : 'rgba(0,0,0,0.08)'};
     border-color: ${props => props.$active ? 'transparent' : props.theme.colors.primary};
   }
 `;
 
 const StatusCard = styled(motion.div)`
-  background: ${props => props.$active 
-    ? 'rgba(16, 185, 129, 0.2)' 
+  background: ${props => props.$active
+    ? 'rgba(16, 185, 129, 0.2)'
     : 'rgba(255, 255, 255, 0.15)'};
-  border: 2px solid ${props => props.$active 
+  border: 2px solid ${props => props.$active
     ? 'rgba(16, 185, 129, 0.5)'
     : 'rgba(255, 255, 255, 0.3)'};
   border-radius: 12px;
@@ -286,10 +286,10 @@ const StatusCard = styled(motion.div)`
 
 const LocationButton = styled(motion.button)`
   padding: 12px 24px;
-  background: ${props => props.$active 
-    ? 'rgba(16, 185, 129, 0.2)' 
+  background: ${props => props.$active
+    ? 'rgba(16, 185, 129, 0.2)'
     : 'rgba(255, 255, 255, 0.15)'};
-  border: 2px solid ${props => props.$active 
+  border: 2px solid ${props => props.$active
     ? 'rgba(16, 185, 129, 0.5)'
     : 'rgba(255, 255, 255, 0.3)'};
   border-radius: 12px;
@@ -353,9 +353,9 @@ const ConfirmationContent = styled.div`
     width: 64px;
     height: 64px;
     margin: 0 auto 16px;
-    background: ${props => props.$isActive 
-      ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%)'
-      : 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%)'};
+    background: ${props => props.$isActive
+    ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%)'
+    : 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%)'};
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -401,19 +401,19 @@ const ConfirmationContent = styled.div`
       border: none;
       
       &.confirm {
-        background: ${props => props.$isActive 
-          ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)'
-          : 'linear-gradient(135deg, #10B981 0%, #059669 100%)'};
+        background: ${props => props.$isActive
+    ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)'
+    : 'linear-gradient(135deg, #10B981 0%, #059669 100%)'};
         color: white;
-        box-shadow: ${props => props.$isActive 
-          ? '0 3px 10px rgba(239, 68, 68, 0.25)'
-          : '0 3px 10px rgba(16, 185, 129, 0.25)'};
+        box-shadow: ${props => props.$isActive
+    ? '0 3px 10px rgba(239, 68, 68, 0.25)'
+    : '0 3px 10px rgba(16, 185, 129, 0.25)'};
         
         &:hover {
           transform: translateY(-1px);
-          box-shadow: ${props => props.$isActive 
-            ? '0 6px 16px rgba(239, 68, 68, 0.3)'
-            : '0 6px 16px rgba(16, 185, 129, 0.3)'};
+          box-shadow: ${props => props.$isActive
+    ? '0 6px 16px rgba(239, 68, 68, 0.3)'
+    : '0 6px 16px rgba(16, 185, 129, 0.3)'};
         }
       }
       
@@ -837,7 +837,7 @@ const JobActions = styled.div`
 
 const ActionButton = styled(motion.button)`
   padding: 8px 14px;
-  background: ${props => props.$primary 
+  background: ${props => props.$primary
     ? `linear-gradient(135deg, ${props.theme.colors.primary}, ${props.theme.colors.secondary})`
     : props.theme.colors.bgLight};
   color: ${props => props.$primary ? 'white' : props.theme.colors.text};
@@ -858,9 +858,9 @@ const ActionButton = styled(motion.button)`
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px ${props => props.$primary 
-      ? `${props.theme.colors.primary}40` 
-      : 'rgba(0,0,0,0.08)'};
+    box-shadow: 0 4px 12px ${props => props.$primary
+    ? `${props.theme.colors.primary}40`
+    : 'rgba(0,0,0,0.08)'};
   }
 `;
 
@@ -909,11 +909,11 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371; // Radius of the Earth in km
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const distance = R * c;
   return distance;
 };
@@ -936,8 +936,12 @@ const translateLocation = (locationStr, language) => {
     .replace(/Hà Nội/g, 'Hanoi')
     .replace(/Đà Nẵng/g, 'Da Nang')
     .replace(/Tân Bình/g, 'Tan Binh')
-    .replace(/Phú Nhuận/g, 'Phu Nhuan')
+    .replace(/Tân Phú/g, 'Tan Phu')
+    .replace(/Bình Tân/g, 'Binh Tan')
     .replace(/Bình Thạnh/g, 'Binh Thanh')
+    .replace(/Phú Nhuận/g, 'Phu Nhuan')
+    .replace(/Gò Vấp/g, 'Go Vap')
+    .replace(/Thủ Đức/g, 'Thu Duc')
     .replace(/Toàn/g, 'All');
 };
 
@@ -947,6 +951,7 @@ const translateTimePosted = (timeStr, language) => {
   return timeStr
     .replace(/(\d+)\s*ngày trước/g, '$1 days ago')
     .replace(/(\d+)\s*giờ trước/g, '$1 hours ago')
+    .replace(/(\d+)\s*phút trước/g, '$1 minutes ago')
     .replace(/1\s*days ago/g, '1 day ago')
     .replace(/1\s*hours ago/g, '1 hour ago');
 };
@@ -956,9 +961,9 @@ const parseTimeToHours = (timeStr) => {
   // Extract number from string
   const match = timeStr.match(/(\d+)/);
   if (!match) return 999999; // Unknown time goes to end
-  
+
   const num = parseInt(match[1]);
-  
+
   // Convert to hours
   if (timeStr.includes('giờ') || timeStr.includes('hour')) {
     return num;
@@ -969,46 +974,74 @@ const parseTimeToHours = (timeStr) => {
   } else if (timeStr.includes('tháng') || timeStr.includes('month')) {
     return num * 24 * 30;
   }
-  
+
   return 999999; // Unknown format goes to end
 };
 
 // Translate job titles
 const translateJobTitle = (titleStr, language) => {
   if (language === 'vi') return titleStr;
-  
+
   const titleMap = {
-    'Nhân viên Kế toán Tổng hợp': 'General Accountant',
-    'Nhân viên Kinh doanh B2B': 'B2B Sales Executive',
-    'Nhân viên Marketing Online': 'Online Marketing Staff',
-    'Nhân viên Hành chính Nhân sự': 'HR & Admin Staff',
+    'Quản lý cửa hàng F&B': 'F&B Store Manager',
+    'Nhân viên pha chế': 'Barista',
+    'Nhân viên phục vụ nhà hàng': 'Restaurant Server',
+    'Đầu bếp chính': 'Head Chef',
     'Nhân viên pha chế - Part-time': 'Barista - Part-time',
-    'Thu ngân - Part-time': 'Cashier - Part-time',
+    'Thu ngân nhà hàng - Part-time': 'Restaurant Cashier - Part-time',
     'Nhân viên phục vụ - Part-time': 'Service Staff - Part-time',
     'Pha chế trà sữa - Part-time': 'Bubble Tea Barista - Part-time',
-    'Nhân viên Telesales': 'Telesales Staff',
-    'Nhân viên Văn phòng': 'Office Staff',
-    'Giáo viên Tiếng Anh': 'English Teacher',
-    'Lễ tân - Receptionist': 'Receptionist',
-    'Ca Đêm - Nhân viên bảo vệ': 'Night Shift - Security Guard',
-    'Ca Sáng - Nhân viên kho': 'Morning Shift - Warehouse Staff',
+    'Quản lý bếp': 'Kitchen Manager',
+    'Nhân viên chế biến thực phẩm': 'Food Processing Staff',
+    'Nhân viên phục vụ bàn': 'Waiter/Waitress',
+    'Barista - Full-time': 'Barista - Full-time',
+    'Ca Đêm - Nhân viên bếp': 'Night Shift - Kitchen Staff',
+    'Ca Sáng - Nhân viên bếp': 'Morning Shift - Kitchen Staff',
     'Ca Chiều - Nhân viên phục vụ': 'Afternoon Shift - Service Staff',
     'Shift Supervisor - Ca đêm': 'Shift Supervisor - Night Shift',
-    'Ca Linh Động - Nhân viên giao hàng': 'Flexible Shift - Delivery Staff',
+    'Ca Linh Động - Nhân viên giao đồ ăn': 'Flexible Shift - Food Delivery',
     'Ca Sáng - Nhân viên bán hàng': 'Morning Shift - Sales Staff',
     'Ca Chiều - Nhân viên pha chế': 'Afternoon Shift - Barista',
-    'Ca Tối - Thu ngân siêu thị': 'Evening Shift - Supermarket Cashier',
+    'Ca Tối - Thu ngân nhà hàng': 'Evening Shift - Restaurant Cashier',
     'Ca Sáng - Phục vụ nhà hàng': 'Morning Shift - Restaurant Server',
-    'Ca Linh Động - Nhân viên kho': 'Flexible Shift - Warehouse Staff'
+    'Ca Linh Động - Giao đồ ăn': 'Flexible Shift - Food Delivery',
+    'Ca Chiều - Nhân viên bếp': 'Afternoon Shift - Kitchen Staff',
+    'Ca Tối - Nhân viên Café': 'Evening Shift - Café Staff',
+    'Ca Sáng - Phục vụ Quán ăn': 'Morning Shift - Eatery Server',
+    'Ca Chiều - Nhân viên bếp nóng': 'Afternoon Shift - Hot Kitchen Staff',
+    'Ca Đêm - Giao đồ ăn đêm': 'Night Shift - Night Food Delivery',
+    'Ca Sáng - Nhân viên pha chế': 'Morning Shift - Barista',
+    'Ca Chiều - Phục vụ Trà sữa': 'Afternoon Shift - Bubble Tea Server',
+    'Ca Sáng - Thu ngân quán café': 'Morning Shift - Café Cashier',
+    'Ca Tối - Bartender': 'Evening Shift - Bartender',
+    'Ca Linh Động - Shipper đồ ăn': 'Flexible Shift - Food Delivery',
+    'Ca Chiều - Nhân viên KFC': 'Afternoon Shift - KFC Staff',
+    'Ca Sáng - Lễ tân nhà hàng': 'Morning Shift - Restaurant Receptionist',
+    'Ca Sáng - Pha chế': 'Morning Shift - Barista',
+    'Ca Chiều - Phục vụ nhà hàng': 'Afternoon Shift - Restaurant Server',
+    'Ca Tối - Thu ngân quán ăn': 'Evening Shift - Eatery Cashier',
+    'Ca Sáng - Nhân viên bếp': 'Morning Shift - Kitchen Staff',
+    'Ca Chiều - Barista': 'Afternoon Shift - Barista',
+    'Ca Tối - Phục vụ Lẩu': 'Evening Shift - Hot Pot Server',
+    'Ca Sáng - Nhân viên McDonald\'s': 'Morning Shift - McDonald\'s Staff',
+    'Ca Chiều - Pha chế Phúc Long': 'Afternoon Shift - Phuc Long Barista',
+    'Ca Tối - Nhân viên KFC': 'Evening Shift - KFC Staff',
+    'Ca Sáng - Phục vụ Jollibee': 'Morning Shift - Jollibee Staff',
+    'Ca Chiều - Nhân viên Lotteria': 'Afternoon Shift - Lotteria Staff',
+    'Ca Sáng - Pha chế Katinat': 'Morning Shift - Katinat Barista',
+    'Ca Chiều - Phục vụ Pizza': 'Afternoon Shift - Pizza Server',
+    'Ca Linh Động - Giao đồ ăn': 'Flexible Shift - Food Delivery',
+    'Ca Đêm - Nhân viên bếp': 'Night Shift - Kitchen Staff',
+    'Ca Sáng - Thu ngân Highlands': 'Morning Shift - Highlands Cashier'
   };
-  
+
   return titleMap[titleStr] || titleStr;
 };
 
 // Translate tags
 const translateTag = (tagStr, language) => {
   if (language === 'vi') return tagStr;
-  
+
   const tagMap = {
     'Kế toán': 'Accounting',
     'Excel': 'Excel',
@@ -1056,16 +1089,24 @@ const translateTag = (tagStr, language) => {
     'Cửa hàng': 'Store',
     'Nhà hàng': 'Restaurant',
     'Ca tối': 'Evening Shift',
-    'Siêu thị': 'Supermarket'
+    'Siêu thị': 'Supermarket',
+    'Đầu bếp': 'Chef',
+    'Bếp': 'Kitchen',
+    'Pizza': 'Pizza',
+    'Lẩu': 'Hot Pot',
+    'Chế biến': 'Processing',
+    'Fast food': 'Fast Food',
+    'Quán ăn': 'Eatery',
+    'Bartender': 'Bartender'
   };
-  
+
   return tagMap[tagStr] || tagStr;
 };
 
 // Translate job type
 const translateJobType = (typeStr, language) => {
   if (language === 'vi') return typeStr;
-  
+
   return typeStr
     .replace(/Ca đêm/g, 'Night Shift')
     .replace(/Ca sáng/g, 'Morning Shift')
@@ -1091,24 +1132,24 @@ const getStoredJobs = () => {
         location: job.location,
         lat: 10.7769, // Default HCM location
         lng: 106.7009,
-        type: job.jobType === 'full-time' ? 'Full-time' : 
-              job.jobType === 'part-time' ? 'Part-time' :
-              job.jobType === 'contract' ? 'Contract' :
+        type: job.jobType === 'full-time' ? 'Full-time' :
+          job.jobType === 'part-time' ? 'Part-time' :
+            job.jobType === 'contract' ? 'Contract' :
               job.jobType === 'freelance' ? 'Freelance' : 'Full-time',
         category: 'standard',
-        salary: job.salaryMin && job.salaryMax 
-          ? `${job.salaryMin} - ${job.salaryMax}` 
-          : job.salaryMin 
-            ? `Từ ${job.salaryMin}` 
+        salary: job.salaryMin && job.salaryMax
+          ? `${job.salaryMin} - ${job.salaryMax}`
+          : job.salaryMin
+            ? `Từ ${job.salaryMin}`
             : job.salaryMax
               ? `Tối đa ${job.salaryMax}`
               : 'Thỏa thuận',
         postedAt: job.posted || 'Vừa xong',
         tags: [
-          job.experienceLevel === 'entry' ? 'Entry Level' : 
-          job.experienceLevel === 'mid' ? 'Mid Level' :
-          job.experienceLevel === 'senior' ? 'Senior' :
-          job.experienceLevel === 'lead' ? 'Lead/Manager' : '',
+          job.experienceLevel === 'entry' ? 'Entry Level' :
+            job.experienceLevel === 'mid' ? 'Mid Level' :
+              job.experienceLevel === 'senior' ? 'Senior' :
+                job.experienceLevel === 'lead' ? 'Lead/Manager' : '',
           job.department || ''
         ].filter(Boolean),
         featured: false,
@@ -1123,101 +1164,101 @@ const getStoredJobs = () => {
 };
 
 const JOBS_DATA = [
-  // Standard Jobs - Full-time
+  // Standard Jobs - F&B tại TP.HCM
   {
     id: 1,
-    title: 'Nhân viên Kế toán Tổng hợp',
-    company: 'Vinamilk',
+    title: 'Phục vụ quán cafe - Part-time',
+    company: 'Highlands Coffee',
     location: 'Quận 1, TP.HCM',
     lat: 10.7769,
     lng: 106.7009,
-    type: 'Full-time',
+    type: 'Part-time',
     category: 'standard',
-    salary: '12 - 18 triệu VND',
+    salary: '28.000 VNĐ/giờ',
     postedAt: '2 ngày trước',
-    tags: ['Kế toán', 'Excel', 'MISA'],
+    tags: ['Phục vụ', 'F&B', 'Coffee'],
     featured: true,
     urgent: false,
-    views: 245
+    views: 345
   },
   {
     id: 2,
-    title: 'Nhân viên Kinh doanh B2B',
-    company: 'Viettel',
+    title: 'Nhân viên pha chế - Part-time',
+    company: 'The Coffee House',
     location: 'Quận 7, TP.HCM',
     lat: 10.7333,
     lng: 106.7182,
-    type: 'Full-time',
+    type: 'Part-time',
     category: 'standard',
-    salary: '15 - 25 triệu VND',
+    salary: '25.000 VNĐ/giờ',
     postedAt: '1 ngày trước',
-    tags: ['Kinh doanh', 'B2B', 'Hoa hồng cao'],
+    tags: ['Pha chế', 'F&B', 'Coffee'],
     featured: true,
     urgent: false,
     views: 412
   },
   {
     id: 3,
-    title: 'Nhân viên Marketing Online',
-    company: 'Lazada Vietnam',
-    location: 'Tân Bình, TP.HCM',
-    lat: 10.7992,
-    lng: 106.6550,
-    type: 'Full-time',
+    title: 'Nhân viên phục vụ - Part-time',
+    company: 'Golden Gate Group',
+    location: 'Quận 3, TP.HCM',
+    lat: 10.7866,
+    lng: 106.6906,
+    type: 'Part-time',
     category: 'standard',
-    salary: '10 - 15 triệu VND',
+    salary: '25.000 VNĐ/giờ',
     postedAt: '3 ngày trước',
-    tags: ['Marketing', 'Facebook Ads', 'SEO'],
+    tags: ['Phục vụ', 'Nhà hàng', 'F&B'],
     featured: false,
     urgent: false,
-    views: 189
+    views: 289
   },
   {
     id: 4,
-    title: 'Nhân viên Hành chính Nhân sự',
-    company: 'Samsung Vietnam',
-    location: 'Quận 1, TP.HCM',
+    title: 'Phụ bếp nhà hàng - Part-time',
+    company: 'Pizza 4P\'s',
+    location: 'Quận 2, TP.HCM',
     lat: 10.7825,
-    lng: 106.6958,
-    type: 'Full-time',
+    lng: 106.7500,
+    type: 'Part-time',
     category: 'standard',
-    salary: '9 - 13 triệu VND',
-    postedAt: '5 ngày trước',
-    tags: ['Nhân sự', 'Hành chính', 'Office'],
-    featured: false,
+    salary: '30.000 VNĐ/giờ',
+    postedAt: '2 ngày trước',
+    tags: ['Phụ bếp', 'Nhà hàng', 'Pizza'],
+    featured: true,
     urgent: false,
-    views: 321
+    views: 521
   },
   {
     id: 5,
     title: 'Nhân viên pha chế - Part-time',
-    company: 'The Coffee House',
+    company: 'Phúc Long Coffee & Tea',
     location: 'Quận 1, TP.HCM',
     lat: 10.7756,
     lng: 106.7004,
-    type: 'Part-time',
+    type: 'Full-time',
     category: 'standard',
-    salary: '25 - 35 triệu VND',
-    postedAt: '2 ngày trước',
-    tags: ['Pha chế', 'Part-time', 'F&B'],
+    salary: '6 triệu VND',
+    postedAt: '1 ngày trước',
+    tags: ['Pha chế', 'Full-time', 'F&B'],
     featured: false,
     urgent: false,
-    views: 234
+    views: 334
   },
   {
     id: 12,
-    title: 'Thu ngân - Part-time',
-    company: 'Lotte Mart',
+    title: 'Thu ngân nhà hàng - Part-time',
+    company: 'Lẩu Phan',
     location: 'Quận 7, TP.HCM',
     lat: 10.7295,
     lng: 106.7195,
     type: 'Part-time',
     category: 'standard',
-    salary: '22 - 30 triệu VND',
+    salary: '24.000 VNĐ/giờ',
     postedAt: '3 ngày trước',
-    tags: ['Thu ngân', 'Part-time', 'Bán lẻ'],
+    tags: ['Thu ngân', 'Part-time', 'Nhà hàng'],
     featured: false,
-    urgent: true,
+    urgent: false,
     views: 189
   },
   {
@@ -1229,23 +1270,23 @@ const JOBS_DATA = [
     lng: 106.7147,
     type: 'Part-time',
     category: 'standard',
-    salary: '20 - 28 triệu VND',
+    salary: '23.000 VNĐ/giờ',
     postedAt: '1 ngày trước',
     tags: ['Phục vụ', 'Part-time', 'Coffee'],
     featured: false,
     urgent: false,
-    views: 167
+    views: 267
   },
   {
     id: 14,
     title: 'Pha chế trà sữa - Part-time',
-    company: 'Gong Cha',
+    company: 'TocoToco',
     location: 'Tân Bình, TP.HCM',
     lat: 10.7985,
     lng: 106.6635,
     type: 'Part-time',
     category: 'standard',
-    salary: '23 - 32 triệu VND',
+    salary: '22.000 VNĐ/giờ',
     postedAt: '4 ngày trước',
     tags: ['Pha chế', 'Part-time', 'Trà sữa'],
     featured: false,
@@ -1254,97 +1295,97 @@ const JOBS_DATA = [
   },
   {
     id: 6,
-    title: 'Nhân viên Telesales',
-    company: 'VNPT',
+    title: 'Nhân viên phụ bếp',
+    company: 'Wrap & Roll',
     location: 'Bình Thạnh, TP.HCM',
     lat: 10.8100,
     lng: 106.7089,
-    type: 'Full-time',
+    type: 'Part-time',
     category: 'standard',
-    salary: '8 - 20 triệu VND',
+    salary: '27.000 VNĐ/giờ',
     postedAt: '4 ngày trước',
-    tags: ['Telesales', 'Gọi điện', 'Hoa hồng'],
+    tags: ['Phụ bếp', 'Nhà hàng', 'F&B'],
     featured: true,
     urgent: false,
     views: 278
   },
   {
     id: 15,
-    title: 'Nhân viên Văn phòng',
-    company: 'Hòa Phát Group',
-    location: 'Quận 3, TP.HCM',
-    lat: 10.7866,
-    lng: 106.6906,
-    type: 'Full-time',
+    title: 'Thu ngân cửa hàng - Part-time',
+    company: 'Jollibee Vietnam',
+    location: 'Quận 10, TP.HCM',
+    lat: 10.7735,
+    lng: 106.6676,
+    type: 'Part-time',
     category: 'standard',
-    salary: '8 - 12 triệu VND',
+    salary: '24.000 VNĐ/giờ',
     postedAt: '2 ngày trước',
-    tags: ['Văn phòng', 'Word/Excel', 'Giao tiếp'],
+    tags: ['Thu ngân', 'Fast food', 'F&B'],
     featured: false,
-    urgent: true,
+    urgent: false,
     views: 312
   },
   {
     id: 16,
-    title: 'Giáo viên Tiếng Anh',
-    company: 'ILA Vietnam',
-    location: 'Quận 10, TP.HCM',
-    lat: 10.7735,
-    lng: 106.6676,
-    type: 'Full-time',
-    category: 'standard',
-    salary: '12 - 18 triệu VND',
-    postedAt: '1 ngày trước',
-    tags: ['Giáo viên', 'Tiếng Anh', 'IELTS'],
-    featured: false,
-    urgent: false,
-    views: 256
-  },
-  {
-    id: 17,
-    title: 'Lễ tân - Receptionist',
-    company: 'Sheraton Saigon',
+    title: 'Nhân viên bưng bê - Part-time',
+    company: 'Haidilao Việt Nam',
     location: 'Quận 1, TP.HCM',
     lat: 10.7801,
     lng: 106.7002,
-    type: 'Full-time',
+    type: 'Part-time',
     category: 'standard',
-    salary: '9 - 14 triệu VND',
-    postedAt: '3 ngày trước',
-    tags: ['Lễ tân', 'Tiếng Anh', 'Khách sạn'],
+    salary: '28.000 VNĐ/giờ',
+    postedAt: '1 ngày trước',
+    tags: ['Phục vụ', 'Nhà hàng', 'Lẩu'],
     featured: false,
     urgent: false,
-    views: 189
+    views: 356
   },
-  // Shift Jobs - Tuyển gấp
+  {
+    id: 17,
+    title: 'Barista - Part-time',
+    company: 'Katinat Saigon Kafe',
+    location: 'Quận 3, TP.HCM',
+    lat: 10.7830,
+    lng: 106.6920,
+    type: 'Part-time',
+    category: 'standard',
+    salary: '27.000 VNĐ/giờ',
+    postedAt: '3 ngày trước',
+    tags: ['Pha chế', 'Coffee', 'F&B'],
+    featured: false,
+    urgent: false,
+    views: 289
+  },
+  // Shift Jobs - F&B Tuyển gấp
   {
     id: 7,
-    title: 'Ca Đêm - Nhân viên bảo vệ',
-    company: 'SecureGuard',
+    title: 'Ca Đêm - Nhân viên bếp',
+    company: 'Bánh Mì Huynh Hoa',
     location: 'Quận 1, TP.HCM',
     lat: 10.7730,
     lng: 106.6985,
     type: 'Ca đêm (22:00 - 06:00)',
     category: 'shift',
-    salary: '200k - 250k/ca',
+    salary: '30.000 VNĐ/giờ',
     postedAt: '1 ngày trước',
-    tags: ['Ca đêm', 'Bảo vệ', 'An ninh'],
+    tags: ['Ca đêm', 'Bếp', 'F&B'],
     featured: false,
     urgent: true,
     views: 156
   },
   {
     id: 8,
-    title: 'Ca Sáng - Nhân viên kho',
-    company: 'FastMove Logistics',
+    title: 'Ca Sáng - Nhân viên bếp',
+    company: 'McDonald\'s Việt Nam',
     location: 'Tân Bình, TP.HCM',
     lat: 10.7750,
     lng: 106.7000,
     type: 'Ca sáng (06:00 - 14:00)',
     category: 'shift',
-    salary: '180k - 220k/ca',
+    salary: '27.000 VNĐ/giờ',
     postedAt: '2 ngày trước',
-    tags: ['Ca sáng', 'Kho vận', 'Logistics'],
+    tags: ['Ca sáng', 'Fast food', 'F&B'],
     featured: true,
     urgent: true,
     views: 234
@@ -1352,13 +1393,13 @@ const JOBS_DATA = [
   {
     id: 9,
     title: 'Ca Chiều - Nhân viên phục vụ',
-    company: 'Highland Coffee',
+    company: 'Highlands Coffee',
     location: 'Phú Nhuận, TP.HCM',
     lat: 10.7700,
     lng: 106.6970,
     type: 'Ca chiều (14:00 - 22:00)',
     category: 'shift',
-    salary: '150k - 180k/ca',
+    salary: '28.000 VNĐ/giờ',
     postedAt: '1 ngày trước',
     tags: ['Ca chiều', 'F&B', 'Phục vụ'],
     featured: false,
@@ -1368,31 +1409,31 @@ const JOBS_DATA = [
   {
     id: 10,
     title: 'Shift Supervisor - Ca đêm',
-    company: 'NightOwl Logistics',
+    company: 'Cơm Tấm Phúc Lộc Thọ',
     location: 'Quận 7, TP.HCM',
     lat: 10.7690,
     lng: 106.6990,
     type: 'Ca đêm (20:00 - 04:00)',
     category: 'shift',
-    salary: '250k - 300k/ca',
+    salary: '32.000 VNĐ/giờ',
     postedAt: '3 ngày trước',
-    tags: ['Ca đêm', 'Quản lý', 'Logistics'],
+    tags: ['Ca đêm', 'Quản lý', 'F&B'],
     featured: true,
     urgent: true,
     views: 312
   },
   {
     id: 11,
-    title: 'Ca Linh Động - Nhân viên giao hàng',
-    company: 'Grab Express',
-    location: 'Toàn TP.HCM',
+    title: 'Ca Sáng - Nhân viên phục vụ',
+    company: 'Cơm Tấm Bụi Sài Gòn',
+    location: 'Quận 3, TP.HCM',
     lat: 10.7740,
     lng: 106.6995,
-    type: 'Ca linh động',
+    type: 'Ca sáng (06:00 - 14:00)',
     category: 'shift',
-    salary: '50k - 80k/giờ',
+    salary: '27.000 VNĐ/giờ',
     postedAt: '1 ngày trước',
-    tags: ['Linh động', 'Giao hàng', 'Xe máy'],
+    tags: ['Ca sáng', 'Phục vụ', 'F&B'],
     featured: false,
     urgent: true,
     views: 445
@@ -1400,15 +1441,15 @@ const JOBS_DATA = [
   {
     id: 18,
     title: 'Ca Sáng - Nhân viên bán hàng',
-    company: 'Circle K',
+    company: 'Phúc Long Coffee & Tea',
     location: 'Quận 1, TP.HCM',
     lat: 10.7715,
     lng: 106.6975,
     type: 'Ca sáng (06:00 - 14:00)',
     category: 'shift',
-    salary: '160k - 200k/ca',
+    salary: '28.000 VNĐ/giờ',
     postedAt: '1 ngày trước',
-    tags: ['Ca sáng', 'Bán hàng', 'Cửa hàng'],
+    tags: ['Ca sáng', 'Bán hàng', 'Coffee'],
     featured: false,
     urgent: true,
     views: 167
@@ -1422,7 +1463,7 @@ const JOBS_DATA = [
     lng: 106.7005,
     type: 'Ca chiều (14:00 - 22:00)',
     category: 'shift',
-    salary: '170k - 210k/ca',
+    salary: '28.000 VNĐ/giờ',
     postedAt: '2 giờ trước',
     tags: ['Ca chiều', 'Pha chế', 'F&B'],
     featured: true,
@@ -1431,16 +1472,16 @@ const JOBS_DATA = [
   },
   {
     id: 20,
-    title: 'Ca Tối - Thu ngân siêu thị',
-    company: 'Lotte Mart',
+    title: 'Ca Tối - Thu ngân nhà hàng',
+    company: 'Lotteria Việt Nam',
     location: 'Quận 3, TP.HCM',
     lat: 10.7760,
     lng: 106.6960,
     type: 'Ca tối (18:00 - 22:00)',
     category: 'shift',
-    salary: '150k - 180k/ca',
+    salary: '28.000 VNĐ/giờ',
     postedAt: '3 giờ trước',
-    tags: ['Ca tối', 'Thu ngân', 'Siêu thị'],
+    tags: ['Ca tối', 'Thu ngân', 'Fast food'],
     featured: false,
     urgent: true,
     views: 189
@@ -1454,55 +1495,55 @@ const JOBS_DATA = [
     lng: 106.6965,
     type: 'Ca sáng (07:00 - 15:00)',
     category: 'shift',
-    salary: '155k - 190k/ca',
+    salary: '27.000 VNĐ/giờ',
     postedAt: '5 giờ trước',
-    tags: ['Ca sáng', 'Phục vụ', 'Nhà hàng'],
+    tags: ['Ca sáng', 'Phục vụ', 'Fast food'],
     featured: false,
     urgent: true,
     views: 201
   },
   {
     id: 22,
-    title: 'Ca Linh Động - Nhân viên kho',
-    company: 'Lazada Express',
+    title: 'Ca Chiều - Nhân viên bếp',
+    company: 'Bánh Mì Hòa Mã',
     location: 'Quận 1, TP.HCM',
     lat: 10.7745,
     lng: 106.6955,
-    type: 'Ca linh động',
+    type: 'Ca chiều (14:00 - 22:00)',
     category: 'shift',
-    salary: '60k - 90k/giờ',
+    salary: '30.000 VNĐ/giờ',
     postedAt: '1 ngày trước',
-    tags: ['Linh động', 'Kho vận', 'Part-time'],
+    tags: ['Ca chiều', 'Bếp', 'F&B'],
     featured: false,
     urgent: true,
-    views: 156
+    views: 356
   },
   {
     id: 23,
-    title: 'Ca Chiều - Nhân viên bảo vệ',
-    company: 'G4S Security',
-    location: 'Quận 1, TP.HCM',
+    title: 'Ca Chiều - Nhân viên bếp',
+    company: 'Gong Cha Vietnam',
+    location: 'Quận 5, TP.HCM',
     lat: 10.7720,
     lng: 106.7010,
     type: 'Ca chiều (14:00 - 22:00)',
     category: 'shift',
-    salary: '180k - 220k/ca',
+    salary: '28.000 VNĐ/giờ',
     postedAt: '4 giờ trước',
-    tags: ['Ca chiều', 'Bảo vệ', 'An ninh'],
+    tags: ['Ca chiều', 'Pha chế', 'Trà sữa'],
     featured: false,
     urgent: true,
-    views: 134
+    views: 234
   },
   {
     id: 24,
     title: 'Ca Tối - Nhân viên Café',
-    company: 'Highlands Coffee - Làng ĐH',
+    company: 'Katinat Saigon Kafe',
     location: 'Thủ Đức, TP.HCM',
     lat: 10.8520,
     lng: 106.8360,
     type: 'Ca tối (18:00 - 23:00)',
     category: 'shift',
-    salary: '165k - 200k/ca',
+    salary: '28.000 VNĐ/giờ',
     postedAt: '3 giờ trước',
     tags: ['Ca tối', 'F&B', 'Pha chế'],
     featured: false,
@@ -1512,13 +1553,13 @@ const JOBS_DATA = [
   {
     id: 25,
     title: 'Ca Sáng - Phục vụ Quán ăn',
-    company: 'Cơm Tấm Sườn Bì Chả',
+    company: 'Cơm Tấm Bụi Sài Gòn',
     location: 'Thủ Đức, TP.HCM',
     lat: 10.8490,
     lng: 106.8380,
     type: 'Ca sáng (06:00 - 12:00)',
     category: 'shift',
-    salary: '140k - 170k/ca',
+    salary: '27.000 VNĐ/giờ',
     postedAt: '5 giờ trước',
     tags: ['Ca sáng', 'Phục vụ', 'Quán ăn'],
     featured: false,
@@ -1527,48 +1568,48 @@ const JOBS_DATA = [
   },
   {
     id: 26,
-    title: 'Ca Chiều - Gia sư Toán Lý',
-    company: 'Trung tâm gia sư SmartEdu',
+    title: 'Ca Chiều - Nhân viên bếp nóng',
+    company: 'Pizza Hut Việt Nam',
     location: 'Thủ Đức, TP.HCM',
     lat: 10.8530,
     lng: 106.8350,
-    type: 'Ca chiều (14:00 - 20:00)',
+    type: 'Ca chiều (14:00 - 22:00)',
     category: 'shift',
-    salary: '200k - 300k/ca',
+    salary: '30.000 VNĐ/giờ',
     postedAt: '1 ngày trước',
-    tags: ['Ca chiều', 'Gia sư', 'Giảng dạy'],
+    tags: ['Ca chiều', 'Bếp', 'Pizza'],
     featured: true,
     urgent: true,
     views: 267
   },
   {
     id: 27,
-    title: 'Ca Đêm - Giao hàng đêm',
-    company: 'Now Food - Khu ĐH',
+    title: 'Ca Đêm - Nhân viên phục vụ',
+    company: 'Quán Ốc Đào - Thủ Đức',
     location: 'Thủ Đức, TP.HCM',
     lat: 10.8480,
     lng: 106.8390,
     type: 'Ca đêm (20:00 - 02:00)',
     category: 'shift',
-    salary: '180k - 250k/ca',
+    salary: '30.000 VNĐ/giờ',
     postedAt: '6 giờ trước',
-    tags: ['Ca đêm', 'Giao hàng', 'Xe máy'],
+    tags: ['Ca đêm', 'Phục vụ', 'F&B'],
     featured: false,
     urgent: true,
     views: 198
   },
   {
     id: 28,
-    title: 'Ca Sáng - Nhân viên kho',
-    company: 'Shopee Warehouse',
-    location: 'Quận 9, TP.HCM',
+    title: 'Ca Sáng - Nhân viên pha chế',
+    company: 'Starbucks Vietnam',
+    location: 'Quận 2, TP.HCM',
     lat: 10.8510,
     lng: 106.8340,
     type: 'Ca sáng (07:00 - 15:00)',
     category: 'shift',
-    salary: '175k - 210k/ca',
+    salary: '28.000 VNĐ/giờ',
     postedAt: '2 ngày trước',
-    tags: ['Ca sáng', 'Kho vận', 'Logistics'],
+    tags: ['Ca sáng', 'Pha chế', 'Coffee'],
     featured: false,
     urgent: true,
     views: 223
@@ -1576,13 +1617,13 @@ const JOBS_DATA = [
   {
     id: 29,
     title: 'Ca Chiều - Phục vụ Trà sữa',
-    company: 'Gong Cha - Thủ Đức',
+    company: 'Koi Thé - Thủ Đức',
     location: 'Thủ Đức, TP.HCM',
     lat: 10.8500,
     lng: 106.8370,
     type: 'Ca chiều (14:00 - 22:00)',
     category: 'shift',
-    salary: '160k - 195k/ca',
+    salary: '27.000 VNĐ/giờ',
     postedAt: '4 giờ trước',
     tags: ['Ca chiều', 'Phục vụ', 'Trà sữa'],
     featured: false,
@@ -1591,16 +1632,16 @@ const JOBS_DATA = [
   },
   {
     id: 30,
-    title: 'Ca Sáng - Thu ngân',
-    company: 'Circle K - Khu ĐH',
+    title: 'Ca Sáng - Thu ngân quán café',
+    company: 'Passio Coffee',
     location: 'Thủ Đức, TP.HCM',
     lat: 10.8540,
     lng: 106.8330,
     type: 'Ca sáng (06:00 - 14:00)',
     category: 'shift',
-    salary: '155k - 185k/ca',
+    salary: '27.000 VNĐ/giờ',
     postedAt: '2 giờ trước',
-    tags: ['Ca sáng', 'Thu ngân', 'Cửa hàng'],
+    tags: ['Ca sáng', 'Thu ngân', 'Coffee'],
     featured: true,
     urgent: true,
     views: 234
@@ -1614,7 +1655,7 @@ const JOBS_DATA = [
     lng: 106.8400,
     type: 'Ca tối (18:00 - 01:00)',
     category: 'shift',
-    salary: '190k - 250k/ca',
+    salary: '32.000 VNĐ/giờ',
     postedAt: '5 giờ trước',
     tags: ['Ca tối', 'Bartender', 'Pha chế'],
     featured: false,
@@ -1623,16 +1664,16 @@ const JOBS_DATA = [
   },
   {
     id: 32,
-    title: 'Ca Linh Động - Shipper',
-    company: 'Grab Food',
+    title: 'Ca Tối - Nhân viên pha chế',
+    company: 'Trà Sữa Bobapop - Thủ Đức',
     location: 'Thủ Đức, TP.HCM',
     lat: 10.8495,
     lng: 106.8385,
-    type: 'Ca linh động',
+    type: 'Ca tối (18:00 - 23:00)',
     category: 'shift',
-    salary: '60k - 100k/giờ',
+    salary: '32.000 VNĐ/giờ',
     postedAt: '1 ngày trước',
-    tags: ['Linh động', 'Giao hàng', 'Xe máy'],
+    tags: ['Ca tối', 'Pha chế', 'Trà sữa'],
     featured: true,
     urgent: true,
     views: 412
@@ -1646,7 +1687,7 @@ const JOBS_DATA = [
     lng: 106.8365,
     type: 'Ca chiều (15:00 - 23:00)',
     category: 'shift',
-    salary: '170k - 210k/ca',
+    salary: '28.000 VNĐ/giờ',
     postedAt: '3 giờ trước',
     tags: ['Ca chiều', 'Fast food', 'Phục vụ'],
     featured: false,
@@ -1655,19 +1696,292 @@ const JOBS_DATA = [
   },
   {
     id: 34,
-    title: 'Ca Sáng - Lễ tân Văn phòng',
-    company: 'CoWorking Space TD',
+    title: 'Ca Sáng - Lễ tân nhà hàng',
+    company: 'Golden Gate - Thủ Đức',
     location: 'Thủ Đức, TP.HCM',
     lat: 10.8485,
     lng: 106.8355,
     type: 'Ca sáng (08:00 - 16:00)',
     category: 'shift',
-    salary: '175k - 220k/ca',
+    salary: '29.000 VNĐ/giờ',
     postedAt: '1 ngày trước',
-    tags: ['Ca sáng', 'Lễ tân', 'Văn phòng'],
+    tags: ['Ca sáng', 'Lễ tân', 'Nhà hàng'],
     featured: false,
     urgent: true,
     views: 167
+  },
+  // Thêm shift jobs trải rộng khắp TP.HCM
+  {
+    id: 35,
+    title: 'Ca Sáng - Pha chế',
+    company: 'Highlands Coffee - Q1',
+    location: 'Quận 1, TP.HCM',
+    lat: 10.7756,
+    lng: 106.7004,
+    type: 'Ca sáng (06:00 - 14:00)',
+    category: 'shift',
+    salary: '28.000 VNĐ/giờ',
+    postedAt: '1 giờ trước',
+    tags: ['Ca sáng', 'Pha chế', 'Coffee'],
+    featured: true,
+    urgent: true,
+    views: 312
+  },
+  {
+    id: 36,
+    title: 'Ca Chiều - Phục vụ nhà hàng',
+    company: 'Golden Gate - Q3',
+    location: 'Quận 3, TP.HCM',
+    lat: 10.7834,
+    lng: 106.6876,
+    type: 'Ca chiều (14:00 - 22:00)',
+    category: 'shift',
+    salary: '28.000 VNĐ/giờ',
+    postedAt: '2 giờ trước',
+    tags: ['Ca chiều', 'Phục vụ', 'Nhà hàng'],
+    featured: false,
+    urgent: true,
+    views: 198
+  },
+  {
+    id: 37,
+    title: 'Ca Tối - Thu ngân quán ăn',
+    company: 'Cơm Tấm Bụi - Q4',
+    location: 'Quận 4, TP.HCM',
+    lat: 10.7579,
+    lng: 106.7065,
+    type: 'Ca tối (17:00 - 23:00)',
+    category: 'shift',
+    salary: '27.000 VNĐ/giờ',
+    postedAt: '3 giờ trước',
+    tags: ['Ca tối', 'Thu ngân', 'F&B'],
+    featured: false,
+    urgent: true,
+    views: 145
+  },
+  {
+    id: 38,
+    title: 'Ca Sáng - Nhân viên bếp',
+    company: 'Phở 24 - Q5',
+    location: 'Quận 5, TP.HCM',
+    lat: 10.7539,
+    lng: 106.6633,
+    type: 'Ca sáng (06:00 - 14:00)',
+    category: 'shift',
+    salary: '28.000 VNĐ/giờ',
+    postedAt: '2 giờ trước',
+    tags: ['Ca sáng', 'Bếp', 'F&B'],
+    featured: false,
+    urgent: true,
+    views: 176
+  },
+  {
+    id: 39,
+    title: 'Ca Chiều - Barista',
+    company: 'The Coffee House - Q7',
+    location: 'Quận 7, TP.HCM',
+    lat: 10.7350,
+    lng: 106.7220,
+    type: 'Ca chiều (14:00 - 22:00)',
+    category: 'shift',
+    salary: '29.000 VNĐ/giờ',
+    postedAt: '1 giờ trước',
+    tags: ['Ca chiều', 'Pha chế', 'Coffee'],
+    featured: true,
+    urgent: true,
+    views: 287
+  },
+  {
+    id: 40,
+    title: 'Ca Tối - Phục vụ Lẩu',
+    company: 'Haidilao - Bình Thạnh',
+    location: 'Bình Thạnh, TP.HCM',
+    lat: 10.8050,
+    lng: 106.7100,
+    type: 'Ca tối (17:00 - 23:00)',
+    category: 'shift',
+    salary: '29.000 VNĐ/giờ',
+    postedAt: '30 phút trước',
+    tags: ['Ca tối', 'Phục vụ', 'Lẩu'],
+    featured: false,
+    urgent: true,
+    views: 234
+  },
+  {
+    id: 41,
+    title: 'Ca Sáng - Nhân viên McDonald\'s',
+    company: 'McDonald\'s - Tân Bình',
+    location: 'Tân Bình, TP.HCM',
+    lat: 10.8017,
+    lng: 106.6528,
+    type: 'Ca sáng (07:00 - 15:00)',
+    category: 'shift',
+    salary: '27.000 VNĐ/giờ',
+    postedAt: '1 giờ trước',
+    tags: ['Ca sáng', 'Fast food', 'F&B'],
+    featured: false,
+    urgent: true,
+    views: 198
+  },
+  {
+    id: 42,
+    title: 'Ca Chiều - Pha chế Phúc Long',
+    company: 'Phúc Long - Phú Nhuận',
+    location: 'Phú Nhuận, TP.HCM',
+    lat: 10.7992,
+    lng: 106.6780,
+    type: 'Ca chiều (14:00 - 22:00)',
+    category: 'shift',
+    salary: '28.000 VNĐ/giờ',
+    postedAt: '2 giờ trước',
+    tags: ['Ca chiều', 'Pha chế', 'Coffee'],
+    featured: false,
+    urgent: true,
+    views: 223
+  },
+  {
+    id: 43,
+    title: 'Ca Tối - Nhân viên KFC',
+    company: 'KFC - Gò Vấp',
+    location: 'Gò Vấp, TP.HCM',
+    lat: 10.8385,
+    lng: 106.6497,
+    type: 'Ca tối (17:00 - 23:00)',
+    category: 'shift',
+    salary: '27.000 VNĐ/giờ',
+    postedAt: '3 giờ trước',
+    tags: ['Ca tối', 'Fast food', 'F&B'],
+    featured: false,
+    urgent: true,
+    views: 167
+  },
+  {
+    id: 44,
+    title: 'Ca Sáng - Phục vụ Jollibee',
+    company: 'Jollibee - Tân Phú',
+    location: 'Tân Phú, TP.HCM',
+    lat: 10.7918,
+    lng: 106.6280,
+    type: 'Ca sáng (07:00 - 15:00)',
+    category: 'shift',
+    salary: '27.000 VNĐ/giờ',
+    postedAt: '1 giờ trước',
+    tags: ['Ca sáng', 'Fast food', 'Phục vụ'],
+    featured: false,
+    urgent: true,
+    views: 189
+  },
+  {
+    id: 45,
+    title: 'Ca Chiều - Nhân viên Lotteria',
+    company: 'Lotteria - Bình Tân',
+    location: 'Bình Tân, TP.HCM',
+    lat: 10.7654,
+    lng: 106.6042,
+    type: 'Ca chiều (14:00 - 22:00)',
+    category: 'shift',
+    salary: '27.000 VNĐ/giờ',
+    postedAt: '4 giờ trước',
+    tags: ['Ca chiều', 'Fast food', 'F&B'],
+    featured: false,
+    urgent: true,
+    views: 156
+  },
+  {
+    id: 46,
+    title: 'Ca Tối - Bartender',
+    company: 'Quán Bar Bùi Viện',
+    location: 'Quận 1, TP.HCM',
+    lat: 10.7680,
+    lng: 106.6935,
+    type: 'Ca tối (19:00 - 02:00)',
+    category: 'shift',
+    salary: '35.000 VNĐ/giờ',
+    postedAt: '1 giờ trước',
+    tags: ['Ca tối', 'Bartender', 'Pha chế'],
+    featured: true,
+    urgent: true,
+    views: 345
+  },
+  {
+    id: 47,
+    title: 'Ca Sáng - Pha chế Katinat',
+    company: 'Katinat - Quận 2',
+    location: 'Quận 2, TP.HCM',
+    lat: 10.7870,
+    lng: 106.7500,
+    type: 'Ca sáng (07:00 - 15:00)',
+    category: 'shift',
+    salary: '29.000 VNĐ/giờ',
+    postedAt: '2 giờ trước',
+    tags: ['Ca sáng', 'Pha chế', 'Coffee'],
+    featured: false,
+    urgent: true,
+    views: 201
+  },
+  {
+    id: 48,
+    title: 'Ca Chiều - Phục vụ Pizza',
+    company: 'Pizza 4P\'s - Q10',
+    location: 'Quận 10, TP.HCM',
+    lat: 10.7735,
+    lng: 106.6676,
+    type: 'Ca chiều (14:00 - 22:00)',
+    category: 'shift',
+    salary: '28.000 VNĐ/giờ',
+    postedAt: '3 giờ trước',
+    tags: ['Ca chiều', 'Phục vụ', 'Pizza'],
+    featured: false,
+    urgent: true,
+    views: 212
+  },
+  {
+    id: 49,
+    title: 'Ca Sáng - Nhân viên thu ngân',
+    company: 'Lẩu Dê Ninh Bình - Q12',
+    location: 'Quận 12, TP.HCM',
+    lat: 10.8671,
+    lng: 106.6413,
+    type: 'Ca sáng (07:00 - 15:00)',
+    category: 'shift',
+    salary: '28.000 VNĐ/giờ',
+    postedAt: '30 phút trước',
+    tags: ['Ca sáng', 'Thu ngân', 'F&B'],
+    featured: false,
+    urgent: true,
+    views: 278
+  },
+  {
+    id: 50,
+    title: 'Ca Đêm - Nhân viên bếp',
+    company: 'Bún Bò Huế 3A3 - Q6',
+    location: 'Quận 6, TP.HCM',
+    lat: 10.7478,
+    lng: 106.6350,
+    type: 'Ca đêm (20:00 - 04:00)',
+    category: 'shift',
+    salary: '32.000 VNĐ/giờ',
+    postedAt: '2 giờ trước',
+    tags: ['Ca đêm', 'Bếp', 'F&B'],
+    featured: false,
+    urgent: true,
+    views: 134
+  },
+  {
+    id: 51,
+    title: 'Ca Sáng - Thu ngân Highlands',
+    company: 'Highlands Coffee - Q8',
+    location: 'Quận 8, TP.HCM',
+    lat: 10.7380,
+    lng: 106.6630,
+    type: 'Ca sáng (06:00 - 14:00)',
+    category: 'shift',
+    salary: '27.000 VNĐ/giờ',
+    postedAt: '1 giờ trước',
+    tags: ['Ca sáng', 'Thu ngân', 'Coffee'],
+    featured: false,
+    urgent: true,
+    views: 156
   }
 ];
 
@@ -1680,13 +1994,13 @@ const JobListing = () => {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
   const [jobCategory, setJobCategory] = useState('standard'); // 'standard' or 'shift'
-  
+
   // Merge stored jobs with default jobs data
   const allJobs = useMemo(() => {
     const storedJobs = getStoredJobs();
     return [...storedJobs, ...JOBS_DATA];
   }, []); // Re-calculate when component mounts
-  
+
   const [quickFilter, setQuickFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState('list');
@@ -1702,14 +2016,14 @@ const JobListing = () => {
   const [selectedExperience, setSelectedExperience] = useState([]);
   const [selectedSalaryRanges, setSelectedSalaryRanges] = useState([]);
   const [selectedCompanies, setSelectedCompanies] = useState([]);
-  
+
   // Location-based states
   const [userLocation, setUserLocation] = useState(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [showNearbyJobs, setShowNearbyJobs] = useState(false);
   const [nearbyRadius, setNearbyRadius] = useState(3); // km
   const [showSavedJobsOnly, setShowSavedJobsOnly] = useState(false);
-  
+
   // Job search status states
   const [isAvailable, setIsAvailable] = useState(true);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -1717,7 +2031,7 @@ const JobListing = () => {
   const handleToggleAvailability = () => {
     setShowConfirmModal(true);
   };
-  
+
   const confirmToggle = () => {
     setIsAvailable(!isAvailable);
     setShowConfirmModal(false);
@@ -1744,8 +2058,8 @@ const JobListing = () => {
   // Scroll to results function
   const scrollToResults = () => {
     if (resultsRef.current) {
-      resultsRef.current.scrollIntoView({ 
-        behavior: 'smooth', 
+      resultsRef.current.scrollIntoView({
+        behavior: 'smooth',
         block: 'start'
       });
     }
@@ -1763,8 +2077,8 @@ const JobListing = () => {
 
   // Auto scroll when filters change
   useEffect(() => {
-    if (selectedJobTypes.length > 0 || selectedExperience.length > 0 || 
-        selectedSalaryRanges.length > 0 || selectedCompanies.length > 0) {
+    if (selectedJobTypes.length > 0 || selectedExperience.length > 0 ||
+      selectedSalaryRanges.length > 0 || selectedCompanies.length > 0) {
       scrollToResults();
     }
   }, [selectedJobTypes, selectedExperience, selectedSalaryRanges, selectedCompanies]);
@@ -1813,24 +2127,24 @@ const JobListing = () => {
 
   const handleSaveJob = (jobId, e) => {
     e?.stopPropagation();
-    
+
     const job = allJobs.find(j => j.id === jobId);
     if (!job) return;
-    
+
     const saved = JSON.parse(localStorage.getItem('savedJobs') || '[]');
     const isAlreadySaved = saved.some(j => j.id === jobId);
-    
+
     let updated;
     if (isAlreadySaved) {
       updated = saved.filter(j => j.id !== jobId);
     } else {
       updated = [...saved, job];
     }
-    
+
     localStorage.setItem('savedJobs', JSON.stringify(updated));
-    
-    setSavedJobs(prev => 
-      prev.includes(jobId) 
+
+    setSavedJobs(prev =>
+      prev.includes(jobId)
         ? prev.filter(id => id !== jobId)
         : [...prev, jobId]
     );
@@ -1840,23 +2154,23 @@ const JobListing = () => {
     // Check KYC completion before allowing application
     const savedKYC = localStorage.getItem('candidateKYC');
     let kycCompleted = false;
-    
+
     if (savedKYC) {
       const kycData = JSON.parse(savedKYC);
       kycCompleted = kycData.completed === true;
     }
-    
+
     if (!kycCompleted) {
       alert(
-        language === 'vi' 
-          ? '⚠️ Bạn cần hoàn thành xác minh KYC trước khi ứng tuyển!\n\nVui lòng vào trang Hồ Sơ để hoàn tất xác minh.'
-          : '⚠️ You need to complete KYC verification before applying!\n\nPlease go to Profile page to complete verification.'
+        language === 'vi'
+          ? '⚠️ Bạn cần hoàn thành xác minh eKYC trước khi ứng tuyển!\n\nVui lòng hoàn tất xác minh eKYC.'
+          : '⚠️ You need to complete eKYC verification before applying!\n\nPlease complete eKYC verification.'
       );
-      navigate('/candidate/profile');
+      navigate('/candidate/ekyc');
       return;
     }
-    
-    // If KYC completed, show success message
+
+    // If eKYC completed, show success message
     alert(
       language === 'vi'
         ? '✅ Ứng tuyển thành công! Nhà tuyển dụng sẽ liên hệ với bạn sớm.'
@@ -1873,25 +2187,25 @@ const JobListing = () => {
 
   // Toggle filter handlers
   const toggleJobType = (type) => {
-    setSelectedJobTypes(prev => 
+    setSelectedJobTypes(prev =>
       prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
     );
   };
 
   const toggleExperience = (level) => {
-    setSelectedExperience(prev => 
+    setSelectedExperience(prev =>
       prev.includes(level) ? prev.filter(l => l !== level) : [...prev, level]
     );
   };
 
   const toggleSalaryRange = (range) => {
-    setSelectedSalaryRanges(prev => 
+    setSelectedSalaryRanges(prev =>
       prev.includes(range) ? prev.filter(r => r !== range) : [...prev, range]
     );
   };
 
   const toggleCompany = (company) => {
-    setSelectedCompanies(prev => 
+    setSelectedCompanies(prev =>
       prev.includes(company) ? prev.filter(c => c !== company) : [...prev, company]
     );
   };
@@ -1914,21 +2228,21 @@ const JobListing = () => {
 
   const isInSalaryRange = (salary, range) => {
     const value = getSalaryValue(salary);
-    
+
     if (jobCategory === 'standard') {
-      switch(range) {
-        case '0-50': return value < 50;
-        case '50-100': return value >= 50 && value < 100;
-        case '100-150': return value >= 100 && value < 150;
-        case '150+': return value >= 150;
+      const isHourly = salary.toLowerCase().includes('giờ') || salary.toLowerCase().includes('hour');
+      switch (range) {
+        case 'hourly': return isHourly;
+        case 'under-10m': return !isHourly && value < 10;
+        case '10m-20m': return !isHourly && value >= 10 && value <= 20;
+        case 'over-20m': return !isHourly && value > 20;
         default: return true;
       }
     } else {
-      switch(range) {
-        case '0-150k': return value < 150;
-        case '150-200k': return value >= 150 && value < 200;
-        case '200-250k': return value >= 200 && value < 250;
-        case '250k+': return value >= 250;
+      switch (range) {
+        case '26-30k': return value >= 26 && value < 30;
+        case '30-35k': return value >= 30 && value <= 35;
+        case '35k+': return value > 35;
         default: return true;
       }
     }
@@ -1945,7 +2259,7 @@ const JobListing = () => {
   // Get nearby jobs
   const nearbyJobs = useMemo(() => {
     if (!userLocation) return [];
-    
+
     return allJobs
       .filter(job => job.category === jobCategory)
       .map(job => ({
@@ -1959,23 +2273,25 @@ const JobListing = () => {
   // Advanced filtering with useMemo for performance
   const filteredJobs = useMemo(() => {
     let result = allJobs;
-    
+
     // Filter by saved jobs only
     if (showSavedJobsOnly) {
       result = result.filter(job => savedJobs.includes(job.id));
       // Don't apply category filter for saved jobs
     } else {
-      // For shift jobs, only show nearby jobs when location is enabled
+      // For shift jobs
       if (jobCategory === 'shift') {
-        if (!showNearbyJobs) {
-          return []; // Don't show any jobs until location is enabled
+        if (showNearbyJobs) {
+          // Location enabled: only show jobs within radius (strict ≤3km)
+          return nearbyJobs;
         }
-        return nearbyJobs; // Show only nearby jobs within radius
+        // Location not enabled: show all shift jobs for browsing
+        result = result.filter(job => job.category === 'shift');
+      } else {
+        result = result.filter(job => job.category === jobCategory);
       }
-      
-      result = result.filter(job => job.category === jobCategory);
     }
-    
+
     // Add distance if user location is available
     if (userLocation) {
       result = result.map(job => ({
@@ -1989,7 +2305,7 @@ const JobListing = () => {
       const keyword = searchKeyword.toLowerCase().trim();
       result = result.filter(job => {
         const locationParts = job.location.toLowerCase().split(',').map(part => part.trim());
-        const locationMatch = locationParts.some(part => 
+        const locationMatch = locationParts.some(part =>
           part === keyword || part.startsWith(keyword + ' ') || part.includes(keyword)
         );
         return (
@@ -2015,28 +2331,28 @@ const JobListing = () => {
 
     // Filter by job type
     if (selectedJobTypes.length > 0) {
-      result = result.filter(job => 
+      result = result.filter(job =>
         selectedJobTypes.some(type => job.type.toLowerCase().includes(type.toLowerCase()))
       );
     }
 
     // Filter by experience (standard jobs only)
     if (selectedExperience.length > 0 && jobCategory === 'standard') {
-      result = result.filter(job => 
+      result = result.filter(job =>
         selectedExperience.includes(getExperienceLevel(job.title))
       );
     }
 
     // Filter by salary range
     if (selectedSalaryRanges.length > 0) {
-      result = result.filter(job => 
+      result = result.filter(job =>
         selectedSalaryRanges.some(range => isInSalaryRange(job.salary, range))
       );
     }
 
     // Filter by company
     if (selectedCompanies.length > 0) {
-      result = result.filter(job => 
+      result = result.filter(job =>
         selectedCompanies.includes(job.company)
       );
     }
@@ -2048,7 +2364,7 @@ const JobListing = () => {
 
     // Sorting
     result = [...result].sort((a, b) => {
-      switch(sortBy) {
+      switch (sortBy) {
         case 'salary':
           return getSalaryValue(b.salary) - getSalaryValue(a.salary);
         case 'views':
@@ -2063,14 +2379,14 @@ const JobListing = () => {
     });
 
     return result;
-  }, [jobCategory, searchKeyword, selectedLocation, selectedJobTypes, 
-      selectedExperience, selectedSalaryRanges, selectedCompanies, 
-      quickFilter, savedJobs, sortBy, userLocation, showNearbyJobs, nearbyJobs, allJobs, showSavedJobsOnly]);
+  }, [jobCategory, searchKeyword, selectedLocation, selectedJobTypes,
+    selectedExperience, selectedSalaryRanges, selectedCompanies,
+    quickFilter, savedJobs, sortBy, userLocation, showNearbyJobs, nearbyJobs, allJobs, showSavedJobsOnly]);
 
   const categoryJobs = allJobs.filter(job => job.category === jobCategory);
 
   return (
-    <DashboardLayout role="candidate">
+    <DashboardLayout role="candidate" key={language}>
       <Container>
         {/* Hero Search Section */}
         <HeroSection
@@ -2082,29 +2398,29 @@ const JobListing = () => {
             <HeroTitle>
               {showSavedJobsOnly
                 ? (language === 'vi' ? 'Công việc đã lưu' : 'Saved Jobs')
-                : jobCategory === 'standard' 
+                : jobCategory === 'standard'
                   ? (language === 'vi' ? 'Tìm công việc mơ ước của bạn ' : 'Find Your Dream Job ')
                   : (language === 'vi' ? 'Công việc theo ca - Tuyển gấp ' : 'Shift Jobs - Hiring Now ')}
             </HeroTitle>
             <HeroSubtitle>
               {showSavedJobsOnly
                 ? (language === 'vi'
-                    ? `Bạn đang theo dõi ${filteredJobs.length} công việc đã lưu`
-                    : `You are tracking ${filteredJobs.length} saved jobs`)
+                  ? `Bạn đang theo dõi ${filteredJobs.length} công việc đã lưu`
+                  : `You are tracking ${filteredJobs.length} saved jobs`)
                 : jobCategory === 'standard'
-                  ? (language === 'vi' 
-                      ? `Hơn ${allJobs.filter(j => j.category === 'standard').length} công việc tiêu chuẩn đang chờ bạn khám phá` 
-                      : `Over ${allJobs.filter(j => j.category === 'standard').length} standard jobs waiting for you to explore`)
+                  ? (language === 'vi'
+                    ? `Hơn ${allJobs.filter(j => j.category === 'standard').length} công việc tiêu chuẩn đang chờ bạn khám phá`
+                    : `Over ${allJobs.filter(j => j.category === 'standard').length} standard jobs waiting for you to explore`)
                   : (language === 'vi'
-                      ? `${allJobs.filter(j => j.category === 'shift').length} công việc theo ca đang tuyển gấp, làm ngay hôm nay!`
-                      : `${allJobs.filter(j => j.category === 'shift').length} shift jobs hiring urgently, start today!`)}
+                    ? `${allJobs.filter(j => j.category === 'shift').length} công việc theo ca đang tuyển gấp, làm ngay hôm nay!`
+                    : `${allJobs.filter(j => j.category === 'shift').length} shift jobs hiring urgently, start today!`)}
             </HeroSubtitle>
-            
+
             <SearchContainer>
               <SearchInput>
                 <Search />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder={language === 'vi' ? 'Tìm theo vị trí, công ty, kỹ năng...' : 'Search by position, company, skills...'}
                   value={searchKeyword}
                   onChange={(e) => setSearchKeyword(e.target.value)}
@@ -2115,11 +2431,11 @@ const JobListing = () => {
                   }}
                 />
               </SearchInput>
-              
+
               <SearchInput>
                 <MapPin />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder={language === 'vi' ? 'Địa điểm' : 'Location'}
                   value={selectedLocation}
                   onChange={(e) => setSelectedLocation(e.target.value)}
@@ -2130,7 +2446,7 @@ const JobListing = () => {
                   }}
                 />
               </SearchInput>
-              
+
               <SearchButton
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -2140,11 +2456,11 @@ const JobListing = () => {
                 {language === 'vi' ? 'Tìm kiếm' : 'Search'}
               </SearchButton>
             </SearchContainer>
-            
-            {/* Location-based search & Job Status - Only for shift jobs */}
-            {jobCategory === 'shift' && (
+
+            {/* Location-based search & Job Status - Only for shift jobs, not saved jobs */}
+            {jobCategory === 'shift' && !showSavedJobsOnly && (
               <motion.div
-                style={{ 
+                style={{
                   marginTop: '16px',
                   display: 'flex',
                   alignItems: 'center',
@@ -2155,80 +2471,80 @@ const JobListing = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
               >
-              {/* Job Search Status Toggle */}
-              {!showSavedJobsOnly && (
-                <StatusCard
-                  $active={isAvailable}
-                  as={motion.div}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="status-content">
-                    <div className="status-info">
-                      <div className="status-badge">
-                        {isAvailable ? <CheckCircle /> : <XCircle />}
-                        {isAvailable 
-                          ? (language === 'vi' ? 'Trạng thái tìm việc đang bật' : 'Job Search Active')
-                          : (language === 'vi' ? 'Trạng thái tìm việc đang tắt' : 'Job Search Paused')}
+                {/* Job Search Status Toggle */}
+                {!showSavedJobsOnly && (
+                  <StatusCard
+                    $active={isAvailable}
+                    as={motion.div}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="status-content">
+                      <div className="status-info">
+                        <div className="status-badge">
+                          {isAvailable ? <CheckCircle /> : <XCircle />}
+                          {isAvailable
+                            ? (language === 'vi' ? 'Trạng thái tìm việc đang bật' : 'Job Search Active')
+                            : (language === 'vi' ? 'Trạng thái tìm việc đang tắt' : 'Job Search Paused')}
+                        </div>
                       </div>
+                      <ToggleButton
+                        onClick={handleToggleAvailability}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <Power />
+                        {isAvailable
+                          ? (language === 'vi' ? 'Tắt' : 'Pause')
+                          : (language === 'vi' ? 'Bật' : 'Activate')}
+                      </ToggleButton>
                     </div>
-                    <ToggleButton
-                      onClick={handleToggleAvailability}
+                  </StatusCard>
+                )}
+
+                {/* Location button - Only show when job search is active */}
+                {isAvailable && (
+                  <>
+                    <LocationButton
+                      $active={showNearbyJobs}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
+                      onClick={getUserLocation}
+                      disabled={isLoadingLocation}
                     >
-                      <Power />
-                      {isAvailable 
-                        ? (language === 'vi' ? 'Tắt' : 'Pause')
-                        : (language === 'vi' ? 'Bật' : 'Activate')}
-                    </ToggleButton>
-                  </div>
-                </StatusCard>
-              )}
-              
-              {/* Location button - Only show when job search is active */}
-              {isAvailable && (
-                <>
-                  <LocationButton
-                    $active={showNearbyJobs}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={getUserLocation}
-                    disabled={isLoadingLocation}
-                  >
-                    {isLoadingLocation ? (
-                      <>
-                        <div className="spinner" />
-                        {language === 'vi' ? 'Đang lấy vị trí...' : 'Getting location...'}
-                      </>
-                    ) : (
-                      <>
-                        <Navigation size={16} />
-                        {showNearbyJobs 
-                          ? (language === 'vi' ? 'Vị trí đã bật' : 'Location Enabled') 
-                          : (language === 'vi' ? 'Tìm việc gần tôi' : 'Find Jobs Near Me')}
-                      </>
+                      {isLoadingLocation ? (
+                        <>
+                          <div className="spinner" />
+                          {language === 'vi' ? 'Đang lấy vị trí...' : 'Getting location...'}
+                        </>
+                      ) : (
+                        <>
+                          <Navigation size={16} />
+                          {showNearbyJobs
+                            ? (language === 'vi' ? 'Vị trí đã bật' : 'Location Enabled')
+                            : (language === 'vi' ? 'Tìm việc gần tôi' : 'Find Jobs Near Me')}
+                        </>
+                      )}
+                    </LocationButton>
+
+                    {showNearbyJobs && (
+                      <motion.span
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        style={{
+                          color: 'rgba(255,255,255,0.9)',
+                          fontSize: '13px',
+                          fontWeight: '500'
+                        }}
+                      >
+                        {language === 'vi'
+                          ? `Tìm thấy ${nearbyJobs.length} việc làm trong bán kính ${nearbyRadius}km`
+                          : `Found ${nearbyJobs.length} jobs within ${nearbyRadius}km radius`}
+                      </motion.span>
                     )}
-                  </LocationButton>
-                  
-                  {showNearbyJobs && (
-                    <motion.span
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      style={{
-                        color: 'rgba(255,255,255,0.9)',
-                        fontSize: '13px',
-                        fontWeight: '500'
-                      }}
-                    >
-                      {language === 'vi' 
-                        ? `Tìm thấy ${nearbyJobs.length} việc làm trong bán kính ${nearbyRadius}km`
-                        : `Found ${nearbyJobs.length} jobs within ${nearbyRadius}km radius`}
-                    </motion.span>
-                  )}
-                </>
-              )}
+                  </>
+                )}
               </motion.div>
             )}
           </HeroContent>
@@ -2253,7 +2569,7 @@ const JobListing = () => {
               ({allJobs.filter(j => j.category === 'standard').length})
             </span>
           </CategoryTab>
-          
+
           <CategoryTab
             $active={jobCategory === 'shift' && !showSavedJobsOnly}
             onClick={() => {
@@ -2271,7 +2587,7 @@ const JobListing = () => {
               ({allJobs.filter(j => j.category === 'shift').length})
             </span>
           </CategoryTab>
-          
+
           <CategoryTab
             $active={showSavedJobsOnly}
             onClick={() => {
@@ -2308,7 +2624,7 @@ const JobListing = () => {
 
             <FilterSection>
               <FilterTitle onClick={() => toggleFilter('jobType')} $expanded={expandedFilters.jobType}>
-                <h4>{jobCategory === 'standard' 
+                <h4>{jobCategory === 'standard'
                   ? (language === 'vi' ? 'Loại hình công việc' : 'Job Type')
                   : (language === 'vi' ? 'Loại ca làm việc' : 'Shift Type')}</h4>
                 <ChevronDown />
@@ -2322,9 +2638,9 @@ const JobListing = () => {
                   {jobCategory === 'standard' ? (
                     <>
                       <FilterOption>
-                        <input 
-                          type="checkbox" 
-                          id="fulltime" 
+                        <input
+                          type="checkbox"
+                          id="fulltime"
                           checked={selectedJobTypes.includes('full-time')}
                           onChange={() => toggleJobType('full-time')}
                         />
@@ -2332,9 +2648,9 @@ const JobListing = () => {
                         <small>28</small>
                       </FilterOption>
                       <FilterOption>
-                        <input 
-                          type="checkbox" 
-                          id="parttime" 
+                        <input
+                          type="checkbox"
+                          id="parttime"
                           checked={selectedJobTypes.includes('part-time')}
                           onChange={() => toggleJobType('part-time')}
                         />
@@ -2345,9 +2661,9 @@ const JobListing = () => {
                   ) : (
                     <>
                       <FilterOption>
-                        <input 
-                          type="checkbox" 
-                          id="morning" 
+                        <input
+                          type="checkbox"
+                          id="morning"
                           checked={selectedJobTypes.includes('sáng')}
                           onChange={() => toggleJobType('sáng')}
                         />
@@ -2355,35 +2671,26 @@ const JobListing = () => {
                         <small>8</small>
                       </FilterOption>
                       <FilterOption>
-                        <input 
-                          type="checkbox" 
-                          id="afternoon" 
+                        <input
+                          type="checkbox"
+                          id="afternoon"
                           checked={selectedJobTypes.includes('chiều')}
                           onChange={() => toggleJobType('chiều')}
                         />
                         <span>{language === 'vi' ? 'Ca chiều (14h-22h)' : 'Afternoon Shift (2PM-10PM)'}</span>
-                        <small>6</small>
+                        <small>5</small>
                       </FilterOption>
                       <FilterOption>
-                        <input 
-                          type="checkbox" 
-                          id="night" 
+                        <input
+                          type="checkbox"
+                          id="night"
                           checked={selectedJobTypes.includes('đêm')}
                           onChange={() => toggleJobType('đêm')}
                         />
                         <span>{language === 'vi' ? 'Ca đêm (22h-6h)' : 'Night Shift (10PM-6AM)'}</span>
                         <small>5</small>
                       </FilterOption>
-                      <FilterOption>
-                        <input 
-                          type="checkbox" 
-                          id="flexible" 
-                          checked={selectedJobTypes.includes('linh động')}
-                          onChange={() => toggleJobType('linh động')}
-                        />
-                        <span>{language === 'vi' ? 'Ca linh động' : 'Flexible Shift'}</span>
-                        <small>4</small>
-                      </FilterOption>
+
                     </>
                   )}
                 </FilterOptions>
@@ -2403,19 +2710,19 @@ const JobListing = () => {
                     exit={{ height: 0 }}
                   >
                     <FilterOption>
-                      <input 
-                        type="checkbox" 
-                        id="intern" 
+                      <input
+                        type="checkbox"
+                        id="intern"
                         checked={selectedExperience.includes('intern')}
                         onChange={() => toggleExperience('intern')}
                       />
                       <span>{language === 'vi' ? 'Thực tập sinh' : 'Intern'}</span>
-                      <small>15</small>
+                      <small>35</small>
                     </FilterOption>
                     <FilterOption>
-                      <input 
-                        type="checkbox" 
-                        id="junior" 
+                      <input
+                        type="checkbox"
+                        id="junior"
                         checked={selectedExperience.includes('junior')}
                         onChange={() => toggleExperience('junior')}
                       />
@@ -2423,9 +2730,9 @@ const JobListing = () => {
                       <small>28</small>
                     </FilterOption>
                     <FilterOption>
-                      <input 
-                        type="checkbox" 
-                        id="mid" 
+                      <input
+                        type="checkbox"
+                        id="mid"
                         checked={selectedExperience.includes('mid')}
                         onChange={() => toggleExperience('mid')}
                       />
@@ -2439,9 +2746,9 @@ const JobListing = () => {
 
             <FilterSection>
               <FilterTitle onClick={() => toggleFilter('salary')} $expanded={expandedFilters.salary}>
-                <h4>{jobCategory === 'standard' 
+                <h4>{jobCategory === 'standard'
                   ? (language === 'vi' ? 'Mức lương' : 'Salary')
-                  : (language === 'vi' ? 'Thu nhập/ca' : 'Income/Shift')}</h4>
+                  : (language === 'vi' ? 'Thu nhập/giờ' : 'Income/Shift')}</h4>
                 <ChevronDown />
               </FilterTitle>
               {expandedFilters.salary && (
@@ -2453,77 +2760,67 @@ const JobListing = () => {
                   {jobCategory === 'standard' ? (
                     <>
                       <FilterOption>
-                        <input 
-                          type="checkbox" 
-                          id="0-50" 
-                          checked={selectedSalaryRanges.includes('0-50')}
-                          onChange={() => toggleSalaryRange('0-50')}
+                        <input
+                          type="checkbox"
+                          id="hourly"
+                          checked={selectedSalaryRanges.includes('hourly')}
+                          onChange={() => toggleSalaryRange('hourly')}
                         />
-                        <span>{language === 'vi' ? 'Dưới 50 triệu' : 'Under 50 million'}</span>
-                        <small>12</small>
+                        <span>{language === 'vi' ? 'Trả theo giờ' : 'Hourly wage'}</span>
+                        <small>8</small>
                       </FilterOption>
                       <FilterOption>
-                        <input 
-                          type="checkbox" 
-                          id="50-100" 
-                          checked={selectedSalaryRanges.includes('50-100')}
-                          onChange={() => toggleSalaryRange('50-100')}
+                        <input
+                          type="checkbox"
+                          id="under-10m"
+                          checked={selectedSalaryRanges.includes('under-10m')}
+                          onChange={() => toggleSalaryRange('under-10m')}
                         />
-                        <span>{language === 'vi' ? '50 - 100 triệu' : '50 - 100 million'}</span>
-                        <small>25</small>
+                        <span>{language === 'vi' ? 'Dưới 10 triệu' : 'Under 10 million'}</span>
+                        <small>4</small>
                       </FilterOption>
                       <FilterOption>
-                        <input 
-                          type="checkbox" 
-                          id="100-150" 
-                          checked={selectedSalaryRanges.includes('100-150')}
-                          onChange={() => toggleSalaryRange('100-150')}
+                        <input
+                          type="checkbox"
+                          id="10m-20m"
+                          checked={selectedSalaryRanges.includes('10m-20m')}
+                          onChange={() => toggleSalaryRange('10m-20m')}
                         />
-                        <span>{language === 'vi' ? '100 - 150 triệu' : '100 - 150 million'}</span>
-                        <small>18</small>
+                        <span>{language === 'vi' ? '10 - 20 triệu' : '10 - 20 million'}</span>
+                        <small>0</small>
+                      </FilterOption>
+                      <FilterOption>
+                        <input
+                          type="checkbox"
+                          id="over-20m"
+                          checked={selectedSalaryRanges.includes('over-20m')}
+                          onChange={() => toggleSalaryRange('over-20m')}
+                        />
+                        <span>{language === 'vi' ? 'Trên 20 triệu' : 'Over 20 million'}</span>
+                        <small>0</small>
                       </FilterOption>
                     </>
                   ) : (
                     <>
                       <FilterOption>
-                        <input 
-                          type="checkbox" 
-                          id="0-150k" 
-                          checked={selectedSalaryRanges.includes('0-150k')}
-                          onChange={() => toggleSalaryRange('0-150k')}
+                        <input
+                          type="checkbox"
+                          id="26-30k"
+                          checked={selectedSalaryRanges.includes('26-30k')}
+                          onChange={() => toggleSalaryRange('26-30k')}
                         />
-                        <span>{language === 'vi' ? 'Dưới 150k/ca' : 'Under 150k/shift'}</span>
+                        <span>{language === 'vi' ? '26.000 - 30.000 VNĐ/giờ' : '26k - 30k/hour'}</span>
+                        <small>35</small>
+                      </FilterOption>
+                      <FilterOption>
+                        <input
+                          type="checkbox"
+                          id="30-35k"
+                          checked={selectedSalaryRanges.includes('30-35k')}
+                          onChange={() => toggleSalaryRange('30-35k')}
+                        />
+                        <span>{language === 'vi' ? '30.000 - 35.000 VNĐ/giờ' : '30k - 35k/hour'}</span>
                         <small>5</small>
-                      </FilterOption>
-                      <FilterOption>
-                        <input 
-                          type="checkbox" 
-                          id="150-200k" 
-                          checked={selectedSalaryRanges.includes('150-200k')}
-                          onChange={() => toggleSalaryRange('150-200k')}
-                        />
-                        <span>{language === 'vi' ? '150k - 200k/ca' : '150k - 200k/shift'}</span>
-                        <small>8</small>
-                      </FilterOption>
-                      <FilterOption>
-                        <input 
-                          type="checkbox" 
-                          id="200-250k" 
-                          checked={selectedSalaryRanges.includes('200-250k')}
-                          onChange={() => toggleSalaryRange('200-250k')}
-                        />
-                        <span>{language === 'vi' ? '200k - 250k/ca' : '200k - 250k/shift'}</span>
-                        <small>6</small>
-                      </FilterOption>
-                      <FilterOption>
-                        <input 
-                          type="checkbox" 
-                          id="250k+" 
-                          checked={selectedSalaryRanges.includes('250k+')}
-                          onChange={() => toggleSalaryRange('250k+')}
-                        />
-                        <span>{language === 'vi' ? 'Trên 250k/ca' : 'Over 250k/shift'}</span>
-                        <small>4</small>
                       </FilterOption>
                     </>
                   )}
@@ -2539,35 +2836,35 @@ const JobListing = () => {
                 <h2>
                   {showSavedJobsOnly
                     ? (language === 'vi' ? 'Công việc đã lưu' : 'Saved Jobs')
-                    : jobCategory === 'standard' 
+                    : jobCategory === 'standard'
                       ? (language === 'vi' ? 'Công việc tiêu chuẩn' : 'Standard Jobs')
                       : (language === 'vi' ? 'Công việc theo ca' : 'Shift Jobs')}
                 </h2>
-                <p>{language === 'vi' 
+                <p>{language === 'vi'
                   ? (showSavedJobsOnly
-                      ? `Bạn đang theo dõi ${filteredJobs.length} công việc đã lưu`
-                      : `Tìm thấy ${filteredJobs.length} công việc phù hợp`)
+                    ? `Bạn đang theo dõi ${filteredJobs.length} công việc đã lưu`
+                    : `Tìm thấy ${filteredJobs.length} công việc phù hợp`)
                   : (showSavedJobsOnly
-                      ? `You are tracking ${filteredJobs.length} saved jobs`
-                      : `Found ${filteredJobs.length} matching jobs`)}</p>
+                    ? `You are tracking ${filteredJobs.length} saved jobs`
+                    : `Found ${filteredJobs.length} matching jobs`)}</p>
               </ResultsInfo>
-              
+
               <ViewControls>
                 <SortSelect value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
                   <option value="newest">{language === 'vi' ? 'Mới nhất' : 'Newest'}</option>
                   <option value="salary">{language === 'vi' ? 'Lương cao nhất' : 'Highest Salary'}</option>
                   <option value="relevant">{language === 'vi' ? 'Phù hợp nhất' : 'Most Relevant'}</option>
                 </SortSelect>
-                
+
                 <ViewToggle>
-                  <ViewButton 
-                    $active={viewMode === 'list'} 
+                  <ViewButton
+                    $active={viewMode === 'list'}
                     onClick={() => setViewMode('list')}
                   >
                     <List />
                   </ViewButton>
-                  <ViewButton 
-                    $active={viewMode === 'grid'} 
+                  <ViewButton
+                    $active={viewMode === 'grid'}
                     onClick={() => setViewMode('grid')}
                   >
                     <Grid />
@@ -2579,9 +2876,9 @@ const JobListing = () => {
             <JobsGrid>
               {filteredJobs.length > 0 ? (
                 filteredJobs.map((job, index) => (
-                  <JobCardComponent 
-                    key={job.id} 
-                    job={job} 
+                  <JobCardComponent
+                    key={job.id}
+                    job={job}
                     saved={savedJobs.includes(job.id)}
                     onSave={handleSaveJob}
                     onClick={handleJobClick}
@@ -2591,9 +2888,9 @@ const JobListing = () => {
                   />
                 ))
               ) : (
-                <div style={{ 
-                  textAlign: 'center', 
-                  padding: '80px 20px', 
+                <div style={{
+                  textAlign: 'center',
+                  padding: '80px 20px',
                   gridColumn: '1 / -1',
                   color: '#6b7280'
                 }}>
@@ -2616,7 +2913,7 @@ const JobListing = () => {
                         {language === 'vi' ? 'Bật vị trí để tìm việc gần bạn' : 'Enable location to find jobs near you'}
                       </p>
                       <p style={{ fontSize: '15px', color: '#6b7280', marginBottom: '20px' }}>
-                        {language === 'vi' 
+                        {language === 'vi'
                           ? 'Nhấn nút "Tìm việc gần tôi" ở phía trên để xem các công việc theo ca trong bán kính 3km'
                           : 'Click "Find Jobs Near Me" button above to see shift jobs within 3km radius'}
                       </p>
@@ -2628,13 +2925,13 @@ const JobListing = () => {
                         {language === 'vi' ? 'Không tìm thấy công việc phù hợp' : 'No matching jobs found'}
                       </p>
                       <p style={{ fontSize: '15px', color: '#6b7280' }}>
-                        {jobCategory === 'shift' 
-                          ? (language === 'vi' 
-                              ? 'Không có công việc theo ca trong bán kính 3km. Thử mở rộng bán kính tìm kiếm.'
-                              : 'No shift jobs within 3km radius. Try expanding the search radius.')
+                        {jobCategory === 'shift'
+                          ? (language === 'vi'
+                            ? 'Không có công việc theo ca trong bán kính 3km. Thử mở rộng bán kính tìm kiếm.'
+                            : 'No shift jobs within 3km radius. Try expanding the search radius.')
                           : (language === 'vi'
-                              ? 'Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn'
-                              : 'Try adjusting your filters or search keywords')
+                            ? 'Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn'
+                            : 'Try adjusting your filters or search keywords')
                         }
                       </p>
                     </>
@@ -2664,11 +2961,11 @@ const JobListing = () => {
           <p>
             {isAvailable
               ? (language === 'vi'
-                  ? 'Hồ sơ của bạn sẽ bị ẩn với nhà tuyển dụng và bạn sẽ không nhận được thông báo về cơ hội việc làm.'
-                  : 'Your profile will be hidden from employers and you will not receive job opportunity notifications.')
+                ? 'Hồ sơ của bạn sẽ bị ẩn với nhà tuyển dụng và bạn sẽ không nhận được thông báo về cơ hội việc làm.'
+                : 'Your profile will be hidden from employers and you will not receive job opportunity notifications.')
               : (language === 'vi'
-                  ? 'Hồ sơ của bạn sẽ hiển thị với nhà tuyển dụng và bạn sẽ nhận được thông báo về cơ hội việc làm phù hợp.'
-                  : 'Your profile will be visible to employers and you will receive notifications about suitable job opportunities.')}
+                ? 'Hồ sơ của bạn sẽ hiển thị với nhà tuyển dụng và bạn sẽ nhận được thông báo về cơ hội việc làm phù hợp.'
+                : 'Your profile will be visible to employers and you will receive notifications about suitable job opportunities.')}
           </p>
           <div className="button-group">
             <button className="cancel" onClick={() => setShowConfirmModal(false)}>
@@ -2737,8 +3034,8 @@ const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0, showDistance
             {showDistance && job.distance !== undefined && (
               <MetaItem style={{ color: '#10b981', fontWeight: '600' }}>
                 <Target size={16} />
-                {job.distance < 1 
-                  ? `${(job.distance * 1000).toFixed(0)}m` 
+                {job.distance < 1
+                  ? `${(job.distance * 1000).toFixed(0)}m`
                   : `${job.distance.toFixed(1)}km`}
               </MetaItem>
             )}
@@ -2760,7 +3057,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0, showDistance
             <Tag key={idx}>{translateTag(tag, language)}</Tag>
           ))}
         </JobTags>
-        
+
         <JobSalary>
           <DollarSign />
           <span>{translateSalary(job.salary, language)}</span>
@@ -2772,7 +3069,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0, showDistance
           <Clock />
           {translateTimePosted(job.postedAt, language)}
         </JobPosted>
-        
+
         <JobActions>
           <ActionButton
             $primary
@@ -2786,7 +3083,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0, showDistance
             {language === 'vi' ? 'Ứng tuyển ngay' : 'Apply Now'}
             <ArrowUpRight />
           </ActionButton>
-          
+
           <SaveButton
             $saved={saved}
             whileHover={{ scale: 1.1 }}

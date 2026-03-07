@@ -206,6 +206,7 @@ const CardGrid = styled.div`
   gap: 28px;
   width: 100%;
   margin-bottom: 40px;
+  align-items: stretch;
 
   @media (max-width: 720px) {
     grid-template-columns: 1fr;
@@ -225,6 +226,7 @@ const RoleCard = styled(motion.div)`
   box-shadow: 0 4px 20px rgba(0,0,0,0.12), 0 20px 48px rgba(14,57,149,0.15);
   border: 2px solid transparent;
   transition: border-color 0.3s, box-shadow 0.3s;
+  height: 100%;
 
   /* top accent */
   &::before {
@@ -471,7 +473,7 @@ const RegisterRoleSelection = () => {
       key: 'candidate',
       emoji: '🎯',
       iconBg: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
-      grad: 'linear-gradient(135deg, #0E3995 0%, #2563eb 50%, #3b82f6 100%)',
+      grad: 'linear-gradient(135deg, #0369a1 0%, #0E3995 50%, #1d4ed8 100%)',
       accent: '#3b82f6',
       shadow: 'rgba(59,130,246,0.45)',
       fBg: '#eff6ff',
@@ -591,7 +593,7 @@ const RegisterRoleSelection = () => {
                 whileHover={{ y: -8, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } }}
                 whileTap={{ scale: 0.985 }}
               >
-                {r.popular && <Popular>🔥 Phổ biến</Popular>}
+
 
                 <IconWrap $bg={r.iconBg}>{r.emoji}</IconWrap>
 
@@ -629,7 +631,7 @@ const RegisterRoleSelection = () => {
             </LoginNote>
             <DividerDot />
             <LoginNote>
-              <Link to="/">← Về trang chủ</Link>
+              <Link to="/"> Về trang chủ</Link>
             </LoginNote>
           </BottomRow>
         </motion.div>
@@ -639,4 +641,3 @@ const RegisterRoleSelection = () => {
 };
 
 export default RegisterRoleSelection;
-

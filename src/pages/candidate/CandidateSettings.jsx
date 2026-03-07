@@ -520,7 +520,7 @@ function CandidateSettings() {
 
 
   return (
-    <DashboardLayout role="candidate" showSearch={false}>
+    <DashboardLayout role="candidate" showSearch={false} key={language}>
       <SettingsContainer>
         <PageHeader
           initial={{ opacity: 0, y: -20 }}

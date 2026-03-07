@@ -109,20 +109,34 @@ const ScanBar = styled.div`
 const BrandRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 52px;
+  justify-content: flex-start;
+  margin-bottom: 48px;
   position: relative;
   z-index: 2;
 `;
+const BrandLogoBox = styled.div`
+  background: #fff;
+  border-radius: 16px;
+  padding: 18px 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 18px rgba(14,57,149,0.10);
+  margin-bottom: 0;
+`;
 const LogoImg = styled.img`
-  height: 40px;
-  filter: brightness(0) invert(1);
+  height: 46px;
+  width: 46px;
+  object-fit: contain;
+  display: block;
 `;
 const BrandName = styled.span`
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 800;
   color: #fff;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.4px;
+  display: flex;
+  align-items: center;
 `;
 
 /* Headline */
@@ -310,7 +324,7 @@ const Card = styled(motion.div)`
   border-radius: 26px;
   padding: 42px 40px 36px;
   width: 100%;
-  max-width: 440px;
+  max-width: 500px;
   position: relative;
   z-index: 1;
   box-shadow:
@@ -713,9 +727,6 @@ const SubmitBtn = styled(motion.button)`
     opacity: 0.6;
     cursor: not-allowed;
   }
-
-  svg { width: 18px; height: 18px; transition: transform 0.25s; }
-  &:hover svg { transform: translateX(4px); }
 `;
 
 const BackBtn = styled.button`
@@ -812,6 +823,7 @@ const EmployerRegister = () => {
   const [showCpw, setShowCpw] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [form, setForm] = useState({
+    fullName: '',
     email: '', password: '', confirmPassword: '',
     companyName: '', phone: '',
   });
@@ -827,6 +839,7 @@ const EmployerRegister = () => {
 
   const validateStep1 = () => {
     const e = {};
+    if (!form.fullName) e.fullName = 'Vui lòng nhập họ và tên';
     if (!form.email) e.email = 'Vui lòng nhập email công ty';
     else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = 'Email không đúng định dạng';
     if (!form.password) e.password = 'Vui lòng nhập mật khẩu';
@@ -882,9 +895,10 @@ const EmployerRegister = () => {
         <Circle $s={80} $b="20%" $r="8%" $op={0.12} $dur={9} $delay={1} $rev />
 
         <BrandRow>
-          <LogoImg src="/OpPoReview/images/logo.png" alt="Ốp Pờ"
-            onError={e => { e.target.style.display = 'none'; }} />
-          <BrandName>Ốp Pờ</BrandName>
+          <BrandLogoBox>
+            <LogoImg src="/OpPoReview/images/logo.png" alt="Ốp Pờ"
+              onError={e => { e.target.style.display = 'none'; }} />
+          </BrandLogoBox>
         </BrandRow>
 
         <Headline>
@@ -992,30 +1006,11 @@ const EmployerRegister = () => {
                 exit="exit"
                 transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
               >
-                {/* Social */}
-                <SocialRow>
-                  <SocialBtn type="button" $c="#EA4335"
-                    onClick={() => handleSocial('Google')}
-                    whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <svg viewBox="0 0 24 24" width="17" height="17">
-                      <path fill="#EA4335" d="M5.266 9.765C6.199 6.939 8.854 4.91 12 4.91c1.69 0 3.218.6 4.418 1.582l3.491-3.491C17.782 1.146 15.055 0 12 0 7.27 0 3.198 2.698 1.24 6.65l4.026 3.115z" />
-                      <path fill="#34A853" d="M16.04 18.013C14.951 18.716 13.566 19.09 12 19.09c-3.134 0-5.78-2.014-6.723-4.823l-4.04 3.067C3.193 21.294 7.265 24 12 24c2.933 0 5.735-1.043 7.834-3.001l-3.794-2.986z" />
-                      <path fill="#4A90E2" d="M19.834 21C22.03 18.952 23.455 15.904 23.455 12c0-.71-.091-1.472-.273-2.182H12v4.636h6.436c-.319 1.56-1.17 2.767-2.396 3.559L19.834 21z" />
-                      <path fill="#FBBC05" d="M5.277 14.268A7.12 7.12 0 014.91 12c0-.782.135-1.533.367-2.235L1.24 6.65A11.945 11.945 0 000 12c0 1.92.444 3.73 1.237 5.335l4.04-3.067z" />
-                    </svg>
-                    Google
-                  </SocialBtn>
-                  <SocialBtn type="button" $c="#1877F2"
-                    onClick={() => handleSocial('Facebook')}
-                    whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <svg viewBox="0 0 24 24" width="17" height="17" fill="#1877F2">
-                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                    </svg>
-                    Facebook
-                  </SocialBtn>
-                </SocialRow>
 
-                <Or><span>hoặc dùng email</span></Or>
+                <FInput id="fullName" name="fullName" type="text"
+                  label="Họ và tên *" value={form.fullName}
+                  onChange={handleChange} error={errors.fullName}
+                  iconL={<IconUser />} />
 
                 <FInput id="email" name="email" type="email"
                   label="Email công ty *" value={form.email}
@@ -1052,7 +1047,7 @@ const EmployerRegister = () => {
                 <SubmitBtn
                   type="button" onClick={goNext}
                   whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  Tiếp tục <IconArrow />
+                  Tiếp tục
                 </SubmitBtn>
 
                 <FootNote>
@@ -1105,12 +1100,12 @@ const EmployerRegister = () => {
                     type="submit" disabled={!agreed}
                     whileHover={agreed ? { scale: 1.02 } : {}}
                     whileTap={agreed ? { scale: 0.98 } : {}}>
-                    Tạo tài khoản <IconArrow />
+                    Tạo tài khoản
                   </SubmitBtn>
                 </form>
 
                 <BackBtn type="button" onClick={() => setStep(1)}>
-                  ← Quay lại
+                   Quay lại
                 </BackBtn>
 
                 <FootNote>

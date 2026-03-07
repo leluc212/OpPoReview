@@ -357,7 +357,7 @@ const UserManagement = () => {
 
 
   return (
-    <DashboardLayout role="admin">
+    <DashboardLayout role="admin" key={language}>
       <UserManagementContainer>
         <PageHeader>
           <h1>{language === 'vi' ? 'Quản Lý Người Dùng' : 'User Management'}</h1>

@@ -32,6 +32,7 @@ import Availability from './pages/candidate/Availability';
 import CandidatePosts from './pages/candidate/CandidatePosts';
 import ChangePassword from './pages/candidate/ChangePassword';
 import DeleteAccount from './pages/candidate/DeleteAccount';
+import CandidateKYC from './pages/candidate/CandidateKYC';
 
 // Employer Pages
 import EmployerDashboard from './pages/employer/EmployerDashboard';
@@ -158,6 +159,11 @@ function AppRoutes() {
           <DeleteAccount />
         </ProtectedRoute>
       } />
+      <Route path="/candidate/kyc" element={
+        <ProtectedRoute allowedRoles={['candidate']}>
+          <CandidateKYC />
+        </ProtectedRoute>
+      } />
       
       {/* Employer Routes */}
       <Route path="/employer/dashboard" element={
@@ -180,7 +186,7 @@ function AppRoutes() {
           <JobManagement />
         </ProtectedRoute>
       } />
-      <Route path="/employer/applications" element={
+      <Route path="/employer/standard-jobs" element={
         <ProtectedRoute allowedRoles={['employer']}>
           <Applications />
         </ProtectedRoute>
@@ -200,7 +206,7 @@ function AppRoutes() {
           <Subscription />
         </ProtectedRoute>
       } />
-      <Route path="/employer/hr-management" element={
+      <Route path="/employer/quick-jobs" element={
         <ProtectedRoute allowedRoles={['employer']}>
           <HRManagement />
         </ProtectedRoute>

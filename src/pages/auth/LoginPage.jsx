@@ -55,7 +55,7 @@ const ROLES = {
       h1: ['Tìm việc', 'part-time', 'lý tưởng'],
       grad: ['#93c5fd', '#c4b5fd', '#fbcfe8'],
       sub: 'Đăng nhập để nhận gợi ý việc làm cá nhân hoá, theo dõi đơn ứng tuyển và kết nối với nhà tuyển dụng.',
-      features: ['Hàng ngàn việc làm part-time đang chờ', 'Ứng tuyển 1-click — không cần CV rườm rà', 'Dashboard theo dõi trạng thái hồ sơ real-time'],
+      features: ['Hàng ngàn việc làm part-time đang chờ', 'Ứng tuyển 1-click — không cần CV rườm rà', 'Theo dõi tiến trình ứng tuyển dễ dàng'],
       stats: [{ n: '50K+', l: 'Ứng viên' }, { n: '12K+', l: 'Việc làm' }, { n: '98%', l: 'Hài lòng' }],
     },
   },
@@ -102,14 +102,16 @@ const Root = styled.div`
   * {
     font-family: inherit !important;
   }
-  overflow: hidden;
   position: relative;
 `;
 
 /* ── LEFT PANEL ── */
 const Left = styled(motion.div)`
   width: 47%;
-  min-height: 100vh;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
   background: ${p => p.$grad};
   background-size: 220% 220%;
   animation: ${gradShift} 10s ease infinite;
@@ -117,8 +119,8 @@ const Left = styled(motion.div)`
   flex-direction: column;
   justify-content: center;
   padding: 56px 52px;
-  position: relative;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   transition: background 0.6s ease;
 
   @media (max-width: 960px) { display: none; }
@@ -251,8 +253,10 @@ const Stat = styled.div`
 /* ── RIGHT PANEL ── */
 const Right = styled.div`
   flex: 1;
+  margin-left: 47%;
   display: flex; align-items: center; justify-content: center;
   padding: 40px 28px; position: relative; overflow-y: auto;
+  min-height: 100vh;
 
   &::before {
     content: '';
@@ -263,6 +267,7 @@ const Right = styled.div`
     pointer-events: none; z-index: 0;
   }
   @media (max-width: 960px) {
+    margin-left: 0;
     background: ${p => p.$grad};
     background-size: 220% 220%;
     animation: ${gradShift} 10s ease infinite;
@@ -272,7 +277,7 @@ const Right = styled.div`
 
 const Card = styled(motion.div)`
   background: #fff; border-radius: 26px;
-  padding: 38px 36px 32px; width: 100%; max-width: 430px;
+  padding: 42px 40px 36px; width: 100%; max-width: 480px;
   position: relative; z-index: 1;
   box-shadow: 0 2px 4px rgba(0,0,0,0.04), 0 8px 24px rgba(14,57,149,0.1), 0 28px 56px rgba(14,57,149,0.12);
 
@@ -298,11 +303,11 @@ const CLogoTxt = styled.span`
   display: none;
 `;
 const CardTitle = styled.h2`
-  font-size: 20px; font-weight: 800; color: #0f172a;
+  font-size: 24px; font-weight: 800; color: #0f172a;
   text-align: center; margin-bottom: 4px; letter-spacing: -0.4px;
 `;
 const CardSub = styled.p`
-  font-size: 12.5px; color: #94a3b8; text-align: center; margin-bottom: 22px;
+  font-size: 14px; color: #94a3b8; text-align: center; margin-bottom: 24px;
   a { color: #0E3995; font-weight: 700; text-decoration: none;
       &:hover { text-decoration: underline; } }
 `;
@@ -314,30 +319,30 @@ const RoleTabs = styled.div`
   gap: 0;
   background: #f1f5f9;
   border-radius: 14px;
-  padding: 4px;
-  margin-bottom: 20px;
+  padding: 5px;
+  margin-bottom: 24px;
   min-width: 180px;
-  max-width: 340px;
+  max-width: 380px;
   margin-left: auto;
   margin-right: auto;
 `;
 
 const RoleTab = styled(motion.button)`
-  padding: 10px 6px;
+  padding: 12px 8px;
   border-radius: 11px;
   border: none;
   background: ${p => p.$on ? '#fff' : 'transparent'};
   color: ${p => p.$on ? p.$c : '#94a3b8'};
   font-weight: ${p => p.$on ? 700 : 600};
-  font-size: 12.5px;
+  font-size: 14px;
   cursor: pointer;
   font-family: inherit;
   display: flex; flex-direction: column;
-  align-items: center; gap: 4px;
+  align-items: center; gap: 5px;
   transition: all 0.25s ease;
   box-shadow: ${p => p.$on ? '0 2px 10px rgba(0,0,0,0.1)' : 'none'};
 
-  .emoji { font-size: 17px; line-height: 1; transition: transform 0.25s; }
+  .emoji { font-size: 20px; line-height: 1; transition: transform 0.25s; }
   &:hover .emoji { transform: scale(1.2) rotate(-5deg); }
 `;
 
@@ -401,10 +406,10 @@ const FIconR = styled.button`
   &:hover { color: ${p => p.$c || '#0E3995'}; }
 `;
 const FInput = styled.input`
-  width: 100%; height: 50px;
+  width: 100%; height: 54px;
   padding: ${p => p.$ic ? '23px 44px 7px 44px' : '23px 15px 7px 15px'};
   ${p => p.$ir && 'padding-right: 42px;'}
-  font-size: 14px; font-weight: 600; font-family: inherit; color: #0f172a;
+  font-size: 15px; font-weight: 600; font-family: inherit; color: #0f172a;
   border: 1.5px solid ${p => p.$err ? '#ef4444' : p.$on ? p.$ac || '#0E3995' : '#eaeff4'};
   border-radius: 12px;
   background: ${p => p.$on ? '#f8faff' : '#fafbfc'};
@@ -428,14 +433,14 @@ const ForgotBtn = styled(Link)`
 
 /* Submit */
 const SubmitBtn = styled(motion.button)`
-  width: 100%; height: 52px; border: none; border-radius: 14px;
+  width: 100%; height: 54px; border: none; border-radius: 14px;
   background: ${p => p.$grad};
   background-size: 200%;
   animation: ${gradShift} 6s ease infinite;
-  color: #fff; font-size: 15px; font-weight: 700; letter-spacing: -0.2px;
+  color: #fff; font-size: 16px; font-weight: 700; letter-spacing: -0.2px;
   cursor: pointer; font-family: inherit;
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  margin-top: 14px; margin-bottom: 14px;
+  margin-top: 16px; margin-bottom: 16px;
   position: relative; overflow: hidden;
   transition: box-shadow 0.25s;
 
@@ -445,19 +450,28 @@ const SubmitBtn = styled(motion.button)`
     pointer-events: none;
   }
   &:hover { box-shadow: 0 8px 28px ${p => p.$shadow}; }
-
-  svg { transition: transform 0.25s; }
-  &:hover svg { transform: translateX(4px); }
 `;
 
 const FootRow = styled.div`
-  display: flex; align-items: center; justify-content: center;
-  gap: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
 `;
-const FootNote = styled.p`
-  font-size: 12px; color: #c0cad4; text-align: center;
-  a { color: #0E3995; font-weight: 600; text-decoration: none;
-      &:hover { text-decoration: underline; } }
+const FootNote = styled.div`
+  font-size: 13px;
+  text-align: center;
+  a {
+    color: #0E3995;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    &:hover {
+      color: #2563eb;
+      text-decoration: underline;
+    }
+  }
 `;
 
 /* Floating label input component */
@@ -676,104 +690,167 @@ const LoginPage = () => {
           {/* Social — only for candidate & employer */}
           {role !== 'admin' && (
             <>
-              <SocialRow>
+              {/* Form */}
+              <AnimatePresence mode="wait">
+                <motion.form
+                  key={role}
+                  onSubmit={handleSubmit}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <FI
+                    id="email" name="email" type="email"
+                    label={`${t.login.email} *`}
+                    value={form.email} onChange={onChange}
+                    error={errors.email}
+                    iconL={<IcoMail />}
+                    accent={rc.color}
+                  />
+
+                  <FI
+                    id="password" name="password"
+                    type={showPw ? 'text' : 'password'}
+                    label={`${t.login.password} *`}
+                    value={form.password} onChange={onChange}
+                    error={errors.password}
+                    iconL={<IcoLock />}
+                    iconR={showPw ? <IcoEyeOff /> : <IcoEye />}
+                    onToggle={() => setShowPw(p => !p)}
+                    accent={rc.color}
+                  />
+
+                  <ForgotBtn to="/forgot-password" $c={rc.color}>
+                    {t.login.forgotPassword}
+                  </ForgotBtn>
+
+                  <SubmitBtn
+                    type="submit"
+                    $grad={rc.grad}
+                    $shadow={`${rc.color}55`}
+                    disabled={loading}
+                    whileHover={{ scale: loading ? 1 : 1.02 }}
+                    whileTap={{ scale: loading ? 1 : 0.98 }}
+                  >
+                    {loading ? (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}
+                        style={{ animation: 'spin 0.8s linear infinite' }}>
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                      </svg>
+                    ) : (
+                      <>{t.login.signIn}</>
+                    )}
+                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                  </SubmitBtn>
+                </motion.form>
+              </AnimatePresence>
+
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 18 }}>
+                <OrDiv><span>hoặc</span></OrDiv>
                 <SocialBtn type="button" $c="#EA4335"
+                  style={{
+                    width: '100%',
+                    fontSize: 16,
+                    fontWeight: 700,
+                    padding: '13px 0',
+                    borderRadius: 12,
+                    boxShadow: '0 2px 8px #0001',
+                    margin: '0 auto',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 10,
+                  }}
                   onClick={() => handleSocial('Google')}
                   whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                  <GoogleSVG /> Google
+                  <GoogleSVG style={{ width: 22, height: 22 }} /> Google
                 </SocialBtn>
-                <SocialBtn type="button" $c="#1877F2"
-                  onClick={() => handleSocial('Facebook')}
-                  whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                  <svg viewBox="0 0 24 24" width="17" height="17" fill="#1877F2">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                  </svg>
-                  Facebook
-                </SocialBtn>
-              </SocialRow>
-              <OrDiv><span>hoặc đăng nhập bằng email</span></OrDiv>
+              </div>
             </>
           )}
 
           {/* Admin notice */}
           {role === 'admin' && (
-            <div style={{
-              background: 'linear-gradient(135deg, #f5f3ff, #ede9fe)',
-              border: '1px solid #c4b5fd',
-              borderRadius: 12, padding: '12px 14px',
-              marginBottom: 14, display: 'flex', alignItems: 'center', gap: 10,
-            }}>
-              <span style={{ fontSize: 20 }}>🛡️</span>
-              <div>
-                <div style={{ fontSize: 12.5, fontWeight: 700, color: '#7c3aed' }}>Khu vực quản trị</div>
-                <div style={{ fontSize: 11.5, color: '#8b5cf6', marginTop: 2 }}>Chỉ dành cho tài khoản được cấp quyền Admin</div>
+            <>
+              <div style={{
+                background: 'linear-gradient(135deg, #f5f3ff, #ede9fe)',
+                border: '1px solid #c4b5fd',
+                borderRadius: 12, padding: '12px 14px',
+                marginBottom: 14, display: 'flex', alignItems: 'center', gap: 10,
+              }}>
+                <span style={{ fontSize: 20 }}>🛡️</span>
+                <div>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: '#7c3aed' }}>Khu vực quản trị</div>
+                  <div style={{ fontSize: 11.5, color: '#8b5cf6', marginTop: 2 }}>Chỉ dành cho tài khoản được cấp quyền Admin</div>
+                </div>
               </div>
-            </div>
+
+              {/* Form */}
+              <AnimatePresence mode="wait">
+                <motion.form
+                  key={role}
+                  onSubmit={handleSubmit}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <FI
+                    id="email" name="email" type="email"
+                    label={`${t.login.email} *`}
+                    value={form.email} onChange={onChange}
+                    error={errors.email}
+                    iconL={<IcoMail />}
+                    accent={rc.color}
+                  />
+
+                  <FI
+                    id="password" name="password"
+                    type={showPw ? 'text' : 'password'}
+                    label={`${t.login.password} *`}
+                    value={form.password} onChange={onChange}
+                    error={errors.password}
+                    iconL={<IcoLock />}
+                    iconR={showPw ? <IcoEyeOff /> : <IcoEye />}
+                    onToggle={() => setShowPw(p => !p)}
+                    accent={rc.color}
+                  />
+
+                  <ForgotBtn to="/forgot-password" $c={rc.color}>
+                    {t.login.forgotPassword}
+                  </ForgotBtn>
+
+                  <SubmitBtn
+                    type="submit"
+                    $grad={rc.grad}
+                    $shadow={`${rc.color}55`}
+                    disabled={loading}
+                    whileHover={{ scale: loading ? 1 : 1.02 }}
+                    whileTap={{ scale: loading ? 1 : 0.98 }}
+                  >
+                    {loading ? (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}
+                        style={{ animation: 'spin 0.8s linear infinite' }}>
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                      </svg>
+                    ) : (
+                      <>{t.login.signIn}</>
+                    )}
+                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                  </SubmitBtn>
+                </motion.form>
+              </AnimatePresence>
+            </>
           )}
-
-          {/* Form */}
-          <AnimatePresence mode="wait">
-            <motion.form
-              key={role}
-              onSubmit={handleSubmit}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.25 }}
-            >
-              <FI
-                id="email" name="email" type="email"
-                label={`${t.login.email} *`}
-                value={form.email} onChange={onChange}
-                error={errors.email}
-                iconL={<IcoMail />}
-                accent={rc.color}
-              />
-
-              <FI
-                id="password" name="password"
-                type={showPw ? 'text' : 'password'}
-                label={`${t.login.password} *`}
-                value={form.password} onChange={onChange}
-                error={errors.password}
-                iconL={<IcoLock />}
-                iconR={showPw ? <IcoEyeOff /> : <IcoEye />}
-                onToggle={() => setShowPw(p => !p)}
-                accent={rc.color}
-              />
-
-              <ForgotBtn to="/forgot-password" $c={rc.color}>
-                {t.login.forgotPassword}
-              </ForgotBtn>
-
-              <SubmitBtn
-                type="submit"
-                $grad={rc.grad}
-                $shadow={`${rc.color}55`}
-                disabled={loading}
-                whileHover={{ scale: loading ? 1 : 1.02 }}
-                whileTap={{ scale: loading ? 1 : 0.98 }}
-              >
-                {loading ? (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}
-                    style={{ animation: 'spin 0.8s linear infinite' }}>
-                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-                  </svg>
-                ) : (
-                  <>{t.login.signIn} <IcoArrow /></>
-                )}
-                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-              </SubmitBtn>
-            </motion.form>
-          </AnimatePresence>
 
           <FootRow>
             <FootNote>
-              <Link to="/">← Về trang chủ</Link>
+              <Link to="/">Về trang chủ</Link>
             </FootNote>
-            <span style={{ color: '#e2e8f0', fontSize: 12 }}>|</span>
+            <span style={{ color: '#d1d9e0', fontSize: 14, fontWeight: 'bold', userSelect: 'none' }}>·</span>
             <FootNote>
-              <a href="#">Gặp sự cố?</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); setShowModal(true); }}>Gặp sự cố?</a>
             </FootNote>
           </FootRow>
         </Card>

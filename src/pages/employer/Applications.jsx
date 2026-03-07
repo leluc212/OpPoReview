@@ -5,8 +5,48 @@ import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
 import TableFilter from '../../components/TableFilter';
 import Modal from '../../components/Modal';
-import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText, Clock, Users } from 'lucide-react';
+import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText, Clock, Users, Newspaper, DollarSign, Edit, Trash2, TrendingUp } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+
+// Mock job posts data
+const getJobPosts = (language) => [
+  {
+    id: 1,
+    title: language === 'vi' ? 'Cửa hàng trưởng' : 'Store Manager',
+    location: language === 'vi' ? 'Quận 8, TP.HCM' : 'District 8, HCMC',
+    salary: language === 'vi' ? '15-20 triệu' : '$600-800',
+    type: language === 'vi' ? 'Toàn thời gian' : 'Full-time',
+    applicants: 12,
+    views: 156,
+    status: 'active',
+    postedDate: language === 'vi' ? '5 ngày trước' : '5 days ago',
+    deadline: language === 'vi' ? '15 ngày nữa' : '15 days left'
+  },
+  {
+    id: 2,
+    title: language === 'vi' ? 'Nhân viên pha chế' : 'Barista',
+    location: language === 'vi' ? 'Quận 1, TP.HCM' : 'District 1, HCMC',
+    salary: language === 'vi' ? '8-12 triệu' : '$320-480',
+    type: language === 'vi' ? 'Toàn thời gian' : 'Full-time',
+    applicants: 28,
+    views: 342,
+    status: 'active',
+    postedDate: language === 'vi' ? '2 ngày trước' : '2 days ago',
+    deadline: language === 'vi' ? '25 ngày nữa' : '25 days left'
+  },
+  {
+    id: 3,
+    title: language === 'vi' ? 'Thu ngân' : 'Cashier',
+    location: language === 'vi' ? 'Quận 7, TP.HCM' : 'District 7, HCMC',
+    salary: language === 'vi' ? '7-10 triệu' : '$280-400',
+    type: language === 'vi' ? 'Bán thời gian' : 'Part-time',
+    applicants: 15,
+    views: 203,
+    status: 'active',
+    postedDate: language === 'vi' ? '1 tuần trước' : '1 week ago',
+    deadline: language === 'vi' ? '20 ngày nữa' : '20 days left'
+  }
+];
 
 // Mock data generator (language-aware)
 const getInitialApplications = (language) => [
@@ -182,6 +222,258 @@ const CountBadge = styled.div`
   font-weight: 700;
   color: #1e40af;
   white-space: nowrap;
+`;
+
+// --- Standard Jobs Section ---
+const StandardJobsSection = styled.div`
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  border: 1.5px solid #E8EFFF;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.06);
+  margin-bottom: 24px;
+`;
+
+const StandardJobsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const StandardJobCard = styled(motion.button)`
+  padding: 28px 24px;
+  background: ${props => {
+    const alpha = props.$active ? '20' : '08';
+    return `linear-gradient(135deg, ${props.$color}${alpha} 0%, ${props.$color}05 100%)`;
+  }};
+  border: 2px solid ${props => props.$active ? props.$color : props.$color + '30'};
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: ${props => props.$color};
+    transform: translateY(-4px);
+    box-shadow: ${props => `0 12px 40px ${props.$color}25`};
+    background: ${props => `linear-gradient(135deg, ${props.$color}25 0%, ${props.$color}10 100%)`};
+  }
+`;
+
+const StandardJobIcon = styled.div`
+  width: 64px;
+  height: 64px;
+  background: ${props => props.$color}20;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  
+  ${StandardJobCard}:hover & {
+    background: ${props => props.$color};
+    
+    svg {
+      color: white;
+    }
+  }
+  
+  svg {
+    width: 32px;
+    height: 32px;
+    color: ${props => props.$color};
+    transition: color 0.3s ease;
+  }
+`;
+
+const StandardJobLabel = styled.div`
+  font-size: 16px;
+  font-weight: 700;
+  color: ${props => props.theme.colors.text};
+  text-align: center;
+`;
+
+const StandardJobDescription = styled.div`
+  font-size: 13px;
+  font-weight: 500;
+  color: ${props => props.theme.colors.textLight};
+  text-align: center;
+  line-height: 1.5;
+`;
+
+const EmptyState = styled(motion.div)`
+  text-align: center;
+  padding: 60px 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1.5px dashed #E2E8F0;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.05);
+
+  .icon { font-size: 36px; margin-bottom: 12px; opacity: 0.5; }
+  h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; color: ${props => props.theme.colors.text}; }
+  p { font-size: 14px; color: ${props => props.theme.colors.textLight}; }
+`;
+
+// --- Job Posts Styles ---
+const JobPostsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 20px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const JobPostCard = styled(motion.div)`
+  background: #ffffff;
+  border: 1.5px solid #E8EFFF;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.06);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: ${props => props.$status === 'active' ? '#10B981' : '#94A3B8'};
+    border-radius: 16px 0 0 16px;
+  }
+  
+  &:hover {
+    border-color: #BFDBFE;
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.13);
+    transform: translateY(-2px);
+  }
+`;
+
+const JobPostHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+`;
+
+const JobPostTitle = styled.h3`
+  font-size: 18px;
+  font-weight: 700;
+  color: ${props => props.theme.colors.text};
+  margin-bottom: 8px;
+`;
+
+const JobPostMeta = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+  
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: ${props => props.theme.colors.textLight};
+    
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+`;
+
+const JobPostStats = styled.div`
+  display: flex;
+  gap: 20px;
+  padding: 16px 0;
+  border-top: 1px solid #E8EFFF;
+  border-bottom: 1px solid #E8EFFF;
+  margin-bottom: 16px;
+  
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    
+    .stat-value {
+      font-size: 20px;
+      font-weight: 800;
+      color: ${props => props.theme.colors.text};
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: ${props => props.theme.colors.textLight};
+      font-weight: 600;
+    }
+  }
+`;
+
+const JobPostActions = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
+const JobPostButton = styled(motion.button)`
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  
+  background: ${props => {
+    if (props.$variant === 'primary') return '#1e40af';
+    if (props.$variant === 'danger') return '#EF4444';
+    return '#EFF6FF';
+  }};
+  
+  color: ${props => props.$variant === 'primary' || props.$variant === 'danger' ? 'white' : '#1e40af'};
+  border: 1.5px solid ${props => {
+    if (props.$variant === 'primary') return '#1e40af';
+    if (props.$variant === 'danger') return '#EF4444';
+    return '#BFDBFE';
+  }};
+  
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${props => {
+      if (props.$variant === 'primary') return '0 4px 12px rgba(30, 64, 175, 0.3)';
+      if (props.$variant === 'danger') return '0 4px 12px rgba(239, 68, 68, 0.3)';
+      return '0 4px 12px rgba(30, 64, 175, 0.15)';
+    }};
+  }
+`;
+
+const JobStatusBadge = styled.div`
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  background: ${props => props.$status === 'active' ? '#D1FAE5' : '#F1F5F9'};
+  color: ${props => props.$status === 'active' ? '#047857' : '#64748B'};
+  border: 1px solid ${props => props.$status === 'active' ? '#10B981' : '#CBD5E1'};
 `;
 
 // --- Card Grid ---
@@ -985,10 +1277,12 @@ ApplicationRow.displayName = 'ApplicationRow';
 
 const Applications = () => {
   const { language } = useLanguage();
+  const [activeSection, setActiveSection] = useState('applications');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilters, setStatusFilters] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [applications, setApplications] = useState(() => getInitialApplications(language));
+  const [jobPosts] = useState(() => getJobPosts(language));
 
   useEffect(() => {
     setApplications(getInitialApplications(language));
@@ -1039,7 +1333,7 @@ const Applications = () => {
   }, []);
 
   return (
-    <DashboardLayout role="employer">
+    <DashboardLayout role="employer" key={language}>
       <ApplicationsContainer
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1047,40 +1341,155 @@ const Applications = () => {
       >
         <PageHeader>
           <PageTitleGroup>
-            <PageIconBox><Users /></PageIconBox>
+            <PageIconBox><Briefcase /></PageIconBox>
             <PageTitleText>
-              <h1>{language === 'vi' ? 'Hồ Sơ Ứng Tuyển' : 'Applications'}</h1>
-              <p>{language === 'vi' ? 'Xem và quản lý hồ sơ ứng viên' : 'View and manage candidate applications'}</p>
+              <h1>{language === 'vi' ? 'Công việc tiêu chuẩn' : 'Standard Jobs'}</h1>
+              <p>{language === 'vi' ? 'Quản lý bài đăng và hồ sơ cho công việc tiêu chuẩn (không bao gồm tuyển gấp)' : 'Manage posts and applications for standard jobs (excluding quick jobs)'}</p>
             </PageTitleText>
           </PageTitleGroup>
-          <CountBadge>
-            {filteredApplications.length} {language === 'vi' ? 'ứng viên' : 'candidates'}
-          </CountBadge>
         </PageHeader>
 
-        <TableFilter
-          searchValue={searchTerm}
-          onSearchChange={setSearchTerm}
-          filterOptions={FILTER_OPTIONS(language)}
-          activeFilters={statusFilters}
-          onFilterToggle={handleFilterToggle}
-          searchPlaceholder={language === 'vi' ? 'Tìm kiếm theo ứng viên hoặc vị trí...' : 'Search by candidate or position...'}
-        />
+        {/* Standard Jobs Section */}
+        <StandardJobsSection>
+          <StandardJobsGrid>
+            <StandardJobCard
+              $color="#1e40af"
+              $active={activeSection === 'posts'}
+              onClick={() => setActiveSection('posts')}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <StandardJobIcon $color="#1e40af">
+                <Newspaper />
+              </StandardJobIcon>
+              <StandardJobLabel>{language === 'vi' ? 'Quản lý bài đăng' : 'Post Management'}</StandardJobLabel>
+              <StandardJobDescription>
+                {language === 'vi' ? 'Quản lý các bài đăng tuyển dụng tiêu chuẩn' : 'Manage standard job postings'}
+              </StandardJobDescription>
+            </StandardJobCard>
 
-        <CardGrid>
-          <AnimatePresence>
-            {filteredApplications.map((app, index) => (
-              <ApplicationRow
-                key={app.id}
-                app={app}
-                onViewProfile={handleViewProfile}
-                onCompleteJob={handleCompleteJob}
-                onMarkCandidate={handleMarkCandidate}
-                index={index}
-              />
-            ))}
-          </AnimatePresence>
-        </CardGrid>
+            <StandardJobCard
+              $color="#10B981"
+              $active={activeSection === 'applications'}
+              onClick={() => setActiveSection('applications')}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <StandardJobIcon $color="#10B981">
+                <Users />
+              </StandardJobIcon>
+              <StandardJobLabel>{language === 'vi' ? 'Hồ sơ ứng tuyển' : 'Applications'}</StandardJobLabel>
+              <StandardJobDescription>
+                {language === 'vi' ? 'Xem và quản lý hồ sơ ứng viên tiêu chuẩn' : 'View and manage standard job applications'}
+              </StandardJobDescription>
+            </StandardJobCard>
+          </StandardJobsGrid>
+        </StandardJobsSection>
+
+        {/* Conditional Content */}
+        {activeSection === 'posts' && (
+          <JobPostsGrid>
+            <AnimatePresence>
+              {jobPosts.map((post, index) => (
+                <JobPostCard
+                  key={post.id}
+                  $status={post.status}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <JobPostHeader>
+                    <div>
+                      <JobPostTitle>{post.title}</JobPostTitle>
+                      <JobPostMeta>
+                        <div className="meta-item">
+                          <MapPin />{post.location}
+                        </div>
+                        <div className="meta-item">
+                          <DollarSign />{post.salary}
+                        </div>
+                        <div className="meta-item">
+                          <Clock />{post.type}
+                        </div>
+                      </JobPostMeta>
+                    </div>
+                    <JobStatusBadge $status={post.status}>
+                      {post.status === 'active' 
+                        ? (language === 'vi' ? 'Đang tuyển' : 'Active') 
+                        : (language === 'vi' ? 'Đã đóng' : 'Closed')}
+                    </JobStatusBadge>
+                  </JobPostHeader>
+                  
+                  <JobPostStats>
+                    <div className="stat">
+                      <div className="stat-value">{post.applicants}</div>
+                      <div className="stat-label">{language === 'vi' ? 'Ứng viên' : 'Applicants'}</div>
+                    </div>
+                    <div className="stat">
+                      <div className="stat-value">{post.views}</div>
+                      <div className="stat-label">{language === 'vi' ? 'Lượt xem' : 'Views'}</div>
+                    </div>
+                    <div className="stat" style={{ marginLeft: 'auto' }}>
+                      <div className="stat-label">{language === 'vi' ? 'Đăng' : 'Posted'}</div>
+                      <div className="stat-label" style={{ color: '#1e40af', fontWeight: 700 }}>{post.postedDate}</div>
+                    </div>
+                  </JobPostStats>
+                  
+                  <JobPostActions>
+                    <JobPostButton
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Eye />{language === 'vi' ? 'Xem' : 'View'}
+                    </JobPostButton>
+                    <JobPostButton
+                      $variant="primary"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Edit />{language === 'vi' ? 'Sửa' : 'Edit'}
+                    </JobPostButton>
+                    <JobPostButton
+                      $variant="danger"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Trash2 />
+                    </JobPostButton>
+                  </JobPostActions>
+                </JobPostCard>
+              ))}
+            </AnimatePresence>
+          </JobPostsGrid>
+        )}
+
+        {activeSection === 'applications' && (
+          <>
+            <TableFilter
+              searchValue={searchTerm}
+              onSearchChange={setSearchTerm}
+              filterOptions={FILTER_OPTIONS(language)}
+              activeFilters={statusFilters}
+              onFilterToggle={handleFilterToggle}
+              searchPlaceholder={language === 'vi' ? 'Tìm kiếm theo ứng viên hoặc vị trí...' : 'Search by candidate or position...'}
+            />
+
+            <CardGrid>
+              <AnimatePresence>
+                {filteredApplications.map((app, index) => (
+                  <ApplicationRow
+                    key={app.id}
+                    app={app}
+                    onViewProfile={handleViewProfile}
+                    onCompleteJob={handleCompleteJob}
+                    onMarkCandidate={handleMarkCandidate}
+                    index={index}
+                  />
+                ))}
+              </AnimatePresence>
+            </CardGrid>
+          </>
+        )}
       </ApplicationsContainer>
 
       {selectedCandidate && (

@@ -546,7 +546,7 @@ const CompanyVerification = () => {
   }
 
   return (
-    <DashboardLayout role="employer">
+    <DashboardLayout role="employer" key={language}>
       <VerificationContainer>
         <Header>
           <h1>{language === 'vi' ? 'Xác Thực Hồ Sơ Công Ty' : 'Company Verification'}</h1>

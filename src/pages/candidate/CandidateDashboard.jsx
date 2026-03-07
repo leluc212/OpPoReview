@@ -518,9 +518,9 @@ const CandidateDashboard = () => {
   const translateJobTitle = (titleVi) => {
     if (language === 'vi') return titleVi;
     const titleMap = {
-      'Nhân viên Bán Hàng': 'Sales Staff',
-      'Nhân viên Văn Phòng': 'Office Staff',
-      'Nhân viên Phục Vụ': 'Service Staff'
+      'Nhân viên Pha Chế': 'Barista',
+      'Nhân viên Phục Vụ': 'Service Staff',
+      'Đầu Bếp Phụ': 'Assistant Chef'
     };
     return titleMap[titleVi] || titleVi;
   };
@@ -567,55 +567,55 @@ const CandidateDashboard = () => {
   const recommendedJobs = [
     {
       id: 1,
-      title: 'Nhân viên Bán Hàng',
-      company: 'Vinamilk',
+      title: 'Nhân viên Pha Chế',
+      company: 'Highlands Coffee',
       location: 'Quận 1, TP.HCM',
       type: 'Toàn thời gian',
       salary: '8-12 triệu',
       postedAt: '2 ngày trước',
-      tags: ['Bán hàng', 'Giao tiếp', 'Nhiệt tình']
+      tags: ['Pha chế', 'F&B', 'Coffee']
     },
     {
       id: 2,
-      title: 'Nhân viên Văn Phòng',
-      company: 'Viettel',  
+      title: 'Nhân viên Phục Vụ',
+      company: 'The Coffee House',  
       location: 'Quận 7, TP.HCM',
       type: 'Toàn thời gian',
       salary: '7-10 triệu',
       postedAt: '1 ngày trước',
-      tags: ['Văn phòng', 'Word/Excel', 'Hành chính']
+      tags: ['Phục vụ', 'F&B', 'Ca làm linh động']
     },
     {
       id: 3,
-      title: 'Nhân viên Phục Vụ',
-      company: 'Highland Coffee',
-      location: 'Quận 1, TP.HCM',
+      title: 'Đầu Bếp Phụ',
+      company: 'Golden Gate Group',
+      location: 'Quận 3, TP.HCM',
       type: 'Toàn thời gian',
-      salary: '6-9 triệu',
+      salary: '9-14 triệu',
       postedAt: '2 ngày trước',
-      tags: ['Phục vụ', 'F&B', 'Ca làm linh động']
+      tags: ['Bếp', 'F&B', 'Nhà hàng']
     }
   ];
 
   const recentApplications = [
     { 
       id: 1, 
-      title: 'Nhân viên Chăm Sóc Khách Hàng', 
-      company: 'FPT Telecom', 
+      title: 'Nhân viên Phục Vụ Bàn', 
+      company: 'Pizza 4P\'s', 
       appliedDate: '2 ngày trước', 
       status: 'reviewed' 
     },
     { 
       id: 2, 
       title: 'Nhân viên Pha Chế', 
-      company: 'Phúc Long', 
+      company: 'Phúc Long Coffee & Tea', 
       appliedDate: '5 ngày trước', 
       status: 'pending' 
     },
     { 
       id: 3, 
-      title: 'Nhân viên Bảo Vệ', 
-      company: 'Vincom Center', 
+      title: 'Nhân viên Phục Vụ', 
+      company: 'Starbucks Vietnam', 
       appliedDate: '1 tuần trước', 
       status: 'approved' 
     },
@@ -656,7 +656,7 @@ const CandidateDashboard = () => {
   };
 
   return (
-    <DashboardLayout role="candidate">
+    <DashboardLayout role="candidate" key={language}>
       <DashboardContainer>
         {/* Welcome Banner */}
         <WelcomeBanner
@@ -873,12 +873,8 @@ const CandidateDashboard = () => {
           <SectionHeader>
             <h2>
               <FileText />
-              {language === 'vi' ? 'Đơn Ứng Tuyển Gần Đây' : 'Recent Applications'}
+              {language === 'vi' ? 'Đơn Ứng Tuyển Của Bạn Gần Đây' : 'Your Recent Applications'}
             </h2>
-            <Link to="/candidate/applications">
-              {language === 'vi' ? 'Xem tất cả' : 'View all'}
-              <ArrowUpRight />
-            </Link>
           </SectionHeader>
 
           {recentApplications.map((app, index) => (

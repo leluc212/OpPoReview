@@ -3,7 +3,115 @@ import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
-import { Users, Briefcase, MapPin, Calendar, Clock, CheckCircle, XCircle, Star, AlertCircle } from 'lucide-react';
+import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Trash2, Eye, CheckCircle, Send, Search, Calendar, DollarSign, Newspaper, TrendingUp } from 'lucide-react';
+
+// Mock HR Staff Data
+const getHRStaff = (language) => [
+  {
+    id: 1,
+    name: language === 'vi' ? 'Nguyễn Văn A' : 'Nguyen Van A',
+    position: language === 'vi' ? 'Nhân viên pha chế' : 'Barista',
+    location: language === 'vi' ? 'Quận 8' : 'District 8',
+    phone: '0123 456 789',
+    email: 'nguyenvana@example.com',
+    startDate: language === 'vi' ? '15/01/2024' : '01/15/2024',
+    status: 'active',
+    shift: language === 'vi' ? 'Ca sáng' : 'Morning shift'
+  },
+  {
+    id: 2,
+    name: language === 'vi' ? 'Trần Thị B' : 'Tran Thi B',
+    position: language === 'vi' ? 'Thu ngân' : 'Cashier',
+    location: language === 'vi' ? 'Quận 1' : 'District 1',
+    phone: '0987 654 321',
+    email: 'tranthib@example.com',
+    startDate: language === 'vi' ? '20/02/2024' : '02/20/2024',
+    status: 'active',
+    shift: language === 'vi' ? 'Ca chiều' : 'Afternoon shift'
+  },
+  {
+    id: 3,
+    name: language === 'vi' ? 'Lê Văn C' : 'Le Van C',
+    position: language === 'vi' ? 'Nhân viên phục vụ' : 'Server',
+    location: language === 'vi' ? 'Quận 7' : 'District 7',
+    phone: '0909 111 222',
+    email: 'levanc@example.com',
+    startDate: language === 'vi' ? '10/03/2024' : '03/10/2024',
+    status: 'active',
+    shift: language === 'vi' ? 'Ca tối' : 'Night shift'
+  }
+];
+
+// Mock Quick Job Posts Data
+const getQuickJobPosts = (language) => [
+  {
+    id: 1,
+    title: language === 'vi' ? 'Nhân viên pha chế - GẤP' : 'Barista - URGENT',
+    location: language === 'vi' ? 'Quận 1, TP.HCM' : 'District 1, HCMC',
+    salary: language === 'vi' ? '10-15 triệu' : '$400-600',
+    type: language === 'vi' ? 'Tuyển gấp' : 'Urgent',
+    applicants: 15,
+    views: 89,
+    status: 'active',
+    deadline: language === 'vi' ? '3 ngày nữa' : '3 days left'
+  },
+  {
+    id: 2,
+    title: language === 'vi' ? 'Thu ngân - Cần ngay' : 'Cashier - Immediate',
+    location: language === 'vi' ? 'Quận 7, TP.HCM' : 'District 7, HCMC',
+    salary: language === 'vi' ? '8-12 triệu' : '$320-480',
+    type: language === 'vi' ? 'Tuyển gấp' : 'Urgent',
+    applicants: 23,
+    views: 134,
+    status: 'active',
+    deadline: language === 'vi' ? '5 ngày nữa' : '5 days left'
+  },
+  {
+    id: 3,
+    title: language === 'vi' ? 'Nhân viên phục vụ - Khẩn cấp' : 'Server - Critical',
+    location: language === 'vi' ? 'Quận 3, TP.HCM' : 'District 3, HCMC',
+    salary: language === 'vi' ? '7-10 triệu' : '$280-400',
+    type: language === 'vi' ? 'Tuyển gấp' : 'Urgent',
+    applicants: 18,
+    views: 102,
+    status: 'active',
+    deadline: language === 'vi' ? '2 ngày nữa' : '2 days left'
+  }
+];
+
+// Mock Chat Conversations Data
+const getChatConversations = (language) => [
+  {
+    id: 1,
+    name: language === 'vi' ? 'Hiếu sàn' : 'Hieu san',
+    role: language === 'vi' ? 'Ứng viên' : 'Candidate',
+    lastMessage: language === 'vi' ? 'Em có thể bắt đầu làm việc ngay ạ' : 'I can start working immediately',
+    time: language === 'vi' ? '5 phút trước' : '5 min ago',
+    unread: 2,
+    status: 'online',
+    position: language === 'vi' ? 'Pha chế' : 'Barista'
+  },
+  {
+    id: 2,
+    name: language === 'vi' ? 'Duy sàn' : 'Duy san',
+    role: language === 'vi' ? 'Ứng viên' : 'Candidate',
+    lastMessage: language === 'vi' ? 'Mức lương có thương lượng được không ạ?' : 'Is the salary negotiable?',
+    time: language === 'vi' ? '15 phút trước' : '15 min ago',
+    unread: 1,
+    status: 'online',
+    position: language === 'vi' ? 'Thu ngân' : 'Cashier'
+  },
+  {
+    id: 3,
+    name: language === 'vi' ? 'Nguyễn Văn A' : 'Nguyen Van A',
+    role: language === 'vi' ? 'Nhân viên' : 'Employee',
+    lastMessage: language === 'vi' ? 'Hôm nay em xin nghỉ ạ' : 'I need to take leave today',
+    time: language === 'vi' ? '1 giờ trước' : '1 hour ago',
+    unread: 0,
+    status: 'offline',
+    position: language === 'vi' ? 'Pha chế' : 'Barista'
+  }
+];
 
 // ─── Page wrapper ─────────────────────────────────────────
 const PageContainer = styled(motion.div)``;
@@ -64,290 +172,6 @@ const CountBadge = styled.div`
   white-space: nowrap;
 `;
 
-// ─── Job Type Switcher ─────────────────────────────────────
-const JobTypeSwitcher = styled.div`
-  display: flex;
-  gap: 6px;
-  margin-bottom: 20px;
-  padding: 5px;
-  background: #F1F5F9;
-  border-radius: 13px;
-  border: 1.5px solid #E2E8F0;
-`;
-
-const JobTypeBtn = styled(motion.button)`
-  flex: 1;
-  padding: 11px 20px;
-  background: ${props => props.$active ? '#1e40af' : 'transparent'};
-  border: none;
-  font-size: 14px;
-  font-weight: 700;
-  color: ${props => props.$active ? 'white' : '#64748B'};
-  border-radius: 9px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: ${props => props.$active ? '0 3px 10px rgba(30,64,175,0.28)' : 'none'};
-  &:hover {
-    color: ${props => props.$active ? 'white' : '#1e40af'};
-    background: ${props => props.$active ? '#1e40af' : '#E0EAFF'};
-  }
-`;
-
-// ─── Sub-tab bar ───────────────────────────────────────────
-const TabBar = styled.div`
-  display: flex;
-  gap: 6px;
-  margin-bottom: 24px;
-  overflow-x: auto;
-  &::-webkit-scrollbar { display: none; }
-`;
-
-const TabBtn = styled(motion.button)`
-  padding: 8px 18px;
-  background: ${props => props.$active ? '#EFF6FF' : 'transparent'};
-  border: 1.5px solid ${props => props.$active ? '#BFDBFE' : 'transparent'};
-  border-radius: 100px;
-  font-size: 13px;
-  font-weight: 700;
-  color: ${props => props.$active ? '#1e40af' : '#94A3B8'};
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-  &:hover {
-    color: #1e40af;
-    background: #EFF6FF;
-    border-color: #BFDBFE;
-  }
-`;
-
-// ─── Card list ─────────────────────────────────────────────
-const CardGrid = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-`;
-
-const statusColor = (status) => {
-  if (status === 'active') return '#10B981';
-  if (status === 'pending') return '#F59E0B';
-  if (status === 'completed') return '#1e40af';
-  if (status === 'requested') return '#EF4444';
-  return '#94A3B8';
-};
-
-const StaffCard = styled(motion.div)`
-  background: #ffffff;
-  border: 1.5px solid #E8EFFF;
-  border-radius: 16px;
-  padding: 18px 24px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.06);
-  transition: border-color 0.22s ease, box-shadow 0.22s ease;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 4px;
-    border-radius: 16px 0 0 16px;
-    background: ${props => statusColor(props.$status)};
-    opacity: 0.5;
-    transition: opacity 0.2s ease;
-  }
-
-  &:hover {
-    border-color: #BFDBFE;
-    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.13);
-
-    &::before { opacity: 1; }
-  }
-`;
-
-// Expanded card (shows meta + actions below)
-const StaffCardExpanded = styled(StaffCard)`
-  flex-direction: column;
-  align-items: stretch;
-  gap: 0;
-`;
-
-const CardRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  width: 100%;
-`;
-
-const StaffAvatar = styled.div`
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  border-radius: 12px;
-  background: #EFF6FF;
-  border: 1.5px solid #BFDBFE;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  font-weight: 800;
-  color: #1e40af;
-  transition: all 0.2s ease;
-
-  ${StaffCard}:hover & {
-    background: #1e40af;
-    color: white;
-    border-color: #1e40af;
-  }
-  ${StaffCardExpanded}:hover & {
-    background: #1e40af;
-    color: white;
-    border-color: #1e40af;
-  }
-`;
-
-const StaffInfo = styled.div`
-  flex: 0 0 200px;
-  min-width: 0;
-
-  .name {
-    font-size: 14.5px;
-    font-weight: 700;
-    color: ${props => props.theme.colors.text};
-    margin-bottom: 3px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .position {
-    font-size: 12.5px;
-    color: ${props => props.theme.colors.textLight};
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-`;
-
-const MetaChip = styled.div`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  padding: 6px 12px;
-  background: #F8FAFC;
-  border: 1px solid #E2E8F0;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #64748B;
-  white-space: nowrap;
-  flex-shrink: 0;
-
-  svg { width: 12px; height: 12px; color: #1e40af; opacity: 0.7; flex-shrink: 0; }
-`;
-
-const StatusPill = styled.span`
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
-  border-radius: 100px;
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
-  flex-shrink: 0;
-
-  background: ${props => {
-    if (props.$status === 'active') return '#ECFDF5';
-    if (props.$status === 'pending') return '#FFFBEB';
-    if (props.$status === 'completed') return '#EFF6FF';
-    if (props.$status === 'requested') return '#FEF2F2';
-    return '#F1F5F9';
-  }};
-  color: ${props => statusColor(props.$status)};
-  border: 1.5px solid ${props => {
-    if (props.$status === 'active') return '#A7F3D0';
-    if (props.$status === 'pending') return '#FDE68A';
-    if (props.$status === 'completed') return '#BFDBFE';
-    if (props.$status === 'requested') return '#FECACA';
-    return '#E2E8F0';
-  }};
-
-  .dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: currentColor;
-  }
-`;
-
-const ActionsCol = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: auto;
-  flex-shrink: 0;
-`;
-
-const ActionBtn = styled(motion.button)`
-  padding: 8px 14px;
-  border-radius: 9px;
-  background: ${props =>
-    props.$variant === 'success' ? '#10B981' :
-    props.$variant === 'danger'  ? '#EF4444' :
-    props.$variant === 'warning' ? '#F59E0B' :
-    '#1e40af'
-  };
-  color: white;
-  font-size: 12.5px;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  border: none;
-  cursor: pointer;
-  white-space: nowrap;
-  box-shadow: 0 2px 6px ${props =>
-    props.$variant === 'success' ? 'rgba(16,185,129,0.22)' :
-    props.$variant === 'danger'  ? 'rgba(239,68,68,0.22)' :
-    props.$variant === 'warning' ? 'rgba(245,158,11,0.22)' :
-    'rgba(30,64,175,0.22)'
-  };
-  svg { width: 13px; height: 13px; }
-  &:hover {
-    filter: brightness(1.08);
-    box-shadow: 0 4px 12px ${props =>
-      props.$variant === 'success' ? 'rgba(16,185,129,0.32)' :
-      props.$variant === 'danger'  ? 'rgba(239,68,68,0.32)' :
-      props.$variant === 'warning' ? 'rgba(245,158,11,0.32)' :
-      'rgba(30,64,175,0.32)'
-    };
-  }
-  &:active { transform: scale(0.97); }
-`;
-
-const MetaRow = styled.div`
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px solid #F1F5F9;
-`;
-
-const ReasonBox = styled.div`
-  margin-top: 14px;
-  padding: 12px 16px;
-  background: #FFFBEB;
-  border-radius: 10px;
-  border: 1.5px solid #FDE68A;
-  font-size: 13px;
-  color: #78350F;
-  strong { font-weight: 700; color: #92400E; }
-`;
-
 const EmptyState = styled(motion.div)`
   text-align: center;
   padding: 60px 20px;
@@ -361,244 +185,465 @@ const EmptyState = styled(motion.div)`
   p { font-size: 14px; color: ${props => props.theme.colors.textLight}; }
 `;
 
+// ─── Quick Jobs Section ────────────────────────────────────
+const QuickJobsSection = styled.div`
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  border: 1.5px solid #E8EFFF;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.06);
+  margin-bottom: 24px;
+`;
+
+const QuickJobsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const QuickJobCard = styled(motion.button)`
+  padding: 28px 24px;
+  background: ${props => {
+    const alpha = props.$active ? '20' : '08';
+    return `linear-gradient(135deg, ${props.$color}${alpha} 0%, ${props.$color}05 100%)`;
+  }};
+  border: 2px solid ${props => props.$active ? props.$color : props.$color + '30'};
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: ${props => props.$color};
+    transform: translateY(-4px);
+    box-shadow: ${props => `0 12px 40px ${props.$color}25`};
+    background: ${props => `linear-gradient(135deg, ${props.$color}25 0%, ${props.$color}10 100%)`};
+  }
+`;
+
+const QuickJobIcon = styled.div`
+  width: 64px;
+  height: 64px;
+  background: ${props => props.$color}20;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  
+  ${QuickJobCard}:hover & {
+    background: ${props => props.$color};
+    
+    svg {
+      color: white;
+    }
+  }
+  
+  svg {
+    width: 32px;
+    height: 32px;
+    color: ${props => props.$color};
+    transition: color 0.3s ease;
+  }
+`;
+
+const QuickJobLabel = styled.div`
+  font-size: 16px;
+  font-weight: 700;
+  color: ${props => props.theme.colors.text};
+  text-align: center;
+`;
+
+const QuickJobDescription = styled.div`
+  font-size: 13px;
+  font-weight: 500;
+  color: ${props => props.theme.colors.textLight};
+  text-align: center;
+  line-height: 1.5;
+`;
+
+// ─── HR Staff Styles ───────────────────────────────────────
+const StaffGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const StaffCard = styled(motion.div)`
+  background: #ffffff;
+  border: 1.5px solid #E8EFFF;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.06);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: #BFDBFE;
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.13);
+    transform: translateY(-2px);
+  }
+`;
+
+const StaffHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+`;
+
+const StaffName = styled.h3`
+  font-size: 18px;
+  font-weight: 700;
+  color: ${props => props.theme.colors.text};
+  margin-bottom: 4px;
+`;
+
+const StaffPosition = styled.div`
+  font-size: 13px;
+  color: ${props => props.theme.colors.textLight};
+  font-weight: 500;
+`;
+
+const StaffStatus = styled.div`
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  background: ${props => props.$status === 'active' ? '#D1FAE5' : '#FEF3C7'};
+  color: ${props => props.$status === 'active' ? '#047857' : '#92400E'};
+  border: 1px solid ${props => props.$status === 'active' ? '#10B981' : '#F59E0B'};
+`;
+
+const StaffMeta = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 16px 0;
+  border-top: 1px solid #E8EFFF;
+  border-bottom: 1px solid #E8EFFF;
+  
+  .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: ${props => props.theme.colors.textLight};
+    
+    svg {
+      width: 14px;
+      height: 14px;
+      color: #1e40af;
+    }
+  }
+`;
+
+const StaffActions = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
+const StaffButton = styled(motion.button)`
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  
+  background: ${props => props.$variant === 'danger' ? '#EF4444' : '#EFF6FF'};
+  color: ${props => props.$variant === 'danger' ? 'white' : '#1e40af'};
+  border: 1.5px solid ${props => props.$variant === 'danger' ? '#EF4444' : '#BFDBFE'};
+  
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: ${props => props.$variant === 'danger' ? '0 4px 12px rgba(239, 68, 68, 0.3)' : '0 4px 12px rgba(30, 64, 175, 0.15)'};
+  }
+`;
+
+// ─── Quick Job Posts Styles ────────────────────────────────
+const QuickJobPostsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const QuickJobPostCard = styled(motion.div)`
+  background: #ffffff;
+  border: 1.5px solid #E8EFFF;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.06);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: ${props => props.$status === 'active' ? '#F59E0B' : '#94A3B8'};
+    border-radius: 16px 0 0 16px;
+  }
+  
+  &:hover {
+    border-color: #BFDBFE;
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.13);
+    transform: translateY(-2px);
+  }
+`;
+
+const QuickJobPostHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+`;
+
+const QuickJobPostTitle = styled.h3`
+  font-size: 18px;
+  font-weight: 700;
+  color: ${props => props.theme.colors.text};
+  margin-bottom: 8px;
+`;
+
+const QuickJobPostMeta = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+  
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: ${props => props.theme.colors.textLight};
+    
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+`;
+
+const QuickJobPostStats = styled.div`
+  display: flex;
+  gap: 20px;
+  padding: 16px 0;
+  border-top: 1px solid #E8EFFF;
+  border-bottom: 1px solid #E8EFFF;
+  margin-bottom: 16px;
+  
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    
+    .stat-value {
+      font-size: 20px;
+      font-weight: 800;
+      color: ${props => props.theme.colors.text};
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: ${props => props.theme.colors.textLight};
+      font-weight: 600;
+    }
+  }
+`;
+
+const QuickJobPostActions = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
+const QuickJobPostButton = styled(motion.button)`
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  
+  background: ${props => {
+    if (props.$variant === 'primary') return '#F59E0B';
+    if (props.$variant === 'danger') return '#EF4444';
+    return '#EFF6FF';
+  }};
+  
+  color: ${props => props.$variant === 'primary' || props.$variant === 'danger' ? 'white' : '#1e40af'};
+  border: 1.5px solid ${props => {
+    if (props.$variant === 'primary') return '#F59E0B';
+    if (props.$variant === 'danger') return '#EF4444';
+    return '#BFDBFE';
+  }};
+  
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: ${props => {
+      if (props.$variant === 'primary') return '0 4px 12px rgba(245, 158, 11, 0.3)';
+      if (props.$variant === 'danger') return '0 4px 12px rgba(239, 68, 68, 0.3)';
+      return '0 4px 12px rgba(30, 64, 175, 0.15)';
+    }};
+  }
+`;
+
+const QuickJobStatusBadge = styled.div`
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  background: ${props => props.$status === 'active' ? '#FEF3C7' : '#F1F5F9'};
+  color: ${props => props.$status === 'active' ? '#92400E' : '#64748B'};
+  border: 1px solid ${props => props.$status === 'active' ? '#F59E0B' : '#CBD5E1'};
+`;
+
+// ─── Chat Styles ───────────────────────────────────────────
+const ChatGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const ChatCard = styled(motion.div)`
+  background: #ffffff;
+  border: 1.5px solid #E8EFFF;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.06);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  
+  &:hover {
+    border-color: #BFDBFE;
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.13);
+    transform: translateY(-2px);
+  }
+`;
+
+const ChatHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+`;
+
+const ChatInfo = styled.div`
+  flex: 1;
+`;
+
+const ChatName = styled.div`
+  font-size: 16px;
+  font-weight: 700;
+  color: ${props => props.theme.colors.text};
+  margin-bottom: 4px;
+`;
+
+const ChatRole = styled.div`
+  font-size: 13px;
+  color: ${props => props.theme.colors.textLight};
+  font-weight: 500;
+`;
+
+const ChatStatus = styled.div`
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: ${props => props.$status === 'online' ? '#10B981' : '#94A3B8'};
+  box-shadow: ${props => props.$status === 'online' ? '0 0 0 2px #D1FAE5' : 'none'};
+`;
+
+const ChatMessage = styled.div`
+  font-size: 13px;
+  color: ${props => props.theme.colors.textLight};
+  margin-bottom: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.5;
+`;
+
+const ChatFooter = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid #E8EFFF;
+`;
+
+const ChatTime = styled.div`
+  font-size: 12px;
+  color: ${props => props.theme.colors.textLight};
+  font-weight: 600;
+`;
+
+const ChatUnread = styled.div`
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #DBEAFE;
+  color: #1e40af;
+  border: 1px solid #BFDBFE;
+`;
+
 // ─── Component ─────────────────────────────────────────────
 const HRManagement = () => {
   const { language } = useLanguage();
-  const [jobType, setJobType] = useState('standard');
-  const [activeTab, setActiveTab] = useState('active');
-
-  const allStaffData = {
-    standard: {
-      active: [
-        {
-          id: 1,
-          name: language === 'vi' ? 'Nguyễn Văn A' : 'Nguyen Van A',
-          position: language === 'vi' ? 'Kỹ sư phần mềm' : 'Software Engineer',
-          startDate: '01/01/2026',
-          shift: language === 'vi' ? 'Toàn thời gian' : 'Full-time',
-          location: language === 'vi' ? 'Quận 3, TP.HCM' : 'District 3, HCMC',
-          status: 'active',
-          jobType: 'standard'
-        },
-        {
-          id: 2,
-          name: language === 'vi' ? 'Trần Thị B' : 'Tran Thi B',
-          position: language === 'vi' ? 'Kế toán' : 'Accountant',
-          startDate: '15/12/2025',
-          shift: language === 'vi' ? 'Toàn thời gian' : 'Full-time',
-          location: language === 'vi' ? 'Quận Phú Nhuận, TP.HCM' : 'Phu Nhuan Dist., HCMC',
-          status: 'active',
-          jobType: 'standard'
-        }
-      ],
-      pending: [
-        {
-          id: 101,
-          name: language === 'vi' ? 'Hiếu sàn' : 'Hieu san',
-          position: 'Senior React Developer',
-          startDate: language === 'vi' ? '2 giờ trước' : '2 hours ago',
-          shift: language === 'vi' ? 'Toàn thời gian' : 'Full-time',
-          location: language === 'vi' ? 'Quận 1, TP.HCM' : 'District 1, HCMC',
-          status: 'pending',
-          jobType: 'standard'
-        },
-        {
-          id: 102,
-          name: language === 'vi' ? 'Duy sàn' : 'Duy san',
-          position: language === 'vi' ? 'Thu ngân' : 'Cashier',
-          startDate: language === 'vi' ? '5 giờ trước' : '5 hours ago',
-          shift: language === 'vi' ? 'Toàn thời gian' : 'Full-time',
-          location: language === 'vi' ? 'Quận Bình Thạnh, TP.HCM' : 'Binh Thanh Dist., HCMC',
-          status: 'pending',
-          jobType: 'standard'
-        },
-      ],
-      completed: [
-        {
-          id: 4,
-          name: language === 'vi' ? 'Phạm Thị D' : 'Pham Thi D',
-          position: language === 'vi' ? 'Nhân viên hành chính' : 'Admin Staff',
-          startDate: '01/10/2025',
-          endDate: '28/02/2026',
-          shift: language === 'vi' ? 'Toàn thời gian' : 'Full-time',
-          location: language === 'vi' ? 'Quận Phú Nhuận, TP.HCM' : 'Phu Nhuan Dist., HCMC',
-          status: 'completed',
-          rating: 4.8,
-          jobType: 'standard'
-        }
-      ],
-      change_request: []
-    },
-    quick: {
-      active: [
-        {
-          id: 11,
-          name: language === 'vi' ? 'Nguyễn Văn X' : 'Nguyen Van X',
-          position: language === 'vi' ? 'Nhân viên bán hàng' : 'Sales Staff',
-          startDate: '15/02/2026',
-          shift: language === 'vi' ? 'Ca sáng 8:00 - 12:00' : 'Morning 8:00 - 12:00',
-          location: language === 'vi' ? 'Quận Tân Bình, TP.HCM' : 'Tan Binh Dist., HCMC',
-          status: 'active',
-          jobType: 'quick'
-        },
-        {
-          id: 12,
-          name: language === 'vi' ? 'Trần Thị Y' : 'Tran Thi Y',
-          position: language === 'vi' ? 'Nhân viên kho' : 'Warehouse Staff',
-          startDate: '12/02/2026',
-          shift: language === 'vi' ? 'Ca chiều 13:00 - 17:00' : 'Afternoon 13:00 - 17:00',
-          location: language === 'vi' ? 'Quận 7, TP.HCM' : 'District 7, HCMC',
-          status: 'active',
-          jobType: 'quick'
-        }
-      ],
-      pending: [
-        {
-          id: 103,
-          name: 'Zun',
-          position: language === 'vi' ? 'Nhân viên phục vụ' : 'Waiter/Server',
-          startDate: language === 'vi' ? '1 tuần trước' : '1 week ago',
-          shift: language === 'vi' ? 'Ca linh hoạt' : 'Flexible shift',
-          location: language === 'vi' ? 'Quận Gò Vấp, TP.HCM' : 'Go Vap Dist., HCMC',
-          status: 'pending',
-          jobType: 'quick'
-        }
-      ],
-      completed: [
-        {
-          id: 14,
-          name: language === 'vi' ? 'Phạm Thị K' : 'Pham Thi K',
-          position: language === 'vi' ? 'Nhân viên phục vụ' : 'Service Staff',
-          startDate: '01/02/2026',
-          endDate: '10/02/2026',
-          shift: language === 'vi' ? 'Ca tối 18:00 - 22:00' : 'Evening 18:00 - 22:00',
-          location: language === 'vi' ? 'Quận 4, TP.HCM' : 'District 4, HCMC',
-          status: 'completed',
-          rating: 4.5,
-          jobType: 'quick'
-        }
-      ],
-      change_request: [
-        {
-          id: 15,
-          name: language === 'vi' ? 'Hoàng Văn L' : 'Hoang Van L',
-          position: language === 'vi' ? 'Nhân viên giao hàng' : 'Delivery Staff',
-          startDate: '10/02/2026',
-          shift: language === 'vi' ? 'Ca sáng 8:00 - 12:00' : 'Morning 8:00 - 12:00',
-          location: language === 'vi' ? 'Quận 10, TP.HCM' : 'District 10, HCMC',
-          status: 'requested',
-          reason: language === 'vi' ? 'Yêu cầu thay đổi ca làm việc' : 'Request to change work shift',
-          jobType: 'quick'
-        }
-      ]
-    }
-  };
-
-  const staffData = allStaffData[jobType];
-
-  const tabs = [
-    { id: 'active',         label: language === 'vi' ? 'Đang làm việc' : 'Active',           count: staffData.active.length },
-    { id: 'pending',        label: language === 'vi' ? 'Chờ xác nhận' : 'Pending',            count: staffData.pending.length },
-    { id: 'completed',      label: language === 'vi' ? 'Đã hoàn thành' : 'Completed',         count: staffData.completed.length },
-    ...(jobType === 'quick' ? [{ id: 'change_request', label: language === 'vi' ? 'Yêu cầu thay đổi' : 'Change Requests', count: staffData.change_request.length }] : []),
-  ];
-
-  const currentData = staffData[activeTab] || [];
-
-  const statusLabel = (s) => {
-    const map = {
-      vi:  { active: 'Đang làm việc', pending: 'Chờ xác nhận', completed: 'Đã hoàn thành', requested: 'Yêu cầu thay đổi' },
-      en:  { active: 'Active', pending: 'Pending', completed: 'Completed', requested: 'Change request' },
-    };
-    return map[language]?.[s] || s;
-  };
-
-  const renderCard = (staff, index) => {
-    const initials = staff.name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
-
-    return (
-      <StaffCardExpanded
-        key={staff.id}
-        $status={staff.status}
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -8, scale: 0.98 }}
-        transition={{ duration: 0.25, delay: index * 0.06, ease: [0.4, 0, 0.2, 1] }}
-        whileHover={{ y: -2 }}
-        layout
-      >
-        {/* Top row */}
-        <CardRow>
-          <StaffAvatar>{initials}</StaffAvatar>
-
-          <StaffInfo>
-            <div className="name">{staff.name}</div>
-            <div className="position">{staff.position}</div>
-          </StaffInfo>
-
-          <MetaChip><Clock />{staff.startDate}</MetaChip>
-          <MetaChip><MapPin />{staff.location}</MetaChip>
-          <MetaChip><Briefcase />{staff.shift}</MetaChip>
-          {staff.rating && (
-            <MetaChip><Star style={{color:'#F59E0B'}} />  {staff.rating}/5</MetaChip>
-          )}
-
-          <StatusPill $status={staff.status}>
-            <span className="dot" />
-            {statusLabel(staff.status)}
-          </StatusPill>
-
-          <ActionsCol>
-            {staff.status === 'pending' && (
-              <>
-                <ActionBtn $variant="success" whileTap={{ scale: 0.97 }}>
-                  <CheckCircle />{language === 'vi' ? 'Xác nhận' : 'Confirm'}
-                </ActionBtn>
-                <ActionBtn $variant="danger" whileTap={{ scale: 0.97 }}>
-                  <XCircle />{language === 'vi' ? 'Từ chối' : 'Reject'}
-                </ActionBtn>
-              </>
-            )}
-            {staff.status === 'active' && (
-              <>
-                <ActionBtn $variant="warning" whileTap={{ scale: 0.97 }}>
-                  <AlertCircle />{language === 'vi' ? 'Yêu cầu thay đổi' : 'Request change'}
-                </ActionBtn>
-                <ActionBtn $variant="primary" whileTap={{ scale: 0.97 }}>
-                  <XCircle />{language === 'vi' ? 'Kết thúc' : 'End'}
-                </ActionBtn>
-              </>
-            )}
-            {staff.status === 'completed' && (
-              <ActionBtn $variant="primary" whileTap={{ scale: 0.97 }}>
-                <Star />{language === 'vi' ? 'Đánh giá' : 'Rate'}
-              </ActionBtn>
-            )}
-            {staff.status === 'requested' && (
-              <>
-                <ActionBtn $variant="success" whileTap={{ scale: 0.97 }}>
-                  <CheckCircle />{language === 'vi' ? 'Chấp nhận' : 'Accept'}
-                </ActionBtn>
-                <ActionBtn $variant="danger" whileTap={{ scale: 0.97 }}>
-                  <XCircle />{language === 'vi' ? 'Từ chối' : 'Reject'}
-                </ActionBtn>
-              </>
-            )}
-          </ActionsCol>
-        </CardRow>
-
-        {/* Reason box for change requests */}
-        {staff.reason && (
-          <ReasonBox>
-            <strong>{language === 'vi' ? 'Lý do: ' : 'Reason: '}</strong>{staff.reason}
-          </ReasonBox>
-        )}
-      </StaffCardExpanded>
-    );
-  };
+  const [activeSection, setActiveSection] = useState('hr');
+  const [hrStaff] = useState(() => getHRStaff(language));
+  const [quickJobPosts] = useState(() => getQuickJobPosts(language));
+  const [chatConversations] = useState(() => getChatConversations(language));
 
   return (
-    <DashboardLayout role="employer">
+    <DashboardLayout role="employer" key={language}>
       <PageContainer
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -607,69 +652,238 @@ const HRManagement = () => {
         {/* Header */}
         <PageHeader>
           <PageTitleGroup>
-            <PageIconBox><Users /></PageIconBox>
+            <PageIconBox><Clock /></PageIconBox>
             <PageTitleText>
-              <h1>{language === 'vi' ? 'Quản lý nhân sự' : 'HR Management'}</h1>
-              <p>{language === 'vi' ? 'Quản lý và theo dõi nhân viên đang làm việc' : 'Manage and track your active workforce'}</p>
+              <h1>{language === 'vi' ? 'Công việc tuyển gấp' : 'Quick Jobs'}</h1>
+              <p>{language === 'vi' ? 'Quản lý nhân sự, bài đăng và tin nhắn tuyển dụng nhanh' : 'Manage HR, posts and recruitment messages quickly'}</p>
             </PageTitleText>
           </PageTitleGroup>
-          <CountBadge>
-            {currentData.length} {language === 'vi' ? 'nhân viên' : 'staff'}
-          </CountBadge>
         </PageHeader>
 
-        {/* Job type switcher */}
-        <JobTypeSwitcher>
-          <JobTypeBtn
-            $active={jobType === 'standard'}
-            onClick={() => { setJobType('standard'); setActiveTab('active'); }}
-            whileTap={{ scale: 0.98 }}
-          >
-            {language === 'vi' ? 'Công việc tiêu chuẩn' : 'Standard Jobs'}
-          </JobTypeBtn>
-          <JobTypeBtn
-            $active={jobType === 'quick'}
-            onClick={() => { setJobType('quick'); setActiveTab('active'); }}
-            whileTap={{ scale: 0.98 }}
-          >
-            {language === 'vi' ? 'Công việc theo ca' : 'Quick Jobs'}
-          </JobTypeBtn>
-        </JobTypeSwitcher>
-
-        {/* Sub-tabs */}
-        <TabBar>
-          {tabs.map(tab => (
-            <TabBtn
-              key={tab.id}
-              $active={activeTab === tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              whileTap={{ scale: 0.97 }}
+        {/* Quick Jobs Section */}
+        <QuickJobsSection>
+          <QuickJobsGrid>
+            <QuickJobCard
+              $color="#1e40af"
+              $active={activeSection === 'hr'}
+              onClick={() => setActiveSection('hr')}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
             >
-              {tab.label} ({tab.count})
-            </TabBtn>
-          ))}
-        </TabBar>
+              <QuickJobIcon $color="#1e40af">
+                <UsersRound />
+              </QuickJobIcon>
+              <QuickJobLabel>{language === 'vi' ? 'Quản lý nhân sự' : 'HR Management'}</QuickJobLabel>
+              <QuickJobDescription>
+                {language === 'vi' ? 'Quản lý và theo dõi nhân viên đang làm việc' : 'Manage and track your workforce'}
+              </QuickJobDescription>
+            </QuickJobCard>
+            
+            <QuickJobCard
+              $color="#10B981"
+              $active={activeSection === 'posts'}
+              onClick={() => setActiveSection('posts')}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <QuickJobIcon $color="#10B981">
+                <FileText />
+              </QuickJobIcon>
+              <QuickJobLabel>{language === 'vi' ? 'Quản lý bài đăng' : 'Post Management'}</QuickJobLabel>
+              <QuickJobDescription>
+                {language === 'vi' ? 'Tạo và quản lý các tin tuyển dụng' : 'Create and manage job postings'}
+              </QuickJobDescription>
+            </QuickJobCard>
+            
+            <QuickJobCard
+              $color="#F59E0B"
+              $active={activeSection === 'chat'}
+              onClick={() => setActiveSection('chat')}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <QuickJobIcon $color="#F59E0B">
+                <MessageSquare />
+              </QuickJobIcon>
+              <QuickJobLabel>{language === 'vi' ? 'Chatting' : 'Chatting'}</QuickJobLabel>
+              <QuickJobDescription>
+                {language === 'vi' ? 'Trò chuyện với ứng viên và nhân viên' : 'Chat with candidates and employees'}
+              </QuickJobDescription>
+            </QuickJobCard>
+          </QuickJobsGrid>
+        </QuickJobsSection>
 
-        {/* Cards */}
-        <CardGrid>
-          <AnimatePresence mode="popLayout">
-            {currentData.length > 0 ? (
-              currentData.map((staff, index) => renderCard(staff, index))
-            ) : (
-              <EmptyState
-                key="empty"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="icon">👥</div>
-                <h3>{language === 'vi' ? 'Chưa có nhân viên' : 'No staff yet'}</h3>
-                <p>{language === 'vi' ? 'Không có nhân viên nào trong danh mục này' : 'No staff members in this category'}</p>
-              </EmptyState>
-            )}
-          </AnimatePresence>
-        </CardGrid>
+        {/* Content Section */}
+        {activeSection === 'hr' && (
+          <StaffGrid>
+            <AnimatePresence>
+              {hrStaff.map((staff, index) => (
+                <StaffCard
+                  key={staff.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <StaffHeader>
+                    <div>
+                      <StaffName>{staff.name}</StaffName>
+                      <StaffPosition>{staff.position}</StaffPosition>
+                    </div>
+                    <StaffStatus $status={staff.status}>
+                      {staff.status === 'active' 
+                        ? (language === 'vi' ? 'Đang làm' : 'Active')
+                        : (language === 'vi' ? 'Nghỉ phép' : 'On Leave')}
+                    </StaffStatus>
+                  </StaffHeader>
+                  
+                  <StaffMeta>
+                    <div className="meta-row">
+                      <MapPin />{staff.location}
+                    </div>
+                    <div className="meta-row">
+                      <Phone />{staff.phone}
+                    </div>
+                    <div className="meta-row">
+                      <Mail />{staff.email}
+                    </div>
+                    <div className="meta-row">
+                      <Calendar />{language === 'vi' ? 'Bắt đầu:' : 'Started:'} {staff.startDate}
+                    </div>
+                    <div className="meta-row">
+                      <Clock />{staff.shift}
+                    </div>
+                  </StaffMeta>
+                  
+                  <StaffActions>
+                    <StaffButton
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Eye />{language === 'vi' ? 'Chi tiết' : 'Details'}
+                    </StaffButton>
+                    <StaffButton
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Edit />{language === 'vi' ? 'Sửa' : 'Edit'}
+                    </StaffButton>
+                    <StaffButton
+                      $variant="danger"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Trash2 />
+                    </StaffButton>
+                  </StaffActions>
+                </StaffCard>
+              ))}
+            </AnimatePresence>
+          </StaffGrid>
+        )}
+
+        {activeSection === 'posts' && (
+          <QuickJobPostsGrid>
+            <AnimatePresence>
+              {quickJobPosts.map((post, index) => (
+                <QuickJobPostCard
+                  key={post.id}
+                  $status={post.status}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <QuickJobPostHeader>
+                    <div>
+                      <QuickJobPostTitle>{post.title}</QuickJobPostTitle>
+                      <QuickJobPostMeta>
+                        <div className="meta-item">
+                          <MapPin />{post.location}
+                        </div>
+                        <div className="meta-item">
+                          <DollarSign />{post.salary}
+                        </div>
+                        <div className="meta-item">
+                          <Clock />{post.deadline}
+                        </div>
+                      </QuickJobPostMeta>
+                    </div>
+                    <QuickJobStatusBadge $status={post.status}>
+                      {post.status === 'active'
+                        ? (language === 'vi' ? 'Đang tuyển' : 'Active')
+                        : (language === 'vi' ? 'Đã đóng' : 'Closed')}
+                    </QuickJobStatusBadge>
+                  </QuickJobPostHeader>
+                  
+                  <QuickJobPostStats>
+                    <div className="stat">
+                      <div className="stat-value">{post.applicants}</div>
+                      <div className="stat-label">{language === 'vi' ? 'Ứng viên' : 'Applicants'}</div>
+                    </div>
+                    <div className="stat">
+                      <div className="stat-value">{post.views}</div>
+                      <div className="stat-label">{language === 'vi' ? 'Lượt xem' : 'Views'}</div>
+                    </div>
+                  </QuickJobPostStats>
+                  
+                  <QuickJobPostActions>
+                    <QuickJobPostButton
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Eye />{language === 'vi' ? 'Xem' : 'View'}
+                    </QuickJobPostButton>
+                    <QuickJobPostButton
+                      $variant="primary"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Edit />{language === 'vi' ? 'Sửa' : 'Edit'}
+                    </QuickJobPostButton>
+                    <QuickJobPostButton
+                      $variant="danger"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Trash2 />
+                    </QuickJobPostButton>
+                  </QuickJobPostActions>
+                </QuickJobPostCard>
+              ))}
+            </AnimatePresence>
+          </QuickJobPostsGrid>
+        )}
+
+        {activeSection === 'chat' && (
+          <ChatGrid>
+            <AnimatePresence>
+              {chatConversations.map((chat, index) => (
+                <ChatCard
+                  key={chat.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <ChatHeader>
+                    <ChatInfo>
+                      <ChatName>{chat.name}</ChatName>
+                      <ChatRole>{chat.role} • {chat.position}</ChatRole>
+                    </ChatInfo>
+                    <ChatStatus $status={chat.status} />
+                  </ChatHeader>
+                  
+                  <ChatMessage>{chat.lastMessage}</ChatMessage>
+                  
+                  <ChatFooter>
+                    <ChatTime>{chat.time}</ChatTime>
+                    {chat.unread > 0 && (
+                      <ChatUnread>{chat.unread} {language === 'vi' ? 'mới' : 'new'}</ChatUnread>
+                    )}
+                  </ChatFooter>
+                </ChatCard>
+              ))}
+            </AnimatePresence>
+          </ChatGrid>
+        )}
       </PageContainer>
     </DashboardLayout>
   );
