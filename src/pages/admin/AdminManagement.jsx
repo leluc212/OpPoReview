@@ -576,10 +576,10 @@ const AdminManagement = () => {
   const admins = [
     {
       id: 1,
-      name: 'Nguyễn Văn Admin',
-      email: 'admin1@opporeview.com',
+      name: 'Nguyễn Thị Anh Thư',
+      email: 'admin1@opcareer.vn',
       phone: '0901234567',
-      role: 'admin',
+      role: 'super_admin',
       status: 'approved',
       joinDate: '2026-01-15',
       reviewDate: '2026-01-16',
@@ -595,8 +595,8 @@ const AdminManagement = () => {
     },
     {
       id: 2,
-      name: 'Trần Thị Moderator',
-      email: 'mod1@opporeview.com',
+      name: 'Nguyễn Hoàng Ngọc Minh',
+      email: 'admin2@opcareer.vn',
       phone: '0912345678',
       role: 'moderator',
       status: 'approved',
@@ -614,8 +614,8 @@ const AdminManagement = () => {
     },
     {
       id: 3,
-      name: 'Lê Văn Pending',
-      email: 'pending@opporeview.com',
+      name: 'Lê Tấn Lực',
+      email: 'admin3@opcareer.vn',
       phone: '0923456789',
       role: 'admin',
       status: 'pending',
@@ -633,8 +633,8 @@ const AdminManagement = () => {
     },
     {
       id: 4,
-      name: 'Phạm Thị Rejected',
-      email: 'rejected@opporeview.com',
+      name: 'Phạm Lê Duy',
+      email: 'admin4@opcareer.vn',
       phone: '0934567890',
       role: 'moderator',
       status: 'rejected',
@@ -652,8 +652,27 @@ const AdminManagement = () => {
     },
     {
       id: 5,
-      name: 'Hoàng Văn Super',
-      email: 'super@opporeview.com',
+      name: 'Đỗ Hoàng Hiếu',
+      email: 'admin5@opcareer.vn',
+      phone: '0945678901',
+      role: 'admin',
+      status: 'approved',
+      joinDate: '2025-12-01',
+      reviewDate: '2025-12-01',
+      location: 'TP.HCM',
+      permissions: {
+        manageUsers: true,
+        managePosts: true,
+        managePackages: true,
+        viewReports: true,
+        manageAdmins: true,
+        systemSettings: true
+      }
+    },
+    {
+      id: 6,
+      name: 'Nguyễn Thị Thùy Dung',
+      email: 'admin6@opcareer.vn',
       phone: '0945678901',
       role: 'super_admin',
       status: 'approved',

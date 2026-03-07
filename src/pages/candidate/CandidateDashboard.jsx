@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import styled, { keyframes } from 'styled-components';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
 import JobCard from '../../components/JobCard';
@@ -29,9 +29,156 @@ import {
   Sparkles,
   X,
   Building2,
-  StarIcon
+  StarIcon,
+  Send,
+  ChevronDown,
+  Phone,
+  MoreVertical
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
+
+const chatSlideUp = keyframes`
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+`;
+
+const ChatBubbleBtn = styled(motion.button)`
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  cursor: grab;
+  z-index: 1000;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+  overflow: hidden;
+  position: relative;
+  &:active { cursor: grabbing; }
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
+
+const UnreadDot = styled.span`
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ef4444;
+  border: 2px solid white;
+  display: ${p => p.$show ? 'block' : 'none'};
+`;
+
+const ChatWindow = styled(motion.div)`
+  position: fixed;
+  bottom: 108px;
+  right: 32px;
+  width: 360px;
+  height: 480px;
+  background: ${props => props.theme?.colors?.bg || '#ffffff'};
+  background-color: ${props => props.theme?.colors?.bg || '#ffffff'};
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid ${props => props.theme?.colors?.border || '#e5e7eb'};
+  animation: ${chatSlideUp} 0.25s ease;
+  isolation: isolate;
+`;
+
+const ChatHeader = styled.div`
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: white;
+  img {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.4);
+  }
+  .info { flex: 1; }
+  .info h4 { font-size: 15px; font-weight: 700; margin: 0; }
+  .info p  { font-size: 12px; opacity: 0.85; margin: 0; display: flex; align-items: center; gap: 4px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; display: inline-block; }
+  .actions { display: flex; gap: 8px; }
+  .actions button { background: none; border: none; color: white; cursor: pointer; opacity: 0.8; &:hover { opacity: 1; } }
+`;
+
+const ChatMessages = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: ${props => props.theme?.colors?.bgDark || '#f3f4f6'};
+  background-color: ${props => props.theme?.colors?.bgDark || '#f3f4f6'};
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb { background: ${props => props.theme?.colors?.border || '#d1d5db'}; border-radius: 2px; }
+`;
+
+const ChatMsg = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: ${p => p.$mine ? 'flex-end' : 'flex-start'};
+  .bubble {
+    max-width: 75%;
+    padding: 10px 14px;
+    border-radius: ${p => p.$mine ? '18px 18px 4px 18px' : '18px 18px 18px 4px'};
+    background: ${p => p.$mine ? 'linear-gradient(135deg, #1e40af, #3b82f6)' : props => props.theme?.colors?.bg || '#fff'};
+    color: ${p => p.$mine ? 'white' : 'inherit'};
+    font-size: 14px;
+    line-height: 1.5;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .time { font-size: 11px; opacity: 0.5; margin-top: 3px; }
+`;
+
+const ChatInputRow = styled.div`
+  padding: 12px 14px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: ${props => props.theme.colors.bg};
+  border-top: 1px solid ${props => props.theme.colors.border};
+  input {
+    flex: 1;
+    border: 1.5px solid ${props => props.theme.colors.border};
+    border-radius: 24px;
+    padding: 10px 16px;
+    font-size: 14px;
+    background: ${props => props.theme.colors.bgDark};
+    color: ${props => props.theme.colors.text};
+    outline: none;
+    &:focus { border-color: #3b82f6; }
+    &::placeholder { color: ${props => props.theme.colors.textLight}; }
+  }
+  button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 0.2s;
+    &:hover { opacity: 0.85; }
+    svg { color: white; width: 18px; height: 18px; }
+  }
+`;
 
 const fadeIn = keyframes`
   from {
@@ -150,47 +297,98 @@ const IllustrationContainer = styled.div`
 `;
 
 const ProfileCompletionBanner = styled(motion.div)`
-  background: linear-gradient(135deg, #93C5FD 0%, #60A5FA 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
   border-radius: ${props => props.theme.borderRadius.xl};
-  padding: 16px 20px;
+  padding: 24px 28px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 24px;
   color: white;
-  box-shadow: 0 8px 20px rgba(96, 165, 250, 0.25);
+  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.3);
   flex: 1;
   min-width: 0;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    right: 10%;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+  }
   
+  .banner-content {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    z-index: 1;
+  }
+
   h3 {
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 700;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
     display: flex;
     align-items: center;
-    gap: 6px;
-    line-height: 1.3;
+    gap: 8px;
+    line-height: 1.4;
 
     svg {
-      width: 16px;
-      height: 16px;
+      width: 20px;
+      height: 20px;
       flex-shrink: 0;
     }
   }
   
   p {
-    font-size: 11px;
-    opacity: 0.95;
+    font-size: 13px;
+    opacity: 0.9;
+    margin-bottom: 2px;
+  }
+
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .progress-percent {
+    font-size: 13px;
+    font-weight: 700;
     white-space: nowrap;
+  }
+
+  .banner-action {
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
   }
 `;
 
 const ProgressBar = styled.div`
-  width: 140px;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.3);
+  flex: 1;
+  max-width: 200px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.25);
   border-radius: ${props => props.theme.borderRadius.full};
   overflow: hidden;
-  margin-top: 6px;
   
   &::after {
     content: '';
@@ -200,6 +398,7 @@ const ProgressBar = styled.div`
     background: white;
     border-radius: ${props => props.theme.borderRadius.full};
     transition: width 0.5s ease;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
   }
 `;
 
@@ -688,11 +887,11 @@ const ModalHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 28px;
+  padding: 16px 24px;
   border-bottom: 2px solid ${props => props.theme.colors.border};
 
   h2 {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     color: ${props => props.theme.colors.text};
     display: flex;
@@ -727,7 +926,7 @@ const ModalHeader = styled.div`
 `;
 
 const ModalBody = styled.div`
-  padding: 28px;
+  padding: 20px 24px;
 `;
 
 const JobDetailRow = styled.div`
@@ -783,14 +982,14 @@ const JobStatusTag = styled.div`
 const ModalActions = styled.div`
   display: flex;
   gap: 12px;
-  margin-top: 24px;
-  padding-top: 20px;
+  margin-top: 16px;
+  padding-top: 14px;
   border-top: 2px solid ${props => props.theme.colors.border};
 `;
 
 const ModalButton = styled(motion.button)`
   flex: 1;
-  padding: 14px 20px;
+  padding: 12px 18px;
   border-radius: ${props => props.theme.borderRadius.lg};
   font-size: 14px;
   font-weight: 700;
@@ -874,14 +1073,14 @@ const SuccessMessage = styled(motion.div)`
 `;
 
 const ReviewForm = styled(motion.div)`
-  margin-top: 20px;
+  margin-top: 12px;
 `;
 
 const ReviewCategory = styled.div`
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 
   .category-label {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: ${props => props.theme.colors.text};
     margin-bottom: 8px;
@@ -890,8 +1089,8 @@ const ReviewCategory = styled.div`
     gap: 8px;
 
     svg {
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
       color: ${props => props.theme.colors.primary};
     }
   }
@@ -914,8 +1113,8 @@ const StarButton = styled.button`
   }
 
   svg {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     fill: ${props => props.$active ? '#F59E0B' : 'transparent'};
     stroke: ${props => props.$active ? '#F59E0B' : props.theme.colors.textLight + '60'};
     stroke-width: 2;
@@ -925,8 +1124,8 @@ const StarButton = styled.button`
 
 const ReviewTextArea = styled.textarea`
   width: 100%;
-  min-height: 100px;
-  padding: 14px 16px;
+  min-height: 70px;
+  padding: 10px 14px;
   border: 2px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.borderRadius.lg};
   font-size: 14px;
@@ -991,7 +1190,7 @@ const CandidateDashboard = () => {
   const [jobCompleted, setJobCompleted] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
-  const [ratings, setRatings] = useState({ environment: 0, attitude: 0, accuracy: 0 });
+  const [ratings, setRatings] = useState({ overall: 0, environment: 0, attitude: 0, accuracy: 0 });
   const [reviewText, setReviewText] = useState('');
 
   const handleSubmitReview = () => {
@@ -1003,7 +1202,7 @@ const CandidateDashboard = () => {
     setJobCompleted(false);
     setShowReviewForm(false);
     setReviewSubmitted(false);
-    setRatings({ environment: 0, attitude: 0, accuracy: 0 });
+    setRatings({ overall: 0, environment: 0, attitude: 0, accuracy: 0 });
     setReviewText('');
   };
 
@@ -1096,33 +1295,53 @@ const CandidateDashboard = () => {
   const recommendedJobs = [
     {
       id: 1,
-      title: 'Nhân viên Pha Chế',
-      company: 'Highlands Coffee',
-      location: 'Quận 1, TP.HCM',
-      type: 'Toàn thời gian',
-      salary: '8-12 triệu',
-      postedAt: '2 ngày trước',
+      title: 'Nhân viên pha chế - Part-time',
+      company: 'The Coffee House',
+      location: 'Quận 7, TP.HCM',
+      type: 'Part-time',
+      salary: '224.400 VNĐ/8h',
+      postedAt: '1 ngày trước',
       tags: ['Pha chế', 'F&B', 'Coffee']
     },
     {
       id: 2,
-      title: 'Nhân viên Phục Vụ',
-      company: 'The Coffee House',  
-      location: 'Quận 7, TP.HCM',
-      type: 'Toàn thời gian',
-      salary: '7-10 triệu',
+      title: 'Nhân viên phục vụ - Part-time',
+      company: 'Starbucks Vietnam',
+      location: 'Bình Thạnh, TP.HCM',
+      type: 'Part-time',
+      salary: '224.400 VNĐ/8h',
       postedAt: '1 ngày trước',
-      tags: ['Phục vụ', 'F&B', 'Ca làm linh động']
+      tags: ['Phục vụ', 'Part-time', 'Coffee']
     },
     {
       id: 3,
-      title: 'Đầu Bếp Phụ',
-      company: 'Golden Gate Group',
-      location: 'Quận 3, TP.HCM',
-      type: 'Toàn thời gian',
-      salary: '9-14 triệu',
+      title: 'Phụ bếp nhà hàng - Part-time',
+      company: 'Pizza 4P\'s',
+      location: 'Quận 2, TP.HCM',
+      type: 'Part-time',
+      salary: '240.000 VNĐ/8h',
       postedAt: '2 ngày trước',
-      tags: ['Bếp', 'F&B', 'Nhà hàng']
+      tags: ['Phụ bếp', 'Nhà hàng', 'Pizza']
+    },
+    {
+      id: 4,
+      title: 'Nhân viên pha chế - Full-time',
+      company: 'Phúc Long Coffee & Tea',
+      location: 'Quận 1, TP.HCM',
+      type: 'Full-time',
+      salary: '6 triệu VND',
+      postedAt: '1 ngày trước',
+      tags: ['Pha chế', 'Full-time', 'F&B']
+    },
+    {
+      id: 5,
+      title: 'Nhân viên bưng bê - Part-time',
+      company: 'Haidilao Việt Nam',
+      location: 'Quận 1, TP.HCM',
+      type: 'Part-time',
+      salary: '224.400 VNĐ/8h',
+      postedAt: '1 ngày trước',
+      tags: ['Phục vụ', 'Nhà hàng', 'Lẩu']
     }
   ];
 
@@ -1132,14 +1351,14 @@ const CandidateDashboard = () => {
       title: 'Nhân viên Phục Vụ Bàn', 
       company: 'Pizza 4P\'s', 
       appliedDate: '2 ngày trước', 
-      status: 'pending' 
+      status: 'unseen' 
     },
     { 
       id: 2, 
       title: 'Nhân viên Pha Chế', 
       company: 'Phúc Long Coffee & Tea', 
       appliedDate: '5 ngày trước', 
-      status: 'pending' 
+      status: 'seen' 
     },
     { 
       id: 3, 
@@ -1151,30 +1370,29 @@ const CandidateDashboard = () => {
     },
   ];
 
-  const activities = [
-    {
-      type: 'view',
-      icon: Eye,
-      color: '#1e40af',
-      title: language === 'vi' ? '12 nhà tuyển dụng đã xem CV của bạn' : '12 employers viewed your CV',
-      time: language === 'vi' ? 'Hôm nay' : 'Today'
-    },
-    {
-      type: 'message',
-      icon: Bell,
-      color: '#F59E0B',
-      title: language === 'vi' ? 'Bạn có 3 phản hồi CV mới từ nhà tuyển dụng' : 'You have 3 new CV responses from employers',
-      time: language === 'vi' ? '2 giờ trước' : '2 hours ago'
-    },
-    {
-      type: 'match',
-      icon: Target,
-      color: '#1e40af',
-      title: language === 'vi' ? '5 công việc mới phù hợp với bạn' : '5 new jobs match your profile',
-      time: language === 'vi' ? '4 giờ trước' : '4 hours ago'
-    },
-  ];
 
+
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const [chatMessages, setChatMessages] = useState([
+    { id: 1, mine: false, text: 'Xin chào! Katinat Quận 8 đã duyệt CV ứng tuyển công việc tuyển gấp của bạn. Bạn có thể liên hệ với chúng tôi qua đây nhé! 😊', time: '3 ngày trước' },
+  ]);
+  const [hasUnread, setHasUnread] = useState(true);
+
+  const sendChatMessage = () => {
+    if (!chatInput.trim()) return;
+    setChatMessages(prev => [...prev, { id: Date.now(), mine: true, text: chatInput.trim(), time: 'Vừa xong' }]);
+    setChatInput('');
+    setTimeout(() => {
+      setChatMessages(prev => [...prev, { id: Date.now() + 1, mine: false, text: 'Cảm ơn bạn đã phản hồi! Chúng tôi sẽ liên hệ lại sớm nhất có thể.', time: 'Vừa xong' }]);
+    }, 1200);
+  };
+
+  const openChat = () => { setChatOpen(true); setHasUnread(false); };
+  const isDragging = useRef(false);
+
+  const bubbleX = useMotionValue(typeof window !== 'undefined' ? window.innerWidth - 96 : 800);
+  const bubbleY = useMotionValue(typeof window !== 'undefined' ? window.innerHeight - 96 : 600);
   const getGreeting = () => {
     const hour = currentTime.getHours();    if (language === 'en') {
       if (hour < 12) return 'Good morning';
@@ -1186,6 +1404,7 @@ const CandidateDashboard = () => {
   };
 
   return (
+    <>
     <DashboardLayout role="candidate" key={language}>
       <DashboardContainer>
         {/* Welcome Banner */}
@@ -1234,26 +1453,31 @@ const CandidateDashboard = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <div>
+              <div className="banner-content">
                 <h3>
                   <Sparkles />
                   {language === 'vi' ? 'Hoàn thiện hồ sơ để tăng cơ hội được tuyển dụng' : 'Complete your profile to increase hiring chances'}
                 </h3>
-                <p>{language === 'vi' ? `Hồ sơ của bạn đã hoàn thành ${profileCompletion}%` : `Your profile is ${profileCompletion}% complete`}</p>
-                <ProgressBar $progress={profileCompletion} />
+                <p>{language === 'vi' ? `Hồ sơ của bạn đã hoàn thành` : `Your profile is ${profileCompletion}% complete`}</p>
+                <div className="progress-row">
+                  <ProgressBar $progress={profileCompletion} />
+                  <span className="progress-percent">{profileCompletion}%</span>
+                </div>
               </div>
-              <ActionButton
-                as={motion.a}
-                href="/candidate/profile"
-                onClick={(e) => { e.preventDefault(); navigate('/candidate/profile'); }}
-                $variant="primary"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-                style={{ padding: '8px 16px', fontSize: '12px' }}
-              >
-                <Upload />
-                {language === 'vi' ? 'Hoàn Thiện Ngay' : 'Complete Now'}
-              </ActionButton>
+              <div className="banner-action">
+                <ActionButton
+                  as={motion.a}
+                  href="/candidate/profile"
+                  onClick={(e) => { e.preventDefault(); navigate('/candidate/profile'); }}
+                  $variant="primary"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
+                  style={{ padding: '10px 20px', fontSize: '13px', background: 'white', color: '#1e40af', fontWeight: 700, borderRadius: '12px', whiteSpace: 'nowrap' }}
+                >
+                  <Upload />
+                  {language === 'vi' ? 'Hoàn Thiện Ngay' : 'Complete Now'}
+                </ActionButton>
+              </div>
             </ProfileCompletionBanner>
           )}
 
@@ -1305,7 +1529,7 @@ const CandidateDashboard = () => {
         >
           <CurrentJobHeader>
             <Briefcase />
-            <h2>{language === 'vi' ? 'Công Việc Hiện Tại' : 'Current Job'}</h2>
+            <h2>{language === 'vi' ? 'Công Việc Tuyển Gấp Hiện Tại' : 'Current Shift Job'}</h2>
           </CurrentJobHeader>
           <CurrentJobCard
             whileHover={{ scale: 1.01 }}
@@ -1317,8 +1541,8 @@ const CandidateDashboard = () => {
               <p>Katinat - Quận 8</p>
               <CurrentJobMeta>
                 <span><MapPin />{language === 'vi' ? 'Quận 8, TP.HCM' : 'District 8, HCMC'}</span>
-                <span><Clock />{language === 'vi' ? 'Ca sáng (06:00 - 14:00)' : 'Morning (06:00 - 14:00)'}</span>
-                <span><DollarSign />27.000 VNĐ/{language === 'vi' ? 'giờ' : 'hr'}</span>
+                <span><Clock />{language === 'vi' ? '06:00 - 14:00' : '06:00 am - 02:00 pm'}</span>
+                <span><DollarSign />224.400 VNĐ</span>
                 <span><Calendar />{language === 'vi' ? 'Từ 05/03/2026' : 'Since Mar 05, 2026'}</span>
               </CurrentJobMeta>
             </CurrentJobInfo>
@@ -1352,7 +1576,7 @@ const CandidateDashboard = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <ModalHeader>
-                <h2><Briefcase />{language === 'vi' ? (showReviewForm ? 'Đánh Giá Nhà Tuyển Dụng' : 'Chi Tiết Công Việc') : (showReviewForm ? 'Rate Employer' : 'Job Details')}</h2>
+                <h2><Briefcase />{language === 'vi' ? (showReviewForm ? 'Đánh Giá Nhà Tuyển Dụng' : 'Chi Tiết Công Việc Tuyển Gấp') : (showReviewForm ? 'Rate Employer' : 'Shift Job Details')}</h2>
                 {canCloseModal && <button onClick={handleCloseModal}><X size={18} /></button>}
               </ModalHeader>
               <ModalBody>
@@ -1375,13 +1599,13 @@ const CandidateDashboard = () => {
                     </JobDetailRow>
                     <JobDetailRow>
                       <Clock />
-                      <span className="label">{language === 'vi' ? 'Ca làm' : 'Shift'}</span>
-                      <span className="value">{language === 'vi' ? 'Ca sáng (06:00 - 14:00)' : 'Morning (06:00 - 14:00)'}</span>
+                      <span className="label">{language === 'vi' ? 'Giờ làm' : 'Shift'}</span>
+                      <span className="value">{language === 'vi' ? '06:00 - 14:00' : '06:00 am - 02:00 pm'}</span>
                     </JobDetailRow>
                     <JobDetailRow>
                       <DollarSign />
                       <span className="label">{language === 'vi' ? 'Lương' : 'Salary'}</span>
-                      <span className="value">27.000 VNĐ/{language === 'vi' ? 'giờ' : 'hr'}</span>
+                      <span className="value">224.400 VNĐ</span>
                     </JobDetailRow>
                     <JobDetailRow>
                       <Calendar />
@@ -1447,9 +1671,16 @@ const CandidateDashboard = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                     >
-                      <p style={{ fontSize: '14px', color: 'inherit', marginBottom: '20px', fontWeight: 600 }}>
+                      <p style={{ fontSize: '14px', color: 'inherit', marginBottom: '12px', fontWeight: 600 }}>
                         Katinat - Quận 8
                       </p>
+                      <ReviewCategory style={{ background: 'linear-gradient(135deg, #FEF3C7, #FDE68A40)', padding: '14px 16px', borderRadius: '12px', border: '2px solid #F59E0B30', marginBottom: '16px' }}>
+                        <div className="category-label" style={{ fontSize: '15px', fontWeight: 700, color: '#B45309' }}>
+  
+                          {language === 'vi' ? '⭐ Đánh giá tổng quan' : '⭐ Overall Rating'}
+                        </div>
+                        {renderStars('overall')}
+                      </ReviewCategory>
                       <ReviewCategory>
                         <div className="category-label">
                           <Building2 />
@@ -1489,8 +1720,8 @@ const CandidateDashboard = () => {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={handleSubmitReview}
-                        style={{ opacity: (ratings.environment && ratings.attitude && ratings.accuracy) ? 1 : 0.5 }}
-                        disabled={!ratings.environment || !ratings.attitude || !ratings.accuracy}
+                        style={{ opacity: (ratings.overall && ratings.environment && ratings.attitude && ratings.accuracy) ? 1 : 0.5 }}
+                        disabled={!ratings.overall || !ratings.environment || !ratings.attitude || !ratings.accuracy}
                       >
                         <CheckCircle />
                         {language === 'vi' ? 'Gửi đánh giá' : 'Submit Review'}
@@ -1571,107 +1802,113 @@ const CandidateDashboard = () => {
 
         {/* Stats Overview moved to TopInfoRow */}
 
-        {/* Main Content Grid */}
-        <ContentGrid>
-          {/* Recommended Jobs */}
-          <Section
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <SectionHeader>
-              <h2>
-                <Target />
-                {language === 'vi' ? 'Việc Làm Phù Hợp Với Bạn' : 'Recommended Jobs'}
-              </h2>
-              <Link to="/candidate/jobs">
-                {language === 'vi' ? 'Xem tất cả' : 'View all'}
-                <ArrowUpRight />
-              </Link>
-            </SectionHeader>
-            
-            <JobsGrid>
-              {recommendedJobs.map((job, index) => (
-                <RecommendedJobCard
-                  key={job.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 + index * 0.1 }}
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <JobHeader>
-                    <CompanyLogo>
-                      {job.company.charAt(0)}
-                    </CompanyLogo>
-                    <JobInfo>
-                      <h4>{translateJobTitle(job.title)}</h4>
-                      <p>{job.company}</p>
-                    </JobInfo>
-                  </JobHeader>
-                  <JobDetails>
-                    <span>
-                      <MapPin />
-                      {translateLocation(job.location)}
-                    </span>
-                    <span>
-                      <DollarSign />
-                      {translateSalary(job.salary)}
-                    </span>
-                    <span>
-                      <Clock />
-                      {translatePostedAt(job.postedAt)}
-                    </span>
-                  </JobDetails>
-                  <JobTags>
-                    {job.tags.map((tag, idx) => (
-                      <span key={idx}>{translateTag(tag)}</span>
-                    ))}
-                  </JobTags>
-                </RecommendedJobCard>
-              ))}
-            </JobsGrid>
-          </Section>
-
-          {/* Activity Feed */}
-          <Section
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            <SectionHeader>
-              <h2>
-                <Bell />
-                {language === 'vi' ? 'Hoạt Động' : 'Activity'}
-              </h2>
-            </SectionHeader>
-            
-            <ActivityFeed>
-              {activities.map((activity, index) => {
-                const IconComponent = activity.icon;
-                return (
-                  <ActivityItem
-                    key={index}
-                    $color={activity.color}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5 + index * 0.1 }}
-                  >
-                    <ActivityIcon $color={activity.color}>
-                      <IconComponent />
-                    </ActivityIcon>
-                    <ActivityContent>
-                      <h5>{activity.title}</h5>
-                      <p>{activity.time}</p>
-                    </ActivityContent>
-                  </ActivityItem>
-                );
-              })}
-            </ActivityFeed>
-          </Section>
-        </ContentGrid>
+        {/* Recommended Jobs - Full Width */}
+        <Section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <SectionHeader>
+            <h2>
+              <Target />
+              {language === 'vi' ? 'Việc Làm Phù Hợp Với Bạn' : 'Recommended Jobs'}
+            </h2>
+            <Link to="/candidate/jobs">
+              {language === 'vi' ? 'Xem tất cả' : 'View all'}
+              <ArrowUpRight />
+            </Link>
+          </SectionHeader>
+          
+          <JobsGrid>
+            {recommendedJobs.map((job, index) => (
+              <RecommendedJobCard
+                key={job.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 + index * 0.1 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <JobHeader>
+                  <CompanyLogo>
+                    {job.company.charAt(0)}
+                  </CompanyLogo>
+                  <JobInfo>
+                    <h4>{translateJobTitle(job.title)}</h4>
+                    <p>{job.company}</p>
+                  </JobInfo>
+                </JobHeader>
+                <JobDetails>
+                  <span>
+                    <MapPin />
+                    {translateLocation(job.location)}
+                  </span>
+                  <span>
+                    <DollarSign />
+                    {translateSalary(job.salary)}
+                  </span>
+                  <span>
+                    <Clock />
+                    {translatePostedAt(job.postedAt)}
+                  </span>
+                </JobDetails>
+                <JobTags>
+                  {job.tags.map((tag, idx) => (
+                    <span key={idx}>{translateTag(tag)}</span>
+                  ))}
+                </JobTags>
+              </RecommendedJobCard>
+            ))}
+          </JobsGrid>
+        </Section>
 
       </DashboardContainer>
     </DashboardLayout>
+
+      {/* Katinat Chat Bubble */}
+      <ChatBubbleBtn
+        onClick={openChat}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        style={{ position: 'fixed', bottom: '32px', right: '32px', zIndex: 1000, cursor: 'pointer' }}
+      >
+        <img src="/OpPoReview/images/katinatlogo.jpg" alt="Katinat" draggable="false" />
+        <UnreadDot $show={hasUnread} />
+      </ChatBubbleBtn>
+
+      {chatOpen && (
+        <ChatWindow>
+          <ChatHeader>
+            <img src="/OpPoReview/images/katinatlogo.jpg" alt="Katinat" />
+            <div className="info">
+              <h4>Katinat Quận 8</h4>
+              <p><span className="dot" /> Đang hoạt động</p>
+            </div>
+            <div className="actions">
+              <button onClick={() => setChatOpen(false)}><ChevronDown /></button>
+              <button onClick={() => setChatOpen(false)}><X /></button>
+            </div>
+          </ChatHeader>
+          <ChatMessages>
+            {chatMessages.map(msg => (
+              <ChatMsg key={msg.id} $mine={msg.mine}>
+                <div className="bubble">{msg.text}</div>
+                <span className="time">{msg.time}</span>
+              </ChatMsg>
+            ))}
+          </ChatMessages>
+          <ChatInputRow>
+            <input
+              type="text"
+              placeholder="Nhắn tin cho Katinat Quận 8..."
+              value={chatInput}
+              onChange={e => setChatInput(e.target.value)}
+              onKeyPress={e => e.key === 'Enter' && sendChatMessage()}
+            />
+            <button onClick={sendChatMessage}><Send /></button>
+          </ChatInputRow>
+        </ChatWindow>
+      )}
+    </>
   );
 };
 

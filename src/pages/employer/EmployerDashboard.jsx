@@ -468,36 +468,7 @@ const EmployerDashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language]);
 
-  const getActivities = () => [
-    {
-      type: 'application',
-      icon: Users,
-      color: '#1e40af',
-      title: language === 'vi' ? '3 ứng viên mới ứng tuyển' : '3 new candidates applied',
-      time: language === 'vi' ? '30 phút trước' : '30 minutes ago'
-    },
-    {
-      type: 'job',
-      icon: Briefcase,
-      color: '#10B981',
-      title: language === 'vi' ? 'Tin "Cửa hàng trưởng" đã được duyệt' : 'Job "Store Manager" approved',
-      time: language === 'vi' ? '2 giờ trước' : '2 hours ago'
-    },
-    {
-      type: 'hired',
-      icon: CheckCircle,
-      color: '#10B981',
-      title: language === 'vi' ? 'Đã tuyển thành công "Thu ngân"' : 'Successfully hired "Cashier"',
-      time: language === 'vi' ? '1 ngày trước' : '1 day ago'
-    },
-  ];
 
-  const [activities, setActivities] = useState(getActivities());
-  
-  useEffect(() => {
-    setActivities(getActivities());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [language]);
 
   const getGreeting = () => {
     const hour = currentTime.getHours();

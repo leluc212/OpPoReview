@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
@@ -288,11 +289,13 @@ const StatusBadge = styled.span`
   background: ${props => {
     if (props.$status === 'success') return '#dcfce7';
     if (props.$status === 'danger') return '#fee2e2';
+    if (props.$status === 'info') return '#dbeafe';
     return '#fef3c7';
   }};
   color: ${props => {
     if (props.$status === 'success') return '#15803d';
     if (props.$status === 'danger') return '#dc2626';
+    if (props.$status === 'info') return '#2563eb';
     return '#ca8a04';
   }};
 `;
@@ -609,6 +612,7 @@ const ActivityTime = styled.div`
 
 const CandidatesManagement = () => {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -616,88 +620,63 @@ const CandidatesManagement = () => {
   const candidates = [
     { 
       id: 1,
-      name: 'Nguyễn Văn A', 
-      email: 'nguyenvana@example.com', 
+      name: 'Mai Thanh Tuấn', 
+      email: 'Tuanmaytinh@gmail.com', 
       ekycVerified: true,
       approvalStatus: 'approved',
-      joined: '2024-03-05',
-      reviewDate: '2024-03-15',
+      joined: '2026-03-05',
+      reviewDate: '2026-03-15',
     },
     { 
       id: 2,
-      name: 'Trần Thị B', 
-      email: 'tranthib@example.com', 
+      name: 'Trần Thị Thu Chi', 
+      email: 'thuchi12795@gmail.com', 
       ekycVerified: true,
       approvalStatus: 'pending',
-      joined: '2024-03-04',
-      reviewDate: '2024-03-12',
+      joined: '2026-03-04',
+      reviewDate: '2026-03-12',
     },
     { 
       id: 3,
-      name: 'Lê Văn C', 
-      email: 'levanc@example.com', 
+      name: 'Ngô Thanh Sơn', 
+      email: 'Alibaba05623@gmail.com', 
       ekycVerified: false,
       approvalStatus: 'pending',
-      joined: '2024-03-03',
+      joined: '2026-03-03',
       reviewDate: null,
     },
     { 
       id: 4,
-      name: 'Phạm Thị D', 
-      email: 'phamthid@example.com', 
+      name: 'Phạm Thị Thu Thao', 
+      email: 'thuthao123@gmail.com', 
       ekycVerified: true,
       approvalStatus: 'approved',
-      joined: '2024-03-02',
-      reviewDate: '2024-03-08',
+      joined: '2026-03-02',
+      reviewDate: '2026-03-08',
     },
     { 
       id: 5,
-      name: 'Hoàng Văn E', 
-      email: 'hoangvane@example.com', 
+      name: 'Hoàng Yến Vy', 
+      email: 'dori.hyv@gmail.com', 
       ekycVerified: false,
       approvalStatus: 'rejected',
-      joined: '2024-03-01',
-      reviewDate: '2024-03-06',
-    },
-    { 
-      id: 6,
-      name: 'Vũ Thị F', 
-      email: 'vuthif@example.com', 
-      ekycVerified: true,
-      approvalStatus: 'approved',
-      joined: '2024-02-28',
-      reviewDate: '2024-03-05',
-    },
-    { 
-      id: 7,
-      name: 'Đặng Văn G', 
-      email: 'dangvang@example.com', 
-      ekycVerified: true,
-      approvalStatus: 'pending',
-      joined: '2024-02-27',
-      reviewDate: null,
-    },
-    { 
-      id: 8,
-      name: 'Bùi Thị H', 
-      email: 'buithih@example.com', 
-      ekycVerified: false,
-      approvalStatus: 'pending',
-      joined: '2024-02-26',
-      reviewDate: null,
+      joined: '2026-03-01',
+      reviewDate: '2026-03-06',
     },
   ];
 
   const getApprovalStatusText = (status) => {
     if (status === 'approved') return language === 'vi' ? 'Đã duyệt' : 'Approved';
     if (status === 'rejected') return language === 'vi' ? 'Không duyệt' : 'Rejected';
-    if (status === 'pending') return language === 'vi' ? 'Chờ duyệt' : 'Pending';
+    if (status === 'unseen') return language === 'vi' ? 'Chưa xem' : 'Not Viewed';
+    if (status === 'seen') return language === 'vi' ? 'Đã xem' : 'Viewed';
     return status;
   };
 
   const getApprovalStatusVariant = (status) => {
     if (status === 'approved') return 'success';
     if (status === 'rejected') return 'danger';
+    if (status === 'seen') return 'info';
     return 'warning';
   };
 
@@ -711,45 +690,10 @@ const CandidatesManagement = () => {
   const stats = {
     total: filteredCandidates.length,
     approved: filteredCandidates.filter(c => c.approvalStatus === 'approved').length,
-    pending: filteredCandidates.filter(c => c.approvalStatus === 'pending').length,
+    unseen: filteredCandidates.filter(c => c.approvalStatus === 'unseen').length,
+    seen: filteredCandidates.filter(c => c.approvalStatus === 'seen').length,
     rejected: filteredCandidates.filter(c => c.approvalStatus === 'rejected').length,
   };
-
-  // Urgent jobs data
-  const urgentJobsData = {
-    total: 28,
-    change: '+47',
-    commission: '18,5 triệu VND',
-    commissionRate: '15%'
-  };
-
-  // Boost packages data
-  const boostPackages = [
-    { name: 'Quick Boost', count: 16, icon: Zap, color: '#3b82f6', bgColor: '#dbeafe' },
-    { name: 'Spongit Banner', count: 6, icon: Target, color: '#8b5cf6', bgColor: '#ede9fe' },
-    { name: 'Hot Search', count: 9, icon: Flame, color: '#ef4444', bgColor: '#fee2e2' },
-    { name: 'Top Spotlight', count: 4, icon: Star, color: '#f59e0b', bgColor: '#fef3c7' },
-  ];
-
-  // Chart data for platform activity
-  const chartData = [
-    { day: 'T2', registrations: 25, applications: 18 },
-    { day: 'T3', registrations: 28, applications: 20 },
-    { day: 'T4', registrations: 32, applications: 24 },
-    { day: 'T5', registrations: 35, applications: 28 },
-    { day: 'T6', registrations: 38, applications: 30 },
-    { day: 'T7', registrations: 42, applications: 35 },
-    { day: 'CN', registrations: 40, applications: 32 },
-  ];
-
-  const maxValue = Math.max(...chartData.flatMap(d => [d.registrations, d.applications]));
-
-  // Recent activity data
-  const recentActivity = [
-    { user: 'Abc', action: language === 'vi' ? 'Đăng ký tài khoản dùng' : 'Account registration', time: language === 'vi' ? '30 phút trước' : '30 min ago' },
-    { user: 'xyz', action: language === 'vi' ? 'Ứng tuyển Bartender' : 'Applied for Bartender', time: language === 'vi' ? '1 giờ trước' : '1 hour ago' },
-    { user: 'Design Inc.', action: language === 'vi' ? 'Đăng tin tuyển dụng' : 'Posted job listing', time: language === 'vi' ? '3 giờ trước' : '3 hours ago' },
-  ];
 
   return (
     <DashboardLayout role="admin" key={language}>
@@ -773,10 +717,16 @@ const CandidatesManagement = () => {
             color="linear-gradient(135deg, #10b981 0%, #059669 100%)"
           />
           <StatsCard
-            title={language === 'vi' ? 'Chờ Duyệt' : 'Pending'}
-            value={stats.pending.toString()}
+            title={language === 'vi' ? 'Chưa Xem' : 'Not Viewed'}
+            value={stats.unseen.toString()}
             icon={Clock}
             color="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
+          />
+          <StatsCard
+            title={language === 'vi' ? 'Đã Xem' : 'Viewed'}
+            value={stats.seen.toString()}
+            icon={Eye}
+            color="linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
           />
           <StatsCard
             title={language === 'vi' ? 'Không Duyệt' : 'Rejected'}
@@ -785,143 +735,6 @@ const CandidatesManagement = () => {
             color="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
           />
         </StatsGrid>
-
-        <OverviewSection>
-          <InfoCard>
-            <CardHeader $color="#f59e0b">
-              <Briefcase />
-              <h3>{language === 'vi' ? 'Bài Tuyển Gấp' : 'Urgent Jobs'}</h3>
-            </CardHeader>
-            <UrgentJobsBox>
-              <UrgentJobsTitle>
-                {urgentJobsData.total} {language === 'vi' ? 'Tin tuyển gấp' : 'Urgent jobs'}
-                <span style={{ fontSize: '16px', color: '#15803d' }}>{urgentJobsData.change}</span>
-              </UrgentJobsTitle>
-              <UrgentJobsSubtitle>
-                {language === 'vi' ? 'Hoa Hồng' : 'Commission'} {urgentJobsData.commissionRate}: {urgentJobsData.commission}
-              </UrgentJobsSubtitle>
-            </UrgentJobsBox>
-          </InfoCard>
-
-          <InfoCard>
-            <CardHeader $color="#8b5cf6">
-              <Zap />
-              <h3>{language === 'vi' ? 'Gói Boost' : 'Boost Packages'}</h3>
-            </CardHeader>
-            <BoostGrid>
-              {boostPackages.map((pkg, index) => (
-                <BoostItem key={index} $bgColor={pkg.bgColor}>
-                  <BoostInfo>
-                    <BoostIcon $color={pkg.color}>
-                      <pkg.icon />
-                    </BoostIcon>
-                    <BoostLabel>{pkg.name}</BoostLabel>
-                  </BoostInfo>
-                  <BoostValue>{pkg.count} {language === 'vi' ? 'Tin' : 'Jobs'}</BoostValue>
-                </BoostItem>
-              ))}
-            </BoostGrid>
-          </InfoCard>
-        </OverviewSection>
-
-        <OverviewSection>
-          <InfoCard>
-            <CardHeader $color="#3b82f6">
-              <TrendingUp />
-              <h3>{language === 'vi' ? 'Hoạt Động Nền Tảng' : 'Platform Activity'}</h3>
-            </CardHeader>
-            <ChartContainer>
-              <ChartSVG viewBox="0 0 700 280">
-                {/* Grid lines */}
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <line
-                    key={i}
-                    x1="50"
-                    y1={40 + i * 50}
-                    x2="650"
-                    y2={40 + i * 50}
-                    stroke="#e5e7eb"
-                    strokeWidth="1"
-                  />
-                ))}
-                
-                {/* Registrations line */}
-                <polyline
-                  points={chartData.map((d, i) => 
-                    `${100 + i * 90},${240 - (d.registrations / maxValue) * 180}`
-                  ).join(' ')}
-                  fill="none"
-                  stroke="#3b82f6"
-                  strokeWidth="3"
-                />
-                
-                {/* Applications line */}
-                <polyline
-                  points={chartData.map((d, i) => 
-                    `${100 + i * 90},${240 - (d.applications / maxValue) * 180}`
-                  ).join(' ')}
-                  fill="none"
-                  stroke="#10b981"
-                  strokeWidth="3"
-                />
-                
-                {/* Data points */}
-                {chartData.map((d, i) => (
-                  <g key={i}>
-                    <circle
-                      cx={100 + i * 90}
-                      cy={240 - (d.registrations / maxValue) * 180}
-                      r="5"
-                      fill="#3b82f6"
-                    />
-                    <circle
-                      cx={100 + i * 90}
-                      cy={240 - (d.applications / maxValue) * 180}
-                      r="5"
-                      fill="#10b981"
-                    />
-                    <text
-                      x={100 + i * 90}
-                      y="265"
-                      textAnchor="middle"
-                      fontSize="13"
-                      fill="#6b7280"
-                      fontWeight="600"
-                    >
-                      {d.day}
-                    </text>
-                  </g>
-                ))}
-              </ChartSVG>
-            </ChartContainer>
-            <ChartLegend>
-              <LegendItem>
-                <LegendDot $color="#3b82f6" />
-                {language === 'vi' ? 'Tin Tuyển Dụng' : 'Job Postings'}
-              </LegendItem>
-              <LegendItem>
-                <LegendDot $color="#10b981" />
-                {language === 'vi' ? 'Ứng Tuyển' : 'Applications'}
-              </LegendItem>
-            </ChartLegend>
-          </InfoCard>
-
-          <InfoCard>
-            <CardHeader $color="#10b981">
-              <Clock />
-              <h3>{language === 'vi' ? 'Hoạt Động Gần Đây' : 'Recent Activity'}</h3>
-            </CardHeader>
-            <ActivityTable>
-              {recentActivity.map((activity, index) => (
-                <ActivityRow key={index}>
-                  <ActivityUser>{activity.user}</ActivityUser>
-                  <ActivityAction>{activity.action}</ActivityAction>
-                  <ActivityTime>{activity.time}</ActivityTime>
-                </ActivityRow>
-              ))}
-            </ActivityTable>
-          </InfoCard>
-        </OverviewSection>
 
         <FilterSection>
           <SearchBox>
@@ -949,10 +762,16 @@ const CandidatesManagement = () => {
               {language === 'vi' ? 'Đã duyệt' : 'Approved'}
             </FilterButton>
             <FilterButton
-              $active={statusFilter === 'pending'}
-              onClick={() => setStatusFilter('pending')}
+              $active={statusFilter === 'unseen'}
+              onClick={() => setStatusFilter('unseen')}
             >
-              {language === 'vi' ? 'Chờ duyệt' : 'Pending'}
+              {language === 'vi' ? 'Chưa xem' : 'Not Viewed'}
+            </FilterButton>
+            <FilterButton
+              $active={statusFilter === 'seen'}
+              onClick={() => setStatusFilter('seen')}
+            >
+              {language === 'vi' ? 'Đã xem' : 'Viewed'}
             </FilterButton>
             <FilterButton
               $active={statusFilter === 'rejected'}
@@ -978,7 +797,11 @@ const CandidatesManagement = () => {
             </thead>
             <tbody>
               {filteredCandidates.map((candidate) => (
-                <tr key={candidate.id}>
+                <tr 
+                  key={candidate.id} 
+                  onClick={() => navigate(`/admin/candidates/${candidate.id}`)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <td style={{ fontWeight: 600 }}>{candidate.name}</td>
                   <td>{candidate.email}</td>
                   <td>
@@ -1013,9 +836,12 @@ const CandidatesManagement = () => {
                       </span>
                     )}
                   </td>
-                  <td>
+                  <td onClick={(e) => e.stopPropagation()}>
                     <ActionButtons>
-                      <ActionButton $variant="view">
+                      <ActionButton 
+                        $variant="view"
+                        onClick={() => navigate(`/admin/candidates/${candidate.id}`)}
+                      >
                         <Eye />
                         {language === 'vi' ? 'Xem' : 'View'}
                       </ActionButton>
@@ -1036,3 +862,4 @@ const CandidatesManagement = () => {
 };
 
 export default CandidatesManagement;
+

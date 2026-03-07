@@ -503,13 +503,13 @@ const PostsManagement = () => {
       employer: 'Quán lẩu 88',
       employerEmail: 'contact@lau88.vn',
       employerPhone: '0904567890',
-      postDate: '2024-01-10',
-      endDate: '2024-07-10',
+      postDate: '2025-01-10',
+      endDate: '2025-07-10',
       applications: 34,
       cvSent: 28,
       status: 'warning',
       candidates: [
-        { name: 'Ngô Văn I', email: 'ngovani@example.com', phone: '0990123456', appliedDate: '2024-01-11', status: 'pending' },
+        { name: 'Ngô Văn I', email: 'ngovani@example.com', phone: '0990123456', appliedDate: '2025-01-11', status: 'pending' },
       ]
     },
     {
@@ -518,13 +518,13 @@ const PostsManagement = () => {
       employer: 'Nhà hàng cưới Victory',
       employerEmail: 'hr@victory.vn',
       employerPhone: '0905678901',
-      postDate: '2024-01-25',
-      endDate: '2024-05-25',
+      postDate: '2025-01-25',
+      endDate: '2025-05-25',
       applications: 23,
       cvSent: 19,
       status: 'rejected',
       candidates: [
-        { name: 'Đinh Thị K', email: 'dinhthik@example.com', phone: '0901234567', appliedDate: '2024-01-26', status: 'rejected' },
+        { name: 'Đinh Thị K', email: 'dinhthik@example.com', phone: '0901234567', appliedDate: '2025-01-26', status: 'rejected' },
       ]
     },
   ]);
@@ -537,15 +537,15 @@ const PostsManagement = () => {
       employer: 'Công ty tổ chức sự kiện MNO',
       employerEmail: 'hr@mno.vn',
       employerPhone: '0906789012',
-      postDate: '2024-02-10',
-      endDate: '2024-02-15',
+      postDate: '2025-02-10',
+      endDate: '2025-02-15',
       applications: 156,
       cvSent: 98,
       status: 'approved',
       candidates: [
-        { name: 'Trương Văn L', email: 'truongvanl@example.com', phone: '0912345678', appliedDate: '2024-02-10', status: 'approved' },
-        { name: 'Lý Thị M', email: 'lythim@example.com', phone: '0923456789', appliedDate: '2024-02-10', status: 'approved' },
-        { name: 'Mai Văn N', email: 'maivann@example.com', phone: '0934567890', appliedDate: '2024-02-11', status: 'pending' },
+        { name: 'Trương Văn L', email: 'truongvanl@example.com', phone: '0912345678', appliedDate: '2025-02-10', status: 'approved' },
+        { name: 'Lý Thị M', email: 'lythim@example.com', phone: '0923456789', appliedDate: '2025-02-10', status: 'approved' },
+        { name: 'Mai Văn N', email: 'maivann@example.com', phone: '0934567890', appliedDate: '2025-02-11', status: 'pending' },
       ]
     },
     {
@@ -554,14 +554,14 @@ const PostsManagement = () => {
       employer: 'Công ty vận tải PQR',
       employerEmail: 'recruit@pqr.vn',
       employerPhone: '0907890123',
-      postDate: '2024-02-12',
-      endDate: '2024-02-14',
+      postDate: '2025-02-12',
+      endDate: '2025-02-14',
       applications: 78,
       cvSent: 65,
       status: 'pending',
       candidates: [
-        { name: 'Cao Văn O', email: 'caovano@example.com', phone: '0945678901', appliedDate: '2024-02-12', status: 'pending' },
-        { name: 'Tô Thị P', email: 'tothip@example.com', phone: '0956789012', appliedDate: '2024-02-12', status: 'pending' },
+        { name: 'Cao Văn O', email: 'caovano@example.com', phone: '0945678901', appliedDate: '2025-02-12', status: 'pending' },
+        { name: 'Tô Thị P', email: 'tothip@example.com', phone: '0956789012', appliedDate: '2025-02-12', status: 'pending' },
       ]
     },
     {
@@ -570,16 +570,16 @@ const PostsManagement = () => {
       employer: 'Siêu thị STU',
       employerEmail: 'hr@stu.vn',
       employerPhone: '0908901234',
-      postDate: '2024-02-11',
-      endDate: '2024-02-13',
+      postDate: '2025-02-11',
+      endDate: '2025-02-13',
       applications: 234,
       cvSent: 187,
       status: 'approved',
       candidates: [
-        { name: 'Hồ Văn Q', email: 'hovanq@example.com', phone: '0967890123', appliedDate: '2024-02-11', status: 'approved' },
-        { name: 'Dương Thị R', email: 'duongthir@example.com', phone: '0978901234', appliedDate: '2024-02-11', status: 'approved' },
-        { name: 'Lâm Văn S', email: 'lamvans@example.com', phone: '0989012345', appliedDate: '2024-02-11', status: 'approved' },
-        { name: 'Võ Thị T', email: 'vothit@example.com', phone: '0990123456', appliedDate: '2024-02-12', status: 'pending' },
+        { name: 'Hồ Văn Q', email: 'hovanq@example.com', phone: '0967890123', appliedDate: '2025-02-11', status: 'approved' },
+        { name: 'Dương Thị R', email: 'duongthir@example.com', phone: '0978901234', appliedDate: '2025-02-11', status: 'approved' },
+        { name: 'Lâm Văn S', email: 'lamvans@example.com', phone: '0989012345', appliedDate: '2025-02-11', status: 'approved' },
+        { name: 'Võ Thị T', email: 'vothit@example.com', phone: '0990123456', appliedDate: '2025-02-12', status: 'pending' },
       ]
     },
     {
@@ -588,14 +588,14 @@ const PostsManagement = () => {
       employer: 'Công ty giao hàng VWX',
       employerEmail: 'contact@vwx.vn',
       employerPhone: '0909012345',
-      postDate: '2024-02-09',
-      endDate: '2024-02-12',
+      postDate: '2025-02-09',
+      endDate: '2025-02-12',
       applications: 145,
       cvSent: 112,
       status: 'warning',
       candidates: [
-        { name: 'Phan Văn U', email: 'phanvanu@example.com', phone: '0901234567', appliedDate: '2024-02-09', status: 'pending' },
-        { name: 'Đặng Thị V', email: 'dangthiv@example.com', phone: '0912345678', appliedDate: '2024-02-09', status: 'approved' },
+        { name: 'Phan Văn U', email: 'phanvanu@example.com', phone: '0901234567', appliedDate: '2025-02-09', status: 'pending' },
+        { name: 'Đặng Thị V', email: 'dangthiv@example.com', phone: '0912345678', appliedDate: '2025-02-09', status: 'approved' },
       ]
     },
     {
@@ -604,13 +604,13 @@ const PostsManagement = () => {
       employer: 'Công ty vệ sinh YZ',
       employerEmail: 'hr@yz.vn',
       employerPhone: '0910123456',
-      postDate: '2024-02-08',
-      endDate: '2024-02-11',
+      postDate: '2025-02-08',
+      endDate: '2025-02-11',
       applications: 56,
       cvSent: 43,
       status: 'rejected',
       candidates: [
-        { name: 'Tạ Văn W', email: 'tavanw@example.com', phone: '0923456789', appliedDate: '2024-02-08', status: 'rejected' },
+        { name: 'Tạ Văn W', email: 'tavanw@example.com', phone: '0923456789', appliedDate: '2025-02-08', status: 'rejected' },
       ]
     },
   ]);
@@ -1078,3 +1078,4 @@ const PostsManagement = () => {
 };
 
 export default PostsManagement;
+

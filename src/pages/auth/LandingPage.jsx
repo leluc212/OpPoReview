@@ -80,7 +80,7 @@ const ScrollContainer = styled.div`
 `;
 
 const Header = styled(motion.header)`
-  padding: 8px 90px;
+  padding: 0 90px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -100,16 +100,16 @@ const Header = styled(motion.header)`
   box-shadow: ${props => props.$isDark 
     ? '0 4px 24px rgba(0, 0, 0, 0.3)' 
     : '0 4px 24px #a4ddf8'};
-  min-height: 70px;
+  min-height: 56px;
   
   @media (max-width: 1024px) {
-    padding: 8px 40px;
-    min-height: 65px;
+    padding: 0 40px;
+    min-height: 52px;
   }
   
   @media (max-width: 768px) {
-    padding: 8px 16px;
-    min-height: 60px;
+    padding: 0 16px;
+    min-height: 48px;
   }
 `;
 
@@ -2802,13 +2802,16 @@ const LandingPage = () => {
       >
         <LeftSection>
           <Logo to="/">
-            <img src="/OpPoReview/images/logo.png" alt="Ốp Pờ" style={{ height: '60px', marginRight: '5px' }} />
+            <img src="/OpPoReview/images/logo.png" alt="Ốp Pờ" style={{ height: '42px', marginRight: '5px' }} />
            
           </Logo>
           <NavLinks $isDark={isDarkMode}>
-          <DropdownContainer ref={jobDropdownRef}>
+          <DropdownContainer
+            ref={jobDropdownRef}
+            onMouseEnter={() => setIsJobDropdownOpen(true)}
+            onMouseLeave={() => setIsJobDropdownOpen(false)}
+          >
             <DropdownButton
-              onClick={() => setIsJobDropdownOpen(!isJobDropdownOpen)}
               $isOpen={isJobDropdownOpen}
               $isDark={isDarkMode}
             >
@@ -2881,9 +2884,12 @@ const LandingPage = () => {
             )}
           </DropdownContainer>
           
-          <DropdownContainer ref={companyDropdownRef}>
+          <DropdownContainer
+            ref={companyDropdownRef}
+            onMouseEnter={() => setIsCompanyDropdownOpen(true)}
+            onMouseLeave={() => setIsCompanyDropdownOpen(false)}
+          >
             <DropdownButton
-              onClick={() => setIsCompanyDropdownOpen(!isCompanyDropdownOpen)}
               $isOpen={isCompanyDropdownOpen}
               $isDark={isDarkMode}
             >

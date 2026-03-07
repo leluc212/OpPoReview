@@ -30,6 +30,20 @@ const BadgeWrapper = styled.span`
     box-shadow: 0 2px 8px ${props.theme.colors.warning}20;
   `}
   
+  ${props => props.$status === 'unseen' && `
+    background: ${props.theme.colors.warningBg};
+    color: ${props.theme.colors.warning};
+    border: 2px solid ${props.theme.colors.warning}40;
+    box-shadow: 0 2px 8px ${props.theme.colors.warning}20;
+  `}
+  
+  ${props => props.$status === 'seen' && `
+    background: ${props.theme.colors.infoBg};
+    color: ${props.theme.colors.info};
+    border: 2px solid ${props.theme.colors.info}40;
+    box-shadow: 0 2px 8px ${props.theme.colors.info}20;
+  `}
+  
   ${props => props.$status === 'approved' && `
     background: ${props.theme.colors.successBg};
     color: ${props.theme.colors.success};
@@ -118,6 +132,8 @@ const StatusBadge = ({ status, showDot = true, children, size = 'md' }) => {
   const statusText = {
     vi: {
       'pending': 'Chờ duyệt',
+      'unseen': 'Chưa xem',
+      'seen': 'Đã xem',
       'approved': 'Chấp nhận',
       'rejected': 'Từ chối',
       'reviewed': 'Đã xem',
@@ -131,6 +147,8 @@ const StatusBadge = ({ status, showDot = true, children, size = 'md' }) => {
     },
     en: {
       'pending': 'Pending',
+      'unseen': 'Not Viewed',
+      'seen': 'Viewed',
       'approved': 'Approved',
       'rejected': 'Rejected',
       'reviewed': 'Reviewed',
