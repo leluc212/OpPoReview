@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
-import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Trash2, Eye, CheckCircle, Send, Search, Calendar, DollarSign, Newspaper, TrendingUp, AlertCircle, User, Plus, X, Wallet } from 'lucide-react';
+import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Trash2, Eye, CheckCircle, Send, Search, Calendar, DollarSign, Newspaper, TrendingUp, AlertCircle, User, Plus, X, Wallet, Save } from 'lucide-react';
+import Modal from '../../components/Modal';
 
 // Mock HR Staff Data
 const getHRStaff = (language) => [
@@ -1231,6 +1232,9 @@ const HRManagement = () => {
   const [deleteJobId, setDeleteJobId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [selectedJobView, setSelectedJobView] = useState(null);
+  const [editJobId, setEditJobId] = useState(null);
+  const [editJobData, setEditJobData] = useState(null);
 
   // Mock wallet connection status - in real app, get from user context or API
   const [isWalletConnected] = useState(() => {
@@ -1406,6 +1410,53 @@ const HRManagement = () => {
 
   // Get job title for delete confirmation
   const jobToDelete = deleteJobId ? quickJobPosts.find(job => job.id === deleteJobId) : null;
+
+  // View job details
+  const handleViewJob = (jobId) => {
+    const job = quickJobPosts.find(j => j.id === jobId);
+    if (job) setSelectedJobView(job);
+  };
+
+  // Edit job
+  const handleEditJob = (jobId) => {
+    const job = quickJobPosts.find(j => j.id === jobId);
+    if (job) {
+      setEditJobId(jobId);
+      setEditJobData({ ...job });
+    }
+  };
+
+  // Save edited job
+  const handleSaveEdit = () => {
+    if (!editJobData) return;
+
+    const savedJobs = localStorage.getItem('quickJobs');
+    if (savedJobs) {
+      try {
+        const jobs = JSON.parse(savedJobs);
+        const updatedJobs = jobs.map(job => 
+          job.id === editJobId ? { ...job, ...editJobData } : job
+        );
+        localStorage.setItem('quickJobs', JSON.stringify(updatedJobs));
+        loadJobsFromLocalStorage();
+        
+        // Show success toast
+        setShowSuccessToast(true);
+        setTimeout(() => setShowSuccessToast(false), 3000);
+        
+        setEditJobId(null);
+        setEditJobData(null);
+      } catch (e) {
+        console.error('Error updating job:', e);
+      }
+    }
+  };
+
+  // Cancel edit
+  const handleCancelEdit = () => {
+    setEditJobId(null);
+    setEditJobData(null);
+  };
 
   // Reload jobs when page becomes visible
   useEffect(() => {
@@ -1662,6 +1713,7 @@ const HRManagement = () => {
                     <QuickJobPostButton
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
+                      onClick={() => handleViewJob(post.id)}
                     >
                       <Eye />{language === 'vi' ? 'Xem' : 'View'}
                     </QuickJobPostButton>
@@ -1669,6 +1721,7 @@ const HRManagement = () => {
                       $variant="primary"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
+                      onClick={() => handleEditJob(post.id)}
                     >
                       <Edit />{language === 'vi' ? 'Sửa' : 'Edit'}
                     </QuickJobPostButton>
@@ -1945,10 +1998,190 @@ const HRManagement = () => {
               exit={{ opacity: 0, x: 100 }}
             >
               <CheckCircle />
-              {language === 'vi' ? 'Đã xóa bài đăng thành công!' : 'Post deleted successfully!'}
+              {language === 'vi' ? (editJobId ? 'Đã cập nhật bài đăng!' : 'Đã xóa bài đăng thành công!') : (editJobId ? 'Post updated!' : 'Post deleted successfully!')}
             </SuccessToast>
           )}
         </AnimatePresence>
+
+        {/* View Job Modal */}
+        {selectedJobView && (
+          <Modal
+            isOpen={true}
+            onClose={() => setSelectedJobView(null)}
+            title={language === 'vi' ? 'Chi tiết bài đăng' : 'Job Post Details'}
+            size="large"
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div>
+                <h3 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '16px', color: '#1e293b' }}>
+                  {selectedJobView.title}
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '20px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
+                    <MapPin size={16} />
+                    <span>{selectedJobView.location}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
+                    <DollarSign size={16} />
+                    <span>{selectedJobView.salary}</span>
+                  </div>
+                  {selectedJobView.shift && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
+                      <Clock size={16} />
+                      <span>{selectedJobView.shift}</span>
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
+                    <Calendar size={16} />
+                    <span>{selectedJobView.deadline}</span>
+                  </div>
+                  {selectedJobView.contactPhone && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
+                      <Phone size={16} />
+                      <span>{selectedJobView.contactPhone}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {selectedJobView.description && (
+                <div>
+                  <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: '#334155' }}>
+                    {language === 'vi' ? 'Mô tả công việc' : 'Job Description'}
+                  </h4>
+                  <p style={{ fontSize: '14px', lineHeight: '1.7', color: '#64748b', whiteSpace: 'pre-wrap' }}>
+                    {selectedJobView.description}
+                  </p>
+                </div>
+              )}
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', padding: '20px', background: '#f8fafc', borderRadius: '12px' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '24px', fontWeight: '700', color: '#1e40af', marginBottom: '4px' }}>
+                    {selectedJobView.applicants}
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#64748b' }}>
+                    {language === 'vi' ? 'Ứng viên' : 'Applicants'}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '24px', fontWeight: '700', color: '#1e40af', marginBottom: '4px' }}>
+                    {selectedJobView.views}
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#64748b' }}>
+                    {language === 'vi' ? 'Lượt xem' : 'Views'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Modal>
+        )}
+
+        {/* Edit Job Modal */}
+        {editJobId && editJobData && (
+          <Modal
+            isOpen={true}
+            onClose={handleCancelEdit}
+            title={language === 'vi' ? 'Chỉnh sửa bài đăng' : 'Edit Job Post'}
+            size="large"
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
+                  {language === 'vi' ? 'Tiêu đề' : 'Title'}
+                </label>
+                <input
+                  type="text"
+                  value={editJobData.title || ''}
+                  onChange={(e) => setEditJobData({ ...editJobData, title: e.target.value })}
+                  style={{ width: '100%', padding: '12px 16px', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '14px' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
+                    {language === 'vi' ? 'Địa điểm' : 'Location'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editJobData.location || ''}
+                    onChange={(e) => setEditJobData({ ...editJobData, location: e.target.value })}
+                    style={{ width: '100%', padding: '12px 16px', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '14px' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
+                    {language === 'vi' ? 'Mức lương' : 'Salary'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editJobData.salary || ''}
+                    onChange={(e) => setEditJobData({ ...editJobData, salary: e.target.value })}
+                    style={{ width: '100%', padding: '12px 16px', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '14px' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
+                    {language === 'vi' ? 'Ca làm việc' : 'Shift'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editJobData.shift || ''}
+                    onChange={(e) => setEditJobData({ ...editJobData, shift: e.target.value })}
+                    style={{ width: '100%', padding: '12px 16px', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '14px' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
+                    {language === 'vi' ? 'Số điện thoại' : 'Phone'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editJobData.contactPhone || ''}
+                    onChange={(e) => setEditJobData({ ...editJobData, contactPhone: e.target.value })}
+                    style={{ width: '100%', padding: '12px 16px', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '14px' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
+                  {language === 'vi' ? 'Mô tả công việc' : 'Description'}
+                </label>
+                <textarea
+                  value={editJobData.description || ''}
+                  onChange={(e) => setEditJobData({ ...editJobData, description: e.target.value })}
+                  rows={6}
+                  style={{ width: '100%', padding: '12px 16px', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleCancelEdit}
+                  style={{ padding: '12px 24px', borderRadius: '12px', border: '2px solid #e2e8f0', background: 'white', color: '#334155', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}
+                >
+                  {language === 'vi' ? 'Hủy' : 'Cancel'}
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleSaveEdit}
+                  style={{ padding: '12px 24px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)', color: 'white', fontSize: '14px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                >
+                  <Save size={16} />
+                  {language === 'vi' ? 'Lưu thay đổi' : 'Save Changes'}
+                </motion.button>
+              </div>
+            </div>
+          </Modal>
+        )}
       </PageContainer>
     </DashboardLayout>
   );
