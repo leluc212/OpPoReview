@@ -286,11 +286,32 @@ const CompletionCard = styled(motion.div)`
   }
 `;
 
+const SuccessMessage = styled(motion.div)`
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+
+  svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+`;
+
 const CompanyVerification = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState([]);
+  const [uploadSuccess, setUploadSuccess] = useState(null); // Track which file was uploaded
   
   const [step1Data, setStep1Data] = useState({
     businessLicense: null,
@@ -410,6 +431,10 @@ const CompanyVerification = () => {
       } else if (step === 2) {
         setStep3Data({ ...step3Data, [field]: compressedDataUrl });
       }
+      
+      // Show success message for this specific field
+      setUploadSuccess(field);
+      setTimeout(() => setUploadSuccess(null), 3000);
     } catch (error) {
       console.error('Error processing file:', error);
       alert('Lỗi khi xử lý file. Vui lòng thử lại với file có kích thước nhỏ hơn.');
@@ -537,7 +562,7 @@ const CompanyVerification = () => {
                 : 'Your company profile has been submitted successfully. We will review and approve within 24-48 hours. Once approved, you can start posting job listings.'}
             </p>
             <Button onClick={goToDashboard}>
-              {language === 'vi' ? 'Về Dashboard' : 'Go to Dashboard'}
+              {language === 'vi' ? 'Về trang chủ' : 'Go to Dashboard'}
             </Button>
           </CompletionCard>
         </VerificationContainer>
@@ -626,20 +651,32 @@ const CompanyVerification = () => {
                     onChange={(e) => handleFileUpload('businessLicense', e.target.files[0], 0)}
                   />
                 </FileUploadArea>
+                <AnimatePresence>
+                  {uploadSuccess === 'businessLicense' && (
+                    <SuccessMessage
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                    >
+                      <CheckCircle />
+                      {language === 'vi' ? 'Tải file thành công!' : 'File uploaded successfully!'}
+                    </SuccessMessage>
+                  )}
+                </AnimatePresence>
+              </FormGroup>
+
+              <FormGroup>
+                <Label>{language === 'vi' ? 'Số giấy phép' : 'License Number'} *</Label>
+                <Input
+                  type="text"
+                  value={step1Data.licenseNumber}
+                  onChange={(e) => setStep1Data({ ...step1Data, licenseNumber: e.target.value })}
+                  placeholder={language === 'vi' ? 'Nhập số giấy phép' : 'Enter license number'}
+                  required
+                />
               </FormGroup>
 
               <FormGrid>
-                <FormGroup>
-                  <Label>{language === 'vi' ? 'Số giấy phép' : 'License Number'} *</Label>
-                  <Input
-                    type="text"
-                    value={step1Data.licenseNumber}
-                    onChange={(e) => setStep1Data({ ...step1Data, licenseNumber: e.target.value })}
-                    placeholder={language === 'vi' ? 'Nhập số giấy phép' : 'Enter license number'}
-                    required
-                  />
-                </FormGroup>
-
                 <FormGroup>
                   <Label>{language === 'vi' ? 'Ngày cấp' : 'Issue Date'} *</Label>
                   <Input
@@ -658,23 +695,23 @@ const CompanyVerification = () => {
                     onChange={(e) => setStep1Data({ ...step1Data, expiryDate: e.target.value })}
                   />
                 </FormGroup>
-
-                <FormGroup>
-                  <Label>{language === 'vi' ? 'Cơ quan cấp' : 'Issuing Authority'} *</Label>
-                  <Input
-                    type="text"
-                    value={step1Data.issuingAuthority}
-                    onChange={(e) => setStep1Data({ ...step1Data, issuingAuthority: e.target.value })}
-                    placeholder={language === 'vi' ? 'VD: Sở KH&ĐT TP.HCM' : 'E.g.: Department of Planning and Investment'}
-                    required
-                  />
-                </FormGroup>
               </FormGrid>
+
+              <FormGroup>
+                <Label>{language === 'vi' ? 'Cơ quan cấp' : 'Issuing Authority'} *</Label>
+                <Input
+                  type="text"
+                  value={step1Data.issuingAuthority}
+                  onChange={(e) => setStep1Data({ ...step1Data, issuingAuthority: e.target.value })}
+                  placeholder={language === 'vi' ? 'VD: Sở KH&ĐT TP.HCM' : 'E.g.: Department of Planning and Investment'}
+                  required
+                />
+              </FormGroup>
 
               <ButtonGroup>
                 <Button $variant="secondary" onClick={() => navigate('/employer/dashboard')}>
                   <ArrowLeft size={18} />
-                  {language === 'vi' ? 'Về Dashboard' : 'Back to Dashboard'}
+                  {language === 'vi' ? 'Về trang chủ' : 'Back to Dashboard'}
                 </Button>
                 <Button $variant="primary" onClick={handleNext}>
                   {language === 'vi' ? 'Tiếp theo' : 'Next'}
@@ -889,6 +926,18 @@ const CompanyVerification = () => {
                     onChange={(e) => handleFileUpload('idFrontImage', e.target.files[0], 2)}
                   />
                 </FileUploadArea>
+                <AnimatePresence>
+                  {uploadSuccess === 'idFrontImage' && (
+                    <SuccessMessage
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                    >
+                      <CheckCircle />
+                      {language === 'vi' ? 'Tải ảnh thành công!' : 'Image uploaded successfully!'}
+                    </SuccessMessage>
+                  )}
+                </AnimatePresence>
               </FormGroup>
 
               <FormGroup>
@@ -911,6 +960,18 @@ const CompanyVerification = () => {
                     onChange={(e) => handleFileUpload('idBackImage', e.target.files[0], 2)}
                   />
                 </FileUploadArea>
+                <AnimatePresence>
+                  {uploadSuccess === 'idBackImage' && (
+                    <SuccessMessage
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                    >
+                      <CheckCircle />
+                      {language === 'vi' ? 'Tải ảnh thành công!' : 'Image uploaded successfully!'}
+                    </SuccessMessage>
+                  )}
+                </AnimatePresence>
               </FormGroup>
 
               <FormGroup>
@@ -933,6 +994,18 @@ const CompanyVerification = () => {
                     onChange={(e) => handleFileUpload('authorizationLetter', e.target.files[0], 2)}
                   />
                 </FileUploadArea>
+                <AnimatePresence>
+                  {uploadSuccess === 'authorizationLetter' && (
+                    <SuccessMessage
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                    >
+                      <CheckCircle />
+                      {language === 'vi' ? 'Tải file thành công!' : 'File uploaded successfully!'}
+                    </SuccessMessage>
+                  )}
+                </AnimatePresence>
               </FormGroup>
 
               <ButtonGroup>

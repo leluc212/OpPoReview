@@ -39,7 +39,7 @@ const getJobPosts = (language) => [
     id: 3,
     title: language === 'vi' ? 'Thu ngân' : 'Cashier',
     location: language === 'vi' ? 'Quận 7, TP.HCM' : 'District 7, HCMC',
-    salary: language === 'vi' ? '7-10 triệu' : '$280-400',
+    salary: language === 'vi' ? '50-70 nghìn/giờ' : '$6-9/hour',
     type: language === 'vi' ? 'Bán thời gian' : 'Part-time',
     applicants: 15,
     views: 203,
@@ -53,7 +53,7 @@ const getJobPosts = (language) => [
 const getInitialApplications = (language) => [
   {
     id: 1,
-    candidate: language === 'vi' ? 'Hiếu sàn' : 'Hieu san',
+    candidate: language === 'vi' ? 'Đỗ Hoàng Hiếu' : 'Do Hoang Hieu',
     job: language === 'vi' ? 'Cửa hàng trưởng' : 'Store Manager',
     applied: language === 'vi' ? '2 giờ trước' : '2 hours ago',
     status: 'pending',
@@ -74,7 +74,7 @@ const getInitialApplications = (language) => [
   },
   {
     id: 2,
-    candidate: language === 'vi' ? 'Duy sàn' : 'Duy san',
+    candidate: language === 'vi' ? 'Phạm Lê Duy' : 'Duy san',
     job: language === 'vi' ? 'Thu ngân' : 'Cashier',
     applied: language === 'vi' ? '5 giờ trước' : '5 hours ago',
     status: 'pending',
@@ -95,14 +95,14 @@ const getInitialApplications = (language) => [
   },
   {
     id: 3,
-    candidate: 'Nheo',
+    candidate: 'Trần Phương Tuấn',
     job: language === 'vi' ? 'Nhân viên pha chế' : 'Barista',
     applied: language === 'vi' ? '1 ngày trước' : '1 day ago',
     status: 'approved',
     completed: false,
     marked: false,
     messagesDeleted: false,
-    email: 'nheo@example.com',
+    email: 'Trần Phương Tuấn@example.com',
     phone: '0909 123 456',
     location: language === 'vi' ? 'Quận 7, TP.HCM' : 'District 7, HCMC',
     experience: language === 'vi' ? '3 năm' : '3 years',
@@ -116,14 +116,14 @@ const getInitialApplications = (language) => [
   },
   {
     id: 4,
-    candidate: 'Gemmin',
+    candidate: 'Lê Tấn Lực',
     job: language === 'vi' ? 'Giám sát ca' : 'Shift Supervisor',
     applied: language === 'vi' ? '2 ngày trước' : '2 days ago',
     status: 'rejected',
     completed: false,
     marked: false,
     messagesDeleted: false,
-    email: 'gemminseu@example.com',
+    email: 'Lê Tấn Lựcseu@example.com',
     phone: '0901 234 567',
     location: language === 'vi' ? 'Quận Tân Bình, TP.HCM' : 'Tan Binh Dist., HCMC',
     experience: language === 'vi' ? '4 năm' : '4 years',
@@ -136,14 +136,14 @@ const getInitialApplications = (language) => [
   },
   {
     id: 5,
-    candidate: 'Zun',
+    candidate: 'Lê Minh Khang',
     job: language === 'vi' ? 'Nhân viên phục vụ' : 'Waiter/Server',
     applied: language === 'vi' ? '1 tuần trước' : '1 week ago',
     status: 'pending',
     completed: false,
     marked: false,
     messagesDeleted: false,
-    email: 'zunseu@example.com',
+    email: 'Lê Minh Khangseu@example.com',
     phone: '0912 345 678',
     location: language === 'vi' ? 'Quận Gò Vấp, TP.HCM' : 'Go Vap Dist., HCMC',
     experience: language === 'vi' ? '1 năm' : '1 year',
@@ -475,6 +475,7 @@ const JobStatusBadge = styled.div`
   background: ${props => props.$status === 'active' ? '#D1FAE5' : '#F1F5F9'};
   color: ${props => props.$status === 'active' ? '#047857' : '#64748B'};
   border: 1px solid ${props => props.$status === 'active' ? '#10B981' : '#CBD5E1'};
+  white-space: nowrap;
 `;
 
 // --- Section Header for Posts ---
@@ -1315,27 +1316,10 @@ const ApplicationRow = React.memo(({
 
       <MetaChip><Clock />{app.applied}</MetaChip>
 
-      <StatusCol><StatusBadge status={currentStatus} /></StatusCol>
-
       <ActionsCol>
         <ActionButton onClick={() => onViewProfile(app)}>
           <Eye />{language === 'vi' ? 'Xem hồ sơ' : 'View'}
         </ActionButton>
-        {app.status === 'pending' && (
-          <>
-            <ActionButton $variant="success" onClick={() => onApprove(app.id)}>
-              <CheckCircle />{language === 'vi' ? 'Duyệt' : 'Approve'}
-            </ActionButton>
-            <ActionButton $variant="danger" onClick={() => onReject(app.id)}>
-              <XCircle />{language === 'vi' ? 'Từ chối' : 'Reject'}
-            </ActionButton>
-          </>
-        )}
-        {app.status === 'approved' && (
-          <ActionButton $variant="warning" onClick={() => onMarkCandidate(app.id)}>
-            <Star />{app.marked ? (language === 'vi' ? 'Bỏ đánh dấu' : 'Unmark') : (language === 'vi' ? 'Đánh dấu' : 'Mark')}
-          </ActionButton>
-        )}
       </ActionsCol>
     </AppCard>
   );
@@ -2080,7 +2064,7 @@ const Applications = () => {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
                   <Calendar size={16} />
-                  <span>{language === 'vi' ? 'Hạn nộp: ' : 'Deadline: '}{selectedJobView.deadline}</span>
+                  <span>{language === 'vi' ? 'Hết hạn: ' : 'Deadline: '}{selectedJobView.deadline}</span>
                 </div>
               </div>
             </div>
@@ -2179,7 +2163,7 @@ const Applications = () => {
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
-                  {language === 'vi' ? 'Hạn nộp' : 'Deadline'}
+                  {language === 'vi' ? 'Hết hạn' : 'Deadline'}
                 </label>
                 <input
                   type="text"
