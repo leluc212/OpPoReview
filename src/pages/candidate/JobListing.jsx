@@ -924,7 +924,36 @@ const translateSalary = (salaryStr, language) => {
   return salaryStr
     .replace(/triệu VND/g, 'million VND')
     .replace(/\/ca/g, '/shift')
-    .replace(/\/giờ/g, '/hour');
+    .replace(/\/giờ/g, '/hour')
+    .replace(/\/tiếng/g, '/hrs');
+};
+
+// Calculate per-shift salary for shift jobs
+const calculateShiftSalary = (job) => {
+  if (job.category !== 'shift') return job.salary;
+  
+  // Parse hours from type like 'Ca sáng (06:00 - 14:00)'
+  const timeMatch = job.type.match(/(\d{2}):(\d{2})\s*-\s*(\d{2}):(\d{2})/);
+  if (!timeMatch) return job.salary;
+  
+  const startH = parseInt(timeMatch[1]);
+  const endH = parseInt(timeMatch[3]);
+  let hours = endH - startH;
+  if (hours <= 0) hours += 24; // overnight shift
+  
+  // Parse original hourly rate - "28.000" means 28000 VND
+  const rateMatch = job.salary.match(/([\d.]+)/);
+  if (!rateMatch) return job.salary;
+  const originalRate = parseInt(rateMatch[1].replace(/\./g, ''));
+  
+  // Min hourly rate is 28,050
+  const hourlyRate = Math.max(originalRate, 28050);
+  const totalSalary = hourlyRate * hours;
+  
+  // Format number with dots: 224400 -> 224.400
+  const formatted = totalSalary.toLocaleString('vi-VN').replace(/,/g, '.');
+  
+  return `${formatted} VNĐ/${hours} tiếng`;
 };
 
 // Translate location string based on language
@@ -1383,7 +1412,7 @@ const JOBS_DATA = [
     lng: 106.7000,
     type: 'Ca sáng (06:00 - 14:00)',
     category: 'shift',
-    salary: '27.000 VNĐ/giờ',
+    salary: '28.500 VNĐ/giờ',
     postedAt: '2 ngày trước',
     tags: ['Ca sáng', 'Fast food', 'F&B'],
     featured: true,
@@ -1399,7 +1428,7 @@ const JOBS_DATA = [
     lng: 106.6970,
     type: 'Ca chiều (14:00 - 22:00)',
     category: 'shift',
-    salary: '28.000 VNĐ/giờ',
+    salary: '29.500 VNĐ/giờ',
     postedAt: '1 ngày trước',
     tags: ['Ca chiều', 'F&B', 'Phục vụ'],
     featured: false,
@@ -1431,7 +1460,7 @@ const JOBS_DATA = [
     lng: 106.6995,
     type: 'Ca sáng (06:00 - 14:00)',
     category: 'shift',
-    salary: '27.000 VNĐ/giờ',
+    salary: '28.050 VNĐ/giờ',
     postedAt: '1 ngày trước',
     tags: ['Ca sáng', 'Phục vụ', 'F&B'],
     featured: false,
@@ -1447,7 +1476,7 @@ const JOBS_DATA = [
     lng: 106.6975,
     type: 'Ca sáng (06:00 - 14:00)',
     category: 'shift',
-    salary: '28.000 VNĐ/giờ',
+    salary: '29.000 VNĐ/giờ',
     postedAt: '1 ngày trước',
     tags: ['Ca sáng', 'Bán hàng', 'Coffee'],
     featured: false,
@@ -1463,7 +1492,7 @@ const JOBS_DATA = [
     lng: 106.7005,
     type: 'Ca chiều (14:00 - 22:00)',
     category: 'shift',
-    salary: '28.000 VNĐ/giờ',
+    salary: '30.500 VNĐ/giờ',
     postedAt: '2 giờ trước',
     tags: ['Ca chiều', 'Pha chế', 'F&B'],
     featured: true,
@@ -1479,7 +1508,7 @@ const JOBS_DATA = [
     lng: 106.6960,
     type: 'Ca tối (18:00 - 22:00)',
     category: 'shift',
-    salary: '28.000 VNĐ/giờ',
+    salary: '28.800 VNĐ/giờ',
     postedAt: '3 giờ trước',
     tags: ['Ca tối', 'Thu ngân', 'Fast food'],
     featured: false,
@@ -1495,7 +1524,7 @@ const JOBS_DATA = [
     lng: 106.6965,
     type: 'Ca sáng (07:00 - 15:00)',
     category: 'shift',
-    salary: '27.000 VNĐ/giờ',
+    salary: '28.200 VNĐ/giờ',
     postedAt: '5 giờ trước',
     tags: ['Ca sáng', 'Phục vụ', 'Fast food'],
     featured: false,
@@ -1527,7 +1556,7 @@ const JOBS_DATA = [
     lng: 106.7010,
     type: 'Ca chiều (14:00 - 22:00)',
     category: 'shift',
-    salary: '28.000 VNĐ/giờ',
+    salary: '28.350 VNĐ/giờ',
     postedAt: '4 giờ trước',
     tags: ['Ca chiều', 'Pha chế', 'Trà sữa'],
     featured: false,
@@ -1543,7 +1572,7 @@ const JOBS_DATA = [
     lng: 106.8360,
     type: 'Ca tối (18:00 - 23:00)',
     category: 'shift',
-    salary: '28.000 VNĐ/giờ',
+    salary: '31.000 VNĐ/giờ',
     postedAt: '3 giờ trước',
     tags: ['Ca tối', 'F&B', 'Pha chế'],
     featured: false,
@@ -1559,7 +1588,7 @@ const JOBS_DATA = [
     lng: 106.8380,
     type: 'Ca sáng (06:00 - 12:00)',
     category: 'shift',
-    salary: '27.000 VNĐ/giờ',
+    salary: '28.500 VNĐ/giờ',
     postedAt: '5 giờ trước',
     tags: ['Ca sáng', 'Phục vụ', 'Quán ăn'],
     featured: false,
@@ -1607,7 +1636,7 @@ const JOBS_DATA = [
     lng: 106.8340,
     type: 'Ca sáng (07:00 - 15:00)',
     category: 'shift',
-    salary: '28.000 VNĐ/giờ',
+    salary: '31.500 VNĐ/giờ',
     postedAt: '2 ngày trước',
     tags: ['Ca sáng', 'Pha chế', 'Coffee'],
     featured: false,
@@ -1623,7 +1652,7 @@ const JOBS_DATA = [
     lng: 106.8370,
     type: 'Ca chiều (14:00 - 22:00)',
     category: 'shift',
-    salary: '27.000 VNĐ/giờ',
+    salary: '28.800 VNĐ/giờ',
     postedAt: '4 giờ trước',
     tags: ['Ca chiều', 'Phục vụ', 'Trà sữa'],
     featured: false,
@@ -1639,7 +1668,7 @@ const JOBS_DATA = [
     lng: 106.8330,
     type: 'Ca sáng (06:00 - 14:00)',
     category: 'shift',
-    salary: '27.000 VNĐ/giờ',
+    salary: '28.050 VNĐ/giờ',
     postedAt: '2 giờ trước',
     tags: ['Ca sáng', 'Thu ngân', 'Coffee'],
     featured: true,
@@ -1687,7 +1716,7 @@ const JOBS_DATA = [
     lng: 106.8365,
     type: 'Ca chiều (15:00 - 23:00)',
     category: 'shift',
-    salary: '28.000 VNĐ/giờ',
+    salary: '28.700 VNĐ/giờ',
     postedAt: '3 giờ trước',
     tags: ['Ca chiều', 'Fast food', 'Phục vụ'],
     featured: false,
@@ -1703,7 +1732,7 @@ const JOBS_DATA = [
     lng: 106.8355,
     type: 'Ca sáng (08:00 - 16:00)',
     category: 'shift',
-    salary: '29.000 VNĐ/giờ',
+    salary: '29.800 VNĐ/giờ',
     postedAt: '1 ngày trước',
     tags: ['Ca sáng', 'Lễ tân', 'Nhà hàng'],
     featured: false,
@@ -1720,7 +1749,7 @@ const JOBS_DATA = [
     lng: 106.7004,
     type: 'Ca sáng (06:00 - 14:00)',
     category: 'shift',
-    salary: '28.000 VNĐ/giờ',
+    salary: '30.000 VNĐ/giờ',
     postedAt: '1 giờ trước',
     tags: ['Ca sáng', 'Pha chế', 'Coffee'],
     featured: true,
@@ -1736,7 +1765,7 @@ const JOBS_DATA = [
     lng: 106.6876,
     type: 'Ca chiều (14:00 - 22:00)',
     category: 'shift',
-    salary: '28.000 VNĐ/giờ',
+    salary: '29.200 VNĐ/giờ',
     postedAt: '2 giờ trước',
     tags: ['Ca chiều', 'Phục vụ', 'Nhà hàng'],
     featured: false,
@@ -1752,7 +1781,7 @@ const JOBS_DATA = [
     lng: 106.7065,
     type: 'Ca tối (17:00 - 23:00)',
     category: 'shift',
-    salary: '27.000 VNĐ/giờ',
+    salary: '28.300 VNĐ/giờ',
     postedAt: '3 giờ trước',
     tags: ['Ca tối', 'Thu ngân', 'F&B'],
     featured: false,
@@ -1768,7 +1797,7 @@ const JOBS_DATA = [
     lng: 106.6633,
     type: 'Ca sáng (06:00 - 14:00)',
     category: 'shift',
-    salary: '28.000 VNĐ/giờ',
+    salary: '29.500 VNĐ/giờ',
     postedAt: '2 giờ trước',
     tags: ['Ca sáng', 'Bếp', 'F&B'],
     featured: false,
@@ -1784,7 +1813,7 @@ const JOBS_DATA = [
     lng: 106.7220,
     type: 'Ca chiều (14:00 - 22:00)',
     category: 'shift',
-    salary: '29.000 VNĐ/giờ',
+    salary: '29.200 VNĐ/giờ',
     postedAt: '1 giờ trước',
     tags: ['Ca chiều', 'Pha chế', 'Coffee'],
     featured: true,
@@ -1800,7 +1829,7 @@ const JOBS_DATA = [
     lng: 106.7100,
     type: 'Ca tối (17:00 - 23:00)',
     category: 'shift',
-    salary: '29.000 VNĐ/giờ',
+    salary: '33.000 VNĐ/giờ',
     postedAt: '30 phút trước',
     tags: ['Ca tối', 'Phục vụ', 'Lẩu'],
     featured: false,
@@ -1816,7 +1845,7 @@ const JOBS_DATA = [
     lng: 106.6528,
     type: 'Ca sáng (07:00 - 15:00)',
     category: 'shift',
-    salary: '27.000 VNĐ/giờ',
+    salary: '28.600 VNĐ/giờ',
     postedAt: '1 giờ trước',
     tags: ['Ca sáng', 'Fast food', 'F&B'],
     featured: false,
@@ -1832,7 +1861,7 @@ const JOBS_DATA = [
     lng: 106.6780,
     type: 'Ca chiều (14:00 - 22:00)',
     category: 'shift',
-    salary: '28.000 VNĐ/giờ',
+    salary: '30.200 VNĐ/giờ',
     postedAt: '2 giờ trước',
     tags: ['Ca chiều', 'Pha chế', 'Coffee'],
     featured: false,
@@ -1848,7 +1877,7 @@ const JOBS_DATA = [
     lng: 106.6497,
     type: 'Ca tối (17:00 - 23:00)',
     category: 'shift',
-    salary: '27.000 VNĐ/giờ',
+    salary: '28.900 VNĐ/giờ',
     postedAt: '3 giờ trước',
     tags: ['Ca tối', 'Fast food', 'F&B'],
     featured: false,
@@ -1864,7 +1893,7 @@ const JOBS_DATA = [
     lng: 106.6280,
     type: 'Ca sáng (07:00 - 15:00)',
     category: 'shift',
-    salary: '27.000 VNĐ/giờ',
+    salary: '28.050 VNĐ/giờ',
     postedAt: '1 giờ trước',
     tags: ['Ca sáng', 'Fast food', 'Phục vụ'],
     featured: false,
@@ -1880,7 +1909,7 @@ const JOBS_DATA = [
     lng: 106.6042,
     type: 'Ca chiều (14:00 - 22:00)',
     category: 'shift',
-    salary: '27.000 VNĐ/giờ',
+    salary: '28.100 VNĐ/giờ',
     postedAt: '4 giờ trước',
     tags: ['Ca chiều', 'Fast food', 'F&B'],
     featured: false,
@@ -1912,7 +1941,7 @@ const JOBS_DATA = [
     lng: 106.7500,
     type: 'Ca sáng (07:00 - 15:00)',
     category: 'shift',
-    salary: '29.000 VNĐ/giờ',
+    salary: '29.500 VNĐ/giờ',
     postedAt: '2 giờ trước',
     tags: ['Ca sáng', 'Pha chế', 'Coffee'],
     featured: false,
@@ -1928,7 +1957,7 @@ const JOBS_DATA = [
     lng: 106.6676,
     type: 'Ca chiều (14:00 - 22:00)',
     category: 'shift',
-    salary: '28.000 VNĐ/giờ',
+    salary: '31.000 VNĐ/giờ',
     postedAt: '3 giờ trước',
     tags: ['Ca chiều', 'Phục vụ', 'Pizza'],
     featured: false,
@@ -1944,7 +1973,7 @@ const JOBS_DATA = [
     lng: 106.6413,
     type: 'Ca sáng (07:00 - 15:00)',
     category: 'shift',
-    salary: '28.000 VNĐ/giờ',
+    salary: '28.400 VNĐ/giờ',
     postedAt: '30 phút trước',
     tags: ['Ca sáng', 'Thu ngân', 'F&B'],
     featured: false,
@@ -1976,7 +2005,7 @@ const JOBS_DATA = [
     lng: 106.6630,
     type: 'Ca sáng (06:00 - 14:00)',
     category: 'shift',
-    salary: '27.000 VNĐ/giờ',
+    salary: '28.250 VNĐ/giờ',
     postedAt: '1 giờ trước',
     tags: ['Ca sáng', 'Thu ngân', 'Coffee'],
     featured: false,
@@ -3060,7 +3089,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, delay = 0, showDistance
 
         <JobSalary>
           <DollarSign />
-          <span>{translateSalary(job.salary, language)}</span>
+          <span>{translateSalary(calculateShiftSalary(job), language)}</span>
         </JobSalary>
       </JobCardBody>
 

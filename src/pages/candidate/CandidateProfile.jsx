@@ -17,7 +17,14 @@ import {
   Link as LinkIcon,
   CreditCard,
   Camera,
-  // Đã loại bỏ các icon mạng xã hội khác ngoài Google
+  Edit2,
+  FileText,
+  Calendar,
+  Globe,
+  Shield,
+  Award,
+  Star,
+  CheckCircle,
 } from 'lucide-react';
 
 // Custom Zalo Icon Component - Based on official Zalo logo
