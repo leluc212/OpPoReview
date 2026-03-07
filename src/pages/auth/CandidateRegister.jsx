@@ -42,8 +42,8 @@ const tickerMove = keyframes`
 const Shell = styled.div`
   min-height: 100vh;
   display: flex;
-  background: #f0f4ff;
-  font-family: 'Grandstander', 'Inter', sans-serif;
+  background: #f8faff;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   color-scheme: light;
   overflow: hidden;
   position: relative;
@@ -718,7 +718,7 @@ const CandidateRegister = () => {
         <Star $s={6} $top="80%" $left="88%" $dur={2.8} $d={1.5} />
 
         <Brand>
-          <BrandLogo src="/images/logo.png" alt="Ốp Pờ" onError={e => { e.target.style.display = 'none'; }} />
+          <BrandLogo src="/OpPoReview/images/logo.png" alt="Ốp Pờ" onError={e => { e.target.style.display = 'none'; }} />
           <BrandText>Ốp Pờ</BrandText>
         </Brand>
 
@@ -778,7 +778,7 @@ const CandidateRegister = () => {
           {/* Header */}
           <CardTop>
             <LogoRow>
-              <LogoImg src="/images/logo.png" alt="Ốp Pờ" onError={e => { e.target.style.display = 'none'; }} />
+              <LogoImg src="/OpPoReview/images/logo.png" alt="Ốp Pờ" onError={e => { e.target.style.display = 'none'; }} />
               <LogoTxt>Ốp Pờ</LogoTxt>
             </LogoRow>
             <CardTitle>Tạo tài khoản ứng viên</CardTitle>
@@ -886,3 +886,4 @@ const CandidateRegister = () => {
 };
 
 export default CandidateRegister;
+

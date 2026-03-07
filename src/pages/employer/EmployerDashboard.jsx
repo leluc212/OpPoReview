@@ -60,7 +60,7 @@ const DashboardContainer = styled.div`
 `;
 
 const WelcomeBanner = styled(motion.div)`
-  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/images/katinatQ8.jpg');
+  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/OpPoReview/images/katinatQ8.jpg');
   background-size: cover;
   background-position: center;
   border-radius: ${props => props.theme.borderRadius.xl};
@@ -489,7 +489,7 @@ const EmployerDashboard = () => {
               </ActionButton>
               <ActionButton
                 as={Link}
-                to="/employer/applications"
+                to="/employer/profile"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -499,7 +499,7 @@ const EmployerDashboard = () => {
             </QuickActions>
           </WelcomeContent>
           <IllustrationContainer>
-            <img src="/images/katinatlogo.jpg" alt="Katinat Logo" />
+            <img src="/OpPoReview/images/katinatlogo.jpg" alt="Katinat Logo" />
           </IllustrationContainer>
         </WelcomeBanner>
 
@@ -694,3 +694,4 @@ const EmployerDashboard = () => {
 };
 
 export default EmployerDashboard;
+

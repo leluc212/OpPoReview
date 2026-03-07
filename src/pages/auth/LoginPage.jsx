@@ -96,7 +96,7 @@ const Root = styled.div`
   min-height: 100vh;
   display: flex;
   background: #f0f4ff;
-  font-family: "Grandstander", 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   color-scheme: light;
 
   * {
@@ -603,7 +603,7 @@ const LoginPage = () => {
           <Star $s={8} $t="68%" $l="5%" $dur={4} $d={0.5}>✦</Star>
           <Star $s={12} $t="86%" $l="86%" $dur={2.4} $d={1.5}>✦</Star>
           <BrandRow>
-            <BrandImg src="/images/logo.png" alt="Ốp Pờ" onError={e => { e.target.style.display = 'none'; }} />
+            <BrandImg src="/OpPoReview/images/logo.png" alt="Ốp Pờ" onError={e => { e.target.style.display = 'none'; }} />
           </BrandRow>
 
           <HeroWrap>
@@ -640,7 +640,7 @@ const LoginPage = () => {
         >
           {/* Header */}
           <CardLogoRow>
-            <CLogoImg src="/images/logo.png" alt="Ốp Pờ" onError={e=>{e.target.style.display='none';}} />
+            <CLogoImg src="/OpPoReview/images/logo.png" alt="Ốp Pờ" onError={e=>{e.target.style.display='none';}} />
           </CardLogoRow>
           <CardTitle>Đăng nhập</CardTitle>
           <CardSub>
@@ -789,3 +789,4 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+

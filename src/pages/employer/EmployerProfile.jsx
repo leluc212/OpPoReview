@@ -475,7 +475,7 @@ const EmployerProfile = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [companyLogo, setCompanyLogo] = useState(() => {
-    return localStorage.getItem('companyLogo') || '/images/katinatlogo.jpg';
+    return localStorage.getItem('companyLogo') || '/OpPoReview/images/katinatlogo.jpg';
   });
   
   const [formData, setFormData] = useState(() => {
@@ -568,7 +568,7 @@ const EmployerProfile = () => {
   };
 
   const handleDeleteLogo = () => {
-    setCompanyLogo('/images/katinatlogo.jpg');
+    setCompanyLogo('/OpPoReview/images/katinatlogo.jpg');
     localStorage.removeItem('companyLogo');
     window.dispatchEvent(new Event('logoChanged'));
   };
@@ -624,7 +624,7 @@ const EmployerProfile = () => {
                 ) : (
                   <Building2 size={64} color="white" />
                 )}
-                {companyLogo && companyLogo !== '/images/katinatlogo.jpg' && (
+                {companyLogo && companyLogo !== '/OpPoReview/images/katinatlogo.jpg' && (
                   <DeleteLogoButton
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
@@ -855,3 +855,4 @@ const EmployerProfile = () => {
 };
 
 export default EmployerProfile;
+

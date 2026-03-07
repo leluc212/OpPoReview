@@ -424,7 +424,7 @@ const Sidebar = ({ role }) => {
   return (
     <SidebarContainer>
       <Logo>
-        <img src="/images/logo.png" alt="Ốp Pờ" style={{ height: '60px' }} />
+        <img src="/OpPoReview/images/logo.png" alt="Ốp Pờ" style={{ height: '60px' }} />
         <LogoText>Ốp Pờ</LogoText>
       </Logo>
       
@@ -455,3 +455,4 @@ const Sidebar = ({ role }) => {
 };
 
 export default Sidebar;
+

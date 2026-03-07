@@ -15,7 +15,9 @@ import {
   Calendar,
   Plus,
   Building2,
-  Users
+  Users,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 const fadeIn = keyframes`
@@ -129,11 +131,42 @@ const BalanceLabel = styled.div`
   }
 `;
 
+const BalanceAmountWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+`;
+
 const BalanceAmount = styled.div`
   font-size: 48px;
   font-weight: 800;
-  margin-bottom: 24px;
   letter-spacing: -1px;
+`;
+
+const EyeButton = styled.button`
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+  }
+  
+  svg {
+    width: 22px;
+    height: 22px;
+  }
 `;
 
 const BalanceActions = styled.div`
@@ -426,6 +459,7 @@ const EmptyState = styled.div`
 const EmployerWallet = () => {
   const { language } = useLanguage();
   const [balance] = useState(125500000); // 125,500,000 VND
+  const [showBalance, setShowBalance] = useState(false);
 
   const transactions = [
     {
@@ -527,7 +561,12 @@ const EmployerWallet = () => {
               <WalletIcon />
               {language === 'vi' ? 'Số dư khả dụng' : 'Available balance'}
             </BalanceLabel>
-            <BalanceAmount>{formatCurrency(balance)}</BalanceAmount>
+            <BalanceAmountWrapper>
+              <BalanceAmount>{showBalance ? formatCurrency(balance) : '******** VND'}</BalanceAmount>
+              <EyeButton onClick={() => setShowBalance(!showBalance)}>
+                {showBalance ? <EyeOff /> : <Eye />}
+              </EyeButton>
+            </BalanceAmountWrapper>
             <BalanceActions>
               <ActionButton 
                 onClick={handleDeposit}
@@ -630,16 +669,7 @@ const EmployerWallet = () => {
                 <div className="label">{language === 'vi' ? 'Tổng chi phí' : 'Total Expenses'}</div>
                 <div className="value">{formatCurrency(totalExpense)}</div>
               </StatItem>
-              <StatItem 
-                $color="#F59E0B"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, delay: 0.5 }}
-                whileHover={{ scale: 1.02 }}
-              >
-                <div className="label">{language === 'vi' ? 'Số dư ví' : 'Wallet Balance'}</div>
-                <div className="value">{formatCurrency(balance)}</div>
-              </StatItem>
+
             </StatsList>
           </Card>
         </Grid>

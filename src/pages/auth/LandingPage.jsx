@@ -567,17 +567,18 @@ const LanguageToggle = styled.button`
 `;
 
 const HeroSection = styled(motion.section)`
-  max-width: 1280px;
-  margin: 0 auto;
+  width: 100%;
   padding: 100px 50px 100px;
   text-align: center;
   position: relative;
-  height: 100vh;
+  min-height: 100vh;
+  height: 900px;
   display: flex;
   align-items: top;
   justify-content: center;
   scroll-snap-align: start;
   scroll-snap-stop: always;
+  overflow: hidden;
   
   @media (max-width: 1024px) {
     padding: 90px 40px 80px;
@@ -597,9 +598,9 @@ const HeroSection = styled(motion.section)`
 const AnimatedBackground = styled.div`
   position: absolute;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100vw;
+  left: 0;
+  right: 0;
+  width: 100%;
   height: 100%;
   z-index: 0;
   overflow: hidden;
@@ -967,6 +968,10 @@ const HeroContent = styled.div`
   position: relative;
   z-index: 10;
   margin-top: 80px;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
 `;
 
 const HeroTitle = styled(motion.h1)`
@@ -2583,15 +2588,15 @@ const particleConfigs = [
 ];
 
 const companyLogos = [
-  { name: 'TRUNG NGUYÊN', logo: '/images/trungnguyen.jpg' },
-  { name: 'KATINAT', logo: '/images/katinat.png' },
-  { name: 'BAMOS COFFEE', logo: '/images/bamos.png' },
-  { name: 'STARBUCK', logo: '/images/starbuck.png' },
-  { name: 'PHUC LONG', logo: '/images/phuclong.jpg' },
-  { name: 'THE COFFEE HOUSE', logo: '/images/coffeehouse.jpg' },
-  { name: 'HỒNG TRÀ NGÔ GIA', logo: '/images/ngogia.png' },
-  { name: 'SUNCHA', logo: '/images/suncha.jpg' },
-  { name: 'HIGHLANDS', logo: '/images/highlands.jpg' },
+  { name: 'TRUNG NGUYÊN', logo: '/OpPoReview/images/trungnguyen.jpg' },
+  { name: 'KATINAT', logo: '/OpPoReview/images/katinat.png' },
+  { name: 'BAMOS COFFEE', logo: '/OpPoReview/images/bamos.png' },
+  { name: 'STARBUCK', logo: '/OpPoReview/images/starbuck.png' },
+  { name: 'PHUC LONG', logo: '/OpPoReview/images/phuclong.jpg' },
+  { name: 'THE COFFEE HOUSE', logo: '/OpPoReview/images/coffeehouse.jpg' },
+  { name: 'HỒNG TRÀ NGÔ GIA', logo: '/OpPoReview/images/ngogia.png' },
+  { name: 'SUNCHA', logo: '/OpPoReview/images/suncha.jpg' },
+  { name: 'HIGHLANDS', logo: '/OpPoReview/images/highlands.jpg' },
 ];
 
 const LandingPage = () => {
@@ -2797,7 +2802,7 @@ const LandingPage = () => {
       >
         <LeftSection>
           <Logo to="/">
-            <img src="/images/logo.png" alt="Ốp Pờ" style={{ height: '60px', marginRight: '5px' }} />
+            <img src="/OpPoReview/images/logo.png" alt="Ốp Pờ" style={{ height: '60px', marginRight: '5px' }} />
            
           </Logo>
           <NavLinks $isDark={isDarkMode}>
@@ -3701,14 +3706,14 @@ const LandingPage = () => {
             transition={{ duration: 0.6, delay: 0.5 }}
           >
             <SecondaryBanner
-              src="/images/phache.png"
+              src="/OpPoReview/images/phache.png"
               alt="Phache"
               initial={{ opacity: 0, y: 30, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.7, delay: 0.7 }}
             />
             <MainBanner
-              src="/images/poster.png"
+              src="/OpPoReview/images/poster.png"
               alt="Poster"
               initial={{ opacity: 0, y: 30, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -3788,7 +3793,7 @@ const LandingPage = () => {
       >
         <TechBannerContent>
           <TechBannerImage
-            src="/images/lemoments.png"
+            src="/OpPoReview/images/lemoments.png"
             alt="Le Moments Technology"
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -3920,7 +3925,7 @@ const LandingPage = () => {
               <StoreButtons>
                 <StoreButton href="https://apps.apple.com" target="_blank">
                   <img 
-                    src="/images/appstore1.jpg" 
+                    src="/OpPoReview/images/appstore1.jpg" 
                     alt="App Store"
                     style={{ 
                       width: '120px', 
@@ -3932,7 +3937,7 @@ const LandingPage = () => {
                 
                 <StoreButton href="https://play.google.com" target="_blank">
                   <img 
-                    src="/images/chplay.jpg" 
+                    src="/OpPoReview/images/chplay.jpg" 
                     alt="Google Play"
                     style={{ 
                       width: '120px', 
@@ -3995,7 +4000,7 @@ const LandingPage = () => {
                           transition={{ duration: 0.4, delay: 0.2 }}
                         >
                           <img 
-                            src="/images/logo.png" 
+                            src="/OpPoReview/images/logo.png" 
                             alt="Ốp Pờ"
                             style={{ 
                               width: '100%',
@@ -4200,3 +4205,5 @@ const LandingPage = () => {
 };
 
 export default LandingPage;
+
+

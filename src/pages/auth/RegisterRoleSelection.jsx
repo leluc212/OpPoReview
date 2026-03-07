@@ -554,7 +554,7 @@ const RegisterRoleSelection = () => {
         {/* brand */}
         <motion.div variants={item}>
           <BrandLink to="/">
-            <BrandImg src="/images/logo.png" alt="Ốp Pờ" onError={e => { e.target.style.display = 'none'; }} />
+            <BrandImg src="/OpPoReview/images/logo.png" alt="Ốp Pờ" onError={e => { e.target.style.display = 'none'; }} />
           </BrandLink>
         </motion.div>
 
@@ -639,3 +639,4 @@ const RegisterRoleSelection = () => {
 };
 
 export default RegisterRoleSelection;
+
