@@ -463,7 +463,7 @@ const DataAnalysis = () => {
   };
 
   return (
-    <DashboardLayout role="admin">
+    <DashboardLayout role="admin" key={language}>
       <PageContainer>
         <PageHeader>
           <Title>{language === 'vi' ? 'Phân Tích Dữ Liệu' : 'Data Analysis'}</Title>

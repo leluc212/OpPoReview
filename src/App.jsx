@@ -180,7 +180,7 @@ function AppRoutes() {
           <JobManagement />
         </ProtectedRoute>
       } />
-      <Route path="/employer/applications" element={
+      <Route path="/employer/standard-jobs" element={
         <ProtectedRoute allowedRoles={['employer']}>
           <Applications />
         </ProtectedRoute>
@@ -200,7 +200,7 @@ function AppRoutes() {
           <Subscription />
         </ProtectedRoute>
       } />
-      <Route path="/employer/hr-management" element={
+      <Route path="/employer/quick-jobs" element={
         <ProtectedRoute allowedRoles={['employer']}>
           <HRManagement />
         </ProtectedRoute>

@@ -109,14 +109,26 @@ const Star = styled.div`
 const Brand = styled.div`
   display: flex;
   align-items: center;
-  gap: 11px;
+  justify-content: flex-start;
   margin-bottom: 48px;
   position: relative;
   z-index: 2;
 `;
+const BrandLogoBox = styled.div`
+  background: #fff;
+  border-radius: 16px;
+  padding: 18px 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 18px rgba(14,57,149,0.10);
+  margin-bottom: 0;
+`;
 const BrandLogo = styled.img`
-  height: 38px;
-  filter: brightness(0) invert(1);
+  height: 46px;
+  width: 46px;
+  object-fit: contain;
+  display: block;
 `;
 const BrandText = styled.span`
   font-size: 22px;
@@ -300,7 +312,7 @@ const Card = styled(motion.div)`
   border-radius: 28px;
   padding: 40px 38px 34px;
   width: 100%;
-  max-width: 430px;
+  max-width: 500px;
   position: relative;
   z-index: 1;
   box-shadow:
@@ -322,6 +334,7 @@ const Card = styled(motion.div)`
 /* card header */
 const CardTop = styled.div`
   text-align: center;
+  margin-top: 32px;
   margin-bottom: 24px;
 `;
 
@@ -329,15 +342,18 @@ const LogoRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
+  gap: 10px;
   margin-bottom: 18px;
 `;
-const LogoImg = styled.img` height: 32px; `;
+const LogoImg = styled.img`
+  height: 38px;
+  object-fit: contain;
+`;
 const LogoTxt = styled.span`
-  font-size: 19px;
+  font-size: 22px;
   font-weight: 800;
   color: #0E3995;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.4px;
 `;
 
 const CardTitle = styled.h2`
@@ -578,9 +594,6 @@ const SubmitBtn = styled(motion.button)`
 
   &:hover:not(:disabled) { box-shadow: 0 8px 28px rgba(14,57,149,0.45); }
   &:disabled { opacity: 0.55; cursor: not-allowed; }
-
-  svg { width: 17px; height: 17px; transition: transform 0.25s; }
-  &:hover:not(:disabled) svg { transform: translateX(4px); }
 `;
 
 const SecondaryBtn = styled.button`
@@ -693,12 +706,12 @@ const CandidateRegister = () => {
     navigate('/verify-otp', { state: { email: form.email, role: 'candidate' } });
   };
 
-  const handleSocial = p => alert(`Đăng ký bằng ${p} (đang phát triển)`);
+  const handleSocial = p => alert(`Đăng ký bằng ${p} (đang phát triển)`); // Facebook đã bị loại bỏ, chỉ còn Google
 
   /* job previews */
   const jobs = [
     { emoji: '☕', bg: 'rgba(251,191,36,0.25)', title: 'Barista bán thời gian', meta: 'TP.HCM · 35K/giờ', badge: 'Mới đăng', bc: 'rgba(96,165,250,0.2)', tc: '#93c5fd' },
-    { emoji: '💼', bg: 'rgba(167,139,250,0.25)', title: 'Nhân viên văn phòng', meta: 'Hà Nội · 40K/giờ', badge: 'Hot 🔥', bc: 'rgba(249,115,22,0.2)', tc: '#fb923c' },
+    { emoji: '🛍️', bg: 'rgba(167,139,250,0.25)', title: 'Nhân viên bán hàng', meta: 'TP.HCM · 38K/giờ', badge: 'Hot 🔥', bc: 'rgba(249,115,22,0.2)', tc: '#fb923c' },
     { emoji: '🎧', bg: 'rgba(52,211,153,0.25)', title: 'CSKH online (remote)', meta: 'Remote · 30K/giờ', badge: 'Urgent', bc: 'rgba(239,68,68,0.2)', tc: '#f87171' },
   ];
 
@@ -718,8 +731,9 @@ const CandidateRegister = () => {
         <Star $s={6} $top="80%" $left="88%" $dur={2.8} $d={1.5} />
 
         <Brand>
-          <BrandLogo src="/OpPoReview/images/logo.png" alt="Ốp Pờ" onError={e => { e.target.style.display = 'none'; }} />
-          <BrandText>Ốp Pờ</BrandText>
+          <BrandLogoBox>
+            <BrandLogo src="/OpPoReview/images/logo.png" alt="Ốp Pờ" onError={e => { e.target.style.display = 'none'; }} />
+          </BrandLogoBox>
         </Brand>
 
         <Hero>
@@ -787,39 +801,6 @@ const CandidateRegister = () => {
             </CardSub>
           </CardTop>
 
-          {/* Tab switcher */}
-          <Tabs>
-            <Tab $active>Đăng ký</Tab>
-            <Tab as={Link} to="/login" style={{ textDecoration: 'none', color: '#94a3b8', fontWeight: 700, fontSize: 13.5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              Đăng nhập
-            </Tab>
-          </Tabs>
-
-          {/* Social */}
-          <SocialRow>
-            <SocialBtn type="button" $c="#EA4335"
-              onClick={() => handleSocial('Google')}
-              whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <svg viewBox="0 0 24 24" width="17" height="17">
-                <path fill="#EA4335" d="M5.266 9.765C6.199 6.939 8.854 4.91 12 4.91c1.69 0 3.218.6 4.418 1.582l3.491-3.491C17.782 1.146 15.055 0 12 0 7.27 0 3.198 2.698 1.24 6.65l4.026 3.115z" />
-                <path fill="#34A853" d="M16.04 18.013C14.951 18.716 13.566 19.09 12 19.09c-3.134 0-5.78-2.014-6.723-4.823l-4.04 3.067C3.193 21.294 7.265 24 12 24c2.933 0 5.735-1.043 7.834-3.001l-3.794-2.986z" />
-                <path fill="#4A90E2" d="M19.834 21C22.03 18.952 23.455 15.904 23.455 12c0-.71-.091-1.472-.273-2.182H12v4.636h6.436c-.319 1.56-1.17 2.767-2.396 3.559L19.834 21z" />
-                <path fill="#FBBC05" d="M5.277 14.268A7.12 7.12 0 014.91 12c0-.782.135-1.533.367-2.235L1.24 6.65A11.945 11.945 0 000 12c0 1.92.444 3.73 1.237 5.335l4.04-3.067z" />
-              </svg>
-              Google
-            </SocialBtn>
-            <SocialBtn type="button" $c="#1877F2"
-              onClick={() => handleSocial('Facebook')}
-              whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <svg viewBox="0 0 24 24" width="17" height="17" fill="#1877F2">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-              </svg>
-              Facebook
-            </SocialBtn>
-          </SocialRow>
-
-          <OrDivider><span>hoặc dùng email</span></OrDivider>
-
           {/* Form */}
           <form onSubmit={handleSubmit}>
             <FloatInput id="fullName" name="fullName" label="Họ và tên *"
@@ -867,12 +848,12 @@ const CandidateRegister = () => {
               disabled={!agreed}
               whileHover={agreed ? { scale: 1.02 } : {}}
               whileTap={agreed ? { scale: 0.98 } : {}}>
-              Tạo tài khoản miễn phí <IcoArrow />
+              Tạo tài khoản miễn phí
             </SubmitBtn>
           </form>
 
           <SecondaryBtn type="button" onClick={() => navigate('/register')}>
-            ← Quay lại chọn vai trò
+            Quay lại chọn vai trò
           </SecondaryBtn>
 
           <FootNote>

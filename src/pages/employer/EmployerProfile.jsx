@@ -574,7 +574,7 @@ const EmployerProfile = () => {
   };
 
   return (
-    <DashboardLayout role="employer">
+    <DashboardLayout role="employer" key={language}>
       <ProfileContainer>
         <PageHeader>
           <PageTitleGroup>

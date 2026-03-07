@@ -267,7 +267,7 @@ const PostJob = () => {
   };
 
   return (
-    <DashboardLayout role="employer" showSearch={false}>
+    <DashboardLayout role="employer" showSearch={false} key={language}>
       <PostJobContainer>
         <BackButton onClick={() => navigate('/employer/dashboard')}>
           <ArrowLeft /> {language === 'vi' ? 'Quay lại Dashboard' : 'Back to Dashboard'}

@@ -364,7 +364,7 @@ const SavedJobs = () => {
   };
 
   return (
-    <DashboardLayout role="candidate" showSearch={false}>
+    <DashboardLayout role="candidate" showSearch={false} key={language}>
       <SavedJobsContainer>
         <PageHeader>
           <h1>{language === 'vi' ? 'Công việc đã lưu' : 'Saved Jobs'}</h1>

@@ -537,7 +537,7 @@ const EmployerWallet = () => {
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
   return (
-    <DashboardLayout role="employer">
+    <DashboardLayout role="employer" key={language}>
       <PageContainer>
         <PageHeader>
           <PageTitleGroup>

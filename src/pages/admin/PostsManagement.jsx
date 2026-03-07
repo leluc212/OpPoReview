@@ -484,7 +484,7 @@ const PostsManagement = () => {
     });
 
   return (
-    <DashboardLayout role="admin">
+    <DashboardLayout role="admin" key={language}>
       <PageContainer>
         <PageHeader>
           <Title>{language === 'vi' ? 'Quản Lý Bài Đăng' : 'Post Management'}</Title>

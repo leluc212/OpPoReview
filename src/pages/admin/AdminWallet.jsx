@@ -415,7 +415,7 @@ const AdminWallet = () => {
   ];
 
   return (
-    <DashboardLayout role="admin">
+    <DashboardLayout role="admin" key={language}>
       <PageContainer>
         <PageHeader>
           <Title>{language === 'vi' ? 'Ví Điện Tử Nền Tảng' : 'Platform E-Wallet'}</Title>

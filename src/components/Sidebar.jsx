@@ -21,7 +21,8 @@ import {
   LogOut,
   UsersRound,
   User,
-  Bookmark
+  Bookmark,
+  Clock
 } from 'lucide-react';
 
 const SidebarContainer = styled.aside`
@@ -376,9 +377,9 @@ const Sidebar = ({ role }) => {
   const employerLinks = [
     { section: t.sidebar.main, items: [
       { to: '/employer/dashboard', icon: LayoutDashboard, label: t.sidebar.dashboard },
-      { to: '/employer/jobs', icon: Briefcase, label: t.sidebar.myJobs },
-      { to: '/employer/applications', icon: FileText, label: t.sidebar.applications },
-      { to: '/employer/hr-management', icon: UsersRound, label: t.sidebar.userManagement || 'HR Management' },
+      { to: '/employer/jobs', icon: FileText, label: t.sidebar.myJobs },
+      { to: '/employer/standard-jobs', icon: Briefcase, label: t.sidebar.applications },
+      { to: '/employer/quick-jobs', icon: Clock, label: t.sidebar.userManagement || 'HR Management' },
     ]},
     { section: t.sidebar.communication, items: [
       { to: '/employer/notifications', icon: Bell, label: t.sidebar.notifications },
