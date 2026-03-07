@@ -701,9 +701,7 @@ const EmployersManagement = () => {
                 <th>{language === 'vi' ? 'Email' : 'Email'}</th>
                 <th>{language === 'vi' ? 'Trạng thái phê duyệt' : 'Approval Status'}</th>
                 <th>{language === 'vi' ? 'Ngày tham gia' : 'Join Date'}</th>
-                <th>{language === 'vi' ? 'Ngày xác nhận' : 'Confirm Date'}</th>
                 <th>{language === 'vi' ? 'Đã xác thực' : 'Verified'}</th>
-                <th>{language === 'vi' ? 'Thao tác' : 'Actions'}</th>
               </tr>
             </thead>
             <tbody>
@@ -734,21 +732,6 @@ const EmployersManagement = () => {
                         : (language === 'vi' ? 'Chưa xác thực' : 'Unverified')
                       }
                     </VerificationBadge>
-                  </td>
-                  <td onClick={(e) => e.stopPropagation()}>
-                    <ActionButtons>
-                      <ActionButton 
-                        $variant="view"
-                        onClick={() => navigate(`/admin/employers/${employer.id}`)}
-                      >
-                        <Eye />
-                        {language === 'vi' ? 'Xem' : 'View'}
-                      </ActionButton>
-                      <ActionButton $variant="delete">
-                        <Trash2 />
-                        {language === 'vi' ? 'Xóa' : 'Delete'}
-                      </ActionButton>
-                    </ActionButtons>
                   </td>
                 </tr>
               ))}

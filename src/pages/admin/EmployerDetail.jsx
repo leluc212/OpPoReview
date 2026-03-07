@@ -684,29 +684,6 @@ const EmployerDetail = () => {
                 {employer.verified ? <CheckCircle size={20} /> : <XCircle size={20} />}
               </VerificationCard>
 
-              <SectionTitle style={{ marginTop: '32px' }}>
-                {language === 'vi' ? 'Quản lý nhà tuyển dụng' : 'Employer Management'}
-              </SectionTitle>
-              <ActionButtonsRow>
-                <ActionButton $variant="success">
-                  <CheckCircle />
-                  {language === 'vi' ? 'Xác thực công ty' : 'Verify Company'}
-                </ActionButton>
-                <ActionButton $variant="warning">
-                  <AlertTriangle />
-                  {language === 'vi' ? 'Cảnh báo vi phạm' : 'Warning'}
-                </ActionButton>
-                <ActionButton $variant="danger">
-                  <Lock />
-                  {language === 'vi' ? 'Khóa tài khoản' : 'Lock Account'}
-                </ActionButton>
-              </ActionButtonsRow>
-              <ActionButtonsRow style={{ marginTop: '12px' }}>
-                <ActionButton>
-                  <Unlock />
-                  {language === 'vi' ? 'Mở khóa tài khoản' : 'Unlock Account'}
-                </ActionButton>
-              </ActionButtonsRow>
             </>
           )}
 

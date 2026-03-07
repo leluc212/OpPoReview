@@ -156,7 +156,7 @@ const CandidateInfo = styled.div`
 
 const StatsRow = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   
   @media (max-width: 768px) {
@@ -402,7 +402,7 @@ const CandidateDetail = () => {
       address: 'Quận 1 - TP.HCM',
       ekycVerified: true,
       approvalStatus: 'approved',
-      joined: '10/01/2024',
+      joined: '10/01/2026',
       jobsCompleted: 32,
       rating: 4.6,
       totalEarned: '1,250,000',
@@ -419,7 +419,7 @@ const CandidateDetail = () => {
       address: 'Quận 3 - TP.HCM',
       ekycVerified: true,
       approvalStatus: 'pending',
-      joined: '15/01/2024',
+      joined: '15/01/2026',
       jobsCompleted: 28,
       rating: 4.8,
       totalEarned: '980,000',
@@ -436,7 +436,7 @@ const CandidateDetail = () => {
       address: 'Quận 8 - TP.HCM',
       ekycVerified: false,
       approvalStatus: 'pending',
-      joined: '20/01/2024',
+      joined: '20/01/2026',
       jobsCompleted: 15,
       rating: 4.2,
       totalEarned: '520,000',
@@ -456,7 +456,7 @@ const CandidateDetail = () => {
       address: 'Quận 7 - TP.HCM',
       ekycVerified: true,
       approvalStatus: 'approved',
-      joined: '25/01/2024',
+      joined: '25/01/2026',
       jobsCompleted: 45,
       rating: 4.9,
       totalEarned: '1,850,000',
@@ -473,7 +473,7 @@ const CandidateDetail = () => {
       address: 'Thủ Đức - TP.HCM',
       ekycVerified: false,
       approvalStatus: 'rejected',
-      joined: '30/01/2024',
+      joined: '30/01/2026',
       jobsCompleted: 5,
       rating: 3.2,
       totalEarned: '180,000',
@@ -534,10 +534,6 @@ const CandidateDetail = () => {
               <div className="value">{candidate.jobsCompleted}</div>
             </StatCard>
             <StatCard>
-              <div className="label">Rating</div>
-              <div className="value">{candidate.rating} / 5</div>
-            </StatCard>
-            <StatCard>
               <div className="label">{language === 'vi' ? 'Trust score' : 'Trust Score'}</div>
               <div className="value">4.6 / 5</div>
             </StatCard>
@@ -549,7 +545,7 @@ const CandidateDetail = () => {
             {language === 'vi' ? 'Thông tin cá nhân' : 'Personal Info'}
           </Tab>
           <Tab $active={activeTab === 'career'} onClick={() => setActiveTab('career')}>
-            {language === 'vi' ? 'Hồ sơ nghề nghiệp' : 'Career Profile'}
+            {language === 'vi' ? 'Lịch sử việc làm' : 'Career History'}
           </Tab>
           <Tab $active={activeTab === 'activity'} onClick={() => setActiveTab('activity')}>
             {language === 'vi' ? 'Hoạt động Job Gấp' : 'Job Activity'}
@@ -559,9 +555,6 @@ const CandidateDetail = () => {
           </Tab>
           <Tab $active={activeTab === 'wallet'} onClick={() => setActiveTab('wallet')}>
             {language === 'vi' ? 'Ví ứng viên' : 'Wallet'}
-          </Tab>
-          <Tab $active={activeTab === 'violations'} onClick={() => setActiveTab('violations')}>
-            {language === 'vi' ? 'Vi phạm' : 'Violations'}
           </Tab>
           <Tab $active={activeTab === 'history'} onClick={() => setActiveTab('history')}>
             {language === 'vi' ? 'Lịch sử vi phạm' : 'Violation History'}
@@ -639,29 +632,6 @@ const CandidateDetail = () => {
                 {candidate.ekycVerified ? <CheckCircle size={20} /> : <XCircle size={20} />}
               </VerificationCard>
 
-              <SectionTitle style={{ marginTop: '32px' }}>
-                {language === 'vi' ? 'Vi ứng viên' : 'Candidate Actions'}
-              </SectionTitle>
-              <ActionButtonsRow>
-                <ActionButton $variant="success">
-                  <CheckCircle />
-                  {language === 'vi' ? 'Xác minh hồ sơ' : 'Verify Profile'}
-                </ActionButton>
-                <ActionButton $variant="warning">
-                  <AlertTriangle />
-                  {language === 'vi' ? 'Cảnh báo vi phạm' : 'Warning'}
-                </ActionButton>
-                <ActionButton $variant="danger">
-                  <Lock />
-                  {language === 'vi' ? 'Khóa tài khoản' : 'Lock Account'}
-                </ActionButton>
-              </ActionButtonsRow>
-              <ActionButtonsRow style={{ marginTop: '12px' }}>
-                <ActionButton>
-                  <Unlock />
-                  {language === 'vi' ? 'Mở khóa tài khoản' : 'Unlock Account'}
-                </ActionButton>
-              </ActionButtonsRow>
             </>
           )}
 
@@ -684,30 +654,6 @@ const CandidateDetail = () => {
             </>
           )}
 
-          {activeTab === 'violations' && (
-            <>
-              <SectionTitle>
-                <AlertTriangle />
-                {language === 'vi' ? 'Vi phạm' : 'Violations'}
-              </SectionTitle>
-              {candidate.violations.length > 0 ? (
-                candidate.violations.map((violation, index) => (
-                  <ViolationCard key={index}>
-                    <div className="date">{language === 'vi' ? 'Ngày' : 'Date'}: {violation.date}</div>
-                    <div className="content">{violation.content}</div>
-                  </ViolationCard>
-                ))
-              ) : (
-                <div style={{ textAlign: 'center', padding: '60px 20px', color: '#6b7280' }}>
-                  <CheckCircle size={48} style={{ margin: '0 auto 16px', opacity: 0.5 }} />
-                  <div style={{ fontSize: '16px', fontWeight: '600' }}>
-                    {language === 'vi' ? 'Không có vi phạm' : 'No violations'}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-
           {activeTab === 'activity' && (
             <>
               <SectionTitle>{language === 'vi' ? 'Hoạt động Job Gấp' : 'Job Activity'}</SectionTitle>
@@ -721,6 +667,45 @@ const CandidateDetail = () => {
                   <div className="value">{candidate.rating} / 5</div>
                 </InfoItem>
               </InfoGrid>
+            </>
+          )}
+
+          {activeTab === 'reviews' && (
+            <>
+              <SectionTitle>{language === 'vi' ? 'Đánh giá từ nhà tuyển dụng' : 'Employer Reviews'}</SectionTitle>
+              <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                {language === 'vi' ? 'Chưa có đánh giá nào' : 'No reviews yet'}
+              </div>
+            </>
+          )}
+
+          {activeTab === 'career' && (
+            <>
+              <SectionTitle>{language === 'vi' ? 'Lịch sử việc làm' : 'Career history'}</SectionTitle>
+              <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                {language === 'vi' ? 'Chưa có thông tin nghề nghiệp' : 'No career information yet'}
+              </div>
+            </>
+          )}
+
+          {activeTab === 'history' && (
+            <>
+              <SectionTitle>
+                <AlertTriangle />
+                {language === 'vi' ? 'Lịch sử vi phạm' : 'Violation History'}
+              </SectionTitle>
+              {candidate.violations.length > 0 ? (
+                candidate.violations.map((violation, index) => (
+                  <ViolationCard key={index}>
+                    <div className="date">{violation.date}</div>
+                    <div className="content">{violation.content}</div>
+                  </ViolationCard>
+                ))
+              ) : (
+                <div style={{ fontSize: '14px', color: '#10b981', fontWeight: '600' }}>
+                  {language === 'vi' ? '✓ Không có vi phạm nào' : '✓ No violations'}
+                </div>
+              )}
             </>
           )}
         </ContentSection>
