@@ -254,16 +254,15 @@ const Badge = styled.span`
 
 const DataAnalysis = () => {
   const { language } = useLanguage();
-  const [activeTab, setActiveTab] = useState('advertisement');
+  const [activeTab, setActiveTab] = useState('overview');
   const [timeRange, setTimeRange] = useState('30days');
 
   const tabs = [
-    { id: 'advertisement', label: language === 'vi' ? 'Quảng Cáo' : 'Advertising', icon: TrendingUp },
-    { id: 'behavior', label: language === 'vi' ? 'Hành Vi' : 'Behavior', icon: Activity },
-    { id: 'postStats', label: language === 'vi' ? 'Thống Kê Bài Đăng' : 'Post Stats', icon: FileText },
-    { id: 'userBehavior', label: language === 'vi' ? 'Hành Vi User' : 'User Behavior', icon: Users },
-    { id: 'shiftJob', label: language === 'vi' ? 'Việc Làm Ca' : 'Shift Jobs', icon: Clock },
-    { id: 'standardJob', label: language === 'vi' ? 'Việc Làm Toàn Thời Gian' : 'Full-time Jobs', icon: Briefcase }
+    { id: 'overview', label: language === 'vi' ? 'Tổng Quan' : 'Overview', icon: BarChart3 },
+    { id: 'users', label: language === 'vi' ? 'Người Dùng' : 'Users', icon: Users },
+    { id: 'jobs', label: language === 'vi' ? 'Việc Làm' : 'Jobs', icon: Briefcase },
+    { id: 'revenue', label: language === 'vi' ? 'Doanh Thu' : 'Revenue', icon: DollarSign },
+    { id: 'engagement', label: language === 'vi' ? 'Tương Tác' : 'Engagement', icon: Activity }
   ];
 
   const renderAdvertisementAnalysis = () => (
@@ -418,47 +417,534 @@ const DataAnalysis = () => {
     </>
   );
 
+  const renderOverview = () => (
+    <>
+      <StatsGrid>
+        <StatCard $color="#1e40af">
+          <StatHeader>
+            <div>
+              <StatLabel>{language === 'vi' ? 'Tổng Người Dùng' : 'Total Users'}</StatLabel>
+              <StatValue>2,458</StatValue>
+              <StatTrend $positive={true}>
+                <TrendingUp size={16} />
+                {language === 'vi' ? '+12% so với tháng trước' : '+12% vs last month'}
+              </StatTrend>
+            </div>
+            <StatIcon $color="#1e40af">
+              <Users size={24} />
+            </StatIcon>
+          </StatHeader>
+        </StatCard>
+
+        <StatCard $color="#10b981">
+          <StatHeader>
+            <div>
+              <StatLabel>{language === 'vi' ? 'Tin Đang Tuyển' : 'Active Jobs'}</StatLabel>
+              <StatValue>345</StatValue>
+              <StatTrend $positive={true}>
+                <TrendingUp size={16} />
+                {language === 'vi' ? '+8% so với tuần trước' : '+8% vs last week'}
+              </StatTrend>
+            </div>
+            <StatIcon $color="#10b981">
+              <Briefcase size={24} />
+            </StatIcon>
+          </StatHeader>
+        </StatCard>
+
+        <StatCard $color="#f59e0b">
+          <StatHeader>
+            <div>
+              <StatLabel>{language === 'vi' ? 'Ứng Tuyển' : 'Applications'}</StatLabel>
+              <StatValue>1,234</StatValue>
+              <StatTrend $positive={true}>
+                <TrendingUp size={16} />
+                {language === 'vi' ? '+18% so với tuần trước' : '+18% vs last week'}
+              </StatTrend>
+            </div>
+            <StatIcon $color="#f59e0b">
+              <FileText size={24} />
+            </StatIcon>
+          </StatHeader>
+        </StatCard>
+
+        <StatCard $color="#8b5cf6">
+          <StatHeader>
+            <div>
+              <StatLabel>{language === 'vi' ? 'Doanh Thu Tháng' : 'Monthly Revenue'}</StatLabel>
+              <StatValue>{language === 'vi' ? '24.5M' : '$1.05M'}</StatValue>
+              <StatTrend $positive={true}>
+                <TrendingUp size={16} />
+                {language === 'vi' ? '+23% so với tháng trước' : '+23% vs last month'}
+              </StatTrend>
+            </div>
+            <StatIcon $color="#8b5cf6">
+              <DollarSign size={24} />
+            </StatIcon>
+          </StatHeader>
+        </StatCard>
+      </StatsGrid>
+
+      <ChartsGrid>
+        <ChartCard>
+          <ChartHeader>
+            <ChartTitle>{language === 'vi' ? 'Người Dùng Mới Theo Thời Gian' : 'New Users Over Time'}</ChartTitle>
+          </ChartHeader>
+          <ChartPlaceholder>
+            <BarChart3 size={48} />
+            <span>{language === 'vi' ? 'Biểu đồ người dùng mới' : 'New users chart'}</span>
+          </ChartPlaceholder>
+        </ChartCard>
+
+        <ChartCard>
+          <ChartHeader>
+            <ChartTitle>{language === 'vi' ? 'Tin Tuyển Dụng Theo Ngành' : 'Jobs by Industry'}</ChartTitle>
+          </ChartHeader>
+          <ChartPlaceholder>
+            <Activity size={48} />
+            <span>{language === 'vi' ? 'Biểu đồ phân bố ngành' : 'Industry distribution'}</span>
+          </ChartPlaceholder>
+        </ChartCard>
+      </ChartsGrid>
+
+      <DataTable>
+        <TableHeader>
+          <TableTitle>{language === 'vi' ? 'Hoạt Động Gần Đây' : 'Recent Activity'}</TableTitle>
+        </TableHeader>
+        <Table>
+          <thead>
+            <tr>
+              <Th>{language === 'vi' ? 'Người Dùng' : 'User'}</Th>
+              <Th>{language === 'vi' ? 'Hành Động' : 'Action'}</Th>
+              <Th>{language === 'vi' ? 'Thời Gian' : 'Time'}</Th>
+              <Th>{language === 'vi' ? 'Trạng Thái' : 'Status'}</Th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <Td>Nguyễn Văn A</Td>
+              <Td>{language === 'vi' ? 'Đăng ký tài khoản' : 'Registered account'}</Td>
+              <Td>{language === 'vi' ? '2 giờ trước' : '2 hours ago'}</Td>
+              <Td><Badge $variant="success">{language === 'vi' ? 'Hoàn thành' : 'Completed'}</Badge></Td>
+            </tr>
+            <tr>
+              <Td>FPT Software</Td>
+              <Td>{language === 'vi' ? 'Đăng tin tuyển dụng' : 'Posted job'}</Td>
+              <Td>{language === 'vi' ? '3 giờ trước' : '3 hours ago'}</Td>
+              <Td><Badge $variant="success">{language === 'vi' ? 'Hoàn thành' : 'Completed'}</Badge></Td>
+            </tr>
+            <tr>
+              <Td>Trần Thị B</Td>
+              <Td>{language === 'vi' ? 'Ứng tuyển vị trí' : 'Applied for position'}</Td>
+              <Td>{language === 'vi' ? '5 giờ trước' : '5 hours ago'}</Td>
+              <Td><Badge $variant="success">{language === 'vi' ? 'Hoàn thành' : 'Completed'}</Badge></Td>
+            </tr>
+          </tbody>
+        </Table>
+      </DataTable>
+    </>
+  );
+
+  const renderUsers = () => (
+    <>
+      <StatsGrid>
+        <StatCard $color="#1e40af">
+          <StatHeader>
+            <div>
+              <StatLabel>{language === 'vi' ? 'Ứng Viên' : 'Candidates'}</StatLabel>
+              <StatValue>1,856</StatValue>
+              <StatTrend $positive={true}>
+                <TrendingUp size={16} />
+                {language === 'vi' ? '+15% tháng này' : '+15% this month'}
+              </StatTrend>
+            </div>
+            <StatIcon $color="#1e40af">
+              <Users size={24} />
+            </StatIcon>
+          </StatHeader>
+        </StatCard>
+
+        <StatCard $color="#10b981">
+          <StatHeader>
+            <div>
+              <StatLabel>{language === 'vi' ? 'Nhà Tuyển Dụng' : 'Employers'}</StatLabel>
+              <StatValue>602</StatValue>
+              <StatTrend $positive={true}>
+                <TrendingUp size={16} />
+                {language === 'vi' ? '+8% tháng này' : '+8% this month'}
+              </StatTrend>
+            </div>
+            <StatIcon $color="#10b981">
+              <Users size={24} />
+            </StatIcon>
+          </StatHeader>
+        </StatCard>
+
+        <StatCard $color="#f59e0b">
+          <StatHeader>
+            <div>
+              <StatLabel>{language === 'vi' ? 'Người Dùng Hoạt Động' : 'Active Users'}</StatLabel>
+              <StatValue>1,234</StatValue>
+              <StatTrend $positive={true}>
+                <TrendingUp size={16} />
+                {language === 'vi' ? '+22% tuần này' : '+22% this week'}
+              </StatTrend>
+            </div>
+            <StatIcon $color="#f59e0b">
+              <Activity size={24} />
+            </StatIcon>
+          </StatHeader>
+        </StatCard>
+
+        <StatCard $color="#ef4444">
+          <StatHeader>
+            <div>
+              <StatLabel>{language === 'vi' ? 'Chờ Xác Thực' : 'Pending Verification'}</StatLabel>
+              <StatValue>45</StatValue>
+              <StatTrend $positive={false}>
+                <TrendingUp size={16} />
+                {language === 'vi' ? '+5 hôm nay' : '+5 today'}
+              </StatTrend>
+            </div>
+            <StatIcon $color="#ef4444">
+              <Clock size={24} />
+            </StatIcon>
+          </StatHeader>
+        </StatCard>
+      </StatsGrid>
+
+      <ChartsGrid>
+        <ChartCard>
+          <ChartHeader>
+            <ChartTitle>{language === 'vi' ? 'Tăng Trưởng Người Dùng' : 'User Growth'}</ChartTitle>
+          </ChartHeader>
+          <ChartPlaceholder>
+            <TrendingUp size={48} />
+            <span>{language === 'vi' ? 'Biểu đồ tăng trưởng' : 'Growth chart'}</span>
+          </ChartPlaceholder>
+        </ChartCard>
+
+        <ChartCard>
+          <ChartHeader>
+            <ChartTitle>{language === 'vi' ? 'Phân Bố Người Dùng' : 'User Distribution'}</ChartTitle>
+          </ChartHeader>
+          <ChartPlaceholder>
+            <Users size={48} />
+            <span>{language === 'vi' ? 'Biểu đồ phân bố' : 'Distribution chart'}</span>
+          </ChartPlaceholder>
+        </ChartCard>
+      </ChartsGrid>
+    </>
+  );
+
+  const renderJobs = () => (
+    <>
+      <StatsGrid>
+        <StatCard $color="#1e40af">
+          <StatHeader>
+            <div>
+              <StatLabel>{language === 'vi' ? 'Tổng Tin Tuyển Dụng' : 'Total Jobs'}</StatLabel>
+              <StatValue>1,245</StatValue>
+              <StatTrend $positive={true}>
+                <TrendingUp size={16} />
+                {language === 'vi' ? '+45 tuần này' : '+45 this week'}
+              </StatTrend>
+            </div>
+            <StatIcon $color="#1e40af">
+              <Briefcase size={24} />
+            </StatIcon>
+          </StatHeader>
+        </StatCard>
+
+        <StatCard $color="#10b981">
+          <StatHeader>
+            <div>
+              <StatLabel>{language === 'vi' ? 'Đang Tuyển' : 'Active'}</StatLabel>
+              <StatValue>345</StatValue>
+              <StatTrend $positive={true}>
+                <TrendingUp size={16} />
+                {language === 'vi' ? '+12 hôm nay' : '+12 today'}
+              </StatTrend>
+            </div>
+            <StatIcon $color="#10b981">
+              <Briefcase size={24} />
+            </StatIcon>
+          </StatHeader>
+        </StatCard>
+
+        <StatCard $color="#f59e0b">
+          <StatHeader>
+            <div>
+              <StatLabel>{language === 'vi' ? 'Lượt Xem' : 'Views'}</StatLabel>
+              <StatValue>45.2K</StatValue>
+              <StatTrend $positive={true}>
+                <TrendingUp size={16} />
+                {language === 'vi' ? '+28% tuần này' : '+28% this week'}
+              </StatTrend>
+            </div>
+            <StatIcon $color="#f59e0b">
+              <Eye size={24} />
+            </StatIcon>
+          </StatHeader>
+        </StatCard>
+
+        <StatCard $color="#8b5cf6">
+          <StatHeader>
+            <div>
+              <StatLabel>{language === 'vi' ? 'Ứng Tuyển' : 'Applications'}</StatLabel>
+              <StatValue>8,456</StatValue>
+              <StatTrend $positive={true}>
+                <TrendingUp size={16} />
+                {language === 'vi' ? '+156 hôm nay' : '+156 today'}
+              </StatTrend>
+            </div>
+            <StatIcon $color="#8b5cf6">
+              <FileText size={24} />
+            </StatIcon>
+          </StatHeader>
+        </StatCard>
+      </StatsGrid>
+
+      <DataTable>
+        <TableHeader>
+          <TableTitle>{language === 'vi' ? 'Top Tin Tuyển Dụng' : 'Top Jobs'}</TableTitle>
+        </TableHeader>
+        <Table>
+          <thead>
+            <tr>
+              <Th>{language === 'vi' ? 'Vị Trí' : 'Position'}</Th>
+              <Th>{language === 'vi' ? 'Công Ty' : 'Company'}</Th>
+              <Th>{language === 'vi' ? 'Lượt Xem' : 'Views'}</Th>
+              <Th>{language === 'vi' ? 'Ứng Tuyển' : 'Applications'}</Th>
+              <Th>{language === 'vi' ? 'Trạng Thái' : 'Status'}</Th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <Td>Senior Frontend Developer</Td>
+              <Td>FPT Software</Td>
+              <Td>2,345</Td>
+              <Td>156</Td>
+              <Td><Badge $variant="success">{language === 'vi' ? 'Đang tuyển' : 'Active'}</Badge></Td>
+            </tr>
+            <tr>
+              <Td>Marketing Manager</Td>
+              <Td>Viettel</Td>
+              <Td>1,890</Td>
+              <Td>98</Td>
+              <Td><Badge $variant="success">{language === 'vi' ? 'Đang tuyển' : 'Active'}</Badge></Td>
+            </tr>
+            <tr>
+              <Td>Data Analyst</Td>
+              <Td>VinGroup</Td>
+              <Td>1,567</Td>
+              <Td>87</Td>
+              <Td><Badge $variant="success">{language === 'vi' ? 'Đang tuyển' : 'Active'}</Badge></Td>
+            </tr>
+          </tbody>
+        </Table>
+      </DataTable>
+    </>
+  );
+
+  const renderRevenue = () => (
+    <>
+      <StatsGrid>
+        <StatCard $color="#10b981">
+          <StatHeader>
+            <div>
+              <StatLabel>{language === 'vi' ? 'Doanh Thu Tháng' : 'Monthly Revenue'}</StatLabel>
+              <StatValue>{language === 'vi' ? '24.5M VND' : '$1.05M'}</StatValue>
+              <StatTrend $positive={true}>
+                <TrendingUp size={16} />
+                {language === 'vi' ? '+23% so với tháng trước' : '+23% vs last month'}
+              </StatTrend>
+            </div>
+            <StatIcon $color="#10b981">
+              <DollarSign size={24} />
+            </StatIcon>
+          </StatHeader>
+        </StatCard>
+
+        <StatCard $color="#1e40af">
+          <StatHeader>
+            <div>
+              <StatLabel>{language === 'vi' ? 'Gói Đăng Ký' : 'Subscriptions'}</StatLabel>
+              <StatValue>156</StatValue>
+              <StatTrend $positive={true}>
+                <TrendingUp size={16} />
+                {language === 'vi' ? '+12 tháng này' : '+12 this month'}
+              </StatTrend>
+            </div>
+            <StatIcon $color="#1e40af">
+              <Calendar size={24} />
+            </StatIcon>
+          </StatHeader>
+        </StatCard>
+
+        <StatCard $color="#f59e0b">
+          <StatHeader>
+            <div>
+              <StatLabel>{language === 'vi' ? 'Doanh Thu Quảng Cáo' : 'Ad Revenue'}</StatLabel>
+              <StatValue>{language === 'vi' ? '8.2M VND' : '$350K'}</StatValue>
+              <StatTrend $positive={true}>
+                <TrendingUp size={16} />
+                {language === 'vi' ? '+18% tháng này' : '+18% this month'}
+              </StatTrend>
+            </div>
+            <StatIcon $color="#f59e0b">
+              <DollarSign size={24} />
+            </StatIcon>
+          </StatHeader>
+        </StatCard>
+
+        <StatCard $color="#8b5cf6">
+          <StatHeader>
+            <div>
+              <StatLabel>{language === 'vi' ? 'Trung Bình/Giao Dịch' : 'Avg/Transaction'}</StatLabel>
+              <StatValue>{language === 'vi' ? '450K VND' : '$19.5'}</StatValue>
+              <StatTrend $positive={true}>
+                <TrendingUp size={16} />
+                {language === 'vi' ? '+5% tháng này' : '+5% this month'}
+              </StatTrend>
+            </div>
+            <StatIcon $color="#8b5cf6">
+              <DollarSign size={24} />
+            </StatIcon>
+          </StatHeader>
+        </StatCard>
+      </StatsGrid>
+
+      <ChartsGrid>
+        <ChartCard>
+          <ChartHeader>
+            <ChartTitle>{language === 'vi' ? 'Doanh Thu Theo Thời Gian' : 'Revenue Over Time'}</ChartTitle>
+          </ChartHeader>
+          <ChartPlaceholder>
+            <BarChart3 size={48} />
+            <span>{language === 'vi' ? 'Biểu đồ doanh thu' : 'Revenue chart'}</span>
+          </ChartPlaceholder>
+        </ChartCard>
+
+        <ChartCard>
+          <ChartHeader>
+            <ChartTitle>{language === 'vi' ? 'Nguồn Doanh Thu' : 'Revenue Sources'}</ChartTitle>
+          </ChartHeader>
+          <ChartPlaceholder>
+            <DollarSign size={48} />
+            <span>{language === 'vi' ? 'Biểu đồ nguồn thu' : 'Revenue sources'}</span>
+          </ChartPlaceholder>
+        </ChartCard>
+      </ChartsGrid>
+    </>
+  );
+
+  const renderEngagement = () => (
+    <>
+      <StatsGrid>
+        <StatCard $color="#1e40af">
+          <StatHeader>
+            <div>
+              <StatLabel>{language === 'vi' ? 'Lượt Truy Cập' : 'Page Views'}</StatLabel>
+              <StatValue>125.4K</StatValue>
+              <StatTrend $positive={true}>
+                <TrendingUp size={16} />
+                {language === 'vi' ? '+32% tuần này' : '+32% this week'}
+              </StatTrend>
+            </div>
+            <StatIcon $color="#1e40af">
+              <Eye size={24} />
+            </StatIcon>
+          </StatHeader>
+        </StatCard>
+
+        <StatCard $color="#10b981">
+          <StatHeader>
+            <div>
+              <StatLabel>{language === 'vi' ? 'Thời Gian Trung Bình' : 'Avg Session'}</StatLabel>
+              <StatValue>8m 34s</StatValue>
+              <StatTrend $positive={true}>
+                <TrendingUp size={16} />
+                {language === 'vi' ? '+12% tuần này' : '+12% this week'}
+              </StatTrend>
+            </div>
+            <StatIcon $color="#10b981">
+              <Clock size={24} />
+            </StatIcon>
+          </StatHeader>
+        </StatCard>
+
+        <StatCard $color="#f59e0b">
+          <StatHeader>
+            <div>
+              <StatLabel>{language === 'vi' ? 'Tỷ Lệ Tương Tác' : 'Engagement Rate'}</StatLabel>
+              <StatValue>68.5%</StatValue>
+              <StatTrend $positive={true}>
+                <TrendingUp size={16} />
+                {language === 'vi' ? '+5.2% tuần này' : '+5.2% this week'}
+              </StatTrend>
+            </div>
+            <StatIcon $color="#f59e0b">
+              <Activity size={24} />
+            </StatIcon>
+          </StatHeader>
+        </StatCard>
+
+        <StatCard $color="#8b5cf6">
+          <StatHeader>
+            <div>
+              <StatLabel>{language === 'vi' ? 'Tỷ Lệ Chuyển Đổi' : 'Conversion Rate'}</StatLabel>
+              <StatValue>12.8%</StatValue>
+              <StatTrend $positive={true}>
+                <TrendingUp size={16} />
+                {language === 'vi' ? '+3.1% tuần này' : '+3.1% this week'}
+              </StatTrend>
+            </div>
+            <StatIcon $color="#8b5cf6">
+              <MousePointerClick size={24} />
+            </StatIcon>
+          </StatHeader>
+        </StatCard>
+      </StatsGrid>
+
+      <ChartsGrid>
+        <ChartCard>
+          <ChartHeader>
+            <ChartTitle>{language === 'vi' ? 'Hoạt Động Người Dùng' : 'User Activity'}</ChartTitle>
+          </ChartHeader>
+          <ChartPlaceholder>
+            <Activity size={48} />
+            <span>{language === 'vi' ? 'Biểu đồ hoạt động' : 'Activity chart'}</span>
+          </ChartPlaceholder>
+        </ChartCard>
+
+        <ChartCard>
+          <ChartHeader>
+            <ChartTitle>{language === 'vi' ? 'Tương Tác Theo Giờ' : 'Engagement by Hour'}</ChartTitle>
+          </ChartHeader>
+          <ChartPlaceholder>
+            <Clock size={48} />
+            <span>{language === 'vi' ? 'Biểu đồ theo giờ' : 'Hourly chart'}</span>
+          </ChartPlaceholder>
+        </ChartCard>
+      </ChartsGrid>
+    </>
+  );
+
   const renderContent = () => {
     switch(activeTab) {
-      case 'advertisement':
-        return renderAdvertisementAnalysis();
-      case 'behavior':
-        return (
-          <ChartPlaceholder style={{ height: '400px', background: 'white', borderRadius: '12px' }}>
-            <Activity size={64} />
-            <span style={{ fontSize: '1.1rem' }}>{language === 'vi' ? 'Phân tích hành vi người dùng' : 'User behavior analysis'}</span>
-          </ChartPlaceholder>
-        );
-      case 'postStats':
-        return (
-          <ChartPlaceholder style={{ height: '400px', background: 'white', borderRadius: '12px' }}>
-            <FileText size={64} />
-            <span style={{ fontSize: '1.1rem' }}>{language === 'vi' ? 'Thống kê bài đăng' : 'Post statistics'}</span>
-          </ChartPlaceholder>
-        );
-      case 'userBehavior':
-        return (
-          <ChartPlaceholder style={{ height: '400px', background: 'white', borderRadius: '12px' }}>
-            <Users size={64} />
-            <span style={{ fontSize: '1.1rem' }}>{language === 'vi' ? 'Hành vi người dùng chi tiết' : 'Detailed user behavior'}</span>
-          </ChartPlaceholder>
-        );
-      case 'shiftJob':
-        return (
-          <ChartPlaceholder style={{ height: '400px', background: 'white', borderRadius: '12px' }}>
-            <Clock size={64} />
-            <span style={{ fontSize: '1.1rem' }}>{language === 'vi' ? 'Phân tích việc làm ca' : 'Shift-job analysis'}</span>
-          </ChartPlaceholder>
-        );
-      case 'standardJob':
-        return (
-          <ChartPlaceholder style={{ height: '400px', background: 'white', borderRadius: '12px' }}>
-            <Briefcase size={64} />
-            <span style={{ fontSize: '1.1rem' }}>{language === 'vi' ? 'Phân tích việc làm toàn thời gian' : 'Full-time job analysis'}</span>
-          </ChartPlaceholder>
-        );
+      case 'overview':
+        return renderOverview();
+      case 'users':
+        return renderUsers();
+      case 'jobs':
+        return renderJobs();
+      case 'revenue':
+        return renderRevenue();
+      case 'engagement':
+        return renderEngagement();
       default:
-        return null;
+        return renderOverview();
     }
   };
 
