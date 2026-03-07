@@ -468,7 +468,32 @@ const EmployerDashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language]);
 
-
+  const activities = [
+    {
+      title: language === 'vi' ? 'Ứng viên "Hiếu sàn" đã ứng tuyển vào "Cửa hàng trưởng"' : 'Candidate "Hieu san" applied for "Store Manager"',
+      time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
+      icon: Users,
+      color: '#1e40af'
+    },
+    {
+      title: language === 'vi' ? 'Tin "Nhân viên pha chế" đã được duyệt' : 'Job "Barista" approved',
+      time: language === 'vi' ? '5 giờ trước' : '5 hours ago',
+      icon: CheckCircle,
+      color: '#10B981'
+    },
+    {
+      title: language === 'vi' ? 'Bạn có tin nhắn mới từ ứng viên' : 'New message from candidate',
+      time: language === 'vi' ? '1 ngày trước' : '1 day ago',
+      icon: MessageSquare,
+      color: '#F59E0B'
+    },
+    {
+      title: language === 'vi' ? 'Báo cáo tuần đã sẵn sàng xem' : 'Weekly report is ready',
+      time: language === 'vi' ? '2 ngày trước' : '2 days ago',
+      icon: BarChart3,
+      color: '#8B5CF6'
+    }
+  ];
 
   const getGreeting = () => {
     const hour = currentTime.getHours();

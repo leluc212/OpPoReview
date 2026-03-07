@@ -6,7 +6,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
 import TableFilter from '../../components/TableFilter';
 import Modal from '../../components/Modal';
-import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText, Clock, Users, Newspaper, DollarSign, Edit, Trash2, TrendingUp, Plus, X, Wallet, AlertCircle, Save } from 'lucide-react';
+import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText, Clock, Users, Newspaper, DollarSign, Edit, Trash2, TrendingUp, Plus, X, XCircle, Wallet, AlertCircle, Save } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 // Mock job posts data
@@ -1277,6 +1277,8 @@ const ApplicationRow = React.memo(({
   onViewProfile,
   onCompleteJob,
   onMarkCandidate,
+  onApprove,
+  onReject,
   index = 0
 }) => {
   const { language } = useLanguage();
@@ -1319,12 +1321,17 @@ const ApplicationRow = React.memo(({
         <ActionButton onClick={() => onViewProfile(app)}>
           <Eye />{language === 'vi' ? 'Xem hồ sơ' : 'View'}
         </ActionButton>
-        {!app.completed && app.status === 'approved' && (
-          <ActionButton $variant="success" onClick={() => onCompleteJob(app.id)}>
-            <CheckCircle />{language === 'vi' ? 'Hoàn thành' : 'Complete'}
-          </ActionButton>
+        {app.status === 'pending' && (
+          <>
+            <ActionButton $variant="success" onClick={() => onApprove(app.id)}>
+              <CheckCircle />{language === 'vi' ? 'Duyệt' : 'Approve'}
+            </ActionButton>
+            <ActionButton $variant="danger" onClick={() => onReject(app.id)}>
+              <XCircle />{language === 'vi' ? 'Từ chối' : 'Reject'}
+            </ActionButton>
+          </>
         )}
-        {app.completed && (
+        {app.status === 'approved' && (
           <ActionButton $variant="warning" onClick={() => onMarkCandidate(app.id)}>
             <Star />{app.marked ? (language === 'vi' ? 'Bỏ đánh dấu' : 'Unmark') : (language === 'vi' ? 'Đánh dấu' : 'Mark')}
           </ActionButton>
@@ -1679,6 +1686,18 @@ const Applications = () => {
     ));
   }, []);
 
+  const handleApproveApplication = useCallback((id) => {
+    setApplications(prev => prev.map(app =>
+      app.id === id ? { ...app, status: 'approved' } : app
+    ));
+  }, []);
+
+  const handleRejectApplication = useCallback((id) => {
+    setApplications(prev => prev.map(app =>
+      app.id === id ? { ...app, status: 'rejected' } : app
+    ));
+  }, []);
+
   const handleViewProfile = useCallback((candidate) => {
     setSelectedCandidate(candidate);
   }, []);
@@ -1929,6 +1948,8 @@ const Applications = () => {
                     onViewProfile={handleViewProfile}
                     onCompleteJob={handleCompleteJob}
                     onMarkCandidate={handleMarkCandidate}
+                    onApprove={handleApproveApplication}
+                    onReject={handleRejectApplication}
                     index={index}
                   />
                 ))}
