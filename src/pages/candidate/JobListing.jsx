@@ -783,6 +783,43 @@ const JobsGrid = styled.div`
   }
 `;
 
+const BoostBannerWrap = styled.div`
+  position: relative;
+  margin-bottom: 16px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+  cursor: pointer;
+
+  img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.35s ease;
+  }
+
+  &:hover img {
+    transform: scale(1.02);
+  }
+`;
+
+const BoostTag = styled.div`
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 2;
+`;
+
 const JobCardWrapper = styled(motion.div)`
   background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.lg};
@@ -2933,6 +2970,11 @@ const JobListing = () => {
                 </ViewToggle>
               </ViewControls>
             </ContentHeader>
+
+            <BoostBannerWrap>
+              <BoostTag>🔥Hot deal</BoostTag>
+              <img src="/OpPoReview/images/seoul.jpg" alt="Seoul Vua Mì Cay" />
+            </BoostBannerWrap>
 
             <JobsGrid>
               {filteredJobs.length > 0 ? (
