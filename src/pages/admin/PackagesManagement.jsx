@@ -339,91 +339,91 @@ const PackagesManagement = () => {
       id: 1,
       employer: 'Highlands Coffee',
       package: 'Quick Boost',
-      purchaseDate: '2024-01-15',
-      expiryDate: '2024-02-15',
+      purchaseDate: '2025-01-15',
+      expiryDate: '2025-02-15',
       status: 'active',
-      price: 500000,
-      duration: '30 ngày'
+      price: 145000,
+      duration: '3 ngày'
     },
     {
       id: 2,
       employer: 'Phúc Long',
       package: 'Top Spotlight',
-      purchaseDate: '2024-01-20',
-      expiryDate: '2024-03-20',
+      purchaseDate: '2025-01-20',
+      expiryDate: '2025-03-20',
       status: 'active',
-      price: 1200000,
-      duration: '60 ngày'
+      price: 745000,
+      duration: '2 ngày'
     },
     {
       id: 3,
       employer: 'Katinat chi nhánh quận 8',
       package: 'Spotlight Banner',
-      purchaseDate: '2024-02-01',
-      expiryDate: '2024-05-01',
+      purchaseDate: '2025-02-01',
+      expiryDate: '2025-05-01',
       status: 'active',
-      price: 2500000,
-      duration: '90 ngày'
+      price: 495000,
+      duration: '1 ngày'
     },
     {
       id: 4,
       employer: 'The Coffee House',
       package: 'Top Spotlight',
-      purchaseDate: '2023-12-10',
-      expiryDate: '2024-01-10',
+      purchaseDate: '2025-01-10',
+      expiryDate: '2025-02-10',
       status: 'expired',
-      price: 5000000,
-      duration: '30 ngày'
+      price: 745000,
+      duration: '2 ngày'
     },
     {
       id: 5,
       employer: 'Starbucks chi nhánh quận 10',
       package: 'Top Spotlight',
-      purchaseDate: '2024-01-25',
-      expiryDate: '2024-04-25',
+      purchaseDate: '2025-01-25',
+      expiryDate: '2025-04-25',
       status: 'active',
-      price: 5000000,
-      duration: '90 ngày'
+      price: 745000,
+      duration: '3 ngày'
     },
     {
       id: 6,
       employer: 'Talk Bread chi nhánh Thủ Đức',
       package: 'Quick Boost',
-      purchaseDate: '2024-02-05',
-      expiryDate: '2024-02-12',
+      purchaseDate: '2025-02-05',
+      expiryDate: '2025-02-12',
       status: 'expiring',
-      price: 500000,
+      price: 145000,
       duration: '7 ngày'
     },
     {
       id: 7,
       employer: 'Trung Nguyên Legend',
       package: 'Hot Search',
-      purchaseDate: '2024-01-10',
-      expiryDate: '2024-02-10',
+      purchaseDate: '2025-01-10',
+      expiryDate: '2025-02-10',
       status: 'expiring',
-      price: 1200000,
-      duration: '30 ngày'
+      price: 245000,
+      duration: '3 ngày'
     },
     {
       id: 8,
       employer: 'Gong Cha chi nhánh quận 1',
       package: 'Spotlight Banner',
-      purchaseDate: '2024-01-18',
-      expiryDate: '2024-04-18',
+      purchaseDate: '2025-01-18',
+      expiryDate: '2025-04-18',
       status: 'active',
-      price: 2500000,
-      duration: '90 ngày'
+      price: 495000,
+      duration: '1 ngày'
     },
     {
-      id: 8,
+      id: 9,
       employer: 'Quán nhậu OK 3 con dê quận 8',
       package: 'Quick Boost',
-      purchaseDate: '2024-01-18',
-      expiryDate: '2024-04-18',
+      purchaseDate: '2025-01-18',
+      expiryDate: '2025-04-18',
       status: 'active',
-      price: 500000,
-      duration: '90 ngày'
+      price: 145000,
+      duration: '9 ngày'
     },
   ]);
 
@@ -561,7 +561,7 @@ const PackagesManagement = () => {
           </StatBox>
           <StatBox $color="#8b5cf6">
             <h3>{language === 'vi' ? 'Tổng doanh thu' : 'Total Revenue'}</h3>
-            <p>{(stats.totalRevenue / 1000000).toFixed(1)}M</p>
+            <p>{stats.totalRevenue.toLocaleString('vi-VN')} VND</p>
           </StatBox>
         </StatsRow>
 
@@ -706,7 +706,7 @@ const PackagesManagement = () => {
                     </td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
-                        {(purchase.price / 1000).toFixed(0)}K VND
+                        {purchase.price.toLocaleString('vi-VN')} VND
                       </div>
                     </td>
                     <td>
@@ -733,3 +733,4 @@ const PackagesManagement = () => {
 };
 
 export default PackagesManagement;
+

@@ -335,9 +335,9 @@ const AdminWallet = () => {
     {
       id: 1,
       type: 'income',
-      title: language === 'vi' ? 'Thanh toán gói Premium - Công ty ABC' : 'Premium package payment - ABC Company',
+      title: language === 'vi' ? 'Thanh toán gói Premium - Bamos chi nhánh Thủ Đức' : 'Premium package payment - ABC Company',
       amount: 5000000,
-      date: '15/02/2024',
+      date: '15/02/2026',
       time: '14:30',
       status: 'completed',
       method: language === 'vi' ? 'Chuyển khoản' : 'Bank transfer'
@@ -345,9 +345,9 @@ const AdminWallet = () => {
     {
       id: 2,
       type: 'expense',
-      title: language === 'vi' ? 'Hoàn tiền cho ứng viên Nguyễn Văn A' : 'Refund to candidate Nguyen Van A',
+      title: language === 'vi' ? 'Hoàn tiền cho ứng viên Nguyễn Thị Mỹ Chi' : 'Refund to candidate Nguyen Van A',
       amount: 500000,
-      date: '14/02/2024',
+      date: '14/02/2025',
       time: '10:15',
       status: 'completed',
       method: language === 'vi' ? 'Ví điện tử' : 'E-wallet'
@@ -355,9 +355,9 @@ const AdminWallet = () => {
     {
       id: 3,
       type: 'income',
-      title: language === 'vi' ? 'Phí dịch vụ quảng cáo - Công ty XYZ' : 'Advertising service fee - XYZ Company',
+      title: language === 'vi' ? 'Phí dịch vụ quảng cáo - Highlands chi nhánh quận 9' : 'Advertising service fee - XYZ Company',
       amount: 2500000,
-      date: '14/02/2024',
+      date: '14/02/2025',
       time: '09:00',
       status: 'completed',
       method: 'PayPal'
@@ -365,9 +365,9 @@ const AdminWallet = () => {
     {
       id: 4,
       type: 'income',
-      title: language === 'vi' ? 'Thanh toán gói Basic - Công ty DEF' : 'Basic package payment - DEF Company',
+      title: language === 'vi' ? 'Thanh toán gói Basic - Katinat chi nhánh quận 8' : 'Basic package payment - DEF Company',
       amount: 1500000,
-      date: '13/02/2024',
+      date: '13/02/2025',
       time: '16:45',
       status: 'pending',
       method: language === 'vi' ? 'Chuyển khoản' : 'Bank transfer'
@@ -377,7 +377,7 @@ const AdminWallet = () => {
       type: 'expense',
       title: language === 'vi' ? 'Chi phí vận hành hệ thống' : 'System operation cost',
       amount: 10000000,
-      date: '13/02/2024',
+      date: '13/02/2025',
       time: '08:00',
       status: 'completed',
       method: language === 'vi' ? 'Chuyển khoản' : 'Bank transfer'
@@ -387,7 +387,7 @@ const AdminWallet = () => {
       type: 'income',
       title: language === 'vi' ? 'Phí đăng tin - Nhiều nhà tuyển dụng' : 'Job posting fee - Multiple employers',
       amount: 8500000,
-      date: '12/02/2024',
+      date: '12/02/2025',
       time: '15:20',
       status: 'completed',
       method: language === 'vi' ? 'Ví điện tử' : 'E-wallet'
@@ -397,7 +397,7 @@ const AdminWallet = () => {
       type: 'expense',
       title: language === 'vi' ? 'Hoàn tiền do lỗi hệ thống' : 'Refund due to system error',
       amount: 1200000,
-      date: '12/02/2024',
+      date: '12/02/2025',
       time: '11:30',
       status: 'failed',
       method: language === 'vi' ? 'Chuyển khoản' : 'Bank transfer'
@@ -407,7 +407,7 @@ const AdminWallet = () => {
       type: 'income',
       title: language === 'vi' ? 'Gia hạn gói Premium - Công ty GHI' : 'Premium package renewal - GHI Company',
       amount: 5000000,
-      date: '11/02/2024',
+      date: '11/02/2025',
       time: '13:00',
       status: 'completed',
       method: 'PayPal'
@@ -528,3 +528,4 @@ const AdminWallet = () => {
 };
 
 export default AdminWallet;
+

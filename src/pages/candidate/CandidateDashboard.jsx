@@ -1370,29 +1370,7 @@ const CandidateDashboard = () => {
     },
   ];
 
-  const activities = [
-    {
-      type: 'view',
-      icon: Eye,
-      color: '#1e40af',
-      title: language === 'vi' ? '12 nhà tuyển dụng đã xem CV của bạn' : '12 employers viewed your CV',
-      time: language === 'vi' ? 'Hôm nay' : 'Today'
-    },
-    {
-      type: 'message',
-      icon: Bell,
-      color: '#F59E0B',
-      title: language === 'vi' ? 'Bạn có 3 phản hồi CV mới từ nhà tuyển dụng' : 'You have 3 new CV responses from employers',
-      time: language === 'vi' ? '2 giờ trước' : '2 hours ago'
-    },
-    {
-      type: 'match',
-      icon: Target,
-      color: '#1e40af',
-      title: language === 'vi' ? '5 công việc mới phù hợp với bạn' : '5 new jobs match your profile',
-      time: language === 'vi' ? '4 giờ trước' : '4 hours ago'
-    },
-  ];
+
 
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
@@ -1824,104 +1802,64 @@ const CandidateDashboard = () => {
 
         {/* Stats Overview moved to TopInfoRow */}
 
-        {/* Main Content Grid */}
-        <ContentGrid>
-          {/* Recommended Jobs */}
-          <Section
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <SectionHeader>
-              <h2>
-                <Target />
-                {language === 'vi' ? 'Việc Làm Phù Hợp Với Bạn' : 'Recommended Jobs'}
-              </h2>
-              <Link to="/candidate/jobs">
-                {language === 'vi' ? 'Xem tất cả' : 'View all'}
-                <ArrowUpRight />
-              </Link>
-            </SectionHeader>
-            
-            <JobsGrid>
-              {recommendedJobs.map((job, index) => (
-                <RecommendedJobCard
-                  key={job.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 + index * 0.1 }}
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <JobHeader>
-                    <CompanyLogo>
-                      {job.company.charAt(0)}
-                    </CompanyLogo>
-                    <JobInfo>
-                      <h4>{translateJobTitle(job.title)}</h4>
-                      <p>{job.company}</p>
-                    </JobInfo>
-                  </JobHeader>
-                  <JobDetails>
-                    <span>
-                      <MapPin />
-                      {translateLocation(job.location)}
-                    </span>
-                    <span>
-                      <DollarSign />
-                      {translateSalary(job.salary)}
-                    </span>
-                    <span>
-                      <Clock />
-                      {translatePostedAt(job.postedAt)}
-                    </span>
-                  </JobDetails>
-                  <JobTags>
-                    {job.tags.map((tag, idx) => (
-                      <span key={idx}>{translateTag(tag)}</span>
-                    ))}
-                  </JobTags>
-                </RecommendedJobCard>
-              ))}
-            </JobsGrid>
-          </Section>
-
-          {/* Activity Feed */}
-          <Section
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            <SectionHeader>
-              <h2>
-                <Bell />
-                {language === 'vi' ? 'Hoạt Động' : 'Activity'}
-              </h2>
-            </SectionHeader>
-            
-            <ActivityFeed>
-              {activities.map((activity, index) => {
-                const IconComponent = activity.icon;
-                return (
-                  <ActivityItem
-                    key={index}
-                    $color={activity.color}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5 + index * 0.1 }}
-                  >
-                    <ActivityIcon $color={activity.color}>
-                      <IconComponent />
-                    </ActivityIcon>
-                    <ActivityContent>
-                      <h5>{activity.title}</h5>
-                      <p>{activity.time}</p>
-                    </ActivityContent>
-                  </ActivityItem>
-                );
-              })}
-            </ActivityFeed>
-          </Section>
-        </ContentGrid>
+        {/* Recommended Jobs - Full Width */}
+        <Section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <SectionHeader>
+            <h2>
+              <Target />
+              {language === 'vi' ? 'Việc Làm Phù Hợp Với Bạn' : 'Recommended Jobs'}
+            </h2>
+            <Link to="/candidate/jobs">
+              {language === 'vi' ? 'Xem tất cả' : 'View all'}
+              <ArrowUpRight />
+            </Link>
+          </SectionHeader>
+          
+          <JobsGrid>
+            {recommendedJobs.map((job, index) => (
+              <RecommendedJobCard
+                key={job.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 + index * 0.1 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <JobHeader>
+                  <CompanyLogo>
+                    {job.company.charAt(0)}
+                  </CompanyLogo>
+                  <JobInfo>
+                    <h4>{translateJobTitle(job.title)}</h4>
+                    <p>{job.company}</p>
+                  </JobInfo>
+                </JobHeader>
+                <JobDetails>
+                  <span>
+                    <MapPin />
+                    {translateLocation(job.location)}
+                  </span>
+                  <span>
+                    <DollarSign />
+                    {translateSalary(job.salary)}
+                  </span>
+                  <span>
+                    <Clock />
+                    {translatePostedAt(job.postedAt)}
+                  </span>
+                </JobDetails>
+                <JobTags>
+                  {job.tags.map((tag, idx) => (
+                    <span key={idx}>{translateTag(tag)}</span>
+                  ))}
+                </JobTags>
+              </RecommendedJobCard>
+            ))}
+          </JobsGrid>
+        </Section>
 
       </DashboardContainer>
     </DashboardLayout>

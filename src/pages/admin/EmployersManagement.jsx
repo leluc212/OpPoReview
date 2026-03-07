@@ -544,8 +544,8 @@ const EmployersManagement = () => {
   const employers = [
     { 
       id: 1,
-      name: 'Highlands Coffee', 
-      email: 'hr@highlandscoffee.com', 
+      name: 'Katinat chi nhánh quận 8', 
+      email: 'hr@katinat.com', 
       verified: true,
       approvalStatus: 'approved',
       joined: '2026-03-06',
@@ -553,8 +553,8 @@ const EmployersManagement = () => {
     },
     { 
       id: 2,
-      name: 'Phúc Long Coffee & Tea', 
-      email: 'recruit@phuclong.com', 
+      name: 'The Coffee House chi nhánh Bình Thạnh', 
+      email: 'recruit@thecoffeehouse.com', 
       verified: true,
       approvalStatus: 'approved',
       joined: '2026-03-05',
@@ -562,8 +562,8 @@ const EmployersManagement = () => {
     },
     { 
       id: 3,
-      name: 'Katinat chi nhánh quận 8', 
-      email: 'hr@katinat.com', 
+      name: 'D coffee', 
+      email: 'hr@dcoffee.com', 
       verified: false,
       approvalStatus: 'pending',
       joined: '2026-02-03',
@@ -571,8 +571,8 @@ const EmployersManagement = () => {
     },
     { 
       id: 4,
-      name: 'The Coffee House', 
-      email: 'jobs@thecoffeehouse.com', 
+      name: 'Quán lẩu 88', 
+      email: 'jobs@quanlau88.com', 
       verified: false,
       approvalStatus: 'pending',
       joined: '2026-03-03',
@@ -580,39 +580,12 @@ const EmployersManagement = () => {
     },
     { 
       id: 5,
-      name: 'Starbucks Vietnam', 
-      email: 'careers@starbucks.vn', 
+      name: 'Nhà hàng cưới Victory', 
+      email: 'careers@victoryvn.com', 
       verified: true,
       approvalStatus: 'approved',
       joined: '2026-03-02',
       confirmDate: '2026-03-07',
-    },
-    { 
-      id: 6,
-      name: 'Trung Nguyên Legend', 
-      email: 'hr@trungnguyen.com', 
-      verified: true,
-      approvalStatus: 'approved',
-      joined: '2026-03-01',
-      confirmDate: '2026-03-06',
-    },
-    { 
-      id: 7,
-      name: 'Gong Cha Vietnam', 
-      email: 'recruit@gongcha.vn', 
-      verified: false,
-      approvalStatus: 'pending',
-      joined: '2026-02-28',
-      confirmDate: null,
-    },
-    { 
-      id: 8,
-      name: 'Lotteria Vietnam', 
-      email: 'hr@lotteria.vn', 
-      verified: true,
-      approvalStatus: 'approved',
-      joined: '2026-03-01',
-      confirmDate: '2026-03-06',
     },
   ];
 
@@ -642,42 +615,6 @@ const EmployersManagement = () => {
     pending: filteredEmployers.filter(e => e.approvalStatus === 'pending').length,
     rejected: filteredEmployers.filter(e => e.approvalStatus === 'rejected').length,
   };
-
-  // Urgent jobs data
-  const urgentJobsData = {
-    total: 35,
-    change: '+52',
-    commission: '22,8 triệu VND',
-    commissionRate: '18%'
-  };
-
-  // Boost packages data
-  const boostPackages = [
-    { name: 'Quick Boost', count: 20, icon: Zap, color: '#3b82f6', bgColor: '#dbeafe' },
-    { name: 'Spongit Banner', count: 8, icon: Target, color: '#8b5cf6', bgColor: '#ede9fe' },
-    { name: 'Hot Search', count: 12, icon: Flame, color: '#ef4444', bgColor: '#fee2e2' },
-    { name: 'Top Spotlight', count: 6, icon: Star, color: '#f59e0b', bgColor: '#fef3c7' },
-  ];
-
-  // Chart data for platform activity
-  const chartData = [
-    { day: 'T2', postings: 30, hires: 22 },
-    { day: 'T3', postings: 35, hires: 25 },
-    { day: 'T4', postings: 38, hires: 28 },
-    { day: 'T5', postings: 42, hires: 32 },
-    { day: 'T6', postings: 45, hires: 35 },
-    { day: 'T7', postings: 50, hires: 40 },
-    { day: 'CN', postings: 48, hires: 38 },
-  ];
-
-  const maxValue = Math.max(...chartData.flatMap(d => [d.postings, d.hires]));
-
-  // Recent activity data
-  const recentActivity = [
-    { user: 'Highlands Coffee', action: language === 'vi' ? 'Đăng tin tuyển Barista' : 'Posted Barista job', time: language === 'vi' ? '45 phút trước' : '45 min ago' },
-    { user: 'Phúc Long', action: language === 'vi' ? 'Mua gói Quick Boost' : 'Purchased Quick Boost', time: language === 'vi' ? '2 giờ trước' : '2 hours ago' },
-    { user: 'Katinat', action: language === 'vi' ? 'Tuyển 3 ứng viên' : 'Hired 3 candidates', time: language === 'vi' ? '4 giờ trước' : '4 hours ago' },
-  ];
 
   return (
     <DashboardLayout role="admin" key={language}>
@@ -713,143 +650,6 @@ const EmployersManagement = () => {
             color="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
           />
         </StatsGrid>
-
-        <OverviewSection>
-          <InfoCard>
-            <CardHeader $color="#f59e0b">
-              <Briefcase />
-              <h3>{language === 'vi' ? 'Bài Tuyển Gấp' : 'Urgent Jobs'}</h3>
-            </CardHeader>
-            <UrgentJobsBox>
-              <UrgentJobsTitle>
-                {urgentJobsData.total} {language === 'vi' ? 'Tin tuyển gấp' : 'Urgent jobs'}
-                <span style={{ fontSize: '16px', color: '#15803d' }}>{urgentJobsData.change}</span>
-              </UrgentJobsTitle>
-              <UrgentJobsSubtitle>
-                {language === 'vi' ? 'Hoa Hồng' : 'Commission'} {urgentJobsData.commissionRate}: {urgentJobsData.commission}
-              </UrgentJobsSubtitle>
-            </UrgentJobsBox>
-          </InfoCard>
-
-          <InfoCard>
-            <CardHeader $color="#8b5cf6">
-              <Zap />
-              <h3>{language === 'vi' ? 'Gói Boost' : 'Boost Packages'}</h3>
-            </CardHeader>
-            <BoostGrid>
-              {boostPackages.map((pkg, index) => (
-                <BoostItem key={index} $bgColor={pkg.bgColor}>
-                  <BoostInfo>
-                    <BoostIcon $color={pkg.color}>
-                      <pkg.icon />
-                    </BoostIcon>
-                    <BoostLabel>{pkg.name}</BoostLabel>
-                  </BoostInfo>
-                  <BoostValue>{pkg.count} {language === 'vi' ? 'Tin' : 'Jobs'}</BoostValue>
-                </BoostItem>
-              ))}
-            </BoostGrid>
-          </InfoCard>
-        </OverviewSection>
-
-        <OverviewSection>
-          <InfoCard>
-            <CardHeader $color="#3b82f6">
-              <TrendingUp />
-              <h3>{language === 'vi' ? 'Hoạt Động Nền Tảng' : 'Platform Activity'}</h3>
-            </CardHeader>
-            <ChartContainer>
-              <ChartSVG viewBox="0 0 700 280">
-                {/* Grid lines */}
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <line
-                    key={i}
-                    x1="50"
-                    y1={40 + i * 50}
-                    x2="650"
-                    y2={40 + i * 50}
-                    stroke="#e5e7eb"
-                    strokeWidth="1"
-                  />
-                ))}
-                
-                {/* Postings line */}
-                <polyline
-                  points={chartData.map((d, i) => 
-                    `${100 + i * 90},${240 - (d.postings / maxValue) * 180}`
-                  ).join(' ')}
-                  fill="none"
-                  stroke="#3b82f6"
-                  strokeWidth="3"
-                />
-                
-                {/* Hires line */}
-                <polyline
-                  points={chartData.map((d, i) => 
-                    `${100 + i * 90},${240 - (d.hires / maxValue) * 180}`
-                  ).join(' ')}
-                  fill="none"
-                  stroke="#10b981"
-                  strokeWidth="3"
-                />
-                
-                {/* Data points */}
-                {chartData.map((d, i) => (
-                  <g key={i}>
-                    <circle
-                      cx={100 + i * 90}
-                      cy={240 - (d.postings / maxValue) * 180}
-                      r="5"
-                      fill="#3b82f6"
-                    />
-                    <circle
-                      cx={100 + i * 90}
-                      cy={240 - (d.hires / maxValue) * 180}
-                      r="5"
-                      fill="#10b981"
-                    />
-                    <text
-                      x={100 + i * 90}
-                      y="265"
-                      textAnchor="middle"
-                      fontSize="13"
-                      fill="#6b7280"
-                      fontWeight="600"
-                    >
-                      {d.day}
-                    </text>
-                  </g>
-                ))}
-              </ChartSVG>
-            </ChartContainer>
-            <ChartLegend>
-              <LegendItem>
-                <LegendDot $color="#3b82f6" />
-                {language === 'vi' ? 'Tin Đăng Tuyển' : 'Job Postings'}
-              </LegendItem>
-              <LegendItem>
-                <LegendDot $color="#10b981" />
-                {language === 'vi' ? 'Tuyển Dụng' : 'Hires'}
-              </LegendItem>
-            </ChartLegend>
-          </InfoCard>
-
-          <InfoCard>
-            <CardHeader $color="#10b981">
-              <Clock />
-              <h3>{language === 'vi' ? 'Hoạt Động Gần Đây' : 'Recent Activity'}</h3>
-            </CardHeader>
-            <ActivityTable>
-              {recentActivity.map((activity, index) => (
-                <ActivityRow key={index}>
-                  <ActivityUser>{activity.user}</ActivityUser>
-                  <ActivityAction>{activity.action}</ActivityAction>
-                  <ActivityTime>{activity.time}</ActivityTime>
-                </ActivityRow>
-              ))}
-            </ActivityTable>
-          </InfoCard>
-        </OverviewSection>
 
         <FilterSection>
           <SearchBox>
