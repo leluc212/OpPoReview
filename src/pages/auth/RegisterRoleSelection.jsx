@@ -203,21 +203,21 @@ const Sub = styled.p`
 const CardGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 28px;
+  gap: 36px;
   width: 100%;
   margin-bottom: 40px;
   align-items: stretch;
 
   @media (max-width: 720px) {
     grid-template-columns: 1fr;
-    max-width: 440px;
+    max-width: 500px;
   }
 `;
 
 const RoleCard = styled(motion.div)`
   background: #fff;
-  border-radius: 26px;
-  padding: 40px 36px 36px;
+  border-radius: 28px;
+  padding: 48px 44px 44px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -256,67 +256,51 @@ const RoleCard = styled(motion.div)`
   }
 `;
 
-/* icon wrapper */
-const IconWrap = styled.div`
-  width: 72px;
-  height: 72px;
-  border-radius: 20px;
-  background: ${p => p.$bg};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 24px;
-  font-size: 32px;
-  flex-shrink: 0;
-  transition: transform 0.3s;
-
-  ${RoleCard}:hover & {
-    transform: scale(1.08) rotate(-4deg);
-  }
-`;
-
 const CardTitle = styled.h2`
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 800;
   color: #0f172a;
-  letter-spacing: -0.5px;
-  margin-bottom: 10px;
+  letter-spacing: -0.8px;
+  line-height: 1.2;
+  margin-bottom: 12px;
 `;
 
 const CardDesc = styled.p`
-  font-size: 14px;
+  font-size: 16px;
   color: #64748b;
-  line-height: 1.65;
-  margin-bottom: 24px;
+  line-height: 1.7;
+  font-weight: 400;
+  margin-bottom: 28px;
 `;
 
 const FeatureList = styled.ul`
   list-style: none;
-  margin: 0 0 32px;
+  margin: 0 0 36px;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   flex: 1;
 `;
 
 const FeatureItem = styled.li`
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 13.5px;
+  gap: 14px;
+  font-size: 15.5px;
   color: #475569;
   font-weight: 500;
+  line-height: 1.6;
 
   &::before {
     content: '✓';
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     border-radius: 6px;
     background: ${p => p.$bg};
     color: ${p => p.$c};
     font-weight: 800;
-    font-size: 12px;
+    font-size: 13px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -326,16 +310,16 @@ const FeatureItem = styled.li`
 
 const SelectBtn = styled(motion.button)`
   width: 100%;
-  height: 52px;
+  height: 56px;
   border: none;
   border-radius: 14px;
   background: ${p => p.$grad};
   background-size: 200%;
   animation: ${gradShift} 6s ease infinite;
   color: #fff;
-  font-size: 14.5px;
+  font-size: 16px;
   font-weight: 700;
-  letter-spacing: -0.2px;
+  letter-spacing: -0.3px;
   cursor: pointer;
   font-family: inherit;
   display: flex;
@@ -363,21 +347,6 @@ const SelectBtn = styled(motion.button)`
     transition: transform 0.25s;
   }
   &:hover .arrow { transform: translateX(5px); }
-`;
-
-/* popular badge */
-const Popular = styled.div`
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: linear-gradient(135deg, #f59e0b, #fb923c);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 800;
-  padding: 4px 10px;
-  border-radius: 999px;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
 `;
 
 /* ═══════════════════════════════════════════════
@@ -471,15 +440,12 @@ const RegisterRoleSelection = () => {
   const roles = [
     {
       key: 'candidate',
-      emoji: '🎯',
-      iconBg: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
       grad: 'linear-gradient(135deg, #0369a1 0%, #0E3995 50%, #1d4ed8 100%)',
       accent: '#3b82f6',
       shadow: 'rgba(59,130,246,0.45)',
       fBg: '#eff6ff',
       fC: '#2563eb',
       path: '/register/candidate',
-      popular: false,
       title: t.register.candidateTitle,
       desc: t.register.candidateDescription,
       features: [
@@ -492,15 +458,12 @@ const RegisterRoleSelection = () => {
     },
     {
       key: 'employer',
-      emoji: '🏢',
-      iconBg: 'linear-gradient(135deg, #f0f9ff 0%, #bae6fd 100%)',
       grad: 'linear-gradient(135deg, #0369a1 0%, #0E3995 50%, #1d4ed8 100%)',
       accent: '#0E3995',
       shadow: 'rgba(14,57,149,0.45)',
       fBg: '#eff6ff',
       fC: '#0E3995',
       path: '/register/employer',
-      popular: true,
       title: t.register.employerTitle,
       desc: t.register.employerDescription,
       features: [
@@ -508,16 +471,16 @@ const RegisterRoleSelection = () => {
         t.register.employerFeature2,
         t.register.employerFeature3,
         t.register.employerFeature4,
+        t.register.employerFeature5,
       ],
       btn: t.register.employerButton,
     },
   ];
 
   const chips = [
-    '☕ Barista', '🛵 Shipper', '📚 Gia sư', '🎨 Designer', '💻 Dev freelance',
-    '🏪 Bán hàng', '📦 Kho vận', '💆 Spa', '🎤 MC sự kiện', '🍜 Phục vụ',
-    '☕ Barista', '🛵 Shipper', '📚 Gia sư', '🎨 Designer', '💻 Dev freelance',
-    '🏪 Bán hàng', '📦 Kho vận', '💆 Spa', '🎤 MC sự kiện', '🍜 Phục vụ',
+    '🛒 Tư vấn sản phẩm', '🍳 Phụ bếp', '📦 Soạn hàng', '🌐 Phiên dịch', '🏨 Lễ tân', '📚 Gia sư',
+    '🛒 Tư vấn sản phẩm', '🍳 Phụ bếp', '📦 Soạn hàng', '🌐 Phiên dịch', '🏨 Lễ tân', '📚 Gia sư',
+    '🛒 Tư vấn sản phẩm', '🍳 Phụ bếp', '📦 Soạn hàng', '🌐 Phiên dịch', '🏨 Lễ tân', '📚 Gia sư',
   ];
 
   /* stagger */
@@ -593,10 +556,6 @@ const RegisterRoleSelection = () => {
                 whileHover={{ y: -8, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } }}
                 whileTap={{ scale: 0.985 }}
               >
-
-
-                <IconWrap $bg={r.iconBg}>{r.emoji}</IconWrap>
-
                 <CardTitle>{r.title}</CardTitle>
                 <CardDesc>{r.desc}</CardDesc>
 

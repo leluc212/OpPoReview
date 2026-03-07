@@ -65,7 +65,7 @@ const ROLES = {
     grad: 'linear-gradient(135deg, #0E3995, #2563eb, #3b82f6)',
     bg: 'linear-gradient(135deg, #f0f4ff, #dbeafe)',
     hero: {
-      eyebrow: 'Dành cho nhà tuyển dụng',
+      eyebrow: 'Chào mừng nhà tuyển dụng',
       h1: ['Tuyển dụng', 'nhanh hơn', 'thông minh hơn'],
       grad: ['#60a5fa', '#a5f3fc', '#bfdbfe'],
       sub: 'Đăng nhập vào dashboard quản lý — xem hồ sơ ứng viên, đăng tin tuyển dụng và phân tích chiến dịch ngay.',
