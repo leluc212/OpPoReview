@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import { Button, Input, FormGroup, Label } from '../../components/FormElements';
@@ -19,148 +19,236 @@ import {
 import { useLanguage } from '../../context/LanguageContext';
 
 const VerificationContainer = styled.div`
-  max-width: 900px;
+  width: 100%;
+  max-width: min(900px, 100%);
   margin: 0 auto;
+  padding: 0 clamp(12px, 3vw, 24px);
+  box-sizing: border-box;
 `;
 
-const Header = styled.div`
+const Header = styled(motion.div)`
   text-align: center;
-  margin-bottom: 48px;
+  margin-bottom: clamp(28px, 5vw, 48px);
+  
+  .header-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(52px, 7vw, 72px);
+    height: clamp(52px, 7vw, 72px);
+    background: ${props => props.theme.colors.primary};
+    border-radius: 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.25);
+    animation: float 3s ease-in-out infinite;
+    
+    svg {
+      width: clamp(24px, 3.5vw, 36px);
+      height: clamp(24px, 3.5vw, 36px);
+      color: white;
+    }
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
   
   h1 {
-    font-size: 32px;
+    font-size: clamp(20px, 3.5vw, 32px);
     font-weight: 800;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     color: ${props => props.theme.colors.text};
+    letter-spacing: -0.5px;
   }
   
   p {
-    font-size: 16px;
+    font-size: clamp(13px, 1.6vw, 16px);
     color: ${props => props.theme.colors.textLight};
+    max-width: 560px;
+    margin: 0 auto;
+    line-height: 1.65;
   }
 `;
 
 const StepperContainer = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 48px;
+  align-items: flex-start;
+  margin-bottom: clamp(28px, 5vw, 48px);
   position: relative;
+  padding: 0 clamp(8px, 2vw, 20px);
   
   &::before {
     content: '';
     position: absolute;
-    top: 20px;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: ${props => props.theme.colors.border};
+    top: clamp(18px, 2.5vw, 28px);
+    left: 12%;
+    right: 12%;
+    height: 3px;
+    background: ${props => props.theme.colors.borderLight};
     z-index: 0;
+    border-radius: 10px;
   }
 `;
 
-const ProgressLine = styled.div`
+const ProgressLine = styled(motion.div)`
   position: absolute;
-  top: 20px;
-  left: 0;
-  height: 2px;
+  top: clamp(18px, 2.5vw, 28px);
+  left: 12%;
+  height: 3px;
   background: ${props => props.theme.colors.primary};
   z-index: 0;
-  transition: width 0.5s ease;
-  width: ${props => props.$progress}%;
+  border-radius: 10px;
+  box-shadow: 0 0 16px rgba(30, 64, 175, 0.4);
 `;
 
-const Step = styled.div`
+const Step = styled(motion.div)`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   flex: 1;
   position: relative;
   z-index: 1;
   cursor: ${props => props.$clickable ? 'pointer' : 'default'};
+  transition: transform 0.3s ease;
+  
+  &:hover {
+    transform: ${props => props.$clickable ? 'translateY(-4px)' : 'none'};
+  }
   
   .step-circle {
-    width: 40px;
-    height: 40px;
+    width: clamp(36px, 4.5vw, 52px);
+    height: clamp(36px, 4.5vw, 52px);
     border-radius: 50%;
     background: ${props => {
       if (props.$completed) return props.theme.colors.success;
       if (props.$active) return props.theme.colors.primary;
       return props.theme.colors.bgLight;
     }};
-    border: 2px solid ${props => {
-      if (props.$completed) return props.theme.colors.success;
-      if (props.$active) return props.theme.colors.primary;
-      return props.theme.colors.border;
+    border: ${props => {
+      if (props.$completed) return `2.5px solid ${props.theme.colors.success}`;
+      if (props.$active) return `2.5px solid ${props.theme.colors.primary}`;
+      return `2.5px solid ${props.theme.colors.border}`;
     }};
     display: flex;
     align-items: center;
     justify-content: center;
     color: ${props => (props.$completed || props.$active) ? 'white' : props.theme.colors.textLight};
-    font-weight: 700;
-    transition: all 0.3s;
-    box-shadow: ${props => (props.$completed || props.$active) ? '0 4px 12px rgba(30, 64, 175, 0.3)' : 'none'};
+    font-weight: 800;
+    font-size: clamp(13px, 1.5vw, 17px);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: ${props => {
+      if (props.$completed || props.$active) {
+        return `0 8px 24px ${props.$active ? 'rgba(30, 64, 175, 0.35)' : 'rgba(16, 185, 129, 0.35)'}`;
+      }
+      return '0 2px 8px rgba(0, 0, 0, 0.05)';
+    }};
+    position: relative;
+    
+    svg {
+      width: clamp(16px, 2vw, 24px);
+      height: clamp(16px, 2vw, 24px);
+    }
+    
+    ${props => props.$active && `
+      animation: pulse 2s ease-in-out infinite;
+    `}
+  }
+  
+  @keyframes pulse {
+    0%, 100% { 
+      transform: scale(1);
+      box-shadow: 0 8px 24px rgba(30, 64, 175, 0.35);
+    }
+    50% { 
+      transform: scale(1.05);
+      box-shadow: 0 12px 32px rgba(30, 64, 175, 0.45);
+    }
   }
   
   .step-label {
-    font-size: 14px;
-    font-weight: 600;
+    font-size: clamp(10px, 1.2vw, 13px);
+    font-weight: 700;
     color: ${props => {
       if (props.$completed) return props.theme.colors.success;
-      if (props.$active) return props.theme.colors.text;
+      if (props.$active) return props.theme.colors.primary;
       return props.theme.colors.textLight;
     }};
     text-align: center;
+    transition: all 0.3s ease;
+    max-width: clamp(60px, 10vw, 100px);
+    line-height: 1.3;
+
+    @media (max-width: 480px) {
+      display: none;
+    }
   }
 `;
 
 const FormCard = styled(motion.div)`
   background: ${props => props.theme.colors.bgLight};
   border: 1px solid ${props => props.theme.colors.border};
-  border-radius: ${props => props.theme.borderRadius.xl};
-  padding: 40px;
-  box-shadow: ${props => props.theme.shadows.md};
+  border-radius: clamp(14px, 2vw, 22px);
+  padding: clamp(20px, 4vw, 40px) clamp(16px, 4vw, 40px);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.07);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: ${props => props.theme.colors.primary};
+  }
 `;
 
 const FormTitle = styled.div`
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 32px;
-  padding-bottom: 24px;
-  border-bottom: 2px solid ${props => props.theme.colors.border};
+  gap: 20px;
+  margin-bottom: 40px;
+  padding-bottom: 28px;
+  border-bottom: 2px solid ${props => props.theme.colors.borderLight};
+  position: relative;
   
   .icon {
-    width: 48px;
-    height: 48px;
-    border-radius: ${props => props.theme.borderRadius.md};
-    background: ${props => props.theme.colors.primary}20;
+    width: clamp(40px, 5vw, 52px);
+    height: clamp(40px, 5vw, 52px);
+    border-radius: 14px;
+    background: ${props => props.theme.colors.primary};
     display: flex;
     align-items: center;
     justify-content: center;
-    color: ${props => props.theme.colors.primary};
+    color: white;
+    box-shadow: 0 6px 18px rgba(30, 64, 175, 0.25);
+    flex-shrink: 0;
     
     svg {
-      width: 24px;
-      height: 24px;
+      width: clamp(20px, 2.5vw, 26px);
+      height: clamp(20px, 2.5vw, 26px);
     }
   }
   
   h2 {
-    font-size: 24px;
-    font-weight: 700;
+    font-size: clamp(16px, 2.5vw, 22px);
+    font-weight: 800;
     color: ${props => props.theme.colors.text};
+    letter-spacing: -0.3px;
   }
 `;
 
 const FormGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-  margin-bottom: 24px;
+  gap: clamp(14px, 2.5vw, 24px);
+  margin-bottom: clamp(14px, 2.5vw, 24px);
   
-  @media (max-width: 768px) {
+  @media (max-width: 640px) {
     grid-template-columns: 1fr;
   }
   
@@ -170,156 +258,254 @@ const FormGrid = styled.div`
 `;
 
 const FileUploadArea = styled.div`
-  border: 2px dashed ${props => props.$hasFile ? props.theme.colors.success : props.theme.colors.border};
-  border-radius: ${props => props.theme.borderRadius.lg};
-  padding: 24px;
+  border: 3px dashed ${props => props.$hasFile ? props.theme.colors.success : props.theme.colors.border};
+  border-radius: 20px;
+  padding: clamp(16px, 3vw, 28px) clamp(12px, 2.5vw, 20px);
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s;
-  background: ${props => props.$hasFile ? props.theme.colors.success + '10' : props.theme.colors.bgDark};
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: ${props => props.$hasFile ? props.theme.colors.success + '08' : props.theme.colors.bgDark};
+  position: relative;
+  overflow: hidden;
   
   &:hover {
     border-color: ${props => props.theme.colors.primary};
-    background: ${props => props.theme.colors.primary}10;
+    background: ${props => props.theme.colors.primary}0a;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(30, 64, 175, 0.13);
+    .upload-icon { transform: scale(1.08) translateY(-3px); }
   }
   
+  &:active { transform: translateY(0); }
+  
   .upload-icon {
-    width: 40px;
-    height: 40px;
-    margin: 0 auto 12px;
-    color: ${props => props.$hasFile ? props.theme.colors.success : props.theme.colors.textLight};
+    width: clamp(32px, 4vw, 44px);
+    height: clamp(32px, 4vw, 44px);
+    margin: 0 auto clamp(8px, 1.5vw, 14px);
+    color: ${props => props.$hasFile ? props.theme.colors.success : props.theme.colors.primary};
+    transition: all 0.3s ease;
   }
   
   .upload-text {
-    font-size: 15px;
-    font-weight: 600;
+    font-size: clamp(12px, 1.4vw, 15px);
+    font-weight: 700;
     color: ${props => props.$hasFile ? props.theme.colors.success : props.theme.colors.text};
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
   
   .upload-hint {
-    font-size: 13px;
+    font-size: clamp(11px, 1.2vw, 13px);
     color: ${props => props.theme.colors.textLight};
+    font-weight: 500;
   }
   
   img {
     max-width: 100%;
-    max-height: 150px;
+    max-height: clamp(100px, 15vw, 160px);
     object-fit: contain;
     margin-top: 12px;
-    border-radius: 8px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.09);
   }
   
-  input[type="file"] {
-    display: none;
-  }
+  input[type="file"] { display: none; }
 `;
 
 const ButtonGroup = styled.div`
   display: flex;
-  gap: 16px;
-  margin-top: 32px;
+  gap: clamp(10px, 2vw, 16px);
+  margin-top: clamp(20px, 3.5vw, 36px);
   
   button {
     flex: 1;
+    min-height: clamp(42px, 5vw, 50px);
+    font-size: clamp(13px, 1.5vw, 15px);
+    font-weight: 700;
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.14);
+    }
+  }
+  
+  @media (max-width: 480px) {
+    flex-direction: column;
   }
 `;
 
-const InfoBox = styled.div`
-  background: ${props => props.theme.colors.info}15;
-  border-left: 4px solid ${props => props.theme.colors.info};
-  padding: 16px;
-  border-radius: ${props => props.theme.borderRadius.md};
-  margin-bottom: 24px;
-  
+const InfoBox = styled(motion.div)`
+  background: ${props => props.theme.colors.primary}08;
+  border: 2px solid ${props => props.theme.colors.primary}30;
+  border-left: 5px solid ${props => props.theme.colors.primary};
+  padding: clamp(12px, 2vw, 18px) clamp(14px, 2.5vw, 22px);
+  border-radius: 14px;
+  margin-bottom: clamp(18px, 3vw, 28px);
   display: flex;
   gap: 12px;
+  box-shadow: 0 3px 10px rgba(30, 64, 175, 0.07);
   
   svg {
     width: 20px;
     height: 20px;
-    color: ${props => props.theme.colors.info};
+    color: ${props => props.theme.colors.primary};
     flex-shrink: 0;
     margin-top: 2px;
   }
   
   .info-content {
+    flex: 1;
+    
     p {
-      font-size: 14px;
+      font-size: clamp(12px, 1.3vw, 14px);
       color: ${props => props.theme.colors.text};
-      line-height: 1.6;
-      margin-bottom: 8px;
-      
-      &:last-child {
-        margin-bottom: 0;
-      }
+      line-height: 1.65;
+      margin-bottom: 6px;
+      &:last-child { margin-bottom: 0; }
     }
     
     strong {
-      font-weight: 600;
+      font-weight: 700;
+      color: ${props => props.theme.colors.primary};
     }
   }
 `;
 
-const CompletionCard = styled(motion.div)`
-  background: linear-gradient(135deg, ${props => props.theme.colors.success} 0%, ${props => props.theme.colors.success}dd 100%);
-  border-radius: ${props => props.theme.borderRadius.xl};
-  padding: 64px 40px;
+const VerifiedContainer = styled(motion.div)`
   text-align: center;
-  color: white;
+  padding: clamp(32px, 6vw, 56px) clamp(16px, 4vw, 40px);
   
-  .success-icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 24px;
-    background: rgba(255, 255, 255, 0.2);
+  .verified-icon-wrapper {
+    width: clamp(80px, 10vw, 110px);
+    height: clamp(80px, 10vw, 110px);
+    margin: 0 auto clamp(16px, 3vw, 24px);
+    background: ${props => props.theme.colors.success}15;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -12px;
+      border: 3px solid ${props => props.theme.colors.success}30;
+      border-radius: 50%;
+      animation: ripple 2s ease-out infinite;
+    }
     
     svg {
-      width: 48px;
-      height: 48px;
+      color: ${props => props.theme.colors.success};
+      filter: drop-shadow(0 4px 12px rgba(16, 185, 129, 0.3));
     }
   }
   
-  h2 {
-    font-size: 32px;
+  @keyframes ripple {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1.2);
+      opacity: 0;
+    }
+  }
+  
+  h3 {
+    font-size: clamp(16px, 2.5vw, 22px);
     font-weight: 800;
-    margin-bottom: 16px;
+    color: ${props => props.theme.colors.success};
+    margin-bottom: 10px;
+    letter-spacing: -0.3px;
   }
   
   p {
-    font-size: 16px;
-    opacity: 0.9;
-    margin-bottom: 32px;
-    line-height: 1.6;
+    color: ${props => props.theme.colors.textLight};
+    max-width: 460px;
+    margin: 0 auto;
+    line-height: 1.65;
+    font-size: clamp(13px, 1.4vw, 15px);
+  }
+`;
+
+const CompletionCard = styled(motion.div)`
+  background: ${props => props.theme.colors.success};
+  border-radius: clamp(16px, 2.5vw, 24px);
+  padding: clamp(40px, 7vw, 64px) clamp(20px, 5vw, 48px);
+  text-align: center;
+  color: white;
+  box-shadow: 0 16px 48px rgba(16, 185, 129, 0.28);
+  position: relative;
+  overflow: hidden;
+  
+  .success-icon {
+    width: clamp(64px, 9vw, 88px);
+    height: clamp(64px, 9vw, 88px);
+    margin: 0 auto clamp(20px, 3vw, 28px);
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+    position: relative;
+    animation: bounce 2s ease-in-out infinite;
+    
+    svg {
+      width: 52px;
+      height: 52px;
+    }
+  }
+  
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  
+  h2 {
+    font-size: clamp(20px, 3.5vw, 32px);
+    font-weight: 900;
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+  }
+  
+  p {
+    font-size: clamp(13px, 1.6vw, 16px);
+    opacity: 0.94;
+    margin-bottom: clamp(24px, 4vw, 36px);
+    line-height: 1.7;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
   }
   
   button {
     background: white;
     color: ${props => props.theme.colors.success};
-    font-weight: 700;
-    padding: 14px 32px;
-    border-radius: ${props => props.theme.borderRadius.md};
-    
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    }
+    font-weight: 800;
+    padding: clamp(12px, 1.5vw, 15px) clamp(24px, 4vw, 36px);
+    border-radius: 12px;
+    font-size: clamp(13px, 1.5vw, 15px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+    transition: all 0.3s ease;
+    &:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,0.18); }
   }
 `;
 
 const VideoWrapper = styled.div`
   width: 100%;
-  max-width: 400px;
+  max-width: min(420px, 100%);
   margin: 0 auto;
-  border-radius: 16px;
+  border-radius: clamp(14px, 2vw, 20px);
   overflow: hidden;
   background: #1a1a2e;
   aspect-ratio: 4/3;
   position: relative;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.18);
+  border: 3px solid ${props => props.theme.colors.border};
   
   video, img {
     width: 100%;
@@ -570,9 +756,15 @@ const CandidateKYC = () => {
   return (
     <DashboardLayout role="candidate">
       <VerificationContainer>
-        <Header>
+        <Header
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="header-icon">
+            <Shield />
+          </div>
           <h1>
-            <Shield style={{ display: 'inline', marginRight: '12px', verticalAlign: 'middle' }} />
             {language === 'vi' ? 'Xác Minh eKYC' : 'eKYC Verification'}
           </h1>
           <p>{language === 'vi' 
@@ -581,7 +773,11 @@ const CandidateKYC = () => {
         </Header>
 
         <StepperContainer>
-          <ProgressLine $progress={getProgress()} />
+          <ProgressLine 
+            initial={{ width: 0 }}
+            animate={{ width: `${getProgress()}%` }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
+          />
           {steps.map((step, index) => (
             <Step
               key={step.id}
@@ -589,14 +785,23 @@ const CandidateKYC = () => {
               $completed={completedSteps.includes(index)}
               $clickable={completedSteps.includes(index)}
               onClick={() => completedSteps.includes(index) && setCurrentStep(index)}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+              whileHover={completedSteps.includes(index) ? { scale: 1.05 } : {}}
             >
-              <div className="step-circle">
+              <motion.div 
+                className="step-circle"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.4, delay: index * 0.1 + 0.2, type: "spring" }}
+              >
                 {completedSteps.includes(index) ? (
-                  <CheckCircle size={20} />
+                  <CheckCircle size={24} />
                 ) : (
                   <span>{index + 1}</span>
                 )}
-              </div>
+              </motion.div>
               <div className="step-label">{step.label}</div>
             </Step>
           ))}
@@ -619,17 +824,23 @@ const CandidateKYC = () => {
                 <h2>{language === 'vi' ? 'Xác Minh Email' : 'Email Verification'}</h2>
               </FormTitle>
 
-              <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                <CheckCircle size={64} style={{ color: '#10B981', margin: '0 auto 16px' }} />
-                <h3 style={{ fontSize: '20px', fontWeight: 600, color: '#10B981', marginBottom: '8px' }}>
+              <VerifiedContainer
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className="verified-icon-wrapper">
+                  <CheckCircle size={72} />
+                </div>
+                <h3>
                   {language === 'vi' ? 'Email đã được xác minh!' : 'Email Verified!'}
                 </h3>
-                <p style={{ color: '#64748B', maxWidth: '400px', margin: '0 auto' }}>
+                <p>
                   {language === 'vi' 
                     ? 'Email của bạn đã được xác minh tự động khi đăng ký tài khoản. Bạn có thể tiếp tục phần xác minh danh tính.' 
                     : 'Your email has been automatically verified during registration. You can proceed with identity verification.'}
                 </p>
-              </div>
+              </VerifiedContainer>
 
               <ButtonGroup>
                 <Button $variant="secondary" onClick={() => navigate('/candidate/profile')}>
@@ -660,7 +871,11 @@ const CandidateKYC = () => {
                 <h2>{language === 'vi' ? 'Xác Minh Số Điện Thoại' : 'Phone Verification'}</h2>
               </FormTitle>
 
-              <InfoBox>
+              <InfoBox
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+              >
                 <AlertCircle />
                 <div className="info-content">
                   <p>{language === 'vi' 
@@ -734,7 +949,11 @@ const CandidateKYC = () => {
                 <h2>{language === 'vi' ? 'Xác Minh CCCD/CMND' : 'ID Card Verification'}</h2>
               </FormTitle>
 
-              <InfoBox>
+              <InfoBox
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+              >
                 <AlertCircle />
                 <div className="info-content">
                   <p><strong>{language === 'vi' ? 'Lưu ý:' : 'Note:'}</strong></p>
@@ -860,7 +1079,11 @@ const CandidateKYC = () => {
                 <h2>{language === 'vi' ? 'Xác Minh Khuôn Mặt' : 'Face Verification'}</h2>
               </FormTitle>
 
-              <InfoBox>
+              <InfoBox
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+              >
                 <AlertCircle />
                 <div className="info-content">
                   <p><strong>{language === 'vi' ? 'Hướng dẫn:' : 'Instructions:'}</strong></p>
