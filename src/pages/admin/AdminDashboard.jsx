@@ -721,10 +721,10 @@ const AdminDashboard = () => {
   };
 
   const boostPackages = [
-    { name: 'Quick Boost', count: 16, icon: '⚡', iconBg: '#DBEAFE', iconColor: '#1E40AF' },
+    { name: 'Bài viết', count: 16, icon: '⚡', iconBg: '#DBEAFE', iconColor: '#1E40AF' },
     { name: 'Hot Search', count: 9, icon: '🔥', iconBg: '#FEE2E2', iconColor: '#DC2626' },
-    { name: 'Spotlight Banner', count: 6, icon: '📱', iconBg: '#E0E7FF', iconColor: '#4F46E5' },
-    { name: 'Top Spotlight', count: 4, icon: '⭐', iconBg: '#FCE7F3', iconColor: '#BE185D' }
+    { name: 'Banner nổi bật 1', count: 6, icon: '📱', iconBg: '#E0E7FF', iconColor: '#4F46E5' },
+    { name: 'Banner nổi bật 2', count: 4, icon: '⭐', iconBg: '#FCE7F3', iconColor: '#BE185D' }
   ];
 
   // Dữ liệu chuẩn cho biểu đồ - sử dụng thống nhất cho toàn bộ website

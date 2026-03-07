@@ -367,7 +367,6 @@ const Sidebar = ({ role }) => {
     ]},
     { section: t.sidebar.account, items: [
       { to: '/candidate/profile', icon: Users, label: t.sidebar.myProfile },
-      { to: '/candidate/settings', icon: Settings, label: t.sidebar.settings },
     ]},
     { section: t.sidebar.utilities, items: [
       { to: '/candidate/wallet', icon: Wallet, label: t.sidebar.digitalWallet },
@@ -387,7 +386,6 @@ const Sidebar = ({ role }) => {
     { section: t.sidebar.account, items: [
       { to: '/employer/profile', icon: Users, label: t.sidebar.companyProfile },
       { to: '/employer/subscription', icon: CreditCard, label: t.sidebar.subscription },
-      { to: '/employer/settings', icon: Settings, label: t.sidebar.settings },
     ]},
     { section: t.sidebar.utilities, items: [
       { to: '/employer/analytics', icon: BarChart3, label: t.sidebar.reports || 'Analytics' },
@@ -412,7 +410,6 @@ const Sidebar = ({ role }) => {
       { to: '/admin/wallet', icon: Wallet, label: t.sidebar.digitalWallet },
       { to: '/admin/notifications', icon: Bell, label: t.sidebar.notifications },
       { to: '/admin/profile', icon: User, label: t.sidebar.myProfile },
-      { to: '/admin/settings', icon: Settings, label: t.sidebar.settings },
     ]}
   ];
   
