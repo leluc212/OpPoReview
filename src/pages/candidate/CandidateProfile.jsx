@@ -55,6 +55,10 @@ const ZaloIcon = ({ size = 24, color = "#0068FF", ...props }) => (
 const ProfileContainer = styled.div`
   max-width: 1400px;
   margin: 0 auto;
+
+  @media (max-width: 768px) {
+    padding: 0 2px;
+  }
 `;
 
 const ProfileHeader = styled(motion.div)`
@@ -93,6 +97,29 @@ const ProfileHeader = styled(motion.div)`
     gap: 12px;
     z-index: 1;
   }
+
+  @media (max-width: 768px) {
+    padding: 28px 20px 24px;
+    margin-bottom: 20px;
+    border-radius: ${props => props.theme.borderRadius.lg};
+
+    .header-content {
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      text-align: center;
+      padding-top: 16px;
+    }
+
+    .header-actions {
+      top: 14px;
+      right: 14px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    padding: 22px 14px 20px;
+  }
 `;
 
 const AvatarWrapper = styled.div`
@@ -113,6 +140,19 @@ const Avatar = styled.div`
   font-weight: 700;
   border: 5px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+
+  @media (max-width: 768px) {
+    width: 100px;
+    height: 100px;
+    font-size: 40px;
+    border-width: 4px;
+  }
+
+  @media (max-width: 480px) {
+    width: 84px;
+    height: 84px;
+    font-size: 34px;
+  }
 `;
 
 const AvatarUpload = styled.label`
@@ -195,6 +235,7 @@ const HeaderInfo = styled.div`
     display: flex;
     gap: 32px;
     margin-top: 20px;
+    flex-wrap: wrap;
     
     .info-item {
       display: flex;
@@ -207,6 +248,40 @@ const HeaderInfo = styled.div`
         width: 18px;
         height: 18px;
       }
+    }
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
+    .title {
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    .info-row {
+      gap: 12px;
+      margin-top: 12px;
+      justify-content: center;
+
+      .info-item {
+        font-size: 13px;
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    h1 { font-size: 20px; }
+
+    .info-row {
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
     }
   }
 `;
@@ -225,6 +300,7 @@ const HeaderButton = styled(motion.button)`
   align-items: center;
   gap: 8px;
   transition: all 0.2s;
+  white-space: nowrap;
   
   svg {
     width: 16px;
@@ -234,6 +310,18 @@ const HeaderButton = styled(motion.button)`
   &:hover {
     background: rgba(255, 255, 255, 0.3);
     border-color: rgba(255, 255, 255, 0.5);
+  }
+
+  @media (max-width: 768px) {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 7px 11px;
+    font-size: 12px;
+
+    span { display: none; }
   }
 `;
 
@@ -281,6 +369,10 @@ const ContentGrid = styled.div`
   
   @media (max-width: 1200px) {
     grid-template-columns: 1fr;
+  }
+
+  @media (max-width: 768px) {
+    gap: 16px;
   }
 `;
 
@@ -347,6 +439,26 @@ const Card = styled(motion.div)`
       }
     }
   }
+
+  @media (max-width: 768px) {
+    padding: 20px 16px;
+    border-radius: ${props => props.theme.borderRadius.lg};
+
+    .card-header {
+      margin-bottom: 18px;
+
+      h2 { font-size: 17px; }
+
+      .edit-btn {
+        padding: 6px 12px;
+        font-size: 13px;
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    padding: 16px 12px;
+  }
 `;
 
 const FormGrid = styled.div`
@@ -356,6 +468,14 @@ const FormGrid = styled.div`
   
   .full-width {
     grid-column: 1 / -1;
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+
+    .full-width {
+      grid-column: 1;
+    }
   }
 `;
 
@@ -592,6 +712,14 @@ const ModalFormGrid = styled.div`
 
   .full-width {
     grid-column: 1 / -1;
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+
+    .full-width {
+      grid-column: 1;
+    }
   }
 `;
 
