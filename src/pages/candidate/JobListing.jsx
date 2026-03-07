@@ -347,190 +347,113 @@ const ToggleButton = styled(motion.button)`
 `;
 
 const ApplyModalWrap = styled.div`
+  padding: 32px 28px 28px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
 
-  .apply-header {
-    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 60%, #3b82f6 100%);
-    padding: 36px 32px 28px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
+  .apply-emoji {
+    font-size: 52px;
+    line-height: 1;
+  }
 
-    &::before {
-      content: '';
-      position: absolute;
-      top: -40px;
-      right: -40px;
-      width: 160px;
-      height: 160px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 50%;
-    }
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: -30px;
-      left: -30px;
-      width: 120px;
-      height: 120px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 50%;
-    }
+  h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: ${props => props.theme.colors.text};
+    margin: 0;
+    letter-spacing: -0.2px;
+  }
 
-    .icon-ring {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.15);
-      border: 2px solid rgba(255,255,255,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 16px;
-      position: relative;
-      z-index: 1;
+  .apply-desc {
+    font-size: 14px;
+    color: ${props => props.theme.colors.textLight};
+    line-height: 1.65;
+    margin: 0;
+    max-width: 340px;
 
-      svg {
-        width: 34px;
-        height: 34px;
-        color: #ffffff;
-      }
-    }
-
-    h3 {
-      font-size: 22px;
-      font-weight: 800;
-      color: #ffffff;
-      margin-bottom: 6px;
-      position: relative;
-      z-index: 1;
-      letter-spacing: -0.3px;
-    }
-
-    p.subtitle {
-      font-size: 13px;
-      color: rgba(255,255,255,0.72);
-      position: relative;
-      z-index: 1;
-      margin: 0;
+    strong {
+      color: ${props => props.theme.colors.text};
+      font-weight: 700;
     }
   }
 
-  .apply-body {
-    padding: 28px 32px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+  .apply-info-card {
+    width: 100%;
+    background: ${props => props.theme.colors.bgDark};
+    border: 1px solid ${props => props.theme.colors.border};
+    border-radius: 12px;
+    overflow: hidden;
+    text-align: left;
 
-    .apply-desc {
-      text-align: center;
-      font-size: 14.5px;
-      color: ${props => props.theme.colors.textLight};
-      line-height: 1.65;
-      margin: 0;
-
-      strong {
-        color: ${props => props.theme.colors.text};
-        font-weight: 700;
-      }
-    }
-
-    .apply-info-card {
-      background: ${props => props.theme.colors.bgDark};
-      border: 1px solid ${props => props.theme.colors.border};
-      border-radius: 16px;
-      overflow: hidden;
-
-      .info-row {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        padding: 14px 18px;
-
-        &:not(:last-child) {
-          border-bottom: 1px solid ${props => props.theme.colors.border};
-        }
-
-        .info-icon {
-          width: 36px;
-          height: 36px;
-          border-radius: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-
-          svg {
-            width: 17px;
-            height: 17px;
-          }
-
-          &.blue  { background: rgba(59,130,246,0.12); color: #3b82f6; }
-          &.purple { background: rgba(139,92,246,0.12); color: #8b5cf6; }
-          &.orange { background: rgba(249,115,22,0.12); color: #f97316; }
-          &.green { background: rgba(16,185,129,0.12); color: #10b981; }
-        }
-
-        .info-label {
-          font-size: 12.5px;
-          color: ${props => props.theme.colors.textLight};
-          flex: 1;
-        }
-
-        .info-value {
-          font-size: 14px;
-          font-weight: 700;
-          color: ${props => props.theme.colors.text};
-          text-align: right;
-
-          &.salary { color: #10b981; }
-        }
-      }
-    }
-
-    .apply-buttons {
+    .info-row {
       display: flex;
-      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+      padding: 11px 16px;
 
-      button {
-        flex: 1;
-        padding: 13px 20px;
-        border-radius: 14px;
-        font-weight: 700;
-        font-size: 14.5px;
-        cursor: pointer;
-        transition: all 0.25s ease;
-        border: none;
-        letter-spacing: 0.1px;
+      &:not(:last-child) {
+        border-bottom: 1px solid ${props => props.theme.colors.border};
       }
 
-      .btn-cancel {
-        background: ${props => props.theme.colors.bgDark};
+      .info-label {
+        font-size: 13px;
         color: ${props => props.theme.colors.textLight};
-        border: 1.5px solid ${props => props.theme.colors.border};
-
-        &:hover {
-          background: ${props => props.theme.colors.border};
-          color: ${props => props.theme.colors.text};
-        }
       }
 
-      .btn-confirm {
-        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-        color: white;
-        box-shadow: 0 4px 16px rgba(59,130,246,0.35);
+      .info-value {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: ${props => props.theme.colors.text};
+        text-align: right;
+        max-width: 60%;
 
-        &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(59,130,246,0.45);
-        }
-
-        &:active {
-          transform: translateY(0);
-        }
+        &.salary { color: #10b981; }
       }
+    }
+  }
+
+  .apply-buttons {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+
+    button {
+      flex: 1;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .btn-cancel {
+      background: ${props => props.theme.colors.bgDark};
+      color: ${props => props.theme.colors.textLight};
+      border: 1.5px solid ${props => props.theme.colors.border};
+
+      &:hover {
+        background: ${props => props.theme.colors.border};
+        color: ${props => props.theme.colors.text};
+      }
+    }
+
+    .btn-confirm {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      color: white;
+      box-shadow: 0 4px 14px rgba(59,130,246,0.35);
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(59,130,246,0.45);
+      }
+
+      &:active { transform: translateY(0); }
     }
   }
 `;
@@ -3124,57 +3047,46 @@ const JobListing = () => {
         isOpen={!!applyModal}
         onClose={() => setApplyModal(null)}
         title=""
-        noPadding
       >
         {applyModal && (
           <ApplyModalWrap onClick={e => e.stopPropagation()}>
-            <div className="apply-header">
-              <div className="icon-ring">
-                <Briefcase />
+            <div className="apply-emoji">📋</div>
+
+            <h3>{language === 'vi' ? 'Xác nhận ứng tuyển' : 'Confirm Application'}</h3>
+
+            <p className="apply-desc">
+              {language === 'vi'
+                ? <>Bạn muốn gửi CV ứng tuyển vào vị trí <strong>{applyModal.job.title}</strong> tại <strong>{applyModal.job.company}</strong>?</>
+                : <>Send your CV for <strong>{applyModal.job.title}</strong> at <strong>{applyModal.job.company}</strong>?</>
+              }
+            </p>
+
+            <div className="apply-info-card">
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Vị trí' : 'Position'}:</span>
+                <span className="info-value">{translateJobTitle(applyModal.job.title, language)}</span>
               </div>
-              <h3>{language === 'vi' ? 'Xác nhận ứng tuyển' : 'Confirm Application'}</h3>
-              <p className="subtitle">{language === 'vi' ? 'Kiểm tra thông tin trước khi gửi CV' : 'Review your details before sending'}</p>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Công ty' : 'Company'}:</span>
+                <span className="info-value">{applyModal.job.company}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Địa điểm' : 'Location'}:</span>
+                <span className="info-value">{applyModal.job.location}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Mức lương' : 'Salary'}:</span>
+                <span className="info-value salary">{translateSalary(applyModal.job.category === 'shift' ? calculateShiftSalary(applyModal.job) : applyModal.job.salary, language)}</span>
+              </div>
             </div>
 
-            <div className="apply-body">
-              <p className="apply-desc">
-                {language === 'vi'
-                  ? <>Bạn muốn gửi CV ứng tuyển vào vị trí <strong>{applyModal.job.title}</strong> tại <strong>{applyModal.job.company}</strong>?</>
-                  : <>Send your CV for <strong>{applyModal.job.title}</strong> at <strong>{applyModal.job.company}</strong>?</>
-                }
-              </p>
-
-              <div className="apply-info-card">
-                <div className="info-row">
-                  <div className="info-icon blue"><Briefcase /></div>
-                  <span className="info-label">{language === 'vi' ? 'Vị trí' : 'Position'}</span>
-                  <span className="info-value">{translateJobTitle(applyModal.job.title, language)}</span>
-                </div>
-                <div className="info-row">
-                  <div className="info-icon purple"><Building2 /></div>
-                  <span className="info-label">{language === 'vi' ? 'Công ty' : 'Company'}</span>
-                  <span className="info-value">{applyModal.job.company}</span>
-                </div>
-                <div className="info-row">
-                  <div className="info-icon orange"><MapPin /></div>
-                  <span className="info-label">{language === 'vi' ? 'Địa điểm' : 'Location'}</span>
-                  <span className="info-value">{applyModal.job.location}</span>
-                </div>
-                <div className="info-row">
-                  <div className="info-icon green"><DollarSign /></div>
-                  <span className="info-label">{language === 'vi' ? 'Mức lương' : 'Salary'}</span>
-                  <span className="info-value salary">{translateSalary(applyModal.job.category === 'shift' ? calculateShiftSalary(applyModal.job) : applyModal.job.salary, language)}</span>
-                </div>
-              </div>
-
-              <div className="apply-buttons">
-                <button className="btn-cancel" onClick={() => setApplyModal(null)}>
-                  {language === 'vi' ? 'Hủy' : 'Cancel'}
-                </button>
-                <button className="btn-confirm" onClick={confirmApply}>
-                  {language === 'vi' ? 'Gửi CV ngay' : 'Send CV'}
-                </button>
-              </div>
+            <div className="apply-buttons">
+              <button className="btn-cancel" onClick={() => setApplyModal(null)}>
+                {language === 'vi' ? 'Hủy' : 'Cancel'}
+              </button>
+              <button className="btn-confirm" onClick={confirmApply}>
+                {language === 'vi' ? 'Gửi CV ngay' : 'Send CV'}
+              </button>
             </div>
           </ApplyModalWrap>
         )}
