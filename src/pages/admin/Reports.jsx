@@ -850,9 +850,9 @@ const Reports = () => {
                   <tbody>
                     <tr>
                       <td style={{ fontWeight: 600 }}>{language === 'vi' ? 'Báo Cáo Doanh Thu' : 'Revenue Report'}</td>
-                      <td>{language === 'vi' ? 'Tháng 6/2024' : 'June 2024'}</td>
+                      <td>{language === 'vi' ? 'Tháng 6/2026' : 'June 2026'}</td>
                       <td><span style={{ color: '#10b981', fontWeight: 600 }}>{language === 'vi' ? 'Hoàn Thành' : 'Completed'}</span></td>
-                      <td>2024-06-30</td>
+                      <td>2026-06-30</td>
                       <td>
                         <DownloadButton style={{ padding: '6px 12px', fontSize: '12px' }}>
                           <Download size={14} />
@@ -862,9 +862,9 @@ const Reports = () => {
                     </tr>
                     <tr>
                       <td style={{ fontWeight: 600 }}>{language === 'vi' ? 'Báo Cáo Người Dùng' : 'User Report'}</td>
-                      <td>{language === 'vi' ? 'Tháng 6/2024' : 'June 2024'}</td>
+                      <td>{language === 'vi' ? 'Tháng 6/2026' : 'June 2026'}</td>
                       <td><span style={{ color: '#10b981', fontWeight: 600 }}>{language === 'vi' ? 'Hoàn Thành' : 'Completed'}</span></td>
-                      <td>2024-06-30</td>
+                      <td>2026-06-30</td>
                       <td>
                         <DownloadButton style={{ padding: '6px 12px', fontSize: '12px' }}>
                           <Download size={14} />
@@ -874,9 +874,9 @@ const Reports = () => {
                     </tr>
                     <tr>
                       <td style={{ fontWeight: 600 }}>{language === 'vi' ? 'Báo Cáo Tin Đăng' : 'Job Posts Report'}</td>
-                      <td>{language === 'vi' ? 'Tháng 6/2024' : 'June 2024'}</td>
+                      <td>{language === 'vi' ? 'Tháng 6/2026' : 'June 2026'}</td>
                       <td><span style={{ color: '#f59e0b', fontWeight: 600 }}>{language === 'vi' ? 'Đang Xử Lý' : 'Processing'}</span></td>
-                      <td>2024-06-30</td>
+                      <td>2026-06-30</td>
                       <td>
                         <DownloadButton style={{ padding: '6px 12px', fontSize: '12px', opacity: 0.5, cursor: 'not-allowed' }}>
                           <Download size={14} />
@@ -886,9 +886,9 @@ const Reports = () => {
                     </tr>
                     <tr>
                       <td style={{ fontWeight: 600 }}>{language === 'vi' ? 'Báo Cáo Gói Dịch Vụ' : 'Package Report'}</td>
-                      <td>{language === 'vi' ? 'Tháng 5/2024' : 'May 2024'}</td>
+                      <td>{language === 'vi' ? 'Tháng 5/2026' : 'May 2026'}</td>
                       <td><span style={{ color: '#10b981', fontWeight: 600 }}>{language === 'vi' ? 'Hoàn Thành' : 'Completed'}</span></td>
-                      <td>2024-05-31</td>
+                      <td>2026-05-31</td>
                       <td>
                         <DownloadButton style={{ padding: '6px 12px', fontSize: '12px' }}>
                           <Download size={14} />
