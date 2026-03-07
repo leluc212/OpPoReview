@@ -118,7 +118,7 @@ const Brand = styled.div`
 const BrandLogoBox = styled.div`
   background: #fff;
   border-radius: 16px;
-  padding: 18px 26px;
+  padding: 10px 26px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -126,8 +126,8 @@ const BrandLogoBox = styled.div`
   margin-bottom: 0;
 `;
 const BrandLogo = styled.img`
-  height: 46px;
-  width: 46px;
+  height: 48px;
+  width: 48px;
   object-fit: contain;
   display: block;
 `;
@@ -158,7 +158,7 @@ const HeroEyebrow = styled.div`
   color: #bfdbfe;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  margin-bottom: 22px;
+  margin-bottom: 12px;
 `;
 
 const HeroH1 = styled.h1`
@@ -728,7 +728,7 @@ const CandidateRegister = () => {
         <DotGrid />
         <Orb $s={500} $top="-20%" $right="-15%" $c="rgba(37,99,235,0.4)" $dur={20} />
         <Orb $s={320} $bottom="-12%" $left="-8%" $c="rgba(14,57,149,0.5)" $dur={16} $flip $d={-3} />
-        <Orb $s={160} $top="45%" $left="12%" $c="rgba(96,165,250,0.3)" $dur={11} $d={-5} />
+        <Orb $s={160} $top="35%" $left="12%" $c="rgba(96,165,250,0.3)" $dur={11} $d={-5} />
         <Star $s={5} $top="15%" $left="22%" $dur={2.5} />
         <Star $s={3} $top="35%" $left="78%" $dur={4} $d={1} />
         <Star $s={4} $top="62%" $left="55%" $dur={3.2} $d={0.5} />

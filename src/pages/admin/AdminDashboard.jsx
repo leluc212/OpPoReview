@@ -35,6 +35,111 @@ const StatsGrid = styled.div`
   }
 `;
 
+const CandidateStatsSection = styled.div`
+  margin-bottom: 48px;
+`;
+
+const CandidateStatsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+  
+  @media (max-width: 1400px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const CandidateStatsRow2 = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const StatBox = styled.div`
+  background: ${props => props.theme.colors.bgLight};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  padding: 24px;
+  border-left: 4px solid ${props => props.$borderColor || '#3b82f6'};
+  box-shadow: ${props => props.theme.shadows.card};
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: ${props => props.theme.shadows.lg};
+  }
+`;
+
+const StatHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+`;
+
+const StatIcon = styled.div`
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: ${props => props.$bgColor || '#3b82f6'};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  svg {
+    width: 24px;
+    height: 24px;
+    color: white;
+  }
+`;
+
+const StatContent = styled.div`
+  flex: 1;
+`;
+
+const StatTitle = styled.div`
+  font-size: 13px;
+  font-weight: 600;
+  color: ${props => props.theme.colors.textLight};
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+`;
+
+const StatValue = styled.div`
+  font-size: 32px;
+  font-weight: 800;
+  color: ${props => props.theme.colors.text};
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const StatChange = styled.span`
+  font-size: 14px;
+  font-weight: 600;
+  color: ${props => props.$positive ? '#10b981' : '#ef4444'};
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+const StatDescription = styled.div`
+  font-size: 13px;
+  color: ${props => props.theme.colors.textLight};
+  margin-top: 8px;
+  font-weight: 500;
+`;
+
 const Section = styled.section`
   margin-bottom: 40px;
   
@@ -618,7 +723,7 @@ const AdminDashboard = () => {
   const boostPackages = [
     { name: 'Quick Boost', count: 16, icon: '⚡', iconBg: '#DBEAFE', iconColor: '#1E40AF' },
     { name: 'Hot Search', count: 9, icon: '🔥', iconBg: '#FEE2E2', iconColor: '#DC2626' },
-    { name: 'Spongit Banner', count: 6, icon: '📱', iconBg: '#E0E7FF', iconColor: '#4F46E5' },
+    { name: 'Spotlight Banner', count: 6, icon: '📱', iconBg: '#E0E7FF', iconColor: '#4F46E5' },
     { name: 'Top Spotlight', count: 4, icon: '⭐', iconBg: '#FCE7F3', iconColor: '#BE185D' }
   ];
 
@@ -644,42 +749,187 @@ const AdminDashboard = () => {
   return (
     <DashboardLayout role="admin" key={language}>
       <DashboardContainer>
-        <StatsGrid>
+        {/* Thống kê chi tiết ứng viên */}
+        <CandidateStatsSection>
+          <CandidateStatsGrid>
+            <StatBox $borderColor="#667eea">
+              <StatHeader>
+                <StatIcon $bgColor="#667eea">
+                  <Users />
+                </StatIcon>
+                <StatContent>
+                  <StatTitle>{language === 'vi' ? 'Tổng ứng viên' : 'Total Candidates'}</StatTitle>
+                  <StatValue>
+                    2,458
+                    <StatChange $positive={true}>
+                      ↗ +12%
+                    </StatChange>
+                  </StatValue>
+                </StatContent>
+              </StatHeader>
+              <StatDescription>
+                {language === 'vi' ? 'so với tháng trước' : 'vs last month'}
+              </StatDescription>
+            </StatBox>
+
+            <StatBox $borderColor="#10b981">
+              <StatHeader>
+                <StatIcon $bgColor="#10b981">
+                  <Users />
+                </StatIcon>
+                <StatContent>
+                  <StatTitle>{language === 'vi' ? 'Ứng viên đang hoạt động' : 'Active Candidates'}</StatTitle>
+                  <StatValue>
+                    1,845
+                    <StatChange $positive={true}>
+                      ↗ +8%
+                    </StatChange>
+                  </StatValue>
+                </StatContent>
+              </StatHeader>
+              <StatDescription>
+                {language === 'vi' ? 'so với tuần trước' : 'vs last week'}
+              </StatDescription>
+            </StatBox>
+
+            <StatBox $borderColor="#3b82f6">
+              <StatHeader>
+                <StatIcon $bgColor="#3b82f6">
+                  <Briefcase />
+                </StatIcon>
+                <StatContent>
+                  <StatTitle>{language === 'vi' ? 'Ứng viên đang làm Job Gấp' : 'Candidates Working'}</StatTitle>
+                  <StatValue>
+                    342
+                    <StatChange $positive={true}>
+                      ↗ +15
+                    </StatChange>
+                  </StatValue>
+                </StatContent>
+              </StatHeader>
+              <StatDescription>
+                {language === 'vi' ? 'đang làm việc' : 'currently working'}
+              </StatDescription>
+            </StatBox>
+
+            <StatBox $borderColor="#f59e0b">
+              <StatHeader>
+                <StatIcon $bgColor="#f59e0b">
+                  <Shield />
+                </StatIcon>
+                <StatContent>
+                  <StatTitle>{language === 'vi' ? 'Ứng viên chờ xác minh' : 'Pending Verification'}</StatTitle>
+                  <StatValue>
+                    156
+                    <StatChange $positive={true}>
+                      ↗ +23
+                    </StatChange>
+                  </StatValue>
+                </StatContent>
+              </StatHeader>
+              <StatDescription>
+                {language === 'vi' ? 'chờ xác minh eKYC' : 'pending eKYC'}
+              </StatDescription>
+            </StatBox>
+          </CandidateStatsGrid>
+
+          <CandidateStatsRow2>
+            <StatBox $borderColor="#06b6d4">
+              <StatHeader>
+                <StatIcon $bgColor="#06b6d4">
+                  <Users />
+                </StatIcon>
+                <StatContent>
+                  <StatTitle>{language === 'vi' ? 'Ứng viên mới hôm nay' : 'New Today'}</StatTitle>
+                  <StatValue>
+                    24
+                    <StatChange $positive={true}>
+                      ↗ +24
+                    </StatChange>
+                  </StatValue>
+                </StatContent>
+              </StatHeader>
+              <StatDescription>
+                {language === 'vi' ? 'đăng ký hôm nay' : 'registered today'}
+              </StatDescription>
+            </StatBox>
+
+            <StatBox $borderColor="#ef4444">
+              <StatHeader>
+                <StatIcon $bgColor="#ef4444">
+                  <XSquare />
+                </StatIcon>
+                <StatContent>
+                  <StatTitle>{language === 'vi' ? 'Ứng viên bị khóa' : 'Locked Candidates'}</StatTitle>
+                  <StatValue>
+                    18
+                    <StatChange $positive={false}>
+                      ↘ -3
+                    </StatChange>
+                  </StatValue>
+                </StatContent>
+              </StatHeader>
+              <StatDescription>
+                {language === 'vi' ? 'so với tháng trước' : 'vs last month'}
+              </StatDescription>
+            </StatBox>
+          </CandidateStatsRow2>
+        </CandidateStatsSection>
+
+        <StatsGrid style={{ display: 'none' }}>
           <StatsCard
-            title={language === 'vi' ? 'Tổng Người Dùng' : 'Total Users'}
+            title={language === 'vi' ? 'Tổng Ứng Viên' : 'Total Candidates'}
             value="2,458"
             change="+12%"
             changeText={language === 'vi' ? 'so với tháng trước' : 'vs last month'}
             icon={Users}
-            color="linear-gradient(135deg, #1e40af 0%, #1e40af 100%)"
+            color="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
             positive
           />
           <StatsCard
-            title={language === 'vi' ? 'Tin Đang Tuyển' : 'Active Jobs'}
-            value="345"
+            title={language === 'vi' ? 'Ứng Viên Đang Hoạt Động' : 'Active Candidates'}
+            value="1,845"
             change="+8%"
             changeText={language === 'vi' ? 'so với tuần trước' : 'vs last week'}
-            icon={Briefcase}
-            color="linear-gradient(135deg, #F093FB 0%, #F5576C 100%)"
+            icon={Users}
+            color="linear-gradient(135deg, #10b981 0%, #059669 100%)"
             positive
           />
           <StatsCard
-            title={language === 'vi' ? 'Công Ty' : 'Companies'}
-            value="156"
+            title={language === 'vi' ? 'Ứng Viên Đang Làm Job Gấp' : 'Candidates Working'}
+            value="342"
             change="+15"
-            changeText={language === 'vi' ? 'đang chờ duyệt' : 'pending approval'}
-            icon={Building2}
-            color="linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%)"
+            changeText={language === 'vi' ? 'đang làm việc' : 'currently working'}
+            icon={Briefcase}
+            color="linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
             positive
           />
           <StatsCard
-            title={language === 'vi' ? 'Doanh Thu' : 'Revenue'}
-            value={language === 'vi' ? '24.5 tỷ VND' : '$1.05M USD'}
-            change="+23%"
-            changeText={language === 'vi' ? 'so với tháng trước' : 'vs last month'}
-            icon={DollarSign}
-            color="linear-gradient(135deg, #43E97B 0%, #38F9D7 100%)"
+            title={language === 'vi' ? 'Ứng Viên Chờ Xác Minh' : 'Pending Verification'}
+            value="156"
+            change="+23"
+            changeText={language === 'vi' ? 'chờ xác minh eKYC' : 'pending eKYC'}
+            icon={Shield}
+            color="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
             positive
+          />
+          <StatsCard
+            title={language === 'vi' ? 'Ứng Viên Mới Hôm Nay' : 'New Today'}
+            value="24"
+            change="+24"
+            changeText={language === 'vi' ? 'đăng ký hôm nay' : 'registered today'}
+            icon={Users}
+            color="linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)"
+            positive
+          />
+          <StatsCard
+            title={language === 'vi' ? 'Ứng Viên Bị Khóa' : 'Locked Candidates'}
+            value="18"
+            change="-3"
+            changeText={language === 'vi' ? 'so với tháng trước' : 'vs last month'}
+            icon={XSquare}
+            color="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
+            positive={false}
           />
         </StatsGrid>
 

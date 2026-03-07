@@ -430,6 +430,88 @@ const ContentGrid = styled.div`
   grid-template-columns: 2.5fr 1fr;
   gap: 24px;
   margin-bottom: 32px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const BoostBannerWrap = styled(motion.div)`
+  position: relative;
+  margin-bottom: 24px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  cursor: pointer;
+
+  img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.35s ease;
+  }
+
+  &:hover img {
+    transform: scale(1.025);
+  }
+`;
+
+const BoostTag = styled.div`
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 2;
+`;
+
+const SidebarCol = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+const SideAdWrap = styled(motion.div)`
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  cursor: pointer;
+  position: relative;
+
+  img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover img {
+    transform: scale(1.03);
+  }
+`;
+
+const SideAdTag = styled.div`
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(245,158,11,0.92);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 2;
 `;
 
 const Section = styled(motion.section)`
@@ -1758,6 +1840,19 @@ const CandidateDashboard = () => {
           </ModalOverlay>
         )}
 
+        <ContentGrid>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        {/* Bamos Boost Banner */}
+        <BoostBannerWrap
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.22 }}
+          whileHover={{ y: -2 }}
+        >
+          <BoostTag>🔥Đề xuất</BoostTag>
+          <img src="/OpPoReview/images/bamosbanner.jpg" alt="Bamos Banner" style={{ width: '100%', height: 'auto', display: 'block' }} />
+        </BoostBannerWrap>
+
         {/* Recent Applications - compact */}
         <Section
           initial={{ opacity: 0, y: 20 }}
@@ -1860,6 +1955,21 @@ const CandidateDashboard = () => {
             ))}
           </JobsGrid>
         </Section>
+          </div>
+
+          {/* Side Banners */}
+          <SidebarCol>
+            <SideAdWrap
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              whileHover={{ y: -3 }}
+            >
+              <SideAdTag>✨ Hot Hot Hot</SideAdTag>
+              <img src="/OpPoReview/images/phucloctho.jpg" alt="Phúc Lộc Thọ" />
+            </SideAdWrap>
+          </SidebarCol>
+        </ContentGrid>
 
       </DashboardContainer>
     </DashboardLayout>

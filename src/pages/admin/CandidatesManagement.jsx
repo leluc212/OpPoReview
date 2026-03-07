@@ -668,6 +668,7 @@ const CandidatesManagement = () => {
   const getApprovalStatusText = (status) => {
     if (status === 'approved') return language === 'vi' ? 'Đã duyệt' : 'Approved';
     if (status === 'rejected') return language === 'vi' ? 'Không duyệt' : 'Rejected';
+    if (status === 'pending') return language === 'vi' ? 'Chờ duyệt' : 'Pending';
     if (status === 'unseen') return language === 'vi' ? 'Chưa xem' : 'Not Viewed';
     if (status === 'seen') return language === 'vi' ? 'Đã xem' : 'Viewed';
     return status;
@@ -690,8 +691,7 @@ const CandidatesManagement = () => {
   const stats = {
     total: filteredCandidates.length,
     approved: filteredCandidates.filter(c => c.approvalStatus === 'approved').length,
-    unseen: filteredCandidates.filter(c => c.approvalStatus === 'unseen').length,
-    seen: filteredCandidates.filter(c => c.approvalStatus === 'seen').length,
+    pending: filteredCandidates.filter(c => c.approvalStatus === 'pending').length,
     rejected: filteredCandidates.filter(c => c.approvalStatus === 'rejected').length,
   };
 
@@ -717,16 +717,10 @@ const CandidatesManagement = () => {
             color="linear-gradient(135deg, #10b981 0%, #059669 100%)"
           />
           <StatsCard
-            title={language === 'vi' ? 'Chưa Xem' : 'Not Viewed'}
-            value={stats.unseen.toString()}
+            title={language === 'vi' ? 'Chờ Duyệt' : 'Pending'}
+            value={stats.pending.toString()}
             icon={Clock}
             color="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
-          />
-          <StatsCard
-            title={language === 'vi' ? 'Đã Xem' : 'Viewed'}
-            value={stats.seen.toString()}
-            icon={Eye}
-            color="linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
           />
           <StatsCard
             title={language === 'vi' ? 'Không Duyệt' : 'Rejected'}
@@ -746,40 +740,6 @@ const CandidatesManagement = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </SearchBox>
-          
-          <FilterGroup>
-            <Filter size={18} />
-            <FilterButton
-              $active={statusFilter === 'all'}
-              onClick={() => setStatusFilter('all')}
-            >
-              {language === 'vi' ? 'Tất cả' : 'All'}
-            </FilterButton>
-            <FilterButton
-              $active={statusFilter === 'approved'}
-              onClick={() => setStatusFilter('approved')}
-            >
-              {language === 'vi' ? 'Đã duyệt' : 'Approved'}
-            </FilterButton>
-            <FilterButton
-              $active={statusFilter === 'unseen'}
-              onClick={() => setStatusFilter('unseen')}
-            >
-              {language === 'vi' ? 'Chưa xem' : 'Not Viewed'}
-            </FilterButton>
-            <FilterButton
-              $active={statusFilter === 'seen'}
-              onClick={() => setStatusFilter('seen')}
-            >
-              {language === 'vi' ? 'Đã xem' : 'Viewed'}
-            </FilterButton>
-            <FilterButton
-              $active={statusFilter === 'rejected'}
-              onClick={() => setStatusFilter('rejected')}
-            >
-              {language === 'vi' ? 'Không duyệt' : 'Rejected'}
-            </FilterButton>
-          </FilterGroup>
         </FilterSection>
 
         <TableWrapper>
@@ -791,8 +751,6 @@ const CandidatesManagement = () => {
                 <th>{language === 'vi' ? 'eKYC (4 bước)' : 'eKYC (4 steps)'}</th>
                 <th>{language === 'vi' ? 'Trạng thái duyệt' : 'Approval Status'}</th>
                 <th>{language === 'vi' ? 'Ngày tham gia' : 'Join Date'}</th>
-                <th>{language === 'vi' ? 'Ngày xét duyệt' : 'Review Date'}</th>
-                <th>{language === 'vi' ? 'Thao tác' : 'Actions'}</th>
               </tr>
             </thead>
             <tbody>
@@ -823,33 +781,6 @@ const CandidatesManagement = () => {
                       <Calendar size={14} />
                       {candidate.joined}
                     </DateText>
-                  </td>
-                  <td>
-                    {candidate.reviewDate ? (
-                      <DateText>
-                        <Calendar size={14} />
-                        {candidate.reviewDate}
-                      </DateText>
-                    ) : (
-                      <span style={{ color: '#94a3b8', fontSize: '13px' }}>
-                        {language === 'vi' ? 'Chưa có' : 'Not set'}
-                      </span>
-                    )}
-                  </td>
-                  <td onClick={(e) => e.stopPropagation()}>
-                    <ActionButtons>
-                      <ActionButton 
-                        $variant="view"
-                        onClick={() => navigate(`/admin/candidates/${candidate.id}`)}
-                      >
-                        <Eye />
-                        {language === 'vi' ? 'Xem' : 'View'}
-                      </ActionButton>
-                      <ActionButton $variant="delete">
-                        <Trash2 />
-                        {language === 'vi' ? 'Xóa' : 'Delete'}
-                      </ActionButton>
-                    </ActionButtons>
                   </td>
                 </tr>
               ))}
