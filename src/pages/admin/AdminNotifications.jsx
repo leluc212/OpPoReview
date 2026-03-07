@@ -380,7 +380,7 @@ const AdminNotifications = () => {
       icon: Briefcase,
       color: '#f59e0b',
       title: language === 'vi' ? 'Yêu cầu phê duyệt nhà tuyển dụng' : 'Employer approval request',
-      message: language === 'vi' ? 'Công ty ABC Tech đang chờ phê duyệt. Vui lòng kiểm tra thông tin và xác minh.' : 'ABC Tech is pending approval. Please review and verify the information.',
+      message: language === 'vi' ? 'Katinat chi nhánh quận 8 đang chờ phê duyệt. Vui lòng kiểm tra thông tin và xác minh.' : 'Katinat branch District 8 is pending approval. Please review and verify the information.',
       time: language === 'vi' ? '3 giờ trước' : '3 hours ago',
       unread: true,
       actionRequired: true
@@ -391,7 +391,7 @@ const AdminNotifications = () => {
       icon: AlertCircle,
       color: '#ef4444',
       title: language === 'vi' ? 'Bài đăng bị cảnh báo' : 'Flagged posts',
-      message: language === 'vi' ? '5 bài đăng mới bị hệ thống tự động cảnh báo về nội dung vi phạm. Cần kiểm duyệt thủ công.' : '5 new posts were automatically flagged for policy violations and require manual review.',
+      message: language === 'vi' ? '5 bài đăng tuyển nhân viên phục vụ bị hệ thống tự động cảnh báo về nội dung vi phạm. Cần kiểm duyệt thủ công.' : '5 new server job posts were automatically flagged for policy violations and require manual review.',
       time: language === 'vi' ? '5 giờ trước' : '5 hours ago',
       unread: true,
       actionRequired: true
@@ -402,7 +402,7 @@ const AdminNotifications = () => {
       icon: DollarSign,
       color: '#10b981',
       title: language === 'vi' ? 'Thanh toán mới' : 'New payment',
-      message: language === 'vi' ? 'Công ty XYZ đã thanh toán gói Premium trị giá 5.000.000 VND' : 'XYZ company paid for the Premium package worth 5,000,000 VND',
+      message: language === 'vi' ? 'The Coffee House chi nhánh Bình Thạnh đã thanh toán gói Banner nổi bật 2 trị giá 745.000 VND' : 'The Coffee House Binh Thanh branch paid for Top Spotlight package worth 745,000 VND',
       time: language === 'vi' ? '1 ngày trước' : '1 day ago',
       unread: false,
       actionRequired: false
@@ -413,7 +413,7 @@ const AdminNotifications = () => {
       icon: Info,
       color: '#1e40af',
       title: language === 'vi' ? 'Cập nhật hệ thống' : 'System update',
-      message: language === 'vi' ? 'Hệ thống sẽ bảo trì vào 23:00 ngày 16/02/2025. Thời gian dự kiến: 2 giờ.' : 'System maintenance is scheduled at 23:00 on 16/02/2025. Estimated duration: 2 hours.',
+      message: language === 'vi' ? 'Hệ thống sẽ bảo trì vào 23:00 ngày 16/02/2026. Thời gian dự kiến: 2 giờ.' : 'System maintenance is scheduled at 23:00 on 16/02/2026. Estimated duration: 2 hours.',
       time: language === 'vi' ? '2 ngày trước' : '2 days ago',
       unread: false,
       actionRequired: false

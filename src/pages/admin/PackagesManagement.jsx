@@ -338,59 +338,59 @@ const PackagesManagement = () => {
     {
       id: 1,
       employer: 'Highlands Coffee',
-      package: 'Quick Boost',
-      purchaseDate: '2025-01-15',
-      expiryDate: '2025-02-15',
+      package: 'Bài viết',
+      purchaseDate: '2026-01-15',
+      expiryDate: '2026-02-15',
       status: 'active',
       price: 145000,
-      duration: '3 ngày'
+      duration: '7 ngày'
     },
     {
       id: 2,
       employer: 'Phúc Long',
-      package: 'Top Spotlight',
-      purchaseDate: '2025-01-20',
-      expiryDate: '2025-03-20',
+      package: 'Banner nổi bật 2',
+      purchaseDate: '2026-01-20',
+      expiryDate: '2026-03-20',
       status: 'active',
       price: 745000,
-      duration: '2 ngày'
+      duration: '7 ngày'
     },
     {
       id: 3,
       employer: 'Katinat chi nhánh quận 8',
-      package: 'Spotlight Banner',
-      purchaseDate: '2025-02-01',
-      expiryDate: '2025-05-01',
+      package: 'Banner nổi bật 1',
+      purchaseDate: '2026-02-01',
+      expiryDate: '2026-05-01',
       status: 'active',
       price: 495000,
-      duration: '1 ngày'
+      duration: '7 ngày'
     },
     {
       id: 4,
       employer: 'The Coffee House',
-      package: 'Top Spotlight',
-      purchaseDate: '2025-01-10',
-      expiryDate: '2025-02-10',
+      package: 'Banner nổi bật 2',
+      purchaseDate: '2026-01-10',
+      expiryDate: '2026-02-10',
       status: 'expired',
       price: 745000,
-      duration: '2 ngày'
+      duration: '7 ngày'
     },
     {
       id: 5,
       employer: 'Starbucks chi nhánh quận 10',
-      package: 'Top Spotlight',
-      purchaseDate: '2025-01-25',
-      expiryDate: '2025-04-25',
+      package: 'Banner nổi bật 2',
+      purchaseDate: '2026-01-25',
+      expiryDate: '2026-04-25',
       status: 'active',
       price: 745000,
-      duration: '3 ngày'
+      duration: '7 ngày'
     },
     {
       id: 6,
       employer: 'Talk Bread chi nhánh Thủ Đức',
-      package: 'Quick Boost',
-      purchaseDate: '2025-02-05',
-      expiryDate: '2025-02-12',
+      package: 'Bài viết',
+      purchaseDate: '2026-02-05',
+      expiryDate: '2026-02-12',
       status: 'expiring',
       price: 145000,
       duration: '7 ngày'
@@ -399,31 +399,31 @@ const PackagesManagement = () => {
       id: 7,
       employer: 'Trung Nguyên Legend',
       package: 'Hot Search',
-      purchaseDate: '2025-01-10',
-      expiryDate: '2025-02-10',
+      purchaseDate: '2026-01-10',
+      expiryDate: '2026-02-10',
       status: 'expiring',
       price: 245000,
-      duration: '3 ngày'
+      duration: '7 ngày'
     },
     {
       id: 8,
       employer: 'Gong Cha chi nhánh quận 1',
-      package: 'Spotlight Banner',
-      purchaseDate: '2025-01-18',
-      expiryDate: '2025-04-18',
+      package: 'Banner nổi bật 1',
+      purchaseDate: '2026-01-18',
+      expiryDate: '2026-04-18',
       status: 'active',
       price: 495000,
-      duration: '1 ngày'
+      duration: '7 ngày'
     },
     {
       id: 9,
       employer: 'Quán nhậu OK 3 con dê quận 8',
-      package: 'Quick Boost',
-      purchaseDate: '2025-01-18',
-      expiryDate: '2025-04-18',
+      package: 'Bài viết',
+      purchaseDate: '2026-01-18',
+      expiryDate: '2026-04-18',
       status: 'active',
       price: 145000,
-      duration: '9 ngày'
+      duration: '7 ngày'
     },
   ]);
 
@@ -438,17 +438,17 @@ const PackagesManagement = () => {
   ];
 
   const packageColors = {
-    'Quick Boost': '#3b82f6',
+    'Bài viết': '#3b82f6',
     'Hot Search': '#f59e0b',
-    'Spotlight Banner': '#8b5cf6',
-    'Top Spotlight': '#ef4444'
+    'Banner nổi bật 1': '#8b5cf6',
+    'Banner nổi bật 2': '#ef4444'
   };
 
   const packageIcons = {
-    'Quick Boost': Zap,
+    'Bài viết': Zap,
     'Hot Search': TrendingUp,
-    'Spotlight Banner': Star,
-    'Top Spotlight': Package
+    'Banner nổi bật 1': Star,
+    'Banner nổi bật 2': Package
   };
 
   const getStatusText = (status) => {
@@ -459,10 +459,10 @@ const PackagesManagement = () => {
   };
 
   const filterOptions = [
-    { value: 'Quick Boost', label: 'Quick Boost' },
+    { value: 'Bài viết', label: 'Bài viết' },
     { value: 'Hot Search', label: 'Hot Search' },
-    { value: 'Spotlight Banner', label: 'Spotlight Banner' },
-    { value: 'Top Spotlight', label: 'Top Spotlight' },
+    { value: 'Banner nổi bật 1', label: 'Banner nổi bật 1' },
+    { value: 'Banner nổi bật 2', label: 'Banner nổi bật 2' },
     { value: 'active', label: language === 'vi' ? 'Đang hoạt động' : 'Active' },
     { value: 'expiring', label: language === 'vi' ? 'Sắp hết hạn' : 'Expiring' },
     { value: 'expired', label: language === 'vi' ? 'Đã hết hạn' : 'Expired' },
@@ -499,10 +499,10 @@ const PackagesManagement = () => {
 
   // Dữ liệu cho biểu đồ tròn
   const packageCounts = {
-    'Quick Boost': purchases.filter(p => p.package === 'Quick Boost').length,
+    'Bài viết': purchases.filter(p => p.package === 'Bài viết').length,
     'Hot Search': purchases.filter(p => p.package === 'Hot Search').length,
-    'Spotlight Banner': purchases.filter(p => p.package === 'Spotlight Banner').length,
-    'Top Spotlight': purchases.filter(p => p.package === 'Top Spotlight').length,
+    'Banner nổi bật 1': purchases.filter(p => p.package === 'Banner nổi bật 1').length,
+    'Banner nổi bật 2': purchases.filter(p => p.package === 'Banner nổi bật 2').length,
   };
 
   const pieData = Object.entries(packageCounts).map(([label, value]) => ({
@@ -577,8 +577,8 @@ const PackagesManagement = () => {
                   <BarsWrapper>
                     <Bar 
                       $height={(data.quickBoost / maxValue) * 100} 
-                      $color={packageColors['Quick Boost']}
-                      title={`Quick Boost: ${data.quickBoost}`}
+                      $color={packageColors['Bài viết']}
+                      title={`Bài viết: ${data.quickBoost}`}
                     >
                       <BarValue>{data.quickBoost}</BarValue>
                     </Bar>
@@ -591,15 +591,15 @@ const PackagesManagement = () => {
                     </Bar>
                     <Bar 
                       $height={(data.spotlight / maxValue) * 100} 
-                      $color={packageColors['Spotlight Banner']}
-                      title={`Spotlight: ${data.spotlight}`}
+                      $color={packageColors['Banner nổi bật 1']}
+                      title={`Banner nổi bật 1: ${data.spotlight}`}
                     >
                       <BarValue>{data.spotlight}</BarValue>
                     </Bar>
                     <Bar 
                       $height={(data.topSpotlight / maxValue) * 100} 
-                      $color={packageColors['Top Spotlight']}
-                      title={`Top Spotlight: ${data.topSpotlight}`}
+                      $color={packageColors['Banner nổi bật 2']}
+                      title={`Banner nổi bật 2: ${data.topSpotlight}`}
                     >
                       <BarValue>{data.topSpotlight}</BarValue>
                     </Bar>
@@ -733,4 +733,5 @@ const PackagesManagement = () => {
 };
 
 export default PackagesManagement;
+
 

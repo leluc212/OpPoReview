@@ -500,10 +500,10 @@ const Reports = () => {
 
   // Package distribution data
   const packageData = [
-    { name: 'Quick Boost', value: 35, color: '#3b82f6' },
+    { name: 'Bài viết', value: 35, color: '#3b82f6' },
     { name: 'Hot Search', value: 25, color: '#ef4444' },
-    { name: 'Spotlight Banner', value: 20, color: '#8b5cf6' },
-    { name: 'Top Spotlight', value: 20, color: '#f59e0b' },
+    { name: 'Banner nổi bật 1', value: 20, color: '#8b5cf6' },
+    { name: 'Banner nổi bật 2', value: 20, color: '#f59e0b' },
   ];
 
   const totalPackages = packageData.reduce((sum, item) => sum + item.value, 0);
