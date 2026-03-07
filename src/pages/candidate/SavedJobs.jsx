@@ -344,10 +344,10 @@ const SavedJobs = () => {
     if (!kycCompleted) {
       alert(
         language === 'vi' 
-          ? '⚠️ Bạn cần hoàn thành xác minh KYC trước khi ứng tuyển!\n\nVui lòng vào trang Hồ Sơ để hoàn tất xác minh.'
-          : '⚠️ You need to complete KYC verification before applying!\n\nPlease go to Profile page to complete verification.'
+          ? '⚠️ Bạn cần hoàn thành xác minh eKYC trước khi ứng tuyển!\n\nVui lòng hoàn tất xác minh trước.'
+          : '⚠️ You need to complete eKYC verification before applying!\n\nPlease complete verification.'
       );
-      navigate('/candidate/profile');
+      navigate('/candidate/kyc');
       return;
     }
     

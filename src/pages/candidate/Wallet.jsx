@@ -674,7 +674,7 @@ const Wallet = () => {
     {
       id: 1,
       type: 'income',
-      title: language === 'vi' ? 'Nhận tiền từ FPT Software' : 'Payment from FPT Software',
+      title: language === 'vi' ? 'Nhận tiền từ The Coffee House' : 'Payment from The Coffee House',
       description: language === 'vi' ? 'Thanh toán cho công việc #12345' : 'Payment for job #12345',
       amount: 2500000,
       date: '2026-02-13'
@@ -682,7 +682,7 @@ const Wallet = () => {
     {
       id: 2,
       type: 'income',
-      title: language === 'vi' ? 'Nhận tiền từ Viettel' : 'Payment from Viettel',
+      title: language === 'vi' ? 'Nhận tiền từ Highlands Coffee' : 'Payment from Highlands Coffee',
       description: language === 'vi' ? 'Thanh toán cho công việc #12344' : 'Payment for job #12344',
       amount: 3000000,
       date: '2026-02-10'
@@ -698,7 +698,7 @@ const Wallet = () => {
     {
       id: 4,
       type: 'income',
-      title: language === 'vi' ? 'Nhận tiền từ VinGroup' : 'Payment from VinGroup',
+      title: language === 'vi' ? 'Nhận tiền từ Pizza 4P\'s' : 'Payment from Pizza 4P\'s',
       description: language === 'vi' ? 'Thanh toán cho công việc #12343' : 'Payment for job #12343',
       amount: 1800000,
       date: '2026-02-05'
@@ -706,7 +706,7 @@ const Wallet = () => {
     {
       id: 5,
       type: 'income',
-      title: language === 'vi' ? 'Nhận tiền từ Bamboo Airways' : 'Payment from Bamboo Airways',
+      title: language === 'vi' ? 'Nhận tiền từ Golden Gate Group' : 'Payment from Golden Gate Group',
       description: language === 'vi' ? 'Thanh toán cho công việc #12342' : 'Payment for job #12342',
       amount: 2200000,
       date: '2026-02-01'

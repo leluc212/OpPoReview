@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -657,6 +658,7 @@ const ModalButtons = styled.div`
 
 const CandidateProfile = () => {
   const { language, t } = useLanguage();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [profileImage, setProfileImage] = useState(() => {
     return localStorage.getItem('profileImage') || null;
@@ -927,7 +929,7 @@ const CandidateProfile = () => {
     
     setKycCompleted(true);
     setShowKYCModal(false);
-    alert(language === 'vi' ? '✅ Xác minh KYC hoàn tất!' : '✅ KYC verification completed!');
+    alert(language === 'vi' ? '✅ Xác minh eKYC hoàn tất!' : '✅ eKYC verification completed!');
   };
 
   const resetKYC = () => {
@@ -1368,7 +1370,7 @@ const CandidateProfile = () => {
               <div className="card-header">
                 <h2>
                   <Shield />
-                  {language === 'vi' ? 'Xác Minh KYC' : 'KYC Verification'}
+                  {language === 'vi' ? 'Xác Minh eKYC' : 'eKYC Verification'}
                 </h2>
               </div>
 
@@ -1393,7 +1395,7 @@ const CandidateProfile = () => {
                 <KYCButton
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={openKYCModal}
+                  onClick={() => navigate('/candidate/kyc')}
                 >
                   <Shield size={18} />
                   {language === 'vi' ? 'Bắt Đầu Xác Minh' : 'Start Verification'}
@@ -1512,13 +1514,13 @@ const CandidateProfile = () => {
 
               <div style={{ fontSize: '14px', color: 'black', lineHeight: '1.8' }}>
                 <div style={{ padding: '12px 0', borderBottom: '1px solid #77ace8' }}>
-                  ✅ {language === 'vi' ? 'Hoàn thành việc tuyển gấp cho Katinat' : 'Completed project for FPT Software'}
+                  ✅ {language === 'vi' ? 'Hoàn thành việc tuyển gấp cho Katinat' : 'Completed urgent hiring for Katinat'}
                 </div>
                 <div style={{ padding: '12px 0', borderBottom: '1px solid #77ace8' }}>
                   📝 {language === 'vi' ? 'Cập nhật hồ sơ' : 'Updated profile'}
                 </div>
                 <div style={{ padding: '12px 0' }}>
-                  ⭐ {language === 'vi' ? 'Nhận đánh giá 5 sao từ Viettel' : 'Received 5-star rating from Viettel'}
+                  ⭐ {language === 'vi' ? 'Nhận đánh giá 5 sao từ Highlands Coffee' : 'Received 5-star rating from Highlands Coffee'}
                 </div>
               </div>
             </Card>
@@ -1556,7 +1558,7 @@ const CandidateProfile = () => {
         <Modal
           isOpen={showKYCModal}
           onClose={() => setShowKYCModal(false)}
-          title={language === 'vi' ? 'Xác Minh KYC' : 'KYC Verification'}
+          title={language === 'vi' ? 'Xác Minh eKYC' : 'eKYC Verification'}
           size="large"
         >
           <div style={{ maxHeight: '70vh', overflowY: 'auto', paddingRight: '8px' }}>
