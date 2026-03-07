@@ -1373,7 +1373,7 @@ const JOBS_DATA = [
   {
     id: 17,
     title: 'Barista - Part-time',
-    company: 'Katinat Saigon Kafe',
+    company: 'Katinat chi nhán quận 8',
     location: 'Quận 3, TP.HCM',
     lat: 10.7830,
     lng: 106.6920,
@@ -1502,7 +1502,7 @@ const JOBS_DATA = [
   {
     id: 20,
     title: 'Ca Tối - Thu ngân nhà hàng',
-    company: 'Lotteria Việt Nam',
+    company: 'Lotteria chi nhánh quận 1',
     location: 'Quận 3, TP.HCM',
     lat: 10.7760,
     lng: 106.6960,
@@ -1566,7 +1566,7 @@ const JOBS_DATA = [
   {
     id: 24,
     title: 'Ca Tối - Nhân viên Café',
-    company: 'Katinat Saigon Kafe',
+    company: 'Katinat chi nhánh quận 8',
     location: 'Thủ Đức, TP.HCM',
     lat: 10.8520,
     lng: 106.8360,
