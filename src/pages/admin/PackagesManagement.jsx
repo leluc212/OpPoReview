@@ -328,13 +328,84 @@ const IconButton = styled.button`
   }
 `;
 
+const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  padding: 20px;
+  background: ${props => props.theme.colors.bgLight};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  border: 2px solid ${props => props.theme.colors.border};
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+`;
+
+const PaginationInfo = styled.div`
+  color: ${props => props.theme.colors.text};
+  font-size: 14px;
+  font-weight: 600;
+  
+  @media (max-width: 768px) {
+    font-size: 13px;
+  }
+`;
+
+const PaginationButtons = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+`;
+
+const PageButton = styled.button`
+  padding: 8px 12px;
+  border: 2px solid ${props => props.$active ? props.theme.colors.primary : props.theme.colors.border};
+  background: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.bgDark};
+  color: ${props => props.$active ? 'white' : props.theme.colors.text};
+  border-radius: ${props => props.theme.borderRadius.md};
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 40px;
+  
+  @media (max-width: 768px) {
+    padding: 6px 10px;
+    font-size: 13px;
+    min-width: 36px;
+  }
+  
+  &:hover:not(:disabled) {
+    border-color: ${props => props.theme.colors.primary};
+    background: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.border};
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const PageEllipsis = styled.span`
+  color: ${props => props.theme.colors.textLight};
+  font-weight: 600;
+  padding: 0 4px;
+`;
+
 const PackagesManagement = () => {
   const { language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
-  // Dữ liệu gói dịch vụ đã mua
+  // Dữ liệu gói dịch vụ đã mua (từ 30 nhà tuyển dụng)
   const [purchases] = useState([
+    // 9 gói cũ (giữ nguyên)
     {
       id: 1,
       employer: 'Highlands Coffee',
@@ -425,6 +496,368 @@ const PackagesManagement = () => {
       price: 145000,
       duration: '7 ngày'
     },
+    // Gói mới từ 30 nhà tuyển dụng
+    {
+      id: 10,
+      employer: 'Lẩu Bò Sài Gòn Vi Vu',
+      package: 'Banner nổi bật 2',
+      purchaseDate: '2026-01-15',
+      expiryDate: '2026-04-15',
+      status: 'active',
+      price: 745000,
+      duration: '7 ngày'
+    },
+    {
+      id: 11,
+      employer: 'Ốc Đêm 79',
+      package: 'Hot Search',
+      purchaseDate: '2026-01-16',
+      expiryDate: '2026-02-16',
+      status: 'active',
+      price: 245000,
+      duration: '7 ngày'
+    },
+    {
+      id: 12,
+      employer: 'Tiệm Trà Tháng Tư',
+      package: 'Bài viết',
+      purchaseDate: '2026-01-17',
+      expiryDate: '2026-02-17',
+      status: 'active',
+      price: 145000,
+      duration: '7 ngày'
+    },
+    {
+      id: 13,
+      employer: 'Bia Sệt 123',
+      package: 'Banner nổi bật 1',
+      purchaseDate: '2026-01-18',
+      expiryDate: '2026-04-18',
+      status: 'active',
+      price: 495000,
+      duration: '7 ngày'
+    },
+    {
+      id: 14,
+      employer: 'Bếp Nhà Mẹ Nấu',
+      package: 'Bài viết',
+      purchaseDate: '2026-01-19',
+      expiryDate: '2026-02-19',
+      status: 'active',
+      price: 145000,
+      duration: '7 ngày'
+    },
+    {
+      id: 15,
+      employer: 'Chill Out Beer Club',
+      package: 'Banner nổi bật 2',
+      purchaseDate: '2026-01-20',
+      expiryDate: '2026-04-20',
+      status: 'active',
+      price: 745000,
+      duration: '7 ngày'
+    },
+    {
+      id: 16,
+      employer: 'Phở Gia Truyền 1954',
+      package: 'Hot Search',
+      purchaseDate: '2026-01-21',
+      expiryDate: '2026-02-21',
+      status: 'active',
+      price: 245000,
+      duration: '7 ngày'
+    },
+    {
+      id: 17,
+      employer: 'Sushi Sen Mini',
+      package: 'Banner nổi bật 1',
+      purchaseDate: '2026-01-22',
+      expiryDate: '2026-04-22',
+      status: 'active',
+      price: 495000,
+      duration: '7 ngày'
+    },
+    {
+      id: 18,
+      employer: 'High Tea & Coffee',
+      package: 'Bài viết',
+      purchaseDate: '2026-01-23',
+      expiryDate: '2026-01-30',
+      status: 'expired',
+      price: 145000,
+      duration: '7 ngày'
+    },
+    {
+      id: 19,
+      employer: 'Gà Nướng Ò Ó O',
+      package: 'Hot Search',
+      purchaseDate: '2026-01-24',
+      expiryDate: '2026-02-24',
+      status: 'active',
+      price: 245000,
+      duration: '7 ngày'
+    },
+    {
+      id: 20,
+      employer: 'Nướng Ngói Gia Bảo',
+      package: 'Banner nổi bật 2',
+      purchaseDate: '2026-01-25',
+      expiryDate: '2026-04-25',
+      status: 'active',
+      price: 745000,
+      duration: '7 ngày'
+    },
+    {
+      id: 21,
+      employer: 'The Morning Bakery',
+      package: 'Bài viết',
+      purchaseDate: '2026-01-26',
+      expiryDate: '2026-02-26',
+      status: 'active',
+      price: 145000,
+      duration: '7 ngày'
+    },
+    {
+      id: 22,
+      employer: 'Lẩu Phan',
+      package: 'Banner nổi bật 1',
+      purchaseDate: '2026-01-27',
+      expiryDate: '2026-04-27',
+      status: 'active',
+      price: 495000,
+      duration: '7 ngày'
+    },
+    {
+      id: 23,
+      employer: 'Beer Garden Phố',
+      package: 'Hot Search',
+      purchaseDate: '2026-01-28',
+      expiryDate: '2026-02-28',
+      status: 'active',
+      price: 245000,
+      duration: '7 ngày'
+    },
+    {
+      id: 24,
+      employer: 'Mì Cay Sasin',
+      package: 'Bài viết',
+      purchaseDate: '2026-01-29',
+      expiryDate: '2026-02-29',
+      status: 'active',
+      price: 145000,
+      duration: '7 ngày'
+    },
+    {
+      id: 25,
+      employer: 'Cà Phê Cây Me',
+      package: 'Banner nổi bật 1',
+      purchaseDate: '2026-01-30',
+      expiryDate: '2026-04-30',
+      status: 'active',
+      price: 495000,
+      duration: '7 ngày'
+    },
+    {
+      id: 26,
+      employer: 'Nhà Hàng Chay Sen Vàng',
+      package: 'Bài viết',
+      purchaseDate: '2026-01-31',
+      expiryDate: '2026-02-07',
+      status: 'expired',
+      price: 145000,
+      duration: '7 ngày'
+    },
+    {
+      id: 27,
+      employer: 'Xiên Khè',
+      package: 'Hot Search',
+      purchaseDate: '2026-02-01',
+      expiryDate: '2026-03-01',
+      status: 'active',
+      price: 245000,
+      duration: '7 ngày'
+    },
+    {
+      id: 28,
+      employer: 'Dimsum House',
+      package: 'Banner nổi bật 2',
+      purchaseDate: '2026-02-02',
+      expiryDate: '2026-05-02',
+      status: 'active',
+      price: 745000,
+      duration: '7 ngày'
+    },
+    {
+      id: 29,
+      employer: 'Bánh Mì PewPew',
+      package: 'Bài viết',
+      purchaseDate: '2026-02-03',
+      expiryDate: '2026-03-03',
+      status: 'active',
+      price: 145000,
+      duration: '7 ngày'
+    },
+    {
+      id: 30,
+      employer: 'Urban Coffee',
+      package: 'Banner nổi bật 1',
+      purchaseDate: '2026-02-04',
+      expiryDate: '2026-05-04',
+      status: 'active',
+      price: 495000,
+      duration: '7 ngày'
+    },
+    {
+      id: 31,
+      employer: 'Lẩu Cá Kèo Bà Huyện',
+      package: 'Hot Search',
+      purchaseDate: '2026-02-05',
+      expiryDate: '2026-03-05',
+      status: 'active',
+      price: 245000,
+      duration: '7 ngày'
+    },
+    {
+      id: 32,
+      employer: 'Hủ Tiếu Nam Vang Thành Đạt',
+      package: 'Bài viết',
+      purchaseDate: '2026-02-06',
+      expiryDate: '2026-03-06',
+      status: 'active',
+      price: 145000,
+      duration: '7 ngày'
+    },
+    {
+      id: 33,
+      employer: 'Draft Beer Sài Gòn',
+      package: 'Banner nổi bật 2',
+      purchaseDate: '2026-02-07',
+      expiryDate: '2026-05-07',
+      status: 'active',
+      price: 745000,
+      duration: '7 ngày'
+    },
+    {
+      id: 34,
+      employer: 'Gòng Tea',
+      package: 'Bài viết',
+      purchaseDate: '2026-02-08',
+      expiryDate: '2026-02-15',
+      status: 'expiring',
+      price: 145000,
+      duration: '7 ngày'
+    },
+    {
+      id: 35,
+      employer: 'Cơm Tấm Cali',
+      package: 'Banner nổi bật 1',
+      purchaseDate: '2026-02-09',
+      expiryDate: '2026-05-09',
+      status: 'active',
+      price: 495000,
+      duration: '7 ngày'
+    },
+    {
+      id: 36,
+      employer: 'Warning Zone',
+      package: 'Hot Search',
+      purchaseDate: '2026-02-10',
+      expiryDate: '2026-03-10',
+      status: 'active',
+      price: 245000,
+      duration: '7 ngày'
+    },
+    {
+      id: 37,
+      employer: 'Trà Chanh Bụi Phố',
+      package: 'Bài viết',
+      purchaseDate: '2026-02-11',
+      expiryDate: '2026-02-18',
+      status: 'expiring',
+      price: 145000,
+      duration: '7 ngày'
+    },
+    {
+      id: 38,
+      employer: 'Quán Nướng Ngói Sapa',
+      package: 'Banner nổi bật 2',
+      purchaseDate: '2026-02-12',
+      expiryDate: '2026-05-12',
+      status: 'active',
+      price: 745000,
+      duration: '7 ngày'
+    },
+    {
+      id: 39,
+      employer: 'Blue Star Cocktail Bar',
+      package: 'Banner nổi bật 1',
+      purchaseDate: '2026-02-13',
+      expiryDate: '2026-05-13',
+      status: 'active',
+      price: 495000,
+      duration: '7 ngày'
+    },
+    // Thêm một số gói mua nhiều lần
+    {
+      id: 40,
+      employer: 'Lẩu Bò Sài Gòn Vi Vu',
+      package: 'Hot Search',
+      purchaseDate: '2026-02-14',
+      expiryDate: '2026-03-14',
+      status: 'active',
+      price: 245000,
+      duration: '7 ngày'
+    },
+    {
+      id: 41,
+      employer: 'Ốc Đêm 79',
+      package: 'Banner nổi bật 1',
+      purchaseDate: '2026-02-15',
+      expiryDate: '2026-05-15',
+      status: 'active',
+      price: 495000,
+      duration: '7 ngày'
+    },
+    {
+      id: 42,
+      employer: 'Chill Out Beer Club',
+      package: 'Hot Search',
+      purchaseDate: '2026-02-16',
+      expiryDate: '2026-03-16',
+      status: 'active',
+      price: 245000,
+      duration: '7 ngày'
+    },
+    {
+      id: 43,
+      employer: 'Nướng Ngói Gia Bảo',
+      package: 'Bài viết',
+      purchaseDate: '2026-02-17',
+      expiryDate: '2026-03-17',
+      status: 'active',
+      price: 145000,
+      duration: '7 ngày'
+    },
+    {
+      id: 44,
+      employer: 'Draft Beer Sài Gòn',
+      package: 'Hot Search',
+      purchaseDate: '2026-02-18',
+      expiryDate: '2026-03-18',
+      status: 'active',
+      price: 245000,
+      duration: '7 ngày'
+    },
+    {
+      id: 45,
+      employer: 'Blue Star Cocktail Bar',
+      package: 'Banner nổi bật 2',
+      purchaseDate: '2026-02-19',
+      expiryDate: '2026-05-19',
+      status: 'active',
+      price: 745000,
+      duration: '7 ngày'
+    },
   ]);
 
   // Dữ liệu theo tháng cho biểu đồ (6 tháng gần nhất)
@@ -481,6 +914,17 @@ const PackagesManagement = () => {
       return matchesSearch && matchesFilters;
     });
   }, [purchases, searchTerm, filters]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredPurchases.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPurchases = filteredPurchases.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search or filters change
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filters]);
 
   const handleFilterToggle = (filterValue) => {
     setFilters(prev => 
@@ -548,7 +992,7 @@ const PackagesManagement = () => {
 
         <StatsRow>
           <StatBox $color="#1e40af">
-            <h3>{language === 'vi' ? 'Tổng gói đã mua' : 'Total Purchases'}</h3>
+            <h3>{language === 'vi' ? 'Tổng gói đã bán' : 'Total Purchases'}</h3>
             <p>{stats.total}</p>
           </StatBox>
           <StatBox $color="#10b981">
@@ -678,7 +1122,7 @@ const PackagesManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredPurchases.map((purchase) => {
+              {currentPurchases.map((purchase) => {
                 const Icon = packageIcons[purchase.package];
                 return (
                   <tr key={purchase.id}>
@@ -727,6 +1171,57 @@ const PackagesManagement = () => {
             </tbody>
           </Table>
         </TableWrapper>
+
+        <PaginationContainer>
+          <PaginationInfo>
+            {language === 'vi' 
+              ? `Hiển thị ${startIndex + 1}-${Math.min(endIndex, filteredPurchases.length)} trong tổng số ${filteredPurchases.length} gói`
+              : `Showing ${startIndex + 1}-${Math.min(endIndex, filteredPurchases.length)} of ${filteredPurchases.length} packages`
+            }
+          </PaginationInfo>
+          <PaginationButtons>
+            <PageButton 
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              {language === 'vi' ? 'Trước' : 'Previous'}
+            </PageButton>
+            
+            {[...Array(totalPages)].map((_, index) => {
+              const pageNumber = index + 1;
+              
+              // Show first page, last page, current page, and pages around current
+              if (
+                pageNumber === 1 ||
+                pageNumber === totalPages ||
+                (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+              ) {
+                return (
+                  <PageButton
+                    key={pageNumber}
+                    $active={currentPage === pageNumber}
+                    onClick={() => setCurrentPage(pageNumber)}
+                  >
+                    {pageNumber}
+                  </PageButton>
+                );
+              } else if (
+                pageNumber === currentPage - 2 ||
+                pageNumber === currentPage + 2
+              ) {
+                return <PageEllipsis key={pageNumber}>...</PageEllipsis>;
+              }
+              return null;
+            })}
+            
+            <PageButton 
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+            >
+              {language === 'vi' ? 'Sau' : 'Next'}
+            </PageButton>
+          </PaginationButtons>
+        </PaginationContainer>
       </PageContainer>
     </DashboardLayout>
   );

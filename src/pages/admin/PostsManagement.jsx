@@ -4,6 +4,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 import TableFilter from '../../components/TableFilter';
 import Modal from '../../components/Modal';
 import { useLanguage } from '../../context/LanguageContext';
+import { jobPosts } from '../../data/jobPosts';
 import { 
   Briefcase, 
   Zap, 
@@ -118,9 +119,10 @@ const StatBox = styled.div`
 
 const ChartsContainer = styled.div`
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 300px 1fr;
   gap: 24px;
   margin-bottom: 24px;
+  align-items: start;
   
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
@@ -437,6 +439,59 @@ const CandidateStatus = styled.div`
   justify-content: flex-end;
 `;
 
+const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  padding: 16px 24px;
+  background: ${props => props.theme.colors.bgLight};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  border: 1px solid ${props => props.theme.colors.border};
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 16px;
+  }
+`;
+
+const PaginationInfo = styled.div`
+  color: ${props => props.theme.colors.textLight};
+  font-size: 14px;
+`;
+
+const PaginationButtons = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+`;
+
+const PageButton = styled.button`
+  padding: 8px 12px;
+  border: 1px solid ${props => props.$active ? props.theme.colors.primary : props.theme.colors.border};
+  background: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.bgLight};
+  color: ${props => props.$active ? 'white' : props.theme.colors.text};
+  border-radius: ${props => props.theme.borderRadius.md};
+  cursor: pointer;
+  font-weight: ${props => props.$active ? '600' : '500'};
+  transition: all 0.2s;
+  
+  &:hover:not(:disabled) {
+    background: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.bgDark};
+    border-color: ${props => props.theme.colors.primary};
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const PageEllipsis = styled.span`
+  padding: 8px 4px;
+  color: ${props => props.theme.colors.textLight};
+`;
+
 const PostsManagement = () => {
   const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState('longterm');
@@ -444,180 +499,222 @@ const PostsManagement = () => {
   const [filters, setFilters] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
-  // Dữ liệu việc làm part-time lâu dài
-  const [longtermJobs] = useState([
-    {
-      id: 1,
-      title: 'Nhân viên phục vụ',
-      employer: 'Katinat chi nhánh quận 8',
-      employerEmail: 'hr@katinat.vn',
-      employerPhone: '0901234567',
-      postDate: '2026-01-15',
-      endDate: '2026-06-15',
-      applications: 45,
-      cvSent: 38,
-      status: 'approved',
-      candidates: [
-        { name: 'Nguyễn Văn A', email: 'nguyenvana@example.com', phone: '0912345678', appliedDate: '2026-01-16', status: 'pending' },
-        { name: 'Trần Thị B', email: 'tranthib@example.com', phone: '0923456789', appliedDate: '2026-01-17', status: 'approved' },
-        { name: 'Lê Văn C', email: 'levanc@example.com', phone: '0934567890', appliedDate: '2026-01-18', status: 'rejected' },
-      ]
-    },
-    {
-      id: 2,
-      title: 'Nhân viên chạy bàn',
-      employer: 'The Coffee House chi nhánh Bình Thạnh',
-      employerEmail: 'recruit@thecoffeehouse.vn',
-      employerPhone: '0902345678',
-      postDate: '2026-01-20',
-      endDate: '2026-12-31',
-      applications: 67,
-      cvSent: 52,
-      status: 'pending',
-      candidates: [
-        { name: 'Phạm Thị D', email: 'phamthid@example.com', phone: '0945678901', appliedDate: '2026-01-21', status: 'pending' },
-        { name: 'Hoàng Văn E', email: 'hoangvane@example.com', phone: '0956789012', appliedDate: '2026-01-22', status: 'pending' },
-      ]
-    },
-    {
-      id: 3,
-      title: 'Nhân viên phục vụ',
-      employer: 'D coffee',
-      employerEmail: 'hr@dcoffee.vn',
-      employerPhone: '0903456789',
-      postDate: '2026-02-01',
-      endDate: '2026-08-01',
-      applications: 89,
-      cvSent: 71,
-      status: 'approved',
-      candidates: [
-        { name: 'Vũ Thị F', email: 'vuthif@example.com', phone: '0967890123', appliedDate: '2026-02-02', status: 'approved' },
-        { name: 'Đỗ Văn G', email: 'dovang@example.com', phone: '0978901234', appliedDate: '2026-02-03', status: 'approved' },
-        { name: 'Bùi Thị H', email: 'buithih@example.com', phone: '0989012345', appliedDate: '2026-02-04', status: 'pending' },
-      ]
-    },
-    {
-      id: 4,
-      title: 'Nhân viên chạy bàn',
-      employer: 'Quán lẩu 88',
-      employerEmail: 'contact@lau88.vn',
-      employerPhone: '0904567890',
-      postDate: '2026-01-10',
-      endDate: '2026-07-10',
-      applications: 34,
-      cvSent: 28,
-      status: 'warning',
-      candidates: [
-        { name: 'Ngô Văn I', email: 'ngovani@example.com', phone: '0990123456', appliedDate: '2026-01-11', status: 'pending' },
-      ]
-    },
-    {
-      id: 5,
-      title: 'Nhân viên vận chuyển kho',
-      employer: 'Nhà hàng cưới Victory',
-      employerEmail: 'hr@victory.vn',
-      employerPhone: '0905678901',
-      postDate: '2026-01-25',
-      endDate: '2026-05-25',
-      applications: 23,
-      cvSent: 19,
-      status: 'rejected',
-      candidates: [
-        { name: 'Đinh Thị K', email: 'dinhthik@example.com', phone: '0901234567', appliedDate: '2026-01-26', status: 'rejected' },
-      ]
-    },
-  ]);
+  // Sample candidate names from CandidatesManagement (100 candidates)
+  const candidatePool = [
+    { name: 'Nguyễn Văn An', email: 'nguyen.an.01@example.com', phone: '0901234567' },
+    { name: 'Trần Thị Bình', email: 'tran.binh.02@example.com', phone: '0902345678' },
+    { name: 'Lê Minh Cường', email: 'le.cuong.03@example.com', phone: '0903456789' },
+    { name: 'Phạm Hoàng Dũng', email: 'pham.dung.04@example.com', phone: '0904567890' },
+    { name: 'Hoàng Ngọc Lan', email: 'hoang.lan.05@example.com', phone: '0905678901' },
+    { name: 'Đỗ Văn Hùng', email: 'do.hung.06@example.com', phone: '0906789012' },
+    { name: 'Bùi Thị Hương', email: 'bui.huong.07@example.com', phone: '0907890123' },
+    { name: 'Vũ Tuấn Kiệt', email: 'vu.kiet.08@example.com', phone: '0908901234' },
+    { name: 'Đặng Thanh Mai', email: 'dang.mai.09@example.com', phone: '0909012345' },
+    { name: 'Ngô Văn Nam', email: 'ngo.nam.10@example.com', phone: '0910123456' },
+    { name: 'Hồ Thị Nga', email: 'ho.nga.11@example.com', phone: '0911234567' },
+    { name: 'Phan Đức Phúc', email: 'phan.phuc.12@example.com', phone: '0912345678' },
+    { name: 'Huỳnh Phương Thảo', email: 'huynh.thao.13@example.com', phone: '0913456789' },
+    { name: 'Nguyễn Văn Tuấn', email: 'nguyen.tuan.14@example.com', phone: '0914567890' },
+    { name: 'Trần Thanh Tú', email: 'tran.tu.15@example.com', phone: '0915678901' },
+    { name: 'Lê Thị Vân', email: 'le.van.16@example.com', phone: '0916789012' },
+    { name: 'Phạm Văn Vinh', email: 'pham.vinh.17@example.com', phone: '0917890123' },
+    { name: 'Hoàng Minh Vũ', email: 'hoang.vu.18@example.com', phone: '0918901234' },
+    { name: 'Đỗ Thị Yến', email: 'do.yen.19@example.com', phone: '0919012345' },
+    { name: 'Bùi Văn Chung', email: 'bui.chung.20@example.com', phone: '0920123456' },
+    { name: 'Nguyễn Thị Duyên', email: 'nguyen.duyen.21@example.com', phone: '0921234567' },
+    { name: 'Trần Văn Giang', email: 'tran.giang.22@example.com', phone: '0922345678' },
+    { name: 'Lê Thanh Hải', email: 'le.hai.23@example.com', phone: '0923456789' },
+    { name: 'Phạm Thị Hồng', email: 'pham.hong.24@example.com', phone: '0924567890' },
+    { name: 'Hoàng Văn Huy', email: 'hoang.huy.25@example.com', phone: '0925678901' },
+    { name: 'Đặng Thị Kim', email: 'dang.kim.26@example.com', phone: '0926789012' },
+    { name: 'Ngô Thanh Lâm', email: 'ngo.lam.27@example.com', phone: '0927890123' },
+    { name: 'Hồ Văn Lộc', email: 'ho.loc.28@example.com', phone: '0928901234' },
+    { name: 'Phan Thị Ly', email: 'phan.ly.29@example.com', phone: '0929012345' },
+    { name: 'Huỳnh Minh Nhật', email: 'huynh.nhat.30@example.com', phone: '0930123456' },
+    { name: 'Nguyễn Thị Oanh', email: 'nguyen.oanh.31@example.com', phone: '0931234567' },
+    { name: 'Trần Văn Phong', email: 'tran.phong.32@example.com', phone: '0932345678' },
+    { name: 'Lê Thị Quyên', email: 'le.quyen.33@example.com', phone: '0933456789' },
+    { name: 'Phạm Văn Sang', email: 'pham.sang.34@example.com', phone: '0934567890' },
+    { name: 'Hoàng Thị Tâm', email: 'hoang.tam.35@example.com', phone: '0935678901' },
+    { name: 'Đỗ Minh Thắng', email: 'do.thang.36@example.com', phone: '0936789012' },
+    { name: 'Bùi Thị Thu', email: 'bui.thu.37@example.com', phone: '0937890123' },
+    { name: 'Vũ Văn Tiến', email: 'vu.tien.38@example.com', phone: '0938901234' },
+    { name: 'Đặng Thanh Tùng', email: 'dang.tung.39@example.com', phone: '0939012345' },
+    { name: 'Ngô Thị Tuyết', email: 'ngo.tuyet.40@example.com', phone: '0940123456' },
+    { name: 'Hồ Văn Uyên', email: 'ho.uyen.41@example.com', phone: '0941234567' },
+    { name: 'Phan Minh Việt', email: 'phan.viet.42@example.com', phone: '0942345678' },
+    { name: 'Huỳnh Thị Xoan', email: 'huynh.xoan.43@example.com', phone: '0943456789' },
+    { name: 'Nguyễn Văn Ý', email: 'nguyen.y.44@example.com', phone: '0944567890' },
+    { name: 'Trần Thanh Ân', email: 'tran.an.45@example.com', phone: '0945678901' },
+    { name: 'Lê Thị Bích', email: 'le.bich.46@example.com', phone: '0946789012' },
+    { name: 'Phạm Văn Cảnh', email: 'pham.canh.47@example.com', phone: '0947890123' },
+    { name: 'Hoàng Minh Danh', email: 'hoang.danh.48@example.com', phone: '0948901234' },
+    { name: 'Đỗ Thị Đào', email: 'do.dao.49@example.com', phone: '0949012345' },
+    { name: 'Bùi Văn Đạt', email: 'bui.dat.50@example.com', phone: '0950123456' },
+    { name: 'Nguyễn Thị Diệp', email: 'nguyen.diep.51@example.com', phone: '0951234567' },
+    { name: 'Trần Văn Đông', email: 'tran.dong.52@example.com', phone: '0952345678' },
+    { name: 'Lê Thị Hà', email: 'le.ha.53@example.com', phone: '0953456789' },
+    { name: 'Phạm Văn Hiếu', email: 'pham.hieu.54@example.com', phone: '0954567890' },
+    { name: 'Hoàng Thị Hoa', email: 'hoang.hoa.55@example.com', phone: '0955678901' },
+    { name: 'Đặng Văn Hùng', email: 'dang.hung.56@example.com', phone: '0956789012' },
+    { name: 'Ngô Thị Huyền', email: 'ngo.huyen.57@example.com', phone: '0957890123' },
+    { name: 'Hồ Văn Khang', email: 'ho.khang.58@example.com', phone: '0958901234' },
+    { name: 'Phan Thị Lan', email: 'phan.lan.59@example.com', phone: '0959012345' },
+    { name: 'Huỳnh Minh Long', email: 'huynh.long.60@example.com', phone: '0960123456' },
+    { name: 'Nguyễn Thị Minh', email: 'nguyen.minh.61@example.com', phone: '0961234567' },
+    { name: 'Trần Văn Nam', email: 'tran.nam.62@example.com', phone: '0962345678' },
+    { name: 'Lê Thị Ngọc', email: 'le.ngoc.63@example.com', phone: '0963456789' },
+    { name: 'Phạm Văn Nghĩa', email: 'pham.nghia.64@example.com', phone: '0964567890' },
+    { name: 'Hoàng Thị Nhung', email: 'hoang.nhung.65@example.com', phone: '0965678901' },
+    { name: 'Đặng Văn Phong', email: 'dang.phong.66@example.com', phone: '0966789012' },
+    { name: 'Ngô Thị Phương', email: 'ngo.phuong.67@example.com', phone: '0967890123' },
+    { name: 'Hồ Văn Quân', email: 'ho.quan.68@example.com', phone: '0968901234' },
+    { name: 'Phan Thị Quý', email: 'phan.quy.69@example.com', phone: '0969012345' },
+    { name: 'Huỳnh Minh Sơn', email: 'huynh.son.70@example.com', phone: '0970123456' },
+    { name: 'Nguyễn Thị Tâm', email: 'nguyen.tam.71@example.com', phone: '0971234567' },
+    { name: 'Trần Văn Thành', email: 'tran.thanh.72@example.com', phone: '0972345678' },
+    { name: 'Lê Thị Thúy', email: 'le.thuy.73@example.com', phone: '0973456789' },
+    { name: 'Phạm Văn Trí', email: 'pham.tri.74@example.com', phone: '0974567890' },
+    { name: 'Hoàng Thị Trúc', email: 'hoang.truc.75@example.com', phone: '0975678901' },
+    { name: 'Đặng Văn Tú', email: 'dang.tu.76@example.com', phone: '0976789012' },
+    { name: 'Ngô Thị Tú Anh', email: 'ngo.tuanh.77@example.com', phone: '0977890123' },
+    { name: 'Hồ Văn Tùng', email: 'ho.tung.78@example.com', phone: '0978901234' },
+    { name: 'Phan Thị Tươi', email: 'phan.tuoi.79@example.com', phone: '0979012345' },
+    { name: 'Huỳnh Minh Vĩnh', email: 'huynh.vinh.80@example.com', phone: '0980123456' },
+    { name: 'Nguyễn Thị Xuân', email: 'nguyen.xuan.81@example.com', phone: '0981234567' },
+    { name: 'Trần Văn Ý', email: 'tran.y.82@example.com', phone: '0982345678' },
+    { name: 'Lê Thị Ánh', email: 'le.anh.83@example.com', phone: '0983456789' },
+    { name: 'Phạm Văn Bằng', email: 'pham.bang.84@example.com', phone: '0984567890' },
+    { name: 'Hoàng Thị Cẩm', email: 'hoang.cam.85@example.com', phone: '0985678901' },
+    { name: 'Đặng Văn Dũng', email: 'dang.dung.86@example.com', phone: '0986789012' },
+    { name: 'Ngô Thị Duyên', email: 'ngo.duyen.87@example.com', phone: '0987890123' },
+    { name: 'Hồ Văn Giang', email: 'ho.giang.88@example.com', phone: '0988901234' },
+    { name: 'Phan Thị Hạnh', email: 'phan.hanh.89@example.com', phone: '0989012345' },
+    { name: 'Huỳnh Minh Hậu', email: 'huynh.hau.90@example.com', phone: '0990123456' },
+    { name: 'Nguyễn Thị Hiền', email: 'nguyen.hien.91@example.com', phone: '0991234567' },
+    { name: 'Trần Văn Hòa', email: 'tran.hoa.92@example.com', phone: '0992345678' },
+    { name: 'Lê Thị Huệ', email: 'le.hue.93@example.com', phone: '0993456789' },
+    { name: 'Phạm Văn Hưng', email: 'pham.hung.94@example.com', phone: '0994567890' },
+    { name: 'Hoàng Thị Khuyên', email: 'hoang.khuyen.95@example.com', phone: '0995678901' },
+    { name: 'Đặng Văn Lợi', email: 'dang.loi.96@example.com', phone: '0996789012' },
+    { name: 'Ngô Thị Mai', email: 'ngo.mai.97@example.com', phone: '0997890123' },
+    { name: 'Hồ Văn Minh', email: 'ho.minh.98@example.com', phone: '0998901234' },
+    { name: 'Phan Thị Mỹ', email: 'phan.my.99@example.com', phone: '0999012345' },
+    { name: 'Huỳnh Minh Nhân', email: 'huynh.nhan.100@example.com', phone: '0990012346' },
+  ];
 
-  // Dữ liệu việc làm part-time gấp
-  const [urgentJobs] = useState([
-    {
-      id: 6,
-      title: 'Nhân viên phục vụ',
-      employer: 'Highlands Coffee chi nhánh quận 1',
-      employerEmail: 'hr@highlandscoffee.vn',
-      employerPhone: '0906789012',
-      postDate: '2026-02-10',
-      endDate: '2026-02-15',
-      applications: 156,
-      cvSent: 98,
-      status: 'approved',
-      candidates: [
-        { name: 'Trương Văn L', email: 'truongvanl@example.com', phone: '0912345678', appliedDate: '2026-02-10', status: 'approved' },
-        { name: 'Lý Thị M', email: 'lythim@example.com', phone: '0923456789', appliedDate: '2026-02-10', status: 'approved' },
-        { name: 'Mai Văn N', email: 'maivann@example.com', phone: '0934567890', appliedDate: '2026-02-11', status: 'pending' },
-      ]
-    },
-    {
-      id: 7,
-      title: 'Nhân viên vận chuyển kho',
-      employer: 'Phúc Long chi nhánh quận 3',
-      employerEmail: 'recruit@phuclong.vn',
-      employerPhone: '0907890123',
-      postDate: '2026-02-12',
-      endDate: '2026-02-14',
-      applications: 78,
-      cvSent: 65,
-      status: 'pending',
-      candidates: [
-        { name: 'Cao Văn O', email: 'caovano@example.com', phone: '0945678901', appliedDate: '2026-02-12', status: 'pending' },
-        { name: 'Tô Thị P', email: 'tothip@example.com', phone: '0956789012', appliedDate: '2026-02-12', status: 'pending' },
-      ]
-    },
-    {
-      id: 8,
-      title: 'Nhân viên phục vụ',
-      employer: 'Quán nhậu Hải Sản 88',
-      employerEmail: 'hr@haisan88.vn',
-      employerPhone: '0908901234',
-      postDate: '2026-02-11',
-      endDate: '2026-02-13',
-      applications: 234,
-      cvSent: 187,
-      status: 'approved',
-      candidates: [
-        { name: 'Hồ Văn Q', email: 'hovanq@example.com', phone: '0967890123', appliedDate: '2026-02-11', status: 'approved' },
-        { name: 'Dương Thị R', email: 'duongthir@example.com', phone: '0978901234', appliedDate: '2026-02-11', status: 'approved' },
-        { name: 'Lâm Văn S', email: 'lamvans@example.com', phone: '0989012345', appliedDate: '2026-02-11', status: 'approved' },
-        { name: 'Võ Thị T', email: 'vothit@example.com', phone: '0990123456', appliedDate: '2026-02-12', status: 'pending' },
-      ]
-    },
-    {
-      id: 9,
-      title: 'Nhân viên chạy bàn',
-      employer: 'Quán lẩu Hồng Kông',
-      employerEmail: 'contact@lauhongkong.vn',
-      employerPhone: '0909012345',
-      postDate: '2026-02-09',
-      endDate: '2026-02-12',
-      applications: 145,
-      cvSent: 112,
-      status: 'warning',
-      candidates: [
-        { name: 'Phan Văn U', email: 'phanvanu@example.com', phone: '0901234567', appliedDate: '2026-02-09', status: 'pending' },
-        { name: 'Đặng Thị V', email: 'dangthiv@example.com', phone: '0912345678', appliedDate: '2026-02-09', status: 'approved' },
-      ]
-    },
-    {
-      id: 10,
-      title: 'Nhân viên phục vụ',
-      employer: 'Starbucks chi nhánh quận 7',
-      employerEmail: 'hr@starbucks.vn',
-      employerPhone: '0910123456',
-      postDate: '2026-02-08',
-      endDate: '2026-02-11',
-      applications: 56,
-      cvSent: 43,
-      status: 'rejected',
-      candidates: [
-        { name: 'Tạ Văn W', email: 'tavanw@example.com', phone: '0923456789', appliedDate: '2026-02-08', status: 'rejected' },
-      ]
-    },
-  ]);
+  // Generate random candidates for each job
+  const generateCandidates = (jobId, numApplications) => {
+    const candidates = [];
+    // Show 50-70% of applications as candidates (realistic conversion rate)
+    // Min 15 candidates, max 80 candidates
+    const conversionRate = 0.5 + Math.random() * 0.2; // 50-70%
+    const numToShow = Math.min(Math.max(15, Math.floor(numApplications * conversionRate)), 80);
+    const usedIndices = new Set();
+    
+    for (let i = 0; i < numToShow; i++) {
+      let randomIndex;
+      do {
+        randomIndex = Math.floor(Math.random() * candidatePool.length);
+      } while (usedIndices.has(randomIndex));
+      
+      usedIndices.add(randomIndex);
+      const candidate = candidatePool[randomIndex];
+      
+      // Random date between 05/03 and 08/03
+      const day = 5 + Math.floor(Math.random() * 4);
+      
+      // Status distribution: 40% approved, 40% pending, 20% rejected
+      let status;
+      const rand = Math.random();
+      if (rand < 0.4) status = 'approved';
+      else if (rand < 0.8) status = 'pending';
+      else status = 'rejected';
+      
+      candidates.push({
+        name: candidate.name,
+        email: candidate.email,
+        phone: candidate.phone,
+        appliedDate: '0' + day + '/03/2026',
+        status: status
+      });
+    }
+    
+    return candidates;
+  };
+
+  // Transform jobPosts data into posts with applications
+  const transformJobToPost = (job, isUrgent = false) => {
+    // For long-term jobs, set end date to 3-6 months from post date
+    let endDate = job.workDate;
+    if (!isUrgent) {
+      const postDateParts = job.workDate.split('/');
+      const postDay = parseInt(postDateParts[0]);
+      const postMonth = parseInt(postDateParts[1]);
+      const postYear = parseInt(postDateParts[2]);
+      
+      // Add 3-6 months randomly
+      const monthsToAdd = 3 + Math.floor(Math.random() * 4); // 3-6 months
+      let endMonth = postMonth + monthsToAdd;
+      let endYear = postYear;
+      
+      if (endMonth > 12) {
+        endYear += Math.floor(endMonth / 12);
+        endMonth = endMonth % 12;
+        if (endMonth === 0) {
+          endMonth = 12;
+          endYear -= 1;
+        }
+      }
+      
+      // Use same day or last day of month if day doesn't exist
+      let endDay = postDay;
+      const daysInMonth = new Date(endYear, endMonth, 0).getDate();
+      if (endDay > daysInMonth) {
+        endDay = daysInMonth;
+      }
+      
+      endDate = String(endDay).padStart(2, '0') + '/' + String(endMonth).padStart(2, '0') + '/' + endYear;
+    }
+    
+    return {
+      id: job.id,
+      title: job.title,
+      employer: job.company,
+      employerType: job.companyType,
+      employerEmail: 'hr@' + job.company.toLowerCase().replace(/\s+/g, '') + '.vn',
+      employerPhone: '090' + String(job.id).padStart(7, '0'),
+      postDate: job.workDate,
+      endDate: endDate,
+      shift: job.shift,
+      salary: job.salary,
+      applications: job.views,
+      cvSent: Math.floor(job.views * 0.7),
+      status: job.urgent ? 'ai-approved' : (job.featured ? 'approved' : 'pending'),
+      aiApproved: job.urgent || job.featured,
+      location: job.location,
+      tags: job.tags,
+      candidates: generateCandidates(job.id, job.views)
+    };
+  };
+
+  // Dữ liệu việc làm part-time lâu dài (standard jobs)
+  const longtermJobs = jobPosts
+    .filter(job => job.category === 'standard')
+    .map(job => transformJobToPost(job, false));
+
+  // Dữ liệu việc làm part-time gấp (urgent jobs)
+  const urgentJobs = jobPosts
+    .filter(job => job.category === 'urgent')
+    .map(job => transformJobToPost(job, true));
 
   const currentJobs = activeTab === 'longterm' ? longtermJobs : urgentJobs;
 
   const getStatusText = (status) => {
+    if (status === 'ai-approved') return language === 'vi' ? 'AI Tự động duyệt' : 'AI Auto-approved';
     if (status === 'approved') return language === 'vi' ? 'Đã duyệt' : 'Approved';
     if (status === 'rejected') return language === 'vi' ? 'Đã từ chối' : 'Rejected';
     if (status === 'warning') return language === 'vi' ? 'Bị cảnh báo' : 'Warning';
@@ -626,6 +723,7 @@ const PostsManagement = () => {
   };
 
   const filterOptions = [
+    { value: 'ai-approved', label: language === 'vi' ? 'AI Tự động duyệt' : 'AI Auto-approved' },
     { value: 'approved', label: language === 'vi' ? 'Đã duyệt' : 'Approved' },
     { value: 'pending', label: language === 'vi' ? 'Chờ duyệt' : 'Pending' },
     { value: 'warning', label: language === 'vi' ? 'Bị cảnh báo' : 'Warning' },
@@ -644,12 +742,25 @@ const PostsManagement = () => {
     });
   }, [currentJobs, searchTerm, filters]);
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentJobs_paginated = filteredJobs.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search or filters change
+  const handleSearchChange = (value) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
+
   const handleFilterToggle = (filterValue) => {
     setFilters(prev => 
       prev.includes(filterValue) 
         ? prev.filter(f => f !== filterValue)
         : [...prev, filterValue]
     );
+    setCurrentPage(1);
   };
 
   const handleViewDetails = (job) => {
@@ -729,6 +840,7 @@ const PostsManagement = () => {
               setActiveTab('longterm');
               setSearchTerm('');
               setFilters([]);
+              setCurrentPage(1);
             }}
           >
             <Briefcase />
@@ -751,6 +863,7 @@ const PostsManagement = () => {
               setActiveTab('urgent');
               setSearchTerm('');
               setFilters([]);
+              setCurrentPage(1);
             }}
           >
             <Zap />
@@ -769,30 +882,22 @@ const PostsManagement = () => {
           </Tab>
         </TabContainer>
 
-        <StatsRow>
-          <StatBox $color="#1e40af">
-            <h3>{language === 'vi' ? 'Tổng bài đăng' : 'Total Posts'}</h3>
-            <p>{stats.total}</p>
-          </StatBox>
-          <StatBox $color="#10b981">
-            <h3>{language === 'vi' ? 'Đã duyệt' : 'Approved'}</h3>
-            <p>{stats.approved}</p>
-          </StatBox>
-          <StatBox $color="#4338ca">
-            <h3>{language === 'vi' ? 'Chờ duyệt' : 'Pending'}</h3>
-            <p>{stats.pending}</p>
-          </StatBox>
-          <StatBox $color="#f59e0b">
-            <h3>{language === 'vi' ? 'Bị cảnh báo' : 'Warning'}</h3>
-            <p>{stats.warning}</p>
-          </StatBox>
-          <StatBox $color="#ef4444">
-            <h3>{language === 'vi' ? 'Đã từ chối' : 'Rejected'}</h3>
-            <p>{stats.rejected}</p>
-          </StatBox>
-        </StatsRow>
-
         <ChartsContainer>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <StatBox $color="#1e40af">
+              <h3>{language === 'vi' ? 'Tổng bài đăng' : 'Total Posts'}</h3>
+              <p>{stats.total}</p>
+            </StatBox>
+            <StatBox $color="#8b5cf6">
+              <h3>{language === 'vi' ? 'Tổng ứng tuyển' : 'Total Applications'}</h3>
+              <p>{totalApplications}</p>
+            </StatBox>
+            <StatBox $color="#10b981">
+              <h3>{language === 'vi' ? 'Tổng CV đã gửi' : 'Total CV Sent'}</h3>
+              <p>{totalCVSent}</p>
+            </StatBox>
+          </div>
+          
           <ChartCard>
             <ChartTitle>
               <BarChart3 size={20} />
@@ -824,42 +929,11 @@ const PostsManagement = () => {
               </div>
             </div>
           </ChartCard>
-
-          <ChartCard>
-            <ChartTitle>
-              <PieChartIcon size={20} />
-              {language === 'vi' ? 'Phân Bố Trạng Thái' : 'Status Distribution'}
-            </ChartTitle>
-            <PieChartContainer>
-              <PieChartSVG viewBox="0 0 200 200">
-                {pieSlices.map((slice, index) => (
-                  <path
-                    key={index}
-                    d={slice.path}
-                    fill={slice.color}
-                    stroke="white"
-                    strokeWidth="2"
-                  />
-                ))}
-              </PieChartSVG>
-              <PieLegend>
-                {pieData.map((item, index) => (
-                  <LegendItem key={index}>
-                    <LegendLabel>
-                      <LegendColor $color={item.color} />
-                      {item.label}
-                    </LegendLabel>
-                    <LegendValue>{item.value} ({pieSlices[index].percentage}%)</LegendValue>
-                  </LegendItem>
-                ))}
-              </PieLegend>
-            </PieChartContainer>
-          </ChartCard>
         </ChartsContainer>
 
         <TableFilter 
           searchValue={searchTerm}
-          onSearchChange={setSearchTerm}
+          onSearchChange={handleSearchChange}
           filterOptions={filterOptions}
           activeFilters={filters}
           onFilterToggle={handleFilterToggle}
@@ -876,12 +950,11 @@ const PostsManagement = () => {
                 <th>{language === 'vi' ? 'Ngày kết thúc' : 'End Date'}</th>
                 <th>{language === 'vi' ? 'Ứng tuyển' : 'Applications'}</th>
                 <th>{language === 'vi' ? 'CV đã gửi' : 'CV Sent'}</th>
-                <th>{language === 'vi' ? 'Trạng thái' : 'Status'}</th>
                 <th>{language === 'vi' ? 'Thao tác' : 'Actions'}</th>
               </tr>
             </thead>
             <tbody>
-              {filteredJobs.map((job) => (
+              {currentJobs_paginated.map((job) => (
                 <tr key={job.id}>
                   <td style={{ fontWeight: 600 }}>{job.title}</td>
                   <td>{job.employer}</td>
@@ -910,11 +983,6 @@ const PostsManagement = () => {
                     </div>
                   </td>
                   <td>
-                    <StatusBadge $status={job.status}>
-                      {getStatusText(job.status)}
-                    </StatusBadge>
-                  </td>
-                  <td>
                     <ActionButtons>
                       <IconButton 
                         onClick={() => handleViewDetails(job)}
@@ -922,23 +990,11 @@ const PostsManagement = () => {
                       >
                         <Eye size={16} />
                       </IconButton>
-                      {job.status === 'pending' && (
-                        <>
-                          <IconButton $variant="success" title={language === 'vi' ? 'Phê duyệt' : 'Approve'}>
-                            <CheckCircle size={16} />
-                          </IconButton>
-                          <IconButton $variant="danger" title={language === 'vi' ? 'Từ chối' : 'Reject'}>
-                            <Ban size={16} />
-                          </IconButton>
-                        </>
-                      )}
-                      {job.status === 'warning' && (
-                        <IconButton $variant="danger" title={language === 'vi' ? 'Cảnh báo' : 'Warning'}>
-                          <AlertTriangle size={16} />
-                        </IconButton>
-                      )}
-                      <IconButton $variant="danger" title={language === 'vi' ? 'Xóa' : 'Delete'}>
-                        <Trash2 size={16} />
+                      <IconButton $variant="success" title={language === 'vi' ? 'Phê duyệt' : 'Approve'}>
+                        <CheckCircle size={16} />
+                      </IconButton>
+                      <IconButton $variant="danger" title={language === 'vi' ? 'Từ chối' : 'Reject'}>
+                        <Ban size={16} />
                       </IconButton>
                     </ActionButtons>
                   </td>
@@ -947,6 +1003,102 @@ const PostsManagement = () => {
             </tbody>
           </Table>
         </TableWrapper>
+
+        {filteredJobs.length > 0 && (
+          <PaginationContainer>
+            <PaginationInfo>
+              {language === 'vi' 
+                ? `Hiển thị ${startIndex + 1}-${Math.min(endIndex, filteredJobs.length)} trong tổng số ${filteredJobs.length} bài đăng`
+                : `Showing ${startIndex + 1}-${Math.min(endIndex, filteredJobs.length)} of ${filteredJobs.length} posts`
+              }
+            </PaginationInfo>
+            
+            <PaginationButtons>
+              <PageButton
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+              >
+                {language === 'vi' ? 'Trước' : 'Previous'}
+              </PageButton>
+              
+              {(() => {
+                const pages = [];
+                
+                if (totalPages <= 7) {
+                  // Show all pages if 7 or fewer
+                  for (let i = 1; i <= totalPages; i++) {
+                    pages.push(
+                      <PageButton
+                        key={i}
+                        $active={currentPage === i}
+                        onClick={() => setCurrentPage(i)}
+                      >
+                        {i}
+                      </PageButton>
+                    );
+                  }
+                } else {
+                  // Always show first page
+                  pages.push(
+                    <PageButton
+                      key={1}
+                      $active={currentPage === 1}
+                      onClick={() => setCurrentPage(1)}
+                    >
+                      1
+                    </PageButton>
+                  );
+                  
+                  // Show ellipsis after first page if current page is far from start
+                  if (currentPage > 3) {
+                    pages.push(<PageEllipsis key="ellipsis-start">...</PageEllipsis>);
+                  }
+                  
+                  // Show pages around current page
+                  const startPage = Math.max(2, currentPage - 1);
+                  const endPage = Math.min(totalPages - 1, currentPage + 1);
+                  
+                  for (let i = startPage; i <= endPage; i++) {
+                    pages.push(
+                      <PageButton
+                        key={i}
+                        $active={currentPage === i}
+                        onClick={() => setCurrentPage(i)}
+                      >
+                        {i}
+                      </PageButton>
+                    );
+                  }
+                  
+                  // Show ellipsis before last page if current page is far from end
+                  if (currentPage < totalPages - 2) {
+                    pages.push(<PageEllipsis key="ellipsis-end">...</PageEllipsis>);
+                  }
+                  
+                  // Always show last page
+                  pages.push(
+                    <PageButton
+                      key={totalPages}
+                      $active={currentPage === totalPages}
+                      onClick={() => setCurrentPage(totalPages)}
+                    >
+                      {totalPages}
+                    </PageButton>
+                  );
+                }
+                
+                return pages;
+              })()}
+              
+              <PageButton
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+              >
+                {language === 'vi' ? 'Sau' : 'Next'}
+              </PageButton>
+            </PaginationButtons>
+          </PaginationContainer>
+        )}
 
         {showDetailModal && selectedJob && (
           <Modal

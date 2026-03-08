@@ -536,59 +536,114 @@ const ActivityTime = styled.div`
   }
 `;
 
+const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  padding: 20px;
+  background: ${props => props.theme.colors.bgLight};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  border: 2px solid ${props => props.theme.colors.border};
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+`;
+
+const PaginationInfo = styled.div`
+  color: ${props => props.theme.colors.text};
+  font-size: 14px;
+  font-weight: 600;
+  
+  @media (max-width: 768px) {
+    font-size: 13px;
+  }
+`;
+
+const PaginationButtons = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+`;
+
+const PageButton = styled.button`
+  padding: 8px 12px;
+  border: 2px solid ${props => props.$active ? props.theme.colors.primary : props.theme.colors.border};
+  background: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.bgDark};
+  color: ${props => props.$active ? 'white' : props.theme.colors.text};
+  border-radius: ${props => props.theme.borderRadius.md};
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 40px;
+  
+  @media (max-width: 768px) {
+    padding: 6px 10px;
+    font-size: 13px;
+    min-width: 36px;
+  }
+  
+  &:hover:not(:disabled) {
+    border-color: ${props => props.theme.colors.primary};
+    background: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.border};
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const PageEllipsis = styled.span`
+  color: ${props => props.theme.colors.textLight};
+  font-weight: 600;
+  padding: 0 4px;
+`;
+
 const EmployersManagement = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   // Sample data
   const employers = [
-    { 
-      id: 1,
-      name: 'Katinat chi nhánh quận 8', 
-      email: 'hr@katinat.com', 
-      verified: true,
-      approvalStatus: 'approved',
-      joined: '2026-03-06',
-      confirmDate: '2026-03-14',
-    },
-    { 
-      id: 2,
-      name: 'The Coffee House chi nhánh Bình Thạnh', 
-      email: 'recruit@thecoffeehouse.com', 
-      verified: true,
-      approvalStatus: 'approved',
-      joined: '2026-03-05',
-      confirmDate: '2026-03-13',
-    },
-    { 
-      id: 3,
-      name: 'D coffee', 
-      email: 'hr@dcoffee.com', 
-      verified: false,
-      approvalStatus: 'pending',
-      joined: '2026-02-03',
-      confirmDate: null,
-    },
-    { 
-      id: 4,
-      name: 'Quán lẩu 88', 
-      email: 'jobs@quanlau88.com', 
-      verified: false,
-      approvalStatus: 'pending',
-      joined: '2026-03-03',
-      confirmDate: null,
-    },
-    { 
-      id: 5,
-      name: 'Nhà hàng cưới Victory', 
-      email: 'careers@victoryvn.com', 
-      verified: true,
-      approvalStatus: 'approved',
-      joined: '2026-03-02',
-      confirmDate: '2026-03-07',
-    },
+    { id: 1, name: 'Lẩu Bò Sài Gòn Vi Vu', type: 'Quán ăn/Nhậu', email: 'vuvu.hr@gmail.com', verified: true, approvalStatus: 'approved', joined: '2026-01-15', confirmDate: '2026-01-20' },
+    { id: 2, name: 'Ốc Đêm 79', type: 'Quán nhậu', email: 'ocdem79.tuyendung@gmail.com', verified: true, approvalStatus: 'approved', joined: '2026-01-16', confirmDate: '2026-01-21' },
+    { id: 3, name: 'Tiệm Trà Tháng Tư', type: 'Café/Trà sữa', email: 'tiemtrathang4.hr@gmail.com', verified: false, approvalStatus: 'pending', joined: '2026-01-17', confirmDate: null },
+    { id: 4, name: 'Bia Sệt 123', type: 'Quán nhậu', email: 'biaset123.info@gmail.com', verified: true, approvalStatus: 'approved', joined: '2026-01-18', confirmDate: '2026-01-23' },
+    { id: 5, name: 'Bếp Nhà Mẹ Nấu', type: 'Cơm niêu/Gia đình', email: 'bepnhamenau.hr@gmail.com', verified: true, approvalStatus: 'approved', joined: '2026-01-19', confirmDate: '2026-01-24' },
+    { id: 6, name: 'Chill Out Beer Club', type: 'Pub/Nhậu', email: 'chillout.beer@gmail.com', verified: false, approvalStatus: 'pending', joined: '2026-01-20', confirmDate: null },
+    { id: 7, name: 'Phở Gia Truyền 1954', type: 'Nhà hàng nhỏ', email: 'phogiatruyen.hr@gmail.com', verified: true, approvalStatus: 'approved', joined: '2026-01-21', confirmDate: '2026-01-26' },
+    { id: 8, name: 'Sushi Sen Mini', type: 'Nhật Bản', email: 'sushisen.recruitment@gmail.com', verified: true, approvalStatus: 'approved', joined: '2026-01-22', confirmDate: '2026-01-27' },
+    { id: 9, name: 'High Tea & Coffee', type: 'Café', email: 'hightea.coffee@gmail.com', verified: false, approvalStatus: 'rejected', joined: '2026-01-23', confirmDate: '2026-01-28' },
+    { id: 10, name: 'Gà Nướng Ò Ó O', type: 'Quán ăn', email: 'ooo.ganuong@gmail.com', verified: true, approvalStatus: 'approved', joined: '2026-01-24', confirmDate: '2026-01-29' },
+    { id: 11, name: 'Nướng Ngói Gia Bảo', type: 'Quán nhậu', email: 'nuongngoigiabao@gmail.com', verified: true, approvalStatus: 'approved', joined: '2026-01-25', confirmDate: '2026-01-30' },
+    { id: 12, name: 'The Morning Bakery', type: 'Tiệm bánh', email: 'morningbakery.hr@gmail.com', verified: false, approvalStatus: 'pending', joined: '2026-01-26', confirmDate: null },
+    { id: 13, name: 'Lẩu Phan', type: 'Nhà hàng lẩu', email: 'lauphan.tuyendung@gmail.com', verified: true, approvalStatus: 'approved', joined: '2026-01-27', confirmDate: '2026-02-01' },
+    { id: 14, name: 'Beer Garden Phố', type: 'Quán nhậu', email: 'beergardenpho@gmail.com', verified: true, approvalStatus: 'approved', joined: '2026-01-28', confirmDate: '2026-02-02' },
+    { id: 15, name: 'Mì Cay Sasin', type: 'Quán ăn', email: 'sasin.hr@gmail.com', verified: false, approvalStatus: 'pending', joined: '2026-01-29', confirmDate: null },
+    { id: 16, name: 'Cà Phê Cây Me', type: 'Café sân vườn', email: 'caphecayme@gmail.com', verified: true, approvalStatus: 'approved', joined: '2026-01-30', confirmDate: '2026-02-04' },
+    { id: 17, name: 'Nhà Hàng Chay Sen Vàng', type: 'Nhà hàng nhỏ', email: 'senvang.chay@gmail.com', verified: true, approvalStatus: 'approved', joined: '2026-01-31', confirmDate: '2026-02-05' },
+    { id: 18, name: 'Xiên Khè', type: 'Quán nhậu', email: 'xienkhe.tuyendung@gmail.com', verified: false, approvalStatus: 'rejected', joined: '2026-02-01', confirmDate: '2026-02-06' },
+    { id: 19, name: 'Dimsum House', type: 'Quán ăn', email: 'dimsumhouse.hr@gmail.com', verified: true, approvalStatus: 'approved', joined: '2026-02-02', confirmDate: '2026-02-07' },
+    { id: 20, name: 'Bánh Mì PewPew', type: 'Thức ăn nhanh', email: 'banhmipewpew.info@gmail.com', verified: true, approvalStatus: 'approved', joined: '2026-02-03', confirmDate: '2026-02-08' },
+    { id: 21, name: 'Urban Coffee', type: 'Café', email: 'urbancoffee.rec@gmail.com', verified: false, approvalStatus: 'pending', joined: '2026-02-04', confirmDate: null },
+    { id: 22, name: 'Lẩu Cá Kèo Bà Huyện', type: 'Quán nhậu', email: 'laucakeobahuyen@gmail.com', verified: true, approvalStatus: 'approved', joined: '2026-02-05', confirmDate: '2026-02-10' },
+    { id: 23, name: 'Hủ Tiếu Nam Vang Thành Đạt', type: 'Quán ăn', email: 'thanhtdat.hutieu@gmail.com', verified: true, approvalStatus: 'approved', joined: '2026-02-06', confirmDate: '2026-02-11' },
+    { id: 24, name: 'Draft Beer Sài Gòn', type: 'Quán nhậu', email: 'draftbeer.sg@gmail.com', verified: false, approvalStatus: 'pending', joined: '2026-02-07', confirmDate: null },
+    { id: 25, name: 'Gòng Tea', type: 'Trà sữa', email: 'gongtea.tuyendung@gmail.com', verified: true, approvalStatus: 'approved', joined: '2026-02-08', confirmDate: '2026-02-13' },
+    { id: 26, name: 'Cơm Tấm Cali', type: 'Hệ thống nhỏ', email: 'comtamcali.hr@gmail.com', verified: true, approvalStatus: 'approved', joined: '2026-02-09', confirmDate: '2026-02-14' },
+    { id: 27, name: 'Warning Zone', type: 'Quán nhậu', email: 'warningzone.recruitment@gmail.com', verified: false, approvalStatus: 'rejected', joined: '2026-02-10', confirmDate: '2026-02-15' },
+    { id: 28, name: 'Trà Chanh Bụi Phố', type: 'Đồ uống', email: 'buipho.trachanh@gmail.com', verified: true, approvalStatus: 'approved', joined: '2026-02-11', confirmDate: '2026-02-16' },
+    { id: 29, name: 'Quán Nướng Ngói Sapa', type: 'Quán ăn', email: 'nuongngoisapa@gmail.com', verified: true, approvalStatus: 'approved', joined: '2026-02-12', confirmDate: '2026-02-17' },
+    { id: 30, name: 'Blue Star Cocktail Bar', type: 'Bar/Pub nhỏ', email: 'bluestar.bar@gmail.com', verified: false, approvalStatus: 'pending', joined: '2026-02-13', confirmDate: null },
   ];
 
   const getApprovalStatusText = (status) => {
@@ -610,6 +665,18 @@ const EmployersManagement = () => {
     const matchesStatus = statusFilter === 'all' || employer.approvalStatus === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredEmployers.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentEmployers = filteredEmployers.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filter changes
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
 
   const stats = {
     total: filteredEmployers.length,
@@ -660,7 +727,7 @@ const EmployersManagement = () => {
               type="text"
               placeholder={language === 'vi' ? 'Tìm kiếm theo tên hoặc email...' : 'Search by name or email...'}
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearchChange}
             />
           </SearchBox>
           
@@ -697,21 +764,27 @@ const EmployersManagement = () => {
           <Table>
             <thead>
               <tr>
-                <th>{language === 'vi' ? 'Tên nhà tuyển dụng' : 'Employer Name'}</th>
-                <th>{language === 'vi' ? 'Email' : 'Email'}</th>
+                <th style={{ width: '60px', textAlign: 'center' }}>{language === 'vi' ? 'STT' : 'No.'}</th>
+                <th>{language === 'vi' ? 'Tên đơn vị (Quán)' : 'Business Name'}</th>
+                <th>{language === 'vi' ? 'Loại hình' : 'Business Type'}</th>
+                <th>{language === 'vi' ? 'Email tuyển dụng' : 'Recruitment Email'}</th>
                 <th>{language === 'vi' ? 'Trạng thái phê duyệt' : 'Approval Status'}</th>
                 <th>{language === 'vi' ? 'Ngày tham gia' : 'Join Date'}</th>
                 <th>{language === 'vi' ? 'Đã xác thực' : 'Verified'}</th>
               </tr>
             </thead>
             <tbody>
-              {filteredEmployers.map((employer) => (
+              {currentEmployers.map((employer, index) => (
                 <tr 
                   key={employer.id}
                   onClick={() => navigate(`/admin/employers/${employer.id}`)}
                   style={{ cursor: 'pointer' }}
                 >
+                  <td style={{ textAlign: 'center', fontWeight: 600, color: '#6b7280' }}>
+                    {startIndex + index + 1}
+                  </td>
                   <td style={{ fontWeight: 600 }}>{employer.name}</td>
+                  <td>{employer.type}</td>
                   <td>{employer.email}</td>
                   <td>
                     <StatusBadge $status={getApprovalStatusVariant(employer.approvalStatus)}>
@@ -738,6 +811,67 @@ const EmployersManagement = () => {
             </tbody>
           </Table>
         </TableWrapper>
+
+        <PaginationContainer>
+          <PaginationInfo>
+            {language === 'vi' 
+              ? `Đang xem ${startIndex + 1}-${Math.min(endIndex, filteredEmployers.length)} trên ${filteredEmployers.length} kết quả`
+              : `Showing ${startIndex + 1}-${Math.min(endIndex, filteredEmployers.length)} of ${filteredEmployers.length} results`
+            }
+          </PaginationInfo>
+          
+          <PaginationButtons>
+            <PageButton 
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              {language === 'vi' ? '← Trước' : '← Previous'}
+            </PageButton>
+            
+            {/* First page */}
+            {currentPage > 3 && (
+              <>
+                <PageButton onClick={() => setCurrentPage(1)}>1</PageButton>
+                <PageEllipsis>...</PageEllipsis>
+              </>
+            )}
+            
+            {/* Page numbers around current page */}
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(page => {
+                return page === currentPage || 
+                       page === currentPage - 1 || 
+                       page === currentPage + 1 ||
+                       (page === 1 && currentPage <= 2) ||
+                       (page === totalPages && currentPage >= totalPages - 1);
+              })
+              .map(page => (
+                <PageButton
+                  key={page}
+                  $active={page === currentPage}
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </PageButton>
+              ))
+            }
+            
+            {/* Last page */}
+            {currentPage < totalPages - 2 && (
+              <>
+                <PageEllipsis>...</PageEllipsis>
+                <PageButton onClick={() => setCurrentPage(totalPages)}>{totalPages}</PageButton>
+              </>
+            )}
+            
+            <PageButton 
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+            >
+              {language === 'vi' ? 'Sau →' : 'Next →'}
+            </PageButton>
+          </PaginationButtons>
+        </PaginationContainer>
       </PageContainer>
     </DashboardLayout>
   );
