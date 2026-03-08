@@ -785,22 +785,54 @@ const JobsGrid = styled.div`
 
 const BoostBannerWrap = styled.div`
   position: relative;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
   cursor: pointer;
 
   img {
     width: 100%;
     height: auto;
     display: block;
-    transition: transform 0.35s ease;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   &:hover img {
-    transform: scale(1.02);
+    transform: scale(1.01);
   }
+`;
+
+const BannerDots = styled.div`
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+`;
+
+const BannerDot = styled.button`
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: ${props => props.$active ? '#fff' : 'rgba(255, 255, 255, 0.4)'};
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.7);
+    width: ${props => props.$active ? '8px' : '12px'};
+  }
+  
+  ${props => props.$active && `
+    width: 20px;
+    background: #fff;
+  `}
 `;
 
 const BoostTag = styled.div`
@@ -2213,7 +2245,8 @@ const JobListing = () => {
 
   const banners = [
     { src: "/OpPoReview/images/seoul.jpg", alt: "Seoul Vua Mì Cay" },
-    { src: "/OpPoReview/images/bamosbanner.jpg", alt: "Bamos Coffee" }
+    { src: "/OpPoReview/images/bamosbanner.jpg", alt: "Bamos Coffee" },
+    { src: "/OpPoReview/images/lebanner.jpg", alt: "Le Banner" }
   ];
 
   useEffect(() => {
@@ -2990,13 +3023,24 @@ const JobListing = () => {
               <BoostTag>🔥Hot deal</BoostTag>
               <motion.img 
                 key={currentBannerIndex}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.8 }}
+                initial={{ opacity: 0.8, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6 }}
                 src={banners[currentBannerIndex].src} 
                 alt={banners[currentBannerIndex].alt} 
               />
+              <BannerDots>
+                {banners.map((_, idx) => (
+                  <BannerDot 
+                    key={idx} 
+                    $active={currentBannerIndex === idx}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentBannerIndex(idx);
+                    }}
+                  />
+                ))}
+              </BannerDots>
             </BoostBannerWrap>
 
             <JobsGrid>
