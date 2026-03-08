@@ -5,10 +5,12 @@ import { useLanguage } from '../../context/LanguageContext';
 import { 
   DollarSign,
   TrendingUp,
-  Target,
+  Briefcase,
+  Building2,
   Users,
   Calendar
 } from 'lucide-react';
+import { jobPosts } from '../../data/jobPosts';
 
 const PageContainer = styled.div`
   background: #0a0a0a;
@@ -313,57 +315,57 @@ const Overview = () => {
         <StatsGrid>
           <StatCard>
             <StatHeader>
-              <StatLabel>{language === 'vi' ? 'Tổng Doanh Thu' : 'Total Revenue'}</StatLabel>
-              <StatIcon $bg="#1e3a8a" $color="#3b82f6">
-                <DollarSign />
-              </StatIcon>
-            </StatHeader>
-            <StatValue>245M</StatValue>
-            <StatChange $positive={true}>
-              <TrendingUp />
-              +12.5%
-            </StatChange>
-          </StatCard>
-
-          <StatCard>
-            <StatHeader>
-              <StatLabel>{language === 'vi' ? 'Tỷ Lệ Chuyển Đổi' : 'Conversion Rate'}</StatLabel>
-              <StatIcon $bg="#1e3a5a" $color="#06b6d4">
-                <Target />
-              </StatIcon>
-            </StatHeader>
-            <StatValue>24.8%</StatValue>
-            <StatChange $positive={true}>
-              <TrendingUp />
-              +3.2%
-            </StatChange>
-          </StatCard>
-
-          <StatCard>
-            <StatHeader>
-              <StatLabel>{language === 'vi' ? 'Giao Dịch Đang Hoạt Động' : 'Active Deals'}</StatLabel>
-              <StatIcon $bg="#1e1e3a" $color="#8b5cf6">
-                <Target />
-              </StatIcon>
-            </StatHeader>
-            <StatValue>147</StatValue>
-            <StatChange $positive={false}>
-              <TrendingUp style={{ transform: 'rotate(180deg)' }} />
-              -5
-            </StatChange>
-          </StatCard>
-
-          <StatCard>
-            <StatHeader>
-              <StatLabel>{language === 'vi' ? 'Khách Hàng Mới' : 'New Leads'}</StatLabel>
-              <StatIcon $bg="#1e2a1e" $color="#10b981">
+              <StatLabel>{language === 'vi' ? 'T\u1ED5ng \u1EE9ng vi\u00EAn' : 'Total Candidates'}</StatLabel>
+              <StatIcon $bg="#1e3a8a" $color="#667eea">
                 <Users />
               </StatIcon>
             </StatHeader>
-            <StatValue>892</StatValue>
+            <StatValue>100</StatValue>
             <StatChange $positive={true}>
               <TrendingUp />
-              +18.3%
+              +12%
+            </StatChange>
+          </StatCard>
+
+          <StatCard>
+            <StatHeader>
+              <StatLabel>{language === 'vi' ? 'T\u1ED5ng nh\u00E0 tuy\u1EC3n d\u1EE5ng' : 'Total Employers'}</StatLabel>
+              <StatIcon $bg="#064e3b" $color="#10b981">
+                <Building2 />
+              </StatIcon>
+            </StatHeader>
+            <StatValue>30</StatValue>
+            <StatChange $positive={true}>
+              <TrendingUp />
+              +8%
+            </StatChange>
+          </StatCard>
+
+          <StatCard>
+            <StatHeader>
+              <StatLabel>{language === 'vi' ? 'B\u00E0i \u0111\u0103ng tuy\u1EC3n d\u1EE5ng' : 'Job Posts'}</StatLabel>
+              <StatIcon $bg="#1e1e3a" $color="#3b82f6">
+                <Briefcase />
+              </StatIcon>
+            </StatHeader>
+            <StatValue>{jobPosts.length}</StatValue>
+            <StatChange $positive={true}>
+              <TrendingUp />
+              +15%
+            </StatChange>
+          </StatCard>
+
+          <StatCard>
+            <StatHeader>
+              <StatLabel>{language === 'vi' ? 'T\u1ED5ng doanh thu' : 'Total Revenue'}</StatLabel>
+              <StatIcon $bg="#422006" $color="#f59e0b">
+                <DollarSign />
+              </StatIcon>
+            </StatHeader>
+            <StatValue>14.8M</StatValue>
+            <StatChange $positive={true}>
+              <TrendingUp />
+              +23%
             </StatChange>
           </StatCard>
         </StatsGrid>
