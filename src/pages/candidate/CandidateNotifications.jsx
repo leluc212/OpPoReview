@@ -3,10 +3,10 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
-import { 
-  Bell, 
-  Briefcase, 
-  CheckCircle, 
+import {
+  Bell,
+  Briefcase,
+  CheckCircle,
   Eye,
   Clock,
   X,
@@ -141,16 +141,16 @@ const FilterButton = styled(motion.button)`
   padding: 10px 20px;
   border-radius: 24px;
   border: none;
-  background: ${props => props.$active 
-    ? 'linear-gradient(135deg, #1e40af 0%, #1e40af 100%)' 
+  background: ${props => props.$active
+    ? 'linear-gradient(135deg, #1e40af 0%, #1e40af 100%)'
     : props.theme.colors.bgLight};
   color: ${props => props.$active ? 'white' : props.theme.colors.text};
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: ${props => props.$active 
-    ? '0 4px 12px rgba(30, 64, 175, 0.4)' 
+  box-shadow: ${props => props.$active
+    ? '0 4px 12px rgba(30, 64, 175, 0.4)'
     : '0 2px 8px rgba(0, 0, 0, 0.08)'};
   display: flex;
   align-items: center;
@@ -175,9 +175,9 @@ const FilterButton = styled(motion.button)`
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: ${props => props.$active 
-      ? '0 6px 16px rgba(30, 64, 175, 0.5)' 
-      : '0 4px 12px rgba(0, 0, 0, 0.12)'};
+    box-shadow: ${props => props.$active
+    ? '0 6px 16px rgba(30, 64, 175, 0.5)'
+    : '0 4px 12px rgba(0, 0, 0, 0.12)'};
     ${props => !props.$active && `
       background: ${props.theme.colors.bgDark};
     `}
@@ -400,7 +400,7 @@ const ActivityItem = styled.div`
 function CandidateNotifications() {
   const { language } = useLanguage();
   const [filter, setFilter] = useState('all');
-  
+
   const getNotificationsData = () => [
     {
       id: 1,
@@ -408,7 +408,7 @@ function CandidateNotifications() {
       icon: Eye,
       color: '#1e40af',
       title: language === 'vi' ? 'Hồ sơ đã được xem' : 'Profile viewed',
-      message: language === 'vi' 
+      message: language === 'vi'
         ? 'FPT Software đã xem hồ sơ ứng tuyển Senior React Developer của bạn'
         : 'FPT Software viewed your Senior React Developer application',
       time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
@@ -488,7 +488,7 @@ function CandidateNotifications() {
   };
 
   const handleMarkAsRead = (id) => {
-    setNotifications(notifications.map(n => 
+    setNotifications(notifications.map(n =>
       n.id === id ? { ...n, unread: false } : n
     ));
   };
@@ -496,8 +496,8 @@ function CandidateNotifications() {
   const filteredNotifications = filter === 'all'
     ? notifications
     : filter === 'unread'
-    ? notifications.filter(n => n.unread)
-    : notifications.filter(n => n.type === filter);
+      ? notifications.filter(n => n.unread)
+      : notifications.filter(n => n.type === filter);
 
   const unreadCount = notifications.filter(n => n.unread).length;
 
@@ -557,8 +557,8 @@ function CandidateNotifications() {
             </FilterBar>
 
             {filteredNotifications.map((notif, index) => (
-              <NotificationCard 
-                key={notif.id} 
+              <NotificationCard
+                key={notif.id}
                 $unread={notif.unread}
                 $borderColor={notif.color}
                 initial={{ opacity: 0, y: 20 }}
@@ -624,7 +624,7 @@ function CandidateNotifications() {
               <div className="card-header">
                 <h2><TrendingUp />{language === 'vi' ? 'Thống kê' : 'Statistics'}</h2>
               </div>
-              
+
               <QuickStats>
                 <StatItem $color="#1e40af">
                   <div className="stat-header">
@@ -633,7 +633,7 @@ function CandidateNotifications() {
                   </div>
                   <div className="stat-value">{notifications.filter(n => n.time.includes(language === 'vi' ? 'giờ trước' : 'hours ago')).length}</div>
                 </StatItem>
-                
+
                 <StatItem $color="#10B981">
                   <div className="stat-header">
                     <span className="stat-label">{language === 'vi' ? 'Lượt xem hồ sơ' : 'Profile views'}</span>
@@ -641,15 +641,7 @@ function CandidateNotifications() {
                   </div>
                   <div className="stat-value">{notifications.filter(n => n.type === 'application' && (n.title.includes('xem') || n.title.includes('viewed'))).length}</div>
                 </StatItem>
-                
-                <StatItem $color="#1e40af">
-                  <div className="stat-header">
-                    <span className="stat-label">{language === 'vi' ? 'Hồ sơ được chấp nhận' : 'Applications accepted'}</span>
-                    <CheckCircle />
-                  </div>
-                  <div className="stat-value">{notifications.filter(n => n.type === 'success' && (n.title.includes('chấp nhận') || n.title.includes('accepted'))).length}</div>
-                </StatItem>
-                
+
                 <StatItem $color="#10B981">
                   <div className="stat-header">
                     <span className="stat-label">{language === 'vi' ? 'Công việc phù hợp' : 'Matching jobs'}</span>
@@ -668,7 +660,7 @@ function CandidateNotifications() {
               <div className="card-header">
                 <h2><Clock />{language === 'vi' ? 'Hoạt động gần đây' : 'Recent Activity'}</h2>
               </div>
-              
+
               {notifications.slice(0, 4).map((notif, index) => (
                 <ActivityItem key={notif.id}>
                   <h4>{notif.title}</h4>

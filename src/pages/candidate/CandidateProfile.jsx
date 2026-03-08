@@ -796,14 +796,20 @@ const CandidateProfile = () => {
     location: 'Thủ Đức, TP.HCM',
     cccd: '',
     dateOfBirth: '',
-    title: 'Senior React Developer',
-    bio: 'Passionate developer with 5+ years of experience in building modern web applications. Specialized in React, Node.js, and cloud technologies.',
+    title: 'Nhân viên Phục vụ / Pha chế',
+    bio: 'Có kinh nghiệm xử lý tình huống thực tế, làm việc nhóm tốt. Nhanh nhẹn, chăm chỉ, mong muốn tìm cơ hội phát triển lâu dài trong ngành dịch vụ nhà hàng và đồ uống.',
     // Đã loại bỏ các trường mạng xã hội khác ngoài Google
   };
   
   const [formData, setFormData] = useState(() => {
     const savedData = localStorage.getItem('candidateProfile');
-    return savedData ? JSON.parse(savedData) : defaultFormData;
+    let data = savedData ? JSON.parse(savedData) : defaultFormData;
+    if (data.title === 'Senior React Developer') {
+        data.title = defaultFormData.title;
+        data.bio = defaultFormData.bio;
+        localStorage.setItem('candidateProfile', JSON.stringify(data));
+    }
+    return data;
   });
   
   const [originalFormData, setOriginalFormData] = useState(formData);
@@ -1342,7 +1348,7 @@ const CandidateProfile = () => {
                       <div className="icon">
                         <Briefcase />
                       </div>
-                      <div className="label">{language === 'vi' ? 'Chức Danh' : 'Title'}</div>
+                      <div className="label">{language === 'vi' ? 'Vị Trí Mong Muốn' : 'Desired Position'}</div>
                     </div>
                     <div className="value">{formData.title}</div>
                   </InfoCard>
