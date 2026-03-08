@@ -6,7 +6,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
 import TableFilter from '../../components/TableFilter';
 import Modal from '../../components/Modal';
-import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText, Clock, Users, Newspaper, DollarSign, Edit, Trash2, TrendingUp, Plus, X, XCircle, Wallet, AlertCircle, Save } from 'lucide-react';
+import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText, Clock, Users, Newspaper, DollarSign, Edit, Trash2, TrendingUp, Plus, X, XCircle, Wallet, AlertCircle, Save, Download } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 // Mock job posts data
@@ -15,37 +15,46 @@ const getJobPosts = (language) => [
     id: 1,
     title: language === 'vi' ? 'Cửa hàng trưởng' : 'Store Manager',
     location: language === 'vi' ? 'Quận 8, TP.HCM' : 'District 8, HCMC',
-    salary: language === 'vi' ? '15-20 triệu' : '$600-800',
+    salary: language === 'vi' ? '15.000.000 VNĐ' : '$600/month',
     type: language === 'vi' ? 'Toàn thời gian' : 'Full-time',
     applicants: 12,
     views: 156,
     status: 'active',
     postedDate: language === 'vi' ? '5 ngày trước' : '5 days ago',
-    deadline: language === 'vi' ? '15 ngày nữa' : '15 days left'
+    deadline: language === 'vi' ? '15 ngày nữa' : '15 days left',
+    description: language === 'vi' 
+      ? 'Chúng tôi đang tìm kiếm một Cửa hàng trưởng có kinh nghiệm để quản lý và điều hành cửa hàng. Bạn sẽ chịu trách nhiệm về doanh thu, quản lý nhân sự, đào tạo và phát triển đội ngũ, đồng thời đảm bảo chất lượng dịch vụ khách hàng.\n\nYêu cầu:\n• Kinh nghiệm tối thiểu 3 năm trong vị trí quản lý cửa hàng F&B\n• Kỹ năng lãnh đạo và quản lý đội ngũ xuất sắc\n• Khả năng phân tích số liệu doanh thu và lập kế hoạch kinh doanh\n• Kỹ năng giao tiếp và giải quyết vấn đề tốt\n• Ưu tiên ứng viên có kinh nghiệm trong chuỗi cà phê\n\nQuyền lợi:\n• Lương cơ bản: 15.000.000 VNĐ/tháng + thưởng KPI\n• Bảo hiểm xã hội đầy đủ\n• Thưởng theo doanh thu cửa hàng\n• Cơ hội thăng tiến rõ ràng'
+      : 'We are looking for an experienced Store Manager to manage and operate the store. You will be responsible for revenue, staff management, training and development, while ensuring customer service quality.\n\nRequirements:\n• Minimum 3 years experience in F&B store management\n• Excellent leadership and team management skills\n• Ability to analyze revenue data and business planning\n• Good communication and problem-solving skills\n• Priority for candidates with coffee chain experience\n\nBenefits:\n• Base salary: $600/month + KPI bonus\n• Full social insurance\n• Bonus based on store revenue\n• Clear promotion opportunities'
   },
   {
     id: 2,
-    title: language === 'vi' ? 'Nhân viên pha chế' : 'Barista',
+    title: language === 'vi' ? 'Nhân viên Pha Chế' : 'Barista',
     location: language === 'vi' ? 'Quận 1, TP.HCM' : 'District 1, HCMC',
-    salary: language === 'vi' ? '8-12 triệu' : '$320-480',
+    salary: language === 'vi' ? '8.000.000 VNĐ' : '$320/month',
     type: language === 'vi' ? 'Toàn thời gian' : 'Full-time',
     applicants: 28,
     views: 342,
     status: 'active',
     postedDate: language === 'vi' ? '2 ngày trước' : '2 days ago',
-    deadline: language === 'vi' ? '25 ngày nữa' : '25 days left'
+    deadline: language === 'vi' ? '25 ngày nữa' : '25 days left',
+    description: language === 'vi'
+      ? 'Tìm kiếm nhân viên pha chế nhiệt tình, yêu thích cà phê để gia nhập đội ngũ. Công việc bao gồm pha chế các loại đồ uống, phục vụ khách hàng và duy trì vệ sinh khu vực làm việc.\n\nYêu cầu:\n• Ưu tiên có kinh nghiệm pha chế từ 1 năm trở lên\n• Chấp nhận fresher có đam mê\n• Nhiệt tình, thân thiện, chăm chỉ\n• Có thể làm việc theo ca\n\nQuyền lợi:\n• Lương: 8.000.000 VNĐ/tháng\n• Tips từ khách hàng\n• Được đào tạo kỹ năng pha chế chuyên nghiệp\n• Môi trường làm việc trẻ trung, năng động'
+      : 'Looking for enthusiastic baristas who love coffee to join our team. Work includes preparing beverages, serving customers and maintaining workspace cleanliness.\n\nRequirements:\n• Priority for 1+ years barista experience\n• Accept passionate freshers\n• Enthusiastic, friendly, hardworking\n• Can work in shifts\n\nBenefits:\n• Salary: $320/month\n• Customer tips\n• Professional barista training\n• Young, dynamic work environment'
   },
   {
     id: 3,
-    title: language === 'vi' ? 'Thu ngân' : 'Cashier',
+    title: language === 'vi' ? 'Nhân viên Thu Ngân' : 'Cashier',
     location: language === 'vi' ? 'Quận 7, TP.HCM' : 'District 7, HCMC',
-    salary: language === 'vi' ? '50-70 nghìn/giờ' : '$6-9/hour',
+    salary: language === 'vi' ? '50.000 VNĐ/giờ' : '$2/hour',
     type: language === 'vi' ? 'Bán thời gian' : 'Part-time',
     applicants: 15,
     views: 203,
     status: 'active',
     postedDate: language === 'vi' ? '1 tuần trước' : '1 week ago',
-    deadline: language === 'vi' ? '20 ngày nữa' : '20 days left'
+    deadline: language === 'vi' ? '20 ngày nữa' : '20 days left',
+    description: language === 'vi'
+      ? 'Tuyển thu ngân bán thời gian làm việc tại cửa hàng cà phê. Công việc chính là thu tiền, đối soát cuối ca và hỗ trợ các công việc khác khi cần.\n\nYêu cầu:\n• Trung thực, cẩn thận trong công việc\n• Có kỹ năng giao tiếp cơ bản\n• Có thể làm việc 4-6 giờ/ngày\n• Ưu tiên sinh viên, học sinh\n\nQuyền lợi:\n• Lương: 50.000 VNĐ/giờ\n• Linh hoạt thời gian làm việc\n• Môi trường thân thiện\n• Được hưởng đồ uống miễn phí trong ca'
+      : 'Hiring part-time cashier to work at coffee shop. Main tasks include cash handling, end-of-shift reconciliation and other support when needed.\n\nRequirements:\n• Honest, careful in work\n• Basic communication skills\n• Can work 4-6 hours/day\n• Priority for students\n\nBenefits:\n• Salary: $2/hour\n• Flexible working hours\n• Friendly environment\n• Free drinks during shift'
   }
 ];
 
@@ -75,7 +84,7 @@ const getInitialApplications = (language) => [
   {
     id: 2,
     candidate: language === 'vi' ? 'Phạm Lê Duy' : 'Duy san',
-    job: language === 'vi' ? 'Thu ngân' : 'Cashier',
+    job: language === 'vi' ? 'Nhân viên Thu Ngân' : 'Cashier',
     applied: language === 'vi' ? '5 giờ trước' : '5 hours ago',
     status: 'pending',
     completed: false,
@@ -89,14 +98,14 @@ const getInitialApplications = (language) => [
     skills: language === 'vi' ? ['Kế toán', 'Excel', 'Giao tiếp', 'Quản lý tiền mặt'] : ['Accounting', 'Excel', 'Communication', 'Cash handling'],
     bio: language === 'vi' ? 'Có kinh nghiệm làm việc tại các cửa hàng bán lẻ và nhà hàng. Cẩn thận, chính xác và trung thực.' : 'Experienced in retail and restaurant roles. Detail-oriented, accurate and honest.',
     reviews: [
-      { id: 1, employer: language === 'vi' ? 'Siêu thị CoopMart' : 'CoopMart Supermarket', position: language === 'vi' ? 'Thu ngân' : 'Cashier', rating: 4, date: language === 'vi' ? 'Tháng 8/2024' : 'Aug 2024', comment: language === 'vi' ? 'Cẩn thận, ít sai sót trong việc xử lý tiền mặt. Thái độ phục vụ tốt.' : 'Careful with cash handling, few errors. Good customer service attitude.' },
-      { id: 2, employer: language === 'vi' ? 'Nhà hàng Hương Việt' : 'Huong Viet Restaurant', position: language === 'vi' ? 'Thu ngân kiêm lễ tân' : 'Cashier & Receptionist', rating: 3, date: language === 'vi' ? 'Tháng 1/2023' : 'Jan 2023', comment: language === 'vi' ? 'Làm việc ổn định nhưng đôi khi cần nhắc nhở. Cần cải thiện tốc độ xử lý.' : 'Stable work but sometimes needs reminders. Speed of processing needs improvement.' },
+      { id: 1, employer: language === 'vi' ? 'Siêu thị CoopMart' : 'CoopMart Supermarket', position: language === 'vi' ? 'Nhân viên Thu Ngân' : 'Cashier', rating: 4, date: language === 'vi' ? 'Tháng 8/2024' : 'Aug 2024', comment: language === 'vi' ? 'Cẩn thận, ít sai sót trong việc xử lý tiền mặt. Thái độ phục vụ tốt.' : 'Careful with cash handling, few errors. Good customer service attitude.' },
+      { id: 2, employer: language === 'vi' ? 'Nhà hàng Hương Việt' : 'Huong Viet Restaurant', position: language === 'vi' ? 'Nhân viên Thu Ngân kiêm Lễ Tân' : 'Cashier & Receptionist', rating: 3, date: language === 'vi' ? 'Tháng 1/2023' : 'Jan 2023', comment: language === 'vi' ? 'Làm việc ổn định nhưng đôi khi cần nhắc nhở. Cần cải thiện tốc độ xử lý.' : 'Stable work but sometimes needs reminders. Speed of processing needs improvement.' },
     ]
   },
   {
     id: 3,
     candidate: 'Trần Phương Tuấn',
-    job: language === 'vi' ? 'Nhân viên pha chế' : 'Barista',
+    job: language === 'vi' ? 'Nhân viên Pha Chế' : 'Barista',
     applied: language === 'vi' ? '1 ngày trước' : '1 day ago',
     status: 'approved',
     completed: false,
@@ -137,7 +146,7 @@ const getInitialApplications = (language) => [
   {
     id: 5,
     candidate: 'Lê Minh Khang',
-    job: language === 'vi' ? 'Nhân viên phục vụ' : 'Waiter/Server',
+    job: language === 'vi' ? 'Nhân viên Phục Vụ' : 'Waiter/Server',
     applied: language === 'vi' ? '1 tuần trước' : '1 week ago',
     status: 'pending',
     completed: false,
@@ -325,8 +334,9 @@ const EmptyState = styled(motion.div)`
 // --- Job Posts Styles ---
 const JobPostsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
   gap: 20px;
+  align-items: stretch;
   
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
@@ -342,6 +352,9 @@ const JobPostCard = styled(motion.div)`
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   
   &::before {
     content: '';
@@ -376,21 +389,30 @@ const JobPostTitle = styled.h3`
 `;
 
 const JobPostMeta = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
   margin-bottom: 16px;
   
   .meta-item {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 13px;
+    gap: 4px;
+    font-size: 11.5px;
     color: ${props => props.theme.colors.textLight};
+    white-space: nowrap;
+    overflow: hidden;
     
     svg {
-      width: 14px;
-      height: 14px;
+      width: 13px;
+      height: 13px;
+      flex-shrink: 0;
+    }
+    
+    /* Allow text to truncate if too long */
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 `;
@@ -425,6 +447,7 @@ const JobPostStats = styled.div`
 const JobPostActions = styled.div`
   display: flex;
   gap: 8px;
+  margin-top: auto;
 `;
 
 const JobPostButton = styled(motion.button)`
@@ -1062,6 +1085,115 @@ const EmptyReviews = styled.div`
   p { font-size: 13px; margin: 0; }
 `;
 
+// --- CV styled components ---
+const CVCard = styled.div`
+  background: white;
+  border: 2px solid #E8EFFF;
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #BFDBFE;
+    box-shadow: 0 4px 16px rgba(30, 64, 175, 0.12);
+    transform: translateY(-1px);
+  }
+`;
+
+const CVIconBox = styled.div`
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+
+  svg {
+    width: 26px;
+    height: 26px;
+    color: white;
+  }
+`;
+
+const CVInfo = styled.div`
+  flex: 1;
+  min-width: 0;
+
+  .cv-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .cv-meta {
+    font-size: 12px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+`;
+
+const CVDownloadButton = styled(motion.button)`
+  padding: 10px 18px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(30, 64, 175, 0.25);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    box-shadow: 0 4px 14px rgba(30, 64, 175, 0.35);
+    transform: translateY(-1px);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
+const EmptyCV = styled.div`
+  text-align: center;
+  padding: 32px 24px;
+  background: #F8FAFC;
+  border: 1.5px dashed #CBD5E1;
+  border-radius: 14px;
+  color: #64748b;
+
+  .icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+    opacity: 0.5;
+  }
+
+  p {
+    font-size: 13px;
+    margin: 0;
+    font-weight: 500;
+  }
+`;
+
+
 const OverallRatingBadge = styled.div`
   display: inline-flex;
   align-items: center;
@@ -1137,6 +1269,36 @@ const ProfileDetailModal = React.memo(({ candidate, onClose }) => {
   const avgRating = candidate.reviews && candidate.reviews.length > 0
     ? (candidate.reviews.reduce((s, r) => s + r.rating, 0) / candidate.reviews.length)
     : null;
+
+  // Read CV from localStorage
+  const candidateCV = JSON.parse(localStorage.getItem('candidateCV') || 'null');
+
+  const handleCVDownload = () => {
+    if (!candidateCV) return;
+    
+    const link = document.createElement('a');
+    link.href = candidateCV.data;
+    link.download = candidateCV.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
 
   return (
     <>
@@ -1263,6 +1425,38 @@ const ProfileDetailModal = React.memo(({ candidate, onClose }) => {
           <ProfileSection>
             <h3><FileText /> {language === 'vi' ? 'Giới thiệu bản thân' : 'About'}</h3>
             <BioText>{candidate.bio}</BioText>
+          </ProfileSection>
+
+          <ProfileSection>
+            <h3><FileText /> {language === 'vi' ? 'Hồ sơ CV' : 'CV Document'}</h3>
+            {candidateCV ? (
+              <CVCard>
+                <CVIconBox>
+                  <FileText />
+                </CVIconBox>
+                <CVInfo>
+                  <div className="cv-name">{candidateCV.name}</div>
+                  <div className="cv-meta">
+                    <span>{formatFileSize(candidateCV.size)}</span>
+                    <span>•</span>
+                    <span>{language === 'vi' ? 'Tải lên:' : 'Uploaded:'} {formatDate(candidateCV.uploadDate)}</span>
+                  </div>
+                </CVInfo>
+                <CVDownloadButton
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleCVDownload}
+                >
+                  <Download />
+                  {language === 'vi' ? 'Tải xuống' : 'Download'}
+                </CVDownloadButton>
+              </CVCard>
+            ) : (
+              <EmptyCV>
+                <div className="icon">📄</div>
+                <p>{language === 'vi' ? 'Ứng viên chưa tải lên CV.' : 'Candidate has not uploaded CV yet.'}</p>
+              </EmptyCV>
+            )}
           </ProfileSection>
         </ProfileInner>
       </ProfileContent>
@@ -1602,6 +1796,7 @@ const Applications = () => {
   const [deleteJobId, setDeleteJobId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const [selectedJobView, setSelectedJobView] = useState(null);
   const [editJobId, setEditJobId] = useState(null);
   const [editJobData, setEditJobData] = useState(null);
@@ -1708,6 +1903,7 @@ const Applications = () => {
     setJobPosts(prev => prev.filter(job => job.id !== deleteJobId));
     
     // Show success toast
+    setSuccessMessage(language === 'vi' ? 'Đã xóa bài đăng thành công!' : 'Post deleted successfully!');
     setShowSuccessToast(true);
     setTimeout(() => setShowSuccessToast(false), 3000);
     
@@ -1748,6 +1944,7 @@ const Applications = () => {
     ));
     
     // Show success toast
+    setSuccessMessage(language === 'vi' ? 'Đã sửa bài đăng thành công!' : 'Post updated successfully!');
     setShowSuccessToast(true);
     setTimeout(() => setShowSuccessToast(false), 3000);
     
@@ -1848,13 +2045,13 @@ const Applications = () => {
                       <JobPostTitle>{post.title}</JobPostTitle>
                       <JobPostMeta>
                         <div className="meta-item">
-                          <MapPin />{post.location}
+                          <MapPin /><span>{post.location}</span>
                         </div>
                         <div className="meta-item">
-                          <DollarSign />{post.salary}
+                          <DollarSign /><span>{post.salary}</span>
                         </div>
                         <div className="meta-item">
-                          <Clock />{post.type}
+                          <Clock /><span>{post.type}</span>
                         </div>
                       </JobPostMeta>
                     </div>
@@ -2031,7 +2228,7 @@ const Applications = () => {
             exit={{ opacity: 0, x: 100 }}
           >
             <CheckCircle />
-            {language === 'vi' ? (editJobId ? 'Đã cập nhật bài đăng!' : 'Đã xóa bài đăng thành công!') : (editJobId ? 'Post updated!' : 'Post deleted successfully!')}
+            {successMessage}
           </SuccessToast>
         )}
       </AnimatePresence>
@@ -2095,6 +2292,18 @@ const Applications = () => {
                 </div>
               </div>
             </div>
+
+            {selectedJobView.description && (
+              <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '20px' }}>
+                <h4 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '12px', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <FileText size={18} />
+                  {language === 'vi' ? 'Mô tả công việc' : 'Job Description'}
+                </h4>
+                <div style={{ fontSize: '14px', color: '#475569', lineHeight: '1.7', whiteSpace: 'pre-line', background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  {selectedJobView.description}
+                </div>
+              </div>
+            )}
 
             <div style={{ fontSize: '13px', color: '#94a3b8', borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
               {language === 'vi' ? 'Đăng ' : 'Posted '}{selectedJobView.postedDate}
@@ -2172,6 +2381,29 @@ const Applications = () => {
                   style={{ width: '100%', padding: '12px 16px', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '14px' }}
                 />
               </div>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FileText size={16} />
+                {language === 'vi' ? 'Mô tả công việc & Phúc lợi' : 'Job Description & Benefits'}
+              </label>
+              <textarea
+                value={editJobData.description || ''}
+                onChange={(e) => setEditJobData({ ...editJobData, description: e.target.value })}
+                placeholder={language === 'vi' ? 'Nhập mô tả công việc chi tiết, yêu cầu và quyền lợi...' : 'Enter detailed job description, requirements and benefits...'}
+                style={{ 
+                  width: '100%', 
+                  minHeight: '200px',
+                  padding: '12px 16px', 
+                  border: '2px solid #e2e8f0', 
+                  borderRadius: '12px', 
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  lineHeight: '1.6',
+                  resize: 'vertical'
+                }}
+              />
             </div>
 
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>

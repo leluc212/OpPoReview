@@ -432,7 +432,7 @@ const JobManagement = () => {
     },
     { 
       id: 2, 
-      title: language === 'vi' ? 'Thu ngân' : 'Cashier', 
+      title: language === 'vi' ? 'Nhân viên Thu Ngân' : 'Cashier', 
       applicants: 32, 
       status: 'displayed', 
       posted: language === 'vi' ? '1 tuần trước' : '1 week ago',
@@ -444,7 +444,7 @@ const JobManagement = () => {
     },
     { 
       id: 3, 
-      title: language === 'vi' ? 'Nhân viên pha chế' : 'Barista', 
+      title: language === 'vi' ? 'Nhân viên Pha Chế' : 'Barista', 
       applicants: 28, 
       status: 'expired', 
       posted: language === 'vi' ? '2 tuần trước' : '2 weeks ago',

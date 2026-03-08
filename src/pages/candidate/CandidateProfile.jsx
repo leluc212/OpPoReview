@@ -26,6 +26,10 @@ import {
   Star,
   CheckCircle,
   ArrowRight,
+  File,
+  Trash2,
+  Download,
+  Eye,
 } from 'lucide-react';
 
 // Custom Zalo Icon Component - Based on official Zalo logo
@@ -568,6 +572,146 @@ const SkillsGrid = styled.div`
   gap: 12px;
 `;
 
+// CV Section Styled Components
+const CVSection = styled(Card)`
+  margin-top: 24px;
+`;
+
+const CVCard = styled(motion.div)`
+  background: white;
+  border: 2px solid #E8EFFF;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: #667EEA;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+  }
+`;
+
+const CVIconBox = styled.div`
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 28px;
+    height: 28px;
+    color: white;
+  }
+`;
+
+const CVInfo = styled.div`
+  flex: 1;
+  min-width: 0;
+
+  .cv-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cv-meta {
+    font-size: 12px;
+    color: #94a3b8;
+    display: flex;
+    gap: 12px;
+  }
+`;
+
+const CVActions = styled.div`
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+`;
+
+const CVButton = styled.button`
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: ${props => props.$danger ? '#FEE2E2' : '#F1F5F9'};
+  color: ${props => props.$danger ? '#EF4444' : '#64748B'};
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.$danger ? '#FCA5A5' : '#E2E8F0'};
+    transform: scale(1.05);
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+`;
+
+const CVUploadButton = styled.button`
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 2px dashed #CBD5E1;
+  background: #F8FAFC;
+  color: #667EEA;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: #667EEA;
+    background: #EEF2FF;
+    transform: translateY(-2px);
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+`;
+
+const EmptyCV = styled.div`
+  text-align: center;
+  padding: 32px 20px;
+  border: 2px dashed #E2E8F0;
+  border-radius: 12px;
+  background: #F8FAFC;
+
+  svg {
+    width: 48px;
+    height: 48px;
+    color: #CBD5E1;
+    margin-bottom: 12px;
+  }
+
+  p {
+    color: #94A3B8;
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+`;
+
+
 const StatItem = styled.div`
   text-align: center;
   padding: 16px;
@@ -796,7 +940,7 @@ const CandidateProfile = () => {
     location: 'Thủ Đức, TP.HCM',
     cccd: '',
     dateOfBirth: '',
-    title: 'Nhân viên Phục vụ / Pha chế',
+    title: 'Nhân viên Phục Vụ / Pha Chế',
     bio: 'Có kinh nghiệm xử lý tình huống thực tế, làm việc nhóm tốt. Nhanh nhẹn, chăm chỉ, mong muốn tìm cơ hội phát triển lâu dài trong ngành dịch vụ nhà hàng và đồ uống.',
     // Đã loại bỏ các trường mạng xã hội khác ngoài Google
   };
@@ -837,6 +981,12 @@ const CandidateProfile = () => {
   
   const [newSkill, setNewSkill] = useState('');
   const [isEditingSkills, setIsEditingSkills] = useState(false);
+  
+  // CV State
+  const [cvFile, setCvFile] = useState(() => {
+    const savedCV = localStorage.getItem('candidateCV');
+    return savedCV ? JSON.parse(savedCV) : null;
+  });
 
   // KYC State
   const [showKYCModal, setShowKYCModal] = useState(false);
@@ -1011,6 +1161,86 @@ const CandidateProfile = () => {
     const updatedSkills = skills.filter(skill => skill !== skillToRemove);
     setSkills(updatedSkills);
     localStorage.setItem('candidateSkills', JSON.stringify(updatedSkills));
+  };
+  
+  // Helper function to format file size
+  const formatFileSize = (bytes) => {
+    if (!bytes || bytes === 0) return '0 B';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+  
+  // CV Handlers
+  const handleCVUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Check file type
+      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      if (!allowedTypes.includes(file.type)) {
+        alert(language === 'vi' ? 'Chỉ chấp nhận file PDF, DOC, DOCX' : 'Only PDF, DOC, DOCX files are accepted');
+        return;
+      }
+      
+      // Check file size (max 3MB)
+      if (file.size > 3 * 1024 * 1024) {
+        alert(language === 'vi' ? 'File không được vượt quá 3MB' : 'File size should not exceed 3MB');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const cvData = {
+          name: file.name,
+          size: file.size,
+          uploadDate: new Date().toISOString(),
+          data: reader.result
+        };
+        
+        try {
+          localStorage.setItem('candidateCV', JSON.stringify(cvData));
+          setCvFile(cvData);
+          alert(language === 'vi' ? 'Tải CV thành công!' : 'CV uploaded successfully!');
+        } catch (error) {
+          if (error.name === 'QuotaExceededError') {
+            alert(language === 'vi' 
+              ? 'Lỗi: Dung lượng lưu trữ không đủ. Vui lòng sử dụng file nhỏ hơn hoặc xóa dữ liệu cũ.'
+              : 'Error: Not enough storage. Please use a smaller file or delete old data.');
+          } else {
+            alert(language === 'vi' ? 'Lỗi khi tải CV' : 'Error uploading CV');
+          }
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+    event.target.value = '';
+  };
+  
+  const handleCVDelete = () => {
+    if (window.confirm(language === 'vi' ? 'Bạn có chắc muốn xóa CV này?' : 'Are you sure you want to delete this CV?')) {
+      setCvFile(null);
+      localStorage.removeItem('candidateCV');
+    }
+  };
+  
+  const handleCVView = () => {
+    if (cvFile && cvFile.data) {
+      const newWindow = window.open();
+      if (cvFile.name.endsWith('.pdf')) {
+        newWindow.document.write(`<iframe src="${cvFile.data}" width="100%" height="100%" style="border:none;"></iframe>`);
+      } else {
+        newWindow.document.write(`<p>Please download the file to view: <a href="${cvFile.data}" download="${cvFile.name}">Download CV</a></p>`);
+      }
+    }
+  };
+  
+  const handleCVDownload = () => {
+    if (cvFile && cvFile.data) {
+      const link = document.createElement('a');
+      link.href = cvFile.data;
+      link.download = cvFile.name;
+      link.click();
+    }
   };
 
   const openKYCModal = () => {
@@ -1571,6 +1801,81 @@ const CandidateProfile = () => {
                 ))}
               </SkillsGrid>
             </Card>
+            
+            {/* CV / Resume Section */}
+            <CVSection
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <div className="card-header">
+                <h2>
+                  <FileText />
+                  {language === 'vi' ? 'CV / Hồ Sơ' : 'CV / Resume'}
+                </h2>
+              </div>
+
+              <input
+                type="file"
+                id="cvUpload"
+                accept=".pdf,.doc,.docx"
+                style={{ display: 'none' }}
+                onChange={handleCVUpload}
+              />
+
+              {cvFile ? (
+                <CVCard
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <CVIconBox>
+                    <FileText />
+                  </CVIconBox>
+                  <CVInfo>
+                    <div className="cv-name">{cvFile.name}</div>
+                    <div className="cv-meta">
+                      <span>{formatFileSize(cvFile.size)}</span>
+                      <span>•</span>
+                      <span>
+                        {new Date(cvFile.uploadDate).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                  </CVInfo>
+                  <CVActions>
+                    <CVButton onClick={handleCVView} title={language === 'vi' ? 'Xem' : 'View'}>
+                      <Eye />
+                    </CVButton>
+                    <CVButton onClick={handleCVDownload} title={language === 'vi' ? 'Tải xuống' : 'Download'}>
+                      <Download />
+                    </CVButton>
+                    <CVButton $danger onClick={handleCVDelete} title={language === 'vi' ? 'Xóa' : 'Delete'}>
+                      <Trash2 />
+                    </CVButton>
+                  </CVActions>
+                </CVCard>
+              ) : (
+                <EmptyCV>
+                  <FileText />
+                  <p>{language === 'vi' ? 'Chưa có CV nào được tải lên' : 'No CV uploaded yet'}</p>
+                  <CVUploadButton onClick={() => document.getElementById('cvUpload').click()}>
+                    <Upload />
+                    {language === 'vi' ? 'Tải lên CV' : 'Upload CV'}
+                  </CVUploadButton>
+                </EmptyCV>
+              )}
+              
+              {cvFile && (
+                <CVUploadButton onClick={() => document.getElementById('cvUpload').click()} style={{ marginTop: '12px' }}>
+                  <Upload />
+                  {language === 'vi' ? 'Tải lên CV mới' : 'Upload New CV'}
+                </CVUploadButton>
+              )}
+            </CVSection>
           </Sidebar>
         </ContentGrid>
 

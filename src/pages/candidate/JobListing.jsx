@@ -1348,7 +1348,7 @@ const JOBS_DATA = [
   // Standard Jobs - F&B tại TP.HCM
   {
     id: 1,
-    title: 'Phục vụ quán cafe - Part-time',
+    title: 'Nhân viên Phục Vụ Quán Cafe - Part-time',
     company: 'Highlands Coffee',
     location: 'Quận 1, TP.HCM',
     lat: 10.7769,
@@ -1364,7 +1364,7 @@ const JOBS_DATA = [
   },
   {
     id: 2,
-    title: 'Nhân viên pha chế - Part-time',
+    title: 'Nhân viên Pha Chế - Part-time',
     company: 'The Coffee House',
     location: 'Quận 7, TP.HCM',
     lat: 10.7333,
@@ -1380,7 +1380,7 @@ const JOBS_DATA = [
   },
   {
     id: 3,
-    title: 'Nhân viên phục vụ - Part-time',
+    title: 'Nhân viên Phục Vụ - Part-time',
     company: 'Golden Gate Group',
     location: 'Quận 3, TP.HCM',
     lat: 10.7866,
@@ -1412,7 +1412,7 @@ const JOBS_DATA = [
   },
   {
     id: 5,
-    title: 'Nhân viên pha chế - Part-time',
+    title: 'Nhân viên Pha Chế - Part-time',
     company: 'Phúc Long Coffee & Tea',
     location: 'Quận 1, TP.HCM',
     lat: 10.7756,
@@ -1428,7 +1428,7 @@ const JOBS_DATA = [
   },
   {
     id: 12,
-    title: 'Thu ngân nhà hàng - Part-time',
+    title: 'Nhân viên Thu Ngân Nhà Hàng - Part-time',
     company: 'Lẩu Phan',
     location: 'Quận 7, TP.HCM',
     lat: 10.7295,
@@ -1444,7 +1444,7 @@ const JOBS_DATA = [
   },
   {
     id: 13,
-    title: 'Nhân viên phục vụ - Part-time',
+    title: 'Nhân viên Phục Vụ - Part-time',
     company: 'Starbucks Vietnam',
     location: 'Bình Thạnh, TP.HCM',
     lat: 10.8065,
@@ -1460,7 +1460,7 @@ const JOBS_DATA = [
   },
   {
     id: 14,
-    title: 'Pha chế trà sữa - Part-time',
+    title: 'Nhân viên Pha Chế Trà Sữa - Part-time',
     company: 'TocoToco',
     location: 'Tân Bình, TP.HCM',
     lat: 10.7985,
@@ -1492,7 +1492,7 @@ const JOBS_DATA = [
   },
   {
     id: 15,
-    title: 'Thu ngân cửa hàng - Part-time',
+    title: 'Nhân viên Thu Ngân Cửa Hàng - Part-time',
     company: 'Jollibee Vietnam',
     location: 'Quận 10, TP.HCM',
     lat: 10.7735,
@@ -1573,7 +1573,7 @@ const JOBS_DATA = [
   },
   {
     id: 9,
-    title: 'Ca Chiều - Nhân viên phục vụ',
+    title: 'Ca Chiều - Nhân viên Phục Vụ',
     company: 'Highlands Coffee',
     location: 'Phú Nhuận, TP.HCM',
     lat: 10.7700,
@@ -1605,7 +1605,7 @@ const JOBS_DATA = [
   },
   {
     id: 11,
-    title: 'Ca Sáng - Nhân viên phục vụ',
+    title: 'Ca Sáng - Nhân viên Phục Vụ',
     company: 'Cơm Tấm Bụi Sài Gòn',
     location: 'Quận 3, TP.HCM',
     lat: 10.7740,
@@ -1637,7 +1637,7 @@ const JOBS_DATA = [
   },
   {
     id: 19,
-    title: 'Ca Chiều - Nhân viên pha chế',
+    title: 'Ca Chiều - Nhân viên Pha Chế',
     company: 'The Coffee House',
     location: 'Quận 1, TP.HCM',
     lat: 10.7735,
@@ -1653,7 +1653,7 @@ const JOBS_DATA = [
   },
   {
     id: 20,
-    title: 'Ca Tối - Thu ngân nhà hàng',
+    title: 'Ca Tối - Nhân viên Thu Ngân Nhà Hàng',
     company: 'Lotteria chi nhánh quận 1',
     location: 'Quận 3, TP.HCM',
     lat: 10.7760,
@@ -1669,7 +1669,7 @@ const JOBS_DATA = [
   },
   {
     id: 21,
-    title: 'Ca Sáng - Phục vụ nhà hàng',
+    title: 'Ca Sáng - Nhân viên Phục Vụ Nhà Hàng',
     company: 'KFC Việt Nam',
     location: 'Quận 1, TP.HCM',
     lat: 10.7710,
@@ -1733,7 +1733,7 @@ const JOBS_DATA = [
   },
   {
     id: 25,
-    title: 'Ca Sáng - Phục vụ Quán ăn',
+    title: 'Ca Sáng - Nhân viên Phục Vụ Quán Ăn',
     company: 'Cơm Tấm Bụi Sài Gòn',
     location: 'Thủ Đức, TP.HCM',
     lat: 10.8490,
@@ -1765,7 +1765,7 @@ const JOBS_DATA = [
   },
   {
     id: 27,
-    title: 'Ca Đêm - Nhân viên phục vụ',
+    title: 'Ca Đêm - Nhân viên Phục Vụ',
     company: 'Quán Ốc Đào - Thủ Đức',
     location: 'Thủ Đức, TP.HCM',
     lat: 10.8480,
@@ -1781,7 +1781,7 @@ const JOBS_DATA = [
   },
   {
     id: 28,
-    title: 'Ca Sáng - Nhân viên pha chế',
+    title: 'Ca Sáng - Nhân viên Pha Chế',
     company: 'Starbucks Vietnam',
     location: 'Quận 2, TP.HCM',
     lat: 10.8510,
@@ -1797,7 +1797,7 @@ const JOBS_DATA = [
   },
   {
     id: 29,
-    title: 'Ca Chiều - Phục vụ Trà sữa',
+    title: 'Ca Chiều - Nhân viên Phục Vụ Trà Sữa',
     company: 'Koi Thé - Thủ Đức',
     location: 'Thủ Đức, TP.HCM',
     lat: 10.8500,
@@ -1813,7 +1813,7 @@ const JOBS_DATA = [
   },
   {
     id: 30,
-    title: 'Ca Sáng - Thu ngân quán café',
+    title: 'Ca Sáng - Nhân viên Thu Ngân Quán Café',
     company: 'Passio Coffee',
     location: 'Thủ Đức, TP.HCM',
     lat: 10.8540,
@@ -1845,7 +1845,7 @@ const JOBS_DATA = [
   },
   {
     id: 32,
-    title: 'Ca Tối - Nhân viên pha chế',
+    title: 'Ca Tối - Nhân viên Pha Chế',
     company: 'Trà Sữa Bobapop - Thủ Đức',
     location: 'Thủ Đức, TP.HCM',
     lat: 10.8495,
@@ -1894,7 +1894,7 @@ const JOBS_DATA = [
   // Thêm shift jobs trải rộng khắp TP.HCM
   {
     id: 35,
-    title: 'Ca Sáng - Pha chế',
+    title: 'Ca Sáng - Nhân viên Pha Chế',
     company: 'Highlands Coffee - Q1',
     location: 'Quận 1, TP.HCM',
     lat: 10.7756,
@@ -1910,7 +1910,7 @@ const JOBS_DATA = [
   },
   {
     id: 36,
-    title: 'Ca Chiều - Phục vụ nhà hàng',
+    title: 'Ca Chiều - Nhân viên Phục Vụ Nhà Hàng',
     company: 'Golden Gate - Q3',
     location: 'Quận 3, TP.HCM',
     lat: 10.7834,
@@ -1926,7 +1926,7 @@ const JOBS_DATA = [
   },
   {
     id: 37,
-    title: 'Ca Tối - Thu ngân quán ăn',
+    title: 'Ca Tối - Nhân viên Thu Ngân Quán Ăn',
     company: 'Cơm Tấm Bụi - Q4',
     location: 'Quận 4, TP.HCM',
     lat: 10.7579,
@@ -1974,7 +1974,7 @@ const JOBS_DATA = [
   },
   {
     id: 40,
-    title: 'Ca Tối - Phục vụ Lẩu',
+    title: 'Ca Tối - Nhân viên Phục Vụ Lẩu',
     company: 'Haidilao - Bình Thạnh',
     location: 'Bình Thạnh, TP.HCM',
     lat: 10.8050,
@@ -2006,7 +2006,7 @@ const JOBS_DATA = [
   },
   {
     id: 42,
-    title: 'Ca Chiều - Pha chế Phúc Long',
+    title: 'Ca Chiều - Nhân viên Pha Chế Phúc Long',
     company: 'Phúc Long - Phú Nhuận',
     location: 'Phú Nhuận, TP.HCM',
     lat: 10.7992,
@@ -2038,7 +2038,7 @@ const JOBS_DATA = [
   },
   {
     id: 44,
-    title: 'Ca Sáng - Phục vụ Jollibee',
+    title: 'Ca Sáng - Nhân viên Phục Vụ Jollibee',
     company: 'Jollibee - Tân Phú',
     location: 'Tân Phú, TP.HCM',
     lat: 10.7918,
@@ -2086,7 +2086,7 @@ const JOBS_DATA = [
   },
   {
     id: 47,
-    title: 'Ca Sáng - Pha chế Katinat',
+    title: 'Ca Sáng - Nhân viên Pha Chế Katinat',
     company: 'Katinat - Quận 2',
     location: 'Quận 2, TP.HCM',
     lat: 10.7870,
@@ -2102,7 +2102,7 @@ const JOBS_DATA = [
   },
   {
     id: 48,
-    title: 'Ca Chiều - Phục vụ Pizza',
+    title: 'Ca Chiều - Nhân viên Phục Vụ Pizza',
     company: 'Pizza 4P\'s - Q10',
     location: 'Quận 10, TP.HCM',
     lat: 10.7735,
@@ -2118,7 +2118,7 @@ const JOBS_DATA = [
   },
   {
     id: 49,
-    title: 'Ca Sáng - Nhân viên thu ngân',
+    title: 'Ca Sáng - Nhân viên Thu Ngân',
     company: 'Lẩu Dê Ninh Bình - Q12',
     location: 'Quận 12, TP.HCM',
     lat: 10.8671,
@@ -2150,7 +2150,7 @@ const JOBS_DATA = [
   },
   {
     id: 51,
-    title: 'Ca Sáng - Thu ngân Highlands',
+    title: 'Ca Sáng - Nhân viên Thu Ngân Highlands',
     company: 'Highlands Coffee - Q8',
     location: 'Quận 8, TP.HCM',
     lat: 10.7380,

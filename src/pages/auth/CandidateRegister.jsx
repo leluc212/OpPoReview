@@ -716,7 +716,7 @@ const CandidateRegister = () => {
   const jobs = [
     { emoji: '☕', bg: 'rgba(251,191,36,0.25)', title: 'Barista bán thời gian', meta: 'TP.HCM · 35K/giờ', badge: 'Mới đăng', bc: 'rgba(96,165,250,0.2)', tc: '#93c5fd' },
     { emoji: '🛍️', bg: 'rgba(167,139,250,0.25)', title: 'Nhân viên bán hàng', meta: 'TP.HCM · 38K/giờ', badge: 'Hot 🔥', bc: 'rgba(249,115,22,0.2)', tc: '#fb923c' },
-    { emoji: '🍽️', bg: 'rgba(52,211,153,0.25)', title: 'Phục vụ nhà hàng', meta: 'TP.HCM · 32K/giờ', badge: 'Urgent', bc: 'rgba(239,68,68,0.2)', tc: '#f87171' },
+    { emoji: '🍽️', bg: 'rgba(52,211,153,0.25)', title: 'Nhân viên Phục Vụ Nhà Hàng', meta: 'TP.HCM · 32K/giờ', badge: 'Urgent', bc: 'rgba(239,68,68,0.2)', tc: '#f87171' },
   ];
 
   const tickerItems = ['🛒 Tư vấn sản phẩm', '🍳 Phụ bếp', '📦 Soạn hàng', '🌐 Phiên dịch', '🏨 Lễ tân', '📚 Gia sư', '🛒 Tư vấn sản phẩm', '🍳 Phụ bếp', '📦 Soạn hàng', '🌐 Phiên dịch', '🏨 Lễ tân', '📚 Gia sư'];

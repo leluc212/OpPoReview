@@ -446,7 +446,7 @@ const EmployerDashboard = () => {
     { 
       id: 2,
       candidate: language === 'vi' ? 'Phạm Lê Duy' : 'Duy Pham Le', 
-      job: language === 'vi' ? 'Thu ngân' : 'Cashier',
+      job: language === 'vi' ? 'Nhân viên Thu Ngân' : 'Cashier',
       applied: language === 'vi' ? '5 giờ trước' : '5 hours ago',
       status: 'pending',
       avatar: 'D'
@@ -454,7 +454,7 @@ const EmployerDashboard = () => {
     { 
       id: 3,
       candidate: 'Trần Phương Tuấn', 
-      job: language === 'vi' ? 'Nhân viên pha chế' : 'Barista',
+      job: language === 'vi' ? 'Nhân viên Pha Chế' : 'Barista',
       applied: language === 'vi' ? '1 ngày trước' : '1 day ago',
       status: 'approved',
       avatar: 'N'
@@ -470,22 +470,10 @@ const EmployerDashboard = () => {
 
   const activities = [
     {
-      title: language === 'vi' ? 'Ứng viên "Hiếu sàn" đã ứng tuyển vào "Cửa hàng trưởng"' : 'Candidate "Hieu san" applied for "Store Manager"',
-      time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
-      icon: Users,
-      color: '#1e40af'
-    },
-    {
-      title: language === 'vi' ? 'Tin "Nhân viên pha chế" đã được duyệt' : 'Job "Barista" approved',
+      title: language === 'vi' ? 'Tin "Nhân viên Pha Chế" đã được duyệt' : 'Job "Barista" approved',
       time: language === 'vi' ? '5 giờ trước' : '5 hours ago',
       icon: CheckCircle,
       color: '#10B981'
-    },
-    {
-      title: language === 'vi' ? 'Bạn có tin nhắn mới từ ứng viên' : 'New message from candidate',
-      time: language === 'vi' ? '1 ngày trước' : '1 day ago',
-      icon: MessageSquare,
-      color: '#F59E0B'
     },
     {
       title: language === 'vi' ? 'Báo cáo tuần đã sẵn sàng xem' : 'Weekly report is ready',
@@ -542,7 +530,7 @@ const EmployerDashboard = () => {
         {/* Stats Overview */}
         <StatsGrid>
           <StatsCard
-            title={language === 'vi' ? 'Tin đã hiển thị' : 'Active Jobs'}
+            title={language === 'vi' ? 'Tổng các tin tuyển dụng' : 'Total Job Posts'}
             value="12"
             change="+3"
             changeText={language === 'vi' ? 'sơ với tháng trước' : 'vs last month'}
@@ -551,7 +539,7 @@ const EmployerDashboard = () => {
             positive
           />
           <StatsCard
-            title={language === 'vi' ? 'Tổng Hồ Sơ được ứng tuyển' : 'Total Applications'}
+            title={language === 'vi' ? 'Tổng hồ sơ ứng tuyển' : 'Total Applications'}
             value="248"
             change="+45%"
             changeText={language === 'vi' ? 'sơ với tháng trước' : 'vs last month'}
@@ -560,7 +548,7 @@ const EmployerDashboard = () => {
             positive
           />
           <StatsCard
-            title={language === 'vi' ? 'Lượt Xem Tin Tuyển Dụng' : 'Views'}
+            title={language === 'vi' ? 'Tổng lượt tiếp cận' : 'Total Views'}
             value="1,234"
             change="+12%"
             changeText={language === 'vi' ? 'sơ với tuần trước' : 'vs last week'}
@@ -569,7 +557,7 @@ const EmployerDashboard = () => {
             positive
           />
           <StatsCard
-            title={language === 'vi' ? 'Đã Tuyển Ứng Viên (Job tuyển gấp)' : 'Hired'}
+            title={language === 'vi' ? 'Tổng tin tuyển dụng gấp' : 'Quick Job Posts'}
             value="8"
             change="+2"
             changeText={language === 'vi' ? 'tháng này' : 'this month'}

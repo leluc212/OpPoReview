@@ -1392,7 +1392,7 @@ const CandidateDashboard = () => {
   const recommendedJobs = [
     {
       id: 1,
-      title: 'Nhân viên pha chế - Part-time',
+      title: 'Nhân viên Pha Chế - Part-time',
       company: 'The Coffee House',
       location: 'Quận 7, TP.HCM',
       type: 'Part-time',
@@ -1402,7 +1402,7 @@ const CandidateDashboard = () => {
     },
     {
       id: 2,
-      title: 'Nhân viên phục vụ - Part-time',
+      title: 'Nhân viên Phục Vụ - Part-time',
       company: 'Starbucks Vietnam',
       location: 'Bình Thạnh, TP.HCM',
       type: 'Part-time',
@@ -1422,7 +1422,7 @@ const CandidateDashboard = () => {
     },
     {
       id: 4,
-      title: 'Nhân viên pha chế - Full-time',
+      title: 'Nhân viên Pha Chế - Full-time',
       company: 'Phúc Long Coffee & Tea',
       location: 'Quận 1, TP.HCM',
       type: 'Full-time',
@@ -1445,7 +1445,7 @@ const CandidateDashboard = () => {
   const recentApplications = [
     { 
       id: 1, 
-      title: 'Nhân viên Phục Vụ Bàn', 
+      title: 'Nhân viên Phục Vụ', 
       company: 'Pizza 4P\'s', 
       appliedDate: '2 ngày trước', 
       status: 'unseen' 

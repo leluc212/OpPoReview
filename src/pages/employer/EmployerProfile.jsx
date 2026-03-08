@@ -18,7 +18,12 @@ import {
   Edit3,
   Check,
   X,
-  ShieldCheck
+  ShieldCheck,
+  File,
+  Trash2,
+  Download,
+  Eye,
+  Plus
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -458,6 +463,175 @@ const SuccessMessage = styled(motion.div)`
   }
 `;
 
+const DocumentsSection = styled.div`
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 2px solid #E8EFFF;
+`;
+
+const DocumentsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+`;
+
+const DocumentCard = styled(motion.div)`
+  background: #ffffff;
+  border: 2px solid #E8EFFF;
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    border-color: #BFDBFE;
+    box-shadow: 0 4px 16px rgba(30, 64, 175, 0.1);
+    transform: translateY(-2px);
+  }
+`;
+
+const DocumentHeader = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+`;
+
+const DocumentIconBox = styled.div`
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border: 1.5px solid #BFDBFE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  svg {
+    width: 22px;
+    height: 22px;
+    color: #1e40af;
+  }
+`;
+
+const DocumentInfo = styled.div`
+  flex: 1;
+  min-width: 0;
+  
+  .doc-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: ${props => props.theme.colors.text};
+    margin-bottom: 4px;
+    word-break: break-word;
+  }
+  
+  .doc-date {
+    font-size: 12px;
+    color: ${props => props.theme.colors.textLight};
+  }
+`;
+
+const DocumentActions = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+`;
+
+const DocumentButton = styled.button`
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1.5px solid;
+  
+  ${props => props.$variant === 'danger' ? `
+    background: #FEE2E2;
+    border-color: #FCA5A5;
+    color: #DC2626;
+    
+    &:hover {
+      background: #FEF2F2;
+      border-color: #EF4444;
+    }
+  ` : `
+    background: #EFF6FF;
+    border-color: #BFDBFE;
+    color: #1e40af;
+    
+    &:hover {
+      background: #DBEAFE;
+      border-color: #93C5FD;
+    }
+  `}
+  
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+`;
+
+const DocumentUploadButton = styled(motion.button)`
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+  transition: all 0.2s ease;
+  
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  &:hover {
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+  }
+`;
+
+const EmptyDocuments = styled.div`
+  text-align: center;
+  padding: 48px 20px;
+  background: #F8FAFC;
+  border-radius: 12px;
+  border: 2px dashed #E2E8F0;
+  
+  .icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+  
+  h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: ${props => props.theme.colors.text};
+    margin-bottom: 8px;
+  }
+  
+  p {
+    font-size: 14px;
+    color: ${props => props.theme.colors.textLight};
+  }
+`;
+
 const getInitialFormData = (language) => ({
   companyName: language === 'vi' ? 'Katinat Quận 8' : 'Katinat District 8',
   email: 'contact@katinat.vn',
@@ -476,6 +650,11 @@ const EmployerProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [companyLogo, setCompanyLogo] = useState(() => {
     return localStorage.getItem('companyLogo') || '/OpPoReview/images/katinatlogo.jpg';
+  });
+  
+  const [documents, setDocuments] = useState(() => {
+    const saved = localStorage.getItem('companyDocuments');
+    return saved ? JSON.parse(saved) : [];
   });
   
   const [formData, setFormData] = useState(() => {
@@ -571,6 +750,28 @@ const EmployerProfile = () => {
     setCompanyLogo('/OpPoReview/images/katinatlogo.jpg');
     localStorage.removeItem('companyLogo');
     window.dispatchEvent(new Event('logoChanged'));
+  };
+
+  const handleDocumentUpload = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+    
+    const newDocuments = files.map(file => ({
+      id: Date.now() + Math.random(),
+      name: file.name,
+      uploadDate: new Date().toLocaleDateString('vi-VN'),
+      size: (file.size / 1024).toFixed(2) + ' KB'
+    }));
+    
+    const updated = [...documents, ...newDocuments];
+    setDocuments(updated);
+    localStorage.setItem('companyDocuments', JSON.stringify(updated));
+  };
+
+  const handleDeleteDocument = (docId) => {
+    const updated = documents.filter(doc => doc.id !== docId);
+    setDocuments(updated);
+    localStorage.setItem('companyDocuments', JSON.stringify(updated));
   };
 
   return (
@@ -846,6 +1047,73 @@ const EmployerProfile = () => {
                   {language === 'vi' ? 'Lưu Thay Đổi' : 'Save Changes'}
                 </SaveButton>
               )}
+
+              {/* Documents Section */}
+              <DocumentsSection>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                  <SectionTitle style={{ marginBottom: 0 }}>
+                    <File />
+                    {language === 'vi' ? 'Hồ Sơ & Tài Liệu' : 'Documents & Files'}
+                  </SectionTitle>
+                  <label htmlFor="doc-upload" style={{ cursor: 'pointer' }}>
+                    <input
+                      id="doc-upload"
+                      type="file"
+                      multiple
+                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                      onChange={handleDocumentUpload}
+                      style={{ display: 'none' }}
+                    />
+                    <DocumentUploadButton
+                      as={motion.span}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Plus />
+                      {language === 'vi' ? 'Tải lên tài liệu' : 'Upload Documents'}
+                    </DocumentUploadButton>
+                  </label>
+                </div>
+
+                {documents.length === 0 ? (
+                  <EmptyDocuments>
+                    <div className="icon">📄</div>
+                    <h3>{language === 'vi' ? 'Chưa có tài liệu nào' : 'No documents yet'}</h3>
+                    <p>{language === 'vi' ? 'Tải lên hồ sơ công ty, giấy phép kinh doanh và các tài liệu liên quan' : 'Upload company profile, business license and related documents'}</p>
+                  </EmptyDocuments>
+                ) : (
+                  <DocumentsGrid>
+                    {documents.map((doc) => (
+                      <DocumentCard
+                        key={doc.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                      >
+                        <DocumentHeader>
+                          <DocumentIconBox>
+                            <File />
+                          </DocumentIconBox>
+                          <DocumentInfo>
+                            <div className="doc-name">{doc.name}</div>
+                            <div className="doc-date">{language === 'vi' ? 'Tải lên: ' : 'Uploaded: '}{doc.uploadDate}</div>
+                          </DocumentInfo>
+                        </DocumentHeader>
+                        <DocumentActions>
+                          <DocumentButton>
+                            <Eye />
+                            {language === 'vi' ? 'Xem' : 'View'}
+                          </DocumentButton>
+                          <DocumentButton $variant="danger" onClick={() => handleDeleteDocument(doc.id)}>
+                            <Trash2 />
+                            {language === 'vi' ? 'Xóa' : 'Delete'}
+                          </DocumentButton>
+                        </DocumentActions>
+                      </DocumentCard>
+                    ))}
+                  </DocumentsGrid>
+                )}
+              </DocumentsSection>
             </form>
           </MainPanel>
         </ProfileContent>

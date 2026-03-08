@@ -9,7 +9,21 @@ import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail,
 import Modal from '../../components/Modal';
 
 // Mock HR Staff Data
-const getHRStaff = (language) => [
+const getHRStaff = (language) => {
+  const now = new Date();
+  const today = language === 'vi' 
+    ? `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`
+    : `${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getDate().toString().padStart(2, '0')}/${now.getFullYear()}`;
+  
+  // Recent time: 30 minutes ago
+  const recentTime = new Date(now - 30 * 60 * 1000);
+  const recentTimeStr = `${recentTime.getHours().toString().padStart(2, '0')}:${recentTime.getMinutes().toString().padStart(2, '0')}`;
+  
+  // Old time: 2 hours ago (for testing hidden info)
+  const oldTime = new Date(now - 2 * 60 * 60 * 1000);
+  const oldTimeStr = `${oldTime.getHours().toString().padStart(2, '0')}:${oldTime.getMinutes().toString().padStart(2, '0')}`;
+  
+  return [
   {
     id: 1,
     name: language === 'vi' ? 'Nguyễn Minh Tuấn' : 'Nguyen Minh Tuan',
@@ -19,8 +33,8 @@ const getHRStaff = (language) => [
     email: 'nguyenminhtuan@example.com',
     startDate: language === 'vi' ? '15/01/2024' : '01/15/2024',
     status: 'active',
-    shift: '06:00 - 14:00',
-    confirmedAt: language === 'vi' ? '15/01/2024 - 09:30' : '01/15/2024 - 09:30',
+    shift: '06:00 - 18:00',
+    confirmedAt: `${today} - ${recentTimeStr}`,
     canRequestChange: true,
     isWithinTimeWindow: true,
     // Additional profile data
@@ -41,8 +55,8 @@ const getHRStaff = (language) => [
     email: 'phamthuhuong@example.com',
     startDate: language === 'vi' ? '20/02/2024' : '02/20/2024',
     status: 'active',
-    shift: '14:00 - 22:00',
-    confirmedAt: language === 'vi' ? '20/02/2024 - 14:15' : '02/20/2024 - 14:15',
+    shift: '08:00 - 20:00',
+    confirmedAt: `${today} - ${oldTimeStr}`,
     canRequestChange: true,
     isWithinTimeWindow: false,
     // Additional profile data
@@ -63,8 +77,8 @@ const getHRStaff = (language) => [
     email: 'tranquocbao@example.com',
     startDate: language === 'vi' ? '10/03/2024' : '03/10/2024',
     status: 'active',
-    shift: '18:00 - 22:00',
-    confirmedAt: language === 'vi' ? '10/03/2024 - 08:45' : '03/10/2024 - 08:45',
+    shift: '10:00 - 22:00',
+    confirmedAt: `${today} - ${recentTimeStr}`,
     canRequestChange: true,
     isWithinTimeWindow: true,
     // Additional profile data
@@ -77,12 +91,13 @@ const getHRStaff = (language) => [
     ]
   }
 ];
+};
 
 // Mock Quick Job Posts Data
 const getQuickJobPosts = (language) => [
   {
     id: 1,
-    title: language === 'vi' ? 'Nhân viên pha chế - GẤP' : 'Barista - URGENT',
+    title: language === 'vi' ? 'Nhân viên Pha Chế - GẤP' : 'Barista - URGENT',
     location: language === 'vi' ? 'Quận 1, TP.HCM' : 'District 1, HCMC',
     salary: language === 'vi' ? '10-15 triệu' : '$400-600',
     type: language === 'vi' ? 'Tuyển gấp' : 'Urgent',
@@ -93,7 +108,7 @@ const getQuickJobPosts = (language) => [
   },
   {
     id: 2,
-    title: language === 'vi' ? 'Thu ngân - Cần ngay' : 'Cashier - Immediate',
+    title: language === 'vi' ? 'Nhân viên Thu Ngân - Cần ngay' : 'Cashier - Immediate',
     location: language === 'vi' ? 'Quận 7, TP.HCM' : 'District 7, HCMC',
     salary: language === 'vi' ? '8-12 triệu' : '$320-480',
     type: language === 'vi' ? 'Tuyển gấp' : 'Urgent',
@@ -104,7 +119,7 @@ const getQuickJobPosts = (language) => [
   },
   {
     id: 3,
-    title: language === 'vi' ? 'Nhân viên phục vụ - Khẩn cấp' : 'Server - Critical',
+    title: language === 'vi' ? 'Nhân viên Phục Vụ - Khẩn cấp' : 'Server - Critical',
     location: language === 'vi' ? 'Quận 3, TP.HCM' : 'District 3, HCMC',
     salary: language === 'vi' ? '7-10 triệu' : '$280-400',
     type: language === 'vi' ? 'Tuyển gấp' : 'Urgent',
@@ -410,16 +425,19 @@ const StaffButton = styled(motion.button)`
   background: ${props => {
     if (props.$variant === 'danger') return '#EF4444';
     if (props.$variant === 'warning') return '#FEF3C7';
+    if (props.$variant === 'success') return '#D1FAE5';
     return '#EFF6FF';
   }};
   color: ${props => {
     if (props.$variant === 'danger') return 'white';
     if (props.$variant === 'warning') return '#D97706';
+    if (props.$variant === 'success') return '#065F46';
     return '#1e40af';
   }};
   border: 1.5px solid ${props => {
     if (props.$variant === 'danger') return '#EF4444';
     if (props.$variant === 'warning') return '#FCD34D';
+    if (props.$variant === 'success') return '#6EE7B7';
     return '#BFDBFE';
   }};
   
@@ -433,6 +451,7 @@ const StaffButton = styled(motion.button)`
     box-shadow: ${props => {
       if (props.$variant === 'danger') return '0 4px 12px rgba(239, 68, 68, 0.3)';
       if (props.$variant === 'warning') return '0 4px 12px rgba(245, 158, 11, 0.3)';
+      if (props.$variant === 'success') return '0 4px 12px rgba(16, 185, 129, 0.3)';
       return '0 4px 12px rgba(30, 64, 175, 0.15)';
     }};
   }
@@ -1515,6 +1534,108 @@ const BioText = styled.p`
   margin: 0;
 `;
 
+const HiddenInfo = styled.div`
+  font-size: 14px;
+  color: #94a3b8;
+  font-weight: 600;
+  letter-spacing: 2px;
+`;
+
+const WorkScheduleCard = styled.div`
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border: 2px solid #BFDBFE;
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+const ScheduleRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  
+  svg {
+    width: 18px;
+    height: 18px;
+    color: #1e40af;
+    flex-shrink: 0;
+  }
+  
+  .label {
+    font-weight: 600;
+    color: #1e40af;
+    min-width: 120px;
+  }
+  
+  .value {
+    color: #1e293b;
+    font-weight: 700;
+  }
+`;
+
+const ChatButton = styled(motion.button)`
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+    transform: translateY(-1px);
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+`;
+
+const WorkingStatusBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+  border: 2px solid #6EE7B7;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #065F46;
+  
+  &:before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+`;
+
 const ReviewList = styled.div`
   display: flex;
   flex-direction: column;
@@ -1623,6 +1744,88 @@ const StaffProfileModal = React.memo(({ staff, onClose }) => {
     ? (staff.reviews.reduce((s, r) => s + r.rating, 0) / staff.reviews.length)
     : null;
 
+  // Parse confirmedAt time and check if more than 1 hour has passed
+  const parseConfirmedTime = () => {
+    if (!staff.confirmedAt) return null;
+    try {
+      // Format: "15/01/2024 - 09:30" (vi) or "01/15/2024 - 09:30" (en)
+      const [datePart, timePart] = staff.confirmedAt.split(' - ');
+      const dateParts = datePart.split('/');
+      let day, month, year;
+      
+      if (language === 'vi') {
+        // Vietnamese: day/month/year
+        [day, month, year] = dateParts;
+      } else {
+        // English: month/day/year
+        [month, day, year] = dateParts;
+      }
+      
+      const [hours, minutes] = timePart.split(':');
+      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes));
+    } catch (e) {
+      console.error('Error parsing confirmedAt:', e);
+      return null;
+    }
+  };
+
+  const confirmedTime = parseConfirmedTime();
+  const now = new Date();
+  const oneHourInMs = 60 * 60 * 1000;
+  const hasPassedOneHour = confirmedTime && (now - confirmedTime) > oneHourInMs;
+
+  // Debug logging
+  console.log('Staff Profile Modal Debug:', {
+    staffName: staff.name,
+    confirmedAt: staff.confirmedAt,
+    confirmedTime: confirmedTime,
+    now: now,
+    timeDiff: confirmedTime ? (now - confirmedTime) / 1000 / 60 : null, // in minutes
+    hasPassedOneHour: hasPassedOneHour,
+    shift: staff.shift
+  });
+
+  // Check if currently within working hours
+  const isCurrentlyWorking = () => {
+    if (!staff.shift) return false;
+    try {
+      const [startTime, endTime] = staff.shift.split(' - ');
+      const [startHour, startMin] = startTime.split(':').map(Number);
+      const [endHour, endMin] = endTime.split(':').map(Number);
+      
+      const nowHour = now.getHours();
+      const nowMin = now.getMinutes();
+      const nowTimeInMin = nowHour * 60 + nowMin;
+      const startTimeInMin = startHour * 60 + startMin;
+      const endTimeInMin = endHour * 60 + endMin;
+      
+      const isWorking = nowTimeInMin >= startTimeInMin && nowTimeInMin <= endTimeInMin;
+      
+      console.log('Working Hours Check:', {
+        shift: staff.shift,
+        nowTime: `${nowHour}:${nowMin}`,
+        nowTimeInMin,
+        startTimeInMin,
+        endTimeInMin,
+        isWorking
+      });
+      
+      return isWorking;
+    } catch (e) {
+      console.error('Error checking working hours:', e);
+      return false;
+    }
+  };
+
+  const currentlyWorking = isCurrentlyWorking();
+
+  const handleChat = () => {
+    // Navigate to chat or open chat modal
+    alert(language === 'vi' 
+      ? `Mở chat với ${staff.name}` 
+      : `Open chat with ${staff.name}`);
+  };
+
   return (
     <>
       <ProfileHeader>
@@ -1658,14 +1861,26 @@ const StaffProfileModal = React.memo(({ staff, onClose }) => {
                 <InfoIconBox><Mail /></InfoIconBox>
                 <InfoItem>
                   <div className="label">{language === 'vi' ? 'Email' : 'Email'}</div>
-                  <div className="value">{staff.email}</div>
+                  <div className="value">
+                    {hasPassedOneHour ? (
+                      <HiddenInfo>●●●●●</HiddenInfo>
+                    ) : (
+                      staff.email
+                    )}
+                  </div>
                 </InfoItem>
               </InfoCard>
               <InfoCard>
                 <InfoIconBox><Phone /></InfoIconBox>
                 <InfoItem>
                   <div className="label">{language === 'vi' ? 'Điện thoại' : 'Phone'}</div>
-                  <div className="value">{staff.phone}</div>
+                  <div className="value">
+                    {hasPassedOneHour ? (
+                      <HiddenInfo>●●●●●</HiddenInfo>
+                    ) : (
+                      staff.phone
+                    )}
+                  </div>
                 </InfoItem>
               </InfoCard>
               <InfoCard>
@@ -1749,6 +1964,46 @@ const StaffProfileModal = React.memo(({ staff, onClose }) => {
             <h3><FileText /> {language === 'vi' ? 'Giới thiệu bản thân' : 'About'}</h3>
             <BioText>{staff.bio}</BioText>
           </ProfileSection>
+
+          <ProfileSection>
+            <h3><Clock /> {language === 'vi' ? 'Lịch làm việc' : 'Work Schedule'}</h3>
+            <WorkScheduleCard>
+              <ScheduleRow>
+                <Clock />
+                <span className="label">{language === 'vi' ? 'Giờ làm việc:' : 'Shift:'}</span>
+                <span className="value">{staff.shift}</span>
+              </ScheduleRow>
+              <ScheduleRow>
+                <CheckCircle />
+                <span className="label">{language === 'vi' ? 'Giờ xác nhận:' : 'Confirmed at:'}</span>
+                <span className="value">{staff.confirmedAt}</span>
+              </ScheduleRow>
+              <ScheduleRow>
+                <Briefcase />
+                <span className="label">{language === 'vi' ? 'Vị trí làm:' : 'Position:'}</span>
+                <span className="value">{staff.position}</span>
+              </ScheduleRow>
+              {currentlyWorking && (
+                <ScheduleRow>
+                  <WorkingStatusBadge>
+                    {language === 'vi' ? 'Đang làm việc' : 'Currently Working'}
+                  </WorkingStatusBadge>
+                </ScheduleRow>
+              )}
+            </WorkScheduleCard>
+            {currentlyWorking && (
+              <div style={{ marginTop: '16px' }}>
+                <ChatButton
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleChat}
+                >
+                  <MessageSquare />
+                  {language === 'vi' ? 'Nhắn tin' : 'Send Message'}
+                </ChatButton>
+              </div>
+            )}
+          </ProfileSection>
         </ProfileInner>
       </ProfileContent>
     </>
@@ -1766,6 +2021,69 @@ const HRManagement = () => {
   const [activeSection, setActiveSection] = useState('hr');
   const [hrStaff] = useState(() => getHRStaff(language));
   const [selectedStaff, setSelectedStaff] = useState(null);
+  
+  // Helper function to check if more than 1 hour has passed
+  const hasPassedOneHourSinceConfirmed = (confirmedAt) => {
+    if (!confirmedAt) return false;
+    try {
+      const [datePart, timePart] = confirmedAt.split(' - ');
+      const dateParts = datePart.split('/');
+      let day, month, year;
+      
+      if (language === 'vi') {
+        [day, month, year] = dateParts;
+      } else {
+        [month, day, year] = dateParts;
+      }
+      
+      const [hours, minutes] = timePart.split(':');
+      const confirmedTime = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes));
+      const now = new Date();
+      const oneHourInMs = 60 * 60 * 1000;
+      return (now - confirmedTime) > oneHourInMs;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  // Helper function to check if currently working
+  const isCurrentlyWorking = (shift) => {
+    if (!shift) return false;
+    try {
+      const [startTime, endTime] = shift.split(' - ');
+      const [startHour, startMin] = startTime.split(':').map(Number);
+      const [endHour, endMin] = endTime.split(':').map(Number);
+      
+      const now = new Date();
+      const nowHour = now.getHours();
+      const nowMin = now.getMinutes();
+      const nowTimeInMin = nowHour * 60 + nowMin;
+      const startTimeInMin = startHour * 60 + startMin;
+      const endTimeInMin = endHour * 60 + endMin;
+      
+      const isWorking = nowTimeInMin >= startTimeInMin && nowTimeInMin <= endTimeInMin;
+      
+      console.log('🕐 Checking working status:', {
+        shift,
+        currentTime: `${nowHour}:${nowMin}`,
+        nowTimeInMin,
+        startTimeInMin,
+        endTimeInMin,
+        isWorking
+      });
+      
+      return isWorking;
+    } catch (e) {
+      console.error('Error checking working hours:', e);
+      return false;
+    }
+  };
+
+  const handleChatWithStaff = (staff) => {
+    alert(language === 'vi' 
+      ? `Mở chat với ${staff.name}` 
+      : `Open chat with ${staff.name}`);
+  };
   
   // Load quick jobs from localStorage
   const [quickJobPosts, setQuickJobPosts] = useState(() => {
@@ -2191,11 +2509,18 @@ const HRManagement = () => {
                       <StaffName>{staff.name}</StaffName>
                       <StaffPosition>{staff.position}</StaffPosition>
                     </div>
-                    <StaffStatus $status={staff.status}>
-                      {staff.status === 'active' 
-                        ? (language === 'vi' ? 'Đang làm' : 'Active')
-                        : (language === 'vi' ? 'Nghỉ phép' : 'On Leave')}
-                    </StaffStatus>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
+                      <StaffStatus $status={staff.status}>
+                        {staff.status === 'active' 
+                          ? (language === 'vi' ? 'Đang làm' : 'Active')
+                          : (language === 'vi' ? 'Nghỉ phép' : 'On Leave')}
+                      </StaffStatus>
+                      {isCurrentlyWorking(staff.shift) && (
+                        <WorkingStatusBadge style={{ fontSize: '11px', padding: '4px 10px' }}>
+                          {language === 'vi' ? 'Đang làm việc' : 'Currently Working'}
+                        </WorkingStatusBadge>
+                      )}
+                    </div>
                   </StaffHeader>
                   
                   <StaffMeta>
@@ -2203,10 +2528,20 @@ const HRManagement = () => {
                       <MapPin />{staff.location}
                     </div>
                     <div className="meta-row">
-                      <Phone />{staff.phone}
+                      <Phone />
+                      {hasPassedOneHourSinceConfirmed(staff.confirmedAt) ? (
+                        <HiddenInfo>●●●●●</HiddenInfo>
+                      ) : (
+                        staff.phone
+                      )}
                     </div>
                     <div className="meta-row">
-                      <Mail />{staff.email}
+                      <Mail />
+                      {hasPassedOneHourSinceConfirmed(staff.confirmedAt) ? (
+                        <HiddenInfo>●●●●●</HiddenInfo>
+                      ) : (
+                        staff.email
+                      )}
                     </div>
                     <div className="meta-row">
                       <Calendar />{language === 'vi' ? 'Bắt đầu:' : 'Started:'} {staff.startDate}
@@ -2227,6 +2562,16 @@ const HRManagement = () => {
                     >
                       <User />{language === 'vi' ? 'Xem hồ sơ' : 'View profile'}
                     </StaffButton>
+                    {isCurrentlyWorking(staff.shift) && (
+                      <StaffButton
+                        $variant="success"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => handleChatWithStaff(staff)}
+                      >
+                        <MessageSquare />{language === 'vi' ? 'Nhắn tin' : 'Chat'}
+                      </StaffButton>
+                    )}
                     {staff.canRequestChange && (
                       <StaffButton
                         $variant="warning"

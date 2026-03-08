@@ -280,8 +280,8 @@ const Analytics = () => {
     { title: language === 'vi' ? 'Nhân viên kinh doanh' : 'Sales Executive', applications: 156, views: 1234, status: 'active' },
     { title: language === 'vi' ? 'Nhân viên kho' : 'Warehouse Staff', applications: 89, views: 876, status: 'active' },
     { title: language === 'vi' ? 'Lễ tân' : 'Receptionist', applications: 67, views: 654, status: 'closed' },
-    { title: language === 'vi' ? 'Nhân viên phục vụ' : 'Service Staff', applications: 45, views: 432, status: 'active' },
-    { title: language === 'vi' ? 'Nhân viên giao hàng' : 'Delivery Staff', applications: 34, views: 321, status: 'draft' },
+    { title: language === 'vi' ? 'Nhân viên Phục Vụ' : 'Service Staff', applications: 45, views: 432, status: 'active' },
+    { title: language === 'vi' ? 'Nhân viên Giao Hàng' : 'Delivery Staff', applications: 34, views: 321, status: 'draft' },
   ];
 
   const timePills = [

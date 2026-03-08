@@ -478,9 +478,9 @@ const RegisterRoleSelection = () => {
   ];
 
   const chips = [
-    '☕ Barista', '🍳 Phụ bếp', '🍽️ Phục vụ bàn', '🧁 Làm bánh', '🥤 Pha chế', '🛎️ Thu ngân quán ăn', '🍜 Nhân viên bếp', '🧹 Dọn dẹp nhà hàng', '📦 Soạn hàng bếp', '🏪 Nhân viên cửa hàng F&B',
-    '☕ Barista', '🍳 Phụ bếp', '🍽️ Phục vụ bàn', '🧁 Làm bánh', '🥤 Pha chế', '🛎️ Thu ngân quán ăn', '🍜 Nhân viên bếp', '🧹 Dọn dẹp nhà hàng', '📦 Soạn hàng bếp', '🏪 Nhân viên cửa hàng F&B',
-    '☕ Barista', '🍳 Phụ bếp', '🍽️ Phục vụ bàn', '🧁 Làm bánh', '🥤 Pha chế', '🛎️ Thu ngân quán ăn', '🍜 Nhân viên bếp', '🧹 Dọn dẹp nhà hàng', '📦 Soạn hàng bếp', '🏪 Nhân viên cửa hàng F&B',
+    '☕ Barista', '🍳 Phụ bếp', '🍽️ Nhân viên Phục Vụ Bàn', '🧁 Làm bánh', '🥤 Nhân viên Pha Chế', '🛎️ Nhân viên Thu Ngân', '🍜 Nhân viên bếp', '🧹 Dọn dẹp nhà hàng', '📦 Soạn hàng bếp', '🏪 Nhân viên cửa hàng F&B',
+    '☕ Barista', '🍳 Phụ bếp', '🍽️ Nhân viên Phục Vụ Bàn', '🧁 Làm bánh', '🥤 Nhân viên Pha Chế', '🛎️ Nhân viên Thu Ngân', '🍜 Nhân viên bếp', '🧹 Dọn dẹp nhà hàng', '📦 Soạn hàng bếp', '🏪 Nhân viên cửa hàng F&B',
+    '☕ Barista', '🍳 Phụ bếp', '🍽️ Nhân viên Phục Vụ Bàn', '🧁 Làm bánh', '🥤 Nhân viên Pha Chế', '🛎️ Nhân viên Thu Ngân', '🍜 Nhân viên bếp', '🧹 Dọn dẹp nhà hàng', '📦 Soạn hàng bếp', '🏪 Nhân viên cửa hàng F&B',
   ];
 
   /* stagger */
