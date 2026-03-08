@@ -590,7 +590,7 @@ const EmployerDetail = () => {
               <div className="icon">
                 <DollarSign />
               </div>
-              <div className="label">{language === 'vi' ? 'Doanh thu' : 'Revenue'}</div>
+              <div className="label">{language === 'vi' ? 'Lợi nhuận thu được' : 'Profit Earned'}</div>
               <div className="value">{employer.totalRevenue}</div>
             </StatCard>
           </StatsRow>
@@ -607,7 +607,7 @@ const EmployerDetail = () => {
             {language === 'vi' ? 'Ứng tuyển' : 'Applications'}
           </Tab>
           <Tab $active={activeTab === 'revenue'} onClick={() => setActiveTab('revenue')}>
-            {language === 'vi' ? 'Doanh thu' : 'Revenue'}
+            {language === 'vi' ? 'Lợi nhuận thu được' : 'Profit Earned'}
           </Tab>
           <Tab $active={activeTab === 'violations'} onClick={() => setActiveTab('violations')}>
             {language === 'vi' ? 'Vi phạm' : 'Violations'}
@@ -729,13 +729,13 @@ const EmployerDetail = () => {
 
           {activeTab === 'revenue' && (
             <>
-              <SectionTitle>{language === 'vi' ? 'Doanh thu' : 'Revenue'}</SectionTitle>
+              <SectionTitle>{language === 'vi' ? 'Lợi nhuận thu được' : 'Profit Earned'}</SectionTitle>
               <div style={{ fontSize: '32px', fontWeight: '700', color: '#10b981', marginBottom: '24px' }}>
                 {employer.totalRevenue} VND
               </div>
               <InfoGrid>
                 <InfoItem>
-                  <div className="label">{language === 'vi' ? 'Tổng doanh thu:' : 'Total Revenue:'}</div>
+                  <div className="label">{language === 'vi' ? 'Tổng lợi nhuận thu được:' : 'Total Profit Earned:'}</div>
                   <div className="value">{employer.totalRevenue} VND</div>
                 </InfoItem>
                 <InfoItem>
