@@ -821,13 +821,18 @@ const CandidateProfile = () => {
   });
 
   const defaultSkills = [
-    'React', 'Node.js', 'TypeScript', 'JavaScript', 'HTML/CSS',
-    'MongoDB', 'PostgreSQL', 'AWS', 'Docker', 'Git'
+    'Pha chế cơ bản', 'Giao tiếp khách hàng', 'Làm việc nhóm', 'Xử lý tình huống', 'Tiếng Anh giao tiếp',
+    'Chăm sóc khách hàng', 'Sử dụng máy POS', 'Bán hàng', 'Quản lý thời gian', 'Vệ sinh an toàn TP'
   ];
   
   const [skills, setSkills] = useState(() => {
     const savedSkills = localStorage.getItem('candidateSkills');
-    return savedSkills ? JSON.parse(savedSkills) : defaultSkills;
+    let data = savedSkills ? JSON.parse(savedSkills) : defaultSkills;
+    if (data.includes('React') || data.includes('Node.js')) {
+        data = defaultSkills;
+        localStorage.setItem('candidateSkills', JSON.stringify(data));
+    }
+    return data;
   });
   
   const [newSkill, setNewSkill] = useState('');
@@ -1565,31 +1570,6 @@ const CandidateProfile = () => {
                   </SkillTag>
                 ))}
               </SkillsGrid>
-            </Card>
-
-            <Card
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <div className="card-header">
-                <h2>
-                  <Calendar />
-                  {language === 'vi' ? 'Hoạt Động Gần Đây' : 'Recent Activity'}
-                </h2>
-              </div>
-
-              <div style={{ fontSize: '14px', color: 'black', lineHeight: '1.8' }}>
-                <div style={{ padding: '12px 0', borderBottom: '1px solid #77ace8' }}>
-                  ✅ {language === 'vi' ? 'Hoàn thành việc tuyển gấp cho Katinat' : 'Completed urgent hiring for Katinat'}
-                </div>
-                <div style={{ padding: '12px 0', borderBottom: '1px solid #77ace8' }}>
-                  📝 {language === 'vi' ? 'Cập nhật hồ sơ' : 'Updated profile'}
-                </div>
-                <div style={{ padding: '12px 0' }}>
-                  ⭐ {language === 'vi' ? 'Nhận đánh giá 5 sao từ Highlands Coffee' : 'Received 5-star rating from Highlands Coffee'}
-                </div>
-              </div>
             </Card>
           </Sidebar>
         </ContentGrid>
