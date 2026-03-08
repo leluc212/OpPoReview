@@ -549,14 +549,14 @@ const PostQuickJob = () => {
     walletData.balance = newBalance;
     localStorage.setItem('employer_wallet', JSON.stringify(walletData));
 
-    // Save transaction
+    // Save transaction (wallet debit)
     const transaction = {
       id: Date.now(),
       type: 'debit',
       amount: totalFee,
       description: language === 'vi' 
-        ? `Đăng bài: ${formData.title} (${calculation.hours.toFixed(1)}h x ${rate.toLocaleString('vi-VN')} VNĐ)`
-        : `Post job: ${formData.title} (${calculation.hours.toFixed(1)}h x ${rate.toLocaleString('vi-VN')} VND)`,
+        ? `Escrow - Đăng bài: ${formData.title} (${calculation.hours.toFixed(1)}h x ${rate.toLocaleString('vi-VN')} VNĐ)`
+        : `Escrow - Post job: ${formData.title} (${calculation.hours.toFixed(1)}h x ${rate.toLocaleString('vi-VN')} VND)`,
       date: new Date().toISOString(),
       balanceAfter: newBalance
     };
@@ -566,10 +566,11 @@ const PostQuickJob = () => {
     localStorage.setItem('employer_transactions', JSON.stringify(transactions));
 
     // Save to posted jobs list in localStorage
+    const jobId = Date.now();
     const jobData = {
       ...formData,
       hourlyRate: rate,
-      id: Date.now(),
+      id: jobId,
       createdAt: new Date().toISOString(),
       type: 'quick',
       status: 'pending',
@@ -582,6 +583,23 @@ const PostQuickJob = () => {
     existingJobs.unshift(jobData);
     localStorage.setItem('quickJobs', JSON.stringify(existingJobs));
 
+    // Save to escrow - hold the funds by job ID
+    const escrowJob = {
+      jobId: jobId,
+      jobTitle: formData.title,
+      amount: totalFee,
+      status: 'held',
+      employerConfirmed: false,
+      candidateConfirmed: false,
+      createdAt: new Date().toISOString(),
+      totalHours: calculation.hours,
+      hourlyRate: rate
+    };
+
+    const escrowJobs = JSON.parse(localStorage.getItem('escrow_jobs') || '[]');
+    escrowJobs.unshift(escrowJob);
+    localStorage.setItem('escrow_jobs', JSON.stringify(escrowJobs));
+
     // Clear draft
     localStorage.removeItem('quickJobDraft');
 
@@ -591,7 +609,8 @@ const PostQuickJob = () => {
       hours: calculation.hours,
       hourlyRate: rate,
       previousBalance: currentBalance,
-      newBalance: newBalance
+      newBalance: newBalance,
+      escrow: true
     });
 
     console.log('Quick Job Saved:', jobData);
@@ -965,6 +984,22 @@ const PostQuickJob = () => {
                   {paymentInfo.newBalance.toLocaleString('vi-VN')} VNĐ
                 </span>
               </div>
+              {paymentInfo.escrow && (
+                <div style={{
+                  marginTop: '10px',
+                  padding: '8px 12px',
+                  background: '#FEF3C7',
+                  border: '1px solid #FCD34D',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  color: '#92400E',
+                  lineHeight: '1.5'
+                }}>
+                  🔒 {language === 'vi'
+                    ? 'Số tiền đang được giữ trong Ví Escrow. Khi cả hai bên xác nhận hoàn thành, 85% sẽ chuyển cho ứng viên và 15% cho nền tảng.'
+                    : 'Funds are held in Escrow. When both parties confirm completion, 85% goes to the candidate and 15% to the platform.'}
+                </div>
+              )}
             </div>
           )}
           {modalType === 'error' && (paymentInfo?.message?.includes('Số dư không đủ') || paymentInfo?.message?.includes('Insufficient balance')) ? (

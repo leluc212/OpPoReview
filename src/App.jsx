@@ -63,6 +63,7 @@ import PackagesManagement from './pages/admin/PackagesManagement';
 import Reports from './pages/admin/Reports';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminWallet from './pages/admin/AdminWallet';
+import AdminEscrow from './pages/admin/AdminEscrow';
 import PostsManagement from './pages/admin/PostsManagement';
 import AdminSupport from './pages/admin/AdminSupport';
 import AdminNotifications from './pages/admin/AdminNotifications';
@@ -146,6 +147,7 @@ function AppRoutes() {
           <Wallet />
         </ProtectedRoute>
       } />
+
       <Route path="/candidate/availability" element={
         <ProtectedRoute allowedRoles={['candidate']}>
           <Availability />
@@ -243,6 +245,7 @@ function AppRoutes() {
           <EmployerWallet />
         </ProtectedRoute>
       } />
+
       
       {/* Admin Routes */}
       <Route path="/admin/dashboard" element={
@@ -288,6 +291,11 @@ function AppRoutes() {
       <Route path="/admin/wallet" element={
         <ProtectedRoute allowedRoles={['admin']}>
           <AdminWallet />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/escrow" element={
+        <ProtectedRoute allowedRoles={['admin']}>
+          <AdminEscrow />
         </ProtectedRoute>
       } />
       <Route path="/admin/posts" element={

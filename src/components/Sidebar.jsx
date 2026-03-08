@@ -408,6 +408,7 @@ const Sidebar = ({ role }) => {
     ]},
     { section: t.sidebar.utilities || 'Utilities', items: [
       { to: '/admin/wallet', icon: Wallet, label: t.sidebar.digitalWallet },
+      { to: '/admin/escrow', icon: ShieldCheck, label: language === 'vi' ? 'Ví Escrow' : 'Escrow Wallet' },
       { to: '/admin/notifications', icon: Bell, label: t.sidebar.notifications },
       { to: '/admin/profile', icon: User, label: t.sidebar.myProfile },
     ]}
