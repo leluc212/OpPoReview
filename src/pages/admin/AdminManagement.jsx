@@ -268,14 +268,14 @@ const AdminManagement = () => {
   const admins = [
     {
       id: 1,
-      name: 'Nguyễn Thị Anh Thư',
-      email: 'admin1@opcareer.vn',
+      name: 'Root',
+      email: 'root@opcareer.vn',
       role: 'super_admin',
       joinDate: '2026-01-15',
       reviewDate: '2026-01-16'
     },
     {
-      id: 5,
+      id: 2,
       name: 'Nguyễn Hoàng Ngọc Minh',
       email: 'admin2@opcareer.vn',
       role: 'admin',
@@ -314,6 +314,15 @@ const AdminManagement = () => {
       id: 6,
       name: 'Phạm Lê Duy',
       email: 'admin6@opcareer.vn',
+      role: 'admin',
+      status: 'approved',
+      joinDate: '2026-03-15',
+      reviewDate: '2026-03-16'
+    }, 
+    {
+      id: 7,
+      name: 'Nguyễn Thị Anh Thư',
+      email: 'admin7@opcareer.vn',
       role: 'admin',
       status: 'approved',
       joinDate: '2026-03-15',

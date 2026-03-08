@@ -504,106 +504,106 @@ const PostsManagement = () => {
 
   // Sample candidate names from CandidatesManagement (100 candidates)
   const candidatePool = [
-    { name: 'Nguyễn Văn An', email: 'nguyen.an.01@example.com', phone: '0901234567' },
-    { name: 'Trần Thị Bình', email: 'tran.binh.02@example.com', phone: '0902345678' },
-    { name: 'Lê Minh Cường', email: 'le.cuong.03@example.com', phone: '0903456789' },
-    { name: 'Phạm Hoàng Dũng', email: 'pham.dung.04@example.com', phone: '0904567890' },
-    { name: 'Hoàng Ngọc Lan', email: 'hoang.lan.05@example.com', phone: '0905678901' },
-    { name: 'Đỗ Văn Hùng', email: 'do.hung.06@example.com', phone: '0906789012' },
-    { name: 'Bùi Thị Hương', email: 'bui.huong.07@example.com', phone: '0907890123' },
-    { name: 'Vũ Tuấn Kiệt', email: 'vu.kiet.08@example.com', phone: '0908901234' },
-    { name: 'Đặng Thanh Mai', email: 'dang.mai.09@example.com', phone: '0909012345' },
-    { name: 'Ngô Văn Nam', email: 'ngo.nam.10@example.com', phone: '0910123456' },
-    { name: 'Hồ Thị Nga', email: 'ho.nga.11@example.com', phone: '0911234567' },
-    { name: 'Phan Đức Phúc', email: 'phan.phuc.12@example.com', phone: '0912345678' },
-    { name: 'Huỳnh Phương Thảo', email: 'huynh.thao.13@example.com', phone: '0913456789' },
-    { name: 'Nguyễn Văn Tuấn', email: 'nguyen.tuan.14@example.com', phone: '0914567890' },
-    { name: 'Trần Thanh Tú', email: 'tran.tu.15@example.com', phone: '0915678901' },
-    { name: 'Lê Thị Vân', email: 'le.van.16@example.com', phone: '0916789012' },
-    { name: 'Phạm Văn Vinh', email: 'pham.vinh.17@example.com', phone: '0917890123' },
-    { name: 'Hoàng Minh Vũ', email: 'hoang.vu.18@example.com', phone: '0918901234' },
-    { name: 'Đỗ Thị Yến', email: 'do.yen.19@example.com', phone: '0919012345' },
-    { name: 'Bùi Văn Chung', email: 'bui.chung.20@example.com', phone: '0920123456' },
-    { name: 'Nguyễn Thị Duyên', email: 'nguyen.duyen.21@example.com', phone: '0921234567' },
-    { name: 'Trần Văn Giang', email: 'tran.giang.22@example.com', phone: '0922345678' },
-    { name: 'Lê Thanh Hải', email: 'le.hai.23@example.com', phone: '0923456789' },
-    { name: 'Phạm Thị Hồng', email: 'pham.hong.24@example.com', phone: '0924567890' },
-    { name: 'Hoàng Văn Huy', email: 'hoang.huy.25@example.com', phone: '0925678901' },
-    { name: 'Đặng Thị Kim', email: 'dang.kim.26@example.com', phone: '0926789012' },
-    { name: 'Ngô Thanh Lâm', email: 'ngo.lam.27@example.com', phone: '0927890123' },
-    { name: 'Hồ Văn Lộc', email: 'ho.loc.28@example.com', phone: '0928901234' },
-    { name: 'Phan Thị Ly', email: 'phan.ly.29@example.com', phone: '0929012345' },
-    { name: 'Huỳnh Minh Nhật', email: 'huynh.nhat.30@example.com', phone: '0930123456' },
-    { name: 'Nguyễn Thị Oanh', email: 'nguyen.oanh.31@example.com', phone: '0931234567' },
-    { name: 'Trần Văn Phong', email: 'tran.phong.32@example.com', phone: '0932345678' },
-    { name: 'Lê Thị Quyên', email: 'le.quyen.33@example.com', phone: '0933456789' },
-    { name: 'Phạm Văn Sang', email: 'pham.sang.34@example.com', phone: '0934567890' },
-    { name: 'Hoàng Thị Tâm', email: 'hoang.tam.35@example.com', phone: '0935678901' },
-    { name: 'Đỗ Minh Thắng', email: 'do.thang.36@example.com', phone: '0936789012' },
-    { name: 'Bùi Thị Thu', email: 'bui.thu.37@example.com', phone: '0937890123' },
-    { name: 'Vũ Văn Tiến', email: 'vu.tien.38@example.com', phone: '0938901234' },
-    { name: 'Đặng Thanh Tùng', email: 'dang.tung.39@example.com', phone: '0939012345' },
-    { name: 'Ngô Thị Tuyết', email: 'ngo.tuyet.40@example.com', phone: '0940123456' },
-    { name: 'Hồ Văn Uyên', email: 'ho.uyen.41@example.com', phone: '0941234567' },
-    { name: 'Phan Minh Việt', email: 'phan.viet.42@example.com', phone: '0942345678' },
-    { name: 'Huỳnh Thị Xoan', email: 'huynh.xoan.43@example.com', phone: '0943456789' },
-    { name: 'Nguyễn Văn Ý', email: 'nguyen.y.44@example.com', phone: '0944567890' },
-    { name: 'Trần Thanh Ân', email: 'tran.an.45@example.com', phone: '0945678901' },
-    { name: 'Lê Thị Bích', email: 'le.bich.46@example.com', phone: '0946789012' },
-    { name: 'Phạm Văn Cảnh', email: 'pham.canh.47@example.com', phone: '0947890123' },
-    { name: 'Hoàng Minh Danh', email: 'hoang.danh.48@example.com', phone: '0948901234' },
-    { name: 'Đỗ Thị Đào', email: 'do.dao.49@example.com', phone: '0949012345' },
-    { name: 'Bùi Văn Đạt', email: 'bui.dat.50@example.com', phone: '0950123456' },
-    { name: 'Nguyễn Thị Diệp', email: 'nguyen.diep.51@example.com', phone: '0951234567' },
-    { name: 'Trần Văn Đông', email: 'tran.dong.52@example.com', phone: '0952345678' },
-    { name: 'Lê Thị Hà', email: 'le.ha.53@example.com', phone: '0953456789' },
-    { name: 'Phạm Văn Hiếu', email: 'pham.hieu.54@example.com', phone: '0954567890' },
-    { name: 'Hoàng Thị Hoa', email: 'hoang.hoa.55@example.com', phone: '0955678901' },
-    { name: 'Đặng Văn Hùng', email: 'dang.hung.56@example.com', phone: '0956789012' },
-    { name: 'Ngô Thị Huyền', email: 'ngo.huyen.57@example.com', phone: '0957890123' },
-    { name: 'Hồ Văn Khang', email: 'ho.khang.58@example.com', phone: '0958901234' },
-    { name: 'Phan Thị Lan', email: 'phan.lan.59@example.com', phone: '0959012345' },
-    { name: 'Huỳnh Minh Long', email: 'huynh.long.60@example.com', phone: '0960123456' },
-    { name: 'Nguyễn Thị Minh', email: 'nguyen.minh.61@example.com', phone: '0961234567' },
-    { name: 'Trần Văn Nam', email: 'tran.nam.62@example.com', phone: '0962345678' },
-    { name: 'Lê Thị Ngọc', email: 'le.ngoc.63@example.com', phone: '0963456789' },
-    { name: 'Phạm Văn Nghĩa', email: 'pham.nghia.64@example.com', phone: '0964567890' },
-    { name: 'Hoàng Thị Nhung', email: 'hoang.nhung.65@example.com', phone: '0965678901' },
-    { name: 'Đặng Văn Phong', email: 'dang.phong.66@example.com', phone: '0966789012' },
-    { name: 'Ngô Thị Phương', email: 'ngo.phuong.67@example.com', phone: '0967890123' },
-    { name: 'Hồ Văn Quân', email: 'ho.quan.68@example.com', phone: '0968901234' },
-    { name: 'Phan Thị Quý', email: 'phan.quy.69@example.com', phone: '0969012345' },
-    { name: 'Huỳnh Minh Sơn', email: 'huynh.son.70@example.com', phone: '0970123456' },
-    { name: 'Nguyễn Thị Tâm', email: 'nguyen.tam.71@example.com', phone: '0971234567' },
-    { name: 'Trần Văn Thành', email: 'tran.thanh.72@example.com', phone: '0972345678' },
-    { name: 'Lê Thị Thúy', email: 'le.thuy.73@example.com', phone: '0973456789' },
-    { name: 'Phạm Văn Trí', email: 'pham.tri.74@example.com', phone: '0974567890' },
-    { name: 'Hoàng Thị Trúc', email: 'hoang.truc.75@example.com', phone: '0975678901' },
-    { name: 'Đặng Văn Tú', email: 'dang.tu.76@example.com', phone: '0976789012' },
-    { name: 'Ngô Thị Tú Anh', email: 'ngo.tuanh.77@example.com', phone: '0977890123' },
-    { name: 'Hồ Văn Tùng', email: 'ho.tung.78@example.com', phone: '0978901234' },
-    { name: 'Phan Thị Tươi', email: 'phan.tuoi.79@example.com', phone: '0979012345' },
-    { name: 'Huỳnh Minh Vĩnh', email: 'huynh.vinh.80@example.com', phone: '0980123456' },
-    { name: 'Nguyễn Thị Xuân', email: 'nguyen.xuan.81@example.com', phone: '0981234567' },
-    { name: 'Trần Văn Ý', email: 'tran.y.82@example.com', phone: '0982345678' },
-    { name: 'Lê Thị Ánh', email: 'le.anh.83@example.com', phone: '0983456789' },
-    { name: 'Phạm Văn Bằng', email: 'pham.bang.84@example.com', phone: '0984567890' },
-    { name: 'Hoàng Thị Cẩm', email: 'hoang.cam.85@example.com', phone: '0985678901' },
-    { name: 'Đặng Văn Dũng', email: 'dang.dung.86@example.com', phone: '0986789012' },
-    { name: 'Ngô Thị Duyên', email: 'ngo.duyen.87@example.com', phone: '0987890123' },
-    { name: 'Hồ Văn Giang', email: 'ho.giang.88@example.com', phone: '0988901234' },
-    { name: 'Phan Thị Hạnh', email: 'phan.hanh.89@example.com', phone: '0989012345' },
-    { name: 'Huỳnh Minh Hậu', email: 'huynh.hau.90@example.com', phone: '0990123456' },
-    { name: 'Nguyễn Thị Hiền', email: 'nguyen.hien.91@example.com', phone: '0991234567' },
-    { name: 'Trần Văn Hòa', email: 'tran.hoa.92@example.com', phone: '0992345678' },
-    { name: 'Lê Thị Huệ', email: 'le.hue.93@example.com', phone: '0993456789' },
-    { name: 'Phạm Văn Hưng', email: 'pham.hung.94@example.com', phone: '0994567890' },
-    { name: 'Hoàng Thị Khuyên', email: 'hoang.khuyen.95@example.com', phone: '0995678901' },
-    { name: 'Đặng Văn Lợi', email: 'dang.loi.96@example.com', phone: '0996789012' },
-    { name: 'Ngô Thị Mai', email: 'ngo.mai.97@example.com', phone: '0997890123' },
-    { name: 'Hồ Văn Minh', email: 'ho.minh.98@example.com', phone: '0998901234' },
-    { name: 'Phan Thị Mỹ', email: 'phan.my.99@example.com', phone: '0999012345' },
-    { name: 'Huỳnh Minh Nhân', email: 'huynh.nhan.100@example.com', phone: '0990012346' },
+    { name: 'Nguyễn Văn An', email: 'nguyen.an.01@gmail.com', phone: '0901234567' },
+    { name: 'Trần Thị Bình', email: 'tran.binh.02@gmail.com', phone: '0902345678' },
+    { name: 'Lê Minh Cường', email: 'le.cuong.03@gmail.com', phone: '0903456789' },
+    { name: 'Phạm Hoàng Dũng', email: 'pham.dung.04@gmail.com', phone: '0904567890' },
+    { name: 'Hoàng Ngọc Lan', email: 'hoang.lan.05@gmail.com', phone: '0905678901' },
+    { name: 'Đỗ Văn Hùng', email: 'do.hung.06@gmail.com', phone: '0906789012' },
+    { name: 'Bùi Thị Hương', email: 'bui.huong.07@gmail.com', phone: '0907890123' },
+    { name: 'Vũ Tuấn Kiệt', email: 'vu.kiet.08@gmail.com', phone: '0908901234' },
+    { name: 'Đặng Thanh Mai', email: 'dang.mai.09@gmail.com', phone: '0909012345' },
+    { name: 'Ngô Văn Nam', email: 'ngo.nam.10@gmail.com', phone: '0910123456' },
+    { name: 'Hồ Thị Nga', email: 'ho.nga.11@gmail.com', phone: '0911234567' },
+    { name: 'Phan Đức Phúc', email: 'phan.phuc.12@gmail.com', phone: '0912345678' },
+    { name: 'Huỳnh Phương Thảo', email: 'huynh.thao.13@gmail.com', phone: '0913456789' },
+    { name: 'Nguyễn Văn Tuấn', email: 'nguyen.tuan.14@gmail.com', phone: '0914567890' },
+    { name: 'Trần Thanh Tú', email: 'tran.tu.15@gmail.com', phone: '0915678901' },
+    { name: 'Lê Thị Vân', email: 'le.van.16@gmail.com', phone: '0916789012' },
+    { name: 'Phạm Văn Vinh', email: 'pham.vinh.17@gmail.com', phone: '0917890123' },
+    { name: 'Hoàng Minh Vũ', email: 'hoang.vu.18@gmail.com', phone: '0918901234' },
+    { name: 'Đỗ Thị Yến', email: 'do.yen.19@gmail.com', phone: '0919012345' },
+    { name: 'Bùi Văn Chung', email: 'bui.chung.20@gmail.com', phone: '0920123456' },
+    { name: 'Nguyễn Thị Duyên', email: 'nguyen.duyen.21@gmail.com', phone: '0921234567' },
+    { name: 'Trần Văn Giang', email: 'tran.giang.22@gmail.com', phone: '0922345678' },
+    { name: 'Lê Thanh Hải', email: 'le.hai.23@gmail.com', phone: '0923456789' },
+    { name: 'Phạm Thị Hồng', email: 'pham.hong.24@gmail.com', phone: '0924567890' },
+    { name: 'Hoàng Văn Huy', email: 'hoang.huy.25@gmail.com', phone: '0925678901' },
+    { name: 'Đặng Thị Kim', email: 'dang.kim.26@gmail.com', phone: '0926789012' },
+    { name: 'Ngô Thanh Lâm', email: 'ngo.lam.27@gmail.com', phone: '0927890123' },
+    { name: 'Hồ Văn Lộc', email: 'ho.loc.28@gmail.com', phone: '0928901234' },
+    { name: 'Phan Thị Ly', email: 'phan.ly.29@gmail.com', phone: '0929012345' },
+    { name: 'Huỳnh Minh Nhật', email: 'huynh.nhat.30@gmail.com', phone: '0930123456' },
+    { name: 'Nguyễn Thị Oanh', email: 'nguyen.oanh.31@gmail.com', phone: '0931234567' },
+    { name: 'Trần Văn Phong', email: 'tran.phong.32@gmail.com', phone: '0932345678' },
+    { name: 'Lê Thị Quyên', email: 'le.quyen.33@gmail.com', phone: '0933456789' },
+    { name: 'Phạm Văn Sang', email: 'pham.sang.34@gmail.com', phone: '0934567890' },
+    { name: 'Hoàng Thị Tâm', email: 'hoang.tam.35@gmail.com', phone: '0935678901' },
+    { name: 'Đỗ Minh Thắng', email: 'do.thang.36@gmail.com', phone: '0936789012' },
+    { name: 'Bùi Thị Thu', email: 'bui.thu.37@gmail.com', phone: '0937890123' },
+    { name: 'Vũ Văn Tiến', email: 'vu.tien.38@gmail.com', phone: '0938901234' },
+    { name: 'Đặng Thanh Tùng', email: 'dang.tung.39@gmail.com', phone: '0939012345' },
+    { name: 'Ngô Thị Tuyết', email: 'ngo.tuyet.40@gmail.com', phone: '0940123456' },
+    { name: 'Hồ Văn Uyên', email: 'ho.uyen.41@gmail.com', phone: '0941234567' },
+    { name: 'Phan Minh Việt', email: 'phan.viet.42@gmail.com', phone: '0942345678' },
+    { name: 'Huỳnh Thị Xoan', email: 'huynh.xoan.43@gmail.com', phone: '0943456789' },
+    { name: 'Nguyễn Văn Ý', email: 'nguyen.y.44@gmail.com', phone: '0944567890' },
+    { name: 'Trần Thanh Ân', email: 'tran.an.45@gmail.com', phone: '0945678901' },
+    { name: 'Lê Thị Bích', email: 'le.bich.46@gmail.com', phone: '0946789012' },
+    { name: 'Phạm Văn Cảnh', email: 'pham.canh.47@gmail.com', phone: '0947890123' },
+    { name: 'Hoàng Minh Danh', email: 'hoang.danh.48@gmail.com', phone: '0948901234' },
+    { name: 'Đỗ Thị Đào', email: 'do.dao.49@gmail.com', phone: '0949012345' },
+    { name: 'Bùi Văn Đạt', email: 'bui.dat.50@gmail.com', phone: '0950123456' },
+    { name: 'Nguyễn Thị Diệp', email: 'nguyen.diep.51@gmail.com', phone: '0951234567' },
+    { name: 'Trần Văn Đông', email: 'tran.dong.52@gmail.com', phone: '0952345678' },
+    { name: 'Lê Thị Hà', email: 'le.ha.53@gmail.com', phone: '0953456789' },
+    { name: 'Phạm Văn Hiếu', email: 'pham.hieu.54@gmail.com', phone: '0954567890' },
+    { name: 'Hoàng Thị Hoa', email: 'hoang.hoa.55@gmail.com', phone: '0955678901' },
+    { name: 'Đặng Văn Hùng', email: 'dang.hung.56@gmail.com', phone: '0956789012' },
+    { name: 'Ngô Thị Huyền', email: 'ngo.huyen.57@gmail.com', phone: '0957890123' },
+    { name: 'Hồ Văn Khang', email: 'ho.khang.58@gmail.com', phone: '0958901234' },
+    { name: 'Phan Thị Lan', email: 'phan.lan.59@gmail.com', phone: '0959012345' },
+    { name: 'Huỳnh Minh Long', email: 'huynh.long.60@gmail.com', phone: '0960123456' },
+    { name: 'Nguyễn Thị Minh', email: 'nguyen.minh.61@gmail.com', phone: '0961234567' },
+    { name: 'Trần Văn Nam', email: 'tran.nam.62@gmail.com', phone: '0962345678' },
+    { name: 'Lê Thị Ngọc', email: 'le.ngoc.63@gmail.com', phone: '0963456789' },
+    { name: 'Phạm Văn Nghĩa', email: 'pham.nghia.64@gmail.com', phone: '0964567890' },
+    { name: 'Hoàng Thị Nhung', email: 'hoang.nhung.65@gmail.com', phone: '0965678901' },
+    { name: 'Đặng Văn Phong', email: 'dang.phong.66@gmail.com', phone: '0966789012' },
+    { name: 'Ngô Thị Phương', email: 'ngo.phuong.67@gmail.com', phone: '0967890123' },
+    { name: 'Hồ Văn Quân', email: 'ho.quan.68@gmail.com', phone: '0968901234' },
+    { name: 'Phan Thị Quý', email: 'phan.quy.69@gmail.com', phone: '0969012345' },
+    { name: 'Huỳnh Minh Sơn', email: 'huynh.son.70@gmail.com', phone: '0970123456' },
+    { name: 'Nguyễn Thị Tâm', email: 'nguyen.tam.71@gmail.com', phone: '0971234567' },
+    { name: 'Trần Văn Thành', email: 'tran.thanh.72@gmail.com', phone: '0972345678' },
+    { name: 'Lê Thị Thúy', email: 'le.thuy.73@gmail.com', phone: '0973456789' },
+    { name: 'Phạm Văn Trí', email: 'pham.tri.74@gmail.com', phone: '0974567890' },
+    { name: 'Hoàng Thị Trúc', email: 'hoang.truc.75@gmail.com', phone: '0975678901' },
+    { name: 'Đặng Văn Tú', email: 'dang.tu.76@gmail.com', phone: '0976789012' },
+    { name: 'Ngô Thị Tú Anh', email: 'ngo.tuanh.77@gmail.com', phone: '0977890123' },
+    { name: 'Hồ Văn Tùng', email: 'ho.tung.78@gmail.com', phone: '0978901234' },
+    { name: 'Phan Thị Tươi', email: 'phan.tuoi.79@gmail.com', phone: '0979012345' },
+    { name: 'Huỳnh Minh Vĩnh', email: 'huynh.vinh.80@gmail.com', phone: '0980123456' },
+    { name: 'Nguyễn Thị Xuân', email: 'nguyen.xuan.81@gmail.com', phone: '0981234567' },
+    { name: 'Trần Văn Ý', email: 'tran.y.82@gmail.com', phone: '0982345678' },
+    { name: 'Lê Thị Ánh', email: 'le.anh.83@gmail.com', phone: '0983456789' },
+    { name: 'Phạm Văn Bằng', email: 'pham.bang.84@gmail.com', phone: '0984567890' },
+    { name: 'Hoàng Thị Cẩm', email: 'hoang.cam.85@gmail.com', phone: '0985678901' },
+    { name: 'Đặng Văn Dũng', email: 'dang.dung.86@gmail.com', phone: '0986789012' },
+    { name: 'Ngô Thị Duyên', email: 'ngo.duyen.87@gmail.com', phone: '0987890123' },
+    { name: 'Hồ Văn Giang', email: 'ho.giang.88@gmail.com', phone: '0988901234' },
+    { name: 'Phan Thị Hạnh', email: 'phan.hanh.89@gmail.com', phone: '0989012345' },
+    { name: 'Huỳnh Minh Hậu', email: 'huynh.hau.90@gmail.com', phone: '0990123456' },
+    { name: 'Nguyễn Thị Hiền', email: 'nguyen.hien.91@gmail.com', phone: '0991234567' },
+    { name: 'Trần Văn Hòa', email: 'tran.hoa.92@gmail.com', phone: '0992345678' },
+    { name: 'Lê Thị Huệ', email: 'le.hue.93@gmail.com', phone: '0993456789' },
+    { name: 'Phạm Văn Hưng', email: 'pham.hung.94@gmail.com', phone: '0994567890' },
+    { name: 'Hoàng Thị Khuyên', email: 'hoang.khuyen.95@gmail.com', phone: '0995678901' },
+    { name: 'Đặng Văn Lợi', email: 'dang.loi.96@gmail.com', phone: '0996789012' },
+    { name: 'Ngô Thị Mai', email: 'ngo.mai.97@gmail.com', phone: '0997890123' },
+    { name: 'Hồ Văn Minh', email: 'ho.minh.98@gmail.com', phone: '0998901234' },
+    { name: 'Phan Thị Mỹ', email: 'phan.my.99@gmail.com', phone: '0999012345' },
+    { name: 'Huỳnh Minh Nhân', email: 'huynh.nhan.100@gmail.com', phone: '0990012346' },
   ];
 
   // Generate random candidates for each job
@@ -786,14 +786,28 @@ const PostsManagement = () => {
   const totalApplications = currentJobs.reduce((sum, job) => sum + job.applications, 0);
   const totalCVSent = currentJobs.reduce((sum, job) => sum + job.cvSent, 0);
 
-  // Dữ liệu cho biểu đồ cột
-  const barChartData = currentJobs.slice(0, 5).map(job => ({
-    label: job.title.length > 15 ? job.title.substring(0, 15) + '...' : job.title,
-    applications: job.applications,
-    cvSent: job.cvSent
-  }));
+  // Dữ liệu biểu đồ theo tháng - Tổng bài đăng và Tổng lượt tiếp cận
+  const [chartView, setChartView] = useState('month'); // 'month' or 'quarter'
+  
+  const monthlyData = [
+    { period: language === 'vi' ? 'T1' : 'Jan', posts: 45, reach: 3250 },
+    { period: language === 'vi' ? 'T2' : 'Feb', posts: 52, reach: 4180 },
+    { period: language === 'vi' ? 'T3' : 'Mar', posts: 48, reach: 3820 },
+    { period: language === 'vi' ? 'T4' : 'Apr', posts: 58, reach: 4650 },
+    { period: language === 'vi' ? 'T5' : 'May', posts: 65, reach: 5290 },
+    { period: language === 'vi' ? 'T6' : 'Jun', posts: 72, reach: 6100 },
+  ];
 
-  const maxValue = Math.max(...barChartData.flatMap(d => [d.applications, d.cvSent]));
+  const quarterlyData = [
+    { period: 'Q1', posts: 145, reach: 11250 },
+    { period: 'Q2', posts: 195, reach: 15640 },
+    { period: 'Q3', posts: 220, reach: 18380 },
+    { period: 'Q4', posts: 185, reach: 14250 },
+  ];
+
+  const chartData = chartView === 'month' ? monthlyData : quarterlyData;
+  const maxPosts = Math.max(...chartData.map(d => d.posts));
+  const maxReach = Math.max(...chartData.map(d => d.reach));
 
   // Dữ liệu cho biểu đồ tròn
   const pieData = [
@@ -899,33 +913,199 @@ const PostsManagement = () => {
           </div>
           
           <ChartCard>
-            <ChartTitle>
-              <BarChart3 size={20} />
-              {language === 'vi' ? 'Biểu Đồ Ứng Tuyển & CV' : 'Applications & CV Chart'}
-            </ChartTitle>
-            <BarChartContainer>
-              {barChartData.map((data, index) => (
-                <div key={index} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', height: '100%' }}>
-                  <div style={{ display: 'flex', gap: '4px', alignItems: 'flex-end', height: '100%', width: '100%', justifyContent: 'center' }}>
-                    <Bar $height={(data.applications / maxValue) * 100} $color="#1e40af" title={`${language === 'vi' ? 'Ứng tuyển' : 'Applications'}: ${data.applications}`}>
-                      <BarValue>{data.applications}</BarValue>
-                    </Bar>
-                    <Bar $height={(data.cvSent / maxValue) * 100} $color="#10b981" title={`CV ${language === 'vi' ? 'đã gửi' : 'sent'}: ${data.cvSent}`}>
-                      <BarValue>{data.cvSent}</BarValue>
-                    </Bar>
-                  </div>
-                  <BarLabel>{data.label}</BarLabel>
-                </div>
-              ))}
-            </BarChartContainer>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginTop: '40px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <ChartTitle>
+                <BarChart3 size={20} />
+                {language === 'vi' ? 'Thống Kê Bài Đăng & Lượt Tiếp Cận' : 'Posts & Reach Statistics'}
+              </ChartTitle>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={() => setChartView('month')}
+                  style={{
+                    padding: '6px 12px',
+                    border: `2px solid ${chartView === 'month' ? '#1e40af' : '#e2e8f0'}`,
+                    background: chartView === 'month' ? '#1e40af' : 'white',
+                    color: chartView === 'month' ? 'white' : '#64748b',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {language === 'vi' ? 'Theo tháng' : 'Monthly'}
+                </button>
+                <button
+                  onClick={() => setChartView('quarter')}
+                  style={{
+                    padding: '6px 12px',
+                    border: `2px solid ${chartView === 'quarter' ? '#1e40af' : '#e2e8f0'}`,
+                    background: chartView === 'quarter' ? '#1e40af' : 'white',
+                    color: chartView === 'quarter' ? 'white' : '#64748b',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {language === 'vi' ? 'Theo quý' : 'Quarterly'}
+                </button>
+              </div>
+            </div>
+            
+            {/* Chart using SVG for better rendering */}
+            <div style={{ height: '320px', position: 'relative' }}>
+              <svg width="100%" height="100%" viewBox="0 0 900 320" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                  <linearGradient id="blueGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#3b82f6" stopOpacity="1" />
+                    <stop offset="100%" stopColor="#1e40af" stopOpacity="1" />
+                  </linearGradient>
+                  <linearGradient id="greenGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#34d399" stopOpacity="1" />
+                    <stop offset="100%" stopColor="#10b981" stopOpacity="1" />
+                  </linearGradient>
+                </defs>
+                
+                {/* Grid lines */}
+                {[0, 1, 2, 3, 4, 5].map((i) => (
+                  <line
+                    key={i}
+                    x1="60"
+                    y1={40 + i * 45}
+                    x2="860"
+                    y2={40 + i * 45}
+                    stroke="#f0f0f0"
+                    strokeWidth="1"
+                  />
+                ))}
+                
+                {/* Y-axis labels */}
+                {chartView === 'month' 
+                  ? ['7000', '6000', '5000', '4000', '3000', '2000', '1000', '0'].map((val, i) => (
+                      <text
+                        key={i}
+                        x="50"
+                        y={40 + i * 32}
+                        textAnchor="end"
+                        fontSize="11"
+                        fill="#9ca3af"
+                        fontWeight="500"
+                      >
+                        {val}
+                      </text>
+                    ))
+                  : ['20000', '15000', '10000', '5000', '0'].map((val, i) => (
+                      <text
+                        key={i}
+                        x="50"
+                        y={40 + i * 56}
+                        textAnchor="end"
+                        fontSize="11"
+                        fill="#9ca3af"
+                        fontWeight="500"
+                      >
+                        {val}
+                      </text>
+                    ))
+                }
+                
+                {/* Bars */}
+                {chartData.map((data, index) => {
+                  const barWidth = 35;
+                  const groupWidth = 800 / chartData.length;
+                  const centerX = 80 + index * groupWidth + groupWidth / 2;
+                  const postsHeight = (data.posts / maxPosts) * 200;
+                  const reachHeight = (data.reach / maxReach) * 200;
+                  
+                  return (
+                    <g key={index}>
+                      {/* Posts bar (blue) */}
+                      <rect
+                        x={centerX - barWidth - 3}
+                        y={265 - postsHeight}
+                        width={barWidth}
+                        height={postsHeight}
+                        fill="url(#blueGradient)"
+                        rx="4"
+                        opacity="0.9"
+                      />
+                      
+                      {/* Reach bar (green) */}
+                      <rect
+                        x={centerX + 3}
+                        y={265 - reachHeight}
+                        width={barWidth}
+                        height={reachHeight}
+                        fill="url(#greenGradient)"
+                        rx="4"
+                        opacity="0.9"
+                      />
+                      
+                      {/* Posts value */}
+                      <text
+                        x={centerX - barWidth/2 - 3}
+                        y={260 - postsHeight - 5}
+                        textAnchor="middle"
+                        fontSize="11"
+                        fill="#1e40af"
+                        fontWeight="700"
+                      >
+                        {data.posts}
+                      </text>
+                      
+                      {/* Reach value */}
+                      <text
+                        x={centerX + barWidth/2 + 3}
+                        y={260 - reachHeight - 5}
+                        textAnchor="middle"
+                        fontSize="11"
+                        fill="#10b981"
+                        fontWeight="700"
+                      >
+                        {data.reach}
+                      </text>
+                      
+                      {/* Period label */}
+                      <text
+                        x={centerX}
+                        y="290"
+                        textAnchor="middle"
+                        fontSize="13"
+                        fill="#6b7280"
+                        fontWeight="600"
+                      >
+                        {data.period}
+                      </text>
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+            
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', marginTop: '16px', padding: '16px', background: '#f8fafc', borderRadius: '8px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: '16px', height: '16px', background: '#1e40af', borderRadius: '4px' }}></div>
-                <span style={{ fontSize: '14px' }}>{language === 'vi' ? 'Ứng tuyển' : 'Applications'}</span>
+                <div style={{ 
+                  width: '24px', 
+                  height: '16px', 
+                  background: 'linear-gradient(180deg, #3b82f6 0%, #1e40af 100%)', 
+                  borderRadius: '4px' 
+                }}></div>
+                <span style={{ fontSize: '14px', fontWeight: '600', color: '#1e40af' }}>
+                  {language === 'vi' ? 'Tổng bài đăng' : 'Total Posts'}
+                </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: '16px', height: '16px', background: '#10b981', borderRadius: '4px' }}></div>
-                <span style={{ fontSize: '14px' }}>{language === 'vi' ? 'CV đã gửi' : 'CV Sent'}</span>
+                <div style={{ 
+                  width: '24px', 
+                  height: '16px', 
+                  background: 'linear-gradient(180deg, #34d399 0%, #10b981 100%)', 
+                  borderRadius: '4px' 
+                }}></div>
+                <span style={{ fontSize: '14px', fontWeight: '600', color: '#10b981' }}>
+                  {language === 'vi' ? 'Tổng lượt tiếp cận' : 'Total Reach'}
+                </span>
               </div>
             </div>
           </ChartCard>
@@ -1126,6 +1306,16 @@ const PostsManagement = () => {
                     <p>{selectedJob.endDate}</p>
                   </InfoItem>
                   <InfoItem>
+                    <label>{language === 'vi' ? 'Mức lương' : 'Salary'}</label>
+                    <p style={{ fontSize: '15px', fontWeight: '600', color: '#10b981' }}>
+                      {selectedJob.salary || (language === 'vi' ? '30.000 - 40.000 VND/giờ' : '30,000 - 40,000 VND/hour')}
+                    </p>
+                  </InfoItem>
+                  <InfoItem>
+                    <label>{language === 'vi' ? 'Hình thức làm việc' : 'Work Type'}</label>
+                    <p>{selectedJob.workType || (language === 'vi' ? 'Part-time theo ca' : 'Part-time shift-based')}</p>
+                  </InfoItem>
+                  <InfoItem>
                     <label>{language === 'vi' ? 'Số lượng ứng tuyển' : 'Applications'}</label>
                     <p>{selectedJob.applications}</p>
                   </InfoItem>
@@ -1140,6 +1330,77 @@ const PostsManagement = () => {
                     </StatusBadge>
                   </InfoItem>
                 </InfoGrid>
+              </DetailSection>
+
+              <DetailSection>
+                <SectionTitle>
+                  <FileText size={20} />
+                  {language === 'vi' ? 'Mô Tả Công Việc (JD)' : 'Job Description (JD)'}
+                </SectionTitle>
+                <InfoItem style={{ marginTop: '12px' }}>
+                  <label>{language === 'vi' ? 'Mô tả chi tiết' : 'Detailed Description'}</label>
+                  <p style={{ 
+                    lineHeight: '1.6', 
+                    whiteSpace: 'pre-line',
+                    background: '#f8fafc',
+                    padding: '16px',
+                    borderRadius: '8px',
+                    border: '1px solid #e2e8f0'
+                  }}>
+                    {selectedJob.description || (language === 'vi' 
+                      ? `• Phục vụ khách hàng tại quầy và bàn\n• Pha chế đồ uống theo yêu cầu\n• Dọn dẹp và vệ sinh khu vực làm việc\n• Hỗ trợ đồng nghiệp khi cần thiết\n• Tư vấn menu cho khách hàng`
+                      : `• Serve customers at counter and tables\n• Prepare beverages as requested\n• Clean and maintain work area\n• Support colleagues when needed\n• Advise customers on menu items`
+                    )}
+                  </p>
+                </InfoItem>
+                <InfoItem style={{ marginTop: '16px' }}>
+                  <label>{language === 'vi' ? 'Yêu cầu ứng viên' : 'Requirements'}</label>
+                  <p style={{ 
+                    lineHeight: '1.6', 
+                    whiteSpace: 'pre-line',
+                    background: '#f8fafc',
+                    padding: '16px',
+                    borderRadius: '8px',
+                    border: '1px solid #e2e8f0'
+                  }}>
+                    {selectedJob.requirements || (language === 'vi'
+                      ? `• Độ tuổi: 18-35 tuổi\n• Ngoại hình: Ưa nhìn, giao tiếp tốt\n• Kinh nghiệm: Không yêu cầu (có kinh nghiệm là lợi thế)\n• Kỹ năng: Nhiệt tình, chăm chỉ, trung thực\n• Sức khỏe: Tốt, có thể đứng lâu`
+                      : `• Age: 18-35 years old\n• Appearance: Presentable, good communication\n• Experience: Not required (experience is a plus)\n• Skills: Enthusiastic, hardworking, honest\n• Health: Good, able to stand for long periods`
+                    )}
+                  </p>
+                </InfoItem>
+                <InfoItem style={{ marginTop: '16px' }}>
+                  <label>{language === 'vi' ? 'Quyền lợi' : 'Benefits'}</label>
+                  <p style={{ 
+                    lineHeight: '1.6', 
+                    whiteSpace: 'pre-line',
+                    background: '#f0fdf4',
+                    padding: '16px',
+                    borderRadius: '8px',
+                    border: '1px solid #bbf7d0'
+                  }}>
+                    {selectedJob.benefits || (language === 'vi'
+                      ? `• Lương theo ca: 30.000 - 40.000 VND/giờ (cao hơn part-time thông thường)\n• Thanh toán ngay sau khi kết thúc ca làm việc\n• Linh hoạt 100%: Tự chọn ca, tự quyết định làm hay không\n• Không ràng buộc thời gian, không hợp đồng dài hạn\n• Làm bao nhiêu nhận bấy nhiêu - như mô hình Grab/Be\n• Thưởng thêm cho ca cao điểm (cuối tuần, lễ tết)\n• Được đào tạo miễn phí trước khi làm việc\n• Môi trường làm việc chuyên nghiệp, thân thiện`
+                      : `• Hourly rate: 30,000 - 40,000 VND/hour (higher than regular part-time)\n• Payment immediately after shift completion\n• 100% flexible: Choose your shifts, decide when to work\n• No time commitment, no long-term contract\n• Work as much as you want - like Grab/Be model\n• Bonus for peak hours (weekends, holidays)\n• Free training before starting\n• Professional and friendly work environment`
+                    )}
+                  </p>
+                </InfoItem>
+                <InfoItem style={{ marginTop: '16px' }}>
+                  <label>{language === 'vi' ? 'Lịch làm việc' : 'Work Schedule'}</label>
+                  <p style={{ 
+                    lineHeight: '1.6', 
+                    whiteSpace: 'pre-line',
+                    background: '#fef3c7',
+                    padding: '16px',
+                    borderRadius: '8px',
+                    border: '1px solid #fde68a'
+                  }}>
+                    {selectedJob.schedule || (language === 'vi'
+                      ? `• Làm việc theo ca: Chọn ca trên app, hết ca là kết thúc\n• Không bắt buộc cam kết số ca tối thiểu\n• Ca sáng: 6:00 - 11:00 (5 giờ)\n• Ca trưa: 11:00 - 15:00 (4 giờ)\n• Ca chiều: 15:00 - 19:00 (4 giờ)\n• Ca tối: 19:00 - 23:00 (4 giờ)\n• Có thể nhận nhiều ca trong ngày hoặc chỉ 1 ca\n• Hủy ca trước 2 giờ không bị phạt`
+                      : `• Shift-based work: Choose shifts on app, finish when shift ends\n• No minimum shift commitment required\n• Morning shift: 6:00 - 11:00 (5 hours)\n• Lunch shift: 11:00 - 15:00 (4 hours)\n• Afternoon shift: 15:00 - 19:00 (4 hours)\n• Evening shift: 19:00 - 23:00 (4 hours)\n• Can take multiple shifts per day or just one\n• Cancel 2 hours before with no penalty`
+                    )}
+                  </p>
+                </InfoItem>
               </DetailSection>
 
               <DetailSection>
@@ -1230,5 +1491,6 @@ const PostsManagement = () => {
 };
 
 export default PostsManagement;
+
 
 

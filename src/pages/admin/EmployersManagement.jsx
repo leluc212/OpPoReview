@@ -770,7 +770,7 @@ const EmployersManagement = () => {
                 <th>{language === 'vi' ? 'Email tuyển dụng' : 'Recruitment Email'}</th>
                 <th>{language === 'vi' ? 'Trạng thái phê duyệt' : 'Approval Status'}</th>
                 <th>{language === 'vi' ? 'Ngày tham gia' : 'Join Date'}</th>
-                <th>{language === 'vi' ? 'Đã xác thực' : 'Verified'}</th>
+                <th>{language === 'vi' ? 'Chấp nhận điều khoản' : 'Terms Accepted'}</th>
               </tr>
             </thead>
             <tbody>
@@ -801,8 +801,8 @@ const EmployersManagement = () => {
                     <VerificationBadge $verified={employer.verified}>
                       {employer.verified ? <Shield /> : <XSquare />}
                       {employer.verified 
-                        ? (language === 'vi' ? 'Đã xác thực' : 'Verified')
-                        : (language === 'vi' ? 'Chưa xác thực' : 'Unverified')
+                        ? (language === 'vi' ? 'Đồng ý' : 'Agreed')
+                        : (language === 'vi' ? 'Không đồng ý' : 'Not Agreed')
                       }
                     </VerificationBadge>
                   </td>

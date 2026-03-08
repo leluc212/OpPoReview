@@ -409,7 +409,7 @@ const PackagesManagement = () => {
     {
       id: 1,
       employer: 'Highlands Coffee',
-      package: 'Bài viết',
+      package: 'Quick Boost',
       purchaseDate: '2026-01-15',
       expiryDate: '2026-02-15',
       status: 'active',
@@ -419,7 +419,7 @@ const PackagesManagement = () => {
     {
       id: 2,
       employer: 'Phúc Long',
-      package: 'Banner nổi bật 2',
+      package: 'Top Spotlight',
       purchaseDate: '2026-01-20',
       expiryDate: '2026-03-20',
       status: 'active',
@@ -429,7 +429,7 @@ const PackagesManagement = () => {
     {
       id: 3,
       employer: 'Katinat chi nhánh quận 8',
-      package: 'Banner nổi bật 1',
+      package: 'Spongit Banner',
       purchaseDate: '2026-02-01',
       expiryDate: '2026-05-01',
       status: 'active',
@@ -439,7 +439,7 @@ const PackagesManagement = () => {
     {
       id: 4,
       employer: 'The Coffee House',
-      package: 'Banner nổi bật 2',
+      package: 'Top Spotlight',
       purchaseDate: '2026-01-10',
       expiryDate: '2026-02-10',
       status: 'expired',
@@ -449,7 +449,7 @@ const PackagesManagement = () => {
     {
       id: 5,
       employer: 'Starbucks chi nhánh quận 10',
-      package: 'Banner nổi bật 2',
+      package: 'Top Spotlight',
       purchaseDate: '2026-01-25',
       expiryDate: '2026-04-25',
       status: 'active',
@@ -459,7 +459,7 @@ const PackagesManagement = () => {
     {
       id: 6,
       employer: 'Talk Bread chi nhánh Thủ Đức',
-      package: 'Bài viết',
+      package: 'Quick Boost',
       purchaseDate: '2026-02-05',
       expiryDate: '2026-02-12',
       status: 'expiring',
@@ -479,7 +479,7 @@ const PackagesManagement = () => {
     {
       id: 8,
       employer: 'Gong Cha chi nhánh quận 1',
-      package: 'Banner nổi bật 1',
+      package: 'Spongit Banner',
       purchaseDate: '2026-01-18',
       expiryDate: '2026-04-18',
       status: 'active',
@@ -489,7 +489,7 @@ const PackagesManagement = () => {
     {
       id: 9,
       employer: 'Quán nhậu OK 3 con dê quận 8',
-      package: 'Bài viết',
+      package: 'Quick Boost',
       purchaseDate: '2026-01-18',
       expiryDate: '2026-04-18',
       status: 'active',
@@ -500,7 +500,7 @@ const PackagesManagement = () => {
     {
       id: 10,
       employer: 'Lẩu Bò Sài Gòn Vi Vu',
-      package: 'Banner nổi bật 2',
+      package: 'Top Spotlight',
       purchaseDate: '2026-01-15',
       expiryDate: '2026-04-15',
       status: 'active',
@@ -520,7 +520,7 @@ const PackagesManagement = () => {
     {
       id: 12,
       employer: 'Tiệm Trà Tháng Tư',
-      package: 'Bài viết',
+      package: 'Quick Boost',
       purchaseDate: '2026-01-17',
       expiryDate: '2026-02-17',
       status: 'active',
@@ -530,7 +530,7 @@ const PackagesManagement = () => {
     {
       id: 13,
       employer: 'Bia Sệt 123',
-      package: 'Banner nổi bật 1',
+      package: 'Spongit Banner',
       purchaseDate: '2026-01-18',
       expiryDate: '2026-04-18',
       status: 'active',
@@ -540,7 +540,7 @@ const PackagesManagement = () => {
     {
       id: 14,
       employer: 'Bếp Nhà Mẹ Nấu',
-      package: 'Bài viết',
+      package: 'Quick Boost',
       purchaseDate: '2026-01-19',
       expiryDate: '2026-02-19',
       status: 'active',
@@ -550,7 +550,7 @@ const PackagesManagement = () => {
     {
       id: 15,
       employer: 'Chill Out Beer Club',
-      package: 'Banner nổi bật 2',
+      package: 'Top Spotlight',
       purchaseDate: '2026-01-20',
       expiryDate: '2026-04-20',
       status: 'active',
@@ -570,7 +570,7 @@ const PackagesManagement = () => {
     {
       id: 17,
       employer: 'Sushi Sen Mini',
-      package: 'Banner nổi bật 1',
+      package: 'Spongit Banner',
       purchaseDate: '2026-01-22',
       expiryDate: '2026-04-22',
       status: 'active',
@@ -580,7 +580,7 @@ const PackagesManagement = () => {
     {
       id: 18,
       employer: 'High Tea & Coffee',
-      package: 'Bài viết',
+      package: 'Quick Boost',
       purchaseDate: '2026-01-23',
       expiryDate: '2026-01-30',
       status: 'expired',
@@ -600,7 +600,7 @@ const PackagesManagement = () => {
     {
       id: 20,
       employer: 'Nướng Ngói Gia Bảo',
-      package: 'Banner nổi bật 2',
+      package: 'Top Spotlight',
       purchaseDate: '2026-01-25',
       expiryDate: '2026-04-25',
       status: 'active',
@@ -610,7 +610,7 @@ const PackagesManagement = () => {
     {
       id: 21,
       employer: 'The Morning Bakery',
-      package: 'Bài viết',
+      package: 'Quick Boost',
       purchaseDate: '2026-01-26',
       expiryDate: '2026-02-26',
       status: 'active',
@@ -620,7 +620,7 @@ const PackagesManagement = () => {
     {
       id: 22,
       employer: 'Lẩu Phan',
-      package: 'Banner nổi bật 1',
+      package: 'Spongit Banner',
       purchaseDate: '2026-01-27',
       expiryDate: '2026-04-27',
       status: 'active',
@@ -640,7 +640,7 @@ const PackagesManagement = () => {
     {
       id: 24,
       employer: 'Mì Cay Sasin',
-      package: 'Bài viết',
+      package: 'Quick Boost',
       purchaseDate: '2026-01-29',
       expiryDate: '2026-02-29',
       status: 'active',
@@ -650,7 +650,7 @@ const PackagesManagement = () => {
     {
       id: 25,
       employer: 'Cà Phê Cây Me',
-      package: 'Banner nổi bật 1',
+      package: 'Spongit Banner',
       purchaseDate: '2026-01-30',
       expiryDate: '2026-04-30',
       status: 'active',
@@ -660,7 +660,7 @@ const PackagesManagement = () => {
     {
       id: 26,
       employer: 'Nhà Hàng Chay Sen Vàng',
-      package: 'Bài viết',
+      package: 'Quick Boost',
       purchaseDate: '2026-01-31',
       expiryDate: '2026-02-07',
       status: 'expired',
@@ -680,7 +680,7 @@ const PackagesManagement = () => {
     {
       id: 28,
       employer: 'Dimsum House',
-      package: 'Banner nổi bật 2',
+      package: 'Top Spotlight',
       purchaseDate: '2026-02-02',
       expiryDate: '2026-05-02',
       status: 'active',
@@ -690,7 +690,7 @@ const PackagesManagement = () => {
     {
       id: 29,
       employer: 'Bánh Mì PewPew',
-      package: 'Bài viết',
+      package: 'Quick Boost',
       purchaseDate: '2026-02-03',
       expiryDate: '2026-03-03',
       status: 'active',
@@ -700,7 +700,7 @@ const PackagesManagement = () => {
     {
       id: 30,
       employer: 'Urban Coffee',
-      package: 'Banner nổi bật 1',
+      package: 'Spongit Banner',
       purchaseDate: '2026-02-04',
       expiryDate: '2026-05-04',
       status: 'active',
@@ -720,7 +720,7 @@ const PackagesManagement = () => {
     {
       id: 32,
       employer: 'Hủ Tiếu Nam Vang Thành Đạt',
-      package: 'Bài viết',
+      package: 'Quick Boost',
       purchaseDate: '2026-02-06',
       expiryDate: '2026-03-06',
       status: 'active',
@@ -730,7 +730,7 @@ const PackagesManagement = () => {
     {
       id: 33,
       employer: 'Draft Beer Sài Gòn',
-      package: 'Banner nổi bật 2',
+      package: 'Top Spotlight',
       purchaseDate: '2026-02-07',
       expiryDate: '2026-05-07',
       status: 'active',
@@ -740,7 +740,7 @@ const PackagesManagement = () => {
     {
       id: 34,
       employer: 'Gòng Tea',
-      package: 'Bài viết',
+      package: 'Quick Boost',
       purchaseDate: '2026-02-08',
       expiryDate: '2026-02-15',
       status: 'expiring',
@@ -750,7 +750,7 @@ const PackagesManagement = () => {
     {
       id: 35,
       employer: 'Cơm Tấm Cali',
-      package: 'Banner nổi bật 1',
+      package: 'Spongit Banner',
       purchaseDate: '2026-02-09',
       expiryDate: '2026-05-09',
       status: 'active',
@@ -770,7 +770,7 @@ const PackagesManagement = () => {
     {
       id: 37,
       employer: 'Trà Chanh Bụi Phố',
-      package: 'Bài viết',
+      package: 'Quick Boost',
       purchaseDate: '2026-02-11',
       expiryDate: '2026-02-18',
       status: 'expiring',
@@ -780,7 +780,7 @@ const PackagesManagement = () => {
     {
       id: 38,
       employer: 'Quán Nướng Ngói Sapa',
-      package: 'Banner nổi bật 2',
+      package: 'Top Spotlight',
       purchaseDate: '2026-02-12',
       expiryDate: '2026-05-12',
       status: 'active',
@@ -790,7 +790,7 @@ const PackagesManagement = () => {
     {
       id: 39,
       employer: 'Blue Star Cocktail Bar',
-      package: 'Banner nổi bật 1',
+      package: 'Spongit Banner',
       purchaseDate: '2026-02-13',
       expiryDate: '2026-05-13',
       status: 'active',
@@ -811,7 +811,7 @@ const PackagesManagement = () => {
     {
       id: 41,
       employer: 'Ốc Đêm 79',
-      package: 'Banner nổi bật 1',
+      package: 'Spongit Banner',
       purchaseDate: '2026-02-15',
       expiryDate: '2026-05-15',
       status: 'active',
@@ -831,7 +831,7 @@ const PackagesManagement = () => {
     {
       id: 43,
       employer: 'Nướng Ngói Gia Bảo',
-      package: 'Bài viết',
+      package: 'Quick Boost',
       purchaseDate: '2026-02-17',
       expiryDate: '2026-03-17',
       status: 'active',
@@ -851,7 +851,7 @@ const PackagesManagement = () => {
     {
       id: 45,
       employer: 'Blue Star Cocktail Bar',
-      package: 'Banner nổi bật 2',
+      package: 'Top Spotlight',
       purchaseDate: '2026-02-19',
       expiryDate: '2026-05-19',
       status: 'active',
@@ -871,17 +871,17 @@ const PackagesManagement = () => {
   ];
 
   const packageColors = {
-    'Bài viết': '#3b82f6',
+    'Quick Boost': '#3b82f6',
     'Hot Search': '#f59e0b',
-    'Banner nổi bật 1': '#8b5cf6',
-    'Banner nổi bật 2': '#ef4444'
+    'Spongit Banner': '#8b5cf6',
+    'Top Spotlight': '#ef4444'
   };
 
   const packageIcons = {
-    'Bài viết': Zap,
+    'Quick Boost': Zap,
     'Hot Search': TrendingUp,
-    'Banner nổi bật 1': Star,
-    'Banner nổi bật 2': Package
+    'Spongit Banner': Star,
+    'Top Spotlight': Package
   };
 
   const getStatusText = (status) => {
@@ -892,10 +892,10 @@ const PackagesManagement = () => {
   };
 
   const filterOptions = [
-    { value: 'Bài viết', label: 'Bài viết' },
+    { value: 'Quick Boost', label: 'Quick Boost' },
     { value: 'Hot Search', label: 'Hot Search' },
-    { value: 'Banner nổi bật 1', label: 'Banner nổi bật 1' },
-    { value: 'Banner nổi bật 2', label: 'Banner nổi bật 2' },
+    { value: 'Spongit Banner', label: 'Spongit Banner' },
+    { value: 'Top Spotlight', label: 'Top Spotlight' },
     { value: 'active', label: language === 'vi' ? 'Đang hoạt động' : 'Active' },
     { value: 'expiring', label: language === 'vi' ? 'Sắp hết hạn' : 'Expiring' },
     { value: 'expired', label: language === 'vi' ? 'Đã hết hạn' : 'Expired' },
@@ -943,10 +943,10 @@ const PackagesManagement = () => {
 
   // Dữ liệu cho biểu đồ tròn
   const packageCounts = {
-    'Bài viết': purchases.filter(p => p.package === 'Bài viết').length,
+    'Quick Boost': purchases.filter(p => p.package === 'Quick Boost').length,
     'Hot Search': purchases.filter(p => p.package === 'Hot Search').length,
-    'Banner nổi bật 1': purchases.filter(p => p.package === 'Banner nổi bật 1').length,
-    'Banner nổi bật 2': purchases.filter(p => p.package === 'Banner nổi bật 2').length,
+    'Spongit Banner': purchases.filter(p => p.package === 'Spongit Banner').length,
+    'Top Spotlight': purchases.filter(p => p.package === 'Top Spotlight').length,
   };
 
   const pieData = Object.entries(packageCounts).map(([label, value]) => ({
@@ -1021,7 +1021,7 @@ const PackagesManagement = () => {
                   <BarsWrapper>
                     <Bar 
                       $height={(data.quickBoost / maxValue) * 100} 
-                      $color={packageColors['Bài viết']}
+                      $color={packageColors['Quick Boost']}
                       title={`Bài viết: ${data.quickBoost}`}
                     >
                       <BarValue>{data.quickBoost}</BarValue>
@@ -1035,14 +1035,14 @@ const PackagesManagement = () => {
                     </Bar>
                     <Bar 
                       $height={(data.spotlight / maxValue) * 100} 
-                      $color={packageColors['Banner nổi bật 1']}
+                      $color={packageColors['Spongit Banner']}
                       title={`Banner nổi bật 1: ${data.spotlight}`}
                     >
                       <BarValue>{data.spotlight}</BarValue>
                     </Bar>
                     <Bar 
                       $height={(data.topSpotlight / maxValue) * 100} 
-                      $color={packageColors['Banner nổi bật 2']}
+                      $color={packageColors['Top Spotlight']}
                       title={`Banner nổi bật 2: ${data.topSpotlight}`}
                     >
                       <BarValue>{data.topSpotlight}</BarValue>
@@ -1228,5 +1228,6 @@ const PackagesManagement = () => {
 };
 
 export default PackagesManagement;
+
 
 
