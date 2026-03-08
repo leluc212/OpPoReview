@@ -19,9 +19,22 @@ const getHRStaff = (language) => {
   const recentTime = new Date(now - 30 * 60 * 1000);
   const recentTimeStr = `${recentTime.getHours().toString().padStart(2, '0')}:${recentTime.getMinutes().toString().padStart(2, '0')}`;
   
-  // Old time: 2 hours ago (for testing hidden info)
+  // Old time: 2 hours ago (for testing hidden info) - lưu cả ngày
   const oldTime = new Date(now - 2 * 60 * 60 * 1000);
+  const oldDate = language === 'vi' 
+    ? `${oldTime.getDate().toString().padStart(2, '0')}/${(oldTime.getMonth() + 1).toString().padStart(2, '0')}/${oldTime.getFullYear()}`
+    : `${(oldTime.getMonth() + 1).toString().padStart(2, '0')}/${oldTime.getDate().toString().padStart(2, '0')}/${oldTime.getFullYear()}`;
   const oldTimeStr = `${oldTime.getHours().toString().padStart(2, '0')}:${oldTime.getMinutes().toString().padStart(2, '0')}`;
+  
+  console.log('📊 Mock data timestamps:', {
+    now: now.toLocaleString(),
+    today,
+    recentTimeStr,
+    oldDate,
+    oldTimeStr,
+    recentConfirmedAt: `${today} - ${recentTimeStr}`,
+    oldConfirmedAt: `${oldDate} - ${oldTimeStr}`
+  });
   
   return [
   {
@@ -56,7 +69,7 @@ const getHRStaff = (language) => {
     startDate: language === 'vi' ? '20/02/2024' : '02/20/2024',
     status: 'active',
     shift: '08:00 - 20:00',
-    confirmedAt: `${today} - ${oldTimeStr}`,
+    confirmedAt: `${oldDate} - ${oldTimeStr}`,
     canRequestChange: true,
     isWithinTimeWindow: false,
     // Additional profile data
@@ -388,6 +401,7 @@ const StaffMeta = styled.div`
   padding: 16px 0;
   border-top: 1px solid #E8EFFF;
   border-bottom: 1px solid #E8EFFF;
+  min-height: 220px; /* Giữ chiều cao đồng đều dù có/không phone/email */
   
   .meta-row {
     display: flex;
@@ -2040,8 +2054,20 @@ const HRManagement = () => {
       const confirmedTime = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes));
       const now = new Date();
       const oneHourInMs = 60 * 60 * 1000;
-      return (now - confirmedTime) > oneHourInMs;
+      const timeDifference = now - confirmedTime;
+      const hasPassed = timeDifference > oneHourInMs;
+      
+      console.log('⏰ Checking time:', {
+        confirmedAt,
+        confirmedTime: confirmedTime.toLocaleString(),
+        now: now.toLocaleString(),
+        timeDifferenceInMinutes: Math.floor(timeDifference / 60000),
+        hasPassed1Hour: hasPassed
+      });
+      
+      return hasPassed;
     } catch (e) {
+      console.error('Error parsing time:', e);
       return false;
     }
   };
@@ -2515,11 +2541,11 @@ const HRManagement = () => {
                           ? (language === 'vi' ? 'Đang làm' : 'Active')
                           : (language === 'vi' ? 'Nghỉ phép' : 'On Leave')}
                       </StaffStatus>
-                      {isCurrentlyWorking(staff.shift) && (
-                        <WorkingStatusBadge style={{ fontSize: '11px', padding: '4px 10px' }}>
-                          {language === 'vi' ? 'Đang làm việc' : 'Currently Working'}
-                        </WorkingStatusBadge>
-                      )}
+                      {/* Always show badge for testing - remove condition later */}
+                      <WorkingStatusBadge style={{ fontSize: '11px', padding: '4px 10px' }}>
+                        {language === 'vi' ? 'Đang làm việc' : 'Currently Working'} 
+                        {' '}({isCurrentlyWorking(staff.shift) ? '✓' : '✗'})
+                      </WorkingStatusBadge>
                     </div>
                   </StaffHeader>
                   
@@ -2527,22 +2553,21 @@ const HRManagement = () => {
                     <div className="meta-row">
                       <MapPin />{staff.location}
                     </div>
-                    <div className="meta-row">
-                      <Phone />
-                      {hasPassedOneHourSinceConfirmed(staff.confirmedAt) ? (
-                        <HiddenInfo>●●●●●</HiddenInfo>
-                      ) : (
-                        staff.phone
-                      )}
-                    </div>
-                    <div className="meta-row">
-                      <Mail />
-                      {hasPassedOneHourSinceConfirmed(staff.confirmedAt) ? (
-                        <HiddenInfo>●●●●●</HiddenInfo>
-                      ) : (
-                        staff.email
-                      )}
-                    </div>
+                    {/* Chỉ hiện phone và email nếu chưa qua 1 giờ */}
+                    {(() => {
+                      const hasPassed = hasPassedOneHourSinceConfirmed(staff.confirmedAt);
+                      console.log(`👤 ${staff.name} - Show contact info: ${!hasPassed}`);
+                      return !hasPassed;
+                    })() && (
+                      <>
+                        <div className="meta-row">
+                          <Phone />{staff.phone}
+                        </div>
+                        <div className="meta-row">
+                          <Mail />{staff.email}
+                        </div>
+                      </>
+                    )}
                     <div className="meta-row">
                       <Calendar />{language === 'vi' ? 'Bắt đầu:' : 'Started:'} {staff.startDate}
                     </div>
@@ -2562,16 +2587,19 @@ const HRManagement = () => {
                     >
                       <User />{language === 'vi' ? 'Xem hồ sơ' : 'View profile'}
                     </StaffButton>
-                    {isCurrentlyWorking(staff.shift) && (
-                      <StaffButton
-                        $variant="success"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => handleChatWithStaff(staff)}
-                      >
-                        <MessageSquare />{language === 'vi' ? 'Nhắn tin' : 'Chat'}
-                      </StaffButton>
-                    )}
+                    {/* Always show Chat button for testing - remove condition later */}
+                    <StaffButton
+                      $variant="success"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        const isWorking = isCurrentlyWorking(staff.shift);
+                        console.log(`👤 ${staff.name} - Đang làm việc:`, isWorking);
+                        handleChatWithStaff(staff);
+                      }}
+                    >
+                      <MessageSquare />{language === 'vi' ? 'Nhắn tin' : 'Chat'}
+                    </StaffButton>
                     {staff.canRequestChange && (
                       <StaffButton
                         $variant="warning"
