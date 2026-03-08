@@ -208,40 +208,115 @@ const BoostSection = styled.div`
 
 const BoostCard = styled.div`
   background: ${props => props.$bgColor || '#FFF9E6'};
-  border-radius: 16px;
-  padding: 32px 36px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 24px;
+  padding: 40px 44px;
+  box-shadow: 0 8px 32px rgba(245, 158, 11, 0.12);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid rgba(245, 158, 11, 0.15);
+  
+  &:hover {
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: 0 16px 48px rgba(245, 158, 11, 0.2);
+    border-color: rgba(245, 158, 11, 0.3);
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  
+  &:hover::before {
+    opacity: 1;
+    animation: shimmer 2s ease-in-out infinite;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%, rgba(245, 158, 11, 0.05) 100%);
+    pointer-events: none;
+  }
+  
+  @keyframes shimmer {
+    0%, 100% {
+      transform: translate(-50%, -50%) rotate(0deg);
+    }
+    50% {
+      transform: translate(-30%, -30%) rotate(180deg);
+    }
+  }
 `;
 
 const BoostHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 24px;
+  gap: 12px;
+  margin-bottom: 28px;
+  position: relative;
+  z-index: 1;
   
   svg {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     color: ${props => props.$color || '#F59E0B'};
+    filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.3));
+    animation: pulse 2s ease-in-out infinite;
   }
   
   h3 {
-    font-size: 15px;
-    font-weight: 700;
-    color: #1F2937;
+    font-size: 16px;
+    font-weight: 800;
+    color: #78350F;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
   }
 `;
 
 const BoostStats = styled.div`
   margin-bottom: 0;
+  position: relative;
+  z-index: 1;
+  animation: fadeInUp 0.6s ease-out;
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 `;
 
 const BoostMainStat = styled.div`
@@ -249,39 +324,59 @@ const BoostMainStat = styled.div`
   align-items: baseline;
   justify-content: center;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 20px;
   flex-wrap: wrap;
   
   .number {
-    font-size: 56px;
+    font-size: 72px;
     font-weight: 900;
-    color: #1F2937;
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     line-height: 1;
+    text-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
   }
   
   .label {
     font-size: 20px;
-    font-weight: 600;
-    color: #6B7280;
+    font-weight: 700;
+    color: #92400E;
   }
   
   .change {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #10B981;
-    background: #D1FAE5;
-    padding: 5px 12px;
-    border-radius: 20px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #059669;
+    background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+    padding: 8px 16px;
+    border-radius: 24px;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+    border: 1px solid rgba(16, 185, 129, 0.2);
   }
 `;
 
 const BoostSubStat = styled.div`
-  font-size: 16px;
-  color: #6B7280;
-  font-weight: 500;
+  font-size: 17px;
+  color: #92400E;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 12px 24px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  
+  svg {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  }
 `;
 
 const BoostOptions = styled.div`
@@ -828,7 +923,7 @@ const ManagementCard = styled.div`
   border-radius: 16px;
   padding: 20px 24px;
   display: grid;
-  grid-template-columns: auto 1fr auto auto auto auto;
+  grid-template-columns: auto 1fr auto auto auto auto auto;
   align-items: center;
   gap: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -841,7 +936,7 @@ const ManagementCard = styled.div`
   }
   
   @media (max-width: 1024px) {
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto 1fr auto;
     gap: 12px;
   }
 `;
@@ -870,6 +965,10 @@ const ManagementAvatar = styled.div`
 const ManagementInfo = styled.div`
   flex: 1;
   min-width: 0;
+  
+  @media (max-width: 1024px) {
+    flex: 1;
+  }
 `;
 
 const ManagementName = styled.div`
@@ -945,6 +1044,11 @@ const ManagementAction = styled.div`
   
   &:hover svg {
     color: #1F2937;
+  }
+  
+  @media (max-width: 1024px) {
+    width: 36px;
+    height: 36px;
   }
 `;
 
@@ -1264,9 +1368,9 @@ const AdminDashboard = () => {
         {/* Tin tuyển gấp & Gói Boost */}
         <BoostSection>
           {/* Tin tuyển gấp */}
-          <BoostCard $bgColor="#FFF9E6">
+          <BoostCard $bgColor="linear-gradient(135deg, #FFF9E6 0%, #FEF3C7 100%)">
             <BoostHeader $color="#F59E0B">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
               </svg>
               <h3>{language === 'vi' ? 'BÀI TUYỂN GẤP' : 'URGENT JOBS'}</h3>
@@ -1275,9 +1379,12 @@ const AdminDashboard = () => {
               <BoostMainStat>
                 <span className="number">{platformData.totalJobs}</span>
                 <span className="label">{language === 'vi' ? 'Tin tuyển gấp' : 'Urgent Jobs'}</span>
-                <span className="change">{platformData.change}</span>
+                <span className="change">↗ {platformData.change}</span>
               </BoostMainStat>
               <BoostSubStat>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{width: '18px', height: '18px', display: 'inline', marginRight: '6px'}}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 {language === 'vi' ? `Hoa Hồng ${platformData.discount}: ${platformData.price}` : `Commission ${platformData.discount}: ${platformData.price}`}
               </BoostSubStat>
             </BoostStats>
