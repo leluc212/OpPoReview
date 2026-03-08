@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { motion, useMotionValue } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -484,7 +484,9 @@ const SideAdWrap = styled(motion.div)`
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0,0,0,0.12);
   cursor: pointer;
-  position: relative;
+  position: sticky;
+  top: 100px;
+  z-index: 10;
 
   img {
     width: 100%;
@@ -1274,6 +1276,19 @@ const CandidateDashboard = () => {
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [ratings, setRatings] = useState({ overall: 0, environment: 0, attitude: 0, accuracy: 0 });
   const [reviewText, setReviewText] = useState('');
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+
+  const banners = [
+    { src: "/OpPoReview/images/bamosbanner.jpg", alt: "Bamos Coffee" },
+    { src: "/OpPoReview/images/seoul.jpg", alt: "Seoul Vua Mì Cay" }
+  ];
+
+  useEffect(() => {
+    const bannerInterval = setInterval(() => {
+      setCurrentBannerIndex(prev => (prev + 1) % banners.length);
+    }, 4000);
+    return () => clearInterval(bannerInterval);
+  }, [banners.length]);
 
   const handleSubmitReview = () => {
     setReviewSubmitted(true);
@@ -1850,7 +1865,16 @@ const CandidateDashboard = () => {
           whileHover={{ y: -2 }}
         >
           <BoostTag>🔥Đề xuất</BoostTag>
-          <img src="/OpPoReview/images/bamosbanner.jpg" alt="Bamos Banner" style={{ width: '100%', height: 'auto', display: 'block' }} />
+          <motion.img 
+            key={currentBannerIndex}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+            src={banners[currentBannerIndex].src} 
+            alt={banners[currentBannerIndex].alt} 
+            style={{ width: '100%', height: 'auto', display: 'block' }} 
+          />
         </BoostBannerWrap>
 
         {/* Recent Applications - compact */}

@@ -2207,7 +2207,21 @@ const JobListing = () => {
   const [isAvailable, setIsAvailable] = useState(true);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [applyModal, setApplyModal] = useState(null); // { job } or null
+  const [detailModal, setDetailModal] = useState(null); // { job } or null
   const [applySuccess, setApplySuccess] = useState(false);
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+
+  const banners = [
+    { src: "/OpPoReview/images/seoul.jpg", alt: "Seoul Vua Mì Cay" },
+    { src: "/OpPoReview/images/bamosbanner.jpg", alt: "Bamos Coffee" }
+  ];
+
+  useEffect(() => {
+    const bannerInterval = setInterval(() => {
+      setCurrentBannerIndex(prev => (prev + 1) % banners.length);
+    }, 4000);
+    return () => clearInterval(bannerInterval);
+  }, [banners.length]);
 
   const handleToggleAvailability = () => {
     setShowConfirmModal(true);
@@ -2332,7 +2346,8 @@ const JobListing = () => {
   };
 
   const handleJobClick = (jobId) => {
-    // Just view the job — no application triggered
+    const job = allJobs.find(j => j.id === jobId);
+    if (job) setDetailModal({ job });
   };
 
   const handleApplyJob = (job) => {
@@ -2973,7 +2988,15 @@ const JobListing = () => {
 
             <BoostBannerWrap>
               <BoostTag>🔥Hot deal</BoostTag>
-              <img src="/OpPoReview/images/seoul.jpg" alt="Seoul Vua Mì Cay" />
+              <motion.img 
+                key={currentBannerIndex}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.8 }}
+                src={banners[currentBannerIndex].src} 
+                alt={banners[currentBannerIndex].alt} 
+              />
             </BoostBannerWrap>
 
             <JobsGrid>
@@ -3128,6 +3151,66 @@ const JobListing = () => {
               </button>
               <button className="btn-confirm" onClick={confirmApply}>
                 {language === 'vi' ? 'Gửi CV ngay' : 'Send CV'}
+              </button>
+            </div>
+          </ApplyModalWrap>
+        )}
+      </Modal>
+
+      {/* Detail Modal */}
+      <Modal
+        isOpen={!!detailModal}
+        onClose={() => setDetailModal(null)}
+        title=""
+      >
+        {detailModal && (
+          <ApplyModalWrap onClick={e => e.stopPropagation()}>
+            <div className="apply-emoji" style={{ fontSize: '40px' }}>💼</div>
+            <h3>{translateJobTitle(detailModal.job.title, language)}</h3>
+            <p className="apply-desc" style={{ marginBottom: '10px' }}>
+              <strong>{detailModal.job.company}</strong>
+            </p>
+
+            <div className="apply-info-card" style={{ marginBottom: '15px' }}>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Địa điểm' : 'Location'}:</span>
+                <span className="info-value">{detailModal.job.location}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Mức lương' : 'Salary'}:</span>
+                <span className="info-value salary">{translateSalary(detailModal.job.category === 'shift' ? calculateShiftSalary(detailModal.job) : detailModal.job.salary, language)}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Loại hình' : 'Type'}:</span>
+                <span className="info-value">{detailModal.job.type}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Ngày đăng' : 'Posted at'}:</span>
+                <span className="info-value">{detailModal.job.postedAt}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Ngày làm' : 'Date'}:</span>
+                <span className="info-value">
+                  {detailModal.job.shiftDetails?.date || (detailModal.job.urgent ? '09/03/2026' : '15/03/2026')}
+                </span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Thời gian' : 'Time'}:</span>
+                <span className="info-value">
+                  {detailModal.job.shiftDetails?.time || detailModal.job.type?.match(/\((.*?)\)/)?.[1] || '07:00 - 10:00'}
+                </span>
+              </div>
+            </div>
+
+            <div className="apply-buttons">
+              <button className="btn-cancel" onClick={() => setDetailModal(null)}>
+                {language === 'vi' ? 'Đóng' : 'Close'}
+              </button>
+              <button className="btn-confirm" onClick={() => {
+                setDetailModal(null);
+                setApplyModal({ job: detailModal.job });
+              }}>
+                {language === 'vi' ? 'Ứng tuyển ngay' : 'Apply Now'}
               </button>
             </div>
           </ApplyModalWrap>

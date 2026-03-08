@@ -1716,6 +1716,7 @@ const TechBannerSection = styled(motion.section)`
       radial-gradient(circle at 20% 30%, rgba(30, 64, 175, 0.15) 0%, transparent 50%),
       radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.12) 0%, transparent 50%);
     pointer-events: none;
+    transition: opacity 0.4s ease;
   }
   
   &::after {
@@ -2753,69 +2754,6 @@ const LandingPage = () => {
 
   return (
     <LandingContainer $isDark={isDarkMode}>
-      <StickyColumn>
-        <StickyIconButton
-          $isDark={isDarkMode}
-          as={Link}
-          to="/candidate/saved-jobs"
-          data-tooltip="Việc làm đã lưu"
-          initial={{ x: -100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <Heart />
-        </StickyIconButton>
-        
-        <StickyIconButton
-          $isDark={isDarkMode}
-          as={Link}
-          to="/register"
-          data-tooltip="Đăng ký"
-          initial={{ x: -100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          <UserPlus />
-        </StickyIconButton>
-        
-        <StickyIconButton
-          $isDark={isDarkMode}
-          as={Link}
-          to="/login"
-          data-tooltip="Đăng nhập an toàn"
-          initial={{ x: -100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-        >
-          <Shield />
-        </StickyIconButton>
-        
-        <StickyIconButton
-          $isDark={isDarkMode}
-          as="button"
-          onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}
-          data-tooltip="Góp ý"
-          initial={{ x: -100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-        >
-          <MessageCircle />
-          <NotificationBadge>3</NotificationBadge>
-        </StickyIconButton>
-        
-        <StickyIconButton
-          $isDark={isDarkMode}
-          as="button"
-          onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}
-          data-tooltip="Hỗ trợ"
-          initial={{ x: -100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-        >
-          <Headphones />
-        </StickyIconButton>
-      </StickyColumn>
-      
       <Header
         initial={{ y: -100 }}
         animate={{ y: 0 }}
