@@ -25,6 +25,7 @@ import {
   Award,
   Star,
   CheckCircle,
+  ArrowRight,
 } from 'lucide-react';
 
 // Custom Zalo Icon Component - Based on official Zalo logo
