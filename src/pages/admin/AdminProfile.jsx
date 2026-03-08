@@ -359,10 +359,10 @@ const AdminProfile = () => {
   });
 
   const defaultProfileData = {
-    fullName: 'Admin',
+    fullName: 'Root',
     email: 'admin@oppo.vn',
     phone: '0909 123 456',
-    address: 'Hà Nội, Việt Nam',
+    address: 'Hồ Chí Minh, Việt Nam',
     bio: language === 'vi' ? 'Quản trị viên hệ thống OppoReview' : 'OppoReview System Administrator'
   };
 
