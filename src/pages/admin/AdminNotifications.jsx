@@ -355,68 +355,122 @@ const AdminNotifications = () => {
   const [filterType, setFilterType] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const [notificationSettings, setNotificationSettings] = useState({
-    users: true,
-    employers: true,
     posts: true,
     payments: true,
-    system: false
+    urgent: true,
+    employers: true
   });
 
   const notifications = [
     {
       id: 1,
-      type: 'users',
-      icon: Users,
-      color: '#1e40af',
-      title: language === 'vi' ? 'Người dùng mới đăng ký' : 'New user registrations',
-      message: language === 'vi' ? '15 ứng viên và 3 nhà tuyển dụng mới đã đăng ký trong 24h qua' : '15 candidates and 3 employers registered in the last 24 hours',
-      time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
-      unread: true,
-      actionRequired: false
-    },
-    {
-      id: 2,
-      type: 'employers',
-      icon: Briefcase,
+      type: 'posts',
+      icon: AlertCircle,
       color: '#f59e0b',
-      title: language === 'vi' ? 'Yêu cầu phê duyệt nhà tuyển dụng' : 'Employer approval request',
-      message: language === 'vi' ? 'Katinat chi nhánh quận 8 đang chờ phê duyệt. Vui lòng kiểm tra thông tin và xác minh.' : 'Katinat branch District 8 is pending approval. Please review and verify the information.',
-      time: language === 'vi' ? '3 giờ trước' : '3 hours ago',
+      title: language === 'vi' ? 'Tin tuyển dụng chưa được phê duyệt' : 'Job posts pending approval',
+      message: language === 'vi' ? '8 tin tuyển dụng mới từ các nhà tuyển dụng đang chờ phê duyệt. Vui lòng kiểm tra và xác nhận.' : '8 new job posts from employers are pending approval. Please review and confirm.',
+      time: language === 'vi' ? '30 phút trước' : '30 minutes ago',
       unread: true,
       actionRequired: true
     },
     {
+      id: 2,
+      type: 'payments',
+      icon: DollarSign,
+      color: '#10b981',
+      title: language === 'vi' ? 'Mua bài' : 'Package purchase',
+      message: language === 'vi' ? 'Chill Out Beer Club đã mua gói Quick Boost trị giá 245.000 VND cho 3 tin tuyển dụng.' : 'Chill Out Beer Club purchased Quick Boost package worth 245,000 VND for 3 job posts.',
+      time: language === 'vi' ? '1 giờ trước' : '1 hour ago',
+      unread: true,
+      actionRequired: false
+    },
+    {
       id: 3,
-      type: 'posts',
+      type: 'urgent',
       icon: AlertCircle,
       color: '#ef4444',
-      title: language === 'vi' ? 'Bài đăng bị cảnh báo' : 'Flagged posts',
-      message: language === 'vi' ? '5 bài đăng tuyển nhân viên phục vụ bị hệ thống tự động cảnh báo về nội dung vi phạm. Cần kiểm duyệt thủ công.' : '5 new server job posts were automatically flagged for policy violations and require manual review.',
-      time: language === 'vi' ? '5 giờ trước' : '5 hours ago',
+      title: language === 'vi' ? 'Duyệt đăng bài Job Gấp' : 'Urgent job approval',
+      message: language === 'vi' ? 'Bia Sệt 123 yêu cầu duyệt gấp 2 tin tuyển nhân viên phục vụ ca tối. Cần xử lý trong 2 giờ.' : 'Bia Sệt 123 requests urgent approval for 2 evening shift server positions. Requires processing within 2 hours.',
+      time: language === 'vi' ? '45 phút trước' : '45 minutes ago',
       unread: true,
       actionRequired: true
     },
     {
       id: 4,
+      type: 'employers',
+      icon: Briefcase,
+      color: '#8b5cf6',
+      title: language === 'vi' ? 'Duyệt nhà tuyển dụng' : 'Employer approval',
+      message: language === 'vi' ? 'Urban Coffee và 2 nhà tuyển dụng khác đang chờ phê duyệt tài khoản. Vui lòng xác minh thông tin và điều khoản.' : 'Urban Coffee and 2 other employers are pending account approval. Please verify information and terms.',
+      time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
+      unread: true,
+      actionRequired: true
+    },
+    {
+      id: 5,
       type: 'payments',
       icon: DollarSign,
       color: '#10b981',
-      title: language === 'vi' ? 'Thanh toán mới' : 'New payment',
-      message: language === 'vi' ? 'The Coffee House chi nhánh Bình Thạnh đã thanh toán gói Banner nổi bật 2 trị giá 745.000 VND' : 'The Coffee House Binh Thanh branch paid for Top Spotlight package worth 745,000 VND',
+      title: language === 'vi' ? 'Mua bài' : 'Package purchase',
+      message: language === 'vi' ? 'Lẩu Bò Sài Gòn Vi Vu đã mua gói Hot Search trị giá 395.000 VND để tăng độ hiển thị.' : 'Lẩu Bò Sài Gòn Vi Vu purchased Hot Search package worth 395,000 VND to increase visibility.',
+      time: language === 'vi' ? '3 giờ trước' : '3 hours ago',
+      unread: false,
+      actionRequired: false
+    },
+    {
+      id: 6,
+      type: 'posts',
+      icon: CheckCircle,
+      color: '#10b981',
+      title: language === 'vi' ? 'Tin tuyển dụng chưa được phê duyệt' : 'Job posts pending approval',
+      message: language === 'vi' ? '5 tin tuyển dụng từ Nướng Ngói Gia Bảo đang chờ phê duyệt. Đã kiểm tra sơ bộ, không có vấn đề.' : '5 job posts from Nướng Ngói Gia Bảo are pending approval. Preliminary check shows no issues.',
+      time: language === 'vi' ? '4 giờ trước' : '4 hours ago',
+      unread: false,
+      actionRequired: true
+    },
+    {
+      id: 7,
+      type: 'urgent',
+      icon: AlertCircle,
+      color: '#ef4444',
+      title: language === 'vi' ? 'Duyệt đăng bài Job Gấp' : 'Urgent job approval',
+      message: language === 'vi' ? 'Beer Garden Phố cần tuyển gấp 4 nhân viên phục vụ cho ca tối hôm nay. Yêu cầu duyệt ngay.' : 'Beer Garden Phố urgently needs 4 servers for tonight shift. Immediate approval requested.',
+      time: language === 'vi' ? '5 giờ trước' : '5 hours ago',
+      unread: false,
+      actionRequired: true
+    },
+    {
+      id: 8,
+      type: 'employers',
+      icon: Briefcase,
+      color: '#8b5cf6',
+      title: language === 'vi' ? 'Duyệt nhà tuyển dụng' : 'Employer approval',
+      message: language === 'vi' ? 'Draft Beer Sài Gòn đã hoàn tất xác thực 4 bước eKYC và chấp nhận điều khoản. Sẵn sàng phê duyệt.' : 'Draft Beer Sài Gòn completed 4-step eKYC verification and accepted terms. Ready for approval.',
+      time: language === 'vi' ? '1 ngày trước' : '1 day ago',
+      unread: false,
+      actionRequired: true
+    },
+    {
+      id: 9,
+      type: 'payments',
+      icon: DollarSign,
+      color: '#10b981',
+      title: language === 'vi' ? 'Mua bài' : 'Package purchase',
+      message: language === 'vi' ? 'Phở Gia Truyền 1954 đã mua gói Spongit Banner trị giá 745.000 VND cho chiến dịch tuyển dụng.' : 'Phở Gia Truyền 1954 purchased Spongit Banner package worth 745,000 VND for recruitment campaign.',
       time: language === 'vi' ? '1 ngày trước' : '1 day ago',
       unread: false,
       actionRequired: false
     },
     {
-      id: 5,
-      type: 'system',
-      icon: Info,
-      color: '#1e40af',
-      title: language === 'vi' ? 'Cập nhật hệ thống' : 'System update',
-      message: language === 'vi' ? 'Hệ thống sẽ bảo trì vào 23:00 ngày 16/02/2026. Thời gian dự kiến: 2 giờ.' : 'System maintenance is scheduled at 23:00 on 16/02/2026. Estimated duration: 2 hours.',
+      id: 10,
+      type: 'posts',
+      icon: AlertCircle,
+      color: '#f59e0b',
+      title: language === 'vi' ? 'Tin tuyển dụng chưa được phê duyệt' : 'Job posts pending approval',
+      message: language === 'vi' ? '12 tin tuyển dụng mới từ 6 nhà tuyển dụng khác nhau đang chờ phê duyệt.' : '12 new job posts from 6 different employers are pending approval.',
       time: language === 'vi' ? '2 ngày trước' : '2 days ago',
       unread: false,
-      actionRequired: false
+      actionRequired: true
     }
   ];
 
@@ -498,12 +552,12 @@ const AdminNotifications = () => {
             <StatValue>{actionRequiredCount}</StatValue>
           </StatCard>
           <StatCard $color="#10b981">
-            <StatLabel>{language === 'vi' ? 'Hôm nay' : 'Today'}</StatLabel>
-            <StatValue>18</StatValue>
+            <StatLabel>{language === 'vi' ? 'Đã xử lý' : 'Resolved'}</StatLabel>
+            <StatValue>{notifications.filter(n => !n.unread && !n.actionRequired).length}</StatValue>
           </StatCard>
-          <StatCard $color="#1e40af">
-            <StatLabel>{language === 'vi' ? 'Tuần này' : 'This week'}</StatLabel>
-            <StatValue>127</StatValue>
+          <StatCard $color="#8b5cf6">
+            <StatLabel>{language === 'vi' ? 'Tổng thông báo' : 'Total'}</StatLabel>
+            <StatValue>{notifications.length}</StatValue>
           </StatCard>
         </StatsGrid>
 
@@ -516,11 +570,10 @@ const AdminNotifications = () => {
               </SearchBox>
               <Select value={filterType} onChange={(e) => setFilterType(e.target.value)}>
                 <option value="all">{language === 'vi' ? 'Tất cả' : 'All'}</option>
-                <option value="users">{language === 'vi' ? 'Người dùng' : 'Users'}</option>
-                <option value="employers">{language === 'vi' ? 'Nhà tuyển dụng' : 'Employers'}</option>
-                <option value="posts">{language === 'vi' ? 'Bài đăng' : 'Posts'}</option>
-                <option value="payments">{language === 'vi' ? 'Thanh toán' : 'Payments'}</option>
-                <option value="system">{language === 'vi' ? 'Hệ thống' : 'System'}</option>
+                <option value="posts">{language === 'vi' ? 'Tin chưa duyệt' : 'Pending posts'}</option>
+                <option value="payments">{language === 'vi' ? 'Mua bài' : 'Purchases'}</option>
+                <option value="urgent">{language === 'vi' ? 'Job gấp' : 'Urgent jobs'}</option>
+                <option value="employers">{language === 'vi' ? 'Duyệt NTD' : 'Employer approval'}</option>
               </Select>
               <Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
                 <option value="newest">{language === 'vi' ? 'Mới nhất' : 'Newest'}</option>
@@ -577,31 +630,7 @@ const AdminNotifications = () => {
               </SettingsTitle>
               
               <SettingItem>
-                <SettingLabel>{language === 'vi' ? 'Người dùng mới' : 'New users'}</SettingLabel>
-                <ToggleSwitch>
-                  <input 
-                    type="checkbox" 
-                    checked={notificationSettings.users}
-                    onChange={() => handleToggle('users')}
-                  />
-                  <span></span>
-                </ToggleSwitch>
-              </SettingItem>
-
-              <SettingItem>
-                <SettingLabel>{language === 'vi' ? 'Nhà tuyển dụng' : 'Employers'}</SettingLabel>
-                <ToggleSwitch>
-                  <input 
-                    type="checkbox" 
-                    checked={notificationSettings.employers}
-                    onChange={() => handleToggle('employers')}
-                  />
-                  <span></span>
-                </ToggleSwitch>
-              </SettingItem>
-
-              <SettingItem>
-                <SettingLabel>{language === 'vi' ? 'Bài đăng' : 'Posts'}</SettingLabel>
+                <SettingLabel>{language === 'vi' ? 'Tin chưa được duyệt' : 'Pending posts'}</SettingLabel>
                 <ToggleSwitch>
                   <input 
                     type="checkbox" 
@@ -613,7 +642,7 @@ const AdminNotifications = () => {
               </SettingItem>
 
               <SettingItem>
-                <SettingLabel>{language === 'vi' ? 'Thanh toán' : 'Payments'}</SettingLabel>
+                <SettingLabel>{language === 'vi' ? 'Mua bài' : 'Package purchases'}</SettingLabel>
                 <ToggleSwitch>
                   <input 
                     type="checkbox" 
@@ -625,12 +654,24 @@ const AdminNotifications = () => {
               </SettingItem>
 
               <SettingItem>
-                <SettingLabel>{language === 'vi' ? 'Cập nhật hệ thống' : 'System updates'}</SettingLabel>
+                <SettingLabel>{language === 'vi' ? 'Job gấp' : 'Urgent jobs'}</SettingLabel>
                 <ToggleSwitch>
                   <input 
                     type="checkbox" 
-                    checked={notificationSettings.system}
-                    onChange={() => handleToggle('system')}
+                    checked={notificationSettings.urgent}
+                    onChange={() => handleToggle('urgent')}
+                  />
+                  <span></span>
+                </ToggleSwitch>
+              </SettingItem>
+
+              <SettingItem>
+                <SettingLabel>{language === 'vi' ? 'Duyệt nhà tuyển dụng' : 'Employer approval'}</SettingLabel>
+                <ToggleSwitch>
+                  <input 
+                    type="checkbox" 
+                    checked={notificationSettings.employers}
+                    onChange={() => handleToggle('employers')}
                   />
                   <span></span>
                 </ToggleSwitch>
