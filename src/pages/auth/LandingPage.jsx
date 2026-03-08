@@ -3768,7 +3768,7 @@ const LandingPage = () => {
             viewport={{ once: false, amount: 0.5 }}
             transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            Nhiều doanh nghiệp đang tìm "tân binh"<br/>giỏi – giống bạn đó!
+            Nhiều nhà tuyển dụng đang tìm "đồng đội"<br/>giỏi – là bạn đó!
           </CompanyBannerTitle>
           
           <LogoCarouselWrapper $isDark={isDarkMode}>
