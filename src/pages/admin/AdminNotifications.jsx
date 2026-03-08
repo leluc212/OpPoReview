@@ -677,18 +677,6 @@ const AdminNotifications = () => {
                 </ToggleSwitch>
               </SettingItem>
             </SettingsCard>
-
-            <SettingsCard>
-              <SettingsTitle>{language === 'vi' ? 'Thao Tác Nhanh' : 'Quick Actions'}</SettingsTitle>
-              <Button $variant="primary" style={{ width: '100%', marginBottom: '0.75rem' }}>
-                <Send size={18} />
-                {language === 'vi' ? 'Gửi thông báo' : 'Send notification'}
-              </Button>
-              <Button $variant="outline" style={{ width: '100%' }}>
-                <Trash2 size={18} />
-                {language === 'vi' ? 'Xóa đã đọc' : 'Delete read'}
-              </Button>
-            </SettingsCard>
           </Sidebar>
         </Grid>
       </PageContainer>
