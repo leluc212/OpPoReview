@@ -1778,11 +1778,19 @@ const HRManagement = () => {
           id: job.id,
           title: job.title,
           location: job.location,
-          salary: job.hourlyRate 
-            ? `${parseInt(job.hourlyRate).toLocaleString('vi-VN')} VNĐ/giờ`
-            : (language === 'vi' ? 'Thỏa thuận' : 'Negotiable'),
+          salary: (() => {
+            if (job.hourlyRate && job.totalHours) {
+              const total = Math.round(parseInt(job.hourlyRate) * job.totalHours);
+              const h = Number.isInteger(job.totalHours) ? job.totalHours : parseFloat(job.totalHours.toFixed(1));
+              return `${total.toLocaleString('vi-VN')} VN\u0110/${h}h`;
+            }
+            if (job.hourlyRate) {
+              return `${parseInt(job.hourlyRate).toLocaleString('vi-VN')} VN\u0110/gi\u1edd`;
+            }
+            return language === 'vi' ? 'Th\u1ecfa thu\u1eadn' : 'Negotiable';
+          })(),
           shift: job.startTime && job.endTime ? `${job.startTime} - ${job.endTime}` : '',
-          type: language === 'vi' ? 'Tuyển gấp' : 'Urgent',
+          type: language === 'vi' ? 'Tuy\u1ec3n g\u1ea5p' : 'Urgent',
           applicants: job.applicants || 0,
           views: job.views || 0,
           status: job.status || 'active',
@@ -1792,9 +1800,9 @@ const HRManagement = () => {
             const diffTime = 7 * 24 * 60 * 60 * 1000 - (now - created); // 7 days validity
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             if (diffDays > 0) {
-              return language === 'vi' ? `${diffDays} ngày nữa` : `${diffDays} days left`;
+              return language === 'vi' ? `${diffDays} ng\u00e0y n\u1eefa` : `${diffDays} days left`;
             }
-            return language === 'vi' ? 'Hết hạn' : 'Expired';
+            return language === 'vi' ? 'H\u1ebft h\u1ea1n' : 'Expired';
           })(),
           contactPhone: job.contactPhone,
           description: job.description,
@@ -1946,11 +1954,19 @@ const HRManagement = () => {
           id: job.id,
           title: job.title,
           location: job.location,
-          salary: job.hourlyRate 
-            ? `${parseInt(job.hourlyRate).toLocaleString('vi-VN')} VNĐ/giờ`
-            : (language === 'vi' ? 'Thỏa thuận' : 'Negotiable'),
+          salary: (() => {
+            if (job.hourlyRate && job.totalHours) {
+              const total = Math.round(parseInt(job.hourlyRate) * job.totalHours);
+              const h = Number.isInteger(job.totalHours) ? job.totalHours : parseFloat(job.totalHours.toFixed(1));
+              return `${total.toLocaleString('vi-VN')} VN\u0110/${h}h`;
+            }
+            if (job.hourlyRate) {
+              return `${parseInt(job.hourlyRate).toLocaleString('vi-VN')} VN\u0110/gi\u1edd`;
+            }
+            return language === 'vi' ? 'Th\u1ecfa thu\u1eadn' : 'Negotiable';
+          })(),
           shift: job.startTime && job.endTime ? `${job.startTime} - ${job.endTime}` : '',
-          type: language === 'vi' ? 'Tuyển gấp' : 'Urgent',
+          type: language === 'vi' ? 'Tuy\u1ec3n g\u1ea5p' : 'Urgent',
           applicants: job.applicants || 0,
           views: job.views || 0,
           status: job.status || 'active',
@@ -1960,9 +1976,9 @@ const HRManagement = () => {
             const diffTime = 7 * 24 * 60 * 60 * 1000 - (now - created);
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             if (diffDays > 0) {
-              return language === 'vi' ? `${diffDays} ngày nữa` : `${diffDays} days left`;
+              return language === 'vi' ? `${diffDays} ng\u00e0y n\u1eefa` : `${diffDays} days left`;
             }
-            return language === 'vi' ? 'Hết hạn' : 'Expired';
+            return language === 'vi' ? 'H\u1ebft h\u1ea1n' : 'Expired';
           })(),
           contactPhone: job.contactPhone,
           description: job.description,

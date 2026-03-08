@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled, { keyframes } from 'styled-components';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
 import { 
@@ -17,7 +17,13 @@ import {
   Building2,
   Users,
   Eye,
-  EyeOff
+  EyeOff,
+  X,
+  CheckCircle,
+  Zap,
+  Banknote,
+  Send,
+  AlertCircle
 } from 'lucide-react';
 
 const fadeIn = keyframes`
@@ -456,6 +462,352 @@ const EmptyState = styled.div`
   }
 `;
 
+// ── Deposit Modal Styled Components ──────────────────────────────────────────
+
+const ModalOverlay = styled(motion.div)`
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 18, 40, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+`;
+
+const ModalBox = styled(motion.div)`
+  background: #ffffff;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow:
+    0 32px 64px -12px rgba(14, 57, 149, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+`;
+
+const ModalHead = styled.div`
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+  padding: 28px 28px 24px;
+  position: relative;
+  color: white;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 180px;
+    height: 180px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+  }
+`;
+
+const ModalHeadIcon = styled.div`
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
+
+  svg { width: 26px; height: 26px; }
+`;
+
+const ModalHeadTitle = styled.div`
+  position: relative;
+  z-index: 1;
+  h2 {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+  p {
+    font-size: 13px;
+    opacity: 0.8;
+  }
+`;
+
+const ModalCloseBtn = styled.button`
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 2;
+
+  &:hover { background: rgba(255, 255, 255, 0.28); transform: scale(1.1); }
+  svg { width: 18px; height: 18px; }
+`;
+
+const ModalBody = styled.div`
+  padding: 24px 28px 8px;
+`;
+
+const SectionLabel = styled.div`
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #94a3b8;
+  margin-bottom: 12px;
+`;
+
+const QuickAmountsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+`;
+
+const QuickAmountBtn = styled.button`
+  padding: 11px 6px;
+  border: 2px solid ${props => props.$selected ? '#1e40af' : '#e2e8f0'};
+  background: ${props => props.$selected ? '#EFF6FF' : '#f8fafc'};
+  color: ${props => props.$selected ? '#1e40af' : '#475569'};
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s;
+
+  &:hover {
+    border-color: #1e40af;
+    background: #EFF6FF;
+    color: #1e40af;
+    transform: translateY(-1px);
+  }
+`;
+
+const AmountInputWrapper = styled.div`
+  position: relative;
+  margin-bottom: 8px;
+`;
+
+const CurrencyLabel = styled.div`
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  font-weight: 700;
+  color: #94a3b8;
+  pointer-events: none;
+`;
+
+const DepositInput = styled.input`
+  width: 100%;
+  padding: 14px 60px 14px 18px;
+  border: 2px solid ${props => props.$invalid ? '#ef4444' : '#e2e8f0'};
+  border-radius: 14px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #1e293b;
+  outline: none;
+  transition: all 0.2s;
+  box-sizing: border-box;
+  letter-spacing: 0.5px;
+
+  &:focus {
+    border-color: #1e40af;
+    box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1);
+  }
+
+  &::placeholder {
+    color: #cbd5e1;
+    font-weight: 500;
+    font-size: 16px;
+  }
+`;
+
+const AmountPreview = styled.div`
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 20px;
+  min-height: 18px;
+  padding-left: 4px;
+`;
+
+const ModalFooter = styled.div`
+  padding: 16px 28px 28px;
+  display: flex;
+  gap: 12px;
+`;
+
+const CancelBtn = styled.button`
+  flex: 1;
+  padding: 14px;
+  background: #f1f5f9;
+  color: #64748b;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover { background: #e2e8f0; color: #475569; }
+`;
+
+const ConfirmBtn = styled(motion.button)`
+  flex: 2;
+  padding: 14px;
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(30, 64, 175, 0.35);
+  transition: box-shadow 0.2s;
+
+  &:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; }
+  &:not(:disabled):hover { box-shadow: 0 8px 24px rgba(30, 64, 175, 0.5); }
+  svg { width: 18px; height: 18px; }
+`;
+
+const SuccessState = styled(motion.div)`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 28px 48px;
+  text-align: center;
+
+  svg {
+    width: 64px;
+    height: 64px;
+    color: #10b981;
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 8px;
+  }
+
+  p {
+    font-size: 15px;
+    color: #64748b;
+  }
+
+  .amount-text {
+    font-size: 28px;
+    font-weight: 900;
+    color: #10b981;
+    margin: 8px 0 4px;
+  }
+`;
+
+const LoadingSpinner = styled(motion.div)`
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: white;
+  border-radius: 50%;
+`;
+
+// ── Withdraw Modal Extra Components ───────────────────────────────────────────
+
+const WithdrawModalHead = styled(ModalHead)`
+  background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+`;
+
+const WithdrawConfirmBtn = styled(ConfirmBtn)`
+  background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+  box-shadow: 0 4px 16px rgba(180, 83, 9, 0.35);
+  &:not(:disabled):hover { box-shadow: 0 8px 24px rgba(180, 83, 9, 0.5); }
+`;
+
+const WithdrawInput = styled.input`
+  width: 100%;
+  padding: 13px 18px;
+  border: 2px solid ${props => props.$invalid ? '#ef4444' : '#e2e8f0'};
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  outline: none;
+  transition: all 0.2s;
+  box-sizing: border-box;
+  background: #ffffff;
+  &:focus {
+    border-color: #b45309;
+    box-shadow: 0 0 0 4px rgba(180, 83, 9, 0.1);
+  }
+  &::placeholder { color: #cbd5e1; font-weight: 400; }
+`;
+
+const WithdrawAmountInput = styled(DepositInput)`
+  &:focus {
+    border-color: #b45309;
+    box-shadow: 0 0 0 4px rgba(180, 83, 9, 0.1);
+  }
+`;
+
+const WithdrawQuickBtn = styled(QuickAmountBtn)`
+  ${props => props.$selected && `
+    border-color: #b45309 !important;
+    background: #FEF3C7 !important;
+    color: #b45309 !important;
+  `}
+  &:hover {
+    border-color: #b45309;
+    background: #FEF3C7;
+    color: #b45309;
+  }
+`;
+
+const BalanceHint = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: ${props => props.$error ? '#ef4444' : '#64748b'};
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  background: ${props => props.$error ? '#fef2f2' : '#f8fafc'};
+  border-radius: 10px;
+  border: 1px solid ${props => props.$error ? '#fecaca' : '#e2e8f0'};
+  svg { width: 14px; height: 14px; flex-shrink: 0; }
+`;
+
+const Divider = styled.div`
+  height: 1px;
+  background: #e2e8f0;
+  margin: 4px 0 20px;
+`;
+
+const WithdrawSuccessState = styled(SuccessState)`
+  svg { color: #b45309; }
+  .amount-text { color: #b45309; }
+`;
+
 const EmployerWallet = () => {
   const { language } = useLanguage();
   
@@ -475,6 +827,41 @@ const EmployerWallet = () => {
 
   const [balance, setBalance] = useState(() => initializeWallet());
   const [showBalance, setShowBalance] = useState(false);
+
+  // Deposit modal state
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [depositRawAmount, setDepositRawAmount] = useState('');
+  const [depositLoading, setDepositLoading] = useState(false);
+  const [depositSuccess, setDepositSuccess] = useState(false);
+  const depositInputRef = useRef(null);
+
+  // Withdraw modal state
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [withdrawRawAmount, setWithdrawRawAmount] = useState('');
+  const [withdrawBankName, setWithdrawBankName] = useState('');
+  const [withdrawAccountNumber, setWithdrawAccountNumber] = useState('');
+  const [withdrawAccountName, setWithdrawAccountName] = useState('');
+  const [withdrawLoading, setWithdrawLoading] = useState(false);
+  const [withdrawSuccess, setWithdrawSuccess] = useState(false);
+  const withdrawInputRef = useRef(null);
+
+  const QUICK_AMOUNTS = [100000, 200000, 500000, 1000000, 2000000, 5000000];
+
+  const formatQuickAmount = (n) => {
+    if (n >= 1000000) return (n / 1000000) + 'M';
+    return (n / 1000) + 'K';
+  };
+
+  const parsedDepositAmount = parseInt(depositRawAmount.replace(/\D/g, '') || '0');
+  const formattedDepositPreview = parsedDepositAmount > 0
+    ? parsedDepositAmount.toLocaleString('vi-VN') + ' VND'
+    : '';
+
+  const parsedWithdrawAmount = parseInt(withdrawRawAmount.replace(/\D/g, '') || '0');
+  const withdrawExceedsBalance = parsedWithdrawAmount > balance;
+  const withdrawFormValid =
+    parsedWithdrawAmount > 0 &&
+    !withdrawExceedsBalance;
 
   // Load transactions from localStorage
   const [transactions, setTransactions] = useState(() => {
@@ -552,46 +939,105 @@ const EmployerWallet = () => {
   };
 
   const handleWithdraw = () => {
-    alert(language === 'vi' ? 'Mở form rút tiền' : 'Open withdrawal form');
+    setWithdrawRawAmount('');
+    setWithdrawBankName('');
+    setWithdrawAccountNumber('');
+    setWithdrawAccountName('');
+    setWithdrawSuccess(false);
+    setWithdrawLoading(false);
+    setShowWithdrawModal(true);
+    setTimeout(() => withdrawInputRef.current?.focus(), 120);
+  };
+
+  const handleConfirmWithdraw = () => {
+    if (!withdrawFormValid) return;
+    setWithdrawLoading(true);
+    setTimeout(() => {
+      const walletData = JSON.parse(localStorage.getItem('employer_wallet') || '{"balance": 0}');
+      const newBalance = (walletData.balance || 0) - parsedWithdrawAmount;
+      walletData.balance = newBalance;
+      localStorage.setItem('employer_wallet', JSON.stringify(walletData));
+
+      const transaction = {
+        id: Date.now(),
+        type: 'debit',
+        amount: parsedWithdrawAmount,
+        description: language === 'vi'
+          ? `Rút tiền → ${withdrawBankName} (${withdrawAccountNumber})`
+          : `Withdraw → ${withdrawBankName} (${withdrawAccountNumber})`,
+        date: new Date().toISOString(),
+        balanceAfter: newBalance
+      };
+
+      const savedTxs = JSON.parse(localStorage.getItem('employer_transactions') || '[]');
+      savedTxs.unshift(transaction);
+      localStorage.setItem('employer_transactions', JSON.stringify(savedTxs));
+
+      setBalance(newBalance);
+      reloadTransactions();
+      setWithdrawLoading(false);
+      setWithdrawSuccess(true);
+
+      setTimeout(() => {
+        setShowWithdrawModal(false);
+        setWithdrawSuccess(false);
+      }, 2400);
+    }, 900);
+  };
+
+  const handleWithdrawAmountInput = (e) => {
+    const raw = e.target.value.replace(/\D/g, '');
+    setWithdrawRawAmount(raw);
   };
 
   const handleDeposit = () => {
-    const amountStr = prompt(language === 'vi' ? 'Nhập số tiền muốn nạp (VNĐ):' : 'Enter amount to deposit (VND):');
-    if (!amountStr) return;
-    
-    const amount = parseInt(amountStr);
-    if (isNaN(amount) || amount <= 0) {
-      alert(language === 'vi' ? 'Số tiền không hợp lệ!' : 'Invalid amount!');
-      return;
-    }
+    setDepositRawAmount('');
+    setDepositSuccess(false);
+    setDepositLoading(false);
+    setShowDepositModal(true);
+    setTimeout(() => depositInputRef.current?.focus(), 120);
+  };
 
-    // Update balance
-    const walletData = JSON.parse(localStorage.getItem('employer_wallet') || '{"balance": 0}');
-    const newBalance = (walletData.balance || 0) + amount;
-    walletData.balance = newBalance;
-    localStorage.setItem('employer_wallet', JSON.stringify(walletData));
+  const handleConfirmDeposit = () => {
+    const amount = parseInt(depositRawAmount.replace(/\D/g, '') || '0');
+    if (!amount || amount <= 0) return;
 
-    // Save transaction
-    const transaction = {
-      id: Date.now(),
-      type: 'credit',
-      amount: amount,
-      description: language === 'vi' ? 'Nạp tiền vào ví' : 'Wallet deposit',
-      date: new Date().toISOString(),
-      balanceAfter: newBalance
-    };
+    setDepositLoading(true);
 
-    const transactions = JSON.parse(localStorage.getItem('employer_transactions') || '[]');
-    transactions.unshift(transaction);
-    localStorage.setItem('employer_transactions', JSON.stringify(transactions));
+    setTimeout(() => {
+      const walletData = JSON.parse(localStorage.getItem('employer_wallet') || '{"balance": 0}');
+      const newBalance = (walletData.balance || 0) + amount;
+      walletData.balance = newBalance;
+      localStorage.setItem('employer_wallet', JSON.stringify(walletData));
 
-    // Reload data
-    setBalance(newBalance);
-    reloadTransactions();
-    
-    alert(language === 'vi' 
-      ? `✓ Nạp thành công ${amount.toLocaleString('vi-VN')} VNĐ!` 
-      : `✓ Successfully deposited ${amount.toLocaleString('vi-VN')} VND!`);
+      const transaction = {
+        id: Date.now(),
+        type: 'credit',
+        amount: amount,
+        description: language === 'vi' ? 'Nạp tiền vào ví' : 'Wallet deposit',
+        date: new Date().toISOString(),
+        balanceAfter: newBalance
+      };
+
+      const savedTxs = JSON.parse(localStorage.getItem('employer_transactions') || '[]');
+      savedTxs.unshift(transaction);
+      localStorage.setItem('employer_transactions', JSON.stringify(savedTxs));
+
+      setBalance(newBalance);
+      reloadTransactions();
+      setDepositLoading(false);
+      setDepositSuccess(true);
+
+      setTimeout(() => {
+        setShowDepositModal(false);
+        setDepositSuccess(false);
+      }, 2200);
+    }, 900);
+  };
+
+  const handleDepositAmountInput = (e) => {
+    const raw = e.target.value.replace(/\D/g, '');
+    setDepositRawAmount(raw);
   };
 
   const handleLinkBank = () => {
@@ -796,6 +1242,238 @@ const EmployerWallet = () => {
           </ReceiptsList>
         </Card>
       </PageContainer>
+
+      {/* ── Withdraw Modal ───────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showWithdrawModal && (
+          <ModalOverlay
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={(e) => { if (e.target === e.currentTarget && !withdrawLoading) setShowWithdrawModal(false); }}
+          >
+            <ModalBox
+              initial={{ opacity: 0, scale: 0.92, y: 24 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 24 }}
+              transition={{ type: 'spring', damping: 26, stiffness: 380 }}
+            >
+              {withdrawSuccess ? (
+                <WithdrawSuccessState
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.1, type: 'spring', damping: 16, stiffness: 260 }}
+                  >
+                    <CheckCircle />
+                  </motion.div>
+                  <h3>{language === 'vi' ? 'Yêu cầu rút tiền thành công!' : 'Withdrawal Submitted!'}</h3>
+                  <div className="amount-text">
+                    -{parsedWithdrawAmount.toLocaleString('vi-VN')} VND
+                  </div>
+                  <p>{language === 'vi' ? 'Tiền sẽ được chuyển về tài khoản của bạn trong 1–3 ngày làm việc.' : 'Funds will be transferred within 1–3 business days.'}</p>
+                </WithdrawSuccessState>
+              ) : (
+                <>
+                  <WithdrawModalHead>
+                    <ModalCloseBtn onClick={() => !withdrawLoading && setShowWithdrawModal(false)}>
+                      <X />
+                    </ModalCloseBtn>
+                    <ModalHeadIcon>
+                      <Send />
+                    </ModalHeadIcon>
+                    <ModalHeadTitle>
+                      <h2>{language === 'vi' ? 'Rút tiền' : 'Withdraw Funds'}</h2>
+                      <p>{language === 'vi' ? 'Chuyển tiền về tài khoản ngân hàng' : 'Transfer funds to your bank account'}</p>
+                    </ModalHeadTitle>
+                  </WithdrawModalHead>
+
+                  <ModalBody>
+                    {/* Amount */}
+                    <SectionLabel>{language === 'vi' ? 'Chọn nhanh' : 'Quick select'}</SectionLabel>
+                    <QuickAmountsGrid>
+                      {QUICK_AMOUNTS.map(amt => (
+                        <WithdrawQuickBtn
+                          key={amt}
+                          $selected={parsedWithdrawAmount === amt}
+                          onClick={() => setWithdrawRawAmount(String(amt))}
+                        >
+                          {formatQuickAmount(amt)}
+                        </WithdrawQuickBtn>
+                      ))}
+                    </QuickAmountsGrid>
+
+                    <SectionLabel>{language === 'vi' ? 'Số tiền rút' : 'Withdraw amount'}</SectionLabel>
+                    <AmountInputWrapper>
+                      <WithdrawAmountInput
+                        ref={withdrawInputRef}
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="0"
+                        value={withdrawRawAmount ? parseInt(withdrawRawAmount).toLocaleString('vi-VN') : ''}
+                        onChange={handleWithdrawAmountInput}
+                        $invalid={withdrawRawAmount !== '' && (parsedWithdrawAmount <= 0 || withdrawExceedsBalance)}
+                      />
+                      <CurrencyLabel>VND</CurrencyLabel>
+                    </AmountInputWrapper>
+
+                    <BalanceHint $error={withdrawExceedsBalance}>
+                      {withdrawExceedsBalance ? (
+                        <><AlertCircle />{language === 'vi' ? 'Vượt số dư khả dụng!' : 'Exceeds available balance!'}</>
+                      ) : (
+                        <><AlertCircle />{language === 'vi' ? `Số dư khả dụng: ${balance.toLocaleString('vi-VN')} VND` : `Available: ${balance.toLocaleString('vi-VN')} VND`}</>
+                      )}
+                    </BalanceHint>
+
+                  </ModalBody>
+
+                  <ModalFooter>
+                    <CancelBtn onClick={() => !withdrawLoading && setShowWithdrawModal(false)}>
+                      {language === 'vi' ? 'Hủy' : 'Cancel'}
+                    </CancelBtn>
+                    <WithdrawConfirmBtn
+                      onClick={handleConfirmWithdraw}
+                      disabled={withdrawLoading || !withdrawFormValid}
+                      whileTap={{ scale: 0.97 }}
+                    >
+                      {withdrawLoading ? (
+                        <LoadingSpinner
+                          animate={{ rotate: 360 }}
+                          transition={{ repeat: Infinity, duration: 0.75, ease: 'linear' }}
+                        />
+                      ) : (
+                        <>
+                          <Send />
+                          {language === 'vi' ? 'Xác nhận rút tiền' : 'Confirm Withdrawal'}
+                        </>
+                      )}
+                    </WithdrawConfirmBtn>
+                  </ModalFooter>
+                </>
+              )}
+            </ModalBox>
+          </ModalOverlay>
+        )}
+      </AnimatePresence>
+
+      {/* ── Deposit Modal ─────────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showDepositModal && (
+          <ModalOverlay
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={(e) => { if (e.target === e.currentTarget && !depositLoading) setShowDepositModal(false); }}
+          >
+            <ModalBox
+              initial={{ opacity: 0, scale: 0.92, y: 24 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 24 }}
+              transition={{ type: 'spring', damping: 26, stiffness: 380 }}
+            >
+              {depositSuccess ? (
+                <SuccessState
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.1, type: 'spring', damping: 16, stiffness: 260 }}
+                  >
+                    <CheckCircle />
+                  </motion.div>
+                  <h3>{language === 'vi' ? 'Nạp tiền thành công!' : 'Deposit Successful!'}</h3>
+                  <div className="amount-text">
+                    +{parsedDepositAmount.toLocaleString('vi-VN')} VND
+                  </div>
+                  <p>{language === 'vi' ? 'Số dư ví của bạn đã được cập nhật.' : 'Your wallet balance has been updated.'}</p>
+                </SuccessState>
+              ) : (
+                <>
+                  {/* Header */}
+                  <ModalHead>
+                    <ModalCloseBtn onClick={() => !depositLoading && setShowDepositModal(false)}>
+                      <X />
+                    </ModalCloseBtn>
+                    <ModalHeadIcon>
+                      <Banknote />
+                    </ModalHeadIcon>
+                    <ModalHeadTitle>
+                      <h2>{language === 'vi' ? 'Nạp tiền vào ví' : 'Deposit to Wallet'}</h2>
+                      <p>{language === 'vi' ? 'Chọn hoặc nhập số tiền muốn nạp' : 'Select or enter the amount to deposit'}</p>
+                    </ModalHeadTitle>
+                  </ModalHead>
+
+                  {/* Body */}
+                  <ModalBody>
+                    <SectionLabel>{language === 'vi' ? 'Chọn nhanh' : 'Quick select'}</SectionLabel>
+                    <QuickAmountsGrid>
+                      {QUICK_AMOUNTS.map(amt => (
+                        <QuickAmountBtn
+                          key={amt}
+                          $selected={parseInt(depositRawAmount.replace(/\D/g, '') || '0') === amt}
+                          onClick={() => setDepositRawAmount(String(amt))}
+                        >
+                          {formatQuickAmount(amt)}
+                        </QuickAmountBtn>
+                      ))}
+                    </QuickAmountsGrid>
+
+                    <SectionLabel>{language === 'vi' ? 'Nhập số tiền' : 'Enter amount'}</SectionLabel>
+                    <AmountInputWrapper>
+                      <DepositInput
+                        ref={depositInputRef}
+                        type="text"
+                        inputMode="numeric"
+                        placeholder={language === 'vi' ? '0' : '0'}
+                        value={depositRawAmount ? parseInt(depositRawAmount).toLocaleString('vi-VN') : ''}
+                        onChange={handleDepositAmountInput}
+                        $invalid={depositRawAmount !== '' && parsedDepositAmount <= 0}
+                      />
+                      <CurrencyLabel>VND</CurrencyLabel>
+                    </AmountInputWrapper>
+                    <AmountPreview>
+                      {formattedDepositPreview
+                        ? `≈ ${formattedDepositPreview}`
+                        : (language === 'vi' ? 'Tối thiểu 1.000 VND' : 'Minimum 1,000 VND')}
+                    </AmountPreview>
+                  </ModalBody>
+
+                  {/* Footer */}
+                  <ModalFooter>
+                    <CancelBtn onClick={() => !depositLoading && setShowDepositModal(false)}>
+                      {language === 'vi' ? 'Huỷ' : 'Cancel'}
+                    </CancelBtn>
+                    <ConfirmBtn
+                      onClick={handleConfirmDeposit}
+                      disabled={depositLoading || parsedDepositAmount <= 0}
+                      whileTap={{ scale: 0.97 }}
+                    >
+                      {depositLoading ? (
+                        <LoadingSpinner
+                          animate={{ rotate: 360 }}
+                          transition={{ repeat: Infinity, duration: 0.75, ease: 'linear' }}
+                        />
+                      ) : (
+                        <>
+                          <Zap />
+                          {language === 'vi' ? 'Xác nhận nạp tiền' : 'Confirm Deposit'}
+                        </>
+                      )}
+                    </ConfirmBtn>
+                  </ModalFooter>
+                </>
+              )}
+            </ModalBox>
+          </ModalOverlay>
+        )}
+      </AnimatePresence>
     </DashboardLayout>
   );
 };
