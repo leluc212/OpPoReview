@@ -818,7 +818,7 @@ const AdminDashboard = () => {
                   <Shield />
                 </StatIcon>
                 <StatContent>
-                  <StatTitle>{language === 'vi' ? 'Ứng viên chờ xác minh' : 'Pending Verification'}</StatTitle>
+                  <StatTitle>{language === 'vi' ? 'Ứng viên chưa xác minh' : 'Pending Verification'}</StatTitle>
                   <StatValue>
                     156
                     <StatChange $positive={true}>
@@ -828,7 +828,7 @@ const AdminDashboard = () => {
                 </StatContent>
               </StatHeader>
               <StatDescription>
-                {language === 'vi' ? 'chờ xác minh eKYC' : 'pending eKYC'}
+                {language === 'vi' ? 'chưa xác minh eKYC' : 'pending eKYC'}
               </StatDescription>
             </StatBox>
           </CandidateStatsGrid>
