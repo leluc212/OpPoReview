@@ -196,9 +196,10 @@ const ViewAllButton = styled.button`
 
 const BoostSection = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1.2fr;
   gap: 24px;
   margin-bottom: 40px;
+  align-items: stretch;
   
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
@@ -207,15 +208,14 @@ const BoostSection = styled.div`
 
 const BoostCard = styled.div`
   background: ${props => props.$bgColor || '#FFF9E6'};
-  border-radius: 12px;
-  padding: 24px;
+  border-radius: 16px;
+  padding: 32px 36px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-  min-height: 160px;
 `;
 
 const BoostHeader = styled.div`
@@ -223,16 +223,16 @@ const BoostHeader = styled.div`
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-bottom: 18px;
+  margin-bottom: 24px;
   
   svg {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     color: ${props => props.$color || '#F59E0B'};
   }
   
   h3 {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
     color: #1F2937;
     text-transform: uppercase;
@@ -248,18 +248,19 @@ const BoostMainStat = styled.div`
   display: flex;
   align-items: baseline;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
   
   .number {
-    font-size: 48px;
+    font-size: 56px;
     font-weight: 900;
     color: #1F2937;
     line-height: 1;
   }
   
   .label {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
     color: #6B7280;
   }
@@ -272,13 +273,13 @@ const BoostMainStat = styled.div`
     font-weight: 600;
     color: #10B981;
     background: #D1FAE5;
-    padding: 5px 10px;
-    border-radius: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
   }
 `;
 
 const BoostSubStat = styled.div`
-  font-size: 14px;
+  font-size: 16px;
   color: #6B7280;
   font-weight: 500;
 `;
@@ -286,28 +287,34 @@ const BoostSubStat = styled.div`
 const BoostOptions = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: 24px;
+  width: 100%;
+  justify-items: center;
+  padding: 16px 0 0 0;
 `;
 
 const BoostOption = styled.div`
   background: white;
-  border-radius: 10px;
-  padding: 18px;
+  border-radius: 16px;
+  padding: 28px 32px;
   display: flex;
   align-items: center;
-  gap: 14px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  gap: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   transition: all 0.2s;
+  width: 260px;
+  max-width: 100%;
+  justify-content: center;
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
   
   .icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -315,8 +322,8 @@ const BoostOption = styled.div`
     flex-shrink: 0;
     
     svg {
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       color: ${props => props.$iconColor || '#1E40AF'};
     }
   }
@@ -325,22 +332,22 @@ const BoostOption = styled.div`
     flex: 1;
     
     .name {
-      font-size: 14px;
-      font-weight: 600;
+      font-size: 16px;
+      font-weight: 700;
       color: #1F2937;
-      margin-bottom: 5px;
+      margin-bottom: 6px;
     }
     
     .count {
-      font-size: 24px;
-      font-weight: 700;
+      font-size: 28px;
+      font-weight: 800;
       color: #1F2937;
       
       span {
-        font-size: 13px;
-        font-weight: 500;
+        font-size: 15px;
+        font-weight: 600;
         color: #6B7280;
-        margin-left: 4px;
+        margin-left: 6px;
       }
     }
   }
