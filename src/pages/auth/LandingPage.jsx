@@ -4169,8 +4169,8 @@ const LandingPage = () => {
               </div>
               <div className="contact-info">
                 <h4>Liên hệ</h4>
-                <p>Số điện thoại 1: <strong>0379 784 509</strong> (Hệ thống)</p>
-                <p>Số điện thoại 2: <strong>0563 518 922</strong> (Hỗ trợ)</p>
+                <p>Hotline hệ thống: <strong>0379 784 509</strong></p>
+                <p>Hỗ trợ khách hàng: <strong>0563 518 922</strong></p>
                 <p>Email: oppohiringplatform@gmail.com</p>
               </div>
 
