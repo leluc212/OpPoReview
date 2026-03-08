@@ -84,12 +84,12 @@ const Header = styled(motion.header)`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: ${props => props.$isDark 
-    ? 'rgba(30, 41, 59, 0.85)' 
+  background: ${props => props.$isDark
+    ? 'rgba(30, 41, 59, 0.85)'
     : 'rgba(255, 255, 255, 0.85)'};
   backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid ${props => props.$isDark 
-    ? 'rgba(75, 85, 99, 0.6)' 
+  border-bottom: 1px solid ${props => props.$isDark
+    ? 'rgba(75, 85, 99, 0.6)'
     : 'rgba(146, 217, 248, 0.6)'};
   position: fixed;
   top: 0;
@@ -97,8 +97,8 @@ const Header = styled(motion.header)`
   right: 0;
   z-index: 1000;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: ${props => props.$isDark 
-    ? '0 4px 24px rgba(0, 0, 0, 0.3)' 
+  box-shadow: ${props => props.$isDark
+    ? '0 4px 24px rgba(0, 0, 0, 0.3)'
     : '0 4px 24px #a4ddf8'};
   min-height: 56px;
   
@@ -281,9 +281,9 @@ const DropdownButton = styled.button`
   
   &:hover {
     color: #0EA5E9;
-    background: ${props => props.$isDark 
-      ? 'rgba(14, 165, 233, 0.1)' 
-      : 'rgba(14, 165, 233, 0.05)'};
+    background: ${props => props.$isDark
+    ? 'rgba(14, 165, 233, 0.1)'
+    : 'rgba(14, 165, 233, 0.05)'};
   }
   
   svg {
@@ -322,14 +322,14 @@ const DropdownMenu = styled(motion.div)`
   left: 0;
   background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.98)' : 'white'};
   border-radius: 12px;
-  box-shadow: ${props => props.$isDark 
-    ? '0 8px 32px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.2)' 
+  box-shadow: ${props => props.$isDark
+    ? '0 8px 32px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.2)'
     : '0 8px 32px rgba(147, 197, 253, 0.25), 0 4px 16px rgba(0, 0, 0, 0.1)'};
   padding: 8px;
   min-width: 220px;
   z-index: 1000;
-  border: 1px solid ${props => props.$isDark 
-    ? 'rgba(75, 85, 99, 0.5)' 
+  border: 1px solid ${props => props.$isDark
+    ? 'rgba(75, 85, 99, 0.5)'
     : 'rgba(147, 197, 253, 0.3)'};
   backdrop-filter: blur(20px);
   transition: background 0.3s ease;
@@ -341,14 +341,14 @@ const LargeDropdownMenu = styled(motion.div)`
   left: 0;
   background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.98)' : 'white'};
   border-radius: 16px;
-  box-shadow: ${props => props.$isDark 
-    ? '0 12px 48px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3)' 
+  box-shadow: ${props => props.$isDark
+    ? '0 12px 48px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3)'
     : '0 12px 48px rgba(147, 197, 253, 0.3), 0 4px 16px rgba(0, 0, 0, 0.1)'};
   padding: 16px;
   min-width: 800px;
   z-index: 1000;
-  border: 1px solid ${props => props.$isDark 
-    ? 'rgba(75, 85, 99, 0.5)' 
+  border: 1px solid ${props => props.$isDark
+    ? 'rgba(75, 85, 99, 0.5)'
     : 'rgba(147, 197, 253, 0.3)'};
   display: flex;
   gap: 20px;
@@ -434,8 +434,8 @@ const CVTemplateItem = styled(motion.div)`
 const DropdownLeftColumn = styled.div`
   flex-shrink: 0;
   width: 200px;
-  border-right: 1px solid ${props => props.$isDark 
-    ? 'rgba(75, 85, 99, 0.3)' 
+  border-right: 1px solid ${props => props.$isDark
+    ? 'rgba(75, 85, 99, 0.3)'
     : 'rgba(0, 0, 0, 0.06)'};
   padding-right: 16px;
   display: flex;
@@ -615,14 +615,14 @@ const AnimatedBackground = styled.div`
     left: 0;
     width: 100%;
     height: 100%;
-    background: ${props => props.$isDark 
-      ? `linear-gradient(
+    background: ${props => props.$isDark
+    ? `linear-gradient(
           to bottom,
           rgba(30, 64, 175, 0) 0%,
           rgba(30, 64, 175, 0.2) 50%,
           rgba(30, 64, 175, 0) 100%
         )`
-      : `linear-gradient(
+    : `linear-gradient(
           to bottom,
           rgba(26, 98, 255, 0) 0%,
           rgba(26, 98, 255, 0.3) 50%,
@@ -1071,7 +1071,7 @@ const SearchContainer = styled(motion.div)`
   border: 2px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.4)' : 'rgba(147, 197, 253, 0.4)'};
   padding: 0;
   border-radius: 16px;
-  box-shadow: ${props => props.$isDark 
+  box-shadow: ${props => props.$isDark
     ? '0 12px 48px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.5)'
     : '0 12px 48px rgba(147, 197, 253, 0.25), 0 4px 16px rgba(251, 207, 232, 0.2)'};
   display: flex;
@@ -1080,9 +1080,9 @@ const SearchContainer = styled(motion.div)`
   overflow: hidden;
   
   &:hover {
-    box-shadow: ${props => props.$isDark 
-      ? '0 16px 64px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.25)'
-      : '0 16px 64px rgba(147, 197, 253, 0.3), 0 8px 24px rgba(251, 207, 232, 0.25)'};
+    box-shadow: ${props => props.$isDark
+    ? '0 16px 64px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.25)'
+    : '0 16px 64px rgba(147, 197, 253, 0.3), 0 8px 24px rgba(251, 207, 232, 0.25)'};
     border-color: #0EA5E9;
     transform: translateY(-3px);
   }
@@ -1522,8 +1522,8 @@ const CompanyLogo = styled(motion.div)`
   width: 200px;
   height: 100px;
   background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : '#FFFFFF'};
-  border: 1px solid ${props => props.$isDark 
-    ? 'rgba(75, 85, 99, 0.4)' 
+  border: 1px solid ${props => props.$isDark
+    ? 'rgba(75, 85, 99, 0.4)'
     : 'rgba(147, 197, 253, 0.2)'};
   border-radius: 12px;
   display: flex;
@@ -1533,15 +1533,15 @@ const CompanyLogo = styled(motion.div)`
   font-size: 24px;
   color: ${props => props.$isDark ? '#94A3B8' : '#64748B'};
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: ${props => props.$isDark 
-    ? '0 2px 8px rgba(0, 0, 0, 0.3)' 
+  box-shadow: ${props => props.$isDark
+    ? '0 2px 8px rgba(0, 0, 0, 0.3)'
     : '0 2px 8px rgba(147, 197, 253, 0.1)'};
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: ${props => props.$isDark 
-      ? '0 4px 16px rgba(30, 64, 175, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2)' 
-      : '0 4px 16px rgba(147, 197, 253, 0.2), 0 2px 8px rgba(251, 207, 232, 0.15)'};
+    box-shadow: ${props => props.$isDark
+    ? '0 4px 16px rgba(30, 64, 175, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2)'
+    : '0 4px 16px rgba(147, 197, 253, 0.2), 0 2px 8px rgba(251, 207, 232, 0.15)'};
     border-color: #0EA5E9;
     color: #0EA5E9;
   }
@@ -1597,8 +1597,8 @@ const CategoryCard = styled(motion.div)`
   background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : '#FFFFFF'};
   padding: 32px 24px;
   border-radius: 16px;
-  border: 1px solid ${props => props.$isDark 
-    ? 'rgba(75, 85, 99, 0.4)' 
+  border: 1px solid ${props => props.$isDark
+    ? 'rgba(75, 85, 99, 0.4)'
     : 'rgba(0, 0, 0, 0.06)'};
   text-align: center;
   cursor: pointer;
@@ -1617,18 +1617,18 @@ const CategoryCard = styled(motion.div)`
     padding: 20px 16px;
     border-radius: 10px;
   }
-  box-shadow: ${props => props.$isDark 
-    ? '0 2px 8px rgba(0, 0, 0, 0.3)' 
+  box-shadow: ${props => props.$isDark
+    ? '0 2px 8px rgba(0, 0, 0, 0.3)'
     : '0 2px 8px rgba(0, 0, 0, 0.04)'};
   
   &:hover {
     transform: translateY(-4px);
-    box-shadow: ${props => props.$isDark 
-      ? '0 8px 24px rgba(0, 0, 0, 0.4)' 
-      : '0 8px 24px rgba(0, 0, 0, 0.08)'};
-    border-color: ${props => props.$isDark 
-      ? 'rgba(30, 64, 175, 0.4)' 
-      : 'rgba(30, 64, 175, 0.2)'};
+    box-shadow: ${props => props.$isDark
+    ? '0 8px 24px rgba(0, 0, 0, 0.4)'
+    : '0 8px 24px rgba(0, 0, 0, 0.08)'};
+    border-color: ${props => props.$isDark
+    ? 'rgba(30, 64, 175, 0.4)'
+    : 'rgba(30, 64, 175, 0.2)'};
   }
 `;
 
@@ -1784,18 +1784,18 @@ const CTASection = styled.section`
 `;
 
 const CTACard = styled(motion.div)`
-  background: ${props => props.$isDark 
-    ? 'linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%)' 
+  background: ${props => props.$isDark
+    ? 'linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%)'
     : 'linear-gradient(135deg, #dceaf9 0%, #ffffffb3 100%)'};
-  border: 1px solid ${props => props.$isDark 
-    ? 'rgba(75, 85, 99, 0.4)' 
+  border: 1px solid ${props => props.$isDark
+    ? 'rgba(75, 85, 99, 0.4)'
     : 'rgba(0, 0, 0, 0.06)'};
   padding: 80px 60px;
   border-radius: 24px;
   text-align: center;
   position: relative;
-  box-shadow: ${props => props.$isDark 
-    ? '0 4px 24px rgba(0, 0, 0, 0.3)' 
+  box-shadow: ${props => props.$isDark
+    ? '0 4px 24px rgba(0, 0, 0, 0.3)'
     : '0 4px 24px rgba(0, 0, 0, 0.04)'};
 `;
 
@@ -1844,8 +1844,8 @@ const CTAText = styled.p`
 
 const DownloadAppSection = styled(motion.section)`
   padding: 60px 90px;
-  background: ${props => props.$isDark 
-    ? '#0c4a6e' 
+  background: ${props => props.$isDark
+    ? '#0c4a6e'
     : '#EFF6FF'};
   max-width: 1440px;
   margin: 0 auto;
@@ -1878,9 +1878,9 @@ const DownloadAppSection = styled(motion.section)`
     left: 0;
     right: 0;
     bottom: 0;
-    background: ${props => props.$isDark 
-      ? 'radial-gradient(circle at 20% 50%, rgba(14, 165, 233, 0.15) 0%, transparent 50%)' 
-      : 'radial-gradient(circle at 80% 50%, rgba(14, 165, 233, 0.08) 0%, transparent 50%)'};
+    background: ${props => props.$isDark
+    ? 'radial-gradient(circle at 20% 50%, rgba(14, 165, 233, 0.15) 0%, transparent 50%)'
+    : 'radial-gradient(circle at 80% 50%, rgba(14, 165, 233, 0.08) 0%, transparent 50%)'};
     pointer-events: none;
     z-index: 0;
   }
@@ -1892,9 +1892,9 @@ const DownloadAppSection = styled(motion.section)`
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: ${props => props.$isDark 
-      ? 'radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px)' 
-      : 'radial-gradient(rgba(14, 165, 233, 0.04) 1px, transparent 1px)'};
+    background-image: ${props => props.$isDark
+    ? 'radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px)'
+    : 'radial-gradient(rgba(14, 165, 233, 0.04) 1px, transparent 1px)'};
     background-size: 20px 20px;
     pointer-events: none;
     opacity: 0.5;
@@ -1991,15 +1991,15 @@ const QRCode = styled.div`
   width: 120px;
   height: 120px;
   background: ${props => props.$isDark ? '#1e293b' : 'white'};
-  border: 2px solid ${props => props.$isDark 
-    ? 'rgba(14, 165, 233, 0.3)' 
+  border: 2px solid ${props => props.$isDark
+    ? 'rgba(14, 165, 233, 0.3)'
     : 'rgba(14, 165, 233, 0.2)'};
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: ${props => props.$isDark 
-    ? '0 4px 16px rgba(0, 0, 0, 0.5)' 
+  box-shadow: ${props => props.$isDark
+    ? '0 4px 16px rgba(0, 0, 0, 0.5)'
     : '0 4px 16px rgba(14, 165, 233, 0.12)'};
   padding: 10px;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -2224,95 +2224,131 @@ const AppServiceCard = styled.div`
 `;
 
 const Footer = styled(motion.footer)`
-  background: ${props => props.$isDark 
-    ? 'linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 100%)' 
-    : 'linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%)'};
-  border-top: 1px solid ${props => props.$isDark 
-    ? 'rgba(75, 85, 99, 0.3)' 
-    : 'rgba(0, 0, 0, 0.06)'};
-  padding: 64px 80px 32px;
+  background: ${props => props.$isDark ? '#0F172A' : '#ffffff'};
+  border-top: 1px solid ${props => props.$isDark ? 'rgba(75, 85, 99, 0.3)' : 'rgba(0, 0, 0, 0.06)'};
+  padding: 80px 80px 20px;
   max-width: 1440px;
   margin: 0 auto;
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  scroll-snap-align: start;
+  justify-content: space-between;
+  scroll-snap-align: end;
   scroll-snap-stop: always;
   transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   
-  @media (max-width: 1024px) {
-    padding: 50px 40px 24px;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 40px 20px 24px;
-    min-height: auto;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 30px 16px 20px;
-  }
+  @media (max-width: 1024px) { padding: 70px 40px 20px; }
+  @media (max-width: 768px) { padding: 60px 20px 20px; height: auto; min-height: 100vh; }
+  @media (max-width: 480px) { padding: 50px 16px 20px; }
 `;
 
-const FooterGrid = styled.div`
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 64px;
-  margin-bottom: 48px;
-  
-  @media (max-width: 1024px) {
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-  }
-  
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 32px;
-    margin-bottom: 32px;
-  }
-  
-  @media (max-width: 480px) {
-    gap: 24px;
-  }
+const FooterMain = styled.div`
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+  flex: 1;
+  @media (max-width: 1024px) { flex-direction: column; }
 `;
 
-const FooterSection = styled.div`
-  h3 {
-    font-size: 14px;
-    font-weight: 600;
+const FooterLeft = styled.div`
+  flex: 0 0 280px;
+  .logo-area {
     margin-bottom: 16px;
-    color: ${props => props.$isDark ? '#F1F5F9' : '#0F172A'};
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+    .logo-link {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        text-decoration: none;
+        img { height: 65px; }
+        span { font-size: 15px; font-weight: 700; color: #002e9d; letter-spacing: -0.3px; line-height: 1; margin-top: 2px;}
+    }
+    p { font-size: 13px; font-weight: 600; color: ${props => props.$isDark ? '#e2e8f0' : '#1e40af'}; line-height: 1.4; margin-top: 4px; }
   }
-  
-  p {
-    color: ${props => props.$isDark ? '#94A3B8' : '#64748B'};
-    margin-bottom: 12px;
-    line-height: 1.6;
-    font-size: 14px;
+  .contact-info {
+    margin-bottom: 16px;
+    h4 { font-size: 14px; font-weight: 600; margin-bottom: 8px; color: ${props => props.$isDark ? '#F1F5F9' : '#0F172A'}; }
+    p { font-size: 13px; color: ${props => props.$isDark ? '#94A3B8' : '#475569'}; margin-bottom: 4px; }
   }
-  
-  a {
-    display: block;
-    color: ${props => props.$isDark ? '#94A3B8' : '#64748B'};
-    margin-bottom: 12px;
-    transition: all 0.3s ease;
-    font-size: 14px;
-    
-    &:hover {
-      color: #0EA5E9;
+  .app-download {
+    h4 { font-size: 14px; font-weight: 600; margin-bottom: 8px; color: ${props => props.$isDark ? '#F1F5F9' : '#0F172A'}; }
+    .badges {
+      display: flex; gap: 8px;
+      img { height: 32px; border-radius: 6px; cursor: pointer; border: 1px solid ${props => props.$isDark ? '#334155' : '#e2e8f0'}; }
     }
   }
 `;
 
+const FooterLinksWrap = styled.div`
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  @media (max-width: 768px) { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  @media (max-width: 480px) { grid-template-columns: 1fr; }
+`;
+
+const FooterLinkCol = styled.div`
+  h4 { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: ${props => props.$isDark ? '#F1F5F9' : '#0F172A'}; }
+  a {
+    display: block; font-size: 13px; color: ${props => props.$isDark ? '#94A3B8' : '#475569'};
+    margin-bottom: 8px; text-decoration: none; transition: color 0.2s;
+    &:hover { color: #1e40af; }
+  }
+`;
+
+const FooterBottom = styled.div`
+  border-top: 1px solid ${props => props.$isDark ? '#334155' : '#e2e8f0'};
+  padding-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  @media (max-width: 768px) { flex-direction: column; gap: 20px; }
+`;
+
+const CompanyDetails = styled.div`
+  flex: 1;
+  h3 { font-size: 15px; font-weight: 700; color: ${props => props.$isDark ? '#F1F5F9' : '#0F172A'}; margin-bottom: 12px; }
+  p {
+    font-size: 12px; color: ${props => props.$isDark ? '#94A3B8' : '#475569'}; margin-bottom: 4px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4;
+    span { color: #10b981; font-weight: bold; padding-top: 1px; }
+  }
+  .ecosystem {
+    margin-top: 16px;
+    h4 { font-size: 13px; font-weight: 600; color: ${props => props.$isDark ? '#F1F5F9' : '#0F172A'}; margin-bottom: 8px; }
+    .badges {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      .badge {
+        display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 6px; color: white; font-size: 11px; font-weight: 600; text-align: left; line-height: 1.3; max-width: 220px;
+        &.blue { background: #1e40af; }
+        &.green { background: #10b981; }
+        &.orange { background: #f59e0b; }
+      }
+    }
+  }
+`;
+
+const QrCodeArea = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 0 auto;
+  img { height: 100px; width: 100px; border-radius: 8px; padding: 4px; background: white; border: 1px solid #e2e8f0; object-fit: contain; }
+  p { font-size: 12px; color: #1e40af; margin-top: 6px; font-weight: 600; text-align: center; }
+  @media (max-width: 768px) { align-items: flex-start; }
+`;
+
 const Copyright = styled.div`
   text-align: center;
-  padding-top: 32px;
-  border-top: 1px solid ${props => props.$isDark 
-    ? 'rgba(148, 163, 184, 0.15)' 
-    : 'rgba(0, 0, 0, 0.06)'};
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid ${props => props.$isDark ? 'rgba(148, 163, 184, 0.15)' : 'rgba(0, 0, 0, 0.06)'};
   color: ${props => props.$isDark ? '#64748B' : '#94A3B8'};
-  font-size: 14px;
+  font-size: 13px;
 `;
 
 const StickyColumn = styled.div`
@@ -2343,8 +2379,8 @@ const StickyIconButton = styled(motion.a)`
   cursor: pointer;
   color: #0EA5E9;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: ${props => props.$isDark 
-    ? '0 4px 16px rgba(0, 0, 0, 0.3)' 
+  box-shadow: ${props => props.$isDark
+    ? '0 4px 16px rgba(0, 0, 0, 0.3)'
     : '0 4px 16px rgba(147, 197, 253, 0.15)'};
   text-decoration: none;
   position: relative;
@@ -2441,8 +2477,8 @@ const SectionHeading = styled(motion.div)`
 `;
 
 const CompanyBannerSection = styled(motion.section)`
-  background: ${props => props.$isDark 
-    ? '#1e293b' 
+  background: ${props => props.$isDark
+    ? '#1e293b'
     : '#E0F2FE'};
   padding: 60px 80px;
   position: relative;
@@ -2496,11 +2532,11 @@ const CompanyBannerContent = styled.div`
 
 const CompanyBannerTitle = styled(motion.h2)`
   text-align: center;
-  font-size: 72px;
+  font-size: 70px;
   font-weight: 800;
   color: ${props => props.$isDark ? '#f1f5f9' : '#0c4a6e'};
   margin-bottom: 60px;
-  line-height: 1.2;
+  line-height: 1.3;
   letter-spacing: -1px;
   transition: color 0.4s ease;
   text-shadow: ${props => props.$isDark ? '0 2px 8px rgba(0, 0, 0, 0.3)' : '0 2px 8px rgba(12, 74, 110, 0.1)'};
@@ -2530,16 +2566,16 @@ const LogoCarouselWrapper = styled.div`
   
   &::before {
     left: 0;
-    background: ${props => props.$isDark 
-      ? 'linear-gradient(to right, rgba(30, 41, 59, 1), rgba(30, 41, 59, 0))' 
-      : 'linear-gradient(to right, rgba(224, 242, 254, 1), rgba(224, 242, 254, 0))'};
+    background: ${props => props.$isDark
+    ? 'linear-gradient(to right, rgba(30, 41, 59, 1), rgba(30, 41, 59, 0))'
+    : 'linear-gradient(to right, rgba(224, 242, 254, 1), rgba(224, 242, 254, 0))'};
   }
   
   &::after {
     right: 0;
-    background: ${props => props.$isDark 
-      ? 'linear-gradient(to left, rgba(30, 41, 59, 1), rgba(30, 41, 59, 0))' 
-      : 'linear-gradient(to left, rgba(224, 242, 254, 1), rgba(224, 242, 254, 0))'};
+    background: ${props => props.$isDark
+    ? 'linear-gradient(to left, rgba(30, 41, 59, 1), rgba(30, 41, 59, 0))'
+    : 'linear-gradient(to left, rgba(224, 242, 254, 1), rgba(224, 242, 254, 0))'};
   }
 `;
 
@@ -2554,11 +2590,11 @@ const BannerCompanyLogo = styled.div`
   background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)'};
   padding: 24px 40px;
   border-radius: 16px;
-  box-shadow: ${props => props.$isDark 
-    ? '0 6px 20px rgba(0, 0, 0, 0.3)' 
+  box-shadow: ${props => props.$isDark
+    ? '0 6px 20px rgba(0, 0, 0, 0.3)'
     : '0 6px 20px rgba(14, 165, 233, 0.15)'};
-  border: 2px solid ${props => props.$isDark 
-    ? 'rgba(148, 163, 184, 0.2)' 
+  border: 2px solid ${props => props.$isDark
+    ? 'rgba(148, 163, 184, 0.2)'
     : 'rgba(14, 165, 233, 0.2)'};
   display: flex;
   align-items: center;
@@ -2570,12 +2606,12 @@ const BannerCompanyLogo = styled.div`
   
   &:hover {
     transform: translateY(-6px) scale(1.05);
-    box-shadow: ${props => props.$isDark 
-      ? '0 12px 32px rgba(0, 0, 0, 0.4)' 
-      : '0 12px 32px rgba(14, 165, 233, 0.25)'};
-    border-color: ${props => props.$isDark 
-      ? 'rgba(148, 163, 184, 0.4)' 
-      : 'rgba(14, 165, 233, 0.4)'};
+    box-shadow: ${props => props.$isDark
+    ? '0 12px 32px rgba(0, 0, 0, 0.4)'
+    : '0 12px 32px rgba(14, 165, 233, 0.25)'};
+    border-color: ${props => props.$isDark
+    ? 'rgba(148, 163, 184, 0.4)'
+    : 'rgba(14, 165, 233, 0.4)'};
   }
   
   img {
@@ -2638,7 +2674,7 @@ const LandingPage = () => {
   const [showPhoneApp, setShowPhoneApp] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
-  
+
   const jobDropdownRef = useRef(null);
   const companyDropdownRef = useRef(null);
   const scrollContainerRef = useRef(null);
@@ -2711,7 +2747,7 @@ const LandingPage = () => {
   useEffect(() => {
     let titleIndex = 0;
     let subtitleIndex = 0;
-    
+
     // Type title first
     const titleInterval = setInterval(() => {
       if (titleIndex < fullTitle.length) {
@@ -2763,176 +2799,176 @@ const LandingPage = () => {
         <LeftSection>
           <Logo to="/">
             <img src="/OpPoReview/images/logo.png" alt="Ốp Pờ" style={{ height: '42px', marginRight: '5px' }} />
-           
+
           </Logo>
           <NavLinks $isDark={isDarkMode}>
-          <DropdownContainer
-            ref={jobDropdownRef}
-            onMouseEnter={() => setIsJobDropdownOpen(true)}
-            onMouseLeave={() => setIsJobDropdownOpen(false)}
-          >
-            <DropdownButton
-              $isOpen={isJobDropdownOpen}
-              $isDark={isDarkMode}
+            <DropdownContainer
+              ref={jobDropdownRef}
+              onMouseEnter={() => setIsJobDropdownOpen(true)}
+              onMouseLeave={() => setIsJobDropdownOpen(false)}
             >
-              Việc làm
-              <ChevronDown />
-            </DropdownButton>
-            {isJobDropdownOpen && (
-              <LargeDropdownMenu
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
+              <DropdownButton
+                $isOpen={isJobDropdownOpen}
                 $isDark={isDarkMode}
               >
-                <DropdownLeftColumn $isDark={isDarkMode}>
-                  <DropdownSection>
+                Việc làm
+                <ChevronDown />
+              </DropdownButton>
+              {isJobDropdownOpen && (
+                <LargeDropdownMenu
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  $isDark={isDarkMode}
+                >
+                  <DropdownLeftColumn $isDark={isDarkMode}>
+                    <DropdownSection>
+                      <GreenSectionTitle>
+                        Việc làm
+                        <ArrowRight />
+                      </GreenSectionTitle>
+                      <CVTemplateItem to="/candidate/jobs" $isDark={isDarkMode}>
+                        <Search />
+                        Tìm việc làm
+                      </CVTemplateItem>
+                      <CVTemplateItem to="/candidate/saved-jobs" $isDark={isDarkMode}>
+                        <Bookmark />
+                        Việc làm đã lưu
+                      </CVTemplateItem>
+                      <CVTemplateItem to="/candidate/applications" $isDark={isDarkMode}>
+                        <FileText />
+                        Việc làm đã ứng tuyển
+                      </CVTemplateItem>
+                      <CVTemplateItem to="/candidate/jobs?recommended=true" $isDark={isDarkMode}>
+                        <ThumbsUp />
+                        Việc làm phù hợp
+                      </CVTemplateItem>
+                    </DropdownSection>
+
+                    <DropdownSection>
+                      <GreenSectionTitle>
+                        Nhà tuyển dụng
+                        <ArrowRight />
+                      </GreenSectionTitle>
+                      <CVTemplateItem to="/companies" $isDark={isDarkMode}>
+                        <Building2 />
+                        Danh sách nhà tuyển dụng
+                      </CVTemplateItem>
+                      <CVTemplateItem to="/companies/top-companies" $isDark={isDarkMode}>
+                        <Star />
+                        Nhà tuyển dụng
+                      </CVTemplateItem>
+                    </DropdownSection>
+                  </DropdownLeftColumn>
+
+                  <DropdownRightColumn>
                     <GreenSectionTitle>
-                      Việc làm
+                      Việc làm theo vị trí
                       <ArrowRight />
                     </GreenSectionTitle>
-                    <CVTemplateItem to="/candidate/jobs" $isDark={isDarkMode}>
-                      <Search />
-                      Tìm việc làm
-                    </CVTemplateItem>
-                    <CVTemplateItem to="/candidate/saved-jobs" $isDark={isDarkMode}>
-                      <Bookmark />
-                      Việc làm đã lưu
-                    </CVTemplateItem>
-                    <CVTemplateItem to="/candidate/applications" $isDark={isDarkMode}>
-                      <FileText />
-                      Việc làm đã ứng tuyển
-                    </CVTemplateItem>
-                    <CVTemplateItem to="/candidate/jobs?recommended=true" $isDark={isDarkMode}>
-                      <ThumbsUp />
-                      Việc làm phù hợp
-                    </CVTemplateItem>
-                  </DropdownSection>
-                  
-                  <DropdownSection>
-                    <GreenSectionTitle>
-                      Nhà tuyển dụng
-                      <ArrowRight />
-                    </GreenSectionTitle>
-                    <CVTemplateItem to="/companies" $isDark={isDarkMode}>
-                      <Building2 />
-                      Danh sách nhà tuyển dụng
-                    </CVTemplateItem>
-                    <CVTemplateItem to="/companies/top-companies" $isDark={isDarkMode}>
-                      <Star />
-                      Nhà tuyển dụng
-                    </CVTemplateItem>
-                  </DropdownSection>
-                </DropdownLeftColumn>
-                
-                <DropdownRightColumn>
-                  <GreenSectionTitle>
-                    Việc làm theo vị trí
-                    <ArrowRight />
-                  </GreenSectionTitle>
-                  <JobCategoriesGrid>
-                    <JobCategoryItem to="/candidate/jobs?category=sales" $isDark={isDarkMode}>Nhân viên pha chế</JobCategoryItem>
-                    <JobCategoryItem to="/candidate/jobs?category=labor" $isDark={isDarkMode}>Nhân viên thu ngân</JobCategoryItem>
-                    <JobCategoryItem to="/candidate/jobs?category=accountant" $isDark={isDarkMode}>Nhân viên phụ bếp</JobCategoryItem>
-                    <JobCategoryItem to="/candidate/jobs?type=senior" $isDark={isDarkMode}>Nhân viên phục vụ</JobCategoryItem>
-                    <JobCategoryItem to="/candidate/jobs?category=marketing" $isDark={isDarkMode}>Nhân viên kho</JobCategoryItem>
-                    <JobCategoryItem to="/candidate/jobs?category=engineer" $isDark={isDarkMode}>Nhân viên kỹ thuật</JobCategoryItem>
-                  </JobCategoriesGrid>
-                </DropdownRightColumn>
-              </LargeDropdownMenu>
-            )}
-          </DropdownContainer>
-          
-          <DropdownContainer
-            ref={companyDropdownRef}
-            onMouseEnter={() => setIsCompanyDropdownOpen(true)}
-            onMouseLeave={() => setIsCompanyDropdownOpen(false)}
-          >
-            <DropdownButton
-              $isOpen={isCompanyDropdownOpen}
-              $isDark={isDarkMode}
+                    <JobCategoriesGrid>
+                      <JobCategoryItem to="/candidate/jobs?category=sales" $isDark={isDarkMode}>Nhân viên pha chế</JobCategoryItem>
+                      <JobCategoryItem to="/candidate/jobs?category=labor" $isDark={isDarkMode}>Nhân viên thu ngân</JobCategoryItem>
+                      <JobCategoryItem to="/candidate/jobs?category=accountant" $isDark={isDarkMode}>Nhân viên phụ bếp</JobCategoryItem>
+                      <JobCategoryItem to="/candidate/jobs?type=senior" $isDark={isDarkMode}>Nhân viên phục vụ</JobCategoryItem>
+                      <JobCategoryItem to="/candidate/jobs?category=marketing" $isDark={isDarkMode}>Nhân viên kho</JobCategoryItem>
+                      <JobCategoryItem to="/candidate/jobs?category=engineer" $isDark={isDarkMode}>Nhân viên kỹ thuật</JobCategoryItem>
+                    </JobCategoriesGrid>
+                  </DropdownRightColumn>
+                </LargeDropdownMenu>
+              )}
+            </DropdownContainer>
+
+            <DropdownContainer
+              ref={companyDropdownRef}
+              onMouseEnter={() => setIsCompanyDropdownOpen(true)}
+              onMouseLeave={() => setIsCompanyDropdownOpen(false)}
             >
-              Tạo CV
-              <ChevronDown />
-            </DropdownButton>
-            {isCompanyDropdownOpen && (
-              <LargeDropdownMenu
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
+              <DropdownButton
+                $isOpen={isCompanyDropdownOpen}
+                $isDark={isDarkMode}
               >
-                <DropdownLeftColumn>
-                  <DropdownSection>
-                    <GreenSectionTitle>
-                      Mẫu CV theo style
-                      <ArrowRight />
-                    </GreenSectionTitle>
-                    <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
-                      <Package />
-                      Mẫu CV Đơn giản
-                    </CVTemplateItem>
-                    <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
-                      <Star />
-                      Mẫu CV Ấn tượng
-                    </CVTemplateItem>
-                  </DropdownSection>
-                  
-                  <DropdownSection>
-                    <GreenSectionTitle>
-                      Tạo CV bằng AI
-                      <ArrowRight />
-                    </GreenSectionTitle>
-                    <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
-                      <Briefcase />
-                      Nhân viên pha chế
-                    </CVTemplateItem>
-                    <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
-                      <Briefcase />
-                      Lập trình viên
-                    </CVTemplateItem>
-                    <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
-                      <Briefcase />
-                      Nhân viên kế toán
-                    </CVTemplateItem>
-                    <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
-                      <Briefcase />
-                      Chuyên viên marketing
-                    </CVTemplateItem>
-                  </DropdownSection>
-                </DropdownLeftColumn>
-                
-                <DropdownRightColumn>
-                  <DropdownSection>
-                    <DropdownItem onClick={() => setIsDevModalOpen(true)}>
-                      <Folder />
-                      Quản lý CV
-                    </DropdownItem>
-                    <DropdownItem onClick={() => setIsDevModalOpen(true)}>
-                      <Upload />
-                      Tải CV lên
-                    </DropdownItem>
-                    <DropdownItem onClick={() => setIsDevModalOpen(true)}>
-                      <Edit3 />
-                      Quản lý Cover Letter
-                    </DropdownItem>
-                    <DropdownItem onClick={() => setIsDevModalOpen(true)}>
-                      <FileText />
-                      Mẫu Cover Letter
-                    </DropdownItem>
-                  </DropdownSection>
-                </DropdownRightColumn>
-              </LargeDropdownMenu>
-            )}
-          </DropdownContainer>
-          
-          <NavLinkItem to="/login?redirect=/employer/quick-jobs&role=employer">
-            Đăng tuyển
-          </NavLinkItem>
+                Tạo CV
+                <ChevronDown />
+              </DropdownButton>
+              {isCompanyDropdownOpen && (
+                <LargeDropdownMenu
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <DropdownLeftColumn>
+                    <DropdownSection>
+                      <GreenSectionTitle>
+                        Mẫu CV theo style
+                        <ArrowRight />
+                      </GreenSectionTitle>
+                      <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
+                        <Package />
+                        Mẫu CV Đơn giản
+                      </CVTemplateItem>
+                      <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
+                        <Star />
+                        Mẫu CV Ấn tượng
+                      </CVTemplateItem>
+                    </DropdownSection>
+
+                    <DropdownSection>
+                      <GreenSectionTitle>
+                        Tạo CV bằng AI
+                        <ArrowRight />
+                      </GreenSectionTitle>
+                      <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
+                        <Briefcase />
+                        Nhân viên pha chế
+                      </CVTemplateItem>
+                      <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
+                        <Briefcase />
+                        Lập trình viên
+                      </CVTemplateItem>
+                      <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
+                        <Briefcase />
+                        Nhân viên kế toán
+                      </CVTemplateItem>
+                      <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
+                        <Briefcase />
+                        Chuyên viên marketing
+                      </CVTemplateItem>
+                    </DropdownSection>
+                  </DropdownLeftColumn>
+
+                  <DropdownRightColumn>
+                    <DropdownSection>
+                      <DropdownItem onClick={() => setIsDevModalOpen(true)}>
+                        <Folder />
+                        Quản lý CV
+                      </DropdownItem>
+                      <DropdownItem onClick={() => setIsDevModalOpen(true)}>
+                        <Upload />
+                        Tải CV lên
+                      </DropdownItem>
+                      <DropdownItem onClick={() => setIsDevModalOpen(true)}>
+                        <Edit3 />
+                        Quản lý Cover Letter
+                      </DropdownItem>
+                      <DropdownItem onClick={() => setIsDevModalOpen(true)}>
+                        <FileText />
+                        Mẫu Cover Letter
+                      </DropdownItem>
+                    </DropdownSection>
+                  </DropdownRightColumn>
+                </LargeDropdownMenu>
+              )}
+            </DropdownContainer>
+
+            <NavLinkItem to="/login?redirect=/employer/quick-jobs&role=employer">
+              Đăng tuyển
+            </NavLinkItem>
           </NavLinks>
         </LeftSection>
-        
+
         <RightSection>
           <LanguageToggle onClick={scrollToDownload} $isDark={isDarkMode}>
             <Download />
@@ -2952,1214 +2988,1251 @@ const LandingPage = () => {
       </Header>
 
       <ScrollContainer ref={scrollContainerRef}>
-      <HeroSection
-        ref={heroRef}
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1, ease: "easeOut" }}
-      >
-        <AnimatedBackground $isDark={isDarkMode}>
-          {/* Aurora ambient light layer */}
-          <AuroraLayer />
-          
-          {/* Grid pattern */}
-          <GridPattern />
-          
-          {/* Noise texture for premium feel */}
-          <NoiseTexture />
-          
-          {/* Central gradient glow behind hero text */}
-          <GradientGlow
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
-          />
-          
-          {/* Large gradient blobs - premium floating shapes */}
-          <GradientBlob
-            rounded
-            opacity={0.25}
-            blur={100}
-            animate={{
-              x: [0, 80, 0],
-              y: [0, -60, 0],
-              scale: [1, 1.15, 1],
-            }}
-            transition={{
-              duration: 22,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            style={{
-              width: '600px',
-              height: '600px',
-              top: '5%',
-              left: '-5%',
-              background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(30, 64, 175, 0.2))',
-            }}
-          />
-          
-          <GradientBlob
-            rounded
-            opacity={0.2}
-            blur={120}
-            animate={{
-              x: [0, -70, 0],
-              y: [0, 80, 0],
-              scale: [1, 1.2, 1],
-            }}
-            transition={{
-              duration: 26,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            style={{
-              width: '700px',
-              height: '700px',
-              top: '40%',
-              right: '-10%',
-              background: 'linear-gradient(135deg, rgba(30, 64, 175, 0.25), rgba(30, 64, 175, 0.15))',
-            }}
-          />
-          
-          <GradientBlob
-            rounded
-            opacity={0.18}
-            blur={90}
-            animate={{
-              x: [0, 50, 0],
-              y: [0, -50, 0],
-              scale: [1, 1.1, 1],
-            }}
-            transition={{
-              duration: 20,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            style={{
-              width: '500px',
-              height: '500px',
-              bottom: '5%',
-              left: '25%',
-              background: 'linear-gradient(135deg, rgba(147, 197, 253, 0.3), rgba(96, 165, 250, 0.2))',
-            }}
-          />
-          
-          {/* Smaller accent blobs */}
-          <GradientBlob
-            rounded
-            opacity={0.22}
-            blur={70}
-            float
-            style={{
-              width: '350px',
-              height: '350px',
-              top: '15%',
-              right: '20%',
-              background: 'radial-gradient(circle, rgba(30, 64, 175, 0.3), rgba(30, 64, 175, 0.15))',
-            }}
-          />
-          
-          <GradientBlob
-            rounded
-            opacity={0.2}
-            blur={80}
-            float
-            style={{
-              width: '400px',
-              height: '400px',
-              bottom: '15%',
-              right: '35%',
-              background: 'radial-gradient(circle, rgba(96, 165, 250, 0.28), rgba(30, 64, 175, 0.12))',
-            }}
-          />
-          
-          {/* Floating particles */}
-          {particleConfigs.map((particle, index) => (
-            <Particle
-              key={`particle-${index}`}
-              style={{
-                top: particle.top,
-                left: particle.left,
+        <HeroSection
+          ref={heroRef}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        >
+          <AnimatedBackground $isDark={isDarkMode}>
+            {/* Aurora ambient light layer */}
+            <AuroraLayer />
+
+            {/* Grid pattern */}
+            <GridPattern />
+
+            {/* Noise texture for premium feel */}
+            <NoiseTexture />
+
+            {/* Central gradient glow behind hero text */}
+            <GradientGlow
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.5, ease: "easeOut" }}
+            />
+
+            {/* Large gradient blobs - premium floating shapes */}
+            <GradientBlob
+              rounded
+              opacity={0.25}
+              blur={100}
+              animate={{
+                x: [0, 80, 0],
+                y: [0, -60, 0],
+                scale: [1, 1.15, 1],
               }}
+              transition={{
+                duration: 22,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              style={{
+                width: '600px',
+                height: '600px',
+                top: '5%',
+                left: '-5%',
+                background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(30, 64, 175, 0.2))',
+              }}
+            />
+
+            <GradientBlob
+              rounded
+              opacity={0.2}
+              blur={120}
+              animate={{
+                x: [0, -70, 0],
+                y: [0, 80, 0],
+                scale: [1, 1.2, 1],
+              }}
+              transition={{
+                duration: 26,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              style={{
+                width: '700px',
+                height: '700px',
+                top: '40%',
+                right: '-10%',
+                background: 'linear-gradient(135deg, rgba(30, 64, 175, 0.25), rgba(30, 64, 175, 0.15))',
+              }}
+            />
+
+            <GradientBlob
+              rounded
+              opacity={0.18}
+              blur={90}
+              animate={{
+                x: [0, 50, 0],
+                y: [0, -50, 0],
+                scale: [1, 1.1, 1],
+              }}
+              transition={{
+                duration: 20,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              style={{
+                width: '500px',
+                height: '500px',
+                bottom: '5%',
+                left: '25%',
+                background: 'linear-gradient(135deg, rgba(147, 197, 253, 0.3), rgba(96, 165, 250, 0.2))',
+              }}
+            />
+
+            {/* Smaller accent blobs */}
+            <GradientBlob
+              rounded
+              opacity={0.22}
+              blur={70}
+              float
+              style={{
+                width: '350px',
+                height: '350px',
+                top: '15%',
+                right: '20%',
+                background: 'radial-gradient(circle, rgba(30, 64, 175, 0.3), rgba(30, 64, 175, 0.15))',
+              }}
+            />
+
+            <GradientBlob
+              rounded
+              opacity={0.2}
+              blur={80}
+              float
+              style={{
+                width: '400px',
+                height: '400px',
+                bottom: '15%',
+                right: '35%',
+                background: 'radial-gradient(circle, rgba(96, 165, 250, 0.28), rgba(30, 64, 175, 0.12))',
+              }}
+            />
+
+            {/* Floating particles */}
+            {particleConfigs.map((particle, index) => (
+              <Particle
+                key={`particle-${index}`}
+                style={{
+                  top: particle.top,
+                  left: particle.left,
+                }}
+                animate={{
+                  y: [0, -20, 0],
+                  x: [0, 15, 0],
+                  opacity: [0.3, 0.8, 0.4],
+                  scale: [1, 1.4, 1],
+                }}
+                transition={{
+                  duration: particle.duration,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                  delay: particle.delay,
+                }}
+              />
+            ))}
+
+            {/* Corner Patterns */}
+            <TopLeftPattern
+              animate={{
+                opacity: [0.1, 0.2, 0.1],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+
+            <BottomRightPattern
+              animate={{
+                opacity: [0.1, 0.2, 0.1],
+              }}
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1,
+              }}
+            />
+
+            {/* Decorative Wave Patterns */}
+            <WavePattern
+              style={{ bottom: 0, left: 0 }}
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 0.4, y: 0 }}
+              transition={{ duration: 2, ease: "easeOut" }}
+            >
+              <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
+                <path
+                  fill="rgba(147, 197, 253, 0.1)"
+                  d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+                ></path>
+              </svg>
+            </WavePattern>
+
+            <WavePattern
+              style={{ top: 0, right: 0 }}
+              initial={{ opacity: 0, y: -50 }}
+              animate={{ opacity: 0.3, y: 0 }}
+              transition={{ duration: 2, delay: 0.3, ease: "easeOut" }}
+            >
+              <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
+                <path
+                  fill="rgba(96, 165, 250, 0.1)"
+                  d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,218.7C672,235,768,245,864,229.3C960,213,1056,171,1152,165.3C1248,160,1344,192,1392,208L1440,224L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"
+                ></path>
+              </svg>
+            </WavePattern>
+
+            {/* Floating Icons */}
+            <FloatingIcon
+              style={{ top: '15%', left: '8%' }}
               animate={{
                 y: [0, -20, 0],
-                x: [0, 15, 0],
-                opacity: [0.3, 0.8, 0.4],
-                scale: [1, 1.4, 1],
+                rotate: [0, 5, 0],
               }}
               transition={{
-                duration: particle.duration,
+                duration: 4,
                 repeat: Infinity,
-                ease: 'easeInOut',
-                delay: particle.delay,
-              }}
-            />
-          ))}
-          
-          {/* Corner Patterns */}
-          <TopLeftPattern
-            animate={{
-              opacity: [0.1, 0.2, 0.1],
-            }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-          
-          <BottomRightPattern
-            animate={{
-              opacity: [0.1, 0.2, 0.1],
-            }}
-            transition={{
-              duration: 5,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1,
-            }}
-          />
-          
-          {/* Decorative Wave Patterns */}
-          <WavePattern
-            style={{ bottom: 0, left: 0 }}
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 0.4, y: 0 }}
-            transition={{ duration: 2, ease: "easeOut" }}
-          >
-            <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
-              <path 
-                fill="rgba(147, 197, 253, 0.1)" 
-                d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-              ></path>
-            </svg>
-          </WavePattern>
-          
-          <WavePattern
-            style={{ top: 0, right: 0 }}
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 0.3, y: 0 }}
-            transition={{ duration: 2, delay: 0.3, ease: "easeOut" }}
-          >
-            <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
-              <path 
-                fill="rgba(96, 165, 250, 0.1)" 
-                d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,218.7C672,235,768,245,864,229.3C960,213,1056,171,1152,165.3C1248,160,1344,192,1392,208L1440,224L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"
-              ></path>
-            </svg>
-          </WavePattern>
-          
-          {/* Floating Icons */}
-          <FloatingIcon
-            style={{ top: '15%', left: '8%' }}
-            animate={{
-              y: [0, -20, 0],
-              rotate: [0, 5, 0],
-            }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          >
-            <Clock />
-          </FloatingIcon>
-          
-          <FloatingIcon
-            style={{ top: '25%', right: '12%' }}
-            animate={{
-              y: [0, -15, 0],
-              rotate: [0, -5, 0],
-            }}
-            transition={{
-              duration: 5,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 0.5,
-            }}
-          >
-            <Mail />
-          </FloatingIcon>
-          
-          <FloatingIcon
-            style={{ bottom: '30%', left: '10%' }}
-            animate={{
-              y: [0, -25, 0],
-              rotate: [0, 10, 0],
-            }}
-            transition={{
-              duration: 4.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1,
-            }}
-          >
-            <Send />
-          </FloatingIcon>
-          
-          <FloatingIcon
-            style={{ bottom: '20%', right: '15%' }}
-            animate={{
-              y: [0, -18, 0],
-              rotate: [0, -8, 0],
-            }}
-            transition={{
-              duration: 5.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1.5,
-            }}
-          >
-            <Award />
-          </FloatingIcon>
-          
-          <FloatingIcon
-            style={{ top: '40%', right: '8%' }}
-            animate={{
-              y: [0, -22, 0],
-              rotate: [0, 12, 0],
-            }}
-            transition={{
-              duration: 4.8,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 0.8,
-            }}
-          >
-            <Zap />
-          </FloatingIcon>
-          
-          <FloatingIcon
-            style={{ top: '60%', left: '12%' }}
-            animate={{
-              y: [0, -16, 0],
-              rotate: [0, -6, 0],
-            }}
-            transition={{
-              duration: 5.2,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1.2,
-            }}
-          >
-            <Target />
-          </FloatingIcon>
-          
-          {/* Geometric Shapes */}
-          <GeometricShape
-            style={{
-              top: '20%',
-              left: '5%',
-              width: '60px',
-              height: '60px',
-              borderRadius: '12px',
-              transform: 'rotate(15deg)',
-            }}
-            animate={{
-              rotate: [15, 25, 15],
-              scale: [1, 1.05, 1],
-            }}
-            transition={{
-              duration: 6,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-          
-          <GeometricShape
-            style={{
-              bottom: '25%',
-              right: '8%',
-              width: '80px',
-              height: '80px',
-              borderRadius: '50%',
-            }}
-            animate={{
-              scale: [1, 1.1, 1],
-              opacity: [0.3, 0.5, 0.3],
-            }}
-            transition={{
-              duration: 5,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1,
-            }}
-          />
-          
-          <GeometricShape
-            style={{
-              top: '35%',
-              right: '18%',
-              width: '50px',
-              height: '50px',
-              transform: 'rotate(45deg)',
-            }}
-            animate={{
-              rotate: [45, 60, 45],
-            }}
-            transition={{
-              duration: 7,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-          
-          {/* Mini Squares */}
-          <MiniSquare
-            style={{ top: '28%', left: '22%' }}
-            animate={{
-              rotate: [0, 90, 0],
-              scale: [1, 1.2, 1],
-            }}
-            transition={{
-              duration: 6,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-          
-          <MiniSquare
-            style={{ top: '48%', right: '25%' }}
-            animate={{
-              rotate: [0, -90, 0],
-              scale: [1, 1.15, 1],
-            }}
-            transition={{
-              duration: 7,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1,
-            }}
-          />
-          
-          <MiniSquare
-            style={{ bottom: '32%', left: '20%' }}
-            animate={{
-              rotate: [0, 180, 0],
-              scale: [1, 1.3, 1],
-            }}
-            transition={{
-              duration: 5.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 0.5,
-            }}
-          />
-          
-          <MiniSquare
-            style={{ top: '65%', right: '30%' }}
-            animate={{
-              rotate: [0, 90, 0],
-              opacity: [0.3, 0.6, 0.3],
-            }}
-            transition={{
-              duration: 6.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1.5,
-            }}
-          />
-          
-          {/* Dotted Circles */}
-          <DottedCircle
-            style={{
-              top: '12%',
-              right: '20%',
-            }}
-            animate={{
-              rotate: [0, 360],
-              scale: [1, 1.1, 1],
-            }}
-            transition={{
-              rotate: { duration: 20, repeat: Infinity, ease: "linear" },
-              scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
-            }}
-          />
-          
-          <DottedCircle
-            style={{
-              bottom: '15%',
-              left: '18%',
-            }}
-            animate={{
-              rotate: [0, -360],
-              scale: [1, 1.15, 1],
-            }}
-            transition={{
-              rotate: { duration: 25, repeat: Infinity, ease: "linear" },
-              scale: { duration: 5, repeat: Infinity, ease: "easeInOut" },
-            }}
-          />
-          
-          {/* Connection Lines */}
-          <ConnectionLine
-            style={{
-              top: '18%',
-              left: '10%',
-              width: '150px',
-              transform: 'rotate(-15deg)',
-            }}
-            animate={{
-              opacity: [0.3, 0.6, 0.3],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-          
-          <ConnectionLine
-            style={{
-              top: '45%',
-              right: '12%',
-              width: '120px',
-              transform: 'rotate(25deg)',
-            }}
-            animate={{
-              opacity: [0.2, 0.5, 0.2],
-            }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1,
-            }}
-          />
-          
-          <ConnectionLine
-            style={{
-              bottom: '28%',
-              left: '15%',
-              width: '180px',
-              transform: 'rotate(10deg)',
-            }}
-            animate={{
-              opacity: [0.25, 0.55, 0.25],
-            }}
-            transition={{
-              duration: 3.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 0.5,
-            }}
-          />
-          
-          {/* Small Floating Dots */}
-          <SmallFloatingDot
-            style={{ top: '22%', left: '25%' }}
-            animate={{
-              y: [0, -15, 0],
-              opacity: [0.4, 0.8, 0.4],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-          
-          <SmallFloatingDot
-            style={{ top: '55%', right: '22%' }}
-            animate={{
-              y: [0, -20, 0],
-              opacity: [0.3, 0.7, 0.3],
-            }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1,
-            }}
-          />
-          
-          <SmallFloatingDot
-            style={{ bottom: '35%', left: '28%' }}
-            animate={{
-              y: [0, -12, 0],
-              opacity: [0.35, 0.75, 0.35],
-            }}
-            transition={{
-              duration: 3.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 0.7,
-            }}
-          />
-          
-          <SmallFloatingDot
-            style={{ top: '38%', left: '18%' }}
-            animate={{
-              y: [0, -18, 0],
-              opacity: [0.3, 0.8, 0.3],
-            }}
-            transition={{
-              duration: 4.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1.5,
-            }}
-          />
-          
-          <SmallFloatingDot
-            style={{ bottom: '40%', right: '18%' }}
-            animate={{
-              y: [0, -16, 0],
-              opacity: [0.4, 0.75, 0.4],
-            }}
-            transition={{
-              duration: 3.8,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 0.3,
-            }}
-          />
-          
-          {/* Circuit Patterns */}
-          <CircuitPattern
-            style={{
-              top: '30%',
-              left: '15%',
-            }}
-            animate={{
-              opacity: [0.2, 0.4, 0.2],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-          
-          <CircuitPattern
-            style={{
-              bottom: '35%',
-              right: '25%',
-            }}
-            animate={{
-              opacity: [0.15, 0.35, 0.15],
-            }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1.5,
-            }}
-          />
-          
-          {/* Glassmorphism overlay */}
-          <GlassmorphismLayer />
-        </AnimatedBackground>
-        
-        <HeroContent>
-          <HeroTitle
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            {titleText}
-            {showCursor && titleText.length < fullTitle.length && <span style={{ opacity: 0.7 }}>|</span>}
-          </HeroTitle>
-          
-          <HeroSubtitle
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            {subtitleText}
-            {showCursor && subtitleText.length > 0 && subtitleText.length < fullSubtitle.length && <span style={{ opacity: 0.7 }}>|</span>}
-          </HeroSubtitle>
-
-          <SearchContainer
-            $isDark={isDarkMode}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            <SearchInput $isDark={isDarkMode} $wide>
-              <Search />
-              <input
-                type="text"
-                placeholder="Vị trí công việc hoặc công ty"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </SearchInput>
-          
-            <SearchInput $isDark={isDarkMode}>
-              <MapPin />
-              <input
-                type="text"
-                placeholder="Địa điểm"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              />
-            </SearchInput>
-          
-            <Button $variant="primary" onClick={() => navigate('/candidate/jobs')}>
-              Tìm việc
-            </Button>
-          </SearchContainer>
-        
-        <BannerContainer>
-          <StatsCard
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-          >
-            <StatsHeader>
-              <Calendar />
-              Thị trường làm việc hôm nay {new Date().toLocaleDateString('vi-VN')}
-            </StatsHeader>
-            
-            <StatsRow>
-              <StatItem
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.8 }}
-              >
-                <StatLabel>Việc làm đang tuyển</StatLabel>
-                <StatValue>
-                  100,000
-                  <TrendingUp />
-                </StatValue>
-              </StatItem>
-              
-              <StatItem
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 1 }}
-              >
-                <StatLabel>Việc làm gấp hôm nay</StatLabel>
-                <StatValue>
-                  50
-                  <TrendingUp />
-                </StatValue>
-              </StatItem>
-            </StatsRow>
-            
-            <StatsRow>
-              <StatItem
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 1.2 }}
-              >
-                <StatLabel>Số lượng ứng viên</StatLabel>
-                <StatValue>
-                  2,345
-                  <Users />
-                </StatValue>
-              </StatItem>
-              
-              <StatItem
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 1.4 }}
-              >
-                <StatLabel>Số lượng nhà tuyển dụng</StatLabel>
-                <StatValue>
-                  42
-                  <Building2 />
-                </StatValue>
-              </StatItem>
-            </StatsRow>
-          </StatsCard>
-          
-          <BannerWrapper
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-          >
-            <SecondaryBanner
-              src="/OpPoReview/images/phache.png"
-              alt="Phache"
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.7, delay: 0.7 }}
-            />
-            <MainBanner
-              src="/OpPoReview/images/poster.png"
-              alt="Poster"
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.7, delay: 0.9 }}
-            />
-          </BannerWrapper>
-        </BannerContainer>
-        </HeroContent>
-      </HeroSection>
-
-      <CompanyBannerSection
-        $isDark={isDarkMode}
-        ref={companyRef}
-        initial={{ opacity: 0, y: 100, scale: 0.95 }}
-        whileInView={{ opacity: 1, y: 0, scale: 1 }}
-        viewport={{ once: false, amount: 0.3 }}
-        transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
-      >
-        <CompanyBannerContent>
-          <CompanyBannerTitle
-            $isDark={isDarkMode}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.5 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-          >
-            Nhiều nhà tuyển dụng đang tìm "đồng đội"<br/>giỏi – là bạn đó!
-          </CompanyBannerTitle>
-          
-          <LogoCarouselWrapper $isDark={isDarkMode}>
-            <LogoCarousel
-              animate={{
-                x: [0, -1800],
-              }}
-              transition={{
-                x: {
-                  repeat: Infinity,
-                  repeatType: "loop",
-                  duration: 30,
-                  ease: "linear",
-                },
+                ease: "easeInOut",
               }}
             >
-              {[...companyLogos, ...companyLogos, ...companyLogos].map((company, index) => (
-                <BannerCompanyLogo $isDark={isDarkMode} key={`${company.name}-${index}`}>
-                  <img 
-                    src={company.logo} 
-                    alt={company.name}
-                    style={{ display: 'block' }}
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'inline-block';
-                    }}
-                  />
-                  <span style={{ 
-                    fontSize: '20px', 
-                    fontWeight: '800',
-                    color: isDarkMode ? '#f1f5f9' : '#0c4a6e',
-                    whiteSpace: 'nowrap',
-                    display: 'none',
-                    letterSpacing: '0.5px'
-                  }}>
-                    {company.name}
-                  </span>
-                </BannerCompanyLogo>
-              ))}
-            </LogoCarousel>
-          </LogoCarouselWrapper>
-        </CompanyBannerContent>
-      </CompanyBannerSection>
+              <Clock />
+            </FloatingIcon>
 
-      <TechBannerSection
-        initial={{ opacity: 0, y: 60 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: false, amount: 0.3 }}
-        transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-      >
-        <TechBannerContent>
-          <TechBannerImage
-            src="/OpPoReview/images/lemoments.png"
-            alt="Le Moments Technology"
+            <FloatingIcon
+              style={{ top: '25%', right: '12%' }}
+              animate={{
+                y: [0, -15, 0],
+                rotate: [0, -5, 0],
+              }}
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.5,
+              }}
+            >
+              <Mail />
+            </FloatingIcon>
+
+            <FloatingIcon
+              style={{ bottom: '30%', left: '10%' }}
+              animate={{
+                y: [0, -25, 0],
+                rotate: [0, 10, 0],
+              }}
+              transition={{
+                duration: 4.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1,
+              }}
+            >
+              <Send />
+            </FloatingIcon>
+
+            <FloatingIcon
+              style={{ bottom: '20%', right: '15%' }}
+              animate={{
+                y: [0, -18, 0],
+                rotate: [0, -8, 0],
+              }}
+              transition={{
+                duration: 5.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1.5,
+              }}
+            >
+              <Award />
+            </FloatingIcon>
+
+            <FloatingIcon
+              style={{ top: '40%', right: '8%' }}
+              animate={{
+                y: [0, -22, 0],
+                rotate: [0, 12, 0],
+              }}
+              transition={{
+                duration: 4.8,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.8,
+              }}
+            >
+              <Zap />
+            </FloatingIcon>
+
+            <FloatingIcon
+              style={{ top: '60%', left: '12%' }}
+              animate={{
+                y: [0, -16, 0],
+                rotate: [0, -6, 0],
+              }}
+              transition={{
+                duration: 5.2,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1.2,
+              }}
+            >
+              <Target />
+            </FloatingIcon>
+
+            {/* Geometric Shapes */}
+            <GeometricShape
+              style={{
+                top: '20%',
+                left: '5%',
+                width: '60px',
+                height: '60px',
+                borderRadius: '12px',
+                transform: 'rotate(15deg)',
+              }}
+              animate={{
+                rotate: [15, 25, 15],
+                scale: [1, 1.05, 1],
+              }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+
+            <GeometricShape
+              style={{
+                bottom: '25%',
+                right: '8%',
+                width: '80px',
+                height: '80px',
+                borderRadius: '50%',
+              }}
+              animate={{
+                scale: [1, 1.1, 1],
+                opacity: [0.3, 0.5, 0.3],
+              }}
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1,
+              }}
+            />
+
+            <GeometricShape
+              style={{
+                top: '35%',
+                right: '18%',
+                width: '50px',
+                height: '50px',
+                transform: 'rotate(45deg)',
+              }}
+              animate={{
+                rotate: [45, 60, 45],
+              }}
+              transition={{
+                duration: 7,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+
+            {/* Mini Squares */}
+            <MiniSquare
+              style={{ top: '28%', left: '22%' }}
+              animate={{
+                rotate: [0, 90, 0],
+                scale: [1, 1.2, 1],
+              }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+
+            <MiniSquare
+              style={{ top: '48%', right: '25%' }}
+              animate={{
+                rotate: [0, -90, 0],
+                scale: [1, 1.15, 1],
+              }}
+              transition={{
+                duration: 7,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1,
+              }}
+            />
+
+            <MiniSquare
+              style={{ bottom: '32%', left: '20%' }}
+              animate={{
+                rotate: [0, 180, 0],
+                scale: [1, 1.3, 1],
+              }}
+              transition={{
+                duration: 5.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.5,
+              }}
+            />
+
+            <MiniSquare
+              style={{ top: '65%', right: '30%' }}
+              animate={{
+                rotate: [0, 90, 0],
+                opacity: [0.3, 0.6, 0.3],
+              }}
+              transition={{
+                duration: 6.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1.5,
+              }}
+            />
+
+            {/* Dotted Circles */}
+            <DottedCircle
+              style={{
+                top: '12%',
+                right: '20%',
+              }}
+              animate={{
+                rotate: [0, 360],
+                scale: [1, 1.1, 1],
+              }}
+              transition={{
+                rotate: { duration: 20, repeat: Infinity, ease: "linear" },
+                scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+              }}
+            />
+
+            <DottedCircle
+              style={{
+                bottom: '15%',
+                left: '18%',
+              }}
+              animate={{
+                rotate: [0, -360],
+                scale: [1, 1.15, 1],
+              }}
+              transition={{
+                rotate: { duration: 25, repeat: Infinity, ease: "linear" },
+                scale: { duration: 5, repeat: Infinity, ease: "easeInOut" },
+              }}
+            />
+
+            {/* Connection Lines */}
+            <ConnectionLine
+              style={{
+                top: '18%',
+                left: '10%',
+                width: '150px',
+                transform: 'rotate(-15deg)',
+              }}
+              animate={{
+                opacity: [0.3, 0.6, 0.3],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+
+            <ConnectionLine
+              style={{
+                top: '45%',
+                right: '12%',
+                width: '120px',
+                transform: 'rotate(25deg)',
+              }}
+              animate={{
+                opacity: [0.2, 0.5, 0.2],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1,
+              }}
+            />
+
+            <ConnectionLine
+              style={{
+                bottom: '28%',
+                left: '15%',
+                width: '180px',
+                transform: 'rotate(10deg)',
+              }}
+              animate={{
+                opacity: [0.25, 0.55, 0.25],
+              }}
+              transition={{
+                duration: 3.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.5,
+              }}
+            />
+
+            {/* Small Floating Dots */}
+            <SmallFloatingDot
+              style={{ top: '22%', left: '25%' }}
+              animate={{
+                y: [0, -15, 0],
+                opacity: [0.4, 0.8, 0.4],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+
+            <SmallFloatingDot
+              style={{ top: '55%', right: '22%' }}
+              animate={{
+                y: [0, -20, 0],
+                opacity: [0.3, 0.7, 0.3],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1,
+              }}
+            />
+
+            <SmallFloatingDot
+              style={{ bottom: '35%', left: '28%' }}
+              animate={{
+                y: [0, -12, 0],
+                opacity: [0.35, 0.75, 0.35],
+              }}
+              transition={{
+                duration: 3.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.7,
+              }}
+            />
+
+            <SmallFloatingDot
+              style={{ top: '38%', left: '18%' }}
+              animate={{
+                y: [0, -18, 0],
+                opacity: [0.3, 0.8, 0.3],
+              }}
+              transition={{
+                duration: 4.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1.5,
+              }}
+            />
+
+            <SmallFloatingDot
+              style={{ bottom: '40%', right: '18%' }}
+              animate={{
+                y: [0, -16, 0],
+                opacity: [0.4, 0.75, 0.4],
+              }}
+              transition={{
+                duration: 3.8,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.3,
+              }}
+            />
+
+            {/* Circuit Patterns */}
+            <CircuitPattern
+              style={{
+                top: '30%',
+                left: '15%',
+              }}
+              animate={{
+                opacity: [0.2, 0.4, 0.2],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+
+            <CircuitPattern
+              style={{
+                bottom: '35%',
+                right: '25%',
+              }}
+              animate={{
+                opacity: [0.15, 0.35, 0.15],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1.5,
+              }}
+            />
+
+            {/* Glassmorphism overlay */}
+            <GlassmorphismLayer />
+          </AnimatedBackground>
+
+          <HeroContent>
+            <HeroTitle
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              {titleText}
+              {showCursor && titleText.length < fullTitle.length && <span style={{ opacity: 0.7 }}>|</span>}
+            </HeroTitle>
+
+            <HeroSubtitle
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              {subtitleText}
+              {showCursor && subtitleText.length > 0 && subtitleText.length < fullSubtitle.length && <span style={{ opacity: 0.7 }}>|</span>}
+            </HeroSubtitle>
+
+            <SearchContainer
+              $isDark={isDarkMode}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <SearchInput $isDark={isDarkMode} $wide>
+                <Search />
+                <input
+                  type="text"
+                  placeholder="Vị trí công việc hoặc công ty"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </SearchInput>
+
+              <SearchInput $isDark={isDarkMode}>
+                <MapPin />
+                <input
+                  type="text"
+                  placeholder="Địa điểm"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                />
+              </SearchInput>
+
+              <Button $variant="primary" onClick={() => navigate('/candidate/jobs')}>
+                Tìm việc
+              </Button>
+            </SearchContainer>
+
+            <BannerContainer>
+              <StatsCard
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+              >
+                <StatsHeader>
+                  <Calendar />
+                  Thị trường làm việc hôm nay {new Date().toLocaleDateString('vi-VN')}
+                </StatsHeader>
+
+                <StatsRow>
+                  <StatItem
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.8 }}
+                  >
+                    <StatLabel>Việc làm đang tuyển</StatLabel>
+                    <StatValue>
+                      100,000
+                      <TrendingUp />
+                    </StatValue>
+                  </StatItem>
+
+                  <StatItem
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 1 }}
+                  >
+                    <StatLabel>Việc làm gấp hôm nay</StatLabel>
+                    <StatValue>
+                      50
+                      <TrendingUp />
+                    </StatValue>
+                  </StatItem>
+                </StatsRow>
+
+                <StatsRow>
+                  <StatItem
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 1.2 }}
+                  >
+                    <StatLabel>Số lượng ứng viên</StatLabel>
+                    <StatValue>
+                      2,345
+                      <Users />
+                    </StatValue>
+                  </StatItem>
+
+                  <StatItem
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 1.4 }}
+                  >
+                    <StatLabel>Số lượng nhà tuyển dụng</StatLabel>
+                    <StatValue>
+                      42
+                      <Building2 />
+                    </StatValue>
+                  </StatItem>
+                </StatsRow>
+              </StatsCard>
+
+              <BannerWrapper
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+              >
+                <SecondaryBanner
+                  src="/OpPoReview/images/phache.png"
+                  alt="Phache"
+                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.7, delay: 0.7 }}
+                />
+                <MainBanner
+                  src="/OpPoReview/images/poster.png"
+                  alt="Poster"
+                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.7, delay: 0.9 }}
+                />
+              </BannerWrapper>
+            </BannerContainer>
+          </HeroContent>
+        </HeroSection>
+
+        <CompanyBannerSection
+          $isDark={isDarkMode}
+          ref={companyRef}
+          initial={{ opacity: 0, y: 100, scale: 0.95 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: false, amount: 0.3 }}
+          transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
+        >
+          <CompanyBannerContent>
+            <CompanyBannerTitle
+              $isDark={isDarkMode}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.5 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+              Nhiều nhà tuyển dụng đang tìm "đồng đội"<br />giỏi – là bạn đó!
+            </CompanyBannerTitle>
+
+            <LogoCarouselWrapper $isDark={isDarkMode}>
+              <LogoCarousel
+                animate={{
+                  x: [0, -1800],
+                }}
+                transition={{
+                  x: {
+                    repeat: Infinity,
+                    repeatType: "loop",
+                    duration: 30,
+                    ease: "linear",
+                  },
+                }}
+              >
+                {[...companyLogos, ...companyLogos, ...companyLogos].map((company, index) => (
+                  <BannerCompanyLogo $isDark={isDarkMode} key={`${company.name}-${index}`}>
+                    <img
+                      src={company.logo}
+                      alt={company.name}
+                      style={{ display: 'block' }}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'inline-block';
+                      }}
+                    />
+                    <span style={{
+                      fontSize: '20px',
+                      fontWeight: '800',
+                      color: isDarkMode ? '#f1f5f9' : '#0c4a6e',
+                      whiteSpace: 'nowrap',
+                      display: 'none',
+                      letterSpacing: '0.5px'
+                    }}>
+                      {company.name}
+                    </span>
+                  </BannerCompanyLogo>
+                ))}
+              </LogoCarousel>
+            </LogoCarouselWrapper>
+          </CompanyBannerContent>
+        </CompanyBannerSection>
+
+        <TechBannerSection
+          initial={{ opacity: 0, y: 60 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false, amount: 0.3 }}
+          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+        >
+          <TechBannerContent>
+            <TechBannerImage
+              src="/OpPoReview/images/lemoments.png"
+              alt="Le Moments Technology"
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            />
+          </TechBannerContent>
+        </TechBannerSection>
+
+        <CTASection>
+          <CTACard
+            $isDark={isDarkMode}
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: false, amount: 0.3 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          />
-        </TechBannerContent>
-      </TechBannerSection>
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <CTATitle $isDark={isDarkMode}>Sẵn Sàng Tuyển Ứng viên Hàng Đầu?</CTATitle>
+            <CTAText $isDark={isDarkMode}>
+              Đăng công việc và kết nối với ứng viên chất lượng ngay hôm nay
+            </CTAText>
+            <Button
+              as={Link}
+              to="/register/employer"
+              $variant="secondary"
+              $size="large"
+              style={{
+                background: 'white',
+                color: '#1e40af',
+                position: 'relative',
+                zIndex: 2,
+                fontWeight: 700,
+                boxShadow: '0 8px 32px rgba(255, 255, 255, 0.2)'
+              }}
+            >
+              Bắt Đầu Miễn Phí
+              <ArrowRight />
+            </Button>
+          </CTACard>
+        </CTASection>
 
-      <CTASection>
-        <CTACard
+        <DownloadAppSection
+          ref={downloadRef}
+          initial={{ opacity: 0, y: 100, scale: 0.95 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: false, amount: 0.3 }}
+          transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
+        >
+          <DownloadAppContainer>
+            <DownloadAppLeft>
+              <DownloadAppTitle
+                $isDark={isDarkMode}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false, amount: 0.8 }}
+                transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+              >
+                Tải ứng dụng
+              </DownloadAppTitle>
+
+              <DownloadAppSubtitle
+                $isDark={isDarkMode}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false, amount: 0.8 }}
+                transition={{ duration: 0.8, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+              >
+                để trải nghiệm các dịch vụ của chúng tôi
+              </DownloadAppSubtitle>
+
+              <DownloadOptions>
+                <QRCodeSection>
+                  <QRCode $isDark={isDarkMode}>
+                    <svg viewBox="0 0 100 100" fill="none">
+                      <rect width="100" height="100" fill="white" />
+                      <rect x="10" y="10" width="15" height="15" fill="black" />
+                      <rect x="30" y="10" width="5" height="5" fill="black" />
+                      <rect x="40" y="10" width="5" height="5" fill="black" />
+                      <rect x="50" y="10" width="5" height="5" fill="black" />
+                      <rect x="60" y="10" width="5" height="5" fill="black" />
+                      <rect x="75" y="10" width="15" height="15" fill="black" />
+                      <rect x="10" y="30" width="5" height="5" fill="black" />
+                      <rect x="20" y="30" width="5" height="5" fill="black" />
+                      <rect x="30" y="30" width="10" height="10" fill="black" />
+                      <rect x="45" y="30" width="5" height="5" fill="black" />
+                      <rect x="55" y="30" width="10" height="10" fill="black" />
+                      <rect x="70" y="30" width="5" height="5" fill="black" />
+                      <rect x="85" y="30" width="5" height="5" fill="black" />
+                      <rect x="10" y="40" width="5" height="5" fill="black" />
+                      <rect x="20" y="40" width="5" height="5" fill="black" />
+                      <rect x="75" y="40" width="5" height="5" fill="black" />
+                      <rect x="85" y="40" width="5" height="5" fill="black" />
+                      <rect x="10" y="50" width="5" height="5" fill="black" />
+                      <rect x="20" y="50" width="5" height="5" fill="black" />
+                      <rect x="35" y="50" width="5" height="5" fill="black" />
+                      <rect x="45" y="50" width="10" height="10" fill="black" />
+                      <rect x="60" y="50" width="5" height="5" fill="black" />
+                      <rect x="75" y="50" width="5" height="5" fill="black" />
+                      <rect x="85" y="50" width="5" height="5" fill="black" />
+                      <rect x="30" y="60" width="5" height="5" fill="black" />
+                      <rect x="40" y="60" width="5" height="5" fill="black" />
+                      <rect x="60" y="60" width="10" height="10" fill="black" />
+                      <rect x="10" y="75" width="15" height="15" fill="black" />
+                      <rect x="30" y="75" width="5" height="5" fill="black" />
+                      <rect x="40" y="75" width="5" height="5" fill="black" />
+                      <rect x="50" y="75" width="5" height="5" fill="black" />
+                      <rect x="60" y="75" width="5" height="5" fill="black" />
+                      <rect x="75" y="75" width="15" height="15" fill="black" />
+                    </svg>
+                  </QRCode>
+                  <QRText $isDark={isDarkMode}>Quét mã QR</QRText>
+
+                  <DownloadAppStats>
+                    <DownloadAppStatItem>
+                      <DownloadAppStatValue>
+                        <DownloadAppStatStars>
+                          <Star fill="#FFB800" strokeWidth={0} size={20} />
+                          <Star fill="#FFB800" strokeWidth={0} size={20} />
+                          <Star fill="#FFB800" strokeWidth={0} size={20} />
+                          <Star fill="#FFB800" strokeWidth={0} size={20} />
+                          <Star fill="#FFB800" strokeWidth={0} size={20} />
+                        </DownloadAppStatStars>
+                      </DownloadAppStatValue>
+                      <DownloadAppStatLabel $isDark={isDarkMode}>Đánh giá ứng dụng</DownloadAppStatLabel>
+                    </DownloadAppStatItem>
+                  </DownloadAppStats>
+                </QRCodeSection>
+
+                <StoreButtons>
+                  <StoreButton href="https://apps.apple.com" target="_blank">
+                    <img
+                      src="/OpPoReview/images/appstore1.jpg"
+                      alt="App Store"
+                      style={{
+                        width: '120px',
+                        height: 'auto',
+                        objectFit: 'contain'
+                      }}
+                    />
+                  </StoreButton>
+
+                  <StoreButton href="https://play.google.com" target="_blank">
+                    <img
+                      src="/OpPoReview/images/chplay.jpg"
+                      alt="Google Play"
+                      style={{
+                        width: '120px',
+                        height: 'auto',
+                        objectFit: 'contain'
+                      }}
+                    />
+                  </StoreButton>
+                </StoreButtons>
+              </DownloadOptions>
+            </DownloadAppLeft>
+
+            <DownloadAppRight
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <PhoneMockup>
+                <PhoneScreen>
+                  <AppPreview>
+                    <AppSearchBar>
+                      {phoneSearchText}
+                      {phoneSearchText.length < phoneSearchFullText.length && <span style={{ animation: 'blink 1s infinite' }}>|</span>}
+                    </AppSearchBar>
+                    {showPhoneApp && (
+                      <motion.div
+                        style={{
+                          background: 'white',
+                          borderRadius: '12px',
+                          padding: '14px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '12px',
+                          marginTop: '12px',
+                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)'
+                        }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        {/* Top Section: Logo + Info */}
+                        <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+                          {/* Logo */}
+                          <motion.div
+                            style={{
+                              width: '56px',
+                              height: '56px',
+                              background: 'linear-gradient(135deg, #ffffff 0%, #ded4d46a 100%)',
+                              borderRadius: '12px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              overflow: 'hidden',
+                              padding: '6px',
+                              flexShrink: 0
+                            }}
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ duration: 0.4, delay: 0.2 }}
+                          >
+                            <img
+                              src="/OpPoReview/images/logo.png"
+                              alt="Ốp Pờ"
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain'
+                              }}
+                            />
+                          </motion.div>
+
+                          {/* App Info */}
+                          <motion.div
+                            style={{
+                              flex: 1,
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '2px',
+                              minWidth: 0
+                            }}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.4, delay: 0.3 }}
+                          >
+                            <div style={{
+                              fontSize: '14px',
+                              fontWeight: '700',
+                              color: '#1f2937',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis'
+                            }}>
+                              Ốp Pờ
+                            </div>
+                            <div style={{
+                              fontSize: '11px',
+                              color: '#6b7280',
+                              fontWeight: '500',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis'
+                            }}>
+                              Ứng dụng tuyển dụng
+                            </div>
+                            <div style={{
+                              fontSize: '10px',
+                              color: '#9ca3af',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis'
+                            }}>
+                              Đã tải xuống - Giáo dục
+                            </div>
+                            {/* Star Rating */}
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '2px',
+                              marginTop: '2px'
+                            }}>
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star
+                                  key={star}
+                                  fill="#FFB800"
+                                  strokeWidth={0}
+                                  size={10}
+                                  style={{ color: '#FFB800' }}
+                                />
+                              ))}
+                            </div>
+                          </motion.div>
+                        </div>
+
+                        {/* Download Button / Loading Spinner */}
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                          {!isDownloading ? (
+                            <motion.div
+                              style={{
+                                padding: '8px 32px',
+                                background: '#1e40af',
+                                color: 'white',
+                                borderRadius: '20px',
+                                fontSize: '13px',
+                                fontWeight: '700',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ delay: 0.5 }}
+                            >
+                              Tải về
+                            </motion.div>
+                          ) : (
+                            <motion.div
+                              style={{
+                                width: '24px',
+                                height: '24px',
+                                position: 'relative'
+                              }}
+                            >
+                              <svg
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                style={{ transform: 'rotate(90deg) scaleX(-1)' }}
+                              >
+                                {/* Background circle */}
+                                <circle
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  fill="none"
+                                  stroke="#e5e7eb"
+                                  strokeWidth="2"
+                                />
+                                {/* Progress circle */}
+                                <motion.circle
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  fill="none"
+                                  stroke="#1e40af"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  initial={{ pathLength: 0 }}
+                                  animate={{ pathLength: 1 }}
+                                  transition={{
+                                    duration: 5,
+                                    ease: "linear",
+                                    repeat: Infinity
+                                  }}
+                                />
+                              </svg>
+                            </motion.div>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AppPreview>
+                </PhoneScreen>
+              </PhoneMockup>
+            </DownloadAppRight>
+          </DownloadAppContainer>
+        </DownloadAppSection>
+
+        <Footer
           $isDark={isDarkMode}
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <CTATitle $isDark={isDarkMode}>Sẵn Sàng Tuyển Ứng viên Hàng Đầu?</CTATitle>
-          <CTAText $isDark={isDarkMode}>
-            Đăng công việc và kết nối với ứng viên chất lượng ngay hôm nay
-          </CTAText>
-          <Button 
-            as={Link} 
-            to="/register/employer" 
-            $variant="secondary" 
-            $size="large" 
-            style={{ 
-              background: 'white', 
-              color: '#1e40af', 
-              position: 'relative',
-              zIndex: 2,
-              fontWeight: 700,
-              boxShadow: '0 8px 32px rgba(255, 255, 255, 0.2)'
-            }}
-          >
-            Bắt Đầu Miễn Phí
-            <ArrowRight />
-          </Button>
-        </CTACard>
-      </CTASection>
+          <FooterMain>
+            <FooterLeft $isDark={isDarkMode}>
+              <div className="logo-area">
+                <Link to="/OpPoReview/" className="logo-link">
+                  <img src="/OpPoReview/images/logo.png" alt="Ốp Pờ Logo" />
+                </Link>
+                <p>Bạn vừa bị đuổi - Đã có Ốp Pờ lo</p>
+                <div style={{ marginTop: '12px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#10b981', border: '1px solid #10b981', padding: '4px 8px', borderRadius: '4px' }}>✓ Được bảo vệ</span>
+                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#6366f1', border: '1px solid #6366f1', padding: '4px 8px', borderRadius: '4px' }}>Google For Startups</span>
+                </div>
+              </div>
+              <div className="contact-info">
+                <h4>Liên hệ</h4>
+                <p>Số điện thoại 1: <strong>0379 784 509</strong> (Hệ thống)</p>
+                <p>Số điện thoại 2: <strong>0563 518 922</strong> (Hỗ trợ)</p>
+                <p>Email: oppohiringplatform@gmail.com</p>
+              </div>
 
-      <DownloadAppSection
-        ref={downloadRef}
-        initial={{ opacity: 0, y: 100, scale: 0.95 }}
-        whileInView={{ opacity: 1, y: 0, scale: 1 }}
-        viewport={{ once: false, amount: 0.3 }}
-        transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
-      >
-        <DownloadAppContainer>
-          <DownloadAppLeft>
-            <DownloadAppTitle
-              $isDark={isDarkMode}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false, amount: 0.8 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-            >
-              Tải ứng dụng
-            </DownloadAppTitle>
-            
-            <DownloadAppSubtitle
-              $isDark={isDarkMode}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false, amount: 0.8 }}
-              transition={{ duration: 0.8, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-            >
-              để trải nghiệm các dịch vụ của chúng tôi
-            </DownloadAppSubtitle>
-            
-            <DownloadOptions>
-              <QRCodeSection>
-                <QRCode $isDark={isDarkMode}>
-                  <svg viewBox="0 0 100 100" fill="none">
-                    <rect width="100" height="100" fill="white"/>
-                    <rect x="10" y="10" width="15" height="15" fill="black"/>
-                    <rect x="30" y="10" width="5" height="5" fill="black"/>
-                    <rect x="40" y="10" width="5" height="5" fill="black"/>
-                    <rect x="50" y="10" width="5" height="5" fill="black"/>
-                    <rect x="60" y="10" width="5" height="5" fill="black"/>
-                    <rect x="75" y="10" width="15" height="15" fill="black"/>
-                    <rect x="10" y="30" width="5" height="5" fill="black"/>
-                    <rect x="20" y="30" width="5" height="5" fill="black"/>
-                    <rect x="30" y="30" width="10" height="10" fill="black"/>
-                    <rect x="45" y="30" width="5" height="5" fill="black"/>
-                    <rect x="55" y="30" width="10" height="10" fill="black"/>
-                    <rect x="70" y="30" width="5" height="5" fill="black"/>
-                    <rect x="85" y="30" width="5" height="5" fill="black"/>
-                    <rect x="10" y="40" width="5" height="5" fill="black"/>
-                    <rect x="20" y="40" width="5" height="5" fill="black"/>
-                    <rect x="75" y="40" width="5" height="5" fill="black"/>
-                    <rect x="85" y="40" width="5" height="5" fill="black"/>
-                    <rect x="10" y="50" width="5" height="5" fill="black"/>
-                    <rect x="20" y="50" width="5" height="5" fill="black"/>
-                    <rect x="35" y="50" width="5" height="5" fill="black"/>
-                    <rect x="45" y="50" width="10" height="10" fill="black"/>
-                    <rect x="60" y="50" width="5" height="5" fill="black"/>
-                    <rect x="75" y="50" width="5" height="5" fill="black"/>
-                    <rect x="85" y="50" width="5" height="5" fill="black"/>
-                    <rect x="30" y="60" width="5" height="5" fill="black"/>
-                    <rect x="40" y="60" width="5" height="5" fill="black"/>
-                    <rect x="60" y="60" width="10" height="10" fill="black"/>
-                    <rect x="10" y="75" width="15" height="15" fill="black"/>
-                    <rect x="30" y="75" width="5" height="5" fill="black"/>
-                    <rect x="40" y="75" width="5" height="5" fill="black"/>
-                    <rect x="50" y="75" width="5" height="5" fill="black"/>
-                    <rect x="60" y="75" width="5" height="5" fill="black"/>
-                    <rect x="75" y="75" width="15" height="15" fill="black"/>
-                  </svg>
-                </QRCode>
-                <QRText $isDark={isDarkMode}>Quét mã QR</QRText>
-                
-                <DownloadAppStats>
-                  <DownloadAppStatItem>
-                    <DownloadAppStatValue>
-                      <DownloadAppStatStars>
-                        <Star fill="#FFB800" strokeWidth={0} size={20} />
-                        <Star fill="#FFB800" strokeWidth={0} size={20} />
-                        <Star fill="#FFB800" strokeWidth={0} size={20} />
-                        <Star fill="#FFB800" strokeWidth={0} size={20} />
-                        <Star fill="#FFB800" strokeWidth={0} size={20} />
-                      </DownloadAppStatStars>
-                    </DownloadAppStatValue>
-                    <DownloadAppStatLabel $isDark={isDarkMode}>Đánh giá ứng dụng</DownloadAppStatLabel>
-                  </DownloadAppStatItem>
-                </DownloadAppStats>
-              </QRCodeSection>
-              
-              <StoreButtons>
-                <StoreButton href="https://apps.apple.com" target="_blank">
-                  <img 
-                    src="/OpPoReview/images/appstore1.jpg" 
-                    alt="App Store"
-                    style={{ 
-                      width: '120px', 
-                      height: 'auto',
-                      objectFit: 'contain'
-                    }}
-                  />
-                </StoreButton>
-                
-                <StoreButton href="https://play.google.com" target="_blank">
-                  <img 
-                    src="/OpPoReview/images/chplay.jpg" 
-                    alt="Google Play"
-                    style={{ 
-                      width: '120px', 
-                      height: 'auto',
-                      objectFit: 'contain'
-                    }}
-                  />
-                </StoreButton>
-              </StoreButtons>
-            </DownloadOptions>
-          </DownloadAppLeft>
-          
-          <DownloadAppRight
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <PhoneMockup>
-              <PhoneScreen>
-                <AppPreview>
-                  <AppSearchBar>
-                    {phoneSearchText}
-                    {phoneSearchText.length < phoneSearchFullText.length && <span style={{ animation: 'blink 1s infinite' }}>|</span>}
-                  </AppSearchBar>
-                  {showPhoneApp && (
-                    <motion.div 
-                      style={{ 
-                        background: 'white',
-                        borderRadius: '12px',
-                        padding: '14px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '12px',
-                        marginTop: '12px',
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)'
-                      }}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      {/* Top Section: Logo + Info */}
-                      <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-                        {/* Logo */}
-                        <motion.div 
-                          style={{ 
-                            width: '56px', 
-                            height: '56px', 
-                            background: 'linear-gradient(135deg, #ffffff 0%, #ded4d46a 100%)',
-                            borderRadius: '12px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            overflow: 'hidden',
-                            padding: '6px',
-                            flexShrink: 0
-                          }}
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ duration: 0.4, delay: 0.2 }}
-                        >
-                          <img 
-                            src="/OpPoReview/images/logo.png" 
-                            alt="Ốp Pờ"
-                            style={{ 
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'contain'
-                            }}
-                          />
-                        </motion.div>
-                        
-                        {/* App Info */}
-                        <motion.div
-                          style={{ 
-                            flex: 1,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '2px',
-                            minWidth: 0
-                          }}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.4, delay: 0.3 }}
-                        >
-                          <div style={{ 
-                            fontSize: '14px', 
-                            fontWeight: '700',
-                            color: '#1f2937',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis'
-                          }}>
-                            Ốp Pờ
-                          </div>
-                          <div style={{ 
-                            fontSize: '11px', 
-                            color: '#6b7280',
-                            fontWeight: '500',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis'
-                          }}>
-                            Ứng dụng tuyển dụng
-                          </div>
-                          <div style={{ 
-                            fontSize: '10px', 
-                            color: '#9ca3af',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis'
-                          }}>
-                            Đã tải xuống - Giáo dục
-                          </div>
-                          {/* Star Rating */}
-                          <div style={{ 
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '2px',
-                            marginTop: '2px'
-                          }}>
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star 
-                                key={star}
-                                fill="#FFB800" 
-                                strokeWidth={0} 
-                                size={10}
-                                style={{ color: '#FFB800' }}
-                              />
-                            ))}
-                          </div>
-                        </motion.div>
-                      </div>
-                      
-                      {/* Download Button / Loading Spinner */}
-                      <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        {!isDownloading ? (
-                          <motion.div
-                            style={{ 
-                              padding: '8px 32px',
-                              background: '#1e40af',
-                              color: 'white',
-                              borderRadius: '20px',
-                              fontSize: '13px',
-                              fontWeight: '700',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center'
-                            }}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.5 }}
-                          >
-                            Tải về
-                          </motion.div>
-                        ) : (
-                          <motion.div
-                            style={{ 
-                              width: '24px',
-                              height: '24px',
-                              position: 'relative'
-                            }}
-                          >
-                            <svg
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              style={{ transform: 'rotate(90deg) scaleX(-1)' }}
-                            >
-                              {/* Background circle */}
-                              <circle
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                fill="none"
-                                stroke="#e5e7eb"
-                                strokeWidth="2"
-                              />
-                              {/* Progress circle */}
-                              <motion.circle
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                fill="none"
-                                stroke="#1e40af"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                initial={{ pathLength: 0 }}
-                                animate={{ pathLength: 1 }}
-                                transition={{
-                                  duration: 5,
-                                  ease: "linear",
-                                  repeat: Infinity
-                                }}
-                              />
-                            </svg>
-                        </motion.div>
-                        )}
-                      </div>
-                    </motion.div>
-                  )}
-                </AppPreview>
-              </PhoneScreen>
-            </PhoneMockup>
-          </DownloadAppRight>
-        </DownloadAppContainer>
-      </DownloadAppSection>
+            </FooterLeft>
 
-      <Footer
-        $isDark={isDarkMode}
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-      >
-        <FooterGrid>
-          <FooterSection $isDark={isDarkMode}>
-            <h3>Ốp Pờ</h3>
-            <p>Ốp Pờ là nền tảng tuyển dụng hiện đại giúp kết nối nhà tuyển dụng với ứng viên tài năng.</p>
-          </FooterSection>
-          
-          <FooterSection $isDark={isDarkMode}>
-            <h3>Dành Cho Ứng Viên</h3>
-            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Tìm việc làm</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Việc làm đã lưu</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Việc làm đã ứng tuyển</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Tạo CV trực tuyến</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Quản lý hồ sơ</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Tải ứng dụng</a>
-          </FooterSection>
-          
-          <FooterSection $isDark={isDarkMode}>
-            <h3>Chào Mừng Nhà Tuyển Dụng</h3>
-            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Đăng tin tuyển dụng</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Quản lý ứng viên</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Gói dịch vụ</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Tìm ứng viên</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Phân tích & Báo cáo</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Quản lý HR</a>
-          </FooterSection>
-          
-          <FooterSection $isDark={isDarkMode}>
-            <h3>Hỗ Trợ</h3>
-            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Trung tâm trợ giúp</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Liên hệ</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Câu hỏi thường gặp</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Điều khoản sử dụng</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Chính sách bảo mật</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Về chúng tôi</a>
-          </FooterSection>
-        </FooterGrid>
-        
-        <Copyright $isDark={isDarkMode}>
-          © 2026 Ốp Pờ. Tất cả quyền được bảo lưu.
-        </Copyright>
-      </Footer>
+            <FooterLinksWrap>
+              <FooterLinkCol $isDark={isDarkMode}>
+                <h4>Về Ốp Pờ</h4>
+                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Giới thiệu</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Góc báo chí</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Tuyển dụng</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Liên hệ</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Hỏi đáp</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Chính sách bảo mật</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Điều khoản dịch vụ</a>
+              </FooterLinkCol>
+
+              <FooterLinkCol $isDark={isDarkMode}>
+                <h4>Hồ sơ và CV</h4>
+                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Quản lý CV của bạn</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Hướng dẫn viết CV</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Review CV</a>
+                <h4 style={{ marginTop: '24px' }}>Khám phá</h4>
+                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Ứng dụng di động Ốp Pờ</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>AI đề xuất công việc phù hợp</a>
+              </FooterLinkCol>
+
+              <FooterLinkCol $isDark={isDarkMode}>
+                <h4>Tìm việc nhanh - uy tín</h4>
+                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Việc làm tốt nhất</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Việc làm lương cao</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Việc làm quản lý</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Việc làm bán thời gian</a>
+              </FooterLinkCol>
+
+              <FooterLinkCol $isDark={isDarkMode}>
+                <h4>Quy tắc chung</h4>
+                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Điều kiện giao dịch chung</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>Giá dịch vụ & Cách thanh toán</a>
+              </FooterLinkCol>
+            </FooterLinksWrap>
+          </FooterMain>
+
+          <FooterBottom $isDark={isDarkMode}>
+            <CompanyDetails $isDark={isDarkMode}>
+              <h3>Công ty Cổ phần Ốp Pờ Việt Nam</h3>
+              <p><span>📄</span> Giấy phép đăng ký kinh doanh số: 0123456789 cấp ngày 21/02/2026, thay đổi lần thứ 1 ngày 03/03/2026 tại Sở Tài chính Thành phố Hồ Chí Minh</p>
+              <p><span>📄</span> Giấy phép hoạt động dịch vụ việc làm số: 123456789/GP-LĐTBXH</p>
+              <p><span>📍</span> Trụ sở chính: Đại học FPT, Khu Công nghệ cao, Quận 9, TP Thủ Đức, TP HCM</p>
+
+            </CompanyDetails>
+
+            <QrCodeArea>
+              <img src="/OpPoReview/images/qrcode.png" alt="QR Code" onError={(e) => { e.target.src = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://leluc212.github.io/OpPoReview/' }} />
+              <p>leluc212.github.io/OpPoReview</p>
+            </QrCodeArea>
+          </FooterBottom>
+
+          <Copyright $isDark={isDarkMode}>
+            © {new Date().getFullYear()} Ốp Pờ Vietnam JSC. All rights reserved.
+          </Copyright>
+        </Footer>
       </ScrollContainer>
 
       <UnderDevelopmentModal
