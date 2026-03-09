@@ -208,9 +208,9 @@ const BoostSection = styled.div`
 
 const BoostCard = styled.div`
   background: ${props => props.$bgColor || '#FFF9E6'};
-  border-radius: 24px;
-  padding: 40px 44px;
-  box-shadow: 0 8px 32px rgba(245, 158, 11, 0.12);
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.08);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -218,50 +218,13 @@ const BoostCard = styled.div`
   text-align: center;
   position: relative;
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 2px solid rgba(245, 158, 11, 0.15);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(245, 158, 11, 0.1);
   
   &:hover {
-    transform: translateY(-6px) scale(1.01);
-    box-shadow: 0 16px 48px rgba(245, 158, 11, 0.2);
-    border-color: rgba(245, 158, 11, 0.3);
-  }
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-  
-  &:hover::before {
-    opacity: 1;
-    animation: shimmer 2s ease-in-out infinite;
-  }
-  
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%, rgba(245, 158, 11, 0.05) 100%);
-    pointer-events: none;
-  }
-  
-  @keyframes shimmer {
-    0%, 100% {
-      transform: translate(-50%, -50%) rotate(0deg);
-    }
-    50% {
-      transform: translate(-30%, -30%) rotate(180deg);
-    }
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.2);
   }
 `;
 
@@ -269,35 +232,23 @@ const BoostHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 28px;
+  gap: 8px;
+  margin-bottom: 12px;
   position: relative;
   z-index: 1;
   
   svg {
-    width: 28px;
-    height: 28px;
+    width: 18px;
+    height: 18px;
     color: ${props => props.$color || '#F59E0B'};
-    filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.3));
-    animation: pulse 2s ease-in-out infinite;
   }
   
   h3 {
-    font-size: 16px;
-    font-weight: 800;
+    font-size: 12px;
+    font-weight: 700;
     color: #78350F;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  }
-  
-  @keyframes pulse {
-    0%, 100% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.1);
-    }
+    letter-spacing: 0.5px;
   }
 `;
 
@@ -382,34 +333,30 @@ const BoostSubStat = styled.div`
 const BoostOptions = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  gap: 8px;
   width: 100%;
-  justify-items: center;
-  padding: 16px 0 0 0;
+  padding: 8px 0 0 0;
 `;
 
 const BoostOption = styled.div`
   background: white;
-  border-radius: 16px;
-  padding: 28px 32px;
+  border-radius: 8px;
+  padding: 12px 14px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 10px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   transition: all 0.2s;
-  width: 260px;
-  max-width: 100%;
-  justify-content: center;
   
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   }
   
   .icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 12px;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -417,32 +364,36 @@ const BoostOption = styled.div`
     flex-shrink: 0;
     
     svg {
-      width: 28px;
-      height: 28px;
+      width: 14px;
+      height: 14px;
       color: ${props => props.$iconColor || '#1E40AF'};
     }
   }
   
   .content {
     flex: 1;
+    min-width: 0;
     
     .name {
       font-size: 16px;
-      font-weight: 700;
+      font-weight: 600;
       color: #1F2937;
-      margin-bottom: 6px;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     
     .count {
-      font-size: 28px;
+      font-size: 20px;
       font-weight: 800;
       color: #1F2937;
       
       span {
-        font-size: 15px;
-        font-weight: 600;
+        font-size: 11px;
+        font-weight: 500;
         color: #6B7280;
-        margin-left: 6px;
+        margin-left: 3px;
       }
     }
   }
@@ -1122,7 +1073,7 @@ const AdminDashboard = () => {
     totalJobs: urgentJobs,
     change: `+${Math.round((urgentJobs / totalJobPosts) * 100)}%`,
     discount: '15%',
-    price: '18,5 triệu VND'
+    price: '18.500.000 VND'
   };
 
   // Boost packages data
@@ -1370,9 +1321,6 @@ const AdminDashboard = () => {
           {/* Tin tuyển gấp */}
           <BoostCard $bgColor="linear-gradient(135deg, #FFF9E6 0%, #FEF3C7 100%)">
             <BoostHeader $color="#F59E0B">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-              </svg>
               <h3>{language === 'vi' ? 'BÀI TUYỂN GẤP' : 'URGENT JOBS'}</h3>
             </BoostHeader>
             <BoostStats>
@@ -1382,9 +1330,6 @@ const AdminDashboard = () => {
                 <span className="change">↗ {platformData.change}</span>
               </BoostMainStat>
               <BoostSubStat>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{width: '18px', height: '18px', display: 'inline', marginRight: '6px'}}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
                 {language === 'vi' ? `Hoa Hồng ${platformData.discount}: ${platformData.price}` : `Commission ${platformData.discount}: ${platformData.price}`}
               </BoostSubStat>
             </BoostStats>
@@ -1393,9 +1338,6 @@ const AdminDashboard = () => {
           {/* Gói Boost */}
           <BoostCard $bgColor="#F0F9FF">
             <BoostHeader $color="#1E40AF">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-              </svg>
               <h3>{language === 'vi' ? 'GÓI BOOST' : 'BOOST PACKAGES'}</h3>
             </BoostHeader>
             <BoostOptions>
