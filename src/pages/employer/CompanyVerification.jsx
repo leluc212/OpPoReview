@@ -375,11 +375,15 @@ const CompanyVerification = () => {
     }
   ];
 
-  // Compress image before storing
-  const compressImage = (file, maxWidth = 1200, quality = 0.7) => {
+  // Compress image before storing - optimized for localStorage
+  const compressImage = (file, maxWidth = 800, quality = 0.4) => {
     return new Promise((resolve, reject) => {
       if (!file.type.startsWith('image/')) {
-        // For non-image files (PDF, etc), read as is but with size limit
+        // For non-image files (PDF, etc), check size limit
+        if (file.size > 2 * 1024 * 1024) { // 2MB limit for PDFs
+          reject(new Error('File quá lớn. Vui lòng sử dụng file nhỏ hơn 2MB'));
+          return;
+        }
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result);
         reader.onerror = reject;
@@ -407,9 +411,18 @@ const CompanyVerification = () => {
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
 
-          // Convert to base64 with compression
+          // Convert to base64 with high compression
           const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-          resolve(compressedDataUrl);
+          
+          // Check if compressed size is still too large
+          const sizeInBytes = (compressedDataUrl.length * 3) / 4;
+          if (sizeInBytes > 500 * 1024) { // 500KB limit after compression
+            // Try again with even lower quality
+            const ultraCompressed = canvas.toDataURL('image/jpeg', 0.3);
+            resolve(ultraCompressed);
+          } else {
+            resolve(compressedDataUrl);
+          }
         };
         img.onerror = reject;
         img.src = e.target.result;
@@ -422,9 +435,41 @@ const CompanyVerification = () => {
   const handleFileUpload = async (field, file, step) => {
     if (!file) return;
     
+    // Check file size before processing
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      alert(language === 'vi' 
+        ? 'File quá lớn! Vui lòng chọn file nhỏ hơn 5MB.'
+        : 'File too large! Please select a file smaller than 5MB.');
+      return;
+    }
+    
     try {
       // Compress image before storing
       const compressedDataUrl = await compressImage(file);
+      
+      // Check if localStorage has enough space
+      const testKey = 'test_storage_' + Date.now();
+      try {
+        localStorage.setItem(testKey, compressedDataUrl);
+        localStorage.removeItem(testKey);
+      } catch (storageError) {
+        // LocalStorage full - try to clear old verification data
+        console.warn('LocalStorage full, attempting to clear old data...');
+        const oldVerification = localStorage.getItem('companyVerificationData');
+        if (oldVerification) {
+          if (confirm(language === 'vi' 
+            ? 'Bộ nhớ đầy. Xóa dữ liệu xác thực cũ để tiếp tục?'
+            : 'Storage full. Clear old verification data to continue?')) {
+            localStorage.removeItem('companyVerificationData');
+            localStorage.removeItem('companyVerificationStatus');
+          } else {
+            throw storageError;
+          }
+        } else {
+          throw storageError;
+        }
+      }
       
       // Store both file name and compressed data
       const fileData = {
@@ -435,9 +480,9 @@ const CompanyVerification = () => {
       };
       
       if (step === 0) {
-        setStep1Data({ ...step1Data, [field]: fileData });
+        setStep1Data(prev => ({ ...prev, [field]: fileData }));
       } else if (step === 2) {
-        setStep3Data({ ...step3Data, [field]: fileData });
+        setStep3Data(prev => ({ ...prev, [field]: fileData }));
       }
       
       // Show success message for this specific field
@@ -445,7 +490,9 @@ const CompanyVerification = () => {
       setTimeout(() => setUploadSuccess(null), 3000);
     } catch (error) {
       console.error('Error processing file:', error);
-      alert('Lỗi khi xử lý file. Vui lòng thử lại với file có kích thước nhỏ hơn.');
+      alert(language === 'vi'
+        ? 'Lỗi khi xử lý file. Vui lòng thử lại với file có kích thước nhỏ hơn hoặc sử dụng ảnh có độ phân giải thấp hơn.'
+        : 'Error processing file. Please try again with a smaller file or lower resolution image.');
     }
   };
 
@@ -477,10 +524,30 @@ const CompanyVerification = () => {
   const validateStep = (step) => {
     switch (step) {
       case 0:
-        if (!step1Data.businessLicense || !step1Data.licenseNumber || !step1Data.issueDate) {
-          alert(language === 'vi' 
-            ? 'Vui lòng điền đầy đủ thông tin và tải lên giấy phép kinh doanh'
-            : 'Please fill in all required fields and upload business license');
+        console.log('=== VALIDATION STEP 1 ===');
+        console.log('businessLicense:', step1Data.businessLicense);
+        console.log('licenseNumber:', step1Data.licenseNumber);
+        console.log('issueDate:', step1Data.issueDate);
+        console.log('issuingAuthority:', step1Data.issuingAuthority);
+        console.log('=========================');
+        
+        const missingFields = [];
+        if (!step1Data.businessLicense) {
+          missingFields.push(language === 'vi' ? 'Giấy phép kinh doanh' : 'Business License');
+        }
+        if (!step1Data.licenseNumber || String(step1Data.licenseNumber).trim() === '') {
+          missingFields.push(language === 'vi' ? 'Số giấy phép' : 'License Number');
+        }
+        if (!step1Data.issueDate || String(step1Data.issueDate).trim() === '') {
+          missingFields.push(language === 'vi' ? 'Ngày cấp' : 'Issue Date');
+        }
+        if (!step1Data.issuingAuthority || String(step1Data.issuingAuthority).trim() === '') {
+          missingFields.push(language === 'vi' ? 'Cơ quan cấp' : 'Issuing Authority');
+        }
+        
+        if (missingFields.length > 0) {
+          console.log('Missing fields:', missingFields);
+          alert((language === 'vi' ? 'Vui lòng điền đầy đủ các trường sau:\n' : 'Please fill in the following fields:\n') + missingFields.join(', '));
           return false;
         }
         break;
@@ -634,8 +701,11 @@ const CompanyVerification = () => {
                     ? '• Tải lên bản scan rõ nét của Giấy phép ĐKKD hoặc Giấy chứng nhận đăng ký doanh nghiệp'
                     : '• Upload a clear scan of your Business Registration Certificate'}</p>
                   <p>{language === 'vi' 
-                    ? '• Định dạng: PDF, JPG, PNG (tối đa 5MB)'
-                    : '• Format: PDF, JPG, PNG (max 5MB)'}</p>
+                    ? '• Định dạng: PDF, JPG, PNG (tối đa 5MB, khuyến nghị dưới 2MB)'
+                    : '• Format: PDF, JPG, PNG (max 5MB, recommended under 2MB)'}</p>
+                  <p>{language === 'vi'
+                    ? '• Ảnh sẽ được tự động nén để tiết kiệm dung lượng'
+                    : '• Images will be automatically compressed to save space'}</p>
                 </div>
               </InfoBox>
 
@@ -651,7 +721,9 @@ const CompanyVerification = () => {
                       ? `✓ ${step1Data.businessLicense.name}`
                       : (language === 'vi' ? 'Nhấn để chọn file' : 'Click to select file')}
                   </div>
-                  <div className="upload-hint">PDF, JPG, PNG (max 5MB)</div>
+                  <div className="upload-hint">
+                    {language === 'vi' ? 'PDF, JPG, PNG (tối đa 5MB, khuyến nghị < 2MB)' : 'PDF, JPG, PNG (max 5MB, recommended < 2MB)'}
+                  </div>
                   <input
                     id="businessLicenseFile"
                     type="file"
@@ -678,7 +750,7 @@ const CompanyVerification = () => {
                 <Input
                   type="text"
                   value={step1Data.licenseNumber}
-                  onChange={(e) => setStep1Data({ ...step1Data, licenseNumber: e.target.value })}
+                  onChange={(e) => setStep1Data(prev => ({ ...prev, licenseNumber: e.target.value }))}
                   placeholder={language === 'vi' ? 'Nhập số giấy phép' : 'Enter license number'}
                   required
                 />
@@ -690,7 +762,7 @@ const CompanyVerification = () => {
                   <Input
                     type="date"
                     value={step1Data.issueDate}
-                    onChange={(e) => setStep1Data({ ...step1Data, issueDate: e.target.value })}
+                    onChange={(e) => setStep1Data(prev => ({ ...prev, issueDate: e.target.value }))}
                     required
                   />
                 </FormGroup>
@@ -700,7 +772,7 @@ const CompanyVerification = () => {
                   <Input
                     type="date"
                     value={step1Data.expiryDate}
-                    onChange={(e) => setStep1Data({ ...step1Data, expiryDate: e.target.value })}
+                    onChange={(e) => setStep1Data(prev => ({ ...prev, expiryDate: e.target.value }))}
                   />
                 </FormGroup>
               </FormGrid>
@@ -710,7 +782,7 @@ const CompanyVerification = () => {
                 <Input
                   type="text"
                   value={step1Data.issuingAuthority}
-                  onChange={(e) => setStep1Data({ ...step1Data, issuingAuthority: e.target.value })}
+                  onChange={(e) => setStep1Data(prev => ({ ...prev, issuingAuthority: e.target.value }))}
                   placeholder={language === 'vi' ? 'VD: Sở KH&ĐT TP.HCM' : 'E.g.: Department of Planning and Investment'}
                   required
                 />
@@ -926,7 +998,9 @@ const CompanyVerification = () => {
                       ? `✓ ${step3Data.idFrontImage.name}`
                       : (language === 'vi' ? 'Tải lên mặt trước CMND/CCCD' : 'Upload ID card front')}
                   </div>
-                  <div className="upload-hint">JPG, PNG (max 5MB)</div>
+                  <div className="upload-hint">
+                    {language === 'vi' ? 'JPG, PNG (tối đa 5MB, khuyến nghị < 2MB)' : 'JPG, PNG (max 5MB, recommended < 2MB)'}
+                  </div>
                   <input
                     id="idFrontImage"
                     type="file"
@@ -960,7 +1034,9 @@ const CompanyVerification = () => {
                       ? `✓ ${step3Data.idBackImage.name}`
                       : (language === 'vi' ? 'Tải lên mặt sau CMND/CCCD' : 'Upload ID card back')}
                   </div>
-                  <div className="upload-hint">JPG, PNG (max 5MB)</div>
+                  <div className="upload-hint">
+                    {language === 'vi' ? 'JPG, PNG (tối đa 5MB, khuyến nghị < 2MB)' : 'JPG, PNG (max 5MB, recommended < 2MB)'}
+                  </div>
                   <input
                     id="idBackImage"
                     type="file"
@@ -994,7 +1070,9 @@ const CompanyVerification = () => {
                       ? `✓ ${step3Data.authorizationLetter.name}`
                       : (language === 'vi' ? 'Tải lên giấy ủy quyền' : 'Upload authorization letter')}
                   </div>
-                  <div className="upload-hint">PDF, JPG, PNG (max 5MB)</div>
+                  <div className="upload-hint">
+                    {language === 'vi' ? 'PDF, JPG, PNG (tối đa 5MB, khuyến nghị < 2MB)' : 'PDF, JPG, PNG (max 5MB, recommended < 2MB)'}
+                  </div>
                   <input
                     id="authorizationLetter"
                     type="file"

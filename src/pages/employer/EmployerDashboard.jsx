@@ -438,7 +438,7 @@ const EmployerDashboard = () => {
     { 
       id: 1,
       candidate: language === 'vi' ? 'Đỗ Hoàng Hiếu' : 'Hieu Do Hoang', 
-      job: language === 'vi' ? 'Cửa hàng trưởng' : 'Store Manager', 
+      job: language === 'vi' ? 'Nhân viên Cửa hàng trưởng' : 'Store Manager', 
       applied: language === 'vi' ? '2 giờ trước' : '2 hours ago',
       status: 'pending',
       avatar: 'H'
@@ -446,7 +446,7 @@ const EmployerDashboard = () => {
     { 
       id: 2,
       candidate: language === 'vi' ? 'Phạm Lê Duy' : 'Duy Pham Le', 
-      job: language === 'vi' ? 'Nhân viên Thu Ngân' : 'Cashier',
+      job: language === 'vi' ? 'Nhân viên Thu ngân' : 'Cashier',
       applied: language === 'vi' ? '5 giờ trước' : '5 hours ago',
       status: 'pending',
       avatar: 'D'
@@ -454,7 +454,7 @@ const EmployerDashboard = () => {
     { 
       id: 3,
       candidate: 'Trần Phương Tuấn', 
-      job: language === 'vi' ? 'Nhân viên Pha Chế' : 'Barista',
+      job: language === 'vi' ? 'Nhân viên Pha chế' : 'Barista',
       applied: language === 'vi' ? '1 ngày trước' : '1 day ago',
       status: 'approved',
       avatar: 'N'
@@ -470,7 +470,7 @@ const EmployerDashboard = () => {
 
   const activities = [
     {
-      title: language === 'vi' ? 'Tin "Nhân viên Pha Chế" đã được duyệt' : 'Job "Barista" approved',
+      title: language === 'vi' ? 'Tin "Nhân viên Pha chế" đã được duyệt' : 'Job "Barista" approved',
       time: language === 'vi' ? '5 giờ trước' : '5 hours ago',
       icon: CheckCircle,
       color: '#10B981'

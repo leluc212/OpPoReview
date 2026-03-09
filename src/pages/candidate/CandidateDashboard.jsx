@@ -1425,7 +1425,7 @@ const CandidateDashboard = () => {
   const recommendedJobs = [
     {
       id: 1,
-      title: 'Nhân viên Pha Chế - Part-time',
+      title: 'Nhân viên Pha chế - Part-time',
       company: 'The Coffee House',
       location: 'Quận 7, TP.HCM',
       type: 'Part-time',
@@ -1435,7 +1435,7 @@ const CandidateDashboard = () => {
     },
     {
       id: 2,
-      title: 'Nhân viên Phục Vụ - Part-time',
+      title: 'Nhân viên Phục vụ - Part-time',
       company: 'Starbucks Vietnam',
       location: 'Bình Thạnh, TP.HCM',
       type: 'Part-time',
@@ -1445,7 +1445,7 @@ const CandidateDashboard = () => {
     },
     {
       id: 3,
-      title: 'Phụ bếp nhà hàng - Part-time',
+      title: 'Nhân viên Phụ bếp - Part-time',
       company: 'Pizza 4P\'s',
       location: 'Quận 2, TP.HCM',
       type: 'Part-time',
@@ -1455,7 +1455,7 @@ const CandidateDashboard = () => {
     },
     {
       id: 4,
-      title: 'Nhân viên Pha Chế - Full-time',
+      title: 'Nhân viên Pha chế - Full-time',
       company: 'Phúc Long Coffee & Tea',
       location: 'Quận 1, TP.HCM',
       type: 'Full-time',
@@ -1465,7 +1465,7 @@ const CandidateDashboard = () => {
     },
     {
       id: 5,
-      title: 'Nhân viên bưng bê - Part-time',
+      title: 'Nhân viên Bưng bê - Part-time',
       company: 'Haidilao Việt Nam',
       location: 'Quận 1, TP.HCM',
       type: 'Part-time',
@@ -1478,21 +1478,21 @@ const CandidateDashboard = () => {
   const recentApplications = [
     { 
       id: 1, 
-      title: 'Nhân viên Phục Vụ', 
+      title: 'Nhân viên Phục vụ', 
       company: 'Pizza 4P\'s', 
       appliedDate: '2 ngày trước', 
       status: 'unseen' 
     },
     { 
       id: 2, 
-      title: 'Nhân viên Pha Chế', 
+      title: 'Nhân viên Pha chế', 
       company: 'Phúc Long Coffee & Tea', 
       appliedDate: '5 ngày trước', 
       status: 'seen' 
     },
     { 
       id: 3, 
-      title: 'Nhân viên Phục Vụ', 
+      title: 'Nhân viên Phục vụ', 
       company: 'Katinat Quận 8', 
       appliedDate: '1 giờ trước', 
       status: 'approved',

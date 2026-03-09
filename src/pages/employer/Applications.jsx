@@ -6,8 +6,9 @@ import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
 import TableFilter from '../../components/TableFilter';
 import Modal from '../../components/Modal';
-import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText, Clock, Users, Newspaper, DollarSign, Edit, Trash2, TrendingUp, Plus, X, XCircle, Wallet, AlertCircle, Save, Download } from 'lucide-react';
+import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText, Clock, Users, Newspaper, DollarSign, Edit, Trash2, TrendingUp, Plus, X, XCircle, Wallet, AlertCircle, Save, Download, MessageSquare } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { initializeMultipleSampleCVs } from '../../utils/sampleCVGenerator';
 
 // Mock job posts data
 const getJobPosts = (language) => [
@@ -1193,6 +1194,191 @@ const EmptyCV = styled.div`
   }
 `;
 
+const CVViewerContainer = styled.div`
+  margin-top: 16px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid #E2E8F0;
+  background: #F8FAFC;
+`;
+
+const CVViewerHeader = styled.div`
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 14px;
+
+  button {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  }
+`;
+
+const CVViewerFrame = styled.iframe`
+  width: 100%;
+  height: 600px;
+  border: none;
+  background: white;
+`;
+
+const CVButtonGroup = styled.div`
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+`;
+
+const CVViewButton = styled(motion.button)`
+  flex: 1;
+  padding: 12px 20px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.25);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    transform: translateY(-1px);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
+const FeedbackSection = styled.div`
+  margin-top: 24px;
+  padding: 24px;
+  background: #F8FAFC;
+  border: 2px solid #E2E8F0;
+  border-radius: 14px;
+`;
+
+const FeedbackHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    color: #1e40af;
+  }
+`;
+
+const FeedbackTextarea = styled.textarea`
+  width: 100%;
+  min-height: 120px;
+  padding: 14px;
+  border: 2px solid #E2E8F0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  transition: all 0.2s ease;
+  background: white;
+
+  &:focus {
+    outline: none;
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+  }
+
+  &::placeholder {
+    color: #94a3b8;
+  }
+`;
+
+const FeedbackActions = styled.div`
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+`;
+
+const FeedbackButton = styled(motion.button)`
+  flex: 1;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  background: ${props =>
+    props.$variant === 'approve' ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' :
+    props.$variant === 'reject' ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)' :
+    'linear-gradient(135deg, #1e40af 0%, #2563eb 100%)'
+  };
+  color: white;
+  box-shadow: ${props =>
+    props.$variant === 'approve' ? '0 3px 10px rgba(16, 185, 129, 0.25)' :
+    props.$variant === 'reject' ? '0 3px 10px rgba(239, 68, 68, 0.25)' :
+    '0 3px 10px rgba(30, 64, 175, 0.25)'
+  };
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: ${props =>
+      props.$variant === 'approve' ? '0 4px 14px rgba(16, 185, 129, 0.35)' :
+      props.$variant === 'reject' ? '0 4px 14px rgba(239, 68, 68, 0.35)' :
+      '0 4px 14px rgba(30, 64, 175, 0.35)'
+    };
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
+const FeedbackMeta = styled.div`
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #E2E8F0;
+  font-size: 12px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+`;
 
 const OverallRatingBadge = styled.div`
   display: inline-flex;
@@ -1270,18 +1456,38 @@ const ProfileDetailModal = React.memo(({ candidate, onClose }) => {
     ? (candidate.reviews.reduce((s, r) => s + r.rating, 0) / candidate.reviews.length)
     : null;
 
-  // Read CV from localStorage
-  const candidateCV = JSON.parse(localStorage.getItem('candidateCV') || 'null');
+  // Read CV from localStorage - try candidate-specific CV first, then fallback to general CV
+  const candidateCV = JSON.parse(
+    localStorage.getItem(`candidateCV_${candidate.id}`) ||
+    localStorage.getItem('candidateCV') ||
+    'null'
+  );
+
+  // State for feedback
+  const [feedback, setFeedback] = useState(() => {
+    const savedFeedback = localStorage.getItem(`feedback_${candidate.id}`);
+    return savedFeedback ? JSON.parse(savedFeedback) : { note: '', date: null };
+  });
 
   const handleCVDownload = () => {
     if (!candidateCV) return;
-    
+
     const link = document.createElement('a');
     link.href = candidateCV.data;
     link.download = candidateCV.name;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleSaveFeedback = () => {
+    const updatedFeedback = {
+      ...feedback,
+      date: new Date().toISOString()
+    };
+    localStorage.setItem(`feedback_${candidate.id}`, JSON.stringify(updatedFeedback));
+    setFeedback(updatedFeedback);
+    alert(language === 'vi' ? 'Đã lưu ghi chú!' : 'Note saved!');
   };
 
   const formatFileSize = (bytes) => {
@@ -1430,27 +1636,64 @@ const ProfileDetailModal = React.memo(({ candidate, onClose }) => {
           <ProfileSection>
             <h3><FileText /> {language === 'vi' ? 'Hồ sơ CV' : 'CV Document'}</h3>
             {candidateCV ? (
-              <CVCard>
-                <CVIconBox>
-                  <FileText />
-                </CVIconBox>
-                <CVInfo>
-                  <div className="cv-name">{candidateCV.name}</div>
-                  <div className="cv-meta">
-                    <span>{formatFileSize(candidateCV.size)}</span>
-                    <span>•</span>
-                    <span>{language === 'vi' ? 'Tải lên:' : 'Uploaded:'} {formatDate(candidateCV.uploadDate)}</span>
-                  </div>
-                </CVInfo>
-                <CVDownloadButton
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleCVDownload}
-                >
-                  <Download />
-                  {language === 'vi' ? 'Tải xuống' : 'Download'}
-                </CVDownloadButton>
-              </CVCard>
+              <>
+                <CVCard>
+                  <CVIconBox>
+                    <FileText />
+                  </CVIconBox>
+                  <CVInfo>
+                    <div className="cv-name">{candidateCV.name}</div>
+                    <div className="cv-meta">
+                      <span>{formatFileSize(candidateCV.size)}</span>
+                      <span>•</span>
+                      <span>{language === 'vi' ? 'Tải lên:' : 'Uploaded:'} {formatDate(candidateCV.uploadDate)}</span>
+                    </div>
+                  </CVInfo>
+                  <CVDownloadButton
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleCVDownload}
+                  >
+                    <Download />
+                    {language === 'vi' ? 'Tải xuống' : 'Download'}
+                  </CVDownloadButton>
+                </CVCard>
+
+                <FeedbackSection>
+                  <FeedbackHeader>
+                    <MessageSquare />
+                    {language === 'vi' ? 'Phản hồi & Đánh giá' : 'Feedback & Review'}
+                  </FeedbackHeader>
+
+                  <FeedbackTextarea
+                    placeholder={language === 'vi'
+                      ? 'Nhập ghi chú, đánh giá về hồ sơ ứng viên này...'
+                      : 'Enter notes, feedback about this candidate...'
+                    }
+                    value={feedback.note}
+                    onChange={(e) => setFeedback({ ...feedback, note: e.target.value })}
+                  />
+
+                  <FeedbackActions>
+                    <FeedbackButton
+                      $variant="save"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleSaveFeedback}
+                    >
+                      <Save />
+                      {language === 'vi' ? 'Lưu ghi chú' : 'Save Note'}
+                    </FeedbackButton>
+                  </FeedbackActions>
+
+                  {feedback.date && (
+                    <FeedbackMeta>
+                      <Clock />
+                      {language === 'vi' ? 'Cập nhật lần cuối:' : 'Last updated:'} {formatDate(feedback.date)}
+                    </FeedbackMeta>
+                  )}
+                </FeedbackSection>
+              </>
             ) : (
               <EmptyCV>
                 <div className="icon">📄</div>
@@ -1809,6 +2052,18 @@ const Applications = () => {
   useEffect(() => {
     setApplications(getInitialApplications(language));
   }, [language]);
+
+  // Initialize sample CVs for demo
+  useEffect(() => {
+    const initCVs = async () => {
+      try {
+        await initializeMultipleSampleCVs();
+      } catch (error) {
+        console.error('Failed to initialize sample CVs:', error);
+      }
+    };
+    initCVs();
+  }, []);
 
   // Auto-open profile modal if candidateId is passed via navigation state
   useEffect(() => {

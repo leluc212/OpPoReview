@@ -382,6 +382,116 @@ const PostQuickJob = () => {
   };
 
   const [formData, setFormData] = useState(() => {
+    // Initialize mock quick jobs if not exists
+    const existingQuickJobs = localStorage.getItem('quickJobs');
+    if (!existingQuickJobs) {
+      const mockQuickJobs = [
+        {
+          id: 1709870123456,
+          title: 'Ca Tối - Nhân viên Phục vụ',
+          location: 'Quận 1, TP.HCM',
+          hourlyRate: 35000,
+          startTime: '18:00',
+          endTime: '23:00',
+          description: 'Cần nhân viên phục vụ ca tối, làm việc tại quán ăn khu vực trung tâm. Yêu cầu nhiệt tình, nhanh nhẹn.',
+          contactPhone: '0901234567',
+          createdAt: new Date('2026-03-08T10:30:00').toISOString(),
+          type: 'quick',
+          status: 'active',
+          fee: 17500,
+          totalHours: 5,
+          applicants: 12,
+          views: 45
+        },
+        {
+          id: 1709783123456,
+          title: 'Ca Trưa - Nhân viên Phụ bếp',
+          location: 'Quận 3, TP.HCM',
+          hourlyRate: 32000,
+          startTime: '10:00',
+          endTime: '14:30',
+          description: 'Tuyển phụ bếp làm ca trưa, hỗ trợ bếp chính chuẩn bị món ăn. Không yêu cầu kinh nghiệm.',
+          contactPhone: '0912345678',
+          createdAt: new Date('2026-03-07T08:15:00').toISOString(),
+          type: 'quick',
+          status: 'active',
+          fee: 14400,
+          totalHours: 4.5,
+          applicants: 8,
+          views: 32
+        },
+        {
+          id: 1709696123456,
+          title: 'Ca Chiều - Nhân viên Pha chế',
+          location: 'Quận 7, TP.HCM',
+          hourlyRate: 38000,
+          startTime: '14:00',
+          endTime: '18:00',
+          description: 'Cần barista pha chế đồ uống ca chiều. Ưu tiên có kinh nghiệm pha cà phê và trà sữa.',
+          contactPhone: '0923456789',
+          createdAt: new Date('2026-03-06T14:20:00').toISOString(),
+          type: 'quick',
+          status: 'completed',
+          fee: 15200,
+          totalHours: 4,
+          applicants: 15,
+          views: 58
+        },
+        {
+          id: 1709609123456,
+          title: 'Ca Sáng - Nhân viên Bán hàng',
+          location: 'Quận 10, TP.HCM',
+          hourlyRate: 33000,
+          startTime: '07:00',
+          endTime: '12:00',
+          description: 'Tuyển nhân viên bán hàng ca sáng tại tiệm bánh. Làm việc từ thứ 2 đến thứ 6.',
+          contactPhone: '0934567890',
+          createdAt: new Date('2026-03-05T06:00:00').toISOString(),
+          type: 'quick',
+          status: 'active',
+          fee: 16500,
+          totalHours: 5,
+          applicants: 6,
+          views: 28
+        },
+        {
+          id: 1709522123456,
+          title: 'Ca Tối - Nhân viên Thu ngân',
+          location: 'Quận 2, TP.HCM',
+          hourlyRate: 36000,
+          startTime: '17:00',
+          endTime: '22:00',
+          description: 'Cần thu ngân ca tối, yêu cầu thành thạo máy tính và giao tiếp tốt với khách hàng.',
+          contactPhone: '0945678901',
+          createdAt: new Date('2026-03-04T16:45:00').toISOString(),
+          type: 'quick',
+          status: 'expired',
+          fee: 18000,
+          totalHours: 5,
+          applicants: 4,
+          views: 22
+        },
+        {
+          id: 1709435123456,
+          title: 'Ca Tối - Nhân viên Rửa chén',
+          location: 'Quận 5, TP.HCM',
+          hourlyRate: 32000,
+          startTime: '19:00',
+          endTime: '23:00',
+          description: 'Tuyển nhân viên rửa chén ca tối tại nhà hàng. Công việc đơn giản, phù hợp sinh viên.',
+          contactPhone: '0956789012',
+          createdAt: new Date('2026-03-03T12:00:00').toISOString(),
+          type: 'quick',
+          status: 'active',
+          fee: 12800,
+          totalHours: 4,
+          applicants: 10,
+          views: 38
+        }
+      ];
+      localStorage.setItem('quickJobs', JSON.stringify(mockQuickJobs));
+    }
+    
     // Load draft from localStorage on mount
     const savedDraft = localStorage.getItem('quickJobDraft');
     if (savedDraft) {

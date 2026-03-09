@@ -256,6 +256,78 @@ const RoleCard = styled(motion.div)`
   }
 `;
 
+const CardBadge = styled.div`
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  font-weight: 800;
+  color: #0E3995;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(14,57,149,0.08);
+  z-index: 1;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  
+  img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+  }
+
+  ${RoleCard}:hover & {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(14,57,149,0.15);
+  }
+
+  ${RoleCard}:hover & img {
+    transform: rotate(10deg) scale(1.1);
+  }
+`;
+
+const CardIconBox = styled.div`
+  width: 68px;
+  height: 68px;
+  border-radius: 18px;
+  background: ${p => p.$bg};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  margin-bottom: 18px;
+  box-shadow: 0 6px 20px ${p => p.$shadow};
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 20px;
+    background: ${p => p.$grad};
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: -1;
+  }
+
+  ${RoleCard}:hover & {
+    transform: scale(1.08) rotate(5deg);
+    box-shadow: 0 10px 30px ${p => p.$shadow};
+  }
+
+  ${RoleCard}:hover &::before {
+    opacity: 0.15;
+  }
+`;
+
 const CardTitle = styled.h2`
   font-size: 22px;
   font-weight: 800;
@@ -440,6 +512,9 @@ const RegisterRoleSelection = () => {
   const roles = [
     {
       key: 'candidate',
+      icon: '👤',
+      iconBg: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
+      iconShadow: 'rgba(59,130,246,0.25)',
       grad: 'linear-gradient(135deg, #0369a1 0%, #0E3995 50%, #1d4ed8 100%)',
       accent: '#3b82f6',
       shadow: 'rgba(59,130,246,0.45)',
@@ -458,6 +533,9 @@ const RegisterRoleSelection = () => {
     },
     {
       key: 'employer',
+      icon: '🏢',
+      iconBg: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
+      iconShadow: 'rgba(14,57,149,0.25)',
       grad: 'linear-gradient(135deg, #0369a1 0%, #0E3995 50%, #1d4ed8 100%)',
       accent: '#0E3995',
       shadow: 'rgba(14,57,149,0.45)',
@@ -478,9 +556,9 @@ const RegisterRoleSelection = () => {
   ];
 
   const chips = [
-    '☕ Barista', '🍳 Phụ bếp', '🍽️ Nhân viên Phục Vụ Bàn', '🧁 Làm bánh', '🥤 Nhân viên Pha Chế', '🛎️ Nhân viên Thu Ngân', '🍜 Nhân viên bếp', '🧹 Dọn dẹp nhà hàng', '📦 Soạn hàng bếp', '🏪 Nhân viên cửa hàng F&B',
-    '☕ Barista', '🍳 Phụ bếp', '🍽️ Nhân viên Phục Vụ Bàn', '🧁 Làm bánh', '🥤 Nhân viên Pha Chế', '🛎️ Nhân viên Thu Ngân', '🍜 Nhân viên bếp', '🧹 Dọn dẹp nhà hàng', '📦 Soạn hàng bếp', '🏪 Nhân viên cửa hàng F&B',
-    '☕ Barista', '🍳 Phụ bếp', '🍽️ Nhân viên Phục Vụ Bàn', '🧁 Làm bánh', '🥤 Nhân viên Pha Chế', '🛎️ Nhân viên Thu Ngân', '🍜 Nhân viên bếp', '🧹 Dọn dẹp nhà hàng', '📦 Soạn hàng bếp', '🏪 Nhân viên cửa hàng F&B',
+    '☕ Nhân viên Barista', '🍳 Nhân viên Phụ bếp', '🍽️ Nhân viên Phục vụ', '🧁 Nhân viên Làm bánh', '🥤 Nhân viên Pha chế', '🛎️ Nhân viên Thu ngân', '🍜 Nhân viên Bếp', '🧹 Nhân viên Dọn dẹp', '📦 Nhân viên Soạn hàng', '🏪 Nhân viên Cửa hàng F&B',
+    '☕ Nhân viên Barista', '🍳 Nhân viên Phụ bếp', '🍽️ Nhân viên Phục vụ', '🧁 Nhân viên Làm bánh', '🥤 Nhân viên Pha chế', '🛎️ Nhân viên Thu ngân', '🍜 Nhân viên Bếp', '🧹 Nhân viên Dọn dẹp', '📦 Nhân viên Soạn hàng', '🏪 Nhân viên Cửa hàng F&B',
+    '☕ Nhân viên Barista', '🍳 Nhân viên Phụ bếp', '🍽️ Nhân viên Phục vụ', '🧁 Nhân viên Làm bánh', '🥤 Nhân viên Pha chế', '🛎️ Nhân viên Thu ngân', '🍜 Nhân viên Bếp', '🧹 Nhân viên Dọn dẹp', '📦 Nhân viên Soạn hàng', '🏪 Nhân viên Cửa hàng F&B',
   ];
 
   /* stagger */
@@ -556,6 +634,15 @@ const RegisterRoleSelection = () => {
                 whileHover={{ y: -8, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } }}
                 whileTap={{ scale: 0.985 }}
               >
+                <CardBadge>
+                  <img src="/OpPoReview/images/logo.png" alt="OpPo" onError={e => { e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"%3E%3Ctext y="20" font-size="20"%3E⭐%3C/text%3E%3C/svg%3E'; }} />
+                  OpPo
+                </CardBadge>
+                
+                <CardIconBox $bg={r.iconBg} $grad={r.grad} $shadow={r.iconShadow}>
+                  {r.icon}
+                </CardIconBox>
+                
                 <CardTitle>{r.title}</CardTitle>
                 <CardDesc>{r.desc}</CardDesc>
 

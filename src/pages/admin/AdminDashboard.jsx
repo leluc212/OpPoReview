@@ -1210,7 +1210,7 @@ const AdminDashboard = () => {
     {
       id: 1,
       employer: 'Katinat chi nhánh quận 8',
-      type: 'Nhân viên phục vụ',
+      type: 'Nhân viên Phục vụ',
       time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
       status: language === 'vi' ? 'DUYỆT' : 'APPROVED',
       statusColor: { bg: '#D1FAE5', color: '#059669' },
@@ -1219,7 +1219,7 @@ const AdminDashboard = () => {
     {
       id: 2,
       employer: 'Cơm tấm phúc lộc thọ',
-      type: 'Nhân viên rửa chén',
+      type: 'Nhân viên Rửa chén',
       time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
       status: language === 'vi' ? 'DUYỆT' : 'APPROVED',
       statusColor: { bg: '#D1FAE5', color: '#059669' },
@@ -1228,7 +1228,7 @@ const AdminDashboard = () => {
     {
       id: 3,
       employer: 'Highlands chi nhánh bưu điện quận 5',
-      type: 'Nhân viên phục vụ',
+      type: 'Nhân viên Phục vụ',
       time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
       status: language === 'vi' ? 'DUYỆT' : 'APPROVED',
       statusColor: { bg: '#D1FAE5', color: '#059669' },

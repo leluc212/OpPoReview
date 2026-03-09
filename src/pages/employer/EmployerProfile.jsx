@@ -23,7 +23,8 @@ import {
   Trash2,
   Download,
   Eye,
-  Plus
+  Plus,
+  AlertCircle
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -469,6 +470,75 @@ const DocumentsSection = styled.div`
   border-top: 2px solid #E8EFFF;
 `;
 
+const VerificationBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-left: 12px;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+`;
+
+const VerificationDocumentCard = styled(motion.div)`
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border: 2px solid #93C5FD;
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3B82F6 0%, #10B981 100%);
+  }
+  
+  &:hover {
+    border-color: #3B82F6;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
+    transform: translateY(-4px);
+  }
+  
+  .verified-badge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
+`;
+
 const DocumentsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -632,6 +702,34 @@ const EmptyDocuments = styled.div`
   }
 `;
 
+const InfoBox = styled.div`
+  padding: 16px;
+  border-radius: 12px;
+  border: 2px solid #E8EFFF;
+  background: #F8FAFC;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  
+  svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  
+  .info-content {
+    flex: 1;
+    
+    p {
+      font-size: 14px;
+      line-height: 1.6;
+      color: ${props => props.theme.colors.text};
+      margin: 0;
+    }
+  }
+`;
+
 const getInitialFormData = (language) => ({
   companyName: language === 'vi' ? 'Katinat Quận 8' : 'Katinat District 8',
   email: 'contact@katinat.vn',
@@ -655,6 +753,78 @@ const EmployerProfile = () => {
   const [documents, setDocuments] = useState(() => {
     const saved = localStorage.getItem('companyDocuments');
     return saved ? JSON.parse(saved) : [];
+  });
+  
+  const [verificationDocuments, setVerificationDocuments] = useState(() => {
+    const verificationData = localStorage.getItem('companyVerificationData');
+    if (!verificationData) return [];
+    
+    try {
+      const parsed = JSON.parse(verificationData);
+      const docs = [];
+      
+      // Step 1: Business License
+      if (parsed.step1?.businessLicense) {
+        docs.push({
+          id: 'business-license',
+          name: language === 'vi' ? 'Giấy phép kinh doanh' : 'Business License',
+          type: 'verification',
+          uploadDate: parsed.submittedAt ? new Date(parsed.submittedAt).toLocaleDateString('vi-VN') : 'N/A',
+          fileData: parsed.step1.businessLicense,
+          metadata: {
+            licenseNumber: parsed.step1.licenseNumber,
+            issueDate: parsed.step1.issueDate,
+            expiryDate: parsed.step1.expiryDate
+          }
+        });
+      }
+      
+      // Step 3: ID Front
+      if (parsed.step3?.idFrontImage) {
+        docs.push({
+          id: 'id-front',
+          name: language === 'vi' ? 'CCCD/CMND mặt trước' : 'ID Card (Front)',
+          type: 'verification',
+          uploadDate: parsed.submittedAt ? new Date(parsed.submittedAt).toLocaleDateString('vi-VN') : 'N/A',
+          fileData: parsed.step3.idFrontImage,
+          metadata: {
+            representativeName: parsed.step3.representativeName,
+            idNumber: parsed.step3.idNumber
+          }
+        });
+      }
+      
+      // Step 3: ID Back
+      if (parsed.step3?.idBackImage) {
+        docs.push({
+          id: 'id-back',
+          name: language === 'vi' ? 'CCCD/CMND mặt sau' : 'ID Card (Back)',
+          type: 'verification',
+          uploadDate: parsed.submittedAt ? new Date(parsed.submittedAt).toLocaleDateString('vi-VN') : 'N/A',
+          fileData: parsed.step3.idBackImage,
+          metadata: {
+            representativeName: parsed.step3.representativeName,
+            idNumber: parsed.step3.idNumber
+          }
+        });
+      }
+      
+      // Step 3: Authorization Letter
+      if (parsed.step3?.authorizationLetter) {
+        docs.push({
+          id: 'authorization-letter',
+          name: language === 'vi' ? 'Giấy ủy quyền' : 'Authorization Letter',
+          type: 'verification',
+          uploadDate: parsed.submittedAt ? new Date(parsed.submittedAt).toLocaleDateString('vi-VN') : 'N/A',
+          fileData: parsed.step3.authorizationLetter
+        });
+      }
+      
+      return docs;
+    } catch (e) {
+      console.error('Error parsing verification data:', e);
+      return [];
+    }
   });
   
   const [formData, setFormData] = useState(() => {
@@ -684,6 +854,76 @@ const EmployerProfile = () => {
       setOriginalFormData(initialData);
       // Save initial data to localStorage so it's always available
       localStorage.setItem('employerProfile', JSON.stringify(initialData));
+    }
+    
+    // Reload verification documents when language changes
+    const verificationData = localStorage.getItem('companyVerificationData');
+    if (verificationData) {
+      try {
+        const parsed = JSON.parse(verificationData);
+        const docs = [];
+        
+        // Step 1: Business License
+        if (parsed.step1?.businessLicense) {
+          docs.push({
+            id: 'business-license',
+            name: language === 'vi' ? 'Giấy phép kinh doanh' : 'Business License',
+            type: 'verification',
+            uploadDate: parsed.submittedAt ? new Date(parsed.submittedAt).toLocaleDateString('vi-VN') : 'N/A',
+            fileData: parsed.step1.businessLicense,
+            metadata: {
+              licenseNumber: parsed.step1.licenseNumber,
+              issueDate: parsed.step1.issueDate,
+              expiryDate: parsed.step1.expiryDate
+            }
+          });
+        }
+        
+        // Step 3: ID Front
+        if (parsed.step3?.idFrontImage) {
+          docs.push({
+            id: 'id-front',
+            name: language === 'vi' ? 'CCCD/CMND mặt trước' : 'ID Card (Front)',
+            type: 'verification',
+            uploadDate: parsed.submittedAt ? new Date(parsed.submittedAt).toLocaleDateString('vi-VN') : 'N/A',
+            fileData: parsed.step3.idFrontImage,
+            metadata: {
+              representativeName: parsed.step3.representativeName,
+              idNumber: parsed.step3.idNumber
+            }
+          });
+        }
+        
+        // Step 3: ID Back
+        if (parsed.step3?.idBackImage) {
+          docs.push({
+            id: 'id-back',
+            name: language === 'vi' ? 'CCCD/CMND mặt sau' : 'ID Card (Back)',
+            type: 'verification',
+            uploadDate: parsed.submittedAt ? new Date(parsed.submittedAt).toLocaleDateString('vi-VN') : 'N/A',
+            fileData: parsed.step3.idBackImage,
+            metadata: {
+              representativeName: parsed.step3.representativeName,
+              idNumber: parsed.step3.idNumber
+            }
+          });
+        }
+        
+        // Step 3: Authorization Letter
+        if (parsed.step3?.authorizationLetter) {
+          docs.push({
+            id: 'authorization-letter',
+            name: language === 'vi' ? 'Giấy ủy quyền' : 'Authorization Letter',
+            type: 'verification',
+            uploadDate: parsed.submittedAt ? new Date(parsed.submittedAt).toLocaleDateString('vi-VN') : 'N/A',
+            fileData: parsed.step3.authorizationLetter
+          });
+        }
+        
+        setVerificationDocuments(docs);
+      } catch (e) {
+        console.error('Error parsing verification data:', e);
+      }
     }
   }, [language]);
 
@@ -772,6 +1012,68 @@ const EmployerProfile = () => {
     const updated = documents.filter(doc => doc.id !== docId);
     setDocuments(updated);
     localStorage.setItem('companyDocuments', JSON.stringify(updated));
+  };
+
+  const handleViewVerificationDocument = (doc) => {
+    if (doc.fileData) {
+      // Open the image/document in a new window
+      const win = window.open('', '_blank');
+      if (win) {
+        win.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>${doc.name}</title>
+              <style>
+                body { 
+                  margin: 0; 
+                  padding: 20px; 
+                  display: flex; 
+                  flex-direction: column;
+                  align-items: center; 
+                  justify-content: center; 
+                  background: #1e293b;
+                  font-family: system-ui, -apple-system, sans-serif;
+                }
+                img { 
+                  max-width: 100%; 
+                  height: auto; 
+                  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+                  border-radius: 8px;
+                }
+                .info {
+                  background: white;
+                  padding: 16px 24px;
+                  border-radius: 8px;
+                  margin-bottom: 16px;
+                  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+                }
+                .info h2 {
+                  margin: 0 0 12px 0;
+                  color: #1e293b;
+                  font-size: 20px;
+                }
+                .info p {
+                  margin: 4px 0;
+                  color: #64748b;
+                  font-size: 14px;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="info">
+                <h2>${doc.name}</h2>
+                <p><strong>${language === 'vi' ? 'Ngày tải lên' : 'Upload Date'}:</strong> ${doc.uploadDate}</p>
+                ${doc.metadata ? Object.entries(doc.metadata).map(([key, value]) => 
+                  value ? `<p><strong>${key}:</strong> ${value}</p>` : ''
+                ).join('') : ''}
+              </div>
+              <img src="${doc.fileData}" alt="${doc.name}" />
+            </body>
+          </html>
+        `);
+      }
+    }
   };
 
   return (
@@ -1048,7 +1350,7 @@ const EmployerProfile = () => {
                 </SaveButton>
               )}
 
-              {/* Documents Section */}
+              {/* Documents Section - Combined Verification & Regular Documents */}
               <DocumentsSection>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                   <SectionTitle style={{ marginBottom: 0 }}>
@@ -1075,43 +1377,108 @@ const EmployerProfile = () => {
                   </label>
                 </div>
 
-                {documents.length === 0 ? (
+                {verificationDocuments.length === 0 && documents.length === 0 ? (
                   <EmptyDocuments>
                     <div className="icon">📄</div>
                     <h3>{language === 'vi' ? 'Chưa có tài liệu nào' : 'No documents yet'}</h3>
                     <p>{language === 'vi' ? 'Tải lên hồ sơ công ty, giấy phép kinh doanh và các tài liệu liên quan' : 'Upload company profile, business license and related documents'}</p>
                   </EmptyDocuments>
                 ) : (
-                  <DocumentsGrid>
-                    {documents.map((doc) => (
-                      <DocumentCard
-                        key={doc.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                      >
-                        <DocumentHeader>
-                          <DocumentIconBox>
-                            <File />
-                          </DocumentIconBox>
-                          <DocumentInfo>
-                            <div className="doc-name">{doc.name}</div>
-                            <div className="doc-date">{language === 'vi' ? 'Tải lên: ' : 'Uploaded: '}{doc.uploadDate}</div>
-                          </DocumentInfo>
-                        </DocumentHeader>
-                        <DocumentActions>
-                          <DocumentButton>
-                            <Eye />
-                            {language === 'vi' ? 'Xem' : 'View'}
-                          </DocumentButton>
-                          <DocumentButton $variant="danger" onClick={() => handleDeleteDocument(doc.id)}>
-                            <Trash2 />
-                            {language === 'vi' ? 'Xóa' : 'Delete'}
-                          </DocumentButton>
-                        </DocumentActions>
-                      </DocumentCard>
-                    ))}
-                  </DocumentsGrid>
+                  <>
+                    <DocumentsGrid>
+                      {/* Verification Documents */}
+                      {verificationDocuments.map((doc) => (
+                        <VerificationDocumentCard
+                          key={doc.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                        >
+                          <div className="verified-badge">
+                            <ShieldCheck />
+                            {language === 'vi' ? 'Xác thực' : 'Verified'}
+                          </div>
+                          <DocumentHeader>
+                            <DocumentIconBox style={{ 
+                              background: 'linear-gradient(135deg, #3B82F6 0%, #1e40af 100%)',
+                              borderColor: '#1e40af'
+                            }}>
+                              <FileText style={{ color: 'white' }} />
+                            </DocumentIconBox>
+                            <DocumentInfo>
+                              <div className="doc-name">{doc.name}</div>
+                              <div className="doc-date" style={{ color: '#1e40af', fontWeight: 600 }}>
+                                {language === 'vi' ? 'Tải lên: ' : 'Uploaded: '}{doc.uploadDate}
+                              </div>
+                              {doc.metadata && (
+                                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>
+                                  {Object.entries(doc.metadata).slice(0, 2).map(([key, value]) => 
+                                    value ? <div key={key}>{key}: {value}</div> : null
+                                  )}
+                                </div>
+                              )}
+                            </DocumentInfo>
+                          </DocumentHeader>
+                          <DocumentActions>
+                            <DocumentButton 
+                              onClick={() => handleViewVerificationDocument(doc)}
+                              style={{ 
+                                background: 'linear-gradient(135deg, #3B82F6 0%, #1e40af 100%)',
+                                color: 'white',
+                                borderColor: '#1e40af'
+                              }}
+                            >
+                              <Eye />
+                              {language === 'vi' ? 'Xem' : 'View'}
+                            </DocumentButton>
+                          </DocumentActions>
+                        </VerificationDocumentCard>
+                      ))}
+
+                      {/* Regular Documents */}
+                      {documents.map((doc) => (
+                        <DocumentCard
+                          key={doc.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                        >
+                          <DocumentHeader>
+                            <DocumentIconBox>
+                              <File />
+                            </DocumentIconBox>
+                            <DocumentInfo>
+                              <div className="doc-name">{doc.name}</div>
+                              <div className="doc-date">{language === 'vi' ? 'Tải lên: ' : 'Uploaded: '}{doc.uploadDate}</div>
+                            </DocumentInfo>
+                          </DocumentHeader>
+                          <DocumentActions>
+                            <DocumentButton>
+                              <Eye />
+                              {language === 'vi' ? 'Xem' : 'View'}
+                            </DocumentButton>
+                            <DocumentButton $variant="danger" onClick={() => handleDeleteDocument(doc.id)}>
+                              <Trash2 />
+                              {language === 'vi' ? 'Xóa' : 'Delete'}
+                            </DocumentButton>
+                          </DocumentActions>
+                        </DocumentCard>
+                      ))}
+                    </DocumentsGrid>
+
+                    {verificationDocuments.length > 0 && (
+                      <InfoBox style={{ marginTop: '20px', background: '#EFF6FF', borderColor: '#3B82F6' }}>
+                        <AlertCircle style={{ color: '#3B82F6' }} />
+                        <div className="info-content">
+                          <p>
+                            {language === 'vi' 
+                              ? 'Các tài liệu xác thực này đã được gửi đến OpPo để xem xét. Bạn không thể chỉnh sửa hoặc xóa các tài liệu này. Nếu cần cập nhật, vui lòng liên hệ bộ phận hỗ trợ.'
+                              : 'These verification documents have been submitted to OpPo for review. You cannot edit or delete these documents. If you need to update them, please contact support.'}
+                          </p>
+                        </div>
+                      </InfoBox>
+                    )}
+                  </>
                 )}
               </DocumentsSection>
             </form>

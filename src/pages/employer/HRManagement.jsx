@@ -46,7 +46,7 @@ const getHRStaff = (language) => {
     email: 'nguyenminhtuan@example.com',
     startDate: language === 'vi' ? '15/01/2024' : '01/15/2024',
     status: 'active',
-    shift: '06:00 - 18:00',
+    shift: '06:00 - 08:00',
     confirmedAt: `${today} - ${recentTimeStr}`,
     canRequestChange: true,
     isWithinTimeWindow: true,
@@ -68,7 +68,7 @@ const getHRStaff = (language) => {
     email: 'phamthuhuong@example.com',
     startDate: language === 'vi' ? '20/02/2024' : '02/20/2024',
     status: 'active',
-    shift: '08:00 - 20:00',
+    shift: '09:00 - 17:00',
     confirmedAt: `${oldDate} - ${oldTimeStr}`,
     canRequestChange: true,
     isWithinTimeWindow: false,
@@ -90,7 +90,7 @@ const getHRStaff = (language) => {
     email: 'tranquocbao@example.com',
     startDate: language === 'vi' ? '10/03/2024' : '03/10/2024',
     status: 'active',
-    shift: '10:00 - 22:00',
+    shift: '18:00 - 22:00',
     confirmedAt: `${today} - ${recentTimeStr}`,
     canRequestChange: true,
     isWithinTimeWindow: true,
@@ -1630,24 +1630,6 @@ const WorkingStatusBadge = styled.div`
   font-size: 12px;
   font-weight: 700;
   color: #065F46;
-  
-  &:before {
-    content: '';
-    width: 8px;
-    height: 8px;
-    background: #10b981;
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-  }
-  
-  @keyframes pulse {
-    0%, 100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.5;
-    }
-  }
 `;
 
 const ReviewList = styled.div`
@@ -1745,7 +1727,7 @@ const StarRating = ({ rating }) => (
 );
 
 // Profile Detail Modal Component
-const StaffProfileModal = React.memo(({ staff, onClose }) => {
+const StaffProfileModal = React.memo(({ staff, onClose, revealedExpiredStaff }) => {
   const { language } = useLanguage();
   const initials = staff.name
     .split(' ')
@@ -1757,88 +1739,6 @@ const StaffProfileModal = React.memo(({ staff, onClose }) => {
   const avgRating = staff.reviews && staff.reviews.length > 0
     ? (staff.reviews.reduce((s, r) => s + r.rating, 0) / staff.reviews.length)
     : null;
-
-  // Parse confirmedAt time and check if more than 1 hour has passed
-  const parseConfirmedTime = () => {
-    if (!staff.confirmedAt) return null;
-    try {
-      // Format: "15/01/2024 - 09:30" (vi) or "01/15/2024 - 09:30" (en)
-      const [datePart, timePart] = staff.confirmedAt.split(' - ');
-      const dateParts = datePart.split('/');
-      let day, month, year;
-      
-      if (language === 'vi') {
-        // Vietnamese: day/month/year
-        [day, month, year] = dateParts;
-      } else {
-        // English: month/day/year
-        [month, day, year] = dateParts;
-      }
-      
-      const [hours, minutes] = timePart.split(':');
-      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes));
-    } catch (e) {
-      console.error('Error parsing confirmedAt:', e);
-      return null;
-    }
-  };
-
-  const confirmedTime = parseConfirmedTime();
-  const now = new Date();
-  const oneHourInMs = 60 * 60 * 1000;
-  const hasPassedOneHour = confirmedTime && (now - confirmedTime) > oneHourInMs;
-
-  // Debug logging
-  console.log('Staff Profile Modal Debug:', {
-    staffName: staff.name,
-    confirmedAt: staff.confirmedAt,
-    confirmedTime: confirmedTime,
-    now: now,
-    timeDiff: confirmedTime ? (now - confirmedTime) / 1000 / 60 : null, // in minutes
-    hasPassedOneHour: hasPassedOneHour,
-    shift: staff.shift
-  });
-
-  // Check if currently within working hours
-  const isCurrentlyWorking = () => {
-    if (!staff.shift) return false;
-    try {
-      const [startTime, endTime] = staff.shift.split(' - ');
-      const [startHour, startMin] = startTime.split(':').map(Number);
-      const [endHour, endMin] = endTime.split(':').map(Number);
-      
-      const nowHour = now.getHours();
-      const nowMin = now.getMinutes();
-      const nowTimeInMin = nowHour * 60 + nowMin;
-      const startTimeInMin = startHour * 60 + startMin;
-      const endTimeInMin = endHour * 60 + endMin;
-      
-      const isWorking = nowTimeInMin >= startTimeInMin && nowTimeInMin <= endTimeInMin;
-      
-      console.log('Working Hours Check:', {
-        shift: staff.shift,
-        nowTime: `${nowHour}:${nowMin}`,
-        nowTimeInMin,
-        startTimeInMin,
-        endTimeInMin,
-        isWorking
-      });
-      
-      return isWorking;
-    } catch (e) {
-      console.error('Error checking working hours:', e);
-      return false;
-    }
-  };
-
-  const currentlyWorking = isCurrentlyWorking();
-
-  const handleChat = () => {
-    // Navigate to chat or open chat modal
-    alert(language === 'vi' 
-      ? `Mở chat với ${staff.name}` 
-      : `Open chat with ${staff.name}`);
-  };
 
   return (
     <>
@@ -1871,32 +1771,24 @@ const StaffProfileModal = React.memo(({ staff, onClose }) => {
           <ProfileSection>
             <h3><FileText /> {language === 'vi' ? 'Thông tin liên hệ' : 'Contact'}</h3>
             <InfoGrid>
-              <InfoCard>
-                <InfoIconBox><Mail /></InfoIconBox>
-                <InfoItem>
-                  <div className="label">{language === 'vi' ? 'Email' : 'Email'}</div>
-                  <div className="value">
-                    {hasPassedOneHour ? (
-                      <HiddenInfo>●●●●●</HiddenInfo>
-                    ) : (
-                      staff.email
-                    )}
-                  </div>
-                </InfoItem>
-              </InfoCard>
-              <InfoCard>
-                <InfoIconBox><Phone /></InfoIconBox>
-                <InfoItem>
-                  <div className="label">{language === 'vi' ? 'Điện thoại' : 'Phone'}</div>
-                  <div className="value">
-                    {hasPassedOneHour ? (
-                      <HiddenInfo>●●●●●</HiddenInfo>
-                    ) : (
-                      staff.phone
-                    )}
-                  </div>
-                </InfoItem>
-              </InfoCard>
+              {!revealedExpiredStaff.has(staff.id) && (
+                <>
+                  <InfoCard>
+                    <InfoIconBox><Mail /></InfoIconBox>
+                    <InfoItem>
+                      <div className="label">{language === 'vi' ? 'Email' : 'Email'}</div>
+                      <div className="value">{staff.email}</div>
+                    </InfoItem>
+                  </InfoCard>
+                  <InfoCard>
+                    <InfoIconBox><Phone /></InfoIconBox>
+                    <InfoItem>
+                      <div className="label">{language === 'vi' ? 'Điện thoại' : 'Phone'}</div>
+                      <div className="value">{staff.phone}</div>
+                    </InfoItem>
+                  </InfoCard>
+                </>
+              )}
               <InfoCard>
                 <InfoIconBox><MapPin /></InfoIconBox>
                 <InfoItem>
@@ -1997,26 +1889,7 @@ const StaffProfileModal = React.memo(({ staff, onClose }) => {
                 <span className="label">{language === 'vi' ? 'Vị trí làm:' : 'Position:'}</span>
                 <span className="value">{staff.position}</span>
               </ScheduleRow>
-              {currentlyWorking && (
-                <ScheduleRow>
-                  <WorkingStatusBadge>
-                    {language === 'vi' ? 'Đang làm việc' : 'Currently Working'}
-                  </WorkingStatusBadge>
-                </ScheduleRow>
-              )}
             </WorkScheduleCard>
-            {currentlyWorking && (
-              <div style={{ marginTop: '16px' }}>
-                <ChatButton
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleChat}
-                >
-                  <MessageSquare />
-                  {language === 'vi' ? 'Nhắn tin' : 'Send Message'}
-                </ChatButton>
-              </div>
-            )}
           </ProfileSection>
         </ProfileInner>
       </ProfileContent>
@@ -2113,7 +1986,118 @@ const HRManagement = () => {
   
   // Load quick jobs from localStorage
   const [quickJobPosts, setQuickJobPosts] = useState(() => {
-    const savedJobs = localStorage.getItem('quickJobs');
+    let savedJobs = localStorage.getItem('quickJobs');
+    
+    // Initialize mock quick jobs if not exists
+    if (!savedJobs) {
+      const mockQuickJobs = [
+        {
+          id: 1709870123456,
+          title: 'Ca Tối - Nhân viên Phục vụ',
+          location: 'Quận 1, TP.HCM',
+          hourlyRate: 35000,
+          startTime: '18:00',
+          endTime: '23:00',
+          description: 'Cần nhân viên phục vụ ca tối, làm việc tại quán ăn khu vực trung tâm. Yêu cầu nhiệt tình, nhanh nhẹn.',
+          contactPhone: '0901234567',
+          createdAt: new Date('2026-03-08T10:30:00').toISOString(),
+          type: 'quick',
+          status: 'active',
+          fee: 17500,
+          totalHours: 5,
+          applicants: 12,
+          views: 45
+        },
+        {
+          id: 1709783123456,
+          title: 'Ca Trưa - Nhân viên Phụ bếp',
+          location: 'Quận 3, TP.HCM',
+          hourlyRate: 32000,
+          startTime: '10:00',
+          endTime: '14:30',
+          description: 'Tuyển phụ bếp làm ca trưa, hỗ trợ bếp chính chuẩn bị món ăn. Không yêu cầu kinh nghiệm.',
+          contactPhone: '0912345678',
+          createdAt: new Date('2026-03-07T08:15:00').toISOString(),
+          type: 'quick',
+          status: 'active',
+          fee: 14400,
+          totalHours: 4.5,
+          applicants: 8,
+          views: 32
+        },
+        {
+          id: 1709696123456,
+          title: 'Ca Chiều - Nhân viên Pha chế',
+          location: 'Quận 7, TP.HCM',
+          hourlyRate: 38000,
+          startTime: '14:00',
+          endTime: '18:00',
+          description: 'Cần barista pha chế đồ uống ca chiều. Ưu tiên có kinh nghiệm pha cà phê và trà sữa.',
+          contactPhone: '0923456789',
+          createdAt: new Date('2026-03-06T14:20:00').toISOString(),
+          type: 'quick',
+          status: 'completed',
+          fee: 15200,
+          totalHours: 4,
+          applicants: 15,
+          views: 58
+        },
+        {
+          id: 1709609123456,
+          title: 'Ca Sáng - Nhân viên Bán hàng',
+          location: 'Quận 10, TP.HCM',
+          hourlyRate: 33000,
+          startTime: '07:00',
+          endTime: '12:00',
+          description: 'Tuyển nhân viên bán hàng ca sáng tại tiệm bánh. Làm việc từ thứ 2 đến thứ 6.',
+          contactPhone: '0934567890',
+          createdAt: new Date('2026-03-05T06:00:00').toISOString(),
+          type: 'quick',
+          status: 'active',
+          fee: 16500,
+          totalHours: 5,
+          applicants: 6,
+          views: 28
+        },
+        {
+          id: 1709522123456,
+          title: 'Ca Tối - Nhân viên Thu ngân',
+          location: 'Quận 2, TP.HCM',
+          hourlyRate: 36000,
+          startTime: '17:00',
+          endTime: '22:00',
+          description: 'Cần thu ngân ca tối, yêu cầu thành thạo máy tính và giao tiếp tốt với khách hàng.',
+          contactPhone: '0945678901',
+          createdAt: new Date('2026-03-04T16:45:00').toISOString(),
+          type: 'quick',
+          status: 'expired',
+          fee: 18000,
+          totalHours: 5,
+          applicants: 4,
+          views: 22
+        },
+        {
+          id: 1709435123456,
+          title: 'Ca Tối - Nhân viên Rửa chén',
+          location: 'Quận 5, TP.HCM',
+          hourlyRate: 32000,
+          startTime: '19:00',
+          endTime: '23:00',
+          description: 'Tuyển nhân viên rửa chén ca tối tại nhà hàng. Công việc đơn giản, phù hợp sinh viên.',
+          contactPhone: '0956789012',
+          createdAt: new Date('2026-03-03T12:00:00').toISOString(),
+          type: 'quick',
+          status: 'active',
+          fee: 12800,
+          totalHours: 4,
+          applicants: 10,
+          views: 38
+        }
+      ];
+      localStorage.setItem('quickJobs', JSON.stringify(mockQuickJobs));
+      savedJobs = JSON.stringify(mockQuickJobs);
+    }
+    
     if (savedJobs) {
       try {
         const jobs = JSON.parse(savedJobs);
@@ -2123,18 +2107,13 @@ const HRManagement = () => {
           title: job.title,
           location: job.location,
           salary: (() => {
-            if (job.hourlyRate && job.totalHours) {
-              const total = Math.round(parseInt(job.hourlyRate) * job.totalHours);
-              const h = Number.isInteger(job.totalHours) ? job.totalHours : parseFloat(job.totalHours.toFixed(1));
-              return `${total.toLocaleString('vi-VN')} VN\u0110/${h}h`;
-            }
             if (job.hourlyRate) {
-              return `${parseInt(job.hourlyRate).toLocaleString('vi-VN')} VN\u0110/gi\u1edd`;
+              return `${parseInt(job.hourlyRate).toLocaleString('vi-VN')} VNĐ/h`;
             }
-            return language === 'vi' ? 'Th\u1ecfa thu\u1eadn' : 'Negotiable';
+            return language === 'vi' ? 'Thỏa thuận' : 'Negotiable';
           })(),
           shift: job.startTime && job.endTime ? `${job.startTime} - ${job.endTime}` : '',
-          type: language === 'vi' ? 'Tuy\u1ec3n g\u1ea5p' : 'Urgent',
+          type: language === 'vi' ? 'Tuyển gấp' : 'Urgent',
           applicants: job.applicants || 0,
           views: job.views || 0,
           status: job.status || 'active',
@@ -2144,9 +2123,9 @@ const HRManagement = () => {
             const diffTime = 7 * 24 * 60 * 60 * 1000 - (now - created); // 7 days validity
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             if (diffDays > 0) {
-              return language === 'vi' ? `${diffDays} ng\u00e0y n\u1eefa` : `${diffDays} days left`;
+              return language === 'vi' ? `${diffDays} ngày nữa` : `${diffDays} days left`;
             }
-            return language === 'vi' ? 'H\u1ebft h\u1ea1n' : 'Expired';
+            return language === 'vi' ? 'Hết hạn' : 'Expired';
           })(),
           contactPhone: job.contactPhone,
           description: job.description,
@@ -2156,7 +2135,6 @@ const HRManagement = () => {
         console.error('Error loading quick jobs:', e);
       }
     }
-    // No fallback mock cards: show empty state when no saved jobs
     return [];
   });
   
@@ -2171,6 +2149,9 @@ const HRManagement = () => {
   const [selectedJobView, setSelectedJobView] = useState(null);
   const [editJobId, setEditJobId] = useState(null);
   const [editJobData, setEditJobData] = useState(null);
+  
+  // Track which staff have been revealed as expired (1h passed)
+  const [revealedExpiredStaff, setRevealedExpiredStaff] = useState(new Set());
 
   // Mock wallet connection status - in real app, get from user context or API
   const [isWalletConnected] = useState(() => {
@@ -2536,16 +2517,17 @@ const HRManagement = () => {
                       <StaffPosition>{staff.position}</StaffPosition>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
-                      <StaffStatus $status={staff.status}>
-                        {staff.status === 'active' 
-                          ? (language === 'vi' ? 'Đang làm' : 'Active')
-                          : (language === 'vi' ? 'Nghỉ phép' : 'On Leave')}
-                      </StaffStatus>
-                      {/* Always show badge for testing - remove condition later */}
-                      <WorkingStatusBadge style={{ fontSize: '11px', padding: '4px 10px' }}>
-                        {language === 'vi' ? 'Đang làm việc' : 'Currently Working'} 
-                        {' '}({isCurrentlyWorking(staff.shift) ? '✓' : '✗'})
-                      </WorkingStatusBadge>
+                      {isCurrentlyWorking(staff.shift) ? (
+                        <StaffStatus $status="active">
+                          {language === 'vi' ? 'Đang làm' : 'Working'}
+                        </StaffStatus>
+                      ) : (
+                        <StaffStatus $status={staff.status}>
+                          {staff.status === 'active' 
+                            ? (language === 'vi' ? 'Đang làm' : 'Active')
+                            : (language === 'vi' ? 'Nghỉ phép' : 'On Leave')}
+                        </StaffStatus>
+                      )}
                     </div>
                   </StaffHeader>
                   
@@ -2553,12 +2535,8 @@ const HRManagement = () => {
                     <div className="meta-row">
                       <MapPin />{staff.location}
                     </div>
-                    {/* Chỉ hiện phone và email nếu chưa qua 1 giờ */}
-                    {(() => {
-                      const hasPassed = hasPassedOneHourSinceConfirmed(staff.confirmedAt);
-                      console.log(`👤 ${staff.name} - Show contact info: ${!hasPassed}`);
-                      return !hasPassed;
-                    })() && (
+                    {/* Only hide phone/email if staff is in revealed expired list */}
+                    {!revealedExpiredStaff.has(staff.id) && (
                       <>
                         <div className="meta-row">
                           <Phone />{staff.phone}
@@ -2611,6 +2589,8 @@ const HRManagement = () => {
                               ? '✓ Yêu cầu thay đổi của bạn đã được gửi!'
                               : '✓ Your change request has been submitted!');
                           } else {
+                            // Add to revealed expired staff to hide contact info
+                            setRevealedExpiredStaff(prev => new Set([...prev, staff.id]));
                             alert(language === 'vi' 
                               ? '✗ Đã quá 1 giờ, không thể yêu cầu thay đổi!'
                               : '✗ More than 1 hour passed, cannot request changes!');
@@ -3208,6 +3188,7 @@ const HRManagement = () => {
             <StaffProfileModal
               staff={selectedStaff}
               onClose={() => setSelectedStaff(null)}
+              revealedExpiredStaff={revealedExpiredStaff}
             />
           </Modal>
         )}
