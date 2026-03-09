@@ -523,8 +523,8 @@ export const translations = {
 
     // Under Development Modal
     underDevelopment: {
-      title: 'Đang Phát Triển',
-      message: 'Chức năng này đang trong quá trình phát triển và sẽ sớm được ra mắt. Cảm ơn bạn đã kiên nhẫn!',
+      title: 'Tính Năng Đang Phát Triển',
+      message: 'Chức năng này đang trong quá trình phát triển và sẽ sớm được ra mắt. Cảm ơn bạn!!!',
       button: 'Đã Hiểu',
     },
   },
@@ -1016,8 +1016,8 @@ export const translations = {
 
     // Under Development Modal
     underDevelopment: {
-      title: 'Đang Phát Triển',
-      message: 'Chức năng này đang trong quá trình phát triển và sẽ sớm được ra mắt. Cảm ơn bạn đã kiên nhẫn!',
+      title: 'Tính Năng Đang Phát Triển',
+      message: 'Chức năng này đang trong quá trình phát triển và sẽ sớm được ra mắt. Cảm ơn bạn!!!',
       button: 'Đã Hiểu',
     },
   },

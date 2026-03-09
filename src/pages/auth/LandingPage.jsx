@@ -2690,7 +2690,13 @@ const LandingPage = () => {
   const phoneSearchFullText = 'Ốp Pờ';
 
   const toggleLanguage = () => {
-    setLanguage(language === 'vi' ? 'en' : 'vi');
+    if (language === 'vi') {
+      // Chặn chuyển sang tiếng Anh, hiển thị modal thông báo
+      setIsDevModalOpen(true);
+    } else {
+      // Cho phép chuyển về tiếng Việt
+      setLanguage('vi');
+    }
   };
 
   const scrollToDownload = () => {
