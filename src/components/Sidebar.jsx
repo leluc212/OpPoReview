@@ -402,7 +402,7 @@ const Sidebar = ({ role }) => {
       { to: '/admin/management', icon: ShieldCheck, label: language === 'vi' ? 'Quản Lý Admin' : 'Admin Management' },
     ]},
     { section: t.sidebar.platform || 'Management', items: [
-      { to: '/admin/posts', icon: FileText, label: t.sidebar.posts || 'Posts Management' },
+      { to: '/admin/posts', icon: FileText, label: language === 'vi' ? 'Quản lý bài đăng' : 'Posts Management' },
       { to: '/admin/packages', icon: Package, label: t.sidebar.packages },
       { to: '/admin/reports', icon: BarChart3, label: t.sidebar.reports },
     ]},
