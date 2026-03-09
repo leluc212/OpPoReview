@@ -1,10 +1,11 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
 import { useLanguage } from '../../context/LanguageContext';
 import { jobPosts } from '../../data/jobPosts';
-import { Users, Briefcase, Building2, DollarSign, CheckSquare, XSquare, Shield, Calendar, ArrowRight, Zap, TrendingUp, Star, Sparkles, Eye } from 'lucide-react';
+import { Users, Briefcase, Building2, DollarSign, CheckSquare, XSquare, Shield, Calendar, ArrowRight, Zap, TrendingUp, Star, Sparkles, Eye, Rocket, FileText, ChevronDown } from 'lucide-react';
 
 const DashboardContainer = styled.div`
   animation: fadeIn 0.5s ease-in;
@@ -196,204 +197,185 @@ const ViewAllButton = styled.button`
 
 const BoostSection = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
+  grid-template-columns: 1fr 1.5fr;
   gap: 24px;
   margin-bottom: 40px;
-  align-items: stretch;
   
-  @media (max-width: 1024px) {
+  @media (max-width: 1200px) {
     grid-template-columns: 1fr;
   }
 `;
 
 const BoostCard = styled.div`
-  background: ${props => props.$bgColor || '#FFF9E6'};
-  border-radius: 16px;
-  padding: 16px 20px;
-  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.08);
+  background: ${props => props.$bgColor || 'white'};
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
   position: relative;
-  overflow: hidden;
   transition: all 0.3s ease;
-  border: 1px solid rgba(245, 158, 11, 0.1);
-  
+
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.15);
-    border-color: rgba(245, 158, 11, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 `;
 
 const BoostHeader = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  position: relative;
-  z-index: 1;
+  gap: 10px;
+  margin-bottom: 24px;
   
-  svg {
-    width: 18px;
-    height: 18px;
-    color: ${props => props.$color || '#F59E0B'};
+  .icon-wrapper {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: ${props => props.$iconBg || '#FEF3C7'};
+    
+    svg {
+      width: 18px;
+      height: 18px;
+      color: ${props => props.$iconColor || '#D97706'};
+    }
   }
   
   h3 {
-    font-size: 12px;
-    font-weight: 700;
-    color: #78350F;
+    font-size: 24px;
+    font-weight: 800;
+    color: #111827;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
 `;
 
-const BoostStats = styled.div`
-  margin-bottom: 0;
-  position: relative;
-  z-index: 1;
-  animation: fadeInUp 0.6s ease-out;
-  
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-`;
-
 const BoostMainStat = styled.div`
+  background: #FFF9F0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 0;
+  flex: 1;
   display: flex;
-  align-items: baseline;
+  flex-direction: column;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  
-  .number {
-    font-size: 72px;
-    font-weight: 900;
-    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1;
-    text-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-  }
-  
-  .label {
-    font-size: 20px;
-    font-weight: 700;
-    color: #92400E;
-  }
-  
-  .change {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 15px;
-    font-weight: 700;
-    color: #059669;
-    background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
-    padding: 8px 16px;
-    border-radius: 24px;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
-    border: 1px solid rgba(16, 185, 129, 0.2);
-  }
-`;
 
-const BoostSubStat = styled.div`
-  font-size: 17px;
-  color: #92400E;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.6);
-  padding: 12px 24px;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(245, 158, 11, 0.15);
-  
-  svg {
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  .top-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    .number {
+      font-size: 28px;
+      font-weight: 800;
+      color: #111827;
+    }
+
+    .label {
+      font-size: 18px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .change {
+      font-size: 12px;
+      font-weight: 600;
+      color: #059669;
+      background: #D1FAE5;
+      padding: 4px 8px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      
+      svg {
+        width: 12px;
+        height: 12px;
+      }
+    }
+  }
+
+  .bottom-row {
+    font-size: 15px;
+    color: #4B5563;
+    font-weight: 500;
+    
+    span {
+      color: #111827;
+      font-weight: 700;
+    }
   }
 `;
 
 const BoostOptions = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  width: 100%;
-  padding: 8px 0 0 0;
+  gap: 12px;
+  
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const BoostOption = styled.div`
   background: white;
-  border-radius: 8px;
-  padding: 12px 14px;
+  border-radius: 10px;
+  padding: 14px 16px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  gap: 12px;
+  border: 1px solid #F3F4F6;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   transition: all 0.2s;
   
   &:hover {
+    border-color: #E5E7EB;
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   }
   
   .icon {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: ${props => props.$iconBg || '#DBEAFE'};
+    background: ${props => props.$iconBg || '#EFF6FF'};
     flex-shrink: 0;
     
     svg {
-      width: 14px;
-      height: 14px;
-      color: ${props => props.$iconColor || '#1E40AF'};
+      width: 18px;
+      height: 18px;
+      color: ${props => props.$iconColor || '#3B82F6'};
     }
   }
   
   .content {
     flex: 1;
-    min-width: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     
     .name {
       font-size: 16px;
       font-weight: 600;
-      color: #1F2937;
-      margin-bottom: 2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      color: #374151;
     }
     
     .count {
-      font-size: 20px;
-      font-weight: 800;
-      color: #1F2937;
+      font-size: 18px;
+      font-weight: 700;
+      color: #111827;
       
       span {
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 500;
         color: #6B7280;
-        margin-left: 3px;
+        margin-left: 2px;
       }
     }
   }
@@ -747,10 +729,63 @@ const SpotlightBadge = styled.div`
   font-size: 14px;
   color: ${props => props.$color || '#1E40AF'};
   margin-bottom: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
   
   svg {
     width: 20px;
     height: 20px;
+  }
+`;
+
+const SpotlightSelector = styled.div`
+  position: absolute;
+  top: 60px;
+  left: 24px;
+  z-index: 100;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid #E5E7EB;
+  width: 280px;
+  overflow: hidden;
+  animation: slideDown 0.2s ease-out;
+  
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+`;
+
+const SelectorOption = styled.div`
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: #F3F4F6;
+    color: ${props => props.$color || '#3B82F6'};
+  }
+  
+  &.active {
+    background: #EFF6FF;
+    color: #2563EB;
+  }
+  
+  svg {
+    width: 18px;
+    height: 18px;
   }
 `;
 
@@ -1006,27 +1041,67 @@ const ManagementAction = styled.div`
 const AdminDashboard = () => {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
-  
+  const [activeSpotlight, setActiveSpotlight] = useState('banner');
+  const [showSelector, setShowSelector] = useState(false);
+
+  const spotlightOptions = [
+    { 
+      id: 'banner', 
+      label: language === 'vi' ? 'Top Spotlight Banner Đang Chạy' : 'Top Spotlight Banner Running', 
+      title: language === 'vi' ? 'Nhà Tuyển Dụng Nổi Bật' : 'Featured Employers',
+      icon: Star, 
+      color: '#0284C7', 
+      bgColor: '#E0F2FE' 
+    },
+    { 
+      id: 'quick_boost', 
+      label: language === 'vi' ? 'Top Quick Boost Đang Chạy' : 'Top Quick Boost Running', 
+      title: language === 'vi' ? 'Ưu Tiên Quick Boost' : 'Quick Boost Favorites',
+      icon: Zap, 
+      color: '#1E40AF', 
+      bgColor: '#DBEAFE' 
+    },
+    { 
+      id: 'hot_search', 
+      label: language === 'vi' ? 'Top Hot Search Đang Chạy' : 'Top Hot Search Running', 
+      title: language === 'vi' ? 'Hot Search Phổ Biến' : 'Popular Hot Searches',
+      icon: TrendingUp, 
+      color: '#DC2626', 
+      bgColor: '#FEE2E2' 
+    },
+    { 
+      id: 'spotlight', 
+      label: language === 'vi' ? 'Top Spotlight Đang Chạy' : 'Top Spotlight Running', 
+      title: language === 'vi' ? 'Ưu Tiên Spotlight' : 'Spotlight Favorites',
+      icon: Sparkles, 
+      color: '#7C3AED', 
+      bgColor: '#EDE9FE' 
+    }
+  ];
+
+  const currentOption = spotlightOptions.find(opt => opt.id === activeSpotlight);
+  const Icon = currentOption.icon;
+
   // Calculate real statistics from data
   const totalCandidates = 100; // From CandidatesManagement.jsx
   const totalEmployers = 30; // From EmployersManagement.jsx
   const totalJobPosts = jobPosts.length; // From jobPosts.js
-  
+
   // Calculate revenue from services (based on real package data)
   const revenueFromBoost = 4200000; // 4.2M VND - Quick Boost packages
   const revenueFromHotSearch = 3100000; // 3.1M VND - Hot Search packages
   const revenueFromBanner = 7500000; // 7.5M VND - Banner packages
   const totalRevenue = revenueFromBoost + revenueFromHotSearch + revenueFromBanner; // 14.8M VND
-  
+
   // Real data for charts - calculated from actual job posts
   const urgentJobs = jobPosts.filter(post => post.category === 'urgent').length;
   const standardJobs = jobPosts.filter(post => post.category === 'standard').length;
-  
+
   // Activity data - calculated from real job posts data
   // Showing cumulative growth over 7 days based on actual total posts
   const totalPosts = jobPosts.length; // 62 posts total
   const conversionRate = 0.65; // 65% of posts get applications (realistic for part-time jobs)
-  
+
   const activityData = [
     { date: '02/3', posts: Math.round(totalPosts * 0.56), applications: Math.round(totalPosts * 0.56 * conversionRate) },
     { date: '03/3', posts: Math.round(totalPosts * 0.68), applications: Math.round(totalPosts * 0.68 * conversionRate) },
@@ -1039,7 +1114,7 @@ const AdminDashboard = () => {
 
   // Job statistics - same data for consistency
   const jobStatsData = activityData;
-  
+
   // Revenue trend data - calculated from real package purchases and job posts
   // Based on: totalRevenue = 14.8M VND (current month)
   // Showing realistic 8-month growth trajectory
@@ -1054,7 +1129,7 @@ const AdminDashboard = () => {
     { month: language === 'vi' ? 'T7' : 'Jul', actual: 5.3, target: 4.8 },
     { month: language === 'vi' ? 'T8' : 'Aug', actual: currentMonthRevenue, target: 5.1 }, // Current month uses real data
   ];
-  
+
   const getApprovalStatusText = (status) => {
     if (status === 'approved') return language === 'vi' ? 'Đã duyệt' : 'Approved';
     if (status === 'rejected') return language === 'vi' ? 'Không duyệt' : 'Rejected';
@@ -1079,43 +1154,43 @@ const AdminDashboard = () => {
   // Boost packages data
   const boostPackages = [
     { name: language === 'vi' ? 'Quick Boost' : 'Quick Boost', count: 16, iconBg: '#DBEAFE', iconColor: '#1E40AF' },
-    { name: language === 'vi' ? 'Spongit Banner' : 'Spongit Banner', count: 6, iconBg: '#E0E7FF', iconColor: '#4F46E5' },
+    { name: language === 'vi' ? 'Spotlight Banner' : 'Spotlight Banner', count: 6, iconBg: '#E0E7FF', iconColor: '#4F46E5' },
     { name: language === 'vi' ? 'Hot Search' : 'Hot Search', count: 9, iconBg: '#FEE2E2', iconColor: '#DC2626' },
     { name: language === 'vi' ? 'Top Spotlight' : 'Top Spotlight', count: 4, iconBg: '#FCE7F3', iconColor: '#BE185D' }
   ];
 
   // Top Employers - Nhà tuyển dụng nổi bật (đăng nhiều tin nhất)
   const topEmployers = [
-    { 
-      id: 1, 
-      name: 'Lẩu Bò Sài Gòn Vi Vu', 
+    {
+      id: 1,
+      name: 'Lẩu Bò Sài Gòn Vi Vu',
       type: 'Quán ăn/Nhậu',
       postsCount: 2,
       status: 'active',
       daysRemaining: 6,
       budget: '4.000 ứng viên'
     },
-    { 
-      id: 2, 
-      name: 'Bia Sệt 123', 
+    {
+      id: 2,
+      name: 'Bia Sệt 123',
       type: 'Quán nhậu',
       postsCount: 3,
       status: 'active',
       daysRemaining: 6,
       budget: '4.000 ứng viên'
     },
-    { 
-      id: 3, 
-      name: 'Nướng Ngói Gia Bảo', 
+    {
+      id: 3,
+      name: 'Nướng Ngói Gia Bảo',
       type: 'Quán nhậu',
       postsCount: 3,
       status: 'active',
       daysRemaining: 6,
       budget: '4.000 ứng viên'
     },
-    { 
-      id: 4, 
-      name: 'Chill Out Beer Club', 
+    {
+      id: 4,
+      name: 'Chill Out Beer Club',
       type: 'Pub/Nhậu',
       postsCount: 2,
       status: 'active',
@@ -1126,33 +1201,33 @@ const AdminDashboard = () => {
 
   // Top Candidates - Ứng viên mới (mới tham gia gần đây)
   const topCandidates = [
-    { 
-      id: 1, 
-      name: 'Mai Thanh Tuấn', 
+    {
+      id: 1,
+      name: 'Mai Thanh Tuấn',
       status: 'verified',
-      joinedTime: language === 'vi' ? 'Hôm nay' : 'Today',
-      ekycStatus: language === 'vi' ? 'ĐÃ XÁC THỰC 4 BƯỚC CHUA' : 'VERIFIED 4 STEPS'
+      joinedTime: '9:00 09/03/2026',
+      ekycStatus: language === 'vi' ? 'eKYC' : 'Verified'
     },
-    { 
-      id: 2, 
-      name: 'Trần Thị Thu Chi', 
+    {
+      id: 2,
+      name: 'Trần Thị Thu Chi',
       status: 'pending',
-      joinedTime: language === 'vi' ? 'Hôm nay' : 'Today',
-      ekycStatus: language === 'vi' ? 'ĐÃ XÁC THỰC 4 BƯỚC CHUA' : 'VERIFIED 4 STEPS'
+      joinedTime: '8:30 09/03/2026',
+      ekycStatus: language === 'vi' ? 'eKYC' : 'Not Verified'
     },
-    { 
-      id: 3, 
-      name: 'Ngô Thanh Sơn', 
+    {
+      id: 3,
+      name: 'Ngô Thanh Sơn',
       status: 'pending',
-      joinedTime: language === 'vi' ? 'Hôm nay' : 'Today',
-      ekycStatus: language === 'vi' ? 'ĐÃ XÁC THỰC 4 BƯỚC CHUA' : 'VERIFIED 4 STEPS'
+      joinedTime: '8:25 09/03/2026',
+      ekycStatus: language === 'vi' ? 'eKYC' : 'Not Verified'
     },
-    { 
-      id: 4, 
-      name: 'Phạm Thị Thu Thao', 
+    {
+      id: 4,
+      name: 'Phạm Thị Thu Thao',
       status: 'verified',
-      joinedTime: language === 'vi' ? 'Hôm nay' : 'Today',
-      ekycStatus: language === 'vi' ? 'ĐÃ XÁC THỰC 4 BƯỚC CHUA' : 'VERIFIED 4 STEPS'
+      joinedTime: '8:22 09/03/2026',
+      ekycStatus: language === 'vi' ? 'eKYC' : 'Verified'
     }
   ];
 
@@ -1319,37 +1394,39 @@ const AdminDashboard = () => {
         {/* Tin tuyển gấp & Gói Boost */}
         <BoostSection>
           {/* Tin tuyển gấp */}
-          <BoostCard $bgColor="linear-gradient(135deg, #FFF9E6 0%, #FEF3C7 100%)">
-            <BoostHeader $color="#F59E0B">
+          <BoostCard>
+            <BoostHeader $iconBg="#FEF3C7" $iconColor="#F59E0B">
               <h3>{language === 'vi' ? 'BÀI TUYỂN GẤP' : 'URGENT JOBS'}</h3>
             </BoostHeader>
-            <BoostStats>
-              <BoostMainStat>
+            <BoostMainStat>
+              <div className="top-row">
                 <span className="number">{platformData.totalJobs}</span>
                 <span className="label">{language === 'vi' ? 'Tin tuyển gấp' : 'Urgent Jobs'}</span>
-                <span className="change">↗ {platformData.change}</span>
-              </BoostMainStat>
-              <BoostSubStat>
-                {language === 'vi' ? `Hoa Hồng ${platformData.discount}: ${platformData.price}` : `Commission ${platformData.discount}: ${platformData.price}`}
-              </BoostSubStat>
-            </BoostStats>
+                <span className="change">
+                  <TrendingUp /> {platformData.change}
+                </span>
+              </div>
+              <div className="bottom-row">
+                {language === 'vi' ? `Hoa Hồng ${platformData.discount}: ` : `Commission ${platformData.discount}: `}
+                <span>{platformData.price}</span>
+              </div>
+            </BoostMainStat>
           </BoostCard>
 
           {/* Gói Boost */}
-          <BoostCard $bgColor="#F0F9FF">
-            <BoostHeader $color="#1E40AF">
+          <BoostCard>
+            <BoostHeader $iconBg="#E0E7FF" $iconColor="#4F46E5">
               <h3>{language === 'vi' ? 'GÓI BOOST' : 'BOOST PACKAGES'}</h3>
             </BoostHeader>
             <BoostOptions>
               {boostPackages.map((pkg, index) => {
-                // Chọn icon dựa trên tên gói
                 let IconComponent;
                 if (pkg.name === 'Quick Boost') IconComponent = Zap;
                 else if (pkg.name === 'Spongit Banner') IconComponent = Star;
                 else if (pkg.name === 'Hot Search') IconComponent = TrendingUp;
                 else if (pkg.name === 'Top Spotlight') IconComponent = Sparkles;
                 else IconComponent = Briefcase;
-                
+
                 return (
                   <BoostOption key={index} $iconBg={pkg.iconBg} $iconColor={pkg.iconColor}>
                     <div className="icon">
@@ -1371,13 +1448,42 @@ const AdminDashboard = () => {
         {/* Spotlight Banner - Nhà tuyển dụng & Ứng viên nổi bật */}
         <SpotlightSection>
           {/* Nhà tuyển dụng đăng nhiều tin */}
-          <SpotlightCard $bgColor="#E0F2FE">
-            <SpotlightBadge $color="#0284C7">
-              <Star />
-              <span>{language === 'vi' ? 'Top Spotlight Banner Đang Chạy' : 'Top Spotlight Banner Running'}</span>
-            </SpotlightBadge>
+          <SpotlightCard $bgColor={currentOption.bgColor}>
+            <div style={{ position: 'relative' }}>
+              <SpotlightBadge 
+                $color={currentOption.color}
+                onClick={() => setShowSelector(!showSelector)}
+              >
+                <Icon />
+                <span>{currentOption.label}</span>
+                <ChevronDown size={14} style={{ opacity: 0.6 }} />
+              </SpotlightBadge>
+
+              {showSelector && (
+                <SpotlightSelector>
+                  {spotlightOptions.map(option => {
+                    const OptionIcon = option.icon;
+                    return (
+                      <SelectorOption 
+                        key={option.id}
+                        className={activeSpotlight === option.id ? 'active' : ''}
+                        $color={option.color}
+                        onClick={() => {
+                          setActiveSpotlight(option.id);
+                          setShowSelector(false);
+                        }}
+                      >
+                        <OptionIcon />
+                        {option.label}
+                      </SelectorOption>
+                    );
+                  })}
+                </SpotlightSelector>
+              )}
+            </div>
+
             <SpotlightTitle>
-              {language === 'vi' ? 'Nhà Tuyển Dụng Nổi Bật' : 'Featured Employers'}
+              {currentOption.title}
             </SpotlightTitle>
             <SpotlightList>
               {topEmployers.map((employer, index) => {
@@ -1389,7 +1495,7 @@ const AdminDashboard = () => {
                   { bg: '#FEF3C7', color: '#D97706' }
                 ];
                 const colorScheme = colors[index % colors.length];
-                
+
                 return (
                   <SpotlightItem key={employer.id} onClick={() => navigate('/admin/employers')}>
                     <SpotlightAvatar $bgColor={colorScheme.bg} $color={colorScheme.color}>
@@ -1432,7 +1538,7 @@ const AdminDashboard = () => {
                   { bg: '#D1FAE5', color: '#059669' }
                 ];
                 const colorScheme = colors[index % colors.length];
-                
+
                 return (
                   <SpotlightItem key={candidate.id} onClick={() => navigate('/admin/candidates')}>
                     <SpotlightAvatar $bgColor={colorScheme.bg} $color={colorScheme.color}>
@@ -1440,11 +1546,24 @@ const AdminDashboard = () => {
                     </SpotlightAvatar>
                     <SpotlightContent>
                       <SpotlightName>{candidate.name}</SpotlightName>
-                      <SpotlightMeta>{candidate.ekycStatus}</SpotlightMeta>
+                      <SpotlightMeta>
+                        <span style={{
+                          display: 'inline-block',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: '700',
+                          backgroundColor: candidate.status === 'verified' ? '#D1FAE5' : '#FEE2E2',
+                          color: candidate.status === 'verified' ? '#059669' : '#DC2626',
+                          textTransform: 'uppercase'
+                        }}>
+                          {candidate.ekycStatus}
+                        </span>
+                      </SpotlightMeta>
                     </SpotlightContent>
-                    <SpotlightBadgeStatus 
-                      $bgColor={candidate.status === 'verified' ? '#D1FAE5' : '#FEF3C7'} 
-                      $color={candidate.status === 'verified' ? '#059669' : '#D97706'}
+                    <SpotlightBadgeStatus
+                      $bgColor="#D1FAE5"
+                      $color="#059669"
                     >
                       {candidate.joinedTime}
                     </SpotlightBadgeStatus>
@@ -1489,7 +1608,7 @@ const AdminDashboard = () => {
                     <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
                   </linearGradient>
                 </defs>
-                
+
                 {/* Grid lines */}
                 {[0, 1, 2, 3, 4].map((i) => (
                   <line
@@ -1502,7 +1621,7 @@ const AdminDashboard = () => {
                     strokeWidth="1"
                   />
                 ))}
-                
+
                 {/* Y-axis labels */}
                 {['80', '60', '40', '20', '0'].map((val, i) => (
                   <text
@@ -1517,12 +1636,12 @@ const AdminDashboard = () => {
                     {val}
                   </text>
                 ))}
-                
+
                 {/* Posts line with area */}
                 <polyline
                   fill="url(#gradient1)"
                   stroke="none"
-                  points={`50,250 ${activityData.map((d, i) => 
+                  points={`50,250 ${activityData.map((d, i) =>
                     `${50 + (i / (activityData.length - 1)) * 600},${250 - (d.posts / 80) * 200}`
                   ).join(' ')} 650,250`}
                 />
@@ -1532,16 +1651,16 @@ const AdminDashboard = () => {
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  points={activityData.map((d, i) => 
+                  points={activityData.map((d, i) =>
                     `${50 + (i / (activityData.length - 1)) * 600},${250 - (d.posts / 80) * 200}`
                   ).join(' ')}
                 />
-                
+
                 {/* Applications line with area */}
                 <polyline
                   fill="url(#gradient2)"
                   stroke="none"
-                  points={`50,250 ${activityData.map((d, i) => 
+                  points={`50,250 ${activityData.map((d, i) =>
                     `${50 + (i / (activityData.length - 1)) * 600},${250 - (d.applications / 80) * 200}`
                   ).join(' ')} 650,250`}
                 />
@@ -1551,11 +1670,11 @@ const AdminDashboard = () => {
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  points={activityData.map((d, i) => 
+                  points={activityData.map((d, i) =>
                     `${50 + (i / (activityData.length - 1)) * 600},${250 - (d.applications / 80) * 200}`
                   ).join(' ')}
                 />
-                
+
                 {/* Data points with values */}
                 {activityData.map((d, i) => {
                   const x = 50 + (i / (activityData.length - 1)) * 600;
@@ -1565,7 +1684,7 @@ const AdminDashboard = () => {
                     <g key={i}>
                       <circle cx={x} cy={yPosts} r="4" fill="#3B82F6" stroke="white" strokeWidth="2" />
                       <circle cx={x} cy={yApps} r="4" fill="#10B981" stroke="white" strokeWidth="2" />
-                      
+
                       {/* Value labels */}
                       <text x={x} y={yPosts - 10} textAnchor="middle" fontSize="10" fill="#3B82F6" fontWeight="600">
                         {d.posts}
@@ -1573,7 +1692,7 @@ const AdminDashboard = () => {
                       <text x={x} y={yApps - 10} textAnchor="middle" fontSize="10" fill="#10B981" fontWeight="600">
                         {d.applications}
                       </text>
-                      
+
                       {/* Date labels */}
                       <text x={x} y="275" textAnchor="middle" fontSize="11" fill="#6b7280" fontWeight="400">
                         {d.date}
@@ -1616,7 +1735,7 @@ const AdminDashboard = () => {
                     <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
                   </linearGradient>
                 </defs>
-                
+
                 {/* Grid lines */}
                 {[0, 1, 2, 3, 4].map((i) => (
                   <line
@@ -1629,7 +1748,7 @@ const AdminDashboard = () => {
                     strokeWidth="1"
                   />
                 ))}
-                
+
                 {/* Y-axis labels */}
                 {['80', '60', '40', '20', '0'].map((val, i) => (
                   <text
@@ -1644,12 +1763,12 @@ const AdminDashboard = () => {
                     {val}
                   </text>
                 ))}
-                
+
                 {/* Posts line with area */}
                 <polyline
                   fill="url(#gradient3)"
                   stroke="none"
-                  points={`50,250 ${jobStatsData.map((d, i) => 
+                  points={`50,250 ${jobStatsData.map((d, i) =>
                     `${50 + (i / (jobStatsData.length - 1)) * 600},${250 - (d.posts / 80) * 200}`
                   ).join(' ')} 650,250`}
                 />
@@ -1659,16 +1778,16 @@ const AdminDashboard = () => {
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  points={jobStatsData.map((d, i) => 
+                  points={jobStatsData.map((d, i) =>
                     `${50 + (i / (jobStatsData.length - 1)) * 600},${250 - (d.posts / 80) * 200}`
                   ).join(' ')}
                 />
-                
+
                 {/* Applications line with area */}
                 <polyline
                   fill="url(#gradient4)"
                   stroke="none"
-                  points={`50,250 ${jobStatsData.map((d, i) => 
+                  points={`50,250 ${jobStatsData.map((d, i) =>
                     `${50 + (i / (jobStatsData.length - 1)) * 600},${250 - (d.applications / 80) * 200}`
                   ).join(' ')} 650,250`}
                 />
@@ -1678,11 +1797,11 @@ const AdminDashboard = () => {
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  points={jobStatsData.map((d, i) => 
+                  points={jobStatsData.map((d, i) =>
                     `${50 + (i / (jobStatsData.length - 1)) * 600},${250 - (d.applications / 80) * 200}`
                   ).join(' ')}
                 />
-                
+
                 {/* Data points with values */}
                 {jobStatsData.map((d, i) => {
                   const x = 50 + (i / (jobStatsData.length - 1)) * 600;
@@ -1692,7 +1811,7 @@ const AdminDashboard = () => {
                     <g key={i}>
                       <circle cx={x} cy={yPosts} r="4" fill="#3B82F6" stroke="white" strokeWidth="2" />
                       <circle cx={x} cy={yApps} r="4" fill="#10B981" stroke="white" strokeWidth="2" />
-                      
+
                       {/* Value labels */}
                       <text x={x} y={yPosts - 10} textAnchor="middle" fontSize="10" fill="#3B82F6" fontWeight="600">
                         {d.posts}
@@ -1700,7 +1819,7 @@ const AdminDashboard = () => {
                       <text x={x} y={yApps - 10} textAnchor="middle" fontSize="10" fill="#10B981" fontWeight="600">
                         {d.applications}
                       </text>
-                      
+
                       {/* Date labels */}
                       <text x={x} y="275" textAnchor="middle" fontSize="11" fill="#6b7280" fontWeight="400">
                         {d.date}
@@ -1718,7 +1837,7 @@ const AdminDashboard = () => {
           <SectionHeader>
             <h2>{language === 'vi' ? 'Doanh Thu Từ Dịch Vụ' : 'Revenue From Services'}</h2>
           </SectionHeader>
-          
+
           <RevenueChartCard>
             <ChartHeader>
               <h3>{language === 'vi' ? 'Xu Hướng Doanh Thu' : 'Revenue Trend'}</h3>
@@ -1728,7 +1847,7 @@ const AdminDashboard = () => {
                 <button>{language === 'vi' ? 'Tất cả' : 'All'}</button>
               </ChartFilters>
             </ChartHeader>
-            
+
             {/* Legend */}
             <ChartLegend>
               <div className="legend-item">
@@ -1740,7 +1859,7 @@ const AdminDashboard = () => {
                 <span>{language === 'vi' ? 'Mục tiêu' : 'Target'}</span>
               </div>
             </ChartLegend>
-            
+
             <SimpleLineChart>
               <LineChartSvg viewBox="0 0 900 320" preserveAspectRatio="xMidYMid meet">
                 <defs>
@@ -1753,7 +1872,7 @@ const AdminDashboard = () => {
                     <stop offset="100%" stopColor="#10b981" stopOpacity="0.02" />
                   </linearGradient>
                 </defs>
-                
+
                 {/* Grid lines */}
                 {[0, 1, 2, 3, 4, 5, 6].map((i) => (
                   <line
@@ -1766,7 +1885,7 @@ const AdminDashboard = () => {
                     strokeWidth="1"
                   />
                 ))}
-                
+
                 {/* Y-axis labels */}
                 {['6M', '5M', '4M', '3M', '2M', '1M', '0'].map((val, i) => (
                   <text
@@ -1781,7 +1900,7 @@ const AdminDashboard = () => {
                     {val}
                   </text>
                 ))}
-                
+
                 {/* Green target curve with area */}
                 <path
                   d="M 120 195 Q 220 180, 320 165 Q 420 145, 520 130 Q 620 115, 720 100 Q 770 95, 820 90 L 820 270 L 120 270 Z"
@@ -1794,7 +1913,7 @@ const AdminDashboard = () => {
                   strokeWidth="2.5"
                   strokeLinecap="round"
                 />
-                
+
                 {/* Blue revenue curve with area */}
                 <path
                   d="M 120 210 Q 220 190, 320 170 Q 420 145, 520 125 Q 620 100, 720 80 Q 770 70, 820 60 L 820 270 L 120 270 Z"
@@ -1807,7 +1926,7 @@ const AdminDashboard = () => {
                   strokeWidth="2.5"
                   strokeLinecap="round"
                 />
-                
+
                 {/* Data points with values */}
                 {[
                   { x: 120, yBlue: 210, yGreen: 195, label: language === 'vi' ? 'T1' : 'Jan', valueBlue: '2.1M', valueGreen: '2.5M' },
@@ -1822,7 +1941,7 @@ const AdminDashboard = () => {
                   <g key={i}>
                     <circle cx={point.x} cy={point.yGreen} r="4" fill="#10b981" stroke="white" strokeWidth="2" />
                     <circle cx={point.x} cy={point.yBlue} r="4" fill="#3b82f6" stroke="white" strokeWidth="2" />
-                    
+
                     {/* Value labels */}
                     <text
                       x={point.x}
@@ -1844,7 +1963,7 @@ const AdminDashboard = () => {
                     >
                       {point.valueGreen}
                     </text>
-                    
+
                     {/* Month labels */}
                     <text
                       x={point.x}
@@ -1861,7 +1980,7 @@ const AdminDashboard = () => {
               </LineChartSvg>
             </SimpleLineChart>
           </RevenueChartCard>
-          
+
           <RevenueStatsGrid>
             <RevenueStatBox $bgColor="#EFF6FF" $iconColor="#3B82F6">
               <div className="icon">
@@ -1875,7 +1994,7 @@ const AdminDashboard = () => {
                 <div className="value">{(revenueFromBoost / 1000000).toFixed(1)}M đ</div>
               </div>
             </RevenueStatBox>
-            
+
             <RevenueStatBox $bgColor="#F0F9FF" $iconColor="#0EA5E9">
               <div className="icon">
                 <TrendingUp />
@@ -1888,7 +2007,7 @@ const AdminDashboard = () => {
                 <div className="value">{(revenueFromHotSearch / 1000000).toFixed(1)}M đ</div>
               </div>
             </RevenueStatBox>
-            
+
             <RevenueStatBox $bgColor="#FEF3C7" $iconColor="#F59E0B">
               <div className="icon">
                 <Star />
@@ -1916,7 +2035,7 @@ const AdminDashboard = () => {
                 '#1E40AF', '#DC2626', '#059669', '#D97706', '#7C3AED'
               ];
               const bgColor = colors[index % colors.length];
-              
+
               // Map logo từ tên - bạn có thể thêm logo vào đây
               const logoMap = {
                 'Cơm tấm phúc lộc thọ': '/images/logo.png',
@@ -1927,7 +2046,7 @@ const AdminDashboard = () => {
                 // Thêm các logo khác ở đây
               };
               const logo = logoMap[post.employer] || null;
-              
+
               return (
                 <ManagementCard key={post.id} $bgColor="#E0F2FE" onClick={() => navigate('/admin/posts')}>
                   <ManagementAvatar $bgColor={bgColor}>
@@ -1969,7 +2088,7 @@ const AdminDashboard = () => {
                 '#1E40AF', '#DC2626', '#059669'
               ];
               const bgColor = colors[index % colors.length];
-              
+
               // Map logo từ tên - bạn có thể thêm logo vào đây
               const logoMap = {
                 'Cơm tấm phúc lộc thọ': '/images/logo.png',
@@ -1980,7 +2099,7 @@ const AdminDashboard = () => {
                 // Thêm các logo khác ở đây
               };
               const logo = logoMap[candidate.name] || null;
-              
+
               return (
                 <ManagementCard key={candidate.id} $bgColor="#EDE9FE" onClick={() => navigate('/admin/employers')}>
                   <ManagementAvatar $bgColor={bgColor}>
