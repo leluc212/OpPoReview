@@ -2639,7 +2639,7 @@ const Applications = () => {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
                 <FileText size={16} />
                 {language === 'vi' ? 'Mô tả công việc & Phúc lợi' : 'Job Description & Benefits'}
               </label>
