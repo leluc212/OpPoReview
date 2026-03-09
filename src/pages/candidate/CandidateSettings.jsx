@@ -571,7 +571,7 @@ function CandidateSettings() {
                   </LanguageButton>
                   <LanguageButton 
                     $active={language === 'en'} 
-                    onClick={() => changeLanguage('en')}
+                    onClick={() => setIsDevModalOpen(true)}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >

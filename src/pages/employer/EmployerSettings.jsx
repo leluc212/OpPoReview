@@ -342,7 +342,7 @@ const EmployerSettings = () => {
                 <LangPill $active={language === 'vi'} onClick={() => changeLanguage('vi')} whileTap={{ scale: 0.97 }}>
                   {t.settings.vietnamese}
                 </LangPill>
-                <LangPill $active={language === 'en'} onClick={() => changeLanguage('en')} whileTap={{ scale: 0.97 }}>
+                <LangPill $active={language === 'en'} onClick={() => setIsDevModalOpen(true)} whileTap={{ scale: 0.97 }}>
                   {t.settings.english}
                 </LangPill>
               </LanguageOptions>
