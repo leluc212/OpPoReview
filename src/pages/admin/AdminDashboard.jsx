@@ -1,10 +1,11 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
 import { useLanguage } from '../../context/LanguageContext';
 import { jobPosts } from '../../data/jobPosts';
-import { Users, Briefcase, Building2, DollarSign, CheckSquare, XSquare, Shield, Calendar, ArrowRight, Zap, TrendingUp, Star, Sparkles, Eye } from 'lucide-react';
+import { Users, Briefcase, Building2, DollarSign, CheckSquare, XSquare, Shield, Calendar, ArrowRight, Zap, TrendingUp, Star, Sparkles, Eye, Rocket, FileText, ChevronDown } from 'lucide-react';
 
 const DashboardContainer = styled.div`
   animation: fadeIn 0.5s ease-in;
@@ -196,253 +197,185 @@ const ViewAllButton = styled.button`
 
 const BoostSection = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
+  grid-template-columns: 1fr 1.5fr;
   gap: 24px;
   margin-bottom: 40px;
-  align-items: stretch;
   
-  @media (max-width: 1024px) {
+  @media (max-width: 1200px) {
     grid-template-columns: 1fr;
   }
 `;
 
 const BoostCard = styled.div`
-  background: ${props => props.$bgColor || '#FFF9E6'};
-  border-radius: 24px;
-  padding: 40px 44px;
-  box-shadow: 0 8px 32px rgba(245, 158, 11, 0.12);
+  background: ${props => props.$bgColor || 'white'};
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
   position: relative;
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 2px solid rgba(245, 158, 11, 0.15);
-  
+  transition: all 0.3s ease;
+
   &:hover {
-    transform: translateY(-6px) scale(1.01);
-    box-shadow: 0 16px 48px rgba(245, 158, 11, 0.2);
-    border-color: rgba(245, 158, 11, 0.3);
-  }
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-  
-  &:hover::before {
-    opacity: 1;
-    animation: shimmer 2s ease-in-out infinite;
-  }
-  
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%, rgba(245, 158, 11, 0.05) 100%);
-    pointer-events: none;
-  }
-  
-  @keyframes shimmer {
-    0%, 100% {
-      transform: translate(-50%, -50%) rotate(0deg);
-    }
-    50% {
-      transform: translate(-30%, -30%) rotate(180deg);
-    }
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 `;
 
 const BoostHeader = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 28px;
-  position: relative;
-  z-index: 1;
+  gap: 10px;
+  margin-bottom: 24px;
   
-  svg {
-    width: 28px;
-    height: 28px;
-    color: ${props => props.$color || '#F59E0B'};
-    filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.3));
-    animation: pulse 2s ease-in-out infinite;
+  .icon-wrapper {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: ${props => props.$iconBg || '#FEF3C7'};
+    
+    svg {
+      width: 18px;
+      height: 18px;
+      color: ${props => props.$iconColor || '#D97706'};
+    }
   }
   
   h3 {
-    font-size: 16px;
+    font-size: 24px;
     font-weight: 800;
-    color: #78350F;
+    color: #111827;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  }
-  
-  @keyframes pulse {
-    0%, 100% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.1);
-    }
-  }
-`;
-
-const BoostStats = styled.div`
-  margin-bottom: 0;
-  position: relative;
-  z-index: 1;
-  animation: fadeInUp 0.6s ease-out;
-  
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    letter-spacing: 0.5px;
   }
 `;
 
 const BoostMainStat = styled.div`
+  background: #FFF9F0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 0;
+  flex: 1;
   display: flex;
-  align-items: baseline;
+  flex-direction: column;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  
-  .number {
-    font-size: 72px;
-    font-weight: 900;
-    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1;
-    text-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-  }
-  
-  .label {
-    font-size: 20px;
-    font-weight: 700;
-    color: #92400E;
-  }
-  
-  .change {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 15px;
-    font-weight: 700;
-    color: #059669;
-    background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
-    padding: 8px 16px;
-    border-radius: 24px;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
-    border: 1px solid rgba(16, 185, 129, 0.2);
-  }
-`;
 
-const BoostSubStat = styled.div`
-  font-size: 17px;
-  color: #92400E;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.6);
-  padding: 12px 24px;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(245, 158, 11, 0.15);
-  
-  svg {
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  .top-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    .number {
+      font-size: 28px;
+      font-weight: 800;
+      color: #111827;
+    }
+
+    .label {
+      font-size: 18px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .change {
+      font-size: 12px;
+      font-weight: 600;
+      color: #059669;
+      background: #D1FAE5;
+      padding: 4px 8px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      
+      svg {
+        width: 12px;
+        height: 12px;
+      }
+    }
+  }
+
+  .bottom-row {
+    font-size: 15px;
+    color: #4B5563;
+    font-weight: 500;
+    
+    span {
+      color: #111827;
+      font-weight: 700;
+    }
   }
 `;
 
 const BoostOptions = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-  width: 100%;
-  justify-items: center;
-  padding: 16px 0 0 0;
+  gap: 12px;
+  
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const BoostOption = styled.div`
   background: white;
-  border-radius: 16px;
-  padding: 28px 32px;
+  border-radius: 10px;
+  padding: 14px 16px;
   display: flex;
   align-items: center;
-  gap: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  gap: 12px;
+  border: 1px solid #F3F4F6;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   transition: all 0.2s;
-  width: 260px;
-  max-width: 100%;
-  justify-content: center;
   
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    border-color: #E5E7EB;
+    transform: translateY(-1px);
   }
   
   .icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: ${props => props.$iconBg || '#DBEAFE'};
+    background: ${props => props.$iconBg || '#EFF6FF'};
     flex-shrink: 0;
     
     svg {
-      width: 28px;
-      height: 28px;
-      color: ${props => props.$iconColor || '#1E40AF'};
+      width: 18px;
+      height: 18px;
+      color: ${props => props.$iconColor || '#3B82F6'};
     }
   }
   
   .content {
     flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     
     .name {
       font-size: 16px;
-      font-weight: 700;
-      color: #1F2937;
-      margin-bottom: 6px;
+      font-weight: 600;
+      color: #374151;
     }
     
     .count {
-      font-size: 28px;
-      font-weight: 800;
-      color: #1F2937;
+      font-size: 18px;
+      font-weight: 700;
+      color: #111827;
       
       span {
-        font-size: 15px;
-        font-weight: 600;
+        font-size: 12px;
+        font-weight: 500;
         color: #6B7280;
-        margin-left: 6px;
+        margin-left: 2px;
       }
     }
   }
@@ -473,10 +406,14 @@ const RevenueChartCard = styled.div`
 
 const RevenueStatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   
-  @media (max-width: 768px) {
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (max-width: 600px) {
     grid-template-columns: 1fr;
   }
 `;
@@ -484,25 +421,33 @@ const RevenueStatsGrid = styled.div`
 const RevenueStatBox = styled.div`
   background: ${props => props.$bgColor || '#EFF6FF'};
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px 20px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  gap: 15px;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
   
   .icon {
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
     border-radius: 10px;
     background: white;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     
     svg {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       color: ${props => props.$iconColor || '#1E40AF'};
     }
   }
@@ -512,23 +457,19 @@ const RevenueStatBox = styled.div`
     
     .label {
       font-size: 13px;
-      font-weight: 600;
-      color: #6B7280;
+      font-weight: 500;
+      color: #64748B;
       margin-bottom: 4px;
       display: flex;
       align-items: center;
       gap: 6px;
-      
-      svg {
-        width: 16px;
-        height: 16px;
-      }
     }
     
     .value {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 700;
-      color: #1F2937;
+      color: #1E293B;
+      letter-spacing: -0.5px;
     }
   }
 `;
@@ -605,25 +546,37 @@ const ChartContainer = styled.div`
 const SimpleBarChart = styled.div`
   display: flex;
   align-items: flex-end;
-  justify-content: space-between;
-  height: 250px;
-  gap: 8px;
-  padding: 20px 0;
+  justify-content: space-around;
+  height: 320px;
+  padding: 40px 20px 10px;
+  background-image: linear-gradient(#f9fafb 1px, transparent 1px);
+  background-size: 100% 40px;
 `;
 
 const BarGroup = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 15px;
+  padding: 20px 25px;
+  background: #F8FAFC;
+  border-radius: 16px;
+  border: 1px solid #F1F5F9;
+  transition: all 0.3s;
   flex: 1;
-  gap: 4px;
+  max-width: 220px;
+  
+  &:hover {
+    background: #F1F5F9;
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
   
   .bars {
     display: flex;
     align-items: flex-end;
-    gap: 4px;
-    height: 200px;
-    width: 100%;
+    gap: 15px;
+    height: 220px;
     justify-content: center;
   }
   
@@ -646,7 +599,7 @@ const BarGroup = styled.div`
 `;
 
 const SimpleLineChart = styled.div`
-  height: 300px;
+  height: 400px;
   position: relative;
   padding: 20px 0;
 `;
@@ -782,6 +735,9 @@ const SpotlightCard = styled.div`
   padding: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 `;
 
 const SpotlightBadge = styled.div`
@@ -796,10 +752,63 @@ const SpotlightBadge = styled.div`
   font-size: 14px;
   color: ${props => props.$color || '#1E40AF'};
   margin-bottom: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
   
   svg {
     width: 20px;
     height: 20px;
+  }
+`;
+
+const SpotlightSelector = styled.div`
+  position: absolute;
+  top: 60px;
+  left: 24px;
+  z-index: 100;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid #E5E7EB;
+  width: 280px;
+  overflow: hidden;
+  animation: slideDown 0.2s ease-out;
+  
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+`;
+
+const SelectorOption = styled.div`
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: #F3F4F6;
+    color: ${props => props.$color || '#3B82F6'};
+  }
+  
+  &.active {
+    background: #EFF6FF;
+    color: #2563EB;
+  }
+  
+  svg {
+    width: 18px;
+    height: 18px;
   }
 `;
 
@@ -827,6 +836,8 @@ const SpotlightItem = styled.div`
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   transition: all 0.2s;
   cursor: pointer;
+  border: 1px solid transparent; /* Tránh nhảy kích thước khi hover hoặc border thay đổi */
+  min-height: 85px; /* Đảm bảo chiều cao tối thiểu bằng nhau */
   
   &:hover {
     transform: translateY(-2px);
@@ -1055,27 +1066,68 @@ const ManagementAction = styled.div`
 const AdminDashboard = () => {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
-  
+  const [activeSpotlight, setActiveSpotlight] = useState('banner');
+  const [showSelector, setShowSelector] = useState(false);
+
+  const spotlightOptions = [
+    {
+      id: 'banner',
+      label: language === 'vi' ? 'Top Spotlight Banner Đang Chạy' : 'Top Spotlight Banner Running',
+      title: language === 'vi' ? 'Nhà Tuyển Dụng Nổi Bật' : 'Featured Employers',
+      icon: Star,
+      color: '#0284C7',
+      bgColor: '#E0F2FE'
+    },
+    {
+      id: 'quick_boost',
+      label: language === 'vi' ? 'Top Quick Boost Đang Chạy' : 'Top Quick Boost Running',
+      title: language === 'vi' ? 'Ưu Tiên Quick Boost' : 'Quick Boost Favorites',
+      icon: Zap,
+      color: '#1E40AF',
+      bgColor: '#DBEAFE'
+    },
+    {
+      id: 'hot_search',
+      label: language === 'vi' ? 'Top Hot Search Đang Chạy' : 'Top Hot Search Running',
+      title: language === 'vi' ? 'Hot Search Phổ Biến' : 'Popular Hot Searches',
+      icon: TrendingUp,
+      color: '#DC2626',
+      bgColor: '#FEE2E2'
+    },
+    {
+      id: 'spotlight',
+      label: language === 'vi' ? 'Top Spotlight Đang Chạy' : 'Top Spotlight Running',
+      title: language === 'vi' ? 'Ưu Tiên Spotlight' : 'Spotlight Favorites',
+      icon: Sparkles,
+      color: '#7C3AED',
+      bgColor: '#EDE9FE'
+    }
+  ];
+
+  const currentOption = spotlightOptions.find(opt => opt.id === activeSpotlight);
+  const Icon = currentOption.icon;
+
   // Calculate real statistics from data
   const totalCandidates = 100; // From CandidatesManagement.jsx
   const totalEmployers = 30; // From EmployersManagement.jsx
   const totalJobPosts = jobPosts.length; // From jobPosts.js
-  
+
   // Calculate revenue from services (based on real package data)
   const revenueFromBoost = 4200000; // 4.2M VND - Quick Boost packages
   const revenueFromHotSearch = 3100000; // 3.1M VND - Hot Search packages
   const revenueFromBanner = 7500000; // 7.5M VND - Banner packages
-  const totalRevenue = revenueFromBoost + revenueFromHotSearch + revenueFromBanner; // 14.8M VND
-  
+  const revenueFromTopSpotlight = 5800000; // 5.8M VND - Top Spotlight packages
+  const totalRevenue = revenueFromBoost + revenueFromHotSearch + revenueFromBanner + revenueFromTopSpotlight; // Total VND
+
   // Real data for charts - calculated from actual job posts
   const urgentJobs = jobPosts.filter(post => post.category === 'urgent').length;
   const standardJobs = jobPosts.filter(post => post.category === 'standard').length;
-  
+
   // Activity data - calculated from real job posts data
   // Showing cumulative growth over 7 days based on actual total posts
   const totalPosts = jobPosts.length; // 62 posts total
   const conversionRate = 0.65; // 65% of posts get applications (realistic for part-time jobs)
-  
+
   const activityData = [
     { date: '02/3', posts: Math.round(totalPosts * 0.56), applications: Math.round(totalPosts * 0.56 * conversionRate) },
     { date: '03/3', posts: Math.round(totalPosts * 0.68), applications: Math.round(totalPosts * 0.68 * conversionRate) },
@@ -1086,9 +1138,14 @@ const AdminDashboard = () => {
     { date: '08/3', posts: totalPosts, applications: Math.round(totalPosts * conversionRate) }
   ];
 
-  // Job statistics - same data for consistency
-  const jobStatsData = activityData;
-  
+  // Quarterly Job application data - Standard vs Quick Jobs (Apps / Posts)
+  const quarterlyJobData = [
+    { label: language === 'vi' ? 'Quý 1' : 'Q1', standard: 450, standardPosts: 120, quick: 580, quickPosts: 150 },
+    { label: language === 'vi' ? 'Quý 2' : 'Q2', standard: 520, standardPosts: 135, quick: 650, quickPosts: 165 },
+    { label: language === 'vi' ? 'Quý 3' : 'Q3', standard: 480, standardPosts: 125, quick: 720, quickPosts: 180 },
+    { label: language === 'vi' ? 'Quý 4' : 'Q4', standard: 610, standardPosts: 155, quick: 890, quickPosts: 210 }
+  ];
+
   // Revenue trend data - calculated from real package purchases and job posts
   // Based on: totalRevenue = 14.8M VND (current month)
   // Showing realistic 8-month growth trajectory
@@ -1103,7 +1160,7 @@ const AdminDashboard = () => {
     { month: language === 'vi' ? 'T7' : 'Jul', actual: 5.3, target: 4.8 },
     { month: language === 'vi' ? 'T8' : 'Aug', actual: currentMonthRevenue, target: 5.1 }, // Current month uses real data
   ];
-  
+
   const getApprovalStatusText = (status) => {
     if (status === 'approved') return language === 'vi' ? 'Đã duyệt' : 'Approved';
     if (status === 'rejected') return language === 'vi' ? 'Không duyệt' : 'Rejected';
@@ -1122,86 +1179,76 @@ const AdminDashboard = () => {
     totalJobs: urgentJobs,
     change: `+${Math.round((urgentJobs / totalJobPosts) * 100)}%`,
     discount: '15%',
-    price: '18,5 triệu VND'
+    price: '18.500.000 VND'
   };
 
   // Boost packages data
   const boostPackages = [
     { name: language === 'vi' ? 'Quick Boost' : 'Quick Boost', count: 16, iconBg: '#DBEAFE', iconColor: '#1E40AF' },
-    { name: language === 'vi' ? 'Spongit Banner' : 'Spongit Banner', count: 6, iconBg: '#E0E7FF', iconColor: '#4F46E5' },
+    { name: language === 'vi' ? 'Spotlight Banner' : 'Spotlight Banner', count: 6, iconBg: '#E0E7FF', iconColor: '#4F46E5' },
     { name: language === 'vi' ? 'Hot Search' : 'Hot Search', count: 9, iconBg: '#FEE2E2', iconColor: '#DC2626' },
     { name: language === 'vi' ? 'Top Spotlight' : 'Top Spotlight', count: 4, iconBg: '#FCE7F3', iconColor: '#BE185D' }
   ];
 
   // Top Employers - Nhà tuyển dụng nổi bật (đăng nhiều tin nhất)
-  const topEmployers = [
-    { 
-      id: 1, 
-      name: 'Lẩu Bò Sài Gòn Vi Vu', 
-      type: 'Quán ăn/Nhậu',
-      postsCount: 2,
-      status: 'active',
-      daysRemaining: 6,
-      budget: '4.000 ứng viên'
-    },
-    { 
-      id: 2, 
-      name: 'Bia Sệt 123', 
-      type: 'Quán nhậu',
-      postsCount: 3,
-      status: 'active',
-      daysRemaining: 6,
-      budget: '4.000 ứng viên'
-    },
-    { 
-      id: 3, 
-      name: 'Nướng Ngói Gia Bảo', 
-      type: 'Quán nhậu',
-      postsCount: 3,
-      status: 'active',
-      daysRemaining: 6,
-      budget: '4.000 ứng viên'
-    },
-    { 
-      id: 4, 
-      name: 'Chill Out Beer Club', 
-      type: 'Pub/Nhậu',
-      postsCount: 2,
-      status: 'active',
-      daysRemaining: 6,
-      budget: '4.000 ứng viên'
-    }
-  ];
+  const spotlightData = {
+    banner: [
+      { id: 1, name: 'Lẩu Bò Sài Gòn Vi Vu', type: 'Quán ăn/Nhậu', daysRemaining: 6, budget: '4.000 ứng viên' },
+      { id: 2, name: 'Bia Sệt 123', type: 'Quán nhậu', daysRemaining: 6, budget: '4.000 ứng viên' },
+      { id: 3, name: 'Nướng Ngói Gia Bảo', type: 'Quán nhậu', daysRemaining: 6, budget: '4.000 ứng viên' },
+      { id: 4, name: 'Chill Out Beer Club', type: 'Pub/Nhậu', daysRemaining: 6, budget: '4.000 ứng viên' }
+    ],
+    quick_boost: [
+      { id: 1, name: 'Phở Hùng', type: 'Ẩm thực Việt', daysRemaining: 5, budget: '3.500 ứng viên' },
+      { id: 2, name: 'Gyu Shige', type: 'Nhà hàng Nhật', daysRemaining: 4, budget: '5.000 ứng viên' },
+      { id: 3, name: 'San Fu Lou', type: 'Ẩm thực Hoa', daysRemaining: 3, budget: '4.200 ứng viên' },
+      { id: 4, name: 'Som Tum Thai', type: 'Ẩm thực Thái', daysRemaining: 7, budget: '3.000 ứng viên' }
+    ],
+    hot_search: [
+      { id: 1, name: 'Gong Cha', type: 'Trà sữa', daysRemaining: 10, budget: '6.000 ứng viên' },
+      { id: 2, name: 'Koi Thé', type: 'Trà sữa', daysRemaining: 12, budget: '8.000 ứng viên' },
+      { id: 3, name: 'The Alley', type: 'Trà sữa', daysRemaining: 8, budget: '4.500 ứng viên' },
+      { id: 4, name: 'Ding Tea', type: 'Trà sữa', daysRemaining: 9, budget: '3.800 ứng viên' }
+    ],
+    spotlight: [
+      { id: 1, name: 'WinMart+', type: 'Siêu thị tiện lợi', daysRemaining: 15, budget: '10.000 ứng viên' },
+      { id: 2, name: 'GS25', type: 'Cửa hàng tiện lợi', daysRemaining: 20, budget: '12.000 ứng viên' },
+      { id: 3, name: 'Circle K', type: 'Cửa hàng tiện lợi', daysRemaining: 18, budget: '9.000 ứng viên' },
+      { id: 4, name: '7-Eleven', type: 'Cửa hàng tiện lợi', daysRemaining: 25, budget: '15.000 ứng viên' }
+    ]
+  };
+
+  const currentSpotlightList = spotlightData[activeSpotlight] || spotlightData.banner;
 
   // Top Candidates - Ứng viên mới (mới tham gia gần đây)
   const topCandidates = [
-    { 
-      id: 1, 
-      name: 'Mai Thanh Tuấn', 
+    {
+      id: 1,
+      name: 'Mai Thanh Tuấn',
       status: 'verified',
-      joinedTime: language === 'vi' ? 'Hôm nay' : 'Today',
-      ekycStatus: language === 'vi' ? 'ĐÃ XÁC THỰC 4 BƯỚC CHUA' : 'VERIFIED 4 STEPS'
+      joinedTime: '09/03/2026',
+      ekycStatus: language === 'vi' ? 'Đã Duyệt Xác Thực' : 'Verified'
     },
-    { 
-      id: 2, 
-      name: 'Trần Thị Thu Chi', 
+    {
+      id: 2,
+      name: 'Trần Thị Thu Chi',
       status: 'pending',
-      joinedTime: language === 'vi' ? 'Hôm nay' : 'Today',
-      ekycStatus: language === 'vi' ? 'ĐÃ XÁC THỰC 4 BƯỚC CHUA' : 'VERIFIED 4 STEPS'
+      joinedTime: '09/03/2026',
+      ekycStatus: language === 'vi' ? 'Chờ Duyệt Xác Thực' : 'Pending'
     },
-    { 
-      id: 3, 
-      name: 'Ngô Thanh Sơn', 
+    {
+      id: 3,
+      name: 'Ngô Thanh Sơn',
       status: 'pending',
-      joinedTime: language === 'vi' ? 'Hôm nay' : 'Today',
-      ekycStatus: language === 'vi' ? 'ĐÃ XÁC THỰC 4 BƯỚC CHUA' : 'VERIFIED 4 STEPS'
+      joinedTime: '08/03/2026',
+      ekycStatus: language === 'vi' ? 'Nhờ Duyệt Xác Thực' : 'Not Verified'
     },
-    { 
-      id: 4, 
-      name: 'Phạm Thị Thu Thao', 
+    {
+      id: 4,
+      name: 'Phạm Thị Thu Thảo',
       status: 'verified',
-      joinedTime: language === 'vi' ? 'Hôm nay' : 'Today',
-      ekycStatus: language === 'vi' ? 'ĐÃ XÁC THỰC 4 BƯỚC CHUA' : 'VERIFIED 4 STEPS'
+      joinedTime: '08/03/2026',
+      ekycStatus: language === 'vi' ? 'Đã Duyệt Xác Thực' : 'Verified'
     }
   ];
 
@@ -1209,38 +1256,38 @@ const AdminDashboard = () => {
   const managementPosts = [
     {
       id: 1,
-      employer: 'Katinat chi nhánh quận 8',
+      employer: 'Katinat Chi Nhánh Quận 1',
       type: 'Nhân viên Phục vụ',
       time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
-      status: language === 'vi' ? 'DUYỆT' : 'APPROVED',
-      statusColor: { bg: '#D1FAE5', color: '#059669' },
-      joinDate: '08/03/2026'
+      status: language === 'vi' ? 'CHỜ DUYỆT' : 'PENDING',
+      statusColor: { bg: '#FEF3C7', color: '#D97706' },
+      joinDate: '09/03/2026'
     },
     {
       id: 2,
-      employer: 'Cơm tấm phúc lộc thọ',
+      employer: 'Cơm tấm Phúc Lộc Thọ',
       type: 'Nhân viên Rửa chén',
       time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
-      status: language === 'vi' ? 'DUYỆT' : 'APPROVED',
-      statusColor: { bg: '#D1FAE5', color: '#059669' },
+      status: language === 'vi' ? 'CHỜ DUYỆT' : 'PENDING',
+      statusColor: { bg: '#FEF3C7', color: '#D97706' },
       joinDate: '08/03/2026'
     },
     {
       id: 3,
-      employer: 'Highlands chi nhánh bưu điện quận 5',
+      employer: 'Highlands Chi Nhánh Bưu Điện Quận 5',
       type: 'Nhân viên Phục vụ',
       time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
-      status: language === 'vi' ? 'DUYỆT' : 'APPROVED',
-      statusColor: { bg: '#D1FAE5', color: '#059669' },
+      status: language === 'vi' ? 'CHỜ DUYỆT' : 'PENDING',
+      statusColor: { bg: '#FEF3C7', color: '#D97706' },
       joinDate: '08/03/2026'
     },
     {
       id: 4,
-      employer: 'Quán Ok 3 con dê',
+      employer: 'Quán Ok 3 Con Dê',
       type: 'Nhân viên Phụ bếp',
       time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
-      status: language === 'vi' ? 'DUYỆT' : 'APPROVED',
-      statusColor: { bg: '#D1FAE5', color: '#059669' },
+      status: language === 'vi' ? 'CHỜ DUYỆT' : 'PENDING',
+      statusColor: { bg: '#FEF3C7', color: '#D97706' },
       joinDate: '08/03/2026'
     }
   ];
@@ -1249,7 +1296,7 @@ const AdminDashboard = () => {
   const managementCandidates = [
     {
       id: 1,
-      name: 'quán lẩu bò Sài Gòn Vi Vu',
+      name: 'Quán lẩu bò Sài Gòn Vi Vu',
       joinDate: '08/03/2026',
       verified: 'CHUA',
       verifiedColor: { bg: '#FEE2E2', color: '#DC2626' },
@@ -1261,21 +1308,31 @@ const AdminDashboard = () => {
       id: 2,
       name: 'Phở Hùng',
       joinDate: '08/03/2026',
-      verified: 'CHUA',
-      verifiedColor: { bg: '#FEE2E2', color: '#DC2626' },
-      status: language === 'vi' ? 'CHUA DUYỆT' : 'NOT APPROVED',
-      statusColor: { bg: '#FEE2E2', color: '#DC2626' },
+      verified: 'DA_DUYET',
+      verifiedColor: { bg: '#D1FAE5', color: '#059669' },
+      status: language === 'vi' ? 'ĐÃ DUYỆT' : 'APPROVED',
+      statusColor: { bg: '#D1FAE5', color: '#059669' },
       approvalDate: '08/03/2026'
     },
     {
       id: 3,
-      name: 'quán đồ nướng Ông Mập',
+      name: 'Quán đồ nướng Ông Mập',
       joinDate: '08/03/2026',
-      verified: 'CHUA',
-      verifiedColor: { bg: '#FEE2E2', color: '#DC2626' },
-      status: language === 'vi' ? 'CHUA DUYỆT' : 'NOT APPROVED',
-      statusColor: { bg: '#FEE2E2', color: '#DC2626' },
+      verified: 'CHO_DUYET',
+      verifiedColor: { bg: '#FEF3C7', color: '#D97706' },
+      status: language === 'vi' ? 'ĐANG CHỜ' : 'WAITING',
+      statusColor: { bg: '#FEF3C7', color: '#D97706' },
       approvalDate: '08/03/2026'
+    },
+    {
+      id: 4,
+      name: 'Katinat Coffee & Tea',
+      joinDate: '09/03/2026',
+      verified: 'CHO_DUYET',
+      verifiedColor: { bg: '#FEF3C7', color: '#D97706' },
+      status: language === 'vi' ? 'ĐANG CHỜ' : 'WAITING',
+      statusColor: { bg: '#FEF3C7', color: '#D97706' },
+      approvalDate: '09/03/2026'
     }
   ];
 
@@ -1368,46 +1425,39 @@ const AdminDashboard = () => {
         {/* Tin tuyển gấp & Gói Boost */}
         <BoostSection>
           {/* Tin tuyển gấp */}
-          <BoostCard $bgColor="linear-gradient(135deg, #FFF9E6 0%, #FEF3C7 100%)">
-            <BoostHeader $color="#F59E0B">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-              </svg>
+          <BoostCard>
+            <BoostHeader $iconBg="#FEF3C7" $iconColor="#F59E0B">
               <h3>{language === 'vi' ? 'BÀI TUYỂN GẤP' : 'URGENT JOBS'}</h3>
             </BoostHeader>
-            <BoostStats>
-              <BoostMainStat>
+            <BoostMainStat>
+              <div className="top-row">
                 <span className="number">{platformData.totalJobs}</span>
                 <span className="label">{language === 'vi' ? 'Tin tuyển gấp' : 'Urgent Jobs'}</span>
-                <span className="change">↗ {platformData.change}</span>
-              </BoostMainStat>
-              <BoostSubStat>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{width: '18px', height: '18px', display: 'inline', marginRight: '6px'}}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {language === 'vi' ? `Hoa Hồng ${platformData.discount}: ${platformData.price}` : `Commission ${platformData.discount}: ${platformData.price}`}
-              </BoostSubStat>
-            </BoostStats>
+                <span className="change">
+                  <TrendingUp /> {platformData.change}
+                </span>
+              </div>
+              <div className="bottom-row">
+                {language === 'vi' ? `Hoa Hồng ${platformData.discount}: ` : `Commission ${platformData.discount}: `}
+                <span>{platformData.price}</span>
+              </div>
+            </BoostMainStat>
           </BoostCard>
 
           {/* Gói Boost */}
-          <BoostCard $bgColor="#F0F9FF">
-            <BoostHeader $color="#1E40AF">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-              </svg>
+          <BoostCard>
+            <BoostHeader $iconBg="#E0E7FF" $iconColor="#4F46E5">
               <h3>{language === 'vi' ? 'GÓI BOOST' : 'BOOST PACKAGES'}</h3>
             </BoostHeader>
             <BoostOptions>
               {boostPackages.map((pkg, index) => {
-                // Chọn icon dựa trên tên gói
                 let IconComponent;
                 if (pkg.name === 'Quick Boost') IconComponent = Zap;
                 else if (pkg.name === 'Spongit Banner') IconComponent = Star;
                 else if (pkg.name === 'Hot Search') IconComponent = TrendingUp;
                 else if (pkg.name === 'Top Spotlight') IconComponent = Sparkles;
                 else IconComponent = Briefcase;
-                
+
                 return (
                   <BoostOption key={index} $iconBg={pkg.iconBg} $iconColor={pkg.iconColor}>
                     <div className="icon">
@@ -1427,18 +1477,168 @@ const AdminDashboard = () => {
         </BoostSection>
 
         {/* Spotlight Banner - Nhà tuyển dụng & Ứng viên nổi bật */}
+        {/* Spotlight Section - Nhà Tuyển Dụng Mới & Ứng Viên Mới */}
         <SpotlightSection>
-          {/* Nhà tuyển dụng đăng nhiều tin */}
-          <SpotlightCard $bgColor="#E0F2FE">
-            <SpotlightBadge $color="#0284C7">
-              <Star />
-              <span>{language === 'vi' ? 'Top Spotlight Banner Đang Chạy' : 'Top Spotlight Banner Running'}</span>
+          {/* Nhà Tuyển Dụng Mới - Đã thu gọn và mang lên bên trái */}
+          <SpotlightCard $bgColor="#EDE9FE">
+            <SpotlightBadge $color="#7C3AED">
+              <Building2 />
+              <span>{language === 'vi' ? 'Nhà Tuyển Dụng Mới' : 'New Employers'}</span>
             </SpotlightBadge>
             <SpotlightTitle>
-              {language === 'vi' ? 'Nhà Tuyển Dụng Nổi Bật' : 'Featured Employers'}
+              {language === 'vi' ? 'Nhà Tuyển Dụng Vừa Tham Gia' : 'Recently Joined Employers'}
             </SpotlightTitle>
             <SpotlightList>
-              {topEmployers.map((employer, index) => {
+              {managementCandidates.map((candidate, index) => {
+                const initials = candidate.name.split(' ').slice(0, 2).map(w => w[0]).join('');
+                const colors = [
+                  { bg: '#E0E7FF', color: '#4F46E5' },
+                  { bg: '#DBEAFE', color: '#0284C7' },
+                  { bg: '#FEE2E2', color: '#DC2626' }
+                ];
+                const colorScheme = colors[index % colors.length];
+
+                return (
+                  <SpotlightItem
+                    key={candidate.id}
+                    onClick={() => navigate('/admin/employers')}
+                    style={{
+                      backgroundColor: candidate.verified === 'CHO_DUYET' ? '#FEFCE8' : 'white',
+                      border: candidate.verified === 'CHO_DUYET' ? '1px solid #FEF3C7' : 'none'
+                    }}
+                  >
+                    <SpotlightAvatar $bgColor={colorScheme.bg} $color={colorScheme.color}>
+                      {initials}
+                    </SpotlightAvatar>
+                    <SpotlightContent>
+                      <SpotlightName>{candidate.name}</SpotlightName>
+                      <SpotlightMeta>
+                        <span style={{
+                          display: 'inline-block',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: '700',
+                          backgroundColor: candidate.verified === 'DA_DUYET' ? '#D1FAE5' : (candidate.verified === 'CHO_DUYET' ? '#FEF3C7' : '#FEE2E2'),
+                          color: candidate.verified === 'DA_DUYET' ? '#059669' : (candidate.verified === 'CHO_DUYET' ? '#D97706' : '#DC2626'),
+                          textTransform: 'uppercase',
+                          marginBottom: '4px'
+                        }}>
+                          {language === 'vi' ? (
+                            candidate.verified === 'DA_DUYET' ? 'Đã Duyệt Xác Thực' :
+                              (candidate.verified === 'CHO_DUYET' ? 'Chờ Duyệt Xác Thực' : 'Chưa Xác Thực')
+                          ) : (
+                            candidate.verified === 'DA_DUYET' ? 'Verified' :
+                              (candidate.verified === 'CHO_DUYET' ? 'Pending' : 'Not Verified')
+                          )}
+                        </span>
+                      </SpotlightMeta>
+                    </SpotlightContent>
+                    <SpotlightBadgeStatus $bgColor="#D1FAE5" $color="#059669">
+                      {candidate.joinDate}
+                    </SpotlightBadgeStatus>
+                  </SpotlightItem>
+                );
+              })}
+            </SpotlightList>
+          </SpotlightCard>
+
+          {/* Ứng viên mới - Bên phải */}
+          <SpotlightCard $bgColor="#EDE9FE">
+            <SpotlightBadge $color="#7C3AED">
+              <Users />
+              <span>{language === 'vi' ? 'Ứng Viên Mới' : 'New Candidates'}</span>
+            </SpotlightBadge>
+            <SpotlightTitle>
+              {language === 'vi' ? 'Ứng Viên Vừa Tham Gia' : 'Recently Joined Candidates'}
+            </SpotlightTitle>
+            <SpotlightList>
+              {topCandidates.map((candidate, index) => {
+                const initials = candidate.name.split(' ').slice(-2).map(w => w[0]).join('');
+                const colors = [
+                  { bg: '#E0E7FF', color: '#4F46E5' },
+                  { bg: '#DBEAFE', color: '#0284C7' },
+                  { bg: '#FEE2E2', color: '#DC2626' },
+                  { bg: '#D1FAE5', color: '#059669' }
+                ];
+                const colorScheme = colors[index % colors.length];
+
+                return (
+                  <SpotlightItem key={candidate.id} onClick={() => navigate('/admin/candidates')}>
+                    <SpotlightAvatar $bgColor={colorScheme.bg} $color={colorScheme.color}>
+                      {initials}
+                    </SpotlightAvatar>
+                    <SpotlightContent>
+                      <SpotlightName>{candidate.name}</SpotlightName>
+                      <SpotlightMeta>
+                        <span style={{
+                          display: 'inline-block',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: '700',
+                          backgroundColor: candidate.status === 'verified' ? '#D1FAE5' : '#FEE2E2',
+                          color: candidate.status === 'verified' ? '#059669' : '#DC2626',
+                          textTransform: 'uppercase'
+                        }}>
+                          eKYC
+                        </span>
+                      </SpotlightMeta>
+                    </SpotlightContent>
+                    <SpotlightBadgeStatus
+                      $bgColor="#D1FAE5"
+                      $color="#059669"
+                    >
+                      {candidate.joinedTime}
+                    </SpotlightBadgeStatus>
+                  </SpotlightItem>
+                );
+              })}
+            </SpotlightList>
+          </SpotlightCard>
+        </SpotlightSection>
+
+        <SpotlightSection>
+          {/* Nhà tuyển dụng nổi bật & Spotlight Banner */}
+          <SpotlightCard $bgColor={currentOption.bgColor}>
+            <div style={{ position: 'relative' }}>
+              <SpotlightBadge
+                $color={currentOption.color}
+                onClick={() => setShowSelector(!showSelector)}
+              >
+                <Icon />
+                <span>{currentOption.label}</span>
+                <ChevronDown size={14} style={{ opacity: 0.6 }} />
+              </SpotlightBadge>
+
+              {showSelector && (
+                <SpotlightSelector>
+                  {spotlightOptions.map(option => {
+                    const OptionIcon = option.icon;
+                    return (
+                      <SelectorOption
+                        key={option.id}
+                        className={activeSpotlight === option.id ? 'active' : ''}
+                        $color={option.color}
+                        onClick={() => {
+                          setActiveSpotlight(option.id);
+                          setShowSelector(false);
+                        }}
+                      >
+                        <OptionIcon />
+                        {option.label}
+                      </SelectorOption>
+                    );
+                  })}
+                </SpotlightSelector>
+              )}
+            </div>
+
+            <SpotlightTitle>
+              {currentOption.title}
+            </SpotlightTitle>
+            <SpotlightList>
+              {currentSpotlightList.map((employer, index) => {
                 const initials = employer.name.split(' ').slice(0, 2).map(w => w[0]).join('');
                 const colors = [
                   { bg: '#DBEAFE', color: '#1E40AF' },
@@ -1447,7 +1647,7 @@ const AdminDashboard = () => {
                   { bg: '#FEF3C7', color: '#D97706' }
                 ];
                 const colorScheme = colors[index % colors.length];
-                
+
                 return (
                   <SpotlightItem key={employer.id} onClick={() => navigate('/admin/employers')}>
                     <SpotlightAvatar $bgColor={colorScheme.bg} $color={colorScheme.color}>
@@ -1471,40 +1671,43 @@ const AdminDashboard = () => {
             </SpotlightList>
           </SpotlightCard>
 
-          {/* Ứng viên mới */}
-          <SpotlightCard $bgColor="#EDE9FE">
+          {/* QUẢN LÝ BÀI ĐĂNG - Chuyển lên bên phải */}
+          <SpotlightCard $bgColor="#DCFCE7">
             <SpotlightBadge $color="#7C3AED">
-              <Users />
-              <span>{language === 'vi' ? 'Ứng Viên Mới' : 'New Candidates'}</span>
+              <FileText />
+              <span>{language === 'vi' ? 'QUẢN LÝ BÀI ĐĂNG' : 'POST MANAGEMENT'}</span>
             </SpotlightBadge>
             <SpotlightTitle>
-              {language === 'vi' ? 'Ứng Viên Vừa Tham Gia' : 'Recently Joined Candidates'}
+              {language === 'vi' ? 'Bài Đăng Chờ Duyệt' : 'Pending Posts'}
             </SpotlightTitle>
             <SpotlightList>
-              {topCandidates.map((candidate, index) => {
-                const initials = candidate.name.split(' ').slice(-2).map(w => w[0]).join('');
-                const colors = [
-                  { bg: '#E0E7FF', color: '#4F46E5' },
-                  { bg: '#DBEAFE', color: '#0284C7' },
-                  { bg: '#FEE2E2', color: '#DC2626' },
-                  { bg: '#D1FAE5', color: '#059669' }
-                ];
-                const colorScheme = colors[index % colors.length];
-                
+              {managementPosts.map((post, index) => {
+                const initials = post.employer.split(' ').slice(0, 2).map(w => w[0]).join('');
+                const colors = ['#1E40AF', '#DC2626', '#059669', '#D97706', '#7C3AED'];
+                const bgColor = colors[index % colors.length];
+
+                const logoMap = {
+                  'Cơm tấm Phúc Lộc Thọ': '/images/logoplt.png',
+                  'Katinat': '/images/katinatlogo.jpg',
+                  'The Coffee House': '/images/coffeehouse.jpg',
+                  'Highlands Coffee': '/images/highlands.jpg',
+                };
+                const logo = logoMap[post.employer] || null;
+
                 return (
-                  <SpotlightItem key={candidate.id} onClick={() => navigate('/admin/candidates')}>
-                    <SpotlightAvatar $bgColor={colorScheme.bg} $color={colorScheme.color}>
-                      {initials}
+                  <SpotlightItem key={post.id} onClick={() => navigate('/admin/posts')}>
+                    <SpotlightAvatar $bgColor={bgColor} $color="white">
+                      {logo ? <img src={logo} alt={post.employer} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }} /> : initials}
                     </SpotlightAvatar>
                     <SpotlightContent>
-                      <SpotlightName>{candidate.name}</SpotlightName>
-                      <SpotlightMeta>{candidate.ekycStatus}</SpotlightMeta>
+                      <SpotlightName>{post.employer}</SpotlightName>
+                      <SpotlightMeta>
+                        <div>{post.type}</div>
+                      </SpotlightMeta>
                     </SpotlightContent>
-                    <SpotlightBadgeStatus 
-                      $bgColor={candidate.status === 'verified' ? '#D1FAE5' : '#FEF3C7'} 
-                      $color={candidate.status === 'verified' ? '#059669' : '#D97706'}
-                    >
-                      {candidate.joinedTime}
+                    <SpotlightBadgeStatus $bgColor="#F3F4F6" $color="#6B7280">
+                      <div style={{ fontSize: '12px', fontWeight: '700' }}>{post.time}</div>
+                      <div style={{ fontSize: '10px' }}>{post.joinDate}</div>
                     </SpotlightBadgeStatus>
                   </SpotlightItem>
                 );
@@ -1547,7 +1750,7 @@ const AdminDashboard = () => {
                     <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
                   </linearGradient>
                 </defs>
-                
+
                 {/* Grid lines */}
                 {[0, 1, 2, 3, 4].map((i) => (
                   <line
@@ -1560,7 +1763,7 @@ const AdminDashboard = () => {
                     strokeWidth="1"
                   />
                 ))}
-                
+
                 {/* Y-axis labels */}
                 {['80', '60', '40', '20', '0'].map((val, i) => (
                   <text
@@ -1575,12 +1778,12 @@ const AdminDashboard = () => {
                     {val}
                   </text>
                 ))}
-                
+
                 {/* Posts line with area */}
                 <polyline
                   fill="url(#gradient1)"
                   stroke="none"
-                  points={`50,250 ${activityData.map((d, i) => 
+                  points={`50,250 ${activityData.map((d, i) =>
                     `${50 + (i / (activityData.length - 1)) * 600},${250 - (d.posts / 80) * 200}`
                   ).join(' ')} 650,250`}
                 />
@@ -1590,16 +1793,16 @@ const AdminDashboard = () => {
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  points={activityData.map((d, i) => 
+                  points={activityData.map((d, i) =>
                     `${50 + (i / (activityData.length - 1)) * 600},${250 - (d.posts / 80) * 200}`
                   ).join(' ')}
                 />
-                
+
                 {/* Applications line with area */}
                 <polyline
                   fill="url(#gradient2)"
                   stroke="none"
-                  points={`50,250 ${activityData.map((d, i) => 
+                  points={`50,250 ${activityData.map((d, i) =>
                     `${50 + (i / (activityData.length - 1)) * 600},${250 - (d.applications / 80) * 200}`
                   ).join(' ')} 650,250`}
                 />
@@ -1609,11 +1812,11 @@ const AdminDashboard = () => {
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  points={activityData.map((d, i) => 
+                  points={activityData.map((d, i) =>
                     `${50 + (i / (activityData.length - 1)) * 600},${250 - (d.applications / 80) * 200}`
                   ).join(' ')}
                 />
-                
+
                 {/* Data points with values */}
                 {activityData.map((d, i) => {
                   const x = 50 + (i / (activityData.length - 1)) * 600;
@@ -1623,7 +1826,7 @@ const AdminDashboard = () => {
                     <g key={i}>
                       <circle cx={x} cy={yPosts} r="4" fill="#3B82F6" stroke="white" strokeWidth="2" />
                       <circle cx={x} cy={yApps} r="4" fill="#10B981" stroke="white" strokeWidth="2" />
-                      
+
                       {/* Value labels */}
                       <text x={x} y={yPosts - 10} textAnchor="middle" fontSize="10" fill="#3B82F6" fontWeight="600">
                         {d.posts}
@@ -1631,7 +1834,7 @@ const AdminDashboard = () => {
                       <text x={x} y={yApps - 10} textAnchor="middle" fontSize="10" fill="#10B981" fontWeight="600">
                         {d.applications}
                       </text>
-                      
+
                       {/* Date labels */}
                       <text x={x} y="275" textAnchor="middle" fontSize="11" fill="#6b7280" fontWeight="400">
                         {d.date}
@@ -1643,131 +1846,114 @@ const AdminDashboard = () => {
             </SimpleLineChart>
           </ChartCard>
 
-          {/* Line Chart 2 - Thống kê công việc */}
+          {/* Bar Chart - Thống kê công việc theo quý */}
           <ChartCard>
             <ChartHeader>
-              <h3>{language === 'vi' ? 'Thống Kê Công Việc' : 'Job Statistics'}</h3>
+              <h3>{language === 'vi' ? 'Ứng tuyển theo loại công việc' : 'Applications by Job Type'}</h3>
               <ChartFilters>
-                <button className="active">{language === 'vi' ? '7 ngày' : '7 days'}</button>
-                <button>{language === 'vi' ? '30 ngày' : '30 days'}</button>
+                <button className="active">{language === 'vi' ? 'Quý' : 'Quarter'}</button>
+                <button>{language === 'vi' ? 'Năm' : 'Year'}</button>
               </ChartFilters>
             </ChartHeader>
             <ChartLegend>
-              <div className="legend-item">
-                <div className="dot" style={{ background: '#3B82F6' }}></div>
-                <span>{language === 'vi' ? 'Tin đăng' : 'Posts'}</span>
-              </div>
-              <div className="legend-item">
-                <div className="dot" style={{ background: '#10B981' }}></div>
-                <span>{language === 'vi' ? 'Ứng tuyển' : 'Applications'}</span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px 30px', background: '#F8FAFC', padding: '10px 15px', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
+                <div style={{ display: 'flex', gap: '20px' }}>
+                  <div className="legend-item">
+                    <div className="dot" style={{ background: '#2563EB', width: '10px', height: '10px' }}></div>
+                    <span style={{ fontSize: '11px', fontWeight: '600', color: '#1E293B' }}>{language === 'vi' ? 'Ứng tuyển Tiêu chuẩn' : 'Std Apps'}</span>
+                  </div>
+                  <div className="legend-item">
+                    <div className="dot" style={{ background: '#93C5FD', width: '10px', height: '10px', opacity: 0.8 }}></div>
+                    <span style={{ fontSize: '11px', fontWeight: '500', color: '#64748B' }}>{language === 'vi' ? 'Bài đăng' : 'Posts'}</span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '20px' }}>
+                  <div className="legend-item">
+                    <div className="dot" style={{ background: '#D97706', width: '10px', height: '10px' }}></div>
+                    <span style={{ fontSize: '11px', fontWeight: '600', color: '#1E293B' }}>{language === 'vi' ? 'Ứng tuyển Tuyển gấp' : 'Urg Apps'}</span>
+                  </div>
+                  <div className="legend-item">
+                    <div className="dot" style={{ background: '#FCD34D', width: '10px', height: '10px', opacity: 0.8 }}></div>
+                    <span style={{ fontSize: '11px', fontWeight: '500', color: '#64748B' }}>{language === 'vi' ? 'Bài đăng' : 'Posts'}</span>
+                  </div>
+                </div>
               </div>
             </ChartLegend>
-            <SimpleLineChart>
-              <LineChartSvg viewBox="0 0 700 320">
-                <defs>
-                  <linearGradient id="gradient3" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.2" />
-                    <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
-                  </linearGradient>
-                  <linearGradient id="gradient4" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#10B981" stopOpacity="0.2" />
-                    <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                
-                {/* Grid lines */}
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <line
-                    key={i}
-                    x1="50"
-                    y1={50 + i * 50}
-                    x2="650"
-                    y2={50 + i * 50}
-                    stroke="#f0f0f0"
-                    strokeWidth="1"
-                  />
-                ))}
-                
-                {/* Y-axis labels */}
-                {['80', '60', '40', '20', '0'].map((val, i) => (
-                  <text
-                    key={i}
-                    x="40"
-                    y={55 + i * 50}
-                    textAnchor="end"
-                    fontSize="11"
-                    fill="#9ca3af"
-                    fontWeight="400"
-                  >
-                    {val}
-                  </text>
-                ))}
-                
-                {/* Posts line with area */}
-                <polyline
-                  fill="url(#gradient3)"
-                  stroke="none"
-                  points={`50,250 ${jobStatsData.map((d, i) => 
-                    `${50 + (i / (jobStatsData.length - 1)) * 600},${250 - (d.posts / 80) * 200}`
-                  ).join(' ')} 650,250`}
-                />
-                <polyline
-                  fill="none"
-                  stroke="#3B82F6"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  points={jobStatsData.map((d, i) => 
-                    `${50 + (i / (jobStatsData.length - 1)) * 600},${250 - (d.posts / 80) * 200}`
-                  ).join(' ')}
-                />
-                
-                {/* Applications line with area */}
-                <polyline
-                  fill="url(#gradient4)"
-                  stroke="none"
-                  points={`50,250 ${jobStatsData.map((d, i) => 
-                    `${50 + (i / (jobStatsData.length - 1)) * 600},${250 - (d.applications / 80) * 200}`
-                  ).join(' ')} 650,250`}
-                />
-                <polyline
-                  fill="none"
-                  stroke="#10B981"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  points={jobStatsData.map((d, i) => 
-                    `${50 + (i / (jobStatsData.length - 1)) * 600},${250 - (d.applications / 80) * 200}`
-                  ).join(' ')}
-                />
-                
-                {/* Data points with values */}
-                {jobStatsData.map((d, i) => {
-                  const x = 50 + (i / (jobStatsData.length - 1)) * 600;
-                  const yPosts = 250 - (d.posts / 80) * 200;
-                  const yApps = 250 - (d.applications / 80) * 200;
-                  return (
-                    <g key={i}>
-                      <circle cx={x} cy={yPosts} r="4" fill="#3B82F6" stroke="white" strokeWidth="2" />
-                      <circle cx={x} cy={yApps} r="4" fill="#10B981" stroke="white" strokeWidth="2" />
-                      
-                      {/* Value labels */}
-                      <text x={x} y={yPosts - 10} textAnchor="middle" fontSize="10" fill="#3B82F6" fontWeight="600">
-                        {d.posts}
-                      </text>
-                      <text x={x} y={yApps - 10} textAnchor="middle" fontSize="10" fill="#10B981" fontWeight="600">
-                        {d.applications}
-                      </text>
-                      
-                      {/* Date labels */}
-                      <text x={x} y="275" textAnchor="middle" fontSize="11" fill="#6b7280" fontWeight="400">
-                        {d.date}
-                      </text>
-                    </g>
-                  );
-                })}
-              </LineChartSvg>
-            </SimpleLineChart>
+            <SimpleBarChart>
+              {quarterlyJobData.map((d, i) => (
+                <BarGroup key={i}>
+                  <div className="bars">
+                    {/* Standard Pair */}
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-end', height: '100%' }}>
+                      <div
+                        className="bar"
+                        style={{
+                          height: `${(d.standard / 1000) * 100}%`,
+                          background: '#3B82F6',
+                          position: 'relative',
+                          borderRadius: '4px 4px 0 0',
+                          width: '36px',
+                          boxShadow: '0 4px 6px rgba(59, 130, 246, 0.3)'
+                        }}
+                      >
+                        <span style={{ position: 'absolute', top: '-22px', left: '50%', transform: 'translateX(-50%)', fontSize: '11px', fontWeight: '900', color: '#1D4ED8' }}>
+                          {d.standard}
+                        </span>
+                      </div>
+                      <div
+                        className="bar"
+                        style={{
+                          height: `${(d.standardPosts / 1000) * 100}%`,
+                          background: '#BFDBFE',
+                          position: 'relative',
+                          borderRadius: '4px 4px 0 0',
+                          width: '28px'
+                        }}
+                      >
+                        <span style={{ position: 'absolute', top: '-22px', left: '50%', transform: 'translateX(-50%)', fontSize: '11px', fontWeight: '800', color: '#3B82F6' }}>
+                          {d.standardPosts}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Urgent Pair */}
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-end', height: '100%' }}>
+                      <div
+                        className="bar"
+                        style={{
+                          height: `${(d.quick / 1000) * 100}%`,
+                          background: '#F59E0B',
+                          position: 'relative',
+                          borderRadius: '4px 4px 0 0',
+                          width: '36px',
+                          boxShadow: '0 4px 6px rgba(245, 158, 11, 0.3)'
+                        }}
+                      >
+                        <span style={{ position: 'absolute', top: '-22px', left: '50%', transform: 'translateX(-50%)', fontSize: '11px', fontWeight: '900', color: '#B45309' }}>
+                          {d.quick}
+                        </span>
+                      </div>
+                      <div
+                        className="bar"
+                        style={{
+                          height: `${(d.quickPosts / 1000) * 100}%`,
+                          background: '#FDE68A',
+                          position: 'relative',
+                          borderRadius: '4px 4px 0 0',
+                          width: '28px'
+                        }}
+                      >
+                        <span style={{ position: 'absolute', top: '-22px', left: '50%', transform: 'translateX(-50%)', fontSize: '11px', fontWeight: '800', color: '#D97706' }}>
+                          {d.quickPosts}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="label" style={{ fontWeight: '800', fontSize: '13px', margin: '12px 0 6px' }}>{d.label}</div>
+                </BarGroup>
+              ))}
+            </SimpleBarChart>
           </ChartCard>
         </ChartsSection>
 
@@ -1776,7 +1962,7 @@ const AdminDashboard = () => {
           <SectionHeader>
             <h2>{language === 'vi' ? 'Doanh Thu Từ Dịch Vụ' : 'Revenue From Services'}</h2>
           </SectionHeader>
-          
+
           <RevenueChartCard>
             <ChartHeader>
               <h3>{language === 'vi' ? 'Xu Hướng Doanh Thu' : 'Revenue Trend'}</h3>
@@ -1786,292 +1972,186 @@ const AdminDashboard = () => {
                 <button>{language === 'vi' ? 'Tất cả' : 'All'}</button>
               </ChartFilters>
             </ChartHeader>
-            
+
             {/* Legend */}
             <ChartLegend>
               <div className="legend-item">
                 <div className="dot" style={{ background: '#3b82f6' }}></div>
-                <span>{language === 'vi' ? 'Doanh thu thực tế' : 'Actual Revenue'}</span>
+                <span style={{ fontWeight: '600' }}>{language === 'vi' ? 'Doanh thu thực tế' : 'Actual Revenue'}</span>
               </div>
               <div className="legend-item">
-                <div className="dot" style={{ background: '#10b981' }}></div>
-                <span>{language === 'vi' ? 'Mục tiêu' : 'Target'}</span>
+                <div className="dot" style={{ background: '#f97316' }}></div>
+                <span style={{ fontWeight: '600' }}>{language === 'vi' ? 'Mục tiêu' : 'Target'}</span>
               </div>
             </ChartLegend>
-            
+
             <SimpleLineChart>
-              <LineChartSvg viewBox="0 0 900 320" preserveAspectRatio="xMidYMid meet">
+              <LineChartSvg viewBox="0 0 1200 350" preserveAspectRatio="xMidYMid meet">
                 <defs>
                   <linearGradient id="blueGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.2" />
-                    <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.02" />
-                  </linearGradient>
-                  <linearGradient id="greenGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#10b981" stopOpacity="0.15" />
-                    <stop offset="100%" stopColor="#10b981" stopOpacity="0.02" />
+                    <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.1" />
+                    <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
                   </linearGradient>
                 </defs>
-                
+
                 {/* Grid lines */}
                 {[0, 1, 2, 3, 4, 5, 6].map((i) => (
                   <line
                     key={i}
-                    x1="70"
-                    y1={30 + i * 40}
-                    x2="870"
-                    y2={30 + i * 40}
-                    stroke="#f0f0f0"
+                    x1="60"
+                    y1={30 + i * 45}
+                    x2="1140"
+                    y2={30 + i * 45}
+                    stroke="#F1F5F9"
                     strokeWidth="1"
                   />
                 ))}
-                
+
                 {/* Y-axis labels */}
-                {['6M', '5M', '4M', '3M', '2M', '1M', '0'].map((val, i) => (
+                {['6000', '5000', '4000', '3000', '2000', '1000', '0'].map((val, i) => (
                   <text
                     key={i}
-                    x="55"
-                    y={35 + i * 40}
+                    x="50"
+                    y={35 + i * 45}
                     textAnchor="end"
-                    fontSize="11"
-                    fill="#9ca3af"
-                    fontWeight="400"
+                    fontSize="12"
+                    fill="#94A3B8"
+                    fontWeight="700"
                   >
                     {val}
                   </text>
                 ))}
-                
-                {/* Green target curve with area */}
+
+                {/* Decorative Artistic Bars (4 columns per month) */}
+                {revenueTrendData.map((d, i) => {
+                  const x = 120 + i * 140; 
+                  return (
+                    <g key={`bars-${i}`}>
+                      <rect x={x - 44} y={300 - d.actual * 40} width="18" height={d.actual * 40} fill="#0284c7" opacity="0.4" rx="3" />
+                      <rect x={x - 22} y={300 - d.target * 35} width="18" height={d.target * 35} fill="#8b5cf6" opacity="0.4" rx="3" />
+                      <rect x={x + 4} y={300 - d.actual * 45} width="18" height={d.actual * 45} fill="#f59e0b" opacity="0.4" rx="3" />
+                      <rect x={x + 26} y={300 - d.target * 30} width="18" height={d.target * 30} fill="#10b981" opacity="0.4" rx="3" />
+                    </g>
+                  );
+                })}
+
+                {/* Smooth Orange Curve (Target) */}
                 <path
-                  d="M 120 195 Q 220 180, 320 165 Q 420 145, 520 130 Q 620 115, 720 100 Q 770 95, 820 90 L 820 270 L 120 270 Z"
-                  fill="url(#greenGradient)"
-                />
-                <path
-                  d="M 120 195 Q 220 180, 320 165 Q 420 145, 520 130 Q 620 115, 720 100 Q 770 95, 820 90"
+                  d={`M 120 ${300 - revenueTrendData[0].target * 45} 
+                     ${revenueTrendData.map((d, i) => {
+                    if (i === 0) return '';
+                    const prev = revenueTrendData[i - 1];
+                    const cp1x = (120 + (i - 1) * 140) + 70;
+                    const cp2x = (120 + i * 140) - 70;
+                    return `C ${cp1x} ${300 - prev.target * 45}, ${cp2x} ${300 - d.target * 45}, ${120 + i * 140} ${300 - d.target * 45}`;
+                  }).join(' ')}`}
                   fill="none"
-                  stroke="#10b981"
-                  strokeWidth="2.5"
+                  stroke="#F97316"
+                  strokeWidth="4"
                   strokeLinecap="round"
                 />
-                
-                {/* Blue revenue curve with area */}
+
+                {/* Smooth Blue Curve (Actual) */}
                 <path
-                  d="M 120 210 Q 220 190, 320 170 Q 420 145, 520 125 Q 620 100, 720 80 Q 770 70, 820 60 L 820 270 L 120 270 Z"
-                  fill="url(#blueGradient)"
-                />
-                <path
-                  d="M 120 210 Q 220 190, 320 170 Q 420 145, 520 125 Q 620 100, 720 80 Q 770 70, 820 60"
+                  d={`M 120 ${300 - revenueTrendData[0].actual * 50} 
+                     ${revenueTrendData.map((d, i) => {
+                    if (i === 0) return '';
+                    const prev = revenueTrendData[i - 1];
+                    const cp1x = (120 + (i - 1) * 140) + 70;
+                    const cp2x = (120 + i * 140) - 70;
+                    return `C ${cp1x} ${300 - prev.actual * 50}, ${cp2x} ${300 - d.actual * 50}, ${120 + i * 140} ${300 - d.actual * 50}`;
+                  }).join(' ')}`}
                   fill="none"
-                  stroke="#3b82f6"
-                  strokeWidth="2.5"
+                  stroke="#3B82F6"
+                  strokeWidth="4"
                   strokeLinecap="round"
                 />
-                
-                {/* Data points with values */}
-                {[
-                  { x: 120, yBlue: 210, yGreen: 195, label: language === 'vi' ? 'T1' : 'Jan', valueBlue: '2.1M', valueGreen: '2.5M' },
-                  { x: 220, yBlue: 190, yGreen: 180, label: language === 'vi' ? 'T2' : 'Feb', valueBlue: '2.6M', valueGreen: '2.8M' },
-                  { x: 320, yBlue: 170, yGreen: 165, label: language === 'vi' ? 'T3' : 'Mar', valueBlue: '3.1M', valueGreen: '3.2M' },
-                  { x: 420, yBlue: 145, yGreen: 145, label: language === 'vi' ? 'T4' : 'Apr', valueBlue: '3.7M', valueGreen: '3.7M' },
-                  { x: 520, yBlue: 125, yGreen: 130, label: language === 'vi' ? 'T5' : 'May', valueBlue: '4.2M', valueGreen: '4.0M' },
-                  { x: 620, yBlue: 100, yGreen: 115, label: language === 'vi' ? 'T6' : 'Jun', valueBlue: '4.8M', valueGreen: '4.4M' },
-                  { x: 720, yBlue: 80, yGreen: 100, label: language === 'vi' ? 'T7' : 'Jul', valueBlue: '5.3M', valueGreen: '4.8M' },
-                  { x: 820, yBlue: 60, yGreen: 90, label: language === 'vi' ? 'T8' : 'Aug', valueBlue: `${currentMonthRevenue.toFixed(1)}M`, valueGreen: '5.1M' },
-                ].map((point, i) => (
-                  <g key={i}>
-                    <circle cx={point.x} cy={point.yGreen} r="4" fill="#10b981" stroke="white" strokeWidth="2" />
-                    <circle cx={point.x} cy={point.yBlue} r="4" fill="#3b82f6" stroke="white" strokeWidth="2" />
-                    
-                    {/* Value labels */}
-                    <text
-                      x={point.x}
-                      y={point.yBlue - 10}
-                      textAnchor="middle"
-                      fontSize="10"
-                      fill="#3b82f6"
-                      fontWeight="600"
-                    >
-                      {point.valueBlue}
-                    </text>
-                    <text
-                      x={point.x}
-                      y={point.yGreen - 10}
-                      textAnchor="middle"
-                      fontSize="10"
-                      fill="#10b981"
-                      fontWeight="600"
-                    >
-                      {point.valueGreen}
-                    </text>
-                    
-                    {/* Month labels */}
-                    <text
-                      x={point.x}
-                      y="290"
-                      textAnchor="middle"
-                      fontSize="11"
-                      fill="#6b7280"
-                      fontWeight="400"
-                    >
-                      {point.label}
-                    </text>
-                  </g>
+
+                {/* Data points */}
+                {revenueTrendData.map((d, i) => {
+                  const x = 120 + i * 140;
+                  const yBlue = 300 - d.actual * 50;
+                  const yOrange = 300 - d.target * 45;
+                  return (
+                    <g key={`points-${i}`}>
+                      <circle cx={x} cy={yBlue} r="7" fill="#3B82F6" stroke="white" strokeWidth="3" />
+                      <circle cx={x} cy={yOrange} r="7" fill="#F97316" stroke="white" strokeWidth="3" />
+                    </g>
+                  );
+                })}
+
+                {/* Month labels */}
+                {revenueTrendData.map((d, i) => (
+                  <text
+                    key={`month-${i}`}
+                    x={120 + i * 140}
+                    y="335"
+                    textAnchor="middle"
+                    fontSize="13"
+                    fill="#94A3B8"
+                    fontWeight="700"
+                  >
+                    {language === 'vi' ? `Tháng ${i + 1}` : `Month ${i + 1}`}
+                  </text>
                 ))}
               </LineChartSvg>
             </SimpleLineChart>
+
+            <RevenueStatsGrid style={{ marginTop: '20px', borderTop: '1px solid #F1F5F9', paddingTop: '24px' }}>
+              <RevenueStatBox $bgColor="#E0F2FE" $iconColor="#0369A1">
+                <div className="icon">
+                  <CheckSquare />
+                </div>
+                <div className="content">
+                  <div className="label">
+                    {language === 'vi' ? 'Quick Boost' : 'Quick Boost'}
+                  </div>
+                  <div className="value">{revenueFromBoost.toLocaleString('vi-VN')}đ</div>
+                </div>
+              </RevenueStatBox>
+
+              <RevenueStatBox $bgColor="#F3E8FF" $iconColor="#7E22CE">
+                <div className="icon">
+                  <TrendingUp />
+                </div>
+                <div className="content">
+                  <div className="label">
+                    {language === 'vi' ? 'Hot Search' : 'Hot Search'}
+                  </div>
+                  <div className="value">{revenueFromHotSearch.toLocaleString('vi-VN')}đ</div>
+                </div>
+              </RevenueStatBox>
+
+              <RevenueStatBox $bgColor="#FFEDD5" $iconColor="#D97706">
+                <div className="icon">
+                  <Star />
+                </div>
+                <div className="content">
+                  <div className="label">
+                    {language === 'vi' ? 'Spotlight Banner' : 'Spotlight Banner'}
+                  </div>
+                  <div className="value">{revenueFromBanner.toLocaleString('vi-VN')}đ</div>
+                </div>
+              </RevenueStatBox>
+
+              <RevenueStatBox $bgColor="#D1FAE5" $iconColor="#059669">
+                <div className="icon">
+                  <Sparkles />
+                </div>
+                <div className="content">
+                  <div className="label">
+                    {language === 'vi' ? 'Top Spotlight' : 'Top Spotlight'}
+                  </div>
+                  <div className="value">{revenueFromTopSpotlight.toLocaleString('vi-VN')}đ</div>
+                </div>
+              </RevenueStatBox>
+            </RevenueStatsGrid>
           </RevenueChartCard>
-          
-          <RevenueStatsGrid>
-            <RevenueStatBox $bgColor="#EFF6FF" $iconColor="#3B82F6">
-              <div className="icon">
-                <CheckSquare />
-              </div>
-              <div className="content">
-                <div className="label">
-                  <CheckSquare size={16} />
-                  {language === 'vi' ? 'Bài viết BOOST' : 'Post BOOST'}
-                </div>
-                <div className="value">{(revenueFromBoost / 1000000).toFixed(1)}M đ</div>
-              </div>
-            </RevenueStatBox>
-            
-            <RevenueStatBox $bgColor="#F0F9FF" $iconColor="#0EA5E9">
-              <div className="icon">
-                <TrendingUp />
-              </div>
-              <div className="content">
-                <div className="label">
-                  <TrendingUp size={16} />
-                  {language === 'vi' ? 'Hot Search' : 'Hot Search'}
-                </div>
-                <div className="value">{(revenueFromHotSearch / 1000000).toFixed(1)}M đ</div>
-              </div>
-            </RevenueStatBox>
-            
-            <RevenueStatBox $bgColor="#FEF3C7" $iconColor="#F59E0B">
-              <div className="icon">
-                <Star />
-              </div>
-              <div className="content">
-                <div className="label">
-                  <Star size={16} />
-                  {language === 'vi' ? 'Banner Quảng Cáo' : 'Banner Ads'}
-                </div>
-                <div className="value">{(revenueFromBanner / 1000000).toFixed(1)}M đ</div>
-              </div>
-            </RevenueStatBox>
-          </RevenueStatsGrid>
         </RevenueSection>
 
-        {/* Quản Lý Bài Đăng */}
-        <ManagementSection>
-          <ManagementTitle>
-            {language === 'vi' ? 'QUẢN LÝ BÀI ĐĂNG' : 'POST MANAGEMENT'}
-          </ManagementTitle>
-          <ManagementGrid>
-            {managementPosts.map((post, index) => {
-              const initials = post.employer.split(' ').slice(0, 2).map(w => w[0]).join('');
-              const colors = [
-                '#1E40AF', '#DC2626', '#059669', '#D97706', '#7C3AED'
-              ];
-              const bgColor = colors[index % colors.length];
-              
-              // Map logo từ tên - bạn có thể thêm logo vào đây
-              const logoMap = {
-                'Cơm tấm phúc lộc thọ': '/images/logo.png',
-                'Katinat': '/images/katinatlogo.jpg',
-                'The Coffee House': '/images/coffeehouse.jpg',
-                'Highlands Coffee': '/images/highlands.jpg',
-                'Phúc Long': '/images/phuclong.jpg',
-                // Thêm các logo khác ở đây
-              };
-              const logo = logoMap[post.employer] || null;
-              
-              return (
-                <ManagementCard key={post.id} $bgColor="#E0F2FE" onClick={() => navigate('/admin/posts')}>
-                  <ManagementAvatar $bgColor={bgColor}>
-                    {logo ? <img src={logo} alt={post.employer} /> : initials}
-                  </ManagementAvatar>
-                  <ManagementInfo>
-                    <ManagementName>{post.employer}</ManagementName>
-                    <ManagementMeta>{post.type}</ManagementMeta>
-                  </ManagementInfo>
-                  <ManagementColumn>
-                    <ManagementColumnLabel>{language === 'vi' ? 'THỜI GIAN' : 'TIME'}</ManagementColumnLabel>
-                    <ManagementColumnValue>{post.time}</ManagementColumnValue>
-                  </ManagementColumn>
-                  <ManagementColumn>
-                    <ManagementColumnLabel>{language === 'vi' ? 'TRẠNG THÁI' : 'STATUS'}</ManagementColumnLabel>
-                    <ManagementColumnValue>{post.status}</ManagementColumnValue>
-                  </ManagementColumn>
-                  <ManagementStatus $bgColor={post.statusColor.bg} $color={post.statusColor.color}>
-                    {post.status}
-                  </ManagementStatus>
-                  <ManagementAction>
-                    <Eye />
-                  </ManagementAction>
-                </ManagementCard>
-              );
-            })}
-          </ManagementGrid>
-        </ManagementSection>
 
-        {/* Nhà Tuyển Dụng Mới */}
-        <ManagementSection>
-          <ManagementTitle>
-            {language === 'vi' ? 'NHÀ TUYỂN DỤNG MỚI' : 'NEW EMPLOYERS'}
-          </ManagementTitle>
-          <ManagementGrid>
-            {managementCandidates.map((candidate, index) => {
-              const initials = candidate.name.split(' ').slice(0, 2).map(w => w[0]).join('');
-              const colors = [
-                '#1E40AF', '#DC2626', '#059669'
-              ];
-              const bgColor = colors[index % colors.length];
-              
-              // Map logo từ tên - bạn có thể thêm logo vào đây
-              const logoMap = {
-                'Cơm tấm phúc lộc thọ': '/images/logo.png',
-                'Katinat': '/images/katinatlogo.jpg',
-                'The Coffee House': '/images/coffeehouse.jpg',
-                'Highlands Coffee': '/images/highlands.jpg',
-                'Phúc Long': '/images/phuclong.jpg',
-                // Thêm các logo khác ở đây
-              };
-              const logo = logoMap[candidate.name] || null;
-              
-              return (
-                <ManagementCard key={candidate.id} $bgColor="#EDE9FE" onClick={() => navigate('/admin/employers')}>
-                  <ManagementAvatar $bgColor={bgColor}>
-                    {logo ? <img src={logo} alt={candidate.name} /> : initials}
-                  </ManagementAvatar>
-                  <ManagementInfo>
-                    <ManagementName>{candidate.name}</ManagementName>
-                    <ManagementMeta>{language === 'vi' ? 'Nhà tuyển dụng' : 'Employer'}</ManagementMeta>
-                  </ManagementInfo>
-                  <ManagementColumn>
-                    <ManagementColumnLabel>{language === 'vi' ? 'NGÀY THAM GIA' : 'JOIN DATE'}</ManagementColumnLabel>
-                    <ManagementColumnValue>{candidate.joinDate}</ManagementColumnValue>
-                  </ManagementColumn>
-                  <ManagementColumn>
-                    <ManagementColumnLabel>{language === 'vi' ? 'XÁC THỰC' : 'VERIFIED'}</ManagementColumnLabel>
-                    <ManagementColumnValue>{candidate.verified}</ManagementColumnValue>
-                  </ManagementColumn>
-                  <ManagementColumn>
-                    <ManagementColumnLabel>{language === 'vi' ? 'TRẠNG THÁI' : 'STATUS'}</ManagementColumnLabel>
-                    <ManagementColumnValue>{candidate.status}</ManagementColumnValue>
-                  </ManagementColumn>
-                  <ManagementColumn>
-                    <ManagementColumnLabel>{language === 'vi' ? 'NGÀY DUYỆT' : 'APPROVAL DATE'}</ManagementColumnLabel>
-                    <ManagementColumnValue>{candidate.approvalDate}</ManagementColumnValue>
-                  </ManagementColumn>
-                  <ManagementAction>
-                    <Eye />
-                  </ManagementAction>
-                </ManagementCard>
-              );
-            })}
-          </ManagementGrid>
-        </ManagementSection>
+
+
       </DashboardContainer>
     </DashboardLayout>
   );
