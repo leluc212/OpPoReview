@@ -628,6 +628,15 @@ const Reports = () => {
   const [dateFilter, setDateFilter] = useState('month');
   const [locationFilter, setLocationFilter] = useState('all');
 
+  // Handler xuất Excel (chưa implement thư viện)
+  const handleExportExcel = () => {
+    alert(
+      language === 'vi' 
+        ? '🚧 Chức năng xuất Excel đang được phát triển\n\n📊 Dữ liệu sẽ được xuất:\n- Thống kê dịch vụ\n- Lịch sử mua gói\n- Trạng thái các gói\n- Báo cáo doanh thu'
+        : '🚧 Excel export feature is under development\n\n📊 Data to be exported:\n- Service statistics\n- Purchase history\n- Package status\n- Revenue reports'
+    );
+  };
+
   // Calculate real statistics
   const totalCandidates = 100;
   const totalEmployers = 30;
@@ -823,7 +832,7 @@ const Reports = () => {
               ))}
             </Select>
           </FilterGroup>
-          <DownloadButton>
+          <DownloadButton onClick={handleExportExcel}>
             <Download />
             {language === 'vi' ? 'Xuất Excel' : 'Export Excel'}
           </DownloadButton>

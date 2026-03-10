@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
-import { TrendingUp, TrendingDown, Users, Eye, DollarSign, Calendar, BarChart3, PieChart, Briefcase, Download, Filter } from 'lucide-react';
+import { TrendingUp, TrendingDown, Users, Eye, DollarSign, Calendar, BarChart3, PieChart, Briefcase } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 // ─── Page wrapper ────────────────────────────────────────────
@@ -58,81 +58,29 @@ const PageTitleText = styled.div`
   }
 `;
 
-// ─── Filter bar ────────────────────────────────────────
+// ─── Time filter pills ────────────────────────────────────────
 const FilterBar = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
+  gap: 6px;
+  margin-bottom: 24px;
   flex-wrap: wrap;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: stretch;
-  }
 `;
 
-const FilterGroup = styled.div`
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  flex-wrap: wrap;
-
-  @media (max-width: 768px) {
-    width: 100%;
-  }
-`;
-
-const Select = styled.select`
-  padding: 10px 16px;
-  border: 2px solid ${props => props.theme.colors.border};
-  border-radius: ${props => props.theme.borderRadius.md};
-  background: ${props => props.theme.colors.bgDark};
-  color: ${props => props.theme.colors.text};
-  font-size: 14px;
-  font-weight: 600;
+const FilterPill = styled(motion.button)`
+  padding: 7px 18px;
+  border-radius: 100px;
+  background: ${props => props.$active ? '#EFF6FF' : 'transparent'};
+  border: 1.5px solid ${props => props.$active ? '#BFDBFE' : 'transparent'};
+  font-weight: 700;
+  font-size: 13px;
+  color: ${props => props.$active ? '#1e40af' : '#94A3B8'};
   cursor: pointer;
-  transition: all 0.2s;
-
-  @media (max-width: 768px) {
-    flex: 1;
-    font-size: 13px;
-  }
-
-  &:focus {
-    outline: none;
-    border-color: ${props => props.theme.colors.primary};
-  }
-`;
-
-const ExportButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  background: ${props => props.theme.colors.primary};
-  color: white;
-  border: none;
-  border-radius: ${props => props.theme.borderRadius.md};
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
   white-space: nowrap;
-
-  @media (max-width: 768px) {
-    width: 100%;
-    justify-content: center;
-  }
-
   &:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-  }
-
-  svg {
-    width: 18px;
-    height: 18px;
+    color: #1e40af;
+    background: #EFF6FF;
+    border-color: #BFDBFE;
   }
 `;
 
@@ -595,15 +543,6 @@ const Analytics = () => {
   const [hoveredPoint, setHoveredPoint] = useState(null);
   const [hoveredSegment, setHoveredSegment] = useState(null);
 
-  // Handler xuất Excel
-  const handleExportExcel = () => {
-    alert(
-      language === 'vi'
-        ? '📊 Xuất báo cáo thống kê\n\nDữ liệu sẽ bao gồm:\n• Tổng số ứng viên và lượt xem\n• Chi phí tuyển dụng\n• Xu hướng ứng tuyển theo thời gian\n• Phân bổ ứng viên theo ngành nghề\n• Pipeline tuyển dụng'
-        : '📊 Export Analytics Report\n\nData includes:\n• Total applicants and views\n• Recruitment costs\n• Application trends over time\n• Candidate distribution by field\n• Recruitment pipeline'
-    );
-  };
-
   // Application trend data
   const applicationData = [
     { month: language === 'vi' ? 'T1' : 'Jan', value: 45 },
@@ -698,25 +637,21 @@ const Analytics = () => {
               <p>{language === 'vi' ? 'Theo dõi hiệu suất tuyển dụng của bạn' : 'Track your hiring performance'}</p>
             </PageTitleText>
           </PageTitleGroup>
-
-          {/* Time filter dropdown & Export button */}
-          <FilterBar>
-            <FilterGroup>
-              <Filter size={18} />
-              <Select value={timeFilter} onChange={(e) => setTimeFilter(e.target.value)}>
-                {timePills.map(p => (
-                  <option key={p.id} value={p.id}>
-                    {p.label}
-                  </option>
-                ))}
-              </Select>
-            </FilterGroup>
-            <ExportButton onClick={handleExportExcel}>
-              <Download />
-              {language === 'vi' ? 'Xuất Excel' : 'Export Excel'}
-            </ExportButton>
-          </FilterBar>
         </PageHeader>
+
+        {/* ── Time filter ── */}
+        <FilterBar>
+          {timePills.map(p => (
+            <FilterPill
+              key={p.id}
+              $active={timeFilter === p.id}
+              onClick={() => setTimeFilter(p.id)}
+              whileTap={{ scale: 0.97 }}
+            >
+              {p.label}
+            </FilterPill>
+          ))}
+        </FilterBar>
 
         {/* ── Stat cards ── */}
         <StatsGrid>
@@ -1005,6 +940,23 @@ const Analytics = () => {
                         onMouseEnter={() => setHoveredSegment(i)}
                         onMouseLeave={() => setHoveredSegment(null)}
                       />
+
+                      {/* Percentage text */}
+                      <text
+                        x={labelX}
+                        y={labelY}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fontSize={isHovered ? "15" : "13"}
+                        fontWeight="800"
+                        fill="white"
+                        style={{
+                          pointerEvents: 'none',
+                          transition: 'all 0.3s ease'
+                        }}
+                      >
+                        {item.value}%
+                      </text>
                     </g>
                   );
                 });
@@ -1012,6 +964,28 @@ const Analytics = () => {
 
               {/* Center circle */}
               <circle cx="150" cy="110" r="45" fill="#ffffff" />
+              <text
+                x="150"
+                y="102"
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontSize="13"
+                fontWeight="600"
+                fill="#94A3B8"
+              >
+                {language === 'vi' ? 'Tổng' : 'Total'}
+              </text>
+              <text
+                x="150"
+                y="120"
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontSize="24"
+                fontWeight="800"
+                fill="#1e40af"
+              >
+                {candidateDistribution.reduce((sum, item) => sum + item.value, 0)}%
+              </text>
             </ChartSvg>
           </ChartCard>
         </ChartsGrid>

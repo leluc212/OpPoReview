@@ -75,13 +75,17 @@ const PageTitleText = styled.div`
 // ─── Pricing grid (equal-height cards) ───────────────────────
 const PricingGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   align-items: stretch;
   margin-bottom: 28px;
   padding-top: 22px;
 
-  @media (max-width: 900px) {
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 768px) {
     grid-template-columns: 1fr;
     max-width: 440px;
   }
@@ -166,6 +170,36 @@ const PriceBox = styled.div`
     pointer-events: none;
   }
 `;
+
+const PriceOption = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: white;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+const PriceDuration = styled.div`
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748B;
+`;
+
+const PriceAmount = styled.div`
+  font-size: 16px;
+  font-weight: 800;
+  color: ${p => p.$c};
+  letter-spacing: -0.5px;
+`;
+
 const PriceNum = styled.div`
   font-size: 34px; font-weight: 900; color: ${p => p.$c};
   letter-spacing: -1.5px; line-height: 1;
@@ -270,68 +304,87 @@ const Subscription = () => {
 
   const plans = [
     {
-      name:    vi ? 'Cơ Bản'         : 'Basic',
-      price:   vi ? '1.2 triệu'      : '1.2M',
-      curr:    'VND',
-      per:     vi ? '/tháng'         : '/month',
+      name:    vi ? 'Quick Boost' : 'Quick Boost',
+      subtitle: vi ? 'Gói Boost' : 'Boost Package',
+      prices: [
+        { duration: vi ? '24h' : '24h', amount: '29,000 VND' },
+        { duration: vi ? '7 ngày' : '7 days', amount: '145,000 VND' }
+      ],
       Icon: Zap,
       color: '#10B981', bg: '#ECFDF5', bd: '#A7F3D0', dur: '4.2s',
       feats: [
-        vi ? '5 tin tuyển dụng'             : '5 job posts',
-        vi ? '50 hồ sơ ứng tuyển'           : '50 applications',
-        vi ? 'Hỗ trợ cơ bản'               : 'Basic support',
-        vi ? 'Bảng điều khiển phân tích'    : 'Analytics dashboard',
+        vi ? 'Đẩy tin lên đầu trang' : 'Push post to top',
+        vi ? 'Hiển thị nổi bật' : 'Featured display',
+        vi ? 'Tăng lượt xem 3x' : '3x more views',
+        vi ? 'Báo cáo chi tiết' : 'Detailed reports',
       ]
     },
     {
-      name:     vi ? 'Chuyên Nghiệp'  : 'Professional',
-      price:    vi ? '2.3 triệu'      : '2.3M',
-      curr:    'VND',
-      per:     vi ? '/tháng'         : '/month',
+      name:     vi ? 'Hot Search' : 'Hot Search',
+      subtitle: vi ? 'Tìm kiếm hot' : 'Hot Search',
+      prices: [
+        { duration: vi ? '24h' : '24h', amount: '49,000 VND' },
+        { duration: vi ? '7 ngày' : '7 days', amount: '245,000 VND' }
+      ],
       Icon: Star,
       color: '#1e40af', bg: '#EFF6FF', bd: '#BFDBFE', dur: '3.6s',
       featured: true,
       feats: [
-        vi ? '20 tin tuyển dụng'                  : '20 job posts',
-        vi ? 'Hồ sơ ứng tuyển không giới hạn'     : 'Unlimited applications',
-        vi ? 'Hỗ trợ ưu tiên'                     : 'Priority support',
-        vi ? 'Phân tích nâng cao'                  : 'Advanced analytics',
-        vi ? 'Tin nổi bật'                         : 'Featured posting',
+        vi ? 'Ưu tiên kết quả tìm kiếm' : 'Priority in search results',
+        vi ? 'Hiển thị với badge đặc biệt' : 'Special badge display',
+        vi ? 'Tăng lượt xem 5x' : '5x more views',
+        vi ? 'Thông báo cho ứng viên phù hợp' : 'Notify matching candidates',
+        vi ? 'Phân tích nâng cao' : 'Advanced analytics',
       ]
     },
     {
-      name:    vi ? 'Doanh Nghiệp'   : 'Enterprise',
-      price:   vi ? '4.5 triệu'      : '4.5M',
-      curr:    'VND',
-      per:     vi ? '/tháng'         : '/month',
+      name:    vi ? 'Spongit Banner' : 'Spongit Banner',
+      subtitle: vi ? 'Banner Nổi bật 1' : 'Featured Banner 1',
+      prices: [
+        { duration: vi ? '24h' : '24h', amount: '99,000 VND' },
+        { duration: vi ? '7 ngày' : '7 days', amount: '495,000 VND' }
+      ],
       Icon: Rocket,
       color: '#F59E0B', bg: '#FFFBEB', bd: '#FDE68A', dur: '5s',
       feats: [
-        vi ? 'Tin tuyển dụng không giới hạn'       : 'Unlimited job posts',
-        vi ? 'Hồ sơ ứng tuyển không giới hạn'      : 'Unlimited applications',
-        vi ? 'Hỗ trợ 24/7'                         : '24/7 support',
-        vi ? 'Phân tích tùy chỉnh'                  : 'Custom analytics',
-        vi ? 'Truy cập API'                         : 'API access',
-        vi ? 'Quản lý riêng'                        : 'Dedicated manager',
+        vi ? 'Hiển thị banner trang chủ' : 'Homepage banner display',
+        vi ? 'Vị trí nổi bật nhất' : 'Top spotlight position',
+        vi ? 'Tăng lượt xem 10x' : '10x more views',
+        vi ? 'Tiếp cận tối đa ứng viên' : 'Maximum candidate reach',
+        vi ? 'Thống kê chi tiết theo giờ' : 'Hourly detailed stats',
+      ]
+    },
+    {
+      name:    vi ? 'Top Spotlight' : 'Top Spotlight',
+      subtitle: vi ? 'Banner Nổi bật 2' : 'Featured Banner 2',
+      prices: [
+        { duration: vi ? '24h' : '24h', amount: '149,000 VND' },
+        { duration: vi ? '7 ngày' : '7 days', amount: '745,000 VND' }
+      ],
+      Icon: Sparkles,
+      color: '#DC2626', bg: '#FEE2E2', bd: '#FECACA', dur: '4.5s',
+      feats: [
+        vi ? 'Banner siêu nổi bật đa nền tảng' : 'Super spotlight multi-platform banner',
+        vi ? 'Hiển thị tất cả các trang' : 'Display on all pages',
+        vi ? 'Tăng lượt xem 15x' : '15x more views',
       ]
     },
   ];
 
   const compareRows = [
-    [vi ? 'Số tin tuyển dụng'   : 'Job posts',          '5',  '20', vi ? 'Không giới hạn' : 'Unlimited'],
-    [vi ? 'Hồ sơ ứng tuyển'     : 'Applications',       '50', vi ? 'Không giới hạn' : 'Unlimited', vi ? 'Không giới hạn' : 'Unlimited'],
-    [vi ? 'Tin nổi bật'         : 'Featured posting',   false, true,  true],
-    [vi ? 'Phân tích nâng cao'  : 'Advanced analytics', false, true,  true],
-    [vi ? 'Truy cập API'        : 'API access',         false, false, true],
-    [vi ? 'Hỗ trợ'             : 'Support',            vi ? 'Cơ bản' : 'Basic', vi ? 'Ưu tiên' : 'Priority', '24/7'],
-    [vi ? 'Quản lý riêng'       : 'Dedicated manager',  false, false, true],
+    [vi ? 'Thời gian hiệu lực'   : 'Duration',          '24h / 7 ngày',  '24h / 7 ngày', '24h / 7 ngày', '24h / 7 ngày'],
+    [vi ? 'Đẩy tin lên top'     : 'Push to top',       true, true,  true, true],
+    [vi ? 'Hiển thị nổi bật'         : 'Featured display',   true, true,  true, true],
+    [vi ? 'Tăng lượt xem'  : 'Views boost', '3x', '5x',  '10x', '15x'],
+    [vi ? 'Phân tích chi tiết'             : 'Detailed analytics',            true, true, true, true],
+    [vi ? 'Hỗ trợ'       : 'Support',  vi ? 'Email' : 'Email', vi ? 'Email' : 'Email', vi ? 'Email + Chat' : 'Email + Chat', '24/7'],
   ];
 
   const faqs = [
     { Icon: CreditCard, q: vi ? 'Các phương thức thanh toán nào được chấp nhận?' : 'Which payment methods are accepted?',    a: vi ? 'Chúng tôi chấp nhận thẻ tín dụng, thẻ ghi nợ, chuyển khoản ngân hàng và ví điện tử. Tất cả giao dịch đều được bảo mật SSL 256-bit.' : 'We accept credit cards, debit cards, bank transfers, and e-wallets. All transactions use 256-bit SSL security.' },
-    { Icon: Shield,     q: vi ? 'Tôi có thể hủy đăng ký bất cứ lúc nào không?' : 'Can I cancel anytime?',                    a: vi ? 'Có. Không có phí hủy và bạn vẫn dùng được dịch vụ đến hết kỳ thanh toán.' : 'Yes. Cancel anytime with no fee — you keep access until the billing cycle ends.' },
-    { Icon: Clock,      q: vi ? 'Tôi có thể nâng hoặc hạ cấp gói không?' : 'Can I upgrade or downgrade?',                    a: vi ? 'Tất nhiên. Đổi gói bất cứ lúc nào, chi phí được tính theo tỷ lệ thời gian còn lại.' : 'Yes. Switch plans anytime — we prorate the cost for the remaining billing period.' },
-    { Icon: HelpCircle, q: vi ? 'Có hỗ trợ khách hàng không?' : 'Is customer support available?',                            a: vi ? 'Tất cả các gói đều có hỗ trợ. Chuyên Nghiệp có hỗ trợ ưu tiên, Doanh Nghiệp có 24/7 qua điện thoại, email và chat.' : 'All plans include support. Professional gets priority, Enterprise gets 24/7 phone, email & chat.' },
+    { Icon: Shield,     q: vi ? 'Gói dịch vụ có tự động gia hạn không?' : 'Do packages auto-renew?',                    a: vi ? 'Không. Gói boost/banner là dịch vụ một lần, không tự động gia hạn. Bạn có thể mua lại khi cần.' : 'No. Boost/banner packages are one-time services with no auto-renewal. You can purchase again when needed.' },
+    { Icon: Clock,      q: vi ? 'Khi nào tin tuyển dụng bắt đầu hiện thị sau khi mua?' : 'When does the post start showing after purchase?',                    a: vi ? 'Ngay lập tức. Tin tuyển dụng sẽ được đẩy lên và hiển thị nổi bật trong vòng 1-2 phút sau khi thanh toán thành công.' : 'Immediately. Your job post will be boosted and featured within 1-2 minutes after successful payment.' },
+    { Icon: HelpCircle, q: vi ? 'Có thể mua nhiều gói cùng lúc không?' : 'Can I buy multiple packages at once?',                            a: vi ? 'Có. Bạn có thể mua nhiều gói khác nhau cho cùng một tin hoặc áp dụng cho nhiều tin khác nhau. Tất cả đều hoạt động đồng thời.' : 'Yes. You can purchase multiple packages for the same post or apply them to different posts. All will work simultaneously.' },
   ];
 
   const buildCard = (plan, i) => (
@@ -371,6 +424,7 @@ const Subscription = () => {
         transition={{ delay: i * 0.12 + 0.15 }}
       >
         <PlanName>{plan.name}</PlanName>
+        {plan.subtitle && <PricePer style={{ textAlign: 'center', marginBottom: '12px', marginTop: '-10px' }}>{plan.subtitle}</PricePer>}
       </motion.div>
 
       <motion.div
@@ -380,10 +434,21 @@ const Subscription = () => {
         transition={{ delay: i * 0.12 + 0.22, type: 'spring', stiffness: 200 }}
       >
         <PriceBox>
-          <PriceNum $c={plan.color}>
-            {plan.price}<span className="unit">{plan.curr}</span>
-          </PriceNum>
-          <PricePer>{plan.per}</PricePer>
+          {plan.prices ? (
+            plan.prices.map((priceOption, pi) => (
+              <PriceOption key={pi}>
+                <PriceDuration>{priceOption.duration}</PriceDuration>
+                <PriceAmount $c={plan.color}>{priceOption.amount}</PriceAmount>
+              </PriceOption>
+            ))
+          ) : (
+            <>
+              <PriceNum $c={plan.color}>
+                {plan.price}<span className="unit">{plan.curr}</span>
+              </PriceNum>
+              <PricePer>{plan.per}</PricePer>
+            </>
+          )}
         </PriceBox>
       </motion.div>
 
@@ -431,8 +496,8 @@ const Subscription = () => {
               <Star />
             </PageIconBox>
             <PageTitleText>
-              <h1>{vi ? 'Chọn Gói Của Bạn' : 'Choose Your Plan'}</h1>
-              <p>{vi ? 'Chọn gói phù hợp cho nhu cầu tuyển dụng' : 'Choose the right plan for your hiring needs'}</p>
+              <h1>{vi ? 'Pricing để xuất' : 'Pricing to Boost'}</h1>
+              <p>{vi ? 'Chọn gói dịch vụ để đẩy tin tuyển dụng của bạn lên top' : 'Choose a boost package to push your job posts to the top'}</p>
             </PageTitleText>
           </PageHeader>
 
@@ -448,14 +513,15 @@ const Subscription = () => {
             viewport={{ once: true, amount: 0.1 }}
             transition={{ duration: 0.32 }}
           >
-            <SectionHead><h2>{vi ? 'So Sánh Chi Tiết Các Gói' : 'Detailed Plan Comparison'}</h2></SectionHead>
+            <SectionHead><h2>{vi ? 'So Sánh Chi Tiết Các Gói' : 'Detailed Package Comparison'}</h2></SectionHead>
             <CompTable>
               <thead>
                 <tr>
                   <th>{vi ? 'Tính Năng' : 'Feature'}</th>
-                  <th style={{ color: '#10B981' }}>{vi ? 'Cơ Bản' : 'Basic'}</th>
-                  <th style={{ color: '#1e40af' }}>{vi ? 'Chuyên Nghiệp' : 'Professional'}</th>
-                  <th style={{ color: '#F59E0B' }}>{vi ? 'Doanh Nghiệp' : 'Enterprise'}</th>
+                  <th style={{ color: '#10B981' }}>Quick Boost</th>
+                  <th style={{ color: '#1e40af' }}>Hot Search</th>
+                  <th style={{ color: '#F59E0B' }}>Spongit Banner</th>
+                  <th style={{ color: '#DC2626' }}>Top Spotlight</th>
                 </tr>
               </thead>
               <tbody>
