@@ -1,4 +1,4 @@
-import { jsPDF } from 'jspdf';
+import jsPDF from 'jspdf';
 
 // Helper function to remove Vietnamese accents
 const removeVietnameseAccents = (str) => {
