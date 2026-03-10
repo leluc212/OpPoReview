@@ -27,6 +27,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 
 const fadeIn = keyframes`
   from {
@@ -744,6 +745,7 @@ const getInitialFormData = (language) => ({
 
 const EmployerProfile = () => {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [companyLogo, setCompanyLogo] = useState(() => {

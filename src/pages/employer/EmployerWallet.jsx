@@ -3,9 +3,11 @@ import styled, { keyframes } from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
+import { Button, Input } from '../../components/FormElements';
 import { 
   Wallet as WalletIcon, 
   TrendingUp, 
+  TrendingDown,
   Download, 
   CreditCard,
   ArrowUpRight,
@@ -23,86 +25,62 @@ import {
   Zap,
   Banknote,
   Send,
-  AlertCircle
+  AlertCircle,
+  Clock,
+  BarChart3,
+  FileText
 } from 'lucide-react';
 
-const fadeIn = keyframes`
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+const WalletContainer = styled.div`
+  max-width: 1400px;
+  margin: 0 auto;
 `;
 
-const PageContainer = styled.div`
-  animation: ${fadeIn} 0.5s ease-in;
-`;
-
-const PageHeader = styled.div`
-  margin-bottom: 28px;
+const Header = styled.div`
   display: flex;
-  align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
-`;
-
-const PageTitleGroup = styled.div`
-  display: flex;
   align-items: center;
-  gap: 16px;
-`;
-
-const PageIconBox = styled.div`
-  width: 52px;
-  height: 52px;
-  border-radius: 15px;
-  background: #EFF6FF;
-  border: 1.5px solid #BFDBFE;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-
-  svg {
-    width: 24px;
-    height: 24px;
-    color: #1e40af;
-  }
-`;
-
-const PageTitleText = styled.div`
+  margin-bottom: 32px;
+  
   h1 {
-    font-size: 26px;
-    font-weight: 800;
+    font-size: 32px;
+    font-weight: 700;
     color: ${props => props.theme.colors.text};
-    letter-spacing: -0.5px;
-    line-height: 1.2;
-    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    svg {
+      width: 36px;
+      height: 36px;
+      color: ${props => props.theme.colors.primary};
+    }
   }
-
-  p {
-    color: ${props => props.theme.colors.textLight};
-    font-size: 13.5px;
-    font-weight: 500;
+  
+  .header-actions {
+    display: flex;
+    gap: 12px;
   }
 `;
 
 const BalanceCard = styled(motion.div)`
-  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
-  border-radius: 16px;
-  padding: 40px;
+  background: linear-gradient(135deg, ${props => props.theme.colors.primary} 0%, #1e40af 100%);
+  border-radius: ${props => props.theme.borderRadius.xl};
+  padding: 48px;
   margin-bottom: 32px;
   color: white;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 20px 60px ${props => props.theme.colors.primary}30;
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px -10px ${props => props.theme.colors.primary}40;
   
   &::before {
     content: '';
     position: absolute;
     top: -50%;
-    right: -20%;
+    right: -10%;
     width: 400px;
     height: 400px;
-    background: rgba(255, 255, 255, 0.08);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
     border-radius: 50%;
   }
   
@@ -113,124 +91,308 @@ const BalanceCard = styled(motion.div)`
     left: -10%;
     width: 300px;
     height: 300px;
-    background: rgba(255, 255, 255, 0.05);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
     border-radius: 50%;
   }
-`;
-
-const BalanceContent = styled.div`
-  position: relative;
-  z-index: 1;
-`;
-
-const BalanceLabel = styled.div`
-  font-size: 16px;
-  opacity: 0.9;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
   
-  svg {
-    width: 20px;
-    height: 20px;
+  .balance-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 32px;
+    position: relative;
+    z-index: 1;
+    
+    .balance-info {
+      flex: 1;
+      
+      .label {
+        font-size: 14px;
+        font-weight: 500;
+        opacity: 0.85;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      
+      .amount-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 12px;
+        
+        .amount {
+          font-size: 52px;
+          font-weight: 800;
+          letter-spacing: -1px;
+          line-height: 1;
+        }
+        
+        .toggle-balance {
+          background: rgba(255, 255, 255, 0.2);
+          border: none;
+          color: white;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s;
+          
+          &:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+          }
+        }
+      }
+      
+      .last-updated {
+        font-size: 13px;
+        opacity: 0.75;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        
+        svg {
+          width: 14px;
+          height: 14px;
+        }
+      }
+    }
+    
+    .wallet-icon {
+      width: 80px;
+      height: 80px;
+      opacity: 0.15;
+    }
   }
-`;
-
-const BalanceAmountWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
-`;
-
-const BalanceAmount = styled.div`
-  font-size: 48px;
-  font-weight: 800;
-  letter-spacing: -1px;
-`;
-
-const EyeButton = styled.button`
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  color: white;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  flex-shrink: 0;
   
-  &:hover {
-    background: rgba(255, 255, 255, 0.25);
-    transform: scale(1.05);
+  .balance-actions {
+    display: flex;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
   }
-  
-  svg {
-    width: 22px;
-    height: 22px;
-  }
-`;
-
-const BalanceActions = styled.div`
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
 `;
 
 const ActionButton = styled(motion.button)`
-  padding: 14px 24px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.2);
   color: white;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(10px);
-  border-radius: 12px;
+  padding: 12px 24px;
+  border-radius: ${props => props.theme.borderRadius.lg};
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.5);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-  }
+  transition: all 0.2s;
   
   svg {
     width: 18px;
     height: 18px;
   }
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+  }
 `;
 
-const Grid = styled.div`
+const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 24px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
   margin-bottom: 32px;
   
-  @media (max-width: 968px) {
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
 `;
 
-const Card = styled(motion.div)`
-  background: #ffffff;
-  border: 1.5px solid #E8EFFF;
-  border-radius: 16px;
-  padding: 28px;
-  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.04);
-  transition: all 0.22s ease;
+const StatCard = styled(motion.div)`
+  background: ${props => props.theme.colors.bgLight};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  padding: 20px 24px;
+  border: 2px solid ${props => props.theme.colors.border};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s;
+  box-shadow: ${props => props.theme.shadows.sm};
+  border-left: 3px solid ${props => {
+    const colorMap = {
+      'success': props.theme.colors.success,
+      'error': props.theme.colors.error,
+      'warning': props.theme.colors.warning,
+      'primary': props.theme.colors.primary
+    };
+    return colorMap[props.$color] || props.theme.colors.primary;
+  }};
   
   &:hover {
-    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.12);
-    border-color: #BFDBFE;
+    border-color: ${props => {
+      const colorMap = {
+        'success': props.theme.colors.success,
+        'error': props.theme.colors.error,
+        'warning': props.theme.colors.warning,
+        'primary': props.theme.colors.primary
+      };
+      return colorMap[props.$color] || props.theme.colors.primary;
+    }};
+    transform: translateX(4px);
+    box-shadow: ${props => props.theme.shadows.md};
+  }
+  
+  .stat-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+    
+    .icon {
+      width: 48px;
+      height: 48px;
+      border-radius: ${props => props.theme.borderRadius.lg};
+      background: ${props => {
+        const colorMap = {
+          'success': props.theme.colors.successBg,
+          'error': props.theme.colors.errorBg,
+          'warning': props.theme.colors.warningBg,
+          'primary': props.theme.colors.primary + '15'
+        };
+        return colorMap[props.$color] || props.theme.colors.primary + '15';
+      }};
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      
+      svg {
+        width: 24px;
+        height: 24px;
+        color: ${props => {
+          const colorMap = {
+            'success': props.theme.colors.success,
+            'error': props.theme.colors.error,
+            'warning': props.theme.colors.warning,
+            'primary': props.theme.colors.primary
+          };
+          return colorMap[props.$color] || props.theme.colors.primary;
+        }};
+      }
+    }
+    
+    .stat-info {
+      flex: 1;
+      min-width: 0;
+      
+      .stat-label {
+        font-size: 13px;
+        color: ${props => props.theme.colors.textLight};
+        font-weight: 500;
+        margin-bottom: 6px;
+      }
+      
+      .stat-value {
+        font-size: 24px;
+        font-weight: 800;
+        color: ${props => props.theme.colors.text};
+        letter-spacing: -0.5px;
+      }
+    }
+  }
+`;
+
+const ContentSection = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 24px;
+  
+  @media (max-width: 1200px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const FilterBar = styled.div`
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  
+  .filter-group {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+  }
+`;
+
+const FilterButton = styled(motion.button)`
+  padding: 10px 20px;
+  border-radius: ${props => props.theme.borderRadius.lg};
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid ${props => props.$active ? props.theme.colors.primary : props.theme.colors.border};
+  background: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.bgDark};
+  color: ${props => props.$active ? 'white' : props.theme.colors.text};
+  box-shadow: ${props => props.$active ? props.theme.shadows.sm : 'none'};
+  
+  &:hover {
+    border-color: ${props => props.theme.colors.primary};
+    transform: translateY(-2px);
+    box-shadow: ${props => props.theme.shadows.sm};
+  }
+`;
+
+const Card = styled(motion.div)`
+  background: ${props => props.theme.colors.bgLight};
+  border-radius: ${props => props.theme.borderRadius.xl};
+  padding: 32px;
+  border: 2px solid ${props => props.theme.colors.border};
+  box-shadow: ${props => props.theme.shadows.sm};
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: ${props => props.theme.colors.primary}30;
+    box-shadow: ${props => props.theme.shadows.md};
+  }
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: ${props => props.theme.colors.text};
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      
+      svg {
+        width: 24px;
+        height: 24px;
+        color: ${props => props.theme.colors.primary};
+      }
+    }
+    
+    .header-action {
+      display: flex;
+      gap: 8px;
+    }
   }
   
   h3 {
@@ -245,7 +407,7 @@ const Card = styled(motion.div)`
     svg {
       width: 22px;
       height: 22px;
-      color: #1e40af;
+      color: ${props => props.theme.colors.primary};
     }
   }
 `;
@@ -253,212 +415,187 @@ const Card = styled(motion.div)`
 const TransactionList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 8px;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: ${props => props.theme.colors.bgDark};
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: ${props => props.theme.colors.border};
+    border-radius: 3px;
+    
+    &:hover {
+      background: ${props => props.theme.colors.primary};
+    }
+  }
 `;
 
 const TransactionItem = styled(motion.div)`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px;
-  background: #ffffff;
-  border-radius: 16px;
-  border: 1.5px solid #E8EFFF;
-  transition: all 0.22s ease;
-  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.04);
-  
-  &:hover {
-    background: #f8fafc;
-    border-color: ${props => props.$type === 'income' ? '#86efac' : '#fca5a5'};
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-  }
-`;
-
-const TransactionIcon = styled.div`
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
-  background: ${props => props.$type === 'income' ? '#dcfce7' : '#fee2e2'};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1.5px solid ${props => props.$type === 'income' ? '#bbf7d0' : '#fecaca'};
-  
-  svg {
-    width: 22px;
-    height: 22px;
-    color: ${props => props.$type === 'income' ? '#16a34a' : '#ef4444'};
-  }
-`;
-
-const TransactionInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex: 1;
-`;
-
-const TransactionDetails = styled.div`
-  .title {
-    font-size: 15px;
-    font-weight: 600;
-    color: ${props => props.theme.colors.text};
-    margin-bottom: 4px;
-  }
-  
-  .date {
-    font-size: 13px;
-    color: ${props => props.theme.colors.textLight};
-  }
-`;
-
-const TransactionAmount = styled.div`
-  font-size: 18px;
-  font-weight: 800;
-  color: ${props => props.$type === 'income' ? props.theme.colors.success : props.theme.colors.error};
-  background: ${props => props.$type === 'income' ? props.theme.colors.successBg : props.theme.colors.errorBg};
-  padding: 8px 16px;
-  border-radius: 10px;
-  border: 1px solid ${props => props.$type === 'income' ? props.theme.colors.success + '30' : props.theme.colors.error + '30'};
-`;
-
-const StatsList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-`;
-
-const StatItem = styled(motion.div)`
-  padding: 24px;
-  background: ${props => props.theme.colors.bgLight};
-  border-radius: 16px;
-  border-left: 5px solid ${props => props.$color || props.theme.colors.primary};
+  padding: 20px;
+  background: ${props => props.theme.colors.bgDark};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  border: 2px solid ${props => props.theme.colors.border};
+  transition: all 0.3s;
+  cursor: pointer;
   box-shadow: ${props => props.theme.shadows.sm};
-  transition: all 0.3s ease;
   
   &:hover {
-    transform: translateX(6px);
+    border-color: ${props => props.$type === 'income' ? props.theme.colors.success : props.theme.colors.error};
+    transform: translateX(8px);
     box-shadow: ${props => props.theme.shadows.md};
-    border-left-width: 8px;
   }
   
-  .label {
-    font-size: 13px;
-    color: ${props => props.theme.colors.textLight};
-    margin-bottom: 8px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  
-  .value {
-    font-size: 24px;
-    font-weight: 900;
-    color: ${props => props.theme.colors.text};
-  }
-`;
-
-const ReceiptsList = styled.div`
-  display: grid;
-  gap: 16px;
-`;
-
-const ReceiptItem = styled(motion.div)`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 18px;
-  border: 1.5px solid #E8EFFF;
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.04);
-  transition: all 0.22s ease;
-  
-  &:hover {
-    border-color: #BFDBFE;
-    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.12);
-    transform: translateY(-2px);
-  }
-`;
-
-const ReceiptInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  
-    .icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    background: #EFF6FF;
-    border: 1.5px solid #BFDBFE;
+  .transaction-info {
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 16px;
+    flex: 1;
     
-    svg {
-      width: 20px;
-      height: 20px;
-      color: #1e40af;
+    .icon {
+      width: 52px;
+      height: 52px;
+      border-radius: ${props => props.theme.borderRadius.lg};
+      background: ${props => props.$type === 'income' ? props.theme.colors.successBg : props.theme.colors.errorBg};
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      
+      svg {
+        width: 24px;
+        height: 24px;
+        color: ${props => props.$type === 'income' ? props.theme.colors.success : props.theme.colors.error};
+      }
+    }
+    
+    .details {
+      flex: 1;
+      min-width: 0;
+      
+      h4 {
+        font-size: 16px;
+        font-weight: 700;
+        color: ${props => props.theme.colors.text};
+        margin-bottom: 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      
+      p {
+        font-size: 14px;
+        color: ${props => props.theme.colors.textLight};
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
     }
   }
   
-  .details {
-    .title {
-      font-size: 14px;
-      font-weight: 600;
-      color: ${props => props.theme.colors.text};
-      margin-bottom: 2px;
+  .transaction-amount {
+    text-align: right;
+    flex-shrink: 0;
+    
+    .amount {
+      font-size: 20px;
+      font-weight: 800;
+      color: ${props => props.$type === 'income' ? props.theme.colors.success : props.theme.colors.error};
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
     }
     
     .date {
-      font-size: 12px;
+      font-size: 13px;
       color: ${props => props.theme.colors.textLight};
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      justify-content: flex-end;
+      
+      svg {
+        width: 12px;
+        height: 12px;
+      }
     }
   }
 `;
 
-const DownloadButton = styled(motion.button)`
-  padding: 10px 20px;
-  background: linear-gradient(135deg, ${props => props.theme.colors.primary} 0%, #1e40af 100%);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px ${props => props.theme.colors.primary}30;
+const ReceiptCard = styled(motion.div)`
+  padding: 20px;
+  background: ${props => props.theme.colors.bgDark};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  border: 2px solid ${props => props.theme.colors.border};
+  margin-bottom: 12px;
+  transition: all 0.3s;
+  box-shadow: ${props => props.theme.shadows.sm};
   
   &:hover {
+    border-color: ${props => props.theme.colors.primary};
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px ${props => props.theme.colors.primary}40;
+    box-shadow: ${props => props.theme.shadows.md};
+    cursor: pointer;
   }
   
-  svg {
-    width: 16px;
-    height: 16px;
+  .receipt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    
+    h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: ${props => props.theme.colors.text};
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      svg {
+        width: 18px;
+        height: 18px;
+        color: ${props => props.theme.colors.primary};
+      }
+    }
+    
+    .download-btn {
+      color: ${props => props.theme.colors.primary};
+      cursor: pointer;
+      padding: 8px;
+      border-radius: ${props => props.theme.borderRadius.md};
+      background: ${props => props.theme.colors.primary}10;
+      transition: all 0.2s;
+      
+      &:hover {
+        background: ${props => props.theme.colors.primary}20;
+        transform: scale(1.1);
+      }
+    }
   }
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: 40px 20px;
-  color: ${props => props.theme.colors.textLight};
   
-  svg {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 12px;
-    opacity: 0.3;
-  }
-  
-  p {
-    font-size: 14px;
+  .receipt-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: ${props => props.theme.colors.textLight};
+    
+    .amount {
+      font-weight: 700;
+      color: ${props => props.theme.colors.text};
+      font-size: 15px;
+    }
   }
 `;
 
@@ -827,6 +964,7 @@ const EmployerWallet = () => {
 
   const [balance, setBalance] = useState(() => initializeWallet());
   const [showBalance, setShowBalance] = useState(false);
+  const [filterType, setFilterType] = useState('all');
 
   // Deposit modal state
   const [showDepositModal, setShowDepositModal] = useState(false);
@@ -923,9 +1061,9 @@ const EmployerWallet = () => {
   }, []);
 
   const receipts = [
-    { id: 1, title: language === 'vi' ? 'Hóa đơn #2026021401' : 'Invoice #2026021401', date: '14/02/2026' },
-    { id: 2, title: language === 'vi' ? 'Hóa đơn #2026021201' : 'Invoice #2026021201', date: '12/02/2026' },
-    { id: 3, title: language === 'vi' ? 'Hóa đơn #2026021001' : 'Invoice #2026021001', date: '10/02/2026' }
+    { id: 1, title: language === 'vi' ? 'Hóa đơn #2026021401' : 'Invoice #2026021401', date: '14/02/2026', amount: '2,500,000 VND' },
+    { id: 2, title: language === 'vi' ? 'Hóa đơn #2026021201' : 'Invoice #2026021201', date: '12/02/2026', amount: '3,000,000 VND' },
+    { id: 3, title: language === 'vi' ? 'Hóa đơn #2026021001' : 'Invoice #2026021001', date: '10/02/2026', amount: '1,800,000 VND' }
   ];
 
   const formatCurrency = (amount) => {
@@ -1053,195 +1191,299 @@ const EmployerWallet = () => {
     .filter(t => t.type === 'expense' || t.type === 'debit')
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
+  // Filter transactions based on filter type
+  const filteredTransactions = filterType === 'all' 
+    ? transactions 
+    : transactions.filter(t => {
+        if (filterType === 'income') return t.type === 'income' || t.type === 'credit';
+        if (filterType === 'expense') return t.type === 'expense' || t.type === 'debit';
+        return true;
+      });
+
   return (
     <DashboardLayout role="employer" key={language}>
-      <PageContainer>
-        <PageHeader>
-          <PageTitleGroup>
-            <PageIconBox>
-              <WalletIcon />
-            </PageIconBox>
-            <PageTitleText>
-              <h1>{language === 'vi' ? 'Ví điện tử' : 'Wallet'}</h1>
-              <p>{language === 'vi' ? 'Quản lý tài chính và giao dịch của bạn' : 'Manage your finances and transactions'}</p>
-            </PageTitleText>
-          </PageTitleGroup>
-        </PageHeader>
+      <WalletContainer>
+        <Header>
+          <h1>
+            <WalletIcon />
+            {language === 'vi' ? 'Ví Điện Tử' : 'E-Wallet'}
+          </h1>
+        </Header>
 
         <BalanceCard
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <BalanceContent>
-            <BalanceLabel>
-              <WalletIcon />
-              {language === 'vi' ? 'Số dư khả dụng' : 'Available balance'}
-            </BalanceLabel>
-            <BalanceAmountWrapper>
-              <BalanceAmount>{showBalance ? formatCurrency(balance) : '******** VND'}</BalanceAmount>
-              <EyeButton onClick={() => setShowBalance(!showBalance)}>
-                {showBalance ? <EyeOff /> : <Eye />}
-              </EyeButton>
-            </BalanceAmountWrapper>
-            <BalanceActions>
-              <ActionButton 
-                onClick={handleDeposit}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Plus size={18} />
-                {language === 'vi' ? 'Nạp tiền' : 'Deposit'}
-              </ActionButton>
-              <ActionButton 
-                onClick={handleWithdraw}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <ArrowUpRight size={18} />
-                {language === 'vi' ? 'Rút tiền' : 'Withdraw'}
-              </ActionButton>
-              <ActionButton 
-                onClick={handleLinkBank}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Building2 size={18} />
-                {language === 'vi' ? 'Liên kết ngân hàng' : 'Link bank'}
-              </ActionButton>
-            </BalanceActions>
-          </BalanceContent>
+          <div className="balance-header">
+            <div className="balance-info">
+              <div className="label">{language === 'vi' ? 'Số Dư Khả Dụng' : 'Available Balance'}</div>
+              <div className="amount-wrapper">
+                <div className="amount">
+                  {showBalance ? formatCurrency(balance) : '••••••••'}
+                </div>
+                <button 
+                  className="toggle-balance"
+                  onClick={() => setShowBalance(!showBalance)}
+                >
+                  {showBalance ? <Eye size={18} /> : <EyeOff size={18} />}
+                </button>
+              </div>
+              <div className="last-updated">
+                <Clock />
+                {language === 'vi' ? 'Cập nhật lần cuối: Hôm nay' : 'Last updated: Today'}
+              </div>
+            </div>
+            <WalletIcon className="wallet-icon" />
+          </div>
+          <div className="balance-actions">
+            <ActionButton 
+              onClick={handleDeposit}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Plus size={18} />
+              {language === 'vi' ? 'Nạp Tiền' : 'Deposit'}
+            </ActionButton>
+            <ActionButton 
+              onClick={handleWithdraw}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <ArrowUpRight size={18} />
+              {language === 'vi' ? 'Rút Tiền' : 'Withdraw'}
+            </ActionButton>
+            <ActionButton 
+              onClick={handleLinkBank}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Building2 size={18} />
+              {language === 'vi' ? 'Liên Kết Ngân Hàng' : 'Link Bank'}
+            </ActionButton>
+          </div>
         </BalanceCard>
 
-        <Grid>
-          {/* Transactions */}
-          <Card
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
+        <StatsGrid>
+          <StatCard 
+            $color="success"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+            whileHover={{ scale: 1.02 }}
           >
-            <h3>
-              <Calendar />
-              {language === 'vi' ? 'Lịch sử giao dịch' : 'Transaction History'}
-            </h3>
-            <TransactionList>
-              {transactions.map((transaction, index) => (
-                <TransactionItem 
-                  key={transaction.id}
-                  $type={transaction.type === 'debit' ? 'expense' : (transaction.type === 'credit' ? 'income' : transaction.type)}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: 0.2 + (index * 0.05) }}
-                >
-                  <TransactionInfo>
-                    <TransactionIcon $type={transaction.type === 'debit' ? 'expense' : (transaction.type === 'credit' ? 'income' : transaction.type)}>
-                      {(transaction.type === 'income' || transaction.type === 'credit') ? (
-                        <ArrowDownLeft />
-                      ) : (
-                        <ArrowUpRight />
-                      )}
-                    </TransactionIcon>
-                    <TransactionDetails>
-                      <div className="title">{transaction.description || transaction.title}</div>
+            <div className="stat-left">
+              <div className="icon">
+                <TrendingUp />
+              </div>
+              <div className="stat-info">
+                <div className="stat-label">{language === 'vi' ? 'Tổng tiền nạp' : 'Total Deposits'}</div>
+                <div className="stat-value">{formatCurrency(totalIncome)}</div>
+              </div>
+            </div>
+          </StatCard>
+          
+          <StatCard 
+            $color="error"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+            whileHover={{ scale: 1.02 }}
+          >
+            <div className="stat-left">
+              <div className="icon">
+                <TrendingDown />
+              </div>
+              <div className="stat-info">
+                <div className="stat-label">{language === 'vi' ? 'Đã Rút Trong Tháng' : 'Total Expenses'}</div>
+                <div className="stat-value">{formatCurrency(totalExpense)}</div>
+              </div>
+            </div>
+          </StatCard>
+          
+          <StatCard 
+            $color="primary"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.3 }}
+            whileHover={{ scale: 1.02 }}
+          >
+            <div className="stat-left">
+              <div className="icon">
+                <BarChart3 />
+              </div>
+              <div className="stat-info">
+                <div className="stat-label">{language === 'vi' ? 'Số lượng giao dịch' : 'Transactions'}</div>
+                <div className="stat-value">{transactions.length}</div>
+              </div>
+            </div>
+          </StatCard>
+          
+          <StatCard 
+            $color="warning"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.4 }}
+            whileHover={{ scale: 1.02 }}
+          >
+            <div className="stat-left">
+              <div className="icon">
+                <FileText />
+              </div>
+              <div className="stat-info">
+                <div className="stat-label">{language === 'vi' ? 'Hóa đơn' : 'Invoices'}</div>
+                <div className="stat-value">{receipts.length}</div>
+              </div>
+            </div>
+          </StatCard>
+        </StatsGrid>
+
+        <ContentSection>
+          <div>
+            <Card
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <div className="card-header">
+                <h2>
+                  <Calendar />
+                  {language === 'vi' ? 'Lịch Sử Giao Dịch' : 'Transaction History'}
+                </h2>
+                <div className="header-action">
+                  <Button 
+                    $variant="secondary" 
+                    $size="small"
+                  >
+                    <Download style={{ width: '16px', height: '16px' }} />
+                    {language === 'vi' ? 'Xuất' : 'Export'}
+                  </Button>
+                </div>
+              </div>
+              
+              <FilterBar>
+                <div className="filter-group">
+                  <FilterButton 
+                    $active={filterType === 'all'}
+                    onClick={() => setFilterType('all')}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {language === 'vi' ? 'Tất Cả' : 'All'}
+                  </FilterButton>
+                  <FilterButton 
+                    $active={filterType === 'income'}
+                    onClick={() => setFilterType('income')}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {language === 'vi' ? 'Nạp tiền' : 'Deposits'}
+                  </FilterButton>
+                  <FilterButton 
+                    $active={filterType === 'expense'}
+                    onClick={() => setFilterType('expense')}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {language === 'vi' ? 'Rút tiền' : 'Withdrawals'}
+                  </FilterButton>
+                </div>
+                <Input 
+                  type="date" 
+                  style={{ width: 'auto', padding: '10px 16px' }} 
+                />
+              </FilterBar>
+              
+              <TransactionList>
+                {filteredTransactions.map((transaction, index) => (
+                  <TransactionItem 
+                    key={transaction.id} 
+                    $type={transaction.type === 'debit' ? 'expense' : (transaction.type === 'credit' ? 'income' : transaction.type)}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    <div className="transaction-info">
+                      <div className="icon">
+                        {(transaction.type === 'income' || transaction.type === 'credit') ? <ArrowDownLeft /> : <ArrowUpRight />}
+                      </div>
+                      <div className="details">
+                        <h4>{transaction.description || transaction.title}</h4>
+                        <p>
+                          <Receipt style={{ width: '14px', height: '14px' }} />
+                          {transaction.description}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="transaction-amount">
+                      <div className="amount">
+                        {(transaction.type === 'income' || transaction.type === 'credit') ? '+' : '-'}
+                        {formatCurrency(Math.abs(transaction.amount))}
+                      </div>
                       <div className="date">
+                        <Calendar />
                         {transaction.date 
-                          ? new Date(transaction.date).toLocaleString(language === 'vi' ? 'vi-VN' : 'en-US', {
-                              year: 'numeric',
-                              month: '2-digit',
-                              day: '2-digit',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })
+                          ? new Date(transaction.date).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US')
                           : ''}
                       </div>
-                    </TransactionDetails>
-                  </TransactionInfo>
-                  <TransactionAmount $type={transaction.type === 'debit' ? 'expense' : (transaction.type === 'credit' ? 'income' : transaction.type)}>
-                    {(transaction.type === 'income' || transaction.type === 'credit') ? '+' : '-'}
-                    {formatCurrency(Math.abs(transaction.amount))}
-                  </TransactionAmount>
-                </TransactionItem>
-              ))}
-            </TransactionList>
-          </Card>
+                    </div>
+                  </TransactionItem>
+                ))}
+              </TransactionList>
+            </Card>
+          </div>
 
-          {/* Stats */}
-          <Card
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <h3>
-              <TrendingUp />
-              {language === 'vi' ? 'Thống kê' : 'Statistics'}
-            </h3>
-            <StatsList>
-              <StatItem 
-                $color="#10B981"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, delay: 0.3 }}
-                whileHover={{ scale: 1.02 }}
-              >
-                <div className="label">{language === 'vi' ? 'Tổng tiền nạp' : 'Total Deposits'}</div>
-                <div className="value">{formatCurrency(totalIncome)}</div>
-              </StatItem>
-              <StatItem 
-                $color="#EF4444"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, delay: 0.4 }}
-                whileHover={{ scale: 1.02 }}
-              >
-                <div className="label">{language === 'vi' ? 'Tổng chi phí' : 'Total Expenses'}</div>
-                <div className="value">{formatCurrency(totalExpense)}</div>
-              </StatItem>
-
-            </StatsList>
-          </Card>
-        </Grid>
-
-        {/* Receipts */}
-        <Card
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <h3>
-            <Receipt />
-            {language === 'vi' ? 'Hóa đơn & Biên lai' : 'Invoices & Receipts'}
-          </h3>
-          <ReceiptsList>
-            {receipts.map((receipt, index) => (
-              <ReceiptItem 
-                key={receipt.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.3 + (index * 0.1) }}
-                whileHover={{ scale: 1.01 }}
-              >
-                <ReceiptInfo>
-                  <div className="icon">
-                    <Receipt />
-                  </div>
-                  <div className="details">
-                    <div className="title">{receipt.title}</div>
-                    <div className="date">{receipt.date}</div>
-                  </div>
-                </ReceiptInfo>
-                <DownloadButton 
-                  onClick={() => handleDownloadReceipt(receipt.id)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.98 }}
+          <div>
+            <Card
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <div className="card-header">
+                <h2>
+                  <Receipt />
+                  {language === 'vi' ? 'Hóa Đơn Điện Tử' : 'Electronic Invoices'}
+                </h2>
+              </div>
+              
+              {receipts.map((receipt, index) => (
+                <ReceiptCard 
+                  key={receipt.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 + index * 0.05 }}
+                  whileHover={{ scale: 1.02 }}
                 >
-                  <Download />
-                  {language === 'vi' ? 'Tải xuống' : 'Download'}
-                </DownloadButton>
-              </ReceiptItem>
-            ))}
-          </ReceiptsList>
-        </Card>
-      </PageContainer>
+                  <div className="receipt-header">
+                    <h4>
+                      <FileText />
+                      {receipt.title}
+                    </h4>
+                    <Download 
+                      className="download-btn" 
+                      style={{ width: '18px', height: '18px' }}
+                      onClick={() => handleDownloadReceipt(receipt.id)}
+                    />
+                  </div>
+                  <div className="receipt-info">
+                    <span>{receipt.date}</span>
+                    <span className="amount">{receipt.amount}</span>
+                  </div>
+                </ReceiptCard>
+              ))}
+              
+              <Button 
+                $variant="ghost" 
+                $fullWidth 
+                style={{ marginTop: '16px' }}
+              >
+                {language === 'vi' ? 'Xem Tất Cả Hóa Đơn' : 'View All Invoices'}
+              </Button>
+            </Card>
+          </div>
+        </ContentSection>
+      </WalletContainer>
 
       {/* ── Withdraw Modal ───────────────────────────────────────────────── */}
       <AnimatePresence>

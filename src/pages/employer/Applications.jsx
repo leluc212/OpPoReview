@@ -8,6 +8,7 @@ import TableFilter from '../../components/TableFilter';
 import Modal from '../../components/Modal';
 import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText, Clock, Users, Newspaper, DollarSign, Edit, Trash2, TrendingUp, Plus, X, XCircle, Wallet, AlertCircle, Save, Download, MessageSquare } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import { initializeMultipleSampleCVs } from '../../utils/sampleCVGenerator';
 
 // Mock job posts data
@@ -172,7 +173,8 @@ const FILTER_OPTIONS = (language) => ([
   { value: 'marked', label: language === 'vi' ? 'Đã đánh dấu' : 'Marked' },
 ]);
 
-const ApplicationsContainer = styled(motion.div)``;
+const ApplicationsContainer = styled(motion.div)`
+`;
 
 const PageHeader = styled.div`
   margin-bottom: 28px;
@@ -1803,8 +1805,9 @@ const WalletModalOverlay = styled(motion.div)`
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 9999;
   padding: 20px;
+  overflow-y: auto;
 `;
 
 const WalletModalContainer = styled(motion.div)`
@@ -1815,6 +1818,9 @@ const WalletModalContainer = styled(motion.div)`
   padding: 40px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   text-align: center;
+  margin: auto;
+  position: relative;
+  z-index: 10000;
 `;
 
 const WalletModalIcon = styled.div`
@@ -1895,8 +1901,9 @@ const DeleteModalOverlay = styled(motion.div)`
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1001;
+  z-index: 9999;
   padding: 20px;
+  overflow-y: auto;
 `;
 
 const DeleteModalContainer = styled(motion.div)`
@@ -1907,6 +1914,9 @@ const DeleteModalContainer = styled(motion.div)`
   padding: 32px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   text-align: center;
+  margin: auto;
+  position: relative;
+  z-index: 10000;
 `;
 
 const DeleteModalIcon = styled.div`
@@ -2027,6 +2037,7 @@ const SuccessToast = styled(motion.div)`
 
 const Applications = () => {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [activeSection, setActiveSection] = useState('posts');
@@ -2051,6 +2062,58 @@ const Applications = () => {
 
   useEffect(() => {
     setApplications(getInitialApplications(language));
+  }, [language]);
+
+  // Comprehensive screenshot prevention
+  useEffect(() => {
+    let blurTimeout;
+    
+    const handleBlur = () => {
+      const container = document.querySelector('[data-secure]');
+      if (container) container.classList.add('blurred');
+    };
+
+    const handleFocus = () => {
+      clearTimeout(blurTimeout);
+      blurTimeout = setTimeout(() => {
+        const container = document.querySelector('[data-secure]');
+        if (container) container.classList.remove('blurred');
+      }, 100);
+    };
+
+    const handleVisibilityChange = () => {
+      document.hidden ? handleBlur() : handleFocus();
+    };
+
+    const handleKeyDown = (e) => {
+      const shouldBlock = 
+        e.key === 'PrintScreen' ||
+        (e.ctrlKey && e.shiftKey && (e.key === 'S' || e.key === 's')) ||
+        (e.metaKey && e.shiftKey && e.key === 's') ||
+        (e.metaKey && e.shiftKey && (e.key === '4' || e.key === '5'));
+      
+      if (shouldBlock) {
+        e.preventDefault();
+        handleBlur();
+        alert(language === 'vi' 
+          ? '🚫 Chụp màn hình bị vô hiệu hóa vì lý do bảo mật!' 
+          : '🚫 Screenshots are disabled for security reasons!');
+        setTimeout(handleFocus, 2000);
+      }
+    };
+
+    window.addEventListener('blur', handleBlur);
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      clearTimeout(blurTimeout);
+      window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, [language]);
 
   // Initialize sample CVs for demo

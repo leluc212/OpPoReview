@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Trash2, Eye, CheckCircle, Send, Search, Calendar, DollarSign, Newspaper, TrendingUp, AlertCircle, User, Plus, X, Wallet, Save, Award, Star, Briefcase } from 'lucide-react';
+import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Trash2, Eye, CheckCircle, Send, Search, Calendar, DollarSign, Newspaper, TrendingUp, AlertCircle, User, Plus, X, Wallet, Save, Award, Star, Briefcase, Zap } from 'lucide-react';
 import Modal from '../../components/Modal';
 
 // Mock HR Staff Data
@@ -48,6 +48,7 @@ const getHRStaff = (language) => {
     status: 'active',
     shift: '06:00 - 08:00',
     confirmedAt: `${today} - ${recentTimeStr}`,
+    totalPaid: 70000,
     canRequestChange: true,
     isWithinTimeWindow: true,
     // Additional profile data
@@ -70,6 +71,7 @@ const getHRStaff = (language) => {
     status: 'active',
     shift: '09:00 - 17:00',
     confirmedAt: `${oldDate} - ${oldTimeStr}`,
+    totalPaid: 160000,
     canRequestChange: true,
     isWithinTimeWindow: false,
     // Additional profile data
@@ -92,6 +94,7 @@ const getHRStaff = (language) => {
     status: 'active',
     shift: '18:00 - 22:00',
     confirmedAt: `${today} - ${recentTimeStr}`,
+    totalPaid: 80000,
     canRequestChange: true,
     isWithinTimeWindow: true,
     // Additional profile data
@@ -102,8 +105,76 @@ const getHRStaff = (language) => {
     reviews: [
       { id: 1, employer: language === 'vi' ? 'Nhà hàng Hương Việt' : 'Huong Viet Restaurant', position: language === 'vi' ? 'Nhân viên phục vụ' : 'Server', rating: 4, date: language === 'vi' ? 'Tháng 11/2024' : 'Nov 2024', comment: language === 'vi' ? 'Nhanh nhẹn, thân thiện.' : 'Quick and friendly.' }
     ]
+  },
+  {
+    id: 4,
+    name: language === 'vi' ? 'Lê Thị Mai' : 'Le Thi Mai',
+    position: language === 'vi' ? 'Nhân viên bán hàng' : 'Sales Staff',
+    location: language === 'vi' ? 'Quận 3' : 'District 3',
+    phone: '0912 345 678',
+    email: 'lethimai@example.com',
+    startDate: today,
+    status: 'active',
+    shift: '14:00 - 18:00',
+    confirmedAt: `${today} - ${recentTimeStr}`,
+    totalPaid: 80000,
+    canRequestChange: true,
+    isWithinTimeWindow: true,
+    // Additional profile data
+    experience: language === 'vi' ? '2 năm' : '2 years',
+    education: language === 'vi' ? 'Cao đẳng Marketing' : 'Marketing College',
+    skills: language === 'vi' ? ['Bán hàng', 'Tư vấn khách hàng', 'Thu ngân'] : ['Sales', 'Customer consulting', 'Cashier'],
+    bio: language === 'vi' ? 'Có kinh nghiệm bán hàng tại các cửa hàng thời trang. Giao tiếp tốt.' : 'Sales experience in fashion stores. Good communication.',
+    reviews: [
+      { id: 1, employer: 'Canifa', position: language === 'vi' ? 'Nhân viên bán hàng' : 'Sales Staff', rating: 5, date: language === 'vi' ? 'Tháng 1/2025' : 'Jan 2025', comment: language === 'vi' ? 'Nhiệt tình, am hiểu sản phẩm.' : 'Enthusiastic, knowledgeable about products.' }
+    ]
+  },
+  {
+    id: 5,
+    name: language === 'vi' ? 'Võ Văn Hùng' : 'Vo Van Hung',
+    position: language === 'vi' ? 'Nhân viên bảo vệ' : 'Security Guard',
+    location: language === 'vi' ? 'Quận 5' : 'District 5',
+    phone: '0934 567 890',
+    email: 'vovanhung@example.com',
+    startDate: language === 'vi' ? '05/02/2024' : '02/05/2024',
+    status: 'completed',
+    shift: '22:00 - 06:00',
+    confirmedAt: `${oldDate} - ${oldTimeStr}`,
+    totalPaid: 200000,
+    canRequestChange: false,
+    isWithinTimeWindow: false,
+    experience: language === 'vi' ? '5 năm' : '5 years',
+    education: language === 'vi' ? 'THPT' : 'High School',
+    skills: language === 'vi' ? ['Bảo vệ', 'Kiểm soát', 'Xử lý tình huống'] : ['Security', 'Control', 'Situation handling'],
+    bio: language === 'vi' ? 'Có kinh nghiệm làm bảo vệ tại các khu chung cư và siêu thị.' : 'Experienced security guard in residential areas and supermarkets.',
+    reviews: [
+      { id: 1, employer: 'BigC', position: language === 'vi' ? 'Bảo vệ' : 'Security', rating: 5, date: language === 'vi' ? 'Tháng 9/2024' : 'Sep 2024', comment: language === 'vi' ? 'Có trách nhiệm, cẩn thận.' : 'Responsible and careful.' }
+    ]
+  },
+  {
+    id: 6,
+    name: language === 'vi' ? 'Đặng Thị Lan' : 'Dang Thi Lan',
+    position: language === 'vi' ? 'Nhân viên dọn dẹp' : 'Cleaner',
+    location: language === 'vi' ? 'Quận 2' : 'District 2',
+    phone: '0945 678 901',
+    email: 'dangthilan@example.com',
+    startDate: language === 'vi' ? '12/01/2024' : '01/12/2024',
+    status: 'completed',
+    shift: '07:00 - 11:00',
+    confirmedAt: `${oldDate} - ${oldTimeStr}`,
+    totalPaid: 100000,
+    canRequestChange: false,
+    isWithinTimeWindow: false,
+    experience: language === 'vi' ? '2 năm' : '2 years',
+    education: language === 'vi' ? 'THCS' : 'Secondary School',
+    skills: language === 'vi' ? ['Dọn dẹp', 'Vệ sinh', 'Cẩn thận'] : ['Cleaning', 'Hygiene', 'Careful'],
+    bio: language === 'vi' ? 'Có kinh nghiệm làm dọn dẹp văn phòng và nhà ở.' : 'Experienced in office and residential cleaning.',
+    reviews: [
+      { id: 1, employer: 'Lotte Mart', position: language === 'vi' ? 'Dọn dẹp' : 'Cleaner', rating: 4, date: language === 'vi' ? 'Tháng 8/2024' : 'Aug 2024', comment: language === 'vi' ? 'Làm việc tốt, sạch sẽ.' : 'Good work, clean.' }
+    ]
   }
 ];
+
 };
 
 // Mock Quick Job Posts Data
@@ -177,11 +248,38 @@ const getChatConversations = (language) => [
     status: 'offline',
     position: language === 'vi' ? 'Nhân viên phục vụ' : 'Server',
     messages: []
+  },
+  {
+    id: 4,
+    name: language === 'vi' ? 'Lê Thị Mai' : 'Le Thi Mai',
+    role: language === 'vi' ? 'Nhân viên' : 'Employee',
+    lastMessage: language === 'vi' ? 'Chưa có tin nhắn' : 'No messages yet',
+    time: language === 'vi' ? '15 phút trước' : '15 min ago',
+    unread: 0,
+    status: 'online',
+    position: language === 'vi' ? 'Nhân viên bán hàng' : 'Sales Staff',
+    messages: []
   }
 ];
 
+// ─── Animations ────────────────────────────────────────────
+const pulseAnimation = `
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.85;
+      transform: scale(1.02);
+    }
+  }
+`;
+
 // ─── Page wrapper ─────────────────────────────────────────
-const PageContainer = styled(motion.div)``;
+const PageContainer = styled(motion.div)`
+  ${pulseAnimation}
+`;
 
 // ─── Page header (đồng nhất Applications) ─────────────────
 const PageHeader = styled.div`
@@ -264,10 +362,10 @@ const QuickJobsSection = styled.div`
 
 const QuickJobsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   
-  @media (max-width: 1024px) {
+  @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
 `;
@@ -388,9 +486,18 @@ const StaffStatus = styled.div`
   border-radius: 8px;
   font-size: 12px;
   font-weight: 700;
-  background: ${props => props.$status === 'active' ? '#D1FAE5' : '#FEF3C7'};
-  color: ${props => props.$status === 'active' ? '#047857' : '#92400E'};
-  border: 1px solid ${props => props.$status === 'active' ? '#10B981' : '#F59E0B'};
+  background: ${props => 
+    props.$status === 'active' ? '#D1FAE5' : 
+    props.$status === 'completed' ? '#E0E7FF' : 
+    '#FEF3C7'};
+  color: ${props => 
+    props.$status === 'active' ? '#047857' : 
+    props.$status === 'completed' ? '#3730A3' : 
+    '#92400E'};
+  border: 1px solid ${props => 
+    props.$status === 'active' ? '#10B981' : 
+    props.$status === 'completed' ? '#818CF8' : 
+    '#F59E0B'};
 `;
 
 const StaffMeta = styled.div`
@@ -785,8 +892,9 @@ const ChatModalOverlay = styled(motion.div)`
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 9999;
   padding: 20px;
+  overflow-y: auto;
 `;
 
 const ChatModalContainer = styled(motion.div)`
@@ -800,6 +908,9 @@ const ChatModalContainer = styled(motion.div)`
   flex-direction: column;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   overflow: hidden;
+  margin: auto;
+  position: relative;
+  z-index: 10000;
 `;
 
 const ChatModalHeader = styled.div`
@@ -1012,8 +1123,9 @@ const WalletModalOverlay = styled(motion.div)`
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 9999;
   padding: 20px;
+  overflow-y: auto;
 `;
 
 const WalletModalContainer = styled(motion.div)`
@@ -1024,6 +1136,9 @@ const WalletModalContainer = styled(motion.div)`
   padding: 40px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   text-align: center;
+  margin: auto;
+  position: relative;
+  z-index: 10000;
 `;
 
 const WalletModalIcon = styled.div`
@@ -1140,8 +1255,9 @@ const DeleteModalOverlay = styled(motion.div)`
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1001;
+  z-index: 9999;
   padding: 20px;
+  overflow-y: auto;
 `;
 
 const DeleteModalContainer = styled(motion.div)`
@@ -1152,6 +1268,9 @@ const DeleteModalContainer = styled(motion.div)`
   padding: 32px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   text-align: center;
+  margin: auto;
+  position: relative;
+  z-index: 10000;
 `;
 
 const DeleteModalIcon = styled.div`
@@ -1727,7 +1846,7 @@ const StarRating = ({ rating }) => (
 );
 
 // Profile Detail Modal Component
-const StaffProfileModal = React.memo(({ staff, onClose, revealedExpiredStaff }) => {
+const StaffProfileModal = React.memo(({ staff, onClose }) => {
   const { language } = useLanguage();
   const initials = staff.name
     .split(' ')
@@ -1769,26 +1888,8 @@ const StaffProfileModal = React.memo(({ staff, onClose, revealedExpiredStaff }) 
       <ProfileContent>
         <ProfileInner>
           <ProfileSection>
-            <h3><FileText /> {language === 'vi' ? 'Thông tin liên hệ' : 'Contact'}</h3>
+            <h3><FileText /> {language === 'vi' ? 'Thông tin công việc' : 'Work Information'}</h3>
             <InfoGrid>
-              {!revealedExpiredStaff.has(staff.id) && (
-                <>
-                  <InfoCard>
-                    <InfoIconBox><Mail /></InfoIconBox>
-                    <InfoItem>
-                      <div className="label">{language === 'vi' ? 'Email' : 'Email'}</div>
-                      <div className="value">{staff.email}</div>
-                    </InfoItem>
-                  </InfoCard>
-                  <InfoCard>
-                    <InfoIconBox><Phone /></InfoIconBox>
-                    <InfoItem>
-                      <div className="label">{language === 'vi' ? 'Điện thoại' : 'Phone'}</div>
-                      <div className="value">{staff.phone}</div>
-                    </InfoItem>
-                  </InfoCard>
-                </>
-              )}
               <InfoCard>
                 <InfoIconBox><MapPin /></InfoIconBox>
                 <InfoItem>
@@ -1799,97 +1900,41 @@ const StaffProfileModal = React.memo(({ staff, onClose, revealedExpiredStaff }) 
               <InfoCard>
                 <InfoIconBox><Calendar /></InfoIconBox>
                 <InfoItem>
-                  <div className="label">{language === 'vi' ? 'Ngày bắt đầu' : 'Start Date'}</div>
+                  <div className="label">{language === 'vi' ? 'Ngày làm' : 'Work Date'}</div>
                   <div className="value">{staff.startDate}</div>
                 </InfoItem>
               </InfoCard>
-            </InfoGrid>
-          </ProfileSection>
-
-          <ProfileSection>
-            <h3><Award /> {language === 'vi' ? 'Học vấn &  Kinh nghiệm' : 'Education & Experience'}</h3>
-            <InfoGrid>
               <InfoCard>
-                <InfoIconBox><Award /></InfoIconBox>
+                <InfoIconBox><Clock /></InfoIconBox>
                 <InfoItem>
-                  <div className="label">{language === 'vi' ? 'Trình độ học vấn' : 'Education'}</div>
-                  <div className="value">{staff.education}</div>
+                  <div className="label">{language === 'vi' ? 'Giờ làm' : 'Work Hours'}</div>
+                  <div className="value">{staff.shift}</div>
+                </InfoItem>
+              </InfoCard>
+              <InfoCard>
+                <InfoIconBox><CheckCircle /></InfoIconBox>
+                <InfoItem>
+                  <div className="label">{language === 'vi' ? 'Giờ xác nhận' : 'Confirmed At'}</div>
+                  <div className="value">{staff.confirmedAt}</div>
                 </InfoItem>
               </InfoCard>
               <InfoCard>
                 <InfoIconBox><Briefcase /></InfoIconBox>
                 <InfoItem>
-                  <div className="label">{language === 'vi' ? 'Kinh nghiệm' : 'Experience'}</div>
-                  <div className="value">{staff.experience}</div>
+                  <div className="label">{language === 'vi' ? 'Vị trí' : 'Position'}</div>
+                  <div className="value">{staff.position}</div>
+                </InfoItem>
+              </InfoCard>
+              <InfoCard style={{ background: 'linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%)', borderColor: '#10B981' }}>
+                <InfoIconBox style={{ background: '#10B981' }}><DollarSign style={{ color: 'white' }} /></InfoIconBox>
+                <InfoItem>
+                  <div className="label" style={{ color: '#065F46' }}>{language === 'vi' ? 'Số tiền chi' : 'Amount Paid'}</div>
+                  <div className="value" style={{ color: '#047857', fontWeight: '700', fontSize: '16px' }}>
+                    {staff.totalPaid ? `${staff.totalPaid.toLocaleString('vi-VN')} VNĐ` : 'N/A'}
+                  </div>
                 </InfoItem>
               </InfoCard>
             </InfoGrid>
-          </ProfileSection>
-
-          <ProfileSection>
-            <h3><Star /> {language === 'vi' ? 'Kỹ năng' : 'Skills'}</h3>
-            <SkillsWrap>
-              {staff.skills.map((skill, index) => (
-                <SkillTag key={index}>{skill}</SkillTag>
-              ))}
-            </SkillsWrap>
-          </ProfileSection>
-
-          <ProfileSection>
-            <h3><Star /> {language === 'vi' ? 'Lịch sử & Đánh giá' : 'History & Reviews'}</h3>
-            {staff.reviews && staff.reviews.length > 0 ? (
-              <ReviewList>
-                {staff.reviews.map(review => (
-                  <ReviewCard key={review.id}>
-                    <ReviewHeader>
-                      <ReviewEmployerInfo>
-                        <div className="employer-name">{review.employer}</div>
-                        <div className="position-date">
-                          <Briefcase size={11} />
-                          {review.position}
-                          <span>·</span>
-                          <Calendar size={11} />
-                          {review.date}
-                        </div>
-                      </ReviewEmployerInfo>
-                      <StarRating rating={review.rating} />
-                    </ReviewHeader>
-                    <ReviewComment>"{review.comment}"</ReviewComment>
-                  </ReviewCard>
-                ))}
-              </ReviewList>
-            ) : (
-              <EmptyReviews>
-                <div className="icon">📋</div>
-                <p>{language === 'vi' ? 'Chưa có đánh giá nào từ nhà tuyển dụng.' : 'No employer reviews yet.'}</p>
-              </EmptyReviews>
-            )}
-          </ProfileSection>
-
-          <ProfileSection>
-            <h3><FileText /> {language === 'vi' ? 'Giới thiệu bản thân' : 'About'}</h3>
-            <BioText>{staff.bio}</BioText>
-          </ProfileSection>
-
-          <ProfileSection>
-            <h3><Clock /> {language === 'vi' ? 'Lịch làm việc' : 'Work Schedule'}</h3>
-            <WorkScheduleCard>
-              <ScheduleRow>
-                <Clock />
-                <span className="label">{language === 'vi' ? 'Giờ làm việc:' : 'Shift:'}</span>
-                <span className="value">{staff.shift}</span>
-              </ScheduleRow>
-              <ScheduleRow>
-                <CheckCircle />
-                <span className="label">{language === 'vi' ? 'Giờ xác nhận:' : 'Confirmed at:'}</span>
-                <span className="value">{staff.confirmedAt}</span>
-              </ScheduleRow>
-              <ScheduleRow>
-                <Briefcase />
-                <span className="label">{language === 'vi' ? 'Vị trí làm:' : 'Position:'}</span>
-                <span className="value">{staff.position}</span>
-              </ScheduleRow>
-            </WorkScheduleCard>
           </ProfileSection>
         </ProfileInner>
       </ProfileContent>
@@ -1979,9 +2024,8 @@ const HRManagement = () => {
   };
 
   const handleChatWithStaff = (staff) => {
-    alert(language === 'vi' 
-      ? `Mở chat với ${staff.name}` 
-      : `Open chat with ${staff.name}`);
+    // Open chat modal directly with staff ID
+    handleOpenChat(staff.id);
   };
   
   // Load quick jobs from localStorage
@@ -2149,9 +2193,6 @@ const HRManagement = () => {
   const [selectedJobView, setSelectedJobView] = useState(null);
   const [editJobId, setEditJobId] = useState(null);
   const [editJobData, setEditJobData] = useState(null);
-  
-  // Track which staff have been revealed as expired (1h passed)
-  const [revealedExpiredStaff, setRevealedExpiredStaff] = useState(new Set());
 
   // Mock wallet connection status - in real app, get from user context or API
   const [isWalletConnected] = useState(() => {
@@ -2481,139 +2522,202 @@ const HRManagement = () => {
                 {language === 'vi' ? 'Tạo và quản lý các tin tuyển dụng' : 'Create and manage job postings'}
               </QuickJobDescription>
             </QuickJobCard>
-            
-            <QuickJobCard
-              $color="#F59E0B"
-              $active={activeSection === 'chat'}
-              onClick={() => setActiveSection('chat')}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <QuickJobIcon $color="#F59E0B">
-                <MessageSquare />
-              </QuickJobIcon>
-              <QuickJobLabel>{language === 'vi' ? 'Chatting' : 'Chatting'}</QuickJobLabel>
-              <QuickJobDescription>
-                {language === 'vi' ? 'Trò chuyện với ứng viên và nhân viên' : 'Chat with candidates and employees'}
-              </QuickJobDescription>
-            </QuickJobCard>
           </QuickJobsGrid>
         </QuickJobsSection>
 
         {/* Content Section */}
         {activeSection === 'hr' && (
-          <StaffGrid>
-            <AnimatePresence>
-              {hrStaff.map((staff, index) => (
-                <StaffCard
-                  key={staff.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <StaffHeader>
-                    <div>
-                      <StaffName>{staff.name}</StaffName>
-                      <StaffPosition>{staff.position}</StaffPosition>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
-                      {isCurrentlyWorking(staff.shift) ? (
-                        <StaffStatus $status="active">
-                          {language === 'vi' ? 'Đang làm' : 'Working'}
-                        </StaffStatus>
-                      ) : (
-                        <StaffStatus $status={staff.status}>
-                          {staff.status === 'active' 
-                            ? (language === 'vi' ? 'Đang làm' : 'Active')
-                            : (language === 'vi' ? 'Nghỉ phép' : 'On Leave')}
-                        </StaffStatus>
-                      )}
-                    </div>
-                  </StaffHeader>
-                  
-                  <StaffMeta>
-                    <div className="meta-row">
-                      <MapPin />{staff.location}
-                    </div>
-                    {/* Only hide phone/email if staff is in revealed expired list */}
-                    {!revealedExpiredStaff.has(staff.id) && (
-                      <>
-                        <div className="meta-row">
-                          <Phone />{staff.phone}
-                        </div>
-                        <div className="meta-row">
-                          <Mail />{staff.email}
-                        </div>
-                      </>
-                    )}
-                    <div className="meta-row">
-                      <Calendar />{language === 'vi' ? 'Bắt đầu:' : 'Started:'} {staff.startDate}
-                    </div>
-                    <div className="meta-row">
-                      <Clock />{language === 'vi' ? 'Giờ làm:' : 'Work hours:'} {staff.shift}
-                    </div>
-                    <div className="meta-row">
-                      <CheckCircle />{language === 'vi' ? 'Xác nhận:' : 'Confirmed:'} {staff.confirmedAt}
-                    </div>
-                  </StaffMeta>
-                  
-                  <StaffActions>
-                    <StaffButton
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setSelectedStaff(staff)}
-                    >
-                      <User />{language === 'vi' ? 'Xem hồ sơ' : 'View profile'}
-                    </StaffButton>
-                    {/* Always show Chat button for testing - remove condition later */}
-                    <StaffButton
-                      $variant="success"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => {
-                        const isWorking = isCurrentlyWorking(staff.shift);
-                        console.log(`👤 ${staff.name} - Đang làm việc:`, isWorking);
-                        handleChatWithStaff(staff);
-                      }}
-                    >
-                      <MessageSquare />{language === 'vi' ? 'Nhắn tin' : 'Chat'}
-                    </StaffButton>
-                    {staff.canRequestChange && (
-                      <StaffButton
-                        $variant="warning"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                          if (staff.isWithinTimeWindow) {
-                            alert(language === 'vi' 
-                              ? '✓ Yêu cầu thay đổi của bạn đã được gửi!'
-                              : '✓ Your change request has been submitted!');
-                          } else {
-                            // Add to revealed expired staff to hide contact info
-                            setRevealedExpiredStaff(prev => new Set([...prev, staff.id]));
-                            alert(language === 'vi' 
-                              ? '✗ Đã quá 1 giờ, không thể yêu cầu thay đổi!'
-                              : '✗ More than 1 hour passed, cannot request changes!');
-                          }
-                        }}
+          <>
+            <SectionHeader>
+              <div>
+                <SectionTitle>
+                  <UsersRound />
+                  {language === 'vi' ? 'Quản lý nhân sự' : 'HR Management'}
+                </SectionTitle>
+                <p style={{ 
+                  fontSize: '13px', 
+                  color: '#64748B', 
+                  marginTop: '8px',
+                  fontWeight: '500',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    background: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)',
+                    color: '#B45309',
+                    padding: '3px 8px',
+                    borderRadius: '6px',
+                    fontSize: '11px',
+                    fontWeight: '700',
+                    letterSpacing: '0.3px',
+                    border: '1px solid #FCD34D'
+                  }}>
+                    <Zap style={{ width: '11px', height: '11px' }} />
+                    REALTIME
+                  </span>
+                  {language === 'vi' 
+                    ? 'Dữ liệu tức thời • Tự động ẩn sau 1 giờ' 
+                    : 'Real-time data • Auto-hide after 1 hour'}
+                </p>
+              </div>
+            </SectionHeader>
+            
+            {hrStaff.filter(staff => staff.isWithinTimeWindow).length === 0 ? (
+              <div style={{
+                padding: '60px 20px',
+                textAlign: 'center',
+                color: '#64748B'
+              }}>
+                <Clock style={{ width: '48px', height: '48px', margin: '0 auto 16px', opacity: 0.3 }} />
+                <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px', color: '#334155' }}>
+                  {language === 'vi' ? 'Không có nhân sự trong khung giờ' : 'No staff in time window'}
+                </h3>
+                <p style={{ fontSize: '14px' }}>
+                  {language === 'vi' 
+                    ? 'Tất cả thông tin nhân sự đã quá 1 giờ và đã bị xóa tự động' 
+                    : 'All staff information has exceeded 1 hour and been automatically removed'}
+                </p>
+              </div>
+            ) : (
+              <StaffGrid>
+                <AnimatePresence>
+                  {hrStaff
+                    .filter(staff => staff.isWithinTimeWindow) // Only show staff within 1 hour time window
+                    .map((staff, index) => (
+                      <StaffCard
+                        key={staff.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
                       >
-                        <AlertCircle />{language === 'vi' ? 'Yêu cầu thay đổi' : 'Request change'}
-                      </StaffButton>
-                    )}
-                  </StaffActions>
-                </StaffCard>
-              ))}
-            </AnimatePresence>
-          </StaffGrid>
+                        <StaffHeader>
+                          <div>
+                            <StaffName>{staff.name}</StaffName>
+                            <StaffPosition>{staff.position}</StaffPosition>
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
+                            {isCurrentlyWorking(staff.shift) ? (
+                              <StaffStatus $status="active">
+                                {language === 'vi' ? 'Đang làm' : 'Working'}
+                              </StaffStatus>
+                            ) : (
+                              <StaffStatus $status={staff.status}>
+                                {staff.status === 'active' 
+                                  ? (language === 'vi' ? 'Đang làm' : 'Active')
+                                  : staff.status === 'completed'
+                                  ? (language === 'vi' ? 'Hoàn thành' : 'Completed')
+                                  : (language === 'vi' ? 'Nghỉ phép' : 'On Leave')}
+                              </StaffStatus>
+                            )}
+                          </div>
+                        </StaffHeader>
+                        
+                        <StaffMeta>
+                          <div className="meta-row">
+                            <MapPin />{staff.location}
+                          </div>
+                          <div className="meta-row">
+                            <Calendar />{language === 'vi' ? 'Ngày làm:' : 'Work date:'} {staff.startDate}
+                          </div>
+                          <div className="meta-row">
+                            <Clock />{language === 'vi' ? 'Giờ làm:' : 'Work hours:'} {staff.shift}
+                          </div>
+                          <div className="meta-row">
+                            <CheckCircle />{language === 'vi' ? 'Xác nhận:' : 'Confirmed:'} {staff.confirmedAt}
+                          </div>
+                          <div className="meta-row" style={{ color: '#10B981', fontWeight: '600' }}>
+                            <DollarSign />{language === 'vi' ? 'Số tiền chi:' : 'Amount paid:'} {staff.totalPaid.toLocaleString('vi-VN')} VNĐ
+                          </div>
+                        </StaffMeta>
+                        
+                        <StaffActions>
+                          <StaffButton
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => setSelectedStaff(staff)}
+                          >
+                            <User />{language === 'vi' ? 'Xem hồ sơ' : 'View profile'}
+                          </StaffButton>
+                          {/* Only show chat button when job is active */}
+                          {staff.status === 'active' && (
+                            <StaffButton
+                              $variant="success"
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => {
+                                const isWorking = isCurrentlyWorking(staff.shift);
+                                console.log(`👤 ${staff.name} - Đang làm việc:`, isWorking);
+                                handleChatWithStaff(staff);
+                              }}
+                            >
+                              <MessageSquare />{language === 'vi' ? 'Nhắn tin' : 'Chat'}
+                            </StaffButton>
+                          )}
+                          {staff.canRequestChange && (
+                            <StaffButton
+                              $variant="warning"
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => {
+                                alert(language === 'vi' 
+                                  ? '✓ Yêu cầu thay đổi của bạn đã được gửi!'
+                                  : '✓ Your change request has been submitted!');
+                              }}
+                            >
+                              <AlertCircle />{language === 'vi' ? 'Yêu cầu thay đổi' : 'Request change'}
+                            </StaffButton>
+                          )}
+                        </StaffActions>
+                      </StaffCard>
+                  ))}
+                </AnimatePresence>
+              </StaffGrid>
+            )}
+          </>
         )}
 
         {activeSection === 'posts' && (
           <>
             <SectionHeader>
-              <SectionTitle>
-                <FileText />
-                {language === 'vi' ? 'Quản lý bài đăng' : 'Post Management'}
-              </SectionTitle>
+              <div>
+                <SectionTitle>
+                  <FileText />
+                  {language === 'vi' ? 'Quản lý bài đăng' : 'Post Management'}
+                </SectionTitle>
+                <p style={{ 
+                  fontSize: '13px', 
+                  color: '#64748B', 
+                  marginTop: '8px',
+                  fontWeight: '500',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    background: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)',
+                    color: '#B45309',
+                    padding: '3px 8px',
+                    borderRadius: '6px',
+                    fontSize: '11px',
+                    fontWeight: '700',
+                    letterSpacing: '0.3px',
+                    border: '1px solid #FCD34D'
+                  }}>
+                    <Zap style={{ width: '11px', height: '11px' }} />
+                    REALTIME
+                  </span>
+                  {language === 'vi' 
+                    ? 'Bài đăng tức thời • Hiệu lực 7 ngày' 
+                    : 'Instant posts • Valid for 7 days'}
+                </p>
+              </div>
               <PostJobButton
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
@@ -2640,121 +2744,88 @@ const HRManagement = () => {
                 </p>
               </div>
             ) : (
-            <QuickJobPostsGrid>
-              <AnimatePresence>
-                {quickJobPosts.map((post, index) => (
-                <QuickJobPostCard
-                  key={post.id}
-                  $status={post.status}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <QuickJobPostHeader>
-                    <div>
-                      <QuickJobPostTitle>{post.title}</QuickJobPostTitle>
-                      <QuickJobPostMeta>
-                        <div className="meta-item">
-                          <MapPin />{post.location}
-                        </div>
-                        <div className="meta-item">
-                          <DollarSign />{post.salary}
-                        </div>
-                        {post.shift && (
-                          <div className="meta-item">
-                            <Clock />{post.shift}
-                          </div>
-                        )}
-                        <div className="meta-item">
-                          <Calendar />{post.deadline}
-                        </div>
-                      </QuickJobPostMeta>
-                    </div>
-                    <QuickJobStatusBadge $status={post.status}>
-                      {post.status === 'active'
-                        ? (language === 'vi' ? 'Đang tuyển' : 'Active')
-                        : (language === 'vi' ? 'Đã đóng' : 'Closed')}
-                    </QuickJobStatusBadge>
-                  </QuickJobPostHeader>
-                  
-                  <QuickJobPostStats>
-                    <div className="stat">
-                      <div className="stat-value">{post.applicants}</div>
-                      <div className="stat-label">{language === 'vi' ? 'Ứng viên' : 'Applicants'}</div>
-                    </div>
-                    <div className="stat">
-                      <div className="stat-value">{post.views}</div>
-                      <div className="stat-label">{language === 'vi' ? 'Lượt xem' : 'Views'}</div>
-                    </div>
-                  </QuickJobPostStats>
-                  
-                  <QuickJobPostActions>
-                    <QuickJobPostButton
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => handleViewJob(post.id)}
+              <QuickJobPostsGrid>
+                <AnimatePresence>
+                  {quickJobPosts.map((post, index) => (
+                    <QuickJobPostCard
+                      key={post.id}
+                      $status={post.status}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
                     >
-                      <Eye />{language === 'vi' ? 'Xem' : 'View'}
-                    </QuickJobPostButton>
-                    <QuickJobPostButton
-                      $variant="primary"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => handleEditJob(post.id)}
-                    >
-                      <Edit />{language === 'vi' ? 'Sửa' : 'Edit'}
-                    </QuickJobPostButton>
-                    <QuickJobPostButton
-                      $variant="danger"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => handleDeleteJob(post.id)}
-                    >
-                      <Trash2 />
-                    </QuickJobPostButton>
-                  </QuickJobPostActions>
-                </QuickJobPostCard>
-              ))}
-              </AnimatePresence>
-            </QuickJobPostsGrid>
+                      <QuickJobPostHeader>
+                        <div>
+                          <QuickJobPostTitle>{post.title}</QuickJobPostTitle>
+                          <QuickJobPostMeta>
+                            <div className="meta-item">
+                              <MapPin />{post.location}
+                            </div>
+                            <div className="meta-item">
+                              <DollarSign />{post.salary}
+                            </div>
+                            {post.shift && (
+                              <div className="meta-item">
+                                <Clock />{post.shift}
+                              </div>
+                            )}
+                            <div className="meta-item">
+                              <Calendar />{post.deadline}
+                            </div>
+                          </QuickJobPostMeta>
+                        </div>
+                        <QuickJobStatusBadge $status={post.status}>
+                          {post.status === 'active'
+                            ? (language === 'vi' ? 'Đang tuyển' : 'Active')
+                            : (language === 'vi' ? 'Đã đóng' : 'Closed')}
+                        </QuickJobStatusBadge>
+                      </QuickJobPostHeader>
+                      
+                      <QuickJobPostStats>
+                        <div className="stat">
+                          <div className="stat-value">{post.applicants}</div>
+                          <div className="stat-label">{language === 'vi' ? 'Ứng viên' : 'Applicants'}</div>
+                        </div>
+                        <div className="stat">
+                          <div className="stat-value">{post.views}</div>
+                          <div className="stat-label">{language === 'vi' ? 'Lượt xem' : 'Views'}</div>
+                        </div>
+                      </QuickJobPostStats>
+                      
+                      <QuickJobPostActions>
+                        <QuickJobPostButton
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => handleViewJob(post.id)}
+                        >
+                          <Eye />{language === 'vi' ? 'Xem' : 'View'}
+                        </QuickJobPostButton>
+                        <QuickJobPostButton
+                          $variant="primary"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => handleEditJob(post.id)}
+                        >
+                          <Edit />{language === 'vi' ? 'Sửa' : 'Edit'}
+                        </QuickJobPostButton>
+                        <QuickJobPostButton
+                          $variant="danger"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => handleDeleteJob(post.id)}
+                        >
+                          <Trash2 />
+                        </QuickJobPostButton>
+                      </QuickJobPostActions>
+                    </QuickJobPostCard>
+                  ))}
+                </AnimatePresence>
+              </QuickJobPostsGrid>
             )}
           </>
         )}
 
-        {activeSection === 'chat' && (
-          <ChatGrid>
-            <AnimatePresence>
-              {chatConversations.map((chat, index) => (
-                <ChatCard
-                  key={chat.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  onClick={() => handleOpenChat(chat.id)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <ChatHeader>
-                    <ChatInfo>
-                      <ChatName>{chat.name}</ChatName>
-                      <ChatRole>{chat.role} • {chat.position}</ChatRole>
-                    </ChatInfo>
-                    <ChatStatus $status={chat.status} />
-                  </ChatHeader>
-                  
-                  <ChatMessagePreview>{chat.lastMessage}</ChatMessagePreview>
-                  
-                  <ChatFooter>
-                    <ChatTime>{chat.time}</ChatTime>
-                    {chat.unread > 0 && (
-                      <ChatUnread>{chat.unread} {language === 'vi' ? 'mới' : 'new'}</ChatUnread>
-                    )}
-                  </ChatFooter>
-                </ChatCard>
-              ))}
-            </AnimatePresence>
-          </ChatGrid>
-        )}
+
 
         {/* Chat Modal */}
         <AnimatePresence>
@@ -2778,7 +2849,25 @@ const HRManagement = () => {
                       <ChatModalOnlineStatus $online={activeChat.status === 'online'} />
                     </ChatModalAvatar>
                     <ChatModalHeaderText>
-                      <h3>{activeChat.name}</h3>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <h3>{activeChat.name}</h3>
+                        <span style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          background: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)',
+                          color: '#B45309',
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          fontSize: '11px',
+                          fontWeight: '700',
+                          letterSpacing: '0.3px',
+                          border: '1px solid #FCD34D'
+                        }}>
+                          <Zap style={{ width: '11px', height: '11px' }} />
+                          REALTIME
+                        </span>
+                      </div>
                       <p>{activeChat.role} • {activeChat.position}</p>
                     </ChatModalHeaderText>
                   </ChatModalHeaderInfo>
@@ -2918,7 +3007,10 @@ const HRManagement = () => {
               </WalletModalContainer>
             </WalletModalOverlay>
           )}
+        </AnimatePresence>
 
+        {/* Delete Job Modal */}
+        <AnimatePresence>
           {deleteJobId && jobToDelete && (
             <DeleteModalOverlay
               initial={{ opacity: 0 }}
@@ -3188,7 +3280,6 @@ const HRManagement = () => {
             <StaffProfileModal
               staff={selectedStaff}
               onClose={() => setSelectedStaff(null)}
-              revealedExpiredStaff={revealedExpiredStaff}
             />
           </Modal>
         )}

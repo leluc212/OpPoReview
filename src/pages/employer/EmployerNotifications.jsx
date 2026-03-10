@@ -400,7 +400,7 @@ const getNotifications = (language) => ([
     id: 1,
     type: 'application',
     title: language === 'vi' ? 'Ứng viên mới ứng tuyển' : 'New candidate application',
-    message: language === 'vi' ? 'Nguyễn Văn A đã ứng tuyển vào vị trí Senior React Developer' : 'Nguyen Van A applied for Senior React Developer',
+    message: language === 'vi' ? 'Nguyễn Văn A đã ứng tuyển' : 'Nguyen Van A applied',
     time: language === 'vi' ? '5 phút trước' : '5 minutes ago',
     read: false,
     icon: UserPlus
@@ -409,7 +409,7 @@ const getNotifications = (language) => ([
     id: 2,
     type: 'application',
     title: language === 'vi' ? 'Ứng viên mới ứng tuyển' : 'New candidate application',
-    message: language === 'vi' ? 'Trần Thị B đã ứng tuyển vào vị trí Nhân viên Marketing' : 'Tran Thi B applied for Marketing Executive',
+    message: language === 'vi' ? 'Trần Thị B đã ứng tuyển' : 'Tran Thi B applied',
     time: language === 'vi' ? '15 phút trước' : '15 minutes ago',
     read: false,
     icon: UserPlus

@@ -438,7 +438,7 @@ const EmployerDashboard = () => {
     { 
       id: 1,
       candidate: language === 'vi' ? 'Đỗ Hoàng Hiếu' : 'Hieu Do Hoang', 
-      job: language === 'vi' ? 'Nhân viên Cửa hàng trưởng' : 'Store Manager', 
+      job: language === 'vi' ? 'Nhân viên phụ bếp' : 'Kitchen Assistant', 
       applied: language === 'vi' ? '2 giờ trước' : '2 hours ago',
       status: 'pending',
       avatar: 'H'
