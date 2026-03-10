@@ -372,12 +372,16 @@ const Subscription = () => {
   ];
 
   const compareRows = [
-    [vi ? 'Thời gian hiệu lực'   : 'Duration',          '24h / 7 ngày',  '24h / 7 ngày', '24h / 7 ngày', '24h / 7 ngày'],
-    [vi ? 'Đẩy tin lên top'     : 'Push to top',       true, true,  true, true],
-    [vi ? 'Hiển thị nổi bật'         : 'Featured display',   true, true,  true, true],
-    [vi ? 'Tăng lượt xem'  : 'Views boost', '3x', '5x',  '10x', '15x'],
-    [vi ? 'Phân tích chi tiết'             : 'Detailed analytics',            true, true, true, true],
-    [vi ? 'Hỗ trợ'       : 'Support',  vi ? 'Email' : 'Email', vi ? 'Email' : 'Email', vi ? 'Email + Chat' : 'Email + Chat', '24/7'],
+    [vi ? 'Giá 24h' : '24h Price', '29,000', '49,000', '99,000', '149,000'],
+    [vi ? 'Giá 7 ngày' : '7 days Price', '145,000', '245,000', '495,000', '745,000'],
+    [vi ? 'Tăng lượt xem' : 'Views boost', '3x', '5x', '10x', '15x'],
+    [vi ? 'Đẩy tin lên đầu' : 'Push to top', true, false, false, false],
+    [vi ? 'Ưu tiên tìm kiếm' : 'Priority search', false, true, false, false],
+    [vi ? 'Badge đặc biệt' : 'Special badge', false, true, false, false],
+    [vi ? 'Thông báo ứng viên' : 'Notify candidates', false, true, false, false],
+    [vi ? 'Banner trang chủ' : 'Homepage banner', false, false, true, true],
+    [vi ? 'Hiển thị đa trang' : 'Multi-page display', false, false, false, true],
+    [vi ? 'Phân tích' : 'Analytics', vi ? 'Cơ bản' : 'Basic', vi ? 'Nâng cao' : 'Advanced', vi ? 'Theo giờ' : 'Hourly', vi ? 'Theo giờ' : 'Hourly'],
   ];
 
   const faqs = [
