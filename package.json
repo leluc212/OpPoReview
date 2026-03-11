@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@aws-amplify/core": "^6.16.1",
+    "@popperjs/core": "^2.11.8",
     "aws-amplify": "^6.16.2",
     "framer-motion": "^11.0.5",
     "jspdf": "^4.2.0",
