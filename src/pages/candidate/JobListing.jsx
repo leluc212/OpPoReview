@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import Modal from '../../components/Modal';
 import {
-  Search, MapPin, Briefcase, Clock, Star, TrendingUp,
+  Search, MapPin, Briefcase, DollarSign, Clock, Star, TrendingUp,
   ChevronDown, Building2, Bookmark, Eye, ArrowUpRight, Filter,
   X, SlidersHorizontal, Grid, List, Sparkles, Zap, Navigation, Target,
   Power, XCircle, AlertCircle, CheckCircle
@@ -2593,7 +2593,7 @@ const JobListing = () => {
                 ? (language === 'vi' ? 'Công việc đã lưu' : 'Saved Jobs')
                 : jobCategory === 'standard'
                   ? (language === 'vi' ? 'Tìm công việc mơ ước của bạn ' : 'Find Your Dream Job ')
-                  : (language === 'vi' ? 'Tìm công việc mơ ước của bạn ' : 'Find Your Dream Job ')}
+                  : (language === 'vi' ? 'Công việc theo ca - Tuyển gấp ' : 'Shift Jobs - Hiring Now ')}
             </HeroTitle>
             <HeroSubtitle>
               {showSavedJobsOnly
@@ -2775,7 +2775,7 @@ const JobListing = () => {
             whileTap={{ scale: 0.98 }}
           >
             <Zap />
-            {language === 'vi' ? 'Công việc Tuyển gấp' : 'Shift Jobs - Hiring Now'}
+            {language === 'vi' ? 'Công việc theo ca - Tuyển gấp' : 'Shift Jobs - Hiring Now'}
             <span style={{ marginLeft: 'auto', fontSize: '14px', opacity: 0.9 }}>
               ({allJobs.filter(j => j.category === 'shift').length})
             </span>
@@ -3354,7 +3354,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, onApply, delay = 0, sho
         </JobTags>
 
         <JobSalary>
-          <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập' : 'Income'}:</span>
+          <DollarSign />
           <span>{translateSalary(job.category === 'shift' ? calculateShiftSalary(job) : job.salary, language)}</span>
         </JobSalary>
       </JobCardBody>
