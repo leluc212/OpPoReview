@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Edit3, Trash2, Eye, CheckCircle, Send, Search, Calendar, Newspaper, TrendingUp, AlertCircle, User, Plus, X, Wallet, Save, Award, Star, Briefcase, Zap, Banknote } from 'lucide-react';
+import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Edit3, Trash2, Eye, CheckCircle, Send, Search, Calendar, Newspaper, TrendingUp, AlertCircle, User, Plus, X, Wallet, Save, Award, Star, Briefcase, Zap, Banknote, ThumbsUp, ThumbsDown, ArrowRight, RefreshCw } from 'lucide-react';
 import Modal from '../../components/Modal';
 
 // Helper: tính số giờ từ chuỗi shift "HH:MM - HH:MM"
@@ -82,13 +82,13 @@ const getHRStaff = (language) => {
     phone: '0987 654 321',
     email: 'phamthuhuong@example.com',
     startDate: language === 'vi' ? '20/02/2024' : '02/20/2024',
-    status: 'active',
+    status: 'pending_confirmation',
     shift: '09:00 - 17:00',
     hourlyRate: 20000,
     confirmedAt: `${oldDate} - ${oldTimeStr}`,
     totalPaid: 160000,
     canRequestChange: true,
-    isWithinTimeWindow: false,
+    isWithinTimeWindow: true,
     // Additional profile data
     experience: language === 'vi' ? '2 năm' : '2 years',
     education: language === 'vi' ? 'Cao đẳng Kinh tế' : 'College of Economics',
@@ -106,7 +106,7 @@ const getHRStaff = (language) => {
     phone: '0909 111 222',
     email: 'tranquocbao@example.com',
     startDate: language === 'vi' ? '10/03/2024' : '03/10/2024',
-    status: 'active',
+    status: 'pending_change',
     shift: '18:00 - 22:00',
     hourlyRate: 20000,
     confirmedAt: `${today} - ${recentTimeStr}`,
@@ -120,7 +120,16 @@ const getHRStaff = (language) => {
     bio: language === 'vi' ? 'Sinh viên kiêm việc, nhiệt tình và nhanh nhẹn.' : 'Student with part-time work, enthusiastic and agile.',
     reviews: [
       { id: 1, employer: language === 'vi' ? 'Nhà hàng Hương Việt' : 'Huong Viet Restaurant', position: language === 'vi' ? 'Nhân viên phục vụ' : 'Server', rating: 4, date: language === 'vi' ? 'Tháng 11/2024' : 'Nov 2024', comment: language === 'vi' ? 'Nhanh nhẹn, thân thiện.' : 'Quick and friendly.' }
-    ]
+    ],
+    changeRequest: {
+      type: 'shift_change',
+      typeLabel: language === 'vi' ? 'Đổi ca làm' : 'Shift Change',
+      from: '18:00 - 22:00',
+      to: '14:00 - 18:00',
+      reason: language === 'vi' ? 'Có lịch học buổi tối từ tuần này, xin đổi sang ca chiều' : 'Have evening classes starting this week, requesting afternoon shift',
+      requestedAt: language === 'vi' ? `${today} - 07:45` : `${today} - 07:45`,
+      urgency: 'urgent'
+    }
   },
   {
     id: 4,
@@ -160,7 +169,7 @@ const getHRStaff = (language) => {
     confirmedAt: `${oldDate} - ${oldTimeStr}`,
     totalPaid: 200000,
     canRequestChange: false,
-    isWithinTimeWindow: false,
+    isWithinTimeWindow: true,
     experience: language === 'vi' ? '5 năm' : '5 years',
     education: language === 'vi' ? 'THPT' : 'High School',
     skills: language === 'vi' ? ['Bảo vệ', 'Kiểm soát', 'Xử lý tình huống'] : ['Security', 'Control', 'Situation handling'],
@@ -183,7 +192,7 @@ const getHRStaff = (language) => {
     confirmedAt: `${oldDate} - ${oldTimeStr}`,
     totalPaid: 100000,
     canRequestChange: false,
-    isWithinTimeWindow: false,
+    isWithinTimeWindow: true,
     experience: language === 'vi' ? '2 năm' : '2 years',
     education: language === 'vi' ? 'THCS' : 'Secondary School',
     skills: language === 'vi' ? ['Dọn dẹp', 'Vệ sinh', 'Cẩn thận'] : ['Cleaning', 'Hygiene', 'Careful'],
@@ -509,17 +518,58 @@ const StaffStatus = styled.div`
     props.$status === 'active' ? '#D1FAE5' : 
     props.$status === 'completed' ? '#E0E7FF' : 
     props.$status === 'pending' ? '#FEF9C3' :
+    props.$status === 'pending_confirmation' ? '#FEE2E2' :
+    props.$status === 'pending_change' ? '#FFF7ED' :
     '#FEF3C7'};
   color: ${props => 
     props.$status === 'active' ? '#047857' : 
     props.$status === 'completed' ? '#3730A3' : 
     props.$status === 'pending' ? '#854D0E' :
+    props.$status === 'pending_confirmation' ? '#991B1B' :
+    props.$status === 'pending_change' ? '#C2410C' :
     '#92400E'};
   border: 1px solid ${props => 
     props.$status === 'active' ? '#10B981' : 
     props.$status === 'completed' ? '#818CF8' : 
     props.$status === 'pending' ? '#EAB308' :
+    props.$status === 'pending_confirmation' ? '#FCA5A5' :
+    props.$status === 'pending_change' ? '#FDBA74' :
     '#F59E0B'};
+`;
+
+const StaffTabBar = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+`;
+
+const StaffTabButton = styled(motion.button)`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid ${props => props.$active ? props.$color : '#E2E8F0'};
+  background: ${props => props.$active ? props.$color + '18' : '#F8FAFC'};
+  color: ${props => props.$active ? props.$color : '#64748B'};
+  transition: all 0.2s ease;
+  .count {
+    background: ${props => props.$active ? props.$color : '#E2E8F0'};
+    color: ${props => props.$active ? '#fff' : '#64748B'};
+    padding: 1px 7px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+  &:hover {
+    border-color: ${props => props.$color};
+    background: ${props => props.$color + '12'};
+    color: ${props => props.$color};
+  }
 `;
 
 const StaffMeta = styled.div`
@@ -551,6 +601,113 @@ const StaffActions = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+`;
+
+const ChangeRequestBanner = styled.div`
+  background: linear-gradient(135deg, #FFF7ED, #FFEDD5);
+  border: 1.5px solid #FDBA74;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+
+  .cr-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .cr-type {
+    font-size: 12px;
+    font-weight: 700;
+    color: #C2410C;
+    background: #FED7AA;
+    padding: 3px 8px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    svg { width: 12px; height: 12px; }
+  }
+
+  .cr-urgency-urgent {
+    font-size: 11px;
+    font-weight: 700;
+    color: #991B1B;
+    background: #FEE2E2;
+    border: 1px solid #FCA5A5;
+    padding: 2px 7px;
+    border-radius: 5px;
+  }
+
+  .cr-urgency-normal {
+    font-size: 11px;
+    font-weight: 700;
+    color: #92400E;
+    background: #FEF3C7;
+    border: 1px solid #FCD34D;
+    padding: 2px 7px;
+    border-radius: 5px;
+  }
+
+  .cr-shift-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #7C2D12;
+    margin-bottom: 6px;
+    svg { width: 14px; height: 14px; color: #F97316; }
+  }
+
+  .cr-reason {
+    font-size: 12px;
+    color: #92400E;
+    line-height: 1.5;
+    font-style: italic;
+    margin-bottom: 6px;
+  }
+
+  .cr-time {
+    font-size: 11px;
+    color: #B45309;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    svg { width: 11px; height: 11px; }
+  }
+`;
+
+const ChangeTypeGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+`;
+
+const ChangeTypeButton = styled.button`
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1.5px solid ${props => props.$selected ? '#F59E0B' : '#E5E7EB'};
+  background: ${props => props.$selected ? 'linear-gradient(135deg, #FFFBEB, #FEF3C7)' : '#FAFAFA'};
+  color: ${props => props.$selected ? '#D97706' : '#6B7280'};
+  box-shadow: ${props => props.$selected ? '0 2px 8px rgba(245,158,11,0.15)' : 'none'};
+
+  svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+  &:hover {
+    border-color: #F59E0B;
+    background: linear-gradient(135deg, #FFFBEB, #FEF3C7);
+    color: #D97706;
+  }
 `;
 
 const StaffButton = styled(motion.button)`
@@ -2225,6 +2382,7 @@ const HRManagement = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeSection, setActiveSection] = useState('hr');
+  const [staffTabFilter, setStaffTabFilter] = useState('working');
   const [hrStaff, setHrStaff] = useState(() => getHRStaff(language).map(s => ({ ...s, rated: false, pendingRating: false })));
   const [selectedStaff, setSelectedStaff] = useState(null);
   
@@ -2481,6 +2639,7 @@ const HRManagement = () => {
   const [showChangeRequestToast, setShowChangeRequestToast] = useState(false);
   const [changeRequestStaff, setChangeRequestStaff] = useState(null);
   const [changeRequestReason, setChangeRequestReason] = useState('');
+  const [changeRequestType, setChangeRequestType] = useState('');
   const [showChangeRequestSuccess, setShowChangeRequestSuccess] = useState(false);
   const [selectedJobView, setSelectedJobView] = useState(null);
   const [editJobId, setEditJobId] = useState(null);
@@ -2590,6 +2749,26 @@ const HRManagement = () => {
         localStorage.removeItem(`chat_${activeChatId}`);
       }
     }
+  };
+
+  const handleConfirmCV = (staffId) => {
+    setHrStaff(prev => prev.map(s =>
+      s.id === staffId ? { ...s, status: 'active' } : s
+    ));
+  };
+
+  const handleApproveChange = (staffId) => {
+    setHrStaff(prev => prev.map(s => {
+      if (s.id !== staffId) return s;
+      const newShift = s.changeRequest?.to || s.shift;
+      return { ...s, status: 'active', shift: newShift, changeRequest: null };
+    }));
+  };
+
+  const handleRejectChange = (staffId) => {
+    setHrStaff(prev => prev.map(s =>
+      s.id === staffId ? { ...s, status: 'active', changeRequest: null } : s
+    ));
   };
 
   const handleCreatePost = () => {
@@ -2870,8 +3049,37 @@ const HRManagement = () => {
                 </p>
               </div>
             </SectionHeader>
+
+            {/* Staff Status Tabs */}
+            <StaffTabBar>
+              {[
+                { key: 'working',       label: language === 'vi' ? 'Đang làm' : 'Working',             color: '#10B981', status: 'active' },
+                { key: 'pending_confirm', label: language === 'vi' ? 'Chờ xác nhận' : 'Pending Confirmation', color: '#EF4444', status: 'pending_confirmation' },
+                { key: 'pending_change',  label: language === 'vi' ? 'Chờ thay đổi' : 'Pending Changes',     color: '#F97316', status: 'pending_change' },
+              ].map(tab => {
+                const count = hrStaff.filter(s => s.status === tab.status).length;
+                return (
+                  <StaffTabButton
+                    key={tab.key}
+                    $active={staffTabFilter === tab.key}
+                    $color={tab.color}
+                    onClick={() => setStaffTabFilter(tab.key)}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    {tab.label}
+                    <span className="count">{count}</span>
+                  </StaffTabButton>
+                );
+              })}
+            </StaffTabBar>
             
-            {hrStaff.filter(staff => staff.isWithinTimeWindow).length === 0 ? (
+            {hrStaff.filter(staff => {
+              if (staffTabFilter === 'working') return staff.status === 'active';
+              if (staffTabFilter === 'pending_confirm') return staff.status === 'pending_confirmation';
+              if (staffTabFilter === 'pending_change') return staff.status === 'pending_change';
+              return false;
+            }).length === 0 ? (
               <div style={{
                 padding: '60px 20px',
                 textAlign: 'center',
@@ -2891,7 +3099,13 @@ const HRManagement = () => {
               <StaffGrid>
                 <AnimatePresence>
                   {hrStaff
-                    .filter(staff => staff.isWithinTimeWindow) // Only show staff within 1 hour time window
+                    .filter(staff => {
+                      if (staffTabFilter === 'working') return staff.status === 'active';
+                      if (staffTabFilter === 'pending_confirm') return staff.status === 'pending_confirmation';
+                      if (staffTabFilter === 'pending_change') return staff.status === 'pending_change';
+                      if (staffTabFilter === 'completed') return staff.status === 'completed';
+                      return false;
+                    })
                     .map((staff, index) => (
                       <StaffCard
                         key={staff.id}
@@ -2916,10 +3130,14 @@ const HRManagement = () => {
                             ) : (
                               <StaffStatus $status={staff.status}>
                                 {staff.status === 'active' 
-                                  ? (language === 'vi' ? 'Đang làm' : 'Active')
+                                  ? (language === 'vi' ? 'Đang làm' : 'Working')
                                   : staff.status === 'completed'
                                   ? (language === 'vi' ? 'Hoàn thành' : 'Completed')
-                                  : (language === 'vi' ? 'Nghỉ phép' : 'On Leave')}
+                                  : staff.status === 'pending_confirmation'
+                                  ? (language === 'vi' ? 'Chờ xác nhận' : 'Pending Confirmation')
+                                  : staff.status === 'pending_change'
+                                  ? (language === 'vi' ? 'Chờ thay đổi' : 'Pending Changes')
+                                  : (language === 'vi' ? 'Không xác định' : 'Unknown')}
                               </StaffStatus>
                             )}
                           </div>
@@ -2942,7 +3160,30 @@ const HRManagement = () => {
                             <Banknote />{language === 'vi' ? 'Số tiền chi:' : 'Amount paid:'} {staff.totalPaid.toLocaleString('vi-VN')} VNĐ
                           </div>
                         </StaffMeta>
-                        
+
+                        {staff.status === 'pending_change' && staff.changeRequest && (
+                          <ChangeRequestBanner>
+                            <div className="cr-header">
+                              <span className={staff.changeRequest.urgency === 'urgent' ? 'cr-urgency-urgent' : 'cr-urgency-normal'}>
+                                {staff.changeRequest.urgency === 'urgent'
+                                  ? (language === 'vi' ? '🔴 Khẩn cấp' : '🔴 Urgent')
+                                  : (language === 'vi' ? 'Bình thường' : 'Normal')}
+                              </span>
+                            </div>
+                            {staff.changeRequest.type === 'shift_change' && (
+                              <div className="cr-shift-row">
+                                <Clock />{staff.changeRequest.from}
+                                <ArrowRight />
+                                {staff.changeRequest.to}
+                              </div>
+                            )}
+                            <div className="cr-reason">"{staff.changeRequest.reason}"</div>
+                            <div className="cr-time">
+                              <Clock />{language === 'vi' ? 'Gửi lúc:' : 'Sent at:'} {staff.changeRequest.requestedAt}
+                            </div>
+                          </ChangeRequestBanner>
+                        )}
+
                         <StaffActions>
                           <StaffButton
                             whileHover={{ scale: 1.02 }}
@@ -2966,7 +3207,17 @@ const HRManagement = () => {
                               <MessageSquare />{language === 'vi' ? 'Nhắn tin' : 'Chat'}
                             </StaffButton>
                           )}
-                          {staff.canRequestChange && (
+                          {staff.status === 'pending_confirmation' ? (
+                            <StaffButton
+                              $variant="success"
+                              style={{ background: 'linear-gradient(135deg, #10B981, #059669)', color: '#fff', border: 'none' }}
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => handleConfirmCV(staff.id)}
+                            >
+                              <CheckCircle />{language === 'vi' ? 'Đồng ý CV' : 'Approve CV'}
+                            </StaffButton>
+                          ) : staff.canRequestChange && (
                             <StaffButton
                               $variant="warning"
                               whileHover={{ scale: 1.02 }}
@@ -2974,6 +3225,7 @@ const HRManagement = () => {
                               onClick={() => {
                                 setChangeRequestStaff(staff);
                                 setChangeRequestReason('');
+                                setChangeRequestType('');
                               }}
                             >
                               <AlertCircle />{language === 'vi' ? 'Yêu cầu thay đổi' : 'Request change'}
@@ -3505,6 +3757,33 @@ const HRManagement = () => {
                     </div>
                   </div>
 
+                  {/* Change type selector */}
+                  <RateCategory>
+                    <div className="category-label">
+                      <RefreshCw />{language === 'vi' ? 'Loại yêu cầu thay đổi' : 'Type of change'}
+                    </div>
+                    <ChangeTypeGrid>
+                      {[
+                        { value: 'shift_change', label: language === 'vi' ? 'Đổi ca làm' : 'Shift Change', icon: Clock },
+                        { value: 'salary_change', label: language === 'vi' ? 'Điều chỉnh lương' : 'Salary Adjustment', icon: Banknote },
+                        { value: 'role_change', label: language === 'vi' ? 'Đổi vị trí' : 'Role Change', icon: User },
+                        { value: 'cancel', label: language === 'vi' ? 'Huỷ ca làm' : 'Cancel Shift', icon: X },
+                      ].map(opt => {
+                        const Icon = opt.icon;
+                        return (
+                          <ChangeTypeButton
+                            key={opt.value}
+                            type="button"
+                            $selected={changeRequestType === opt.value}
+                            onClick={() => setChangeRequestType(opt.value)}
+                          >
+                            <Icon />{opt.label}
+                          </ChangeTypeButton>
+                        );
+                      })}
+                    </ChangeTypeGrid>
+                  </RateCategory>
+
                   {/* Reason input */}
                   <RateCategory>
                     <div className="category-label">
@@ -3524,15 +3803,16 @@ const HRManagement = () => {
                       as={motion.button}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      disabled={!changeRequestReason.trim()}
+                      disabled={!changeRequestReason.trim() || !changeRequestType}
                       onClick={() => {
-                        if (!changeRequestReason.trim()) return;
+                        if (!changeRequestReason.trim() || !changeRequestType) return;
                         setChangeRequestStaff(null);
                         setChangeRequestReason('');
+                        setChangeRequestType('');
                         setShowChangeRequestSuccess(true);
                       }}
                       style={{
-                        background: changeRequestReason.trim()
+                        background: (changeRequestReason.trim() && changeRequestType)
                           ? 'linear-gradient(135deg, #F59E0B, #D97706)'
                           : undefined,
                         transition: 'background 0.2s'

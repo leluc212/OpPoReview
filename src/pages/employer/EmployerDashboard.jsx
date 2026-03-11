@@ -501,7 +501,6 @@ const EmployerDashboard = () => {
         >
           <WelcomeContent>
             <h1>{getGreeting()}, {user?.role === 'employer' ? (language === 'vi' ? 'Katinat Quận 8' : 'Katinat District 8') : (user?.name || 'User')}! 👋</h1>
-            <p>{language === 'vi' ? 'Hôm nay bạn có 3 ứng viên mới' : 'You have 3 new candidates'}</p>
             <QuickActions>
               <ActionButton
                 $variant="primary"
