@@ -663,7 +663,7 @@ const Reports = () => {
       color: '#8b5cf6'
     },
     { 
-      label: language === 'vi' ? 'Job Thường' : 'Standard Jobs',
+      label: language === 'vi' ? 'Công việc Tiêu chuẩn' : 'Standard Jobs',
       value: standardPosts.toString(),
       change: '+15%',
       positive: true,
@@ -671,7 +671,7 @@ const Reports = () => {
       color: '#10b981'
     },
     { 
-      label: language === 'vi' ? 'Job Gấp' : 'Urgent Jobs',
+      label: language === 'vi' ? 'Công việc Tuyển gấp' : 'Urgent Jobs',
       value: urgentPosts.toString(),
       change: '+23%',
       positive: true,
@@ -680,7 +680,7 @@ const Reports = () => {
     },
   ];
 
-  // Revenue data for Job thường (Standard Jobs)
+  // Revenue data for Công việc Tiêu chuẩn (Standard Jobs)
   const standardRevenueData = [
     { month: 'T1', revenue: 85 },
     { month: 'T2', revenue: 92 },
@@ -690,7 +690,7 @@ const Reports = () => {
     { month: 'T6', revenue: 90 },
   ];
 
-  // Revenue data for Job gấp (Urgent Jobs)
+  // Revenue data for Công việc Tuyển gấp (Urgent Jobs)
   const urgentRevenueData = [
     { month: 'T1', revenue: 95 },
     { month: 'T2', revenue: 103 },
@@ -733,41 +733,41 @@ const Reports = () => {
     'Quận Bình Tân', 'Quận Thủ Đức'
   ];
 
-  // Service packages data for Job thường
+  // Service packages data for Công việc Tiêu chuẩn
   const standardJobServices = [
-    { id: 1, name: 'Quick Boost', price: '245.000 VND', duration: '24H', status: 'active' },
-    { id: 2, name: 'Hot Search', price: '395.000 VND', duration: '48H', status: 'active' },
-    { id: 3, name: 'Spotlight Banner', price: '745.000 VND', duration: '7 ngày', status: 'active' },
-    { id: 4, name: 'Top Spotlight', price: '1.245.000 VND', duration: '14 ngày', status: 'active' },
+    { id: 1, name: 'Quick Boost', price: '145.000 VND', duration: '7 ngày', status: 'active' },
+    { id: 2, name: 'Hot Search', price: '245.000 VND', duration: '7 ngày', status: 'active' },
+    { id: 3, name: 'Spotlight Banner', price: '495.000 VND', duration: '7 ngày', status: 'active' },
+    { id: 4, name: 'Top Spotlight', price: '745.000 VND', duration: '7 ngày', status: 'active' },
   ];
 
-  // Service packages data for Job gấp
+  // Service packages data for Công việc Tuyển gấp
   const urgentJobServices = [
-    { id: 1, name: 'Quick Boost Gấp', price: '345.000 VND', duration: '12H', status: 'active' },
-    { id: 2, name: 'Hot Search Gấp', price: '495.000 VND', duration: '24H', status: 'active' },
-    { id: 3, name: 'Spotlight Banner Gấp', price: '895.000 VND', duration: '3 ngày', status: 'active' },
-    { id: 4, name: 'Top Spotlight Gấp', price: '1.495.000 VND', duration: '7 ngày', status: 'active' },
+    { id: 1, name: 'Quick Boost Gấp', price: '245.000 VND', duration: '7 ngày', status: 'active' },
+    { id: 2, name: 'Hot Search Gấp', price: '395.000 VND', duration: '7 ngày', status: 'active' },
+    { id: 3, name: 'Spotlight Banner Gấp', price: '745.000 VND', duration: '7 ngày', status: 'active' },
+    { id: 4, name: 'Top Spotlight Gấp', price: '1.095.000 VND', duration: '7 ngày', status: 'active' },
   ];
 
-  // Purchase history for Job thường
+  // Purchase history for Công việc Tiêu chuẩn
   const standardPurchaseHistory = [
-    { id: 1, employer: 'Lẩu Bò Sài Gòn Vi Vu', package: 'Hot Search', price: '395.000 VND', date: '08/03/2026', status: 'active' },
-    { id: 2, employer: 'Phở Gia Truyền 1954', package: 'Spotlight Banner', price: '745.000 VND', date: '07/03/2026', status: 'active' },
-    { id: 3, employer: 'Urban Coffee', package: 'Quick Boost', price: '245.000 VND', date: '06/03/2026', status: 'expired' },
-    { id: 4, employer: 'Dimsum House', package: 'Top Spotlight', price: '1.245.000 VND', date: '05/03/2026', status: 'active' },
-    { id: 5, employer: 'Bánh Mì PewPew', package: 'Hot Search', price: '395.000 VND', date: '04/03/2026', status: 'active' },
+    { id: 1, employer: 'Lẩu Bò Sài Gòn Vi Vu', package: 'Hot Search', price: '245.000 VND', date: '08/03/2026', status: 'active' },
+    { id: 2, employer: 'Phở Gia Truyền 1954', package: 'Spotlight Banner', price: '495.000 VND', date: '07/03/2026', status: 'active' },
+    { id: 3, employer: 'Urban Coffee', package: 'Quick Boost', price: '145.000 VND', date: '06/03/2026', status: 'expired' },
+    { id: 4, employer: 'Dimsum House', package: 'Top Spotlight', price: '745.000 VND', date: '05/03/2026', status: 'active' },
+    { id: 5, employer: 'Bánh Mì PewPew', package: 'Hot Search', price: '245.000 VND', date: '04/03/2026', status: 'active' },
   ];
 
-  // Purchase history for Job gấp
+  // Purchase history for Công việc Tuyển gấp
   const urgentPurchaseHistory = [
-    { id: 1, employer: 'Chill Out Beer Club', package: 'Quick Boost Gấp', price: '345.000 VND', date: '08/03/2026', status: 'active' },
-    { id: 2, employer: 'Bia Sệt 123', package: 'Hot Search Gấp', price: '495.000 VND', date: '08/03/2026', status: 'active' },
-    { id: 3, employer: 'Beer Garden Phố', package: 'Spotlight Banner Gấp', price: '895.000 VND', date: '07/03/2026', status: 'active' },
-    { id: 4, employer: 'Nướng Ngói Gia Bảo', package: 'Top Spotlight Gấp', price: '1.495.000 VND', date: '07/03/2026', status: 'active' },
-    { id: 5, employer: 'Lẩu Phan', package: 'Quick Boost Gấp', price: '345.000 VND', date: '06/03/2026', status: 'expired' },
+    { id: 1, employer: 'Chill Out Beer Club', package: 'Quick Boost Gấp', price: '245.000 VND', date: '08/03/2026', status: 'active' },
+    { id: 2, employer: 'Bia Sệt 123', package: 'Hot Search Gấp', price: '395.000 VND', date: '08/03/2026', status: 'active' },
+    { id: 3, employer: 'Beer Garden Phố', package: 'Spotlight Banner Gấp', price: '745.000 VND', date: '07/03/2026', status: 'active' },
+    { id: 4, employer: 'Nướng Ngói Gia Bảo', package: 'Top Spotlight Gấp', price: '1.095.000 VND', date: '07/03/2026', status: 'active' },
+    { id: 5, employer: 'Lẩu Phan', package: 'Quick Boost Gấp', price: '245.000 VND', date: '06/03/2026', status: 'expired' },
   ];
 
-  // Package status for Job thường
+  // Package status for Công việc Tiêu chuẩn
   const standardPackageStatus = [
     { id: 1, employer: 'Lẩu Bò Sài Gòn Vi Vu', package: 'Hot Search', startDate: '08/03/2026', endDate: '10/03/2026', status: 'active' },
     { id: 2, employer: 'Phở Gia Truyền 1954', package: 'Spotlight Banner', startDate: '07/03/2026', endDate: '14/03/2026', status: 'active' },
@@ -775,7 +775,7 @@ const Reports = () => {
     { id: 4, employer: 'Dimsum House', package: 'Top Spotlight', startDate: '05/03/2026', endDate: '19/03/2026', status: 'active' },
   ];
 
-  // Package status for Job gấp
+  // Package status for Công việc Tuyển gấp
   const urgentPackageStatus = [
     { id: 1, employer: 'Chill Out Beer Club', package: 'Quick Boost Gấp', startDate: '08/03/2026', endDate: '08/03/2026', status: 'active' },
     { id: 2, employer: 'Bia Sệt 123', package: 'Hot Search Gấp', startDate: '08/03/2026', endDate: '09/03/2026', status: 'active' },
@@ -843,7 +843,7 @@ const Reports = () => {
             <ServiceTable>
               <ServiceTableHeader>
                 <Briefcase size={24} />
-                {language === 'vi' ? 'Thống kê dịch vụ - Job Thường' : 'Service Statistics - Standard Jobs'}
+                {language === 'vi' ? 'Thống kê dịch vụ - Công việc Tiêu chuẩn' : 'Service Statistics - Standard Jobs'}
               </ServiceTableHeader>
               <ServiceTableContent>
                 <ServiceTableGrid>
@@ -882,7 +882,7 @@ const Reports = () => {
             <ServiceTable>
               <ServiceTableHeader>
                 <Zap size={24} />
-                {language === 'vi' ? 'Thống kê dịch vụ - Job Gấp' : 'Service Statistics - Urgent Jobs'}
+                {language === 'vi' ? 'Thống kê dịch vụ - Công việc Tuyển gấp' : 'Service Statistics - Urgent Jobs'}
               </ServiceTableHeader>
               <ServiceTableContent>
                 <ServiceTableGrid>
@@ -944,7 +944,7 @@ const Reports = () => {
             <ChartHeader>
               <h3>
                 <Briefcase />
-                {language === 'vi' ? 'Doanh Thu Job Thường' : 'Standard Jobs Revenue'}
+                {language === 'vi' ? 'Doanh Thu Công việc Tiêu chuẩn' : 'Standard Jobs Revenue'}
               </h3>
               <RevenueTotal>{language === 'vi' ? '90.000.000 VNĐ' : '90.000.000 VNĐ'}</RevenueTotal>
             </ChartHeader>
@@ -1011,7 +1011,7 @@ const Reports = () => {
             <ChartHeader>
               <h3>
                 <Zap />
-                {language === 'vi' ? 'Doanh Thu Job Gấp' : 'Urgent Jobs Revenue'}
+                {language === 'vi' ? 'Doanh Thu Công việc Tuyển gấp' : 'Urgent Jobs Revenue'}
               </h3>
               <RevenueTotal>{language === 'vi' ? '127 triệu VNĐ' : '127M VND'}</RevenueTotal>
             </ChartHeader>
@@ -1163,7 +1163,7 @@ const Reports = () => {
             <ServiceTable>
               <ServiceTableHeader>
                 <Briefcase size={24} />
-                {language === 'vi' ? 'Lịch sử mua gói - Job Thường' : 'Purchase History - Standard Jobs'}
+                {language === 'vi' ? 'Lịch sử mua gói - Công việc Tiêu chuẩn' : 'Purchase History - Standard Jobs'}
               </ServiceTableHeader>
               <ServiceTableContent>
                 <ServiceTableGrid>
@@ -1207,7 +1207,7 @@ const Reports = () => {
             <ServiceTable>
               <ServiceTableHeader>
                 <Zap size={24} />
-                {language === 'vi' ? 'Lịch sử mua gói - Job Gấp' : 'Purchase History - Urgent Jobs'}
+                {language === 'vi' ? 'Lịch sử mua gói - Công việc Tuyển gấp' : 'Purchase History - Urgent Jobs'}
               </ServiceTableHeader>
               <ServiceTableContent>
                 <ServiceTableGrid>
@@ -1255,7 +1255,7 @@ const Reports = () => {
             <ServiceTable>
               <ServiceTableHeader>
                 <Briefcase size={24} />
-                {language === 'vi' ? 'Trạng thái các gói - Job Thường' : 'Package Status - Standard Jobs'}
+                {language === 'vi' ? 'Trạng thái các gói - Công việc Tiêu chuẩn' : 'Package Status - Standard Jobs'}
               </ServiceTableHeader>
               <ServiceTableContent>
                 <ServiceTableGrid>
@@ -1297,7 +1297,7 @@ const Reports = () => {
             <ServiceTable>
               <ServiceTableHeader>
                 <Zap size={24} />
-                {language === 'vi' ? 'Trạng thái các gói - Job Gấp' : 'Package Status - Urgent Jobs'}
+                {language === 'vi' ? 'Trạng thái các gói - Công việc Tuyển gấp' : 'Package Status - Urgent Jobs'}
               </ServiceTableHeader>
               <ServiceTableContent>
                 <ServiceTableGrid>

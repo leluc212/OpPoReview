@@ -2593,7 +2593,7 @@ const JobListing = () => {
                 ? (language === 'vi' ? 'Công việc đã lưu' : 'Saved Jobs')
                 : jobCategory === 'standard'
                   ? (language === 'vi' ? 'Tìm công việc mơ ước của bạn ' : 'Find Your Dream Job ')
-                  : (language === 'vi' ? 'Công việc theo ca - Tuyển gấp ' : 'Shift Jobs - Hiring Now ')}
+                  : (language === 'vi' ? 'Tìm công việc mơ ước của bạn ' : 'Find Your Dream Job ')}
             </HeroTitle>
             <HeroSubtitle>
               {showSavedJobsOnly
@@ -2605,7 +2605,7 @@ const JobListing = () => {
                     ? `Hơn ${allJobs.filter(j => j.category === 'standard').length} công việc tiêu chuẩn đang chờ bạn khám phá`
                     : `Over ${allJobs.filter(j => j.category === 'standard').length} standard jobs waiting for you to explore`)
                   : (language === 'vi'
-                    ? `${allJobs.filter(j => j.category === 'shift').length} công việc theo ca đang tuyển gấp, làm ngay hôm nay!`
+                    ? `${allJobs.filter(j => j.category === 'shift').length} công việc đang tuyển gấp, làm ngay hôm nay!`
                     : `${allJobs.filter(j => j.category === 'shift').length} shift jobs hiring urgently, start today!`)}
             </HeroSubtitle>
 
@@ -2775,7 +2775,7 @@ const JobListing = () => {
             whileTap={{ scale: 0.98 }}
           >
             <Zap />
-            {language === 'vi' ? 'Công việc theo ca - Tuyển gấp' : 'Shift Jobs - Hiring Now'}
+            {language === 'vi' ? 'Công việc Tuyển gấp' : 'Shift Jobs - Hiring Now'}
             <span style={{ marginLeft: 'auto', fontSize: '14px', opacity: 0.9 }}>
               ({allJobs.filter(j => j.category === 'shift').length})
             </span>

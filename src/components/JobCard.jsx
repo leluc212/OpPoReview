@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Briefcase, MapPin, Clock, DollarSign, Bookmark } from 'lucide-react';
+import { Briefcase, MapPin, Clock, Bookmark } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 // Translate salary string based on language
@@ -338,7 +338,7 @@ const JobCard = ({ job, onClick, onSave, saved = false }) => {
           <span>{translateLocation(job.location, language)}</span>
         </DetailItem>
         <DetailItem whileHover={{ x: 4 }}>
-          <DollarSign />
+          <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span>
           <span>{translateSalary(job.salary, language)}</span>
         </DetailItem>
         {job.shift && (

@@ -389,7 +389,7 @@ const AdminNotifications = () => {
       type: 'urgent',
       icon: AlertCircle,
       color: '#ef4444',
-      title: language === 'vi' ? 'Duyệt đăng bài Job Gấp' : 'Urgent job approval',
+      title: language === 'vi' ? 'Duyệt đăng bài Công việc Tuyển gấp' : 'Urgent job approval',
       message: language === 'vi' ? 'Bia Sệt 123 yêu cầu duyệt gấp 2 tin tuyển nhân viên phục vụ ca tối. Cần xử lý trong 2 giờ.' : 'Bia Sệt 123 requests urgent approval for 2 evening shift server positions. Requires processing within 2 hours.',
       time: language === 'vi' ? '45 phút trước' : '45 minutes ago',
       unread: true,
@@ -433,7 +433,7 @@ const AdminNotifications = () => {
       type: 'urgent',
       icon: AlertCircle,
       color: '#ef4444',
-      title: language === 'vi' ? 'Duyệt đăng bài Job Gấp' : 'Urgent job approval',
+      title: language === 'vi' ? 'Duyệt đăng bài Công việc Tuyển gấp' : 'Urgent job approval',
       message: language === 'vi' ? 'Beer Garden Phố cần tuyển gấp 4 nhân viên phục vụ cho ca tối hôm nay. Yêu cầu duyệt ngay.' : 'Beer Garden Phố urgently needs 4 servers for tonight shift. Immediate approval requested.',
       time: language === 'vi' ? '5 giờ trước' : '5 hours ago',
       unread: false,
@@ -572,7 +572,7 @@ const AdminNotifications = () => {
                 <option value="all">{language === 'vi' ? 'Tất cả' : 'All'}</option>
                 <option value="posts">{language === 'vi' ? 'Tin chưa duyệt' : 'Pending posts'}</option>
                 <option value="payments">{language === 'vi' ? 'Mua bài' : 'Purchases'}</option>
-                <option value="urgent">{language === 'vi' ? 'Job gấp' : 'Urgent jobs'}</option>
+                <option value="urgent">{language === 'vi' ? 'Công việc Tuyển gấp' : 'Urgent jobs'}</option>
                 <option value="employers">{language === 'vi' ? 'Duyệt NTD' : 'Employer approval'}</option>
               </Select>
               <Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
@@ -654,7 +654,7 @@ const AdminNotifications = () => {
               </SettingItem>
 
               <SettingItem>
-                <SettingLabel>{language === 'vi' ? 'Job gấp' : 'Urgent jobs'}</SettingLabel>
+                <SettingLabel>{language === 'vi' ? 'Công việc Tuyển gấp' : 'Urgent jobs'}</SettingLabel>
                 <ToggleSwitch>
                   <input 
                     type="checkbox" 

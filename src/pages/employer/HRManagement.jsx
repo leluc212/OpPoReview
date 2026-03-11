@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Edit3, Trash2, Eye, CheckCircle, Send, Search, Calendar, DollarSign, Newspaper, TrendingUp, AlertCircle, User, Plus, X, Wallet, Save, Award, Star, Briefcase, Zap } from 'lucide-react';
+import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Edit3, Trash2, Eye, CheckCircle, Send, Search, Calendar, Newspaper, TrendingUp, AlertCircle, User, Plus, X, Wallet, Save, Award, Star, Briefcase, Zap } from 'lucide-react';
 import Modal from '../../components/Modal';
 
 // Helper: tính số giờ từ chuỗi shift "HH:MM - HH:MM"
@@ -3099,7 +3099,7 @@ const HRManagement = () => {
                               <MapPin />{post.location}
                             </div>
                             <div className="meta-item">
-                              <DollarSign />{post.salary}
+                              <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span> {post.salary}
                             </div>
                             {post.shift && (
                               <div className="meta-item">
@@ -3909,7 +3909,7 @@ const HRManagement = () => {
                     <span>{selectedJobView.location}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
-                    <DollarSign size={16} />
+                    <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span>
                     <span>{selectedJobView.salary}</span>
                   </div>
                   {selectedJobView.shift && (
