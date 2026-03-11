@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Edit3, Trash2, Eye, CheckCircle, Send, Search, Calendar, Newspaper, TrendingUp, AlertCircle, User, Plus, X, Wallet, Save, Award, Star, Briefcase, Zap } from 'lucide-react';
+import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Edit3, Trash2, Eye, CheckCircle, Send, Search, Calendar, Newspaper, TrendingUp, AlertCircle, User, Plus, X, Wallet, Save, Award, Star, Briefcase, Zap, DollarSign } from 'lucide-react';
 import Modal from '../../components/Modal';
 
 // Helper: tính số giờ từ chuỗi shift "HH:MM - HH:MM"
