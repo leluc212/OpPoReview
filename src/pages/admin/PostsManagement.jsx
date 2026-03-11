@@ -1294,26 +1294,38 @@ const PostsManagement = () => {
                 </SectionTitle>
                 <InfoGrid>
                   <InfoItem style={{ gridColumn: '1 / -1' }}>
-                    <label>{language === 'vi' ? 'Tiêu đề' : 'Title'}</label>
+                    <label>{language === 'vi' ? 'Vị trí' : 'Position'}</label>
                     <p style={{ fontSize: '16px', fontWeight: '600' }}>{selectedJob.title}</p>
+                  </InfoItem>
+                  <InfoItem>
+                    <label>{language === 'vi' ? 'Công ty' : 'Company'}</label>
+                    <p style={{ fontSize: '15px', fontWeight: '600' }}>{selectedJob.company}</p>
+                  </InfoItem>
+                  <InfoItem>
+                    <label>{language === 'vi' ? 'Địa điểm' : 'Location'}</label>
+                    <p>{selectedJob.location}</p>
+                  </InfoItem>
+                  <InfoItem>
+                    <label>{language === 'vi' ? 'Mức lương' : 'Salary'}</label>
+                    <p style={{ fontSize: '15px', fontWeight: '600' }}>
+                      {selectedJob.salary || (language === 'vi' ? '25.000 VND/giờ' : '25,000 VND/hour')}
+                    </p>
+                  </InfoItem>
+                  <InfoItem>
+                    <label>{language === 'vi' ? 'Loại hình' : 'Work Type'}</label>
+                    <p>{selectedJob.workType || 'Part-time'}</p>
                   </InfoItem>
                   <InfoItem>
                     <label>{language === 'vi' ? 'Ngày đăng' : 'Post Date'}</label>
                     <p>{selectedJob.postDate}</p>
                   </InfoItem>
                   <InfoItem>
-                    <label>{language === 'vi' ? 'Ngày kết thúc' : 'End Date'}</label>
-                    <p>{selectedJob.endDate}</p>
+                    <label>{language === 'vi' ? 'Ngày làm' : 'Work Date'}</label>
+                    <p>{selectedJob.workDate || (language === 'vi' ? '22/03/2026' : '22/03/2026')}</p>
                   </InfoItem>
                   <InfoItem>
-                    <label>{language === 'vi' ? 'Mức lương' : 'Salary'}</label>
-                    <p style={{ fontSize: '15px', fontWeight: '600', color: '#10b981' }}>
-                      {selectedJob.salary || (language === 'vi' ? '30.000 - 40.000 VND/giờ' : '30,000 - 40,000 VND/hour')}
-                    </p>
-                  </InfoItem>
-                  <InfoItem>
-                    <label>{language === 'vi' ? 'Hình thức làm việc' : 'Work Type'}</label>
-                    <p>{selectedJob.workType || (language === 'vi' ? 'Part-time theo ca' : 'Part-time shift-based')}</p>
+                    <label>{language === 'vi' ? 'Thời gian' : 'Time'}</label>
+                    <p>{selectedJob.workTime || '06:00 - 14:00'}</p>
                   </InfoItem>
                   <InfoItem>
                     <label>{language === 'vi' ? 'Số lượng ứng tuyển' : 'Applications'}</label>
@@ -1338,66 +1350,38 @@ const PostsManagement = () => {
                   {language === 'vi' ? 'Mô Tả Công Việc (JD)' : 'Job Description (JD)'}
                 </SectionTitle>
                 <InfoItem style={{ marginTop: '12px' }}>
-                  <label>{language === 'vi' ? 'Mô tả chi tiết' : 'Detailed Description'}</label>
                   <p style={{ 
-                    lineHeight: '1.6', 
+                    lineHeight: '1.8', 
                     whiteSpace: 'pre-line',
-                    background: '#f8fafc',
+                    background: '#ffffff',
                     padding: '16px',
                     borderRadius: '8px',
-                    border: '1px solid #e2e8f0'
+                    border: '1px solid #e5e7eb',
+                    fontSize: '14px'
                   }}>
                     {selectedJob.description || (language === 'vi' 
-                      ? `• Phục vụ khách hàng tại quầy và bàn\n• Pha chế đồ uống theo yêu cầu\n• Dọn dẹp và vệ sinh khu vực làm việc\n• Hỗ trợ đồng nghiệp khi cần thiết\n• Tư vấn menu cho khách hàng`
-                      : `• Serve customers at counter and tables\n• Prepare beverages as requested\n• Clean and maintain work area\n• Support colleagues when needed\n• Advise customers on menu items`
+                      ? `• Thái độ nhiệt tình, thân thiện với khách hàng\n• Nhanh nhẹn, chịu được áp lực công việc cao điểm\n• Có tinh thần trách nhiệm và làm việc nhóm tốt\n• Chấp nhận làm việc theo ca, kể cả cuối tuần và lễ`
+                      : `• Enthusiastic and friendly attitude towards customers\n• Quick and able to handle peak hour pressure\n• Responsible and good teamwork spirit\n• Accept shift work, including weekends and holidays`
                     )}
                   </p>
                 </InfoItem>
                 <InfoItem style={{ marginTop: '16px' }}>
-                  <label>{language === 'vi' ? 'Yêu cầu ứng viên' : 'Requirements'}</label>
+                  <label style={{ fontWeight: '700', fontSize: '15px', color: '#1e293b' }}>
+                    {language === 'vi' ? 'CHẾ ĐỘ PHÚC LỢI:' : 'BENEFITS:'}
+                  </label>
                   <p style={{ 
-                    lineHeight: '1.6', 
+                    lineHeight: '1.8', 
                     whiteSpace: 'pre-line',
-                    background: '#f8fafc',
+                    background: '#ffffff',
                     padding: '16px',
                     borderRadius: '8px',
-                    border: '1px solid #e2e8f0'
-                  }}>
-                    {selectedJob.requirements || (language === 'vi'
-                      ? `• Độ tuổi: 18-35 tuổi\n• Ngoại hình: Ưa nhìn, giao tiếp tốt\n• Kinh nghiệm: Không yêu cầu (có kinh nghiệm là lợi thế)\n• Kỹ năng: Nhiệt tình, chăm chỉ, trung thực\n• Sức khỏe: Tốt, có thể đứng lâu`
-                      : `• Age: 18-35 years old\n• Appearance: Presentable, good communication\n• Experience: Not required (experience is a plus)\n• Skills: Enthusiastic, hardworking, honest\n• Health: Good, able to stand for long periods`
-                    )}
-                  </p>
-                </InfoItem>
-                <InfoItem style={{ marginTop: '16px' }}>
-                  <label>{language === 'vi' ? 'Quyền lợi' : 'Benefits'}</label>
-                  <p style={{ 
-                    lineHeight: '1.6', 
-                    whiteSpace: 'pre-line',
-                    background: '#f0fdf4',
-                    padding: '16px',
-                    borderRadius: '8px',
-                    border: '1px solid #bbf7d0'
+                    border: '1px solid #e5e7eb',
+                    fontSize: '14px',
+                    marginTop: '8px'
                   }}>
                     {selectedJob.benefits || (language === 'vi'
-                      ? `• Lương theo ca: 30.000 - 40.000 VND/giờ (cao hơn part-time thông thường)\n• Thanh toán ngay sau khi kết thúc ca làm việc\n• Linh hoạt 100%: Tự chọn ca, tự quyết định làm hay không\n• Không ràng buộc thời gian, không hợp đồng dài hạn\n• Làm bao nhiêu nhận bấy nhiêu - như mô hình Grab/Be\n• Thưởng thêm cho ca cao điểm (cuối tuần, lễ tết)\n• Được đào tạo miễn phí trước khi làm việc\n• Môi trường làm việc chuyên nghiệp, thân thiện`
-                      : `• Hourly rate: 30,000 - 40,000 VND/hour (higher than regular part-time)\n• Payment immediately after shift completion\n• 100% flexible: Choose your shifts, decide when to work\n• No time commitment, no long-term contract\n• Work as much as you want - like Grab/Be model\n• Bonus for peak hours (weekends, holidays)\n• Free training before starting\n• Professional and friendly work environment`
-                    )}
-                  </p>
-                </InfoItem>
-                <InfoItem style={{ marginTop: '16px' }}>
-                  <label>{language === 'vi' ? 'Lịch làm việc' : 'Work Schedule'}</label>
-                  <p style={{ 
-                    lineHeight: '1.6', 
-                    whiteSpace: 'pre-line',
-                    background: '#fef3c7',
-                    padding: '16px',
-                    borderRadius: '8px',
-                    border: '1px solid #fde68a'
-                  }}>
-                    {selectedJob.schedule || (language === 'vi'
-                      ? `• Làm việc theo ca: Chọn ca trên app, hết ca là kết thúc\n• Không bắt buộc cam kết số ca tối thiểu\n• Ca sáng: 6:00 - 11:00 (5 giờ)\n• Ca trưa: 11:00 - 15:00 (4 giờ)\n• Ca chiều: 15:00 - 19:00 (4 giờ)\n• Ca tối: 19:00 - 23:00 (4 giờ)\n• Có thể nhận nhiều ca trong ngày hoặc chỉ 1 ca\n• Hủy ca trước 2 giờ không bị phạt`
-                      : `• Shift-based work: Choose shifts on app, finish when shift ends\n• No minimum shift commitment required\n• Morning shift: 6:00 - 11:00 (5 hours)\n• Lunch shift: 11:00 - 15:00 (4 hours)\n• Afternoon shift: 15:00 - 19:00 (4 hours)\n• Evening shift: 19:00 - 23:00 (4 hours)\n• Can take multiple shifts per day or just one\n• Cancel 2 hours before with no penalty`
+                      ? `• Được đào tạo kỹ năng pha chế chuyên nghiệp\n• Thưởng hiệu suất làm việc hàng tháng\n• Nghỉ phép có lương theo quy định\n• Được hưởng BHXH sau thời gian thử việc\n• Môi trường làm việc trẻ trung, năng động\n• Cơ hội thăng tiến lên vị trí quản lý`
+                      : `• Professional barista skills training\n• Monthly performance bonus\n• Paid leave according to regulations\n• Social insurance after probation period\n• Young and dynamic work environment\n• Promotion opportunities to management positions`
                     )}
                   </p>
                 </InfoItem>
