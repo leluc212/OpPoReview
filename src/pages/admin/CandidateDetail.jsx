@@ -530,7 +530,7 @@ const CandidateDetail = () => {
 
           <StatsRow>
             <StatCard>
-              <div className="label">{language === 'vi' ? 'Job Gấp đã làm' : 'Jobs Completed'}</div>
+              <div className="label">{language === 'vi' ? 'Công việc Tuyển gấp đã làm' : 'Urgent Jobs Completed'}</div>
               <div className="value">{candidate.jobsCompleted}</div>
             </StatCard>
             <StatCard>
@@ -548,7 +548,7 @@ const CandidateDetail = () => {
             {language === 'vi' ? 'Lịch sử việc làm' : 'Career History'}
           </Tab>
           <Tab $active={activeTab === 'activity'} onClick={() => setActiveTab('activity')}>
-            {language === 'vi' ? 'Hoạt động Job Gấp' : 'Job Activity'}
+            {language === 'vi' ? 'Hoạt động Công việc Tuyển gấp' : 'Urgent Job Activity'}
           </Tab>
           <Tab $active={activeTab === 'reviews'} onClick={() => setActiveTab('reviews')}>
             {language === 'vi' ? 'Đánh giá' : 'Reviews'}
@@ -656,7 +656,7 @@ const CandidateDetail = () => {
 
           {activeTab === 'activity' && (
             <>
-              <SectionTitle>{language === 'vi' ? 'Hoạt động Job Gấp' : 'Job Activity'}</SectionTitle>
+              <SectionTitle>{language === 'vi' ? 'Hoạt động Công việc Tuyển gấp' : 'Urgent Job Activity'}</SectionTitle>
               <InfoGrid>
                 <InfoItem>
                   <div className="label">{language === 'vi' ? 'Job đã hoàn thành:' : 'Jobs Completed:'}</div>

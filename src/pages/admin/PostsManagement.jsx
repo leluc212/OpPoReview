@@ -701,12 +701,12 @@ const PostsManagement = () => {
     };
   };
 
-  // Dữ liệu việc làm part-time lâu dài (standard jobs)
+  // Dữ liệu việc làm Công việc Tiêu chuẩn (standard jobs)
   const longtermJobs = jobPosts
     .filter(job => job.category === 'standard')
     .map(job => transformJobToPost(job, false));
 
-  // Dữ liệu việc làm part-time gấp (urgent jobs)
+  // Dữ liệu việc làm Công việc Tuyển gấp (urgent jobs)
   const urgentJobs = jobPosts
     .filter(job => job.category === 'urgent')
     .map(job => transformJobToPost(job, true));
@@ -844,7 +844,7 @@ const PostsManagement = () => {
       <PageContainer>
         <PageHeader>
           <h1>{language === 'vi' ? 'Quản Lý Bài Đăng' : 'Posts Management'}</h1>
-          <p>{language === 'vi' ? 'Quản lý việc làm part-time lâu dài và gấp' : 'Manage long-term and urgent part-time jobs'}</p>
+          <p>{language === 'vi' ? 'Quản lý Công việc Tiêu chuẩn và Công việc Tuyển gấp' : 'Manage standard and urgent job posts'}</p>
         </PageHeader>
 
         <TabContainer>
@@ -858,7 +858,7 @@ const PostsManagement = () => {
             }}
           >
             <Briefcase />
-            {language === 'vi' ? 'Part-time Lâu Dài' : 'Long-term Part-time'}
+            {language === 'vi' ? 'Công việc Tiêu chuẩn' : 'Standard Jobs'}
             <span style={{ 
               marginLeft: '4px', 
               padding: '2px 8px', 
@@ -881,7 +881,7 @@ const PostsManagement = () => {
             }}
           >
             <Zap />
-            {language === 'vi' ? 'Part-time Gấp' : 'Urgent Part-time'}
+            {language === 'vi' ? 'Công việc Tuyển gấp' : 'Urgent Jobs'}
             <span style={{ 
               marginLeft: '4px', 
               padding: '2px 8px', 

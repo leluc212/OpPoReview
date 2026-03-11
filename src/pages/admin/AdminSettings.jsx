@@ -5,6 +5,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
 import { Globe, Moon, Sun } from 'lucide-react';
 import { Button } from '../../components/FormElements';
+import UnderDevelopmentModal from '../../components/UnderDevelopmentModal';
 
 const SettingsContainer = styled.div`
   max-width: 900px;
@@ -133,10 +134,18 @@ const Toggle = styled.label`
 const AdminSettings = () => {
   const { language, changeLanguage, t } = useLanguage();
   const { isDarkMode, toggleTheme } = useTheme();
+  const [isDevModalOpen, setIsDevModalOpen] = useState(false);
   
-  const handleDarkModeToggle = (e) => {
-    setDarkMode(e.target.checked);
-    alert(darkMode ? 'Light mode enabled' : 'Dark mode enabled');
+  const handleLanguageChange = (lang) => {
+    if (lang === 'en') {
+      setIsDevModalOpen(true);
+    } else {
+      changeLanguage(lang);
+    }
+  };
+  
+  const handleDarkModeToggle = () => {
+    setIsDevModalOpen(true);
   };
 
   return (
@@ -158,13 +167,13 @@ const AdminSettings = () => {
             <LanguageOptions>
               <LanguageButton
                 $active={language === 'vi'}
-                onClick={() => changeLanguage('vi')}
+                onClick={() => handleLanguageChange('vi')}
               >
                 {t.settings.vietnamese}
               </LanguageButton>
               <LanguageButton
                 $active={language === 'en'}
-                onClick={() => changeLanguage('en')}
+                onClick={() => handleLanguageChange('en')}
               >
                 {t.settings.english}
               </LanguageButton>
@@ -184,12 +193,19 @@ const AdminSettings = () => {
               <p>{t.settings.darkModeDesc}</p>
             </SettingInfo>
             <Toggle>
-              <input type="checkbox" checked={isDarkMode} onChange={toggleTheme} />
+              <input type="checkbox" checked={isDarkMode} onChange={handleDarkModeToggle} />
               <span></span>
             </Toggle>
           </SettingItem>
         </SettingsCard>
       </SettingsContainer>
+      
+      <UnderDevelopmentModal 
+        isOpen={isDevModalOpen}
+        onClose={() => setIsDevModalOpen(false)}
+        title="Tính Năng Đang Phát Triển"
+        message="Chức năng này đang trong quá trình phát triển và sẽ sớm được ra mắt. Cảm ơn bạn!!!"
+      />
     </DashboardLayout>
   );
 };

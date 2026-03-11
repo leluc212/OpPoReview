@@ -869,7 +869,7 @@ const CandidatesManagement = () => {
                   strokeWidth="3"
                 />
                 
-                {/* Job gấp - Dynamic polyline */}
+                {/* Công việc Tuyển gấp - Dynamic polyline */}
                 <polyline
                   points={chartData.map((item, i) => {
                     const x = 100 + (i * (500 / Math.max(chartData.length - 1, 1)));
@@ -946,7 +946,7 @@ const CandidatesManagement = () => {
               </LegendItem>
               <LegendItem>
                 <LegendDot $color="#f59e0b" />
-                {language === 'vi' ? 'Job gấp' : 'Urgent Jobs'}
+                {language === 'vi' ? 'Công việc Tuyển gấp' : 'Urgent Jobs'}
               </LegendItem>
             </ChartLegend>
           </ChartCard>
