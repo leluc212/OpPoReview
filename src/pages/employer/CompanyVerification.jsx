@@ -996,7 +996,7 @@ const CompanyVerification = () => {
                     type="text"
                     value={step3Data.representativeName}
                     onChange={(e) => setStep3Data({ ...step3Data, representativeName: e.target.value })}
-                    placeholder={language === 'vi' ? 'Nguyễn Văn A' : 'John Doe'}
+                    placeholder={language === 'vi' ? 'Nguyễn Hùng Anh' : 'John Doe'}
                     required
                   />
                 </FormGroup>

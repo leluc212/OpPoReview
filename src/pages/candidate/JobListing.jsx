@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import Modal from '../../components/Modal';
 import {
@@ -792,16 +792,33 @@ const BoostBannerWrap = styled.div`
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(0,0,0,0.12);
   cursor: pointer;
-
-  img {
+  background: #1e293b;
+  
+  .banner-image-container {
+    position: relative;
     width: 100%;
-    height: auto;
-    display: block;
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    padding-bottom: 42%;
+    overflow: hidden;
   }
 
-  &:hover img {
-    transform: scale(1.01);
+  img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    will-change: opacity;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  &:hover .banner-image-container img {
+    transform: scale(1.01) translateZ(0);
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 `;
 
@@ -2312,8 +2329,8 @@ const JobListing = () => {
 
   const banners = [
     { src: "/OpPoReview/images/seoul.jpg", alt: "Seoul Vua Mì Cay" },
-    { src: "/OpPoReview/images/bamosbanner.jpg", alt: "Bamos Coffee" },
-    { src: "/OpPoReview/images/lebanner.jpg", alt: "Le Banner" }
+    { src: "/OpPoReview/images/unnamed (1).jpg", alt: "Banner" },
+    { src: "/OpPoReview/images/unnamed.jpg", alt: "Banner" }
   ];
 
   useEffect(() => {
@@ -3092,14 +3109,22 @@ const JobListing = () => {
 
             <BoostBannerWrap>
               <BoostTag>🔥Hot deal</BoostTag>
-              <motion.img 
-                key={currentBannerIndex}
-                initial={{ opacity: 0.8, scale: 1.05 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6 }}
-                src={banners[currentBannerIndex].src} 
-                alt={banners[currentBannerIndex].alt} 
-              />
+              <div className="banner-image-container">
+                <AnimatePresence initial={false}>
+                  <motion.img 
+                    key={currentBannerIndex}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ 
+                      duration: 0.7,
+                      ease: [0.25, 0.1, 0.25, 1]
+                    }}
+                    src={banners[currentBannerIndex].src} 
+                    alt={banners[currentBannerIndex].alt} 
+                  />
+                </AnimatePresence>
+              </div>
               <BannerDots>
                 {banners.map((_, idx) => (
                   <BannerDot 

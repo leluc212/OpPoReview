@@ -400,7 +400,7 @@ const getNotifications = (language) => ([
     id: 1,
     type: 'application',
     title: language === 'vi' ? 'Ứng viên mới ứng tuyển' : 'New candidate application',
-    message: language === 'vi' ? 'Nguyễn Văn A đã ứng tuyển' : 'Nguyen Van A applied',
+    message: language === 'vi' ? 'Nguyễn Hùng Anh vị trí Nhân viên phục vụ ca tối. Hồ sơ đang chờ xem xét.' : 'Nguyen Van A applied for Evening Shift Server position. Application pending review.',
     time: language === 'vi' ? '5 phút trước' : '5 minutes ago',
     read: false,
     icon: UserPlus
@@ -409,7 +409,7 @@ const getNotifications = (language) => ([
     id: 2,
     type: 'application',
     title: language === 'vi' ? 'Ứng viên mới ứng tuyển' : 'New candidate application',
-    message: language === 'vi' ? 'Trần Thị B đã ứng tuyển' : 'Tran Thi B applied',
+    message: language === 'vi' ? 'Trương Tú Phương đã ứng tuyển vị trí Nhân viên pha chế. Kinh nghiệm 2 năm tại Highlands Coffee.' : 'Tran Thi B applied for Barista position. 2 years experience at Highlands Coffee.',
     time: language === 'vi' ? '15 phút trước' : '15 minutes ago',
     read: false,
     icon: UserPlus
@@ -417,8 +417,8 @@ const getNotifications = (language) => ([
   {
     id: 3,
     type: 'rating',
-    title: language === 'vi' ? 'Đánh giá nhân viên mới' : 'Rate new employee',
-    message: language === 'vi' ? 'Phạm Thị D đã hoàn thành công việc. Vui lòng đánh giá nhân viên.' : 'Pham Thi D has completed the job. Please provide a rating.',
+    title: language === 'vi' ? 'Đánh giá nhân viên' : 'Rate employee',
+    message: language === 'vi' ? 'Phạm Lê Duy đã hoàn thành ca làm việc ngày 10/03/2026. Vui lòng đánh giá nhân viên để hoàn tất quy trình.' : 'Pham Thi D completed work shift on 10/03/2026. Please rate the employee to complete the process.',
     time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
     read: false,
     icon: Star
@@ -427,7 +427,7 @@ const getNotifications = (language) => ([
     id: 4,
     type: 'system',
     title: language === 'vi' ? 'Tin tuyển dụng sắp hết hạn' : 'Job post expiring soon',
-    message: language === 'vi' ? 'Tin tuyển dụng "Nhân viên Thu Ngân" sẽ hết hạn vào 27/02/2026' : 'The "Cashier" job post will expire on 27/02/2026',
+    message: language === 'vi' ? 'Tin tuyển dụng "Nhân viên Thu Ngân" sẽ hết hạn vào 27/03/2026. Gia hạn ngay để tiếp tục tuyển dụng.' : 'Job post "Cashier" will expire on 27/03/2026. Renew now to continue recruiting.',
     time: language === 'vi' ? '3 giờ trước' : '3 hours ago',
     read: true,
     icon: AlertCircle
@@ -435,8 +435,8 @@ const getNotifications = (language) => ([
   {
     id: 5,
     type: 'application',
-    title: language === 'vi' ? 'Hồ sơ đã được xem' : 'Profiles viewed',
-    message: language === 'vi' ? '12 ứng viên mới đã xem tin tuyển dụng của bạn' : '12 new candidates viewed your job post',
+    title: language === 'vi' ? 'Tin tuyển dụng được quan tâm' : 'Job post getting attention',
+    message: language === 'vi' ? '12 ứng viên mới đã xem tin tuyển dụng "Nhân viên phục vụ" của bạn trong 24 giờ qua.' : '12 new candidates viewed your "Server" job post in the last 24 hours.',
     time: language === 'vi' ? '4 giờ trước' : '4 hours ago',
     read: true,
     icon: Eye
@@ -444,8 +444,8 @@ const getNotifications = (language) => ([
   {
     id: 6,
     type: 'system',
-    title: language === 'vi' ? 'Cập nhật hệ thống' : 'System update',
-    message: language === 'vi' ? 'Hệ thống đã được cập nhật phiên bản mới với nhiều tính năng hữu ích' : 'The system has been updated with a new version and useful features',
+    title: language === 'vi' ? 'Tin tuyển dụng đã được duyệt' : 'Job post approved',
+    message: language === 'vi' ? 'Tin tuyển dụng "Nhân viên bếp" đã được admin phê duyệt và đang hiển thị công khai.' : 'Job post "Kitchen Staff" has been approved by admin and is now publicly visible.',
     time: language === 'vi' ? '1 ngày trước' : '1 day ago',
     read: true,
     icon: CheckCircle

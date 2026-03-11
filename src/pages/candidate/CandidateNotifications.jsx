@@ -407,10 +407,10 @@ function CandidateNotifications() {
       type: 'application',
       icon: Eye,
       color: '#1e40af',
-      title: language === 'vi' ? 'Hồ sơ đã được xem' : 'Profile viewed',
+      title: language === 'vi' ? 'Nhà tuyển dụng đã xem hồ sơ' : 'Employer viewed profile',
       message: language === 'vi'
-        ? 'FPT Software đã xem hồ sơ ứng tuyển Senior React Developer của bạn'
-        : 'FPT Software viewed your Senior React Developer application',
+        ? 'Highlands Coffee đã xem hồ sơ ứng tuyển Nhân viên pha chế của bạn. Hãy chuẩn bị sẵn sàng cho cuộc phỏng vấn.'
+        : 'Highlands Coffee viewed your Barista application. Be ready for the interview.',
       time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
       unread: true
     },
@@ -421,8 +421,8 @@ function CandidateNotifications() {
       color: '#10B981',
       title: language === 'vi' ? 'Hồ sơ được chấp nhận' : 'Application accepted',
       message: language === 'vi'
-        ? 'Hồ sơ Nhân viên tại Highlands của bạn đã được chấp nhận'
-        : 'Your application for Highlands has been accepted',
+        ? 'Chúc mừng! Hồ sơ ứng tuyển Nhân viên phục vụ tại Katinat Quận 8 đã được chấp nhận. Nhà tuyển dụng sẽ liên hệ với bạn sớm.'
+        : 'Congratulations! Your Server application at Katinat District 8 has been accepted. The employer will contact you soon.',
       time: language === 'vi' ? '1 ngày trước' : '1 day ago',
       unread: false
     },
@@ -433,8 +433,8 @@ function CandidateNotifications() {
       color: '#1e40af',
       title: language === 'vi' ? 'Công việc phù hợp với bạn' : 'Jobs matching your profile',
       message: language === 'vi'
-        ? 'Có 3 công việc mới phù hợp với kỹ năng React, Node.js của bạn'
-        : '3 new jobs match your React, Node.js skills',
+        ? 'Có 5 công việc mới phù hợp với kỹ năng Pha chế, Phục vụ của bạn tại khu vực Quận 1, Quận 3.'
+        : '5 new jobs match your Barista, Server skills in District 1, District 3 area.',
       time: language === 'vi' ? '3 giờ trước' : '3 hours ago',
       unread: true
     },
@@ -443,10 +443,10 @@ function CandidateNotifications() {
       type: 'success',
       icon: CheckCircle,
       color: '#10B981',
-      title: language === 'vi' ? 'CV ứng tuyển được duyệt' : 'Application CV approved',
+      title: language === 'vi' ? 'Hồ sơ ứng tuyển được duyệt' : 'Application approved',
       message: language === 'vi'
-        ? 'Katinat quận 8 đã duyệt CV ứng tuyển gấp của bạn. Bạn có thể liên hệ với nhà tuyển dụng qua tin nhắn'
-        : 'Katinat District 8 approved your urgent job application CV. You can contact the employer via message',
+        ? 'The Coffee House đã duyệt hồ sơ ứng tuyển ca tối của bạn. Bạn có thể liên hệ với nhà tuyển dụng qua tin nhắn để xác nhận lịch làm việc.'
+        : 'The Coffee House approved your evening shift application. You can contact the employer via message to confirm the work schedule.',
       time: language === 'vi' ? '3 ngày trước' : '3 days ago',
       unread: false
     },
@@ -457,21 +457,21 @@ function CandidateNotifications() {
       color: '#10B981',
       title: language === 'vi' ? 'Chúc mừng! Hồ sơ hoàn thiện 100%' : 'Congratulations! Profile 100% complete',
       message: language === 'vi'
-        ? 'Bạn đã hoàn thiện hồ sơ. Cơ hội được tuyển dụng tăng 70%'
-        : 'You completed your profile. Your hiring chances increased by 70%',
+        ? 'Bạn đã hoàn thiện hồ sơ với đầy đủ thông tin, kỹ năng và kinh nghiệm. Cơ hội được tuyển dụng tăng 70%!'
+        : 'You completed your profile with full information, skills and experience. Your hiring chances increased by 70%!',
       time: language === 'vi' ? '3 ngày trước' : '3 days ago',
       unread: false
     },
     {
       id: 6,
       type: 'application',
-      icon: Eye,
+      icon: TrendingUp,
       color: '#F59E0B',
-      title: language === 'vi' ? 'Đề xuất: Hồ sơ của bạn đang được quan tâm!' : 'Suggestion: Your profile is getting attention!',
+      title: language === 'vi' ? 'Hồ sơ của bạn đang được quan tâm!' : 'Your profile is getting attention!',
       message: language === 'vi'
-        ? 'Bạn có 12 nhà tuyển dụng đã xem hồ sơ và 5 công việc mới phù hợp với bạn. Hãy cập nhật hồ sơ để tăng cơ hội!'
-        : 'You have 12 employers who viewed your profile and 5 new matching jobs. Update your profile to increase your chances!',
-      time: language === 'vi' ? 'Hôm nay' : 'Today',
+        ? 'Có 8 nhà tuyển dụng đã xem hồ sơ của bạn trong tuần này. Hãy cập nhật thêm kỹ năng và kinh nghiệm để tăng cơ hội được tuyển!'
+        : '8 employers viewed your profile this week. Update your skills and experience to increase your hiring chances!',
+      time: language === 'vi' ? '5 giờ trước' : '5 hours ago',
       unread: true
     }
   ];
