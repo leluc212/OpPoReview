@@ -24,7 +24,7 @@ import TermsUrgentJobs from './pages/TermsUrgentJobs';
 // Candidate Pages
 import CandidateDashboard from './pages/candidate/CandidateDashboard';
 import JobListing from './pages/candidate/JobListing';
-import SavedJobs from './pages/candidate/SavedJobs';
+
 import CandidateProfile from './pages/candidate/CandidateProfile';
 import CandidateSettings from './pages/candidate/CandidateSettings';
 import CandidateNotifications from './pages/candidate/CandidateNotifications';
@@ -114,11 +114,7 @@ function AppRoutes() {
           <JobListing />
         </ProtectedRoute>
       } />
-      <Route path="/candidate/saved-jobs" element={
-        <ProtectedRoute allowedRoles={['candidate']}>
-          <SavedJobs />
-        </ProtectedRoute>
-      } />
+      <Route path="/candidate/saved-jobs" element={<Navigate to="/candidate/jobs?tab=saved" replace />} />
       <Route path="/candidate/profile" element={
         <ProtectedRoute allowedRoles={['candidate']}>
           <CandidateProfile />

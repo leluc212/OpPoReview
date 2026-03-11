@@ -2849,7 +2849,7 @@ const LandingPage = () => {
                         <Search />
                         Tìm việc làm
                       </CVTemplateItem>
-                      <CVTemplateItem to="/candidate/saved-jobs" $isDark={isDarkMode}>
+                      <CVTemplateItem to="/candidate/jobs?tab=saved" $isDark={isDarkMode}>
                         <Bookmark />
                         Việc làm đã lưu
                       </CVTemplateItem>

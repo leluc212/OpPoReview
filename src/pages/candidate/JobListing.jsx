@@ -2305,10 +2305,13 @@ const JobListing = () => {
     setShowConfirmModal(false);
   };
 
-  // Check if we're on saved jobs page
+  // Check if we're on saved jobs tab via query param
   useEffect(() => {
-    // Removed - no longer using separate route for saved jobs
-  }, [location.pathname]);
+    const params = new URLSearchParams(location.search);
+    if (params.get('tab') === 'saved') {
+      setShowSavedJobsOnly(true);
+    }
+  }, [location.search]);
 
   // Load saved jobs from localStorage on mount
   useEffect(() => {
