@@ -518,16 +518,22 @@ const StaffStatus = styled.div`
     props.$status === 'active' ? '#D1FAE5' : 
     props.$status === 'completed' ? '#E0E7FF' : 
     props.$status === 'pending' ? '#FEF9C3' :
+    props.$status === 'pending_confirmation' ? '#FEE2E2' :
+    props.$status === 'pending_change' ? '#FFEDD5' :
     '#FEF3C7'};
   color: ${props => 
     props.$status === 'active' ? '#047857' : 
     props.$status === 'completed' ? '#3730A3' : 
     props.$status === 'pending' ? '#854D0E' :
+    props.$status === 'pending_confirmation' ? '#B91C1C' :
+    props.$status === 'pending_change' ? '#C2410C' :
     '#92400E'};
   border: 1px solid ${props => 
     props.$status === 'active' ? '#10B981' : 
     props.$status === 'completed' ? '#818CF8' : 
     props.$status === 'pending' ? '#EAB308' :
+    props.$status === 'pending_confirmation' ? '#EF4444' :
+    props.$status === 'pending_change' ? '#F97316' :
     '#F59E0B'};
 `;
 
