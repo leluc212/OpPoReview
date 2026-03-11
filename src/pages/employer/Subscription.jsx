@@ -500,7 +500,7 @@ const Subscription = () => {
               <Star />
             </PageIconBox>
             <PageTitleText>
-              <h1>{vi ? 'Dịch Vụ đề xuất ' : 'Pricing to Boost'}</h1>
+              <h1>{vi ? 'Dịch Vụ Đề Xuất ' : 'Pricing to Boost'}</h1>
               <p>{vi ? 'Chọn gói dịch vụ để đẩy tin tuyển dụng của bạn lên "TOP"' : 'Choose a boost package to push your job posts to the top'}</p>
             </PageTitleText>
           </PageHeader>

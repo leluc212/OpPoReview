@@ -19,6 +19,8 @@ const getJobPosts = (language) => [
     location: language === 'vi' ? 'Quận 8, TP.HCM' : 'District 8, HCMC',
     salary: language === 'vi' ? '15.000.000 VNĐ' : '$600/month',
     type: language === 'vi' ? 'Toàn thời gian' : 'Full-time',
+    shift: '08:00 - 17:00',
+    workDays: language === 'vi' ? '20/03/2026' : '03/20/2026',
     applicants: 12,
     views: 156,
     status: 'active',
@@ -34,6 +36,8 @@ const getJobPosts = (language) => [
     location: language === 'vi' ? 'Quận 1, TP.HCM' : 'District 1, HCMC',
     salary: language === 'vi' ? '8.000.000 VNĐ' : '$320/month',
     type: language === 'vi' ? 'Toàn thời gian' : 'Full-time',
+    shift: '07:00 - 15:00',
+    workDays: language === 'vi' ? '18/03/2026' : '03/18/2026',
     applicants: 28,
     views: 342,
     status: 'active',
@@ -50,6 +54,7 @@ const getJobPosts = (language) => [
     salary: language === 'vi' ? '50.000 VNĐ/giờ' : '$2/hour',
     type: language === 'vi' ? 'Bán thời gian' : 'Part-time',
     shift: '13:00 - 18:00',
+    workDays: language === 'vi' ? '15/03/2026' : '03/15/2026',
     applicants: 15,
     views: 203,
     status: 'active',
@@ -2334,8 +2339,13 @@ const Applications = () => {
                           <DollarSign /><span>{post.salary}</span>
                         </div>
                         {post.shift && (
-                          <div className="meta-item" style={{ gridColumn: '1 / -1' }}>
+                          <div className="meta-item">
                             <Clock /><span>{post.shift}</span>
+                          </div>
+                        )}
+                        {post.workDays && (
+                          <div className="meta-item">
+                            <Calendar /><span>{language === 'vi' ? 'Ngày làm: ' : 'Work date: '}{post.workDays}</span>
                           </div>
                         )}
                       </JobPostMeta>

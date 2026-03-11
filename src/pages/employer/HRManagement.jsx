@@ -3630,7 +3630,7 @@ const HRManagement = () => {
                 ))}
               </RateStarRow>
             );
-            const canSubmit = ratings.overall > 0;
+            const canSubmit = ratings.overall > 0 && ratings.attitude > 0 && ratings.efficiency > 0 && ratings.discipline > 0 && ratings.skills > 0;
             return (
               <RateModalOverlay
                 initial={{ opacity: 0 }}

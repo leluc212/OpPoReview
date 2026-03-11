@@ -141,6 +141,20 @@ const FormTitle = styled.div`
   }
 `;
 
+const ErrorMessage = styled(motion.div)`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px 14px;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: 8px;
+  color: #DC2626;
+  font-size: 13px;
+  font-weight: 500;
+`;
+
 const FormGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -313,6 +327,8 @@ const CompanyVerification = () => {
   const [completedSteps, setCompletedSteps] = useState([]);
   const [uploadSuccess, setUploadSuccess] = useState(null); // Track which file was uploaded
   
+  const [expiryDateError, setExpiryDateError] = useState(false);
+
   const [step1Data, setStep1Data] = useState({
     businessLicense: null,
     licenseNumber: '',
@@ -544,6 +560,10 @@ const CompanyVerification = () => {
         if (!step1Data.issuingAuthority || String(step1Data.issuingAuthority).trim() === '') {
           missingFields.push(language === 'vi' ? 'Cơ quan cấp' : 'Issuing Authority');
         }
+        if (step1Data.expiryDate && step1Data.issueDate && step1Data.expiryDate <= step1Data.issueDate) {
+          setExpiryDateError(true);
+          return false;
+        }
         
         if (missingFields.length > 0) {
           console.log('Missing fields:', missingFields);
@@ -772,8 +792,26 @@ const CompanyVerification = () => {
                   <Input
                     type="date"
                     value={step1Data.expiryDate}
-                    onChange={(e) => setStep1Data(prev => ({ ...prev, expiryDate: e.target.value }))}
+                    min={step1Data.issueDate || undefined}
+                    onChange={(e) => {
+                      setExpiryDateError(false);
+                      setStep1Data(prev => ({ ...prev, expiryDate: e.target.value }));
+                    }}
+                    style={expiryDateError ? { borderColor: '#DC2626' } : {}}
                   />
+                  <AnimatePresence>
+                    {expiryDateError && (
+                      <ErrorMessage
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <AlertCircle size={15} />
+                        {language === 'vi' ? 'Ngày hết hạn không hợp lệ' : 'Invalid expiry date'}
+                      </ErrorMessage>
+                    )}
+                  </AnimatePresence>
                 </FormGroup>
               </FormGrid>
 
