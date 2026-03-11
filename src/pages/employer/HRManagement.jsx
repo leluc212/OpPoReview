@@ -3099,7 +3099,7 @@ const HRManagement = () => {
                               <MapPin />{post.location}
                             </div>
                             <div className="meta-item">
-                              <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span> {post.salary}
+                              <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Mức lương:' : 'Salary:'}</span> {post.salary}
                             </div>
                             {post.shift && (
                               <div className="meta-item">
@@ -3909,7 +3909,7 @@ const HRManagement = () => {
                     <span>{selectedJobView.location}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
-                    <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span>
+                    <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Mức lương:' : 'Salary:'}</span>
                     <span>{selectedJobView.salary}</span>
                   </div>
                   {selectedJobView.shift && (
