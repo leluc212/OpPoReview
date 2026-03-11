@@ -1378,22 +1378,24 @@ const translateTag = (tagStr, language) => {
 
 // Translate job type
 const translateJobType = (typeStr, language) => {
-  // Extract only time from "Ca sáng (06:00 - 14:00)" -> "(06:00 - 14:00)"
-  const timeMatch = typeStr.match(/\((\d{2}:\d{2}\s*-\s*\d{2}:\d{2})\)/);
-  if (timeMatch) {
-    return `(${timeMatch[1]})`;
+  // If it's a shift job (contains "Ca"), return Part-time
+  if (typeStr.includes('Ca ')) {
+    return language === 'vi' ? 'Part-time' : 'Part-time';
   }
   
-  if (language === 'vi') return typeStr;
-
-  return typeStr
-    .replace(/Ca đêm/g, 'Night Shift')
-    .replace(/Ca sáng/g, 'Morning Shift')
-    .replace(/Ca chiều/g, 'Afternoon Shift')
-    .replace(/Ca tối/g, 'Evening Shift')
-    .replace(/Ca linh động/g, 'Flexible Shift')
-    .replace(/Part-time/g, 'Part-time')
-    .replace(/Full-time/g, 'Full-time');
+  // If already Part-time or Full-time, keep it
+  if (typeStr.includes('Part-time') || typeStr.includes('Full-time')) {
+    return typeStr;
+  }
+  
+  // For English translation
+  if (language === 'en') {
+    return typeStr
+      .replace(/Part-time/g, 'Part-time')
+      .replace(/Full-time/g, 'Full-time');
+  }
+  
+  return typeStr;
 };
 
 // Jobs data - moved outside component to avoid re-creation on each render
