@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import { GlobalStyles, theme, darkTheme } from './styles/theme';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -73,9 +73,11 @@ import AdminManagement from './pages/admin/AdminManagement';
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { isAuthenticated, user } = useAuth();
+  const location = useLocation();
   
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    const redirect = location.pathname + location.search;
+    return <Navigate to={`/login?redirect=${encodeURIComponent(redirect)}`} replace />;
   }
   
   if (allowedRoles && !allowedRoles.includes(user?.role)) {
