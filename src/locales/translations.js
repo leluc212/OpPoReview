@@ -377,7 +377,7 @@ export const translations = {
       posts: 'Bài Đăng',
       standardJobs: 'Công việc tiêu chuẩn',
       jobStatus: 'Trạng Thái Tin',
-      shiftJobs: 'Công việc theo ca',
+      shiftJobs: 'Công việc Tuyển gấp',
       savedTab: 'Việc Đã Lưu',
       postsLabel: 'bài đăng',
       showing: 'Đang hiển thị',
