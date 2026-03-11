@@ -313,8 +313,8 @@ const LocationButton = styled(motion.button)`
   .spinner {
     width: 16px;
     height: 16px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-top: 2px solid white;
+    border: 2px solid rgba(59, 130, 246, 0.2);
+    border-top: 2px solid #3b82f6;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
@@ -353,6 +353,8 @@ const ApplyModalWrap = styled.div`
   align-items: center;
   text-align: center;
   gap: 16px;
+  background: #eff6ff;
+  border-radius: 16px;
 
   .apply-emoji {
     font-size: 52px;
@@ -1221,8 +1223,10 @@ const parseTimeToHours = (timeStr) => {
 
 // Translate job titles
 const translateJobTitle = (titleStr, language) => {
-  // Remove shift prefix (Ca Sáng -, Ca Chiều -, Ca Tối -, etc.)
-  let cleanTitle = titleStr.replace(/^(Ca\s+(Sáng|Chiều|Tối|Đêm|Trưa|Linh Động)\s*-\s*)/i, '');
+  // Remove shift prefix (Ca Sáng -, Ca Chiều -, Ca Tối -, etc.) - more flexible pattern
+  let cleanTitle = titleStr
+    .replace(/^Ca\s+(Sáng|Chiều|Tối|Đêm|Trưa|Linh\s+Động)\s*-\s*/gi, '')
+    .replace(/\s*-\s*Ca\s+(sáng|chiều|tối|đêm|trưa)/gi, '');
   
   // Remove Part-time and Full-time suffix
   cleanTitle = cleanTitle.replace(/\s*-\s*(Part-time|Full-time)\s*$/i, '');
@@ -1234,55 +1238,77 @@ const translateJobTitle = (titleStr, language) => {
     'Nhân viên pha chế': 'Barista',
     'Nhân viên phục vụ nhà hàng': 'Restaurant Server',
     'Đầu bếp chính': 'Head Chef',
-    'Nhân viên pha chế - Part-time': 'Barista - Part-time',
-    'Thu ngân nhà hàng - Part-time': 'Restaurant Cashier - Part-time',
-    'Nhân viên phục vụ - Part-time': 'Service Staff - Part-time',
-    'Pha chế trà sữa - Part-time': 'Bubble Tea Barista - Part-time',
+    'Nhân viên pha chế': 'Barista',
+    'Thu ngân nhà hàng': 'Restaurant Cashier',
+    'Nhân viên phục vụ': 'Service Staff',
+    'Pha chế trà sữa': 'Bubble Tea Barista',
     'Quản lý bếp': 'Kitchen Manager',
     'Nhân viên chế biến thực phẩm': 'Food Processing Staff',
     'Nhân viên phục vụ bàn': 'Waiter/Waitress',
-    'Barista - Full-time': 'Barista - Full-time',
-    'Ca Đêm - Nhân viên bếp': 'Night Shift - Kitchen Staff',
-    'Ca Sáng - Nhân viên bếp': 'Morning Shift - Kitchen Staff',
-    'Ca Chiều - Nhân viên phục vụ': 'Afternoon Shift - Service Staff',
-    'Shift Supervisor - Ca đêm': 'Shift Supervisor - Night Shift',
-    'Ca Linh Động - Nhân viên giao đồ ăn': 'Flexible Shift - Food Delivery',
-    'Ca Sáng - Nhân viên bán hàng': 'Morning Shift - Sales Staff',
-    'Ca Chiều - Nhân viên pha chế': 'Afternoon Shift - Barista',
-    'Ca Tối - Thu ngân nhà hàng': 'Evening Shift - Restaurant Cashier',
-    'Ca Sáng - Phục vụ nhà hàng': 'Morning Shift - Restaurant Server',
-    'Ca Linh Động - Giao đồ ăn nhanh': 'Flexible Shift - Fast Food Delivery',
-    'Ca Chiều - Nhân viên bếp': 'Afternoon Shift - Kitchen Staff',
-    'Ca Tối - Nhân viên Café': 'Evening Shift - Café Staff',
-    'Ca Sáng - Phục vụ Quán ăn': 'Morning Shift - Eatery Server',
-    'Ca Chiều - Nhân viên bếp nóng': 'Afternoon Shift - Hot Kitchen Staff',
-    'Ca Đêm - Giao đồ ăn đêm': 'Night Shift - Night Food Delivery',
-    'Ca Sáng - Nhân viên pha chế': 'Morning Shift - Barista',
-    'Ca Chiều - Phục vụ Trà sữa': 'Afternoon Shift - Bubble Tea Server',
-    'Ca Sáng - Thu ngân quán café': 'Morning Shift - Café Cashier',
-    'Ca Tối - Bartender': 'Evening Shift - Bartender',
-    'Ca Linh Động - Shipper đồ ăn': 'Flexible Shift - Food Delivery',
-    'Ca Chiều - Nhân viên KFC': 'Afternoon Shift - KFC Staff',
-    'Ca Sáng - Lễ tân nhà hàng': 'Morning Shift - Restaurant Receptionist',
-    'Ca Sáng - Pha chế': 'Morning Shift - Barista',
-    'Ca Chiều - Phục vụ nhà hàng': 'Afternoon Shift - Restaurant Server',
-    'Ca Tối - Thu ngân quán ăn': 'Evening Shift - Eatery Cashier',
-    'Ca Sáng - Nhân viên bếp sáng': 'Morning Shift - Kitchen Staff',
-    'Ca Chiều - Barista': 'Afternoon Shift - Barista',
-    'Ca Tối - Phục vụ Lẩu': 'Evening Shift - Hot Pot Server',
-    'Ca Sáng - Nhân viên McDonald\'s': 'Morning Shift - McDonald\'s Staff',
-    'Ca Chiều - Pha chế Phúc Long': 'Afternoon Shift - Phuc Long Barista',
-    'Ca Tối - Nhân viên KFC': 'Evening Shift - KFC Staff',
-    'Ca Sáng - Phục vụ Jollibee': 'Morning Shift - Jollibee Staff',
-    'Ca Chiều - Nhân viên Lotteria': 'Afternoon Shift - Lotteria Staff',
-    'Ca Sáng - Pha chế Katinat': 'Morning Shift - Katinat Barista',
-    'Ca Chiều - Phục vụ Pizza': 'Afternoon Shift - Pizza Server',
-    'Ca Linh Động - Giao đồ ăn': 'Flexible Shift - Food Delivery',
-    'Ca Đêm - Nhân viên bếp đêm': 'Night Shift - Kitchen Staff',
-    'Ca Sáng - Thu ngân Highlands': 'Morning Shift - Highlands Cashier'
+    'Barista': 'Barista',
+    'Nhân viên bếp': 'Kitchen Staff',
+    'Shift Supervisor': 'Shift Supervisor',
+    'Nhân viên giao đồ ăn': 'Food Delivery',
+    'Nhân viên bán hàng': 'Sales Staff',
+    'Thu ngân nhà hàng': 'Restaurant Cashier',
+    'Phục vụ nhà hàng': 'Restaurant Server',
+    'Giao đồ ăn nhanh': 'Fast Food Delivery',
+    'Nhân viên Café': 'Café Staff',
+    'Phục vụ Quán ăn': 'Eatery Server',
+    'Nhân viên bếp nóng': 'Hot Kitchen Staff',
+    'Giao đồ ăn đêm': 'Night Food Delivery',
+    'Phục vụ Trà sữa': 'Bubble Tea Server',
+    'Thu ngân quán café': 'Café Cashier',
+    'Bartender': 'Bartender',
+    'Shipper đồ ăn': 'Food Delivery',
+    'Nhân viên KFC': 'KFC Staff',
+    'Lễ tân nhà hàng': 'Restaurant Receptionist',
+    'Pha chế': 'Barista',
+    'Thu ngân quán ăn': 'Eatery Cashier',
+    'Nhân viên bếp sáng': 'Kitchen Staff',
+    'Phục vụ Lẩu': 'Hot Pot Server',
+    'Nhân viên McDonald\'s': 'McDonald\'s Staff',
+    'Pha chế Phúc Long': 'Phuc Long Barista',
+    'Phục vụ Jollibee': 'Jollibee Staff',
+    'Nhân viên Lotteria': 'Lotteria Staff',
+    'Pha chế Katinat': 'Katinat Barista',
+    'Phục vụ Pizza': 'Pizza Server',
+    'Giao đồ ăn': 'Food Delivery',
+    'Nhân viên bếp đêm': 'Kitchen Staff',
+    'Thu ngân Highlands': 'Highlands Cashier'
   };
 
-  return titleMap[titleStr] || titleStr;
+  return titleMap[cleanTitle] || cleanTitle;
+};
+
+// Generate job description based on job title and company
+const generateJobDescription = (job, language) => {
+  const title = translateJobTitle(job.title, language).toLowerCase();
+  const company = job.company;
+  
+  const descriptions = {
+    'vi': {
+      'pha chế': `• Pha chế các loại đồ uống theo tiêu chuẩn của ${company}\n• Tư vấn và giới thiệu menu cho khách hàng\n• Kiểm tra chất lượng nguyên liệu trước khi sử dụng\n• Vệ sinh và bảo quản máy móc, dụng cụ pha chế\n• Sắp xếp và trưng bày sản phẩm hấp dẫn\n\nYÊU CẦU:\n• Có kinh nghiệm pha chế từ 3-6 tháng trở lên (ưu tiên)\n• Thái độ nhiệt tình, thân thiện với khách hàng\n• Nhanh nhẹn, chịu được áp lực công việc cao điểm\n• Có tinh thần trách nhiệm và làm việc nhóm tốt\n• Chấp nhận làm việc theo ca, kể cả cuối tuần và lễ\n\nCHẾ ĐỘ PHÚC LỢI:\n• Được đào tạo kỹ năng pha chế chuyên nghiệp\n• Thưởng hiệu suất làm việc hàng tháng\n• Nghỉ phép có lương theo quy định\n• Được hưởng BHXH sau thời gian thử việc\n• Môi trường làm việc trẻ trung, năng động\n• Cơ hội thăng tiến lên vị trí quản lý`,
+      'barista': `• Pha chế cà phê espresso, cappuccino, latte và các loại đồ uống đặc biệt\n• Tạo latte art và trang trí đồ uống đẹp mắt\n• Tư vấn khách hàng về hương vị và loại cà phê phù hợp\n• Kiểm soát chất lượng từng ly đồ uống\n• Vệ sinh máy pha, grinder và khu vực làm việc\n• Quản lý tồn kho nguyên liệu, báo cáo khi thiếu hàng\n\nYÊU CẦU:\n• Am hiểu về cà phê và các phương pháp pha chế\n• Có kỹ năng pha chế và tạo latte art cơ bản\n• Giao tiếp tốt, khéo léo trong xử lý tình huống\n• Ngoại hình ưa nhìn, tác phong chuyên nghiệp\n• Sẵn sàng học hỏi và cải thiện kỹ năng\n\nCHẾ ĐỘ PHÚC LỢI:\n• Được đào tạo bài bản về cà phê chuyên sâu\n• Tham gia các khóa học nâng cao kỹ năng\n• Thưởng theo doanh số và KPI cá nhân\n• Bảo hiểm tai nạn 24/7\n• Môi trường làm việc hiện đại, chuyên nghiệp\n• Cơ hội phát triển nghề nghiệp lâu dài tại ${company}`,
+      'phục vụ': `• Đón tiếp và chào hỏi khách hàng thân thiện\n• Tư vấn menu, nhận order và ghi chép chính xác\n• Phục vụ đồ ăn, thức uống nhanh chóng và cẩn thận\n• Thu dọn bàn, vệ sinh khu vực phục vụ\n• Hỗ trợ thanh toán và tiễn khách\n• Xử lý các yêu cầu đặc biệt của khách hàng\n\nYÊU CẦU:\n• Nhanh nhẹn, lanh lợi, có sức khỏe tốt\n• Giao tiếp tốt, giọng nói rõ ràng\n• Nhiệt tình, vui vẻ, thái độ phục vụ tốt\n• Có tinh thần trách nhiệm cao\n• Ưu tiên có kinh nghiệm phục vụ nhà hàng/quán café\n\nCHẾ ĐỘ PHÚC LỢI:\n• Nhận tip trực tiếp từ khách hàng\n• Được ăn ca miễn phí tại cửa hàng\n• Làm việc theo ca linh hoạt, phù hợp sinh viên\n• Được hưởng BHXH, BHYT theo luật lao động\n• Môi trường làm việc thân thiện, đồng nghiệp hỗ trợ nhiệt tình\n• Có cơ hội trở thành nhân viên chính thức lâu dài`,
+      'bếp': `• Chuẩn bị và sơ chế nguyên liệu theo quy trình\n• Chế biến món ăn theo công thức chuẩn của ${company}\n• Kiểm tra chất lượng món ăn trước khi ra khách\n• Đảm bảo vệ sinh an toàn thực phẩm\n• Hỗ trợ đầu bếp trong giờ cao điểm\n• Vệ sinh bếp và dụng cụ sau ca làm việc\n\nYÊU CẦU:\n• Có kinh nghiệm làm bếp từ 6 tháng trở lên\n• Biết chế biến các món ăn cơ bản\n• Chịu được nhiệt độ cao và áp lực công việc\n• Sức khỏe tốt, không bị dị ứng thực phẩm\n• Có tinh thần trách nhiệm và làm việc nhóm\n\nCHẾ ĐỘ PHÚC LỢI:\n• Được ăn 3 bữa/ngày tại nhà hàng\n• Đào tạo kỹ năng nấu ăn chuyên nghiệp\n• Trang bị đồng phục và dụng cụ bảo hộ đầy đủ\n• Thưởng theo hiệu suất làm việc\n• Môi trường bếp hiện đại, trang thiết bị đầy đủ\n• Cơ hội thăng tiến lên vị trí bếp trưởng`,
+      'thu ngân': `• Thu tiền và xuất hóa đơn cho khách hàng\n• Kiểm tra và đối chiếu tiền cuối mỗi ca\n• Xử lý các hình thức thanh toán: tiền mặt, thẻ, ví điện tử\n• Hỗ trợ khách hàng về chương trình khuyến mãi\n• Báo cáo doanh thu và các vấn đề phát sinh\n• Bảo quản tiền mặt và chứng từ an toàn\n\nYÊU CẦU:\n• Trung thực, cẩn thận, tỉ mỉ trong công việc\n• Tính toán nhanh, sử dụng máy tính tiền thành thạo\n• Giao tiếp tốt, thái độ niềm nở với khách\n• Có khả năng làm việc độc lập\n• Ưu tiên có kinh nghiệm thu ngân\n\nCHẾ ĐỘ PHÚC LỢI:\n• Làm việc trong môi trường chuyên nghiệp\n• Được đào tạo sử dụng hệ thống POS hiện đại\n• Thưởng khi không sai sót tiền\n• Nghỉ phép có lương theo quy định\n• Được hưởng đầy đủ chế độ BHXH, BHYT\n• Cơ hội thăng tiến lên vị trí quản lý ca`,
+      'bán hàng': `• Tư vấn và giới thiệu sản phẩm cho khách hàng\n• Chăm sóc khách hàng, giải đáp thắc mắc\n• Sắp xếp, trưng bày hàng hóa đẹp mắt\n• Kiểm kê tồn kho, báo cáo hàng cần nhập\n• Hỗ trợ thanh toán và đóng gói sản phẩm\n• Duy trì vệ sinh khu vực bán hàng\n\nYÊU CẦU:\n• Giao tiếp tốt, nhiệt tình với khách hàng\n• Ngoại hình ưa nhìn, tác phong chuyên nghiệp\n• Trung thực, có tinh thần trách nhiệm\n• Ham học hỏi, tiếp thu kiến thức sản phẩm\n• Ưu tiên có kinh nghiệm bán hàng\n\nCHẾ ĐỘ PHÚC LỢI:\n• Hoa hồng hấp dẫn theo doanh số\n• Thưởng khi đạt chỉ tiêu tháng\n• Được đào tạo kỹ năng bán hàng chuyên nghiệp\n• Môi trường làm việc năng động, trẻ trung\n• Cơ hội thăng tiến lên vị trí quản lý cửa hàng\n• Được hưởng các chế độ phúc lợi theo luật lao động`,
+      'giao hàng': `• Nhận đơn hàng và kiểm tra thông tin giao hàng\n• Giao hàng đúng địa chỉ và đúng thời gian cam kết\n• Thu tiền và chuyển về quầy cuối ca\n• Báo cáo các vấn đề phát sinh trong quá trình giao hàng\n• Giữ gìn hàng hóa cẩn thận, tránh hư hỏng\n• Hỗ trợ đóng gói hàng khi cần thiết\n\nYÊU CẦU:\n• Có xe máy và giấy phép lái xe hợp lệ\n• Biết đường, am hiểu khu vực giao hàng\n• Chịu khó, trung thực, có trách nhiệm\n• Sức khỏe tốt, chịu được thời tiết\n• Giao tiếp tốt với khách hàng\n\nCHẾ ĐỘ PHÚC LỢI:\n• Thưởng theo số đơn giao thành công\n• Hỗ trợ xăng xe hàng tháng\n• Bảo hiểm tai nạn 24/7 cho shipper\n• Ca làm việc linh hoạt, phù hợp sinh viên\n• Môi trường làm việc tự do, năng động\n• Cơ hội kiếm thu nhập cao trong giờ cao điểm`,
+      'default': `• Thực hiện các nhiệm vụ được giao theo quy trình\n• Hỗ trợ đồng nghiệp khi cần thiết\n• Đảm bảo chất lượng công việc đạt tiêu chuẩn\n• Báo cáo tiến độ và vấn đề phát sinh\n• Tham gia các hoạt động đào tạo nội bộ\n\nYÊU CẦU:\n• Có trách nhiệm và chăm chỉ trong công việc\n• Ham học hỏi, tiếp thu nhanh\n• Làm việc nhóm tốt, hỗ trợ đồng nghiệp\n• Thái độ tích cực, nhiệt tình\n• Sẵn sàng làm việc theo ca\n\nCHẾ ĐỘ PHÚC LỢI:\n• Được đào tạo kỹ năng nghề nghiệp\n• Môi trường làm việc thân thiện, chuyên nghiệp\n• Nghỉ phép có lương theo quy định\n• Được hưởng các chế độ BHXH theo luật\n• Cơ hội phát triển và thăng tiến\n• Tham gia các hoạt động team building định kỳ`
+    },
+    'en': {
+      'barista': `• Prepare espresso, cappuccino, latte and specialty drinks\n• Create latte art and beautifully decorated beverages\n• Advise customers on flavors and suitable coffee types\n• Control quality of each drink\n• Clean machines, grinders and work area\n• Manage ingredient inventory, report shortages\n\nREQUIREMENTS:\n• Knowledge of coffee and brewing methods\n• Brewing skills and basic latte art\n• Good communication, tactful in handling situations\n• Professional appearance and demeanor\n• Willing to learn and improve skills\n\nBENEFITS:\n• Professional in-depth coffee training\n• Advanced skill development courses\n• Performance and KPI bonuses\n• 24/7 accident insurance\n• Modern, professional work environment\n• Long-term career development at ${company}`,
+      'server': `• Greet and welcome customers friendly\n• Advise menu, take orders accurately\n• Serve food and drinks quickly and carefully\n• Clean tables and service areas\n• Assist with payment and see off customers\n• Handle special customer requests\n\nREQUIREMENTS:\n• Quick, agile, good health\n• Good communication, clear voice\n• Enthusiastic, cheerful, good service attitude\n• Highly responsible\n• Restaurant/café service experience preferred\n\nBENEFITS:\n• Receive tips directly from customers\n• Free meals during shifts\n• Flexible shifts, suitable for students\n• Social and health insurance as per law\n• Friendly environment, supportive colleagues\n• Opportunity for long-term employment`,
+      'default': `• Perform assigned tasks according to procedures\n• Support colleagues when needed\n• Ensure work quality meets standards\n• Report progress and issues\n• Participate in internal training activities\n\nREQUIREMENTS:\n• Responsible and hardworking\n• Eager to learn, quick to absorb\n• Good teamwork, support colleagues\n• Positive attitude, enthusiastic\n• Willing to work shifts\n\nBENEFITS:\n• Professional skills training\n• Friendly, professional environment\n• Paid leave as regulated\n• Social insurance benefits as per law\n• Development and promotion opportunities\n• Regular team building activities`
+    }
+  };
+  
+  const langDescriptions = descriptions[language] || descriptions['vi'];
+  for (const [key, desc] of Object.entries(langDescriptions)) {
+    if (title.includes(key)) return desc;
+  }
+  return langDescriptions['default'];
 };
 
 // Translate tags
@@ -2280,6 +2306,7 @@ const JobListing = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [applyModal, setApplyModal] = useState(null); // { job } or null
   const [detailModal, setDetailModal] = useState(null); // { job } or null
+  const [jobDescriptionModal, setJobDescriptionModal] = useState(null); // { job } or null
   const [applySuccess, setApplySuccess] = useState(false);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
@@ -3206,8 +3233,8 @@ const JobListing = () => {
 
             <p className="apply-desc">
               {language === 'vi'
-                ? <>Bạn muốn gửi CV ứng tuyển vào vị trí <strong>{applyModal.job.title}</strong> tại <strong>{applyModal.job.company}</strong>?</>
-                : <>Send your CV for <strong>{applyModal.job.title}</strong> at <strong>{applyModal.job.company}</strong>?</>
+                ? <>Bạn muốn gửi CV ứng tuyển vào vị trí <strong>{translateJobTitle(applyModal.job.title, language)}</strong> tại <strong>{applyModal.job.company}</strong>?</>
+                : <>Send your CV for <strong>{translateJobTitle(applyModal.job.title, language)}</strong> at <strong>{applyModal.job.company}</strong>?</>
               }
             </p>
 
@@ -3250,9 +3277,31 @@ const JobListing = () => {
               </div>
             </div>
 
-            <div className="apply-buttons">
+            <div className="apply-buttons" style={{ display: 'flex', gap: '10px' }}>
               <button className="btn-cancel" onClick={() => setApplyModal(null)}>
                 {language === 'vi' ? 'Hủy' : 'Cancel'}
+              </button>
+              <button 
+                className="btn-info" 
+                onClick={() => {
+                  setJobDescriptionModal({ job: applyModal.job });
+                }}
+                style={{ 
+                  flex: 1,
+                  padding: '12px 20px',
+                  background: '#f3f4f6',
+                  color: '#374151',
+                  border: 'none',
+                  borderRadius: '12px',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.style.background = '#e5e7eb'}
+                onMouseLeave={(e) => e.target.style.background = '#f3f4f6'}
+              >
+                {language === 'vi' ? 'Xem mô tả' : 'View Description'}
               </button>
               <button className="btn-confirm" onClick={confirmApply}>
                 {language === 'vi' ? 'Gửi CV ngay' : 'Send CV'}
@@ -3316,6 +3365,45 @@ const JobListing = () => {
                 setApplyModal({ job: detailModal.job });
               }}>
                 {language === 'vi' ? 'Ứng tuyển ngay' : 'Apply Now'}
+              </button>
+            </div>
+          </ApplyModalWrap>
+        )}
+      </Modal>
+
+      {/* Job Description Modal */}
+      <Modal
+        isOpen={!!jobDescriptionModal}
+        onClose={() => setJobDescriptionModal(null)}
+        title=""
+      >
+        {jobDescriptionModal && (
+          <ApplyModalWrap onClick={e => e.stopPropagation()}>
+            <div className="apply-emoji" style={{ fontSize: '40px' }}>📋</div>
+            <h3>{language === 'vi' ? 'Mô tả công việc' : 'Job Description'}</h3>
+            <p className="apply-desc" style={{ marginBottom: '10px' }}>
+              <strong>{translateJobTitle(jobDescriptionModal.job.title, language)}</strong> - {jobDescriptionModal.job.company}
+            </p>
+
+            <div style={{ marginTop: '16px', padding: '20px', background: '#f3f4f6', borderRadius: '12px', border: '1px solid #e5e7eb', maxHeight: '350px', overflowY: 'auto' }}>
+              <div style={{ fontSize: '16px', color: '#374151', lineHeight: '1.8', whiteSpace: 'pre-line', textAlign: 'left' }}>
+                {(jobDescriptionModal.job.description || generateJobDescription(jobDescriptionModal.job, language))
+                  .split('\n')
+                  .map((line, index) => {
+                    // Make YÊU CẦU:, CHẾ ĐỘ PHÚC LỢI:, REQUIREMENTS:, and BENEFITS: bold
+                    if (line.trim() === 'YÊU CẦU:' || line.trim() === 'CHẾ ĐỘ PHÚC LỢI:' || 
+                        line.trim() === 'REQUIREMENTS:' || line.trim() === 'BENEFITS:') {
+                      return <div key={index} style={{ fontWeight: 'bold', marginTop: index > 0 ? '12px' : '0' }}>{line}</div>;
+                    }
+                    return <div key={index}>{line}</div>;
+                  })
+                }
+              </div>
+            </div>
+
+            <div className="apply-buttons" style={{ marginTop: '16px' }}>
+              <button className="btn-cancel" onClick={() => setJobDescriptionModal(null)} style={{ width: '100%' }}>
+                {language === 'vi' ? 'Đóng' : 'Close'}
               </button>
             </div>
           </ApplyModalWrap>
