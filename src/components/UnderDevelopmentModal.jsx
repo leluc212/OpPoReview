@@ -109,7 +109,7 @@ const ModalButton = styled(motion.button)`
   }
 `;
 
-const UnderDevelopmentModal = ({ isOpen, onClose }) => {
+const UnderDevelopmentModal = ({ isOpen, onClose, title, message }) => {
   const { t } = useLanguage();
 
   return (
@@ -135,8 +135,8 @@ const UnderDevelopmentModal = ({ isOpen, onClose }) => {
                 <Construction size={40} color="#f59e0b" strokeWidth={2.25} />
               </motion.div>
             </ModalIconWrapper>
-            <ModalTitle>{t.underDevelopment.title}</ModalTitle>
-            <ModalText>{t.underDevelopment.message}</ModalText>
+            <ModalTitle>{title || t.underDevelopment.title}</ModalTitle>
+            <ModalText>{message || t.underDevelopment.message}</ModalText>
             <ModalButton
               onClick={onClose}
               whileHover={{ scale: 1.02 }}
