@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Edit3, Trash2, Eye, CheckCircle, Send, Search, Calendar, Newspaper, TrendingUp, AlertCircle, User, Plus, X, Wallet, Save, Award, Star, Briefcase, Zap, DollarSign } from 'lucide-react';
+import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Edit3, Trash2, Eye, CheckCircle, Send, Search, Calendar, Newspaper, TrendingUp, AlertCircle, User, Plus, X, Wallet, Save, Award, Star, Briefcase, Zap, Banknote } from 'lucide-react';
 import Modal from '../../components/Modal';
 
 // Helper: tính số giờ từ chuỗi shift "HH:MM - HH:MM"
@@ -2200,7 +2200,7 @@ const StaffProfileModal = React.memo(({ staff, onClose }) => {
                 </InfoItem>
               </InfoCard>
               <InfoCard style={{ background: 'linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%)', borderColor: '#10B981' }}>
-                <InfoIconBox style={{ background: '#10B981' }}><DollarSign style={{ color: 'white' }} /></InfoIconBox>
+                <InfoIconBox style={{ background: '#10B981' }}><Banknote style={{ color: 'white' }} /></InfoIconBox>
                 <InfoItem>
                   <div className="label" style={{ color: '#065F46' }}>{language === 'vi' ? 'Số tiền chi' : 'Amount Paid'}</div>
                   <div className="value" style={{ color: '#047857', fontWeight: '700', fontSize: '16px' }}>
@@ -2939,7 +2939,7 @@ const HRManagement = () => {
                             <CheckCircle />{language === 'vi' ? 'Xác nhận:' : 'Confirmed:'} {staff.confirmedAt}
                           </div>
                           <div className="meta-row" style={{ color: '#10B981', fontWeight: '600' }}>
-                            <DollarSign />{language === 'vi' ? 'Số tiền chi:' : 'Amount paid:'} {staff.totalPaid.toLocaleString('vi-VN')} VNĐ
+                            <Banknote />{language === 'vi' ? 'Số tiền chi:' : 'Amount paid:'} {staff.totalPaid.toLocaleString('vi-VN')} VNĐ
                           </div>
                         </StaffMeta>
                         
