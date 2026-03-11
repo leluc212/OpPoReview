@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import Modal from '../../components/Modal';
 import {
-  Search, MapPin, Briefcase, Clock, Star, TrendingUp,
+  Search, MapPin, Briefcase, Clock, TrendingUp,
   ChevronDown, Building2, Bookmark, Eye, ArrowUpRight, Filter,
   X, SlidersHorizontal, Grid, List, Sparkles, Zap, Navigation, Target,
   Power, XCircle, AlertCircle, CheckCircle
@@ -1099,6 +1099,34 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
   return distance;
 };
 
+// Calculate work date for urgent jobs (1-2 days from now)
+const getUrgentJobWorkDate = () => {
+  const today = new Date();
+  const daysToAdd = Math.floor(Math.random() * 2) + 1; // Random 1 or 2 days
+  const workDate = new Date(today);
+  workDate.setDate(today.getDate() + daysToAdd);
+  
+  const day = String(workDate.getDate()).padStart(2, '0');
+  const month = String(workDate.getMonth() + 1).padStart(2, '0');
+  const year = workDate.getFullYear();
+  
+  return `${day}/${month}/${year}`;
+};
+
+// Calculate work date for standard jobs (7-14 days from now)
+const getStandardJobWorkDate = () => {
+  const today = new Date();
+  const daysToAdd = Math.floor(Math.random() * 8) + 7; // Random 7-14 days
+  const workDate = new Date(today);
+  workDate.setDate(today.getDate() + daysToAdd);
+  
+  const day = String(workDate.getDate()).padStart(2, '0');
+  const month = String(workDate.getMonth() + 1).padStart(2, '0');
+  const year = workDate.getFullYear();
+  
+  return `${day}/${month}/${year}`;
+};
+
 // Translate salary string based on language
 const translateSalary = (salaryStr, language) => {
   if (language === 'vi') return salaryStr;
@@ -1193,7 +1221,13 @@ const parseTimeToHours = (timeStr) => {
 
 // Translate job titles
 const translateJobTitle = (titleStr, language) => {
-  if (language === 'vi') return titleStr;
+  // Remove shift prefix (Ca Sáng -, Ca Chiều -, Ca Tối -, etc.)
+  let cleanTitle = titleStr.replace(/^(Ca\s+(Sáng|Chiều|Tối|Đêm|Trưa|Linh Động)\s*-\s*)/i, '');
+  
+  // Remove Part-time and Full-time suffix
+  cleanTitle = cleanTitle.replace(/\s*-\s*(Part-time|Full-time)\s*$/i, '');
+  
+  if (language === 'vi') return cleanTitle;
 
   const titleMap = {
     'Quản lý cửa hàng F&B': 'F&B Store Manager',
@@ -1318,6 +1352,12 @@ const translateTag = (tagStr, language) => {
 
 // Translate job type
 const translateJobType = (typeStr, language) => {
+  // Extract only time from "Ca sáng (06:00 - 14:00)" -> "(06:00 - 14:00)"
+  const timeMatch = typeStr.match(/\((\d{2}:\d{2}\s*-\s*\d{2}:\d{2})\)/);
+  if (timeMatch) {
+    return `(${timeMatch[1]})`;
+  }
+  
   if (language === 'vi') return typeStr;
 
   return typeStr
@@ -2379,8 +2419,9 @@ const JobListing = () => {
   };
 
   const handleJobClick = (jobId) => {
-    const job = allJobs.find(j => j.id === jobId);
-    if (job) setDetailModal({ job });
+    // Disabled: Don't show detail modal when clicking on job card
+    // const job = allJobs.find(j => j.id === jobId);
+    // if (job) setDetailModal({ job });
   };
 
   const handleApplyJob = (job) => {
@@ -2605,7 +2646,7 @@ const JobListing = () => {
                     ? `Hơn ${allJobs.filter(j => j.category === 'standard').length} công việc tiêu chuẩn đang chờ bạn khám phá`
                     : `Over ${allJobs.filter(j => j.category === 'standard').length} standard jobs waiting for you to explore`)
                   : (language === 'vi'
-                    ? `${allJobs.filter(j => j.category === 'shift').length} công việc theo ca đang tuyển gấp, làm ngay hôm nay!`
+                    ? `${allJobs.filter(j => j.category === 'shift').length} công việc đang tuyển gấp, làm ngay hôm nay!`
                     : `${allJobs.filter(j => j.category === 'shift').length} shift jobs hiring urgently, start today!`)}
             </HeroSubtitle>
 
@@ -2984,7 +3025,7 @@ const JobListing = () => {
                     ? (language === 'vi' ? 'Công việc đã lưu' : 'Saved Jobs')
                     : jobCategory === 'standard'
                       ? (language === 'vi' ? 'Công việc tiêu chuẩn' : 'Standard Jobs')
-                      : (language === 'vi' ? 'Công việc theo ca' : 'Shift Jobs')}
+                      : (language === 'vi' ? 'Công việc tuyển gấp' : 'Shift Jobs')}
                 </h2>
                 <p>{language === 'vi'
                   ? (showSavedJobsOnly
@@ -3085,7 +3126,7 @@ const JobListing = () => {
                       </p>
                       <p style={{ fontSize: '15px', color: '#6b7280', marginBottom: '20px' }}>
                         {language === 'vi'
-                          ? 'Nhấn nút "Tìm việc gần tôi" ở phía trên để xem các công việc theo ca trong bán kính 3km'
+                          ? 'Nhấn nút "Tìm việc gần tôi" ở phía trên để xem các công việc tuyển gấp trong bán kính 3km'
                           : 'Click "Find Jobs Near Me" button above to see shift jobs within 3km radius'}
                       </p>
                     </>
@@ -3098,7 +3139,7 @@ const JobListing = () => {
                       <p style={{ fontSize: '15px', color: '#6b7280' }}>
                         {jobCategory === 'shift'
                           ? (language === 'vi'
-                            ? 'Không có công việc theo ca trong bán kính 3km. Thử mở rộng bán kính tìm kiếm.'
+                            ? 'Không có công việc tuyển gấp trong bán kính 3km. Thử mở rộng bán kính tìm kiếm.'
                             : 'No shift jobs within 3km radius. Try expanding the search radius.')
                           : (language === 'vi'
                             ? 'Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn'
@@ -3181,11 +3222,31 @@ const JobListing = () => {
               </div>
               <div className="info-row">
                 <span className="info-label">{language === 'vi' ? 'Địa điểm' : 'Location'}:</span>
-                <span className="info-value">{applyModal.job.location}</span>
+                <span className="info-value">{translateLocation(applyModal.job.location, language)}</span>
               </div>
               <div className="info-row">
                 <span className="info-label">{language === 'vi' ? 'Mức lương' : 'Salary'}:</span>
                 <span className="info-value salary">{translateSalary(applyModal.job.category === 'shift' ? calculateShiftSalary(applyModal.job) : applyModal.job.salary, language)}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Loại hình' : 'Type'}:</span>
+                <span className="info-value">{translateJobType(applyModal.job.type, language)}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Ngày đăng' : 'Posted'}:</span>
+                <span className="info-value">{translateTimePosted(applyModal.job.postedAt, language)}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Ngày làm' : 'Work Date'}:</span>
+                <span className="info-value">
+                  {applyModal.job.shiftDetails?.date || (applyModal.job.urgent ? getUrgentJobWorkDate() : getStandardJobWorkDate())}
+                </span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Thời gian' : 'Time'}:</span>
+                <span className="info-value">
+                  {applyModal.job.shiftDetails?.time || applyModal.job.type?.match(/\((.*?)\)/)?.[1] || '06:00 - 14:00'}
+                </span>
               </div>
             </div>
 
@@ -3235,7 +3296,7 @@ const JobListing = () => {
               <div className="info-row">
                 <span className="info-label">{language === 'vi' ? 'Ngày làm' : 'Date'}:</span>
                 <span className="info-value">
-                  {detailModal.job.shiftDetails?.date || (detailModal.job.urgent ? '09/03/2026' : '15/03/2026')}
+                  {detailModal.job.shiftDetails?.date || (detailModal.job.urgent ? getUrgentJobWorkDate() : getStandardJobWorkDate())}
                 </span>
               </div>
               <div className="info-row">
@@ -3314,8 +3375,6 @@ const JobCardComponent = ({ job, saved, onSave, onClick, onApply, delay = 0, sho
         <JobInfo>
           <JobTitle>
             {translateJobTitle(job.title, language)}
-            {job.urgent && <StatusBadge status="urgent" size="sm">{language === 'vi' ? 'Tuyển gấp' : 'Urgent'}</StatusBadge>}
-            {job.featured && <Star size={18} fill="#F59E0B" color="#F59E0B" />}
           </JobTitle>
           <CompanyName>
             <Building2 />
@@ -3344,11 +3403,16 @@ const JobCardComponent = ({ job, saved, onSave, onClick, onApply, delay = 0, sho
             </MetaItem>
           </JobMeta>
         </JobInfo>
+        {job.urgent && (
+          <div style={{ marginLeft: 'auto', alignSelf: 'flex-start' }}>
+            <StatusBadge status="urgent" size="sm">{language === 'vi' ? 'Tuyển gấp' : 'Urgent'}</StatusBadge>
+          </div>
+        )}
       </JobCardHeader>
 
       <JobCardBody>
         <JobTags>
-          {job.tags.map((tag, idx) => (
+          {job.tags.filter(tag => !tag.match(/^Ca\s+(sáng|chiều|tối|đêm|trưa)/i)).map((tag, idx) => (
             <Tag key={idx}>{translateTag(tag, language)}</Tag>
           ))}
         </JobTags>
