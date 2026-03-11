@@ -338,7 +338,7 @@ const Subscription = () => {
       ]
     },
     {
-      name:    vi ? 'Spongit Banner' : 'Spongit Banner',
+      name:    vi ? 'Spotlight Banner' : 'Spotlight Banner',
       subtitle: vi ? 'Banner Nổi bật 1' : 'Featured Banner 1',
       prices: [
         { duration: vi ? '24h' : '24h', amount: '99,000 VND' },
@@ -500,8 +500,8 @@ const Subscription = () => {
               <Star />
             </PageIconBox>
             <PageTitleText>
-              <h1>{vi ? 'Pricing để xuất' : 'Pricing to Boost'}</h1>
-              <p>{vi ? 'Chọn gói dịch vụ để đẩy tin tuyển dụng của bạn lên top' : 'Choose a boost package to push your job posts to the top'}</p>
+              <h1>{vi ? 'Dịch Vụ đề xuất ' : 'Pricing to Boost'}</h1>
+              <p>{vi ? 'Chọn gói dịch vụ để đẩy tin tuyển dụng của bạn lên "TOP"' : 'Choose a boost package to push your job posts to the top'}</p>
             </PageTitleText>
           </PageHeader>
 
@@ -524,7 +524,7 @@ const Subscription = () => {
                   <th>{vi ? 'Tính Năng' : 'Feature'}</th>
                   <th style={{ color: '#10B981' }}>Quick Boost</th>
                   <th style={{ color: '#1e40af' }}>Hot Search</th>
-                  <th style={{ color: '#F59E0B' }}>Spongit Banner</th>
+                  <th style={{ color: '#F59E0B' }}>Spotlight Banner</th>
                   <th style={{ color: '#DC2626' }}>Top Spotlight</th>
                 </tr>
               </thead>

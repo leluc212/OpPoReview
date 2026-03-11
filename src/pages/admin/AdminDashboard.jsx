@@ -1453,7 +1453,7 @@ const AdminDashboard = () => {
               {boostPackages.map((pkg, index) => {
                 let IconComponent;
                 if (pkg.name === 'Quick Boost') IconComponent = Zap;
-                else if (pkg.name === 'Spongit Banner') IconComponent = Star;
+                else if (pkg.name === 'Spotlight Banner') IconComponent = Star;
                 else if (pkg.name === 'Hot Search') IconComponent = TrendingUp;
                 else if (pkg.name === 'Top Spotlight') IconComponent = Sparkles;
                 else IconComponent = Briefcase;

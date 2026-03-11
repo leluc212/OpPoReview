@@ -5,8 +5,21 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Trash2, Eye, CheckCircle, Send, Search, Calendar, DollarSign, Newspaper, TrendingUp, AlertCircle, User, Plus, X, Wallet, Save, Award, Star, Briefcase, Zap } from 'lucide-react';
+import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Edit3, Trash2, Eye, CheckCircle, Send, Search, Calendar, DollarSign, Newspaper, TrendingUp, AlertCircle, User, Plus, X, Wallet, Save, Award, Star, Briefcase, Zap } from 'lucide-react';
 import Modal from '../../components/Modal';
+
+// Helper: tính số giờ từ chuỗi shift "HH:MM - HH:MM"
+const calcShiftHours = (shift) => {
+  if (!shift) return 0;
+  const parts = shift.split(' - ');
+  if (parts.length !== 2) return 0;
+  const [startH, startM] = parts[0].split(':').map(Number);
+  const [endH, endM] = parts[1].split(':').map(Number);
+  let start = startH * 60 + startM;
+  let end = endH * 60 + endM;
+  if (end <= start) end += 24 * 60; // qua đêm
+  return (end - start) / 60;
+};
 
 // Mock HR Staff Data
 const getHRStaff = (language) => {
@@ -47,6 +60,7 @@ const getHRStaff = (language) => {
     startDate: language === 'vi' ? '15/01/2024' : '01/15/2024',
     status: 'active',
     shift: '06:00 - 08:00',
+    hourlyRate: 35000,
     confirmedAt: `${today} - ${recentTimeStr}`,
     totalPaid: 70000,
     canRequestChange: true,
@@ -70,6 +84,7 @@ const getHRStaff = (language) => {
     startDate: language === 'vi' ? '20/02/2024' : '02/20/2024',
     status: 'active',
     shift: '09:00 - 17:00',
+    hourlyRate: 20000,
     confirmedAt: `${oldDate} - ${oldTimeStr}`,
     totalPaid: 160000,
     canRequestChange: true,
@@ -93,8 +108,9 @@ const getHRStaff = (language) => {
     startDate: language === 'vi' ? '10/03/2024' : '03/10/2024',
     status: 'active',
     shift: '18:00 - 22:00',
+    hourlyRate: 20000,
     confirmedAt: `${today} - ${recentTimeStr}`,
-    totalPaid: 80000,
+    totalPaid: 155000,
     canRequestChange: true,
     isWithinTimeWindow: true,
     // Additional profile data
@@ -116,8 +132,9 @@ const getHRStaff = (language) => {
     startDate: today,
     status: 'active',
     shift: '14:00 - 18:00',
+    hourlyRate: 40000,
     confirmedAt: `${today} - ${recentTimeStr}`,
-    totalPaid: 80000,
+    totalPaid: 160000,
     canRequestChange: true,
     isWithinTimeWindow: true,
     // Additional profile data
@@ -139,6 +156,7 @@ const getHRStaff = (language) => {
     startDate: language === 'vi' ? '05/02/2024' : '02/05/2024',
     status: 'completed',
     shift: '22:00 - 06:00',
+    hourlyRate: 25000,
     confirmedAt: `${oldDate} - ${oldTimeStr}`,
     totalPaid: 200000,
     canRequestChange: false,
@@ -161,6 +179,7 @@ const getHRStaff = (language) => {
     startDate: language === 'vi' ? '12/01/2024' : '01/12/2024',
     status: 'completed',
     shift: '07:00 - 11:00',
+    hourlyRate: 25000,
     confirmedAt: `${oldDate} - ${oldTimeStr}`,
     totalPaid: 100000,
     canRequestChange: false,
@@ -489,14 +508,17 @@ const StaffStatus = styled.div`
   background: ${props => 
     props.$status === 'active' ? '#D1FAE5' : 
     props.$status === 'completed' ? '#E0E7FF' : 
+    props.$status === 'pending' ? '#FEF9C3' :
     '#FEF3C7'};
   color: ${props => 
     props.$status === 'active' ? '#047857' : 
     props.$status === 'completed' ? '#3730A3' : 
+    props.$status === 'pending' ? '#854D0E' :
     '#92400E'};
   border: 1px solid ${props => 
     props.$status === 'active' ? '#10B981' : 
     props.$status === 'completed' ? '#818CF8' : 
+    props.$status === 'pending' ? '#EAB308' :
     '#F59E0B'};
 `;
 
@@ -527,6 +549,7 @@ const StaffMeta = styled.div`
 
 const StaffActions = styled.div`
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 `;
 
@@ -1365,6 +1388,257 @@ const DeleteModalButton = styled(motion.button)`
   }
 `;
 
+// ─── Confirm Complete Modal ───────────────────────────────
+const RateModalOverlay = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+`;
+
+const RateModalContent = styled(motion.div)`
+  background: ${props => props.theme.colors.bgLight};
+  border-radius: ${props => props.theme.borderRadius.xl};
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+`;
+
+const RateModalHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 2px solid ${props => props.theme.colors.border};
+  h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: ${props => props.theme.colors.text};
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    svg { width: 24px; height: 24px; color: ${props => props.theme.colors.primary}; }
+  }
+  button {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: none;
+    background: ${props => props.theme.colors.border};
+    color: ${props => props.theme.colors.textLight};
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s;
+    &:hover { background: ${props => props.theme.colors.error}15; color: ${props => props.theme.colors.error}; }
+  }
+`;
+
+const RateModalBody = styled.div`
+  padding: 20px 24px;
+`;
+
+const RateCategory = styled.div`
+  margin-bottom: 12px;
+  .category-label {
+    font-size: 13px; font-weight: 600;
+    color: ${props => props.theme.colors.text};
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+    svg { width: 16px; height: 16px; color: ${props => props.theme.colors.primary}; }
+  }
+`;
+
+const RateStarRow = styled.div`
+  display: flex;
+  gap: 6px;
+`;
+
+const RateStarButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  transition: transform 0.2s;
+  &:hover { transform: scale(1.2); }
+  svg {
+    width: 24px; height: 24px;
+    fill: ${props => props.$active ? '#F59E0B' : 'transparent'};
+    stroke: ${props => props.$active ? '#F59E0B' : props.theme.colors.textLight + '60'};
+    stroke-width: 2;
+    transition: all 0.2s;
+  }
+`;
+
+const RateTextArea = styled.textarea`
+  width: 100%;
+  min-height: 70px;
+  padding: 10px 14px;
+  border: 2px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  font-size: 14px;
+  font-family: inherit;
+  color: ${props => props.theme.colors.text};
+  background: ${props => props.theme.colors.bgLight};
+  resize: vertical;
+  transition: border-color 0.3s;
+  box-sizing: border-box;
+  &:focus { outline: none; border-color: ${props => props.theme.colors.primary}; }
+  &::placeholder { color: ${props => props.theme.colors.textLight}80; }
+`;
+
+const RateActions = styled.div`
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 2px solid ${props => props.theme.colors.border};
+`;
+
+const RateActionButton = styled(motion.button)`
+  flex: 1;
+  padding: 12px 18px;
+  border-radius: ${props => props.theme.borderRadius.lg};
+  font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  background: ${props => props.theme.colors.primary};
+  color: white;
+  opacity: ${props => props.disabled ? 0.5 : 1};
+  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
+  &:hover:not(:disabled) {
+    background: ${props => props.theme.colors.primary}dd;
+    box-shadow: 0 8px 20px ${props => props.theme.colors.primary}40;
+  }
+  svg { width: 18px; height: 18px; }
+`;
+
+// ─── Confirm Complete Modal ───────────────────────────────
+const ConfirmCompleteOverlay = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+`;
+
+const ConfirmCompleteContainer = styled(motion.div)`
+  background: white;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 440px;
+  padding: 36px 32px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(16,185,129,0.1);
+  text-align: center;
+  position: relative;
+  z-index: 10000;
+`;
+
+const ConfirmCompleteIcon = styled.div`
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  svg {
+    width: 44px;
+    height: 44px;
+    color: #059669;
+  }
+`;
+
+const ConfirmCompleteTitle = styled.h2`
+  font-size: 22px;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 10px;
+`;
+
+const ConfirmCompleteMessage = styled.p`
+  font-size: 14px;
+  color: #6B7280;
+  line-height: 1.65;
+  margin-bottom: 8px;
+`;
+
+const ConfirmCompleteStaffName = styled.p`
+  font-size: 16px;
+  font-weight: 700;
+  color: #065F46;
+  background: linear-gradient(135deg, #ECFDF5, #D1FAE5);
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin: 16px 0 24px;
+  border: 2px solid #A7F3D0;
+`;
+
+const ConfirmCompleteActions = styled.div`
+  display: flex;
+  gap: 12px;
+`;
+
+const ConfirmCompleteButton = styled(motion.button)`
+  flex: 1;
+  padding: 13px 20px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  border: 2px solid;
+  transition: all 0.2s ease;
+  ${props => props.$variant === 'success' ? `
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    color: white;
+    border-color: #059669;
+    &:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(16,185,129,0.35); }
+  ` : `
+    background: white;
+    color: #374151;
+    border-color: #E5E7EB;
+    &:hover { background: #F9FAFB; border-color: #D1D5DB; }
+  `}
+  svg { width: 18px; height: 18px; }
+`;
+
+const CompleteSuccessToast = styled(motion.div)`
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+  padding: 14px 20px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.4);
+  font-weight: 700;
+  font-size: 14px;
+  z-index: 10001;
+  svg { width: 20px; height: 20px; flex-shrink: 0; }
+`;
+
 // ─── Success Toast ─────────────────────────────────────────
 const SuccessToast = styled(motion.div)`
   position: fixed;
@@ -1951,7 +2225,7 @@ const HRManagement = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeSection, setActiveSection] = useState('hr');
-  const [hrStaff] = useState(() => getHRStaff(language));
+  const [hrStaff, setHrStaff] = useState(() => getHRStaff(language).map(s => ({ ...s, rated: false, pendingRating: false })));
   const [selectedStaff, setSelectedStaff] = useState(null);
   
   // Helper function to check if more than 1 hour has passed
@@ -2151,8 +2425,13 @@ const HRManagement = () => {
           title: job.title,
           location: job.location,
           salary: (() => {
+            if (job.hourlyRate && job.totalHours) {
+              const total = Math.round(parseInt(job.hourlyRate) * job.totalHours);
+              const h = Number.isInteger(job.totalHours) ? job.totalHours : parseFloat(job.totalHours.toFixed(1));
+              return `${total.toLocaleString('vi-VN')} VNĐ/${h}h`;
+            }
             if (job.hourlyRate) {
-              return `${parseInt(job.hourlyRate).toLocaleString('vi-VN')} VNĐ/h`;
+              return `${parseInt(job.hourlyRate).toLocaleString('vi-VN')} VNĐ/giờ`;
             }
             return language === 'vi' ? 'Thỏa thuận' : 'Negotiable';
           })(),
@@ -2190,9 +2469,24 @@ const HRManagement = () => {
   const [deleteJobId, setDeleteJobId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [confirmCompleteStaff, setConfirmCompleteStaff] = useState(null);
+  const [showCompleteToast, setShowCompleteToast] = useState(false);
+  const [completedStaffSummary, setCompletedStaffSummary] = useState(null);
+  const [showRateModal, setShowRateModal] = useState(false);
+  const [rateStaff, setRateStaff] = useState(null);
+  const [ratings, setRatings] = useState({ overall: 0, attitude: 0, efficiency: 0, discipline: 0, skills: 0 });
+  const [ratingHover, setRatingHover] = useState({ overall: 0, attitude: 0, efficiency: 0, discipline: 0, skills: 0 });
+  const [ratingComment, setRatingComment] = useState('');
+  const [ratingSubmitted, setRatingSubmitted] = useState(false);
+  const [showChangeRequestToast, setShowChangeRequestToast] = useState(false);
+  const [changeRequestStaff, setChangeRequestStaff] = useState(null);
+  const [changeRequestReason, setChangeRequestReason] = useState('');
+  const [showChangeRequestSuccess, setShowChangeRequestSuccess] = useState(false);
   const [selectedJobView, setSelectedJobView] = useState(null);
   const [editJobId, setEditJobId] = useState(null);
   const [editJobData, setEditJobData] = useState(null);
+  const [showShiftEndedModal, setShowShiftEndedModal] = useState(false);
+  const [shiftEndedShown, setShiftEndedShown] = useState(false);
 
   // Mock wallet connection status - in real app, get from user context or API
   const [isWalletConnected] = useState(() => {
@@ -2208,6 +2502,17 @@ const HRManagement = () => {
       window.history.replaceState({}, document.title);
     }
   }, [location]);
+
+  // Check if all visible staff have been rated -> end shift (called from Done button)
+  const checkAndEndShift = (updatedStaff) => {
+    if (shiftEndedShown) return;
+    const ratedStaff = updatedStaff.filter(s => s.rated);
+    const stillPending = updatedStaff.filter(s => s.isWithinTimeWindow && !s.rated);
+    if (ratedStaff.length > 0 && stillPending.length === 0) {
+      setShowShiftEndedModal(true);
+      setShiftEndedShown(true);
+    }
+  };
 
   const activeChat = activeChatId
     ? chatConversations.find(chat => chat.id === activeChatId)
@@ -2560,8 +2865,8 @@ const HRManagement = () => {
                     REALTIME
                   </span>
                   {language === 'vi' 
-                    ? 'Dữ liệu tức thời • Tự động ẩn sau 1 giờ' 
-                    : 'Real-time data • Auto-hide after 1 hour'}
+                    ? 'Tự động ẩn sau khi hoàn thành' 
+                    : 'Real-time data'}
                 </p>
               </div>
             </SectionHeader>
@@ -2600,9 +2905,13 @@ const HRManagement = () => {
                             <StaffPosition>{staff.position}</StaffPosition>
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
-                            {isCurrentlyWorking(staff.shift) ? (
+                            {isCurrentlyWorking(staff.shift) && !staff.pendingRating ? (
                               <StaffStatus $status="active">
                                 {language === 'vi' ? 'Đang làm' : 'Working'}
+                              </StaffStatus>
+                            ) : staff.pendingRating ? (
+                              <StaffStatus $status="pending">
+                                {language === 'vi' ? 'Chờ đánh giá' : 'Pending Review'}
                               </StaffStatus>
                             ) : (
                               <StaffStatus $status={staff.status}>
@@ -2663,12 +2972,40 @@ const HRManagement = () => {
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.98 }}
                               onClick={() => {
-                                alert(language === 'vi' 
-                                  ? '✓ Yêu cầu thay đổi của bạn đã được gửi!'
-                                  : '✓ Your change request has been submitted!');
+                                setChangeRequestStaff(staff);
+                                setChangeRequestReason('');
                               }}
                             >
                               <AlertCircle />{language === 'vi' ? 'Yêu cầu thay đổi' : 'Request change'}
+                            </StaffButton>
+                          )}
+                          {staff.status === 'active' && !staff.pendingRating && (
+                            <StaffButton
+                              $variant="success"
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              style={{ width: '100%', flex: 'none', background: 'linear-gradient(135deg, #10B981, #059669)', color: '#fff', border: 'none', padding: '12px 16px', fontSize: '14px' }}
+                              onClick={() => setConfirmCompleteStaff(staff)}
+                            >
+                              <CheckCircle />{language === 'vi' ? 'Xác nhận hoàn thành công việc' : 'Confirm job completion'}
+                            </StaffButton>
+                          )}
+                          {staff.pendingRating && (
+                            <StaffButton
+                              $variant="success"
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              style={{ width: '100%', flex: 'none', background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#fff', border: 'none', padding: '12px 16px', fontSize: '14px' }}
+                              onClick={() => {
+                                setRateStaff({ ...staff });
+                                setRatings({ overall: 0, attitude: 0, efficiency: 0, discipline: 0, skills: 0 });
+                                setRatingHover({ overall: 0, attitude: 0, efficiency: 0, discipline: 0, skills: 0 });
+                                setRatingComment('');
+                                setRatingSubmitted(false);
+                                setShowRateModal(true);
+                              }}
+                            >
+                              <Star />{language === 'vi' ? 'Đánh giá ngay' : 'Rate now'}
                             </StaffButton>
                           )}
                         </StaffActions>
@@ -3009,7 +3346,471 @@ const HRManagement = () => {
           )}
         </AnimatePresence>
 
-        {/* Delete Job Modal */}
+        {/* Confirm Complete Job Modal */}
+        <AnimatePresence>
+          {confirmCompleteStaff && (
+            <ConfirmCompleteOverlay
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setConfirmCompleteStaff(null)}
+            >
+              <ConfirmCompleteContainer
+                initial={{ scale: 0.88, opacity: 0, y: 24 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.88, opacity: 0, y: 24 }}
+                transition={{ type: 'spring', damping: 22, stiffness: 300 }}
+                onClick={e => e.stopPropagation()}
+              >
+                <ConfirmCompleteIcon>
+                  <CheckCircle />
+                </ConfirmCompleteIcon>
+                <ConfirmCompleteTitle>
+                  {language === 'vi' ? 'Xác nhận hoàn thành' : 'Confirm Completion'}
+                </ConfirmCompleteTitle>
+                <ConfirmCompleteMessage>
+                  {language === 'vi'
+                    ? 'Bạn xác nhận nhân viên này đã hoàn thành công việc?'
+                    : 'Confirm that this staff member has completed the job?'}
+                </ConfirmCompleteMessage>
+                <ConfirmCompleteStaffName>
+                  {confirmCompleteStaff.name} — {confirmCompleteStaff.position}
+                </ConfirmCompleteStaffName>
+                <ConfirmCompleteActions>
+                  <ConfirmCompleteButton
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => setConfirmCompleteStaff(null)}
+                  >
+                    <X />{language === 'vi' ? 'Hủy' : 'Cancel'}
+                  </ConfirmCompleteButton>
+                  <ConfirmCompleteButton
+                    $variant='success'
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => {
+                      const staffData = { ...confirmCompleteStaff };
+                      setHrStaff(prev => prev.map(s =>
+                        s.id === confirmCompleteStaff.id
+                          ? { ...s, pendingRating: true }
+                          : s
+                      ));
+                      setConfirmCompleteStaff(null);
+                      setCompletedStaffSummary(staffData);
+                    }}
+                  >
+                    <CheckCircle />{language === 'vi' ? 'Xác nhận' : 'Confirm'}
+                  </ConfirmCompleteButton>
+                </ConfirmCompleteActions>
+              </ConfirmCompleteContainer>
+            </ConfirmCompleteOverlay>
+          )}
+          {showCompleteToast && (
+            <CompleteSuccessToast
+              initial={{ opacity: 0, y: -20, x: 100 }}
+              animate={{ opacity: 1, y: 0, x: 0 }}
+              exit={{ opacity: 0, x: 100 }}
+            >
+              <CheckCircle />
+              {language === 'vi' ? 'Đã xác nhận hoàn thành công việc!' : 'Job completion confirmed!'}
+            </CompleteSuccessToast>
+          )}
+          {showChangeRequestToast && (
+            <CompleteSuccessToast
+              initial={{ opacity: 0, y: -20, x: 100 }}
+              animate={{ opacity: 1, y: 0, x: 0 }}
+              exit={{ opacity: 0, x: 100 }}
+              style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', top: '24px' }}
+            >
+              <CheckCircle />
+              {language === 'vi' ? 'Yêu cầu thay đổi đã được gửi!' : 'Change request submitted!'}
+            </CompleteSuccessToast>
+          )}
+        </AnimatePresence>
+
+        {/* Change Request Success Modal */}
+        <AnimatePresence>
+          {showChangeRequestSuccess && (
+            <RateModalOverlay
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowChangeRequestSuccess(false)}
+            >
+              <RateModalContent
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                onClick={e => e.stopPropagation()}
+                style={{ maxWidth: '400px' }}
+              >
+                <RateModalHeader>
+                  <h2><AlertCircle />{language === 'vi' ? 'Yêu Cầu Đã Gửi' : 'Request Submitted'}</h2>
+                </RateModalHeader>
+                <RateModalBody style={{ textAlign: 'center', padding: '32px 24px' }}>
+                  <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'linear-gradient(135deg, #FEF3C7, #FDE68A)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+                    <CheckCircle style={{ width: '36px', height: '36px', color: '#D97706' }} />
+                  </div>
+                  <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#111827', marginBottom: '10px' }}>
+                    {language === 'vi' ? 'Yêu cầu đã được gửi!' : 'Request submitted!'}
+                  </h3>
+                  <p style={{ fontSize: '14px', color: '#6B7280', lineHeight: '1.65', marginBottom: '28px' }}>
+                    {language === 'vi'
+                      ? 'Chúng tôi đã nhận yêu cầu thay đổi của bạn và sẽ xử lý trong thời gian sớm nhất.'
+                      : 'We have received your change request and will process it as soon as possible.'}
+                  </p>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => setShowChangeRequestSuccess(false)}
+                    style={{ width: '100%', padding: '13px 20px', background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: 'white', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer' }}
+                  >
+                    {language === 'vi' ? 'Đóng' : 'Close'}
+                  </motion.button>
+                </RateModalBody>
+              </RateModalContent>
+            </RateModalOverlay>
+          )}
+        </AnimatePresence>
+        <AnimatePresence>
+          {changeRequestStaff && (
+            <RateModalOverlay
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setChangeRequestStaff(null)}
+            >
+              <RateModalContent
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                onClick={e => e.stopPropagation()}
+                style={{ maxWidth: '480px' }}
+              >
+                <RateModalHeader>
+                  <h2><AlertCircle />{language === 'vi' ? 'Yêu Cầu Thay Đổi' : 'Request Change'}</h2>
+                  <button onClick={() => setChangeRequestStaff(null)}><X size={18} /></button>
+                </RateModalHeader>
+                <RateModalBody>
+                  {/* Staff info */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'linear-gradient(135deg, #FFFBEB, #FEF3C740)', border: '1.5px solid #FDE68A', borderRadius: '12px', padding: '12px 14px', marginBottom: '20px' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, #F59E0B, #D97706)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <User style={{ width: '20px', height: '20px', color: 'white' }} />
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: '700', fontSize: '14px', color: '#92400E' }}>{changeRequestStaff.name}</div>
+                      <div style={{ fontSize: '12px', color: '#B45309' }}>{changeRequestStaff.position} • {changeRequestStaff.shift}</div>
+                    </div>
+                  </div>
+
+                  {/* Reason input */}
+                  <RateCategory>
+                    <div className="category-label">
+                      <Edit3 />{language === 'vi' ? 'Nguyên nhân yêu cầu thay đổi' : 'Reason for change request'}
+                    </div>
+                    <RateTextArea
+                      rows={4}
+                      placeholder={language === 'vi' ? 'Nhập nguyên nhân bạn muốn thay đổi...' : 'Enter the reason for your change request...'}
+                      value={changeRequestReason}
+                      onChange={e => setChangeRequestReason(e.target.value)}
+                      autoFocus
+                    />
+                  </RateCategory>
+
+                  <RateActions>
+                    <RateActionButton
+                      as={motion.button}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      disabled={!changeRequestReason.trim()}
+                      onClick={() => {
+                        if (!changeRequestReason.trim()) return;
+                        setChangeRequestStaff(null);
+                        setChangeRequestReason('');
+                        setShowChangeRequestSuccess(true);
+                      }}
+                      style={{
+                        background: changeRequestReason.trim()
+                          ? 'linear-gradient(135deg, #F59E0B, #D97706)'
+                          : undefined,
+                        transition: 'background 0.2s'
+                      }}
+                    >
+                      <Send style={{ width: '16px', height: '16px' }} />
+                      {language === 'vi' ? 'Gửi yêu cầu' : 'Submit request'}
+                    </RateActionButton>
+                  </RateActions>
+                </RateModalBody>
+              </RateModalContent>
+            </RateModalOverlay>
+          )}
+        </AnimatePresence>
+
+        {/* Job Completed Summary Modal (employer side) */}
+        <AnimatePresence>
+          {completedStaffSummary && (
+            <RateModalOverlay
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <RateModalContent
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                onClick={e => e.stopPropagation()}
+              >
+                <RateModalHeader>
+                  <h2><Briefcase />{language === 'vi' ? 'Chi Tiết Công Việc Tuyển Gấp' : 'Quick Job Details'}</h2>
+                </RateModalHeader>
+                <RateModalBody style={{ textAlign: 'center', padding: '32px 24px' }}>
+                  {/* Icon */}
+                  <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: '#D1FAE5', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+                    <CheckCircle style={{ width: '36px', height: '36px', color: '#059669' }} />
+                  </div>
+
+                  <h3 style={{ fontSize: '20px', fontWeight: '800', marginBottom: '8px' }}>
+                    {language === 'vi' ? 'Công việc đã hoàn thành!' : 'Job completed!'}
+                  </h3>
+                  <p style={{ fontSize: '14px', lineHeight: '1.6', opacity: 0.7, marginBottom: '0' }}>
+                    {language === 'vi'
+                      ? `Tiền công sẽ được giải phóng cho ${completedStaffSummary.name} trong vòng 48h.`
+                      : `Payment will be released to ${completedStaffSummary.name} within 48h.`}
+                  </p>
+
+                  <RateActions>
+                    <RateActionButton
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => {
+                        setRateStaff(completedStaffSummary);
+                        setRatings({ overall: 0, attitude: 0, efficiency: 0, discipline: 0, skills: 0 });
+                        setRatingHover({ overall: 0, attitude: 0, efficiency: 0, discipline: 0, skills: 0 });
+                        setRatingComment('');
+                        setRatingSubmitted(false);
+                        setCompletedStaffSummary(null);
+                        setShowRateModal(true);
+                      }}
+                    >
+                      <Star />
+                      {language === 'vi' ? 'Đánh giá Nhân viên' : 'Rate Employee'}
+                    </RateActionButton>
+                  </RateActions>
+                </RateModalBody>
+              </RateModalContent>
+            </RateModalOverlay>
+          )}
+        </AnimatePresence>
+
+        {/* Rate Employee Modal */}
+        <AnimatePresence>
+          {showRateModal && rateStaff && (() => {
+            const categories = [
+              { key: 'attitude', label: language === 'vi' ? 'Thái độ làm việc' : 'Work Attitude', Icon: Users },
+              { key: 'efficiency', label: language === 'vi' ? 'Hiệu quả công việc' : 'Work Efficiency', Icon: TrendingUp },
+              { key: 'discipline', label: language === 'vi' ? 'Kỷ luật và đúng giờ' : 'Discipline & Punctuality', Icon: Clock },
+              { key: 'skills', label: language === 'vi' ? 'Kỹ năng công việc' : 'Job Skills', Icon: Award },
+            ];
+            const renderStars = (catKey) => (
+              <RateStarRow>
+                {[1,2,3,4,5].map(star => (
+                  <RateStarButton
+                    key={star}
+                    type="button"
+                    $active={(ratingHover[catKey] || ratings[catKey]) >= star}
+                    onMouseEnter={() => setRatingHover(p => ({ ...p, [catKey]: star }))}
+                    onMouseLeave={() => setRatingHover(p => ({ ...p, [catKey]: 0 }))}
+                    onClick={() => setRatings(p => ({ ...p, [catKey]: star }))}
+                  >
+                    <Star />
+                  </RateStarButton>
+                ))}
+              </RateStarRow>
+            );
+            const canSubmit = ratings.overall > 0;
+            return (
+              <RateModalOverlay
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => { if (ratingSubmitted) { setShowRateModal(false); setRateStaff(null); } }}
+              >
+                <RateModalContent
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                  onClick={e => e.stopPropagation()}
+                >
+                  <RateModalHeader>
+                    <h2><Briefcase />{language === 'vi' ? (ratingSubmitted ? 'Đánh Giá Hoàn Tất' : 'Đánh Giá Nhân Viên') : (ratingSubmitted ? 'Review Submitted' : 'Rate Employee')}</h2>
+                    {ratingSubmitted && (
+                      <button onClick={() => { setShowRateModal(false); setRateStaff(null); checkAndEndShift(hrStaff); }}><X size={18} /></button>
+                    )}
+                  </RateModalHeader>
+                  <RateModalBody>
+                    {!ratingSubmitted ? (
+                      <>
+                        <p style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px' }}>
+                          {rateStaff.name} — {rateStaff.position}
+                        </p>
+
+                        {/* Overall */}
+                        <RateCategory style={{ background: 'linear-gradient(135deg, #FEF3C7, #FDE68A40)', padding: '14px 16px', borderRadius: '12px', border: '2px solid #F59E0B30', marginBottom: '16px' }}>
+                          <div className="category-label" style={{ fontSize: '15px', fontWeight: 700, color: '#B45309' }}>
+                            {language === 'vi' ? '⭐ Đánh giá tổng quan' : '⭐ Overall Rating'}
+                          </div>
+                          {renderStars('overall')}
+                        </RateCategory>
+
+                        {/* Categories */}
+                        {categories.map(({ key, label, Icon }) => (
+                          <RateCategory key={key}>
+                            <div className="category-label">
+                              <Icon />{label}
+                            </div>
+                            {renderStars(key)}
+                          </RateCategory>
+                        ))}
+
+                        {/* Comment */}
+                        <RateCategory>
+                          <div className="category-label">
+                            <Edit3 />{language === 'vi' ? 'Nhận xét của bạn' : 'Your Review'}
+                          </div>
+                          <RateTextArea
+                            placeholder={language === 'vi' ? 'Chia sẻ trải nghiệm làm việc với nhân viên này...' : 'Share your experience working with this employee...'}
+                            value={ratingComment}
+                            onChange={e => setRatingComment(e.target.value)}
+                          />
+                        </RateCategory>
+
+                        <RateActions>
+                          <RateActionButton
+                            whileHover={canSubmit ? { scale: 1.02 } : {}}
+                            whileTap={canSubmit ? { scale: 0.98 } : {}}
+                            disabled={!canSubmit}
+                            onClick={() => {
+                              if (!canSubmit) return;
+                              const staffId = rateStaff.id;
+                              setHrStaff(prev => prev.map(s =>
+                                s.id === staffId
+                                  ? { ...s, status: 'completed', rated: true, pendingRating: false, canRequestChange: false, isWithinTimeWindow: false }
+                                  : s
+                              ));
+                              setRatingSubmitted(true);
+                            }}
+                          >
+                            <CheckCircle />
+                            {language === 'vi' ? 'Gửi đánh giá' : 'Submit Review'}
+                          </RateActionButton>
+                        </RateActions>
+                      </>
+                    ) : (
+                      <>
+                        <div style={{ textAlign: 'center', padding: '24px 0' }}>
+                          <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#10B98115', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                            <CheckCircle style={{ width: '32px', height: '32px', color: '#10B981' }} />
+                          </div>
+                          <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'inherit', marginBottom: '8px' }}>
+                            {language === 'vi' ? 'Cảm ơn bạn đã đánh giá!' : 'Thank you for your review!'}
+                          </h3>
+                          <p style={{ fontSize: '14px', lineHeight: '1.6', opacity: 0.7 }}>
+                            {language === 'vi'
+                              ? 'Đánh giá của bạn giúp cộng đồng tìm được nhân viên chất lượng hơn.'
+                              : 'Your review helps the community find better employees.'}
+                          </p>
+                        </div>
+                        <RateActions>
+                          <RateActionButton
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => {
+                              setShowRateModal(false);
+                              setRateStaff(null);
+                              checkAndEndShift(hrStaff);
+                            }}
+                          >
+                            <CheckCircle />
+                            {language === 'vi' ? 'Hoàn tất' : 'Done'}
+                          </RateActionButton>
+                        </RateActions>
+                      </>
+                    )}
+                  </RateModalBody>
+                </RateModalContent>
+              </RateModalOverlay>
+            );
+          })()}
+        </AnimatePresence>
+
+        {/* Shift Ended Modal - shown when ALL staff have been rated */}
+        <AnimatePresence>
+          {showShiftEndedModal && (
+            <ConfirmCompleteOverlay
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <ConfirmCompleteContainer
+                initial={{ scale: 0.88, opacity: 0, y: 24 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.88, opacity: 0, y: 24 }}
+                transition={{ type: 'spring', damping: 22, stiffness: 300 }}
+                style={{ maxWidth: '420px' }}
+              >
+                {/* green glow icon */}
+                <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, #D1FAE5, #6EE7B7)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', boxShadow: '0 8px 24px rgba(16,185,129,0.25)' }}>
+                  <CheckCircle style={{ width: '40px', height: '40px', color: '#059669' }} />
+                </div>
+
+                <ConfirmCompleteTitle>
+                  {language === 'vi' ? 'Ca làm đã kết thúc!' : 'Shift has ended!'}
+                </ConfirmCompleteTitle>
+                <ConfirmCompleteMessage>
+                  {language === 'vi'
+                    ? 'Tất cả nhân viên đã được đánh giá. Ca làm việc đã chính thức kết thúc.'
+                    : 'All employees have been reviewed. The work shift has officially ended.'}
+                </ConfirmCompleteMessage>
+
+                {/* Rated staff list */}
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
+                  {hrStaff.filter(s => s.rated).map(s => (
+                    <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'linear-gradient(135deg, #F0FDF4, #DCFCE7)', border: '1px solid #BBF7D0', borderRadius: '10px', padding: '10px 14px' }}>
+                      <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, #10B981, #059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <User style={{ width: '18px', height: '18px', color: 'white' }} />
+                      </div>
+                      <div style={{ flex: 1, textAlign: 'left' }}>
+                        <div style={{ fontWeight: '700', fontSize: '13px', color: '#065F46' }}>{s.name}</div>
+                        <div style={{ fontSize: '11px', color: '#059669' }}>{s.position}</div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                        <Star style={{ width: '12px', height: '12px', color: '#F59E0B', fill: '#F59E0B' }} />
+                        <span style={{ fontSize: '12px', fontWeight: '700', color: '#065F46' }}>
+                          {language === 'vi' ? 'Đã đánh giá' : 'Rated'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <ConfirmCompleteButton
+                  $variant='success'
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  style={{ width: '100%' }}
+                  onClick={() => setShowShiftEndedModal(false)}
+                >
+                  <CheckCircle />{language === 'vi' ? 'Đóng' : 'Close'}
+                </ConfirmCompleteButton>
+              </ConfirmCompleteContainer>
+            </ConfirmCompleteOverlay>
+          )}
+        </AnimatePresence>
+
         <AnimatePresence>
           {deleteJobId && jobToDelete && (
             <DeleteModalOverlay

@@ -49,6 +49,7 @@ const getJobPosts = (language) => [
     location: language === 'vi' ? 'Quận 7, TP.HCM' : 'District 7, HCMC',
     salary: language === 'vi' ? '50.000 VNĐ/giờ' : '$2/hour',
     type: language === 'vi' ? 'Bán thời gian' : 'Part-time',
+    shift: '13:00 - 18:00',
     applicants: 15,
     views: 203,
     status: 'active',
@@ -393,7 +394,7 @@ const JobPostTitle = styled.h3`
 
 const JobPostMeta = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
   margin-bottom: 16px;
   
@@ -1458,10 +1459,9 @@ const ProfileDetailModal = React.memo(({ candidate, onClose }) => {
     ? (candidate.reviews.reduce((s, r) => s + r.rating, 0) / candidate.reviews.length)
     : null;
 
-  // Read CV from localStorage - try candidate-specific CV first, then fallback to general CV
+  // Read CV from localStorage - only load candidate-specific CV
   const candidateCV = JSON.parse(
     localStorage.getItem(`candidateCV_${candidate.id}`) ||
-    localStorage.getItem('candidateCV') ||
     'null'
   );
 
@@ -1660,41 +1660,6 @@ const ProfileDetailModal = React.memo(({ candidate, onClose }) => {
                     {language === 'vi' ? 'Tải xuống' : 'Download'}
                   </CVDownloadButton>
                 </CVCard>
-
-                <FeedbackSection>
-                  <FeedbackHeader>
-                    <MessageSquare />
-                    {language === 'vi' ? 'Phản hồi & Đánh giá' : 'Feedback & Review'}
-                  </FeedbackHeader>
-
-                  <FeedbackTextarea
-                    placeholder={language === 'vi'
-                      ? 'Nhập ghi chú, đánh giá về hồ sơ ứng viên này...'
-                      : 'Enter notes, feedback about this candidate...'
-                    }
-                    value={feedback.note}
-                    onChange={(e) => setFeedback({ ...feedback, note: e.target.value })}
-                  />
-
-                  <FeedbackActions>
-                    <FeedbackButton
-                      $variant="save"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleSaveFeedback}
-                    >
-                      <Save />
-                      {language === 'vi' ? 'Lưu ghi chú' : 'Save Note'}
-                    </FeedbackButton>
-                  </FeedbackActions>
-
-                  {feedback.date && (
-                    <FeedbackMeta>
-                      <Clock />
-                      {language === 'vi' ? 'Cập nhật lần cuối:' : 'Last updated:'} {formatDate(feedback.date)}
-                    </FeedbackMeta>
-                  )}
-                </FeedbackSection>
               </>
             ) : (
               <EmptyCV>
@@ -2368,9 +2333,11 @@ const Applications = () => {
                         <div className="meta-item">
                           <DollarSign /><span>{post.salary}</span>
                         </div>
-                        <div className="meta-item">
-                          <Clock /><span>{post.type}</span>
-                        </div>
+                        {post.shift && (
+                          <div className="meta-item" style={{ gridColumn: '1 / -1' }}>
+                            <Clock /><span>{post.shift}</span>
+                          </div>
+                        )}
                       </JobPostMeta>
                     </div>
                     <JobStatusBadge $status={post.status}>

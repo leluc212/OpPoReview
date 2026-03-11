@@ -338,13 +338,15 @@ const JobCard = ({ job, onClick, onSave, saved = false }) => {
           <span>{translateLocation(job.location, language)}</span>
         </DetailItem>
         <DetailItem whileHover={{ x: 4 }}>
-          <Briefcase />
-          <span>{translateJobType(job.type, language)}</span>
-        </DetailItem>
-        <DetailItem whileHover={{ x: 4 }}>
           <DollarSign />
           <span>{translateSalary(job.salary, language)}</span>
         </DetailItem>
+        {job.shift && (
+          <DetailItem whileHover={{ x: 4 }}>
+            <Clock />
+            <span>{job.shift}</span>
+          </DetailItem>
+        )}
         <DetailItem whileHover={{ x: 4 }}>
           <Clock />
           <span>{translatePostedAt(job.postedAt, language)}</span>

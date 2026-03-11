@@ -501,7 +501,7 @@ const EmployerDashboard = () => {
         >
           <WelcomeContent>
             <h1>{getGreeting()}, {user?.role === 'employer' ? (language === 'vi' ? 'Katinat Quận 8' : 'Katinat District 8') : (user?.name || 'User')}! 👋</h1>
-            <p>{language === 'vi' ? 'Hôm nay bạn có 3 ứng viên mới và 5 thông báo cần xem' : 'You have 3 new candidates and 5 notifications to review'}</p>
+            <p>{language === 'vi' ? 'Hôm nay bạn có 3 ứng viên mới ' : 'You have 3 new candidates and 5 notifications to review'}</p>
             <QuickActions>
               <ActionButton
                 $variant="primary"
@@ -533,7 +533,7 @@ const EmployerDashboard = () => {
             title={language === 'vi' ? 'Tổng các tin tuyển dụng' : 'Total Job Posts'}
             value="12"
             change="+3"
-            changeText={language === 'vi' ? 'sơ với tháng trước' : 'vs last month'}
+            changeText={language === 'vi' ? 'so với tháng trước' : 'vs last month'}
             icon={Briefcase}
             color="#1e40af"
             positive
@@ -542,7 +542,7 @@ const EmployerDashboard = () => {
             title={language === 'vi' ? 'Tổng hồ sơ ứng tuyển' : 'Total Applications'}
             value="248"
             change="+45%"
-            changeText={language === 'vi' ? 'sơ với tháng trước' : 'vs last month'}
+            changeText={language === 'vi' ? 'so với tháng trước' : 'vs last month'}
             icon={Users}
             color="#F59E0B"
             positive
@@ -551,7 +551,7 @@ const EmployerDashboard = () => {
             title={language === 'vi' ? 'Tổng lượt tiếp cận' : 'Total Views'}
             value="1,234"
             change="+12%"
-            changeText={language === 'vi' ? 'sơ với tuần trước' : 'vs last week'}
+            changeText={language === 'vi' ? 'so với tuần trước' : 'vs last week'}
             icon={Eye}
             color="#10B981"
             positive

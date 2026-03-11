@@ -789,7 +789,7 @@ function Support() {
                 </div>
                 <div className="info">
                   <div className="label">Email</div>
-                  <div className="value">support@oppo.vn</div>
+                  <div className="value">oppohiringplatform@gmail.com</div>
                 </div>
               </ContactInfo>
 

@@ -728,7 +728,7 @@ const Reports = () => {
   const standardJobServices = [
     { id: 1, name: 'Quick Boost', price: '245.000 VND', duration: '24H', status: 'active' },
     { id: 2, name: 'Hot Search', price: '395.000 VND', duration: '48H', status: 'active' },
-    { id: 3, name: 'Spongit Banner', price: '745.000 VND', duration: '7 ngày', status: 'active' },
+    { id: 3, name: 'Spotlight Banner', price: '745.000 VND', duration: '7 ngày', status: 'active' },
     { id: 4, name: 'Top Spotlight', price: '1.245.000 VND', duration: '14 ngày', status: 'active' },
   ];
 
@@ -736,14 +736,14 @@ const Reports = () => {
   const urgentJobServices = [
     { id: 1, name: 'Quick Boost Gấp', price: '345.000 VND', duration: '12H', status: 'active' },
     { id: 2, name: 'Hot Search Gấp', price: '495.000 VND', duration: '24H', status: 'active' },
-    { id: 3, name: 'Spongit Banner Gấp', price: '895.000 VND', duration: '3 ngày', status: 'active' },
+    { id: 3, name: 'Spotlight Banner Gấp', price: '895.000 VND', duration: '3 ngày', status: 'active' },
     { id: 4, name: 'Top Spotlight Gấp', price: '1.495.000 VND', duration: '7 ngày', status: 'active' },
   ];
 
   // Purchase history for Job thường
   const standardPurchaseHistory = [
     { id: 1, employer: 'Lẩu Bò Sài Gòn Vi Vu', package: 'Hot Search', price: '395.000 VND', date: '08/03/2026', status: 'active' },
-    { id: 2, employer: 'Phở Gia Truyền 1954', package: 'Spongit Banner', price: '745.000 VND', date: '07/03/2026', status: 'active' },
+    { id: 2, employer: 'Phở Gia Truyền 1954', package: 'Spotlight Banner', price: '745.000 VND', date: '07/03/2026', status: 'active' },
     { id: 3, employer: 'Urban Coffee', package: 'Quick Boost', price: '245.000 VND', date: '06/03/2026', status: 'expired' },
     { id: 4, employer: 'Dimsum House', package: 'Top Spotlight', price: '1.245.000 VND', date: '05/03/2026', status: 'active' },
     { id: 5, employer: 'Bánh Mì PewPew', package: 'Hot Search', price: '395.000 VND', date: '04/03/2026', status: 'active' },
@@ -753,7 +753,7 @@ const Reports = () => {
   const urgentPurchaseHistory = [
     { id: 1, employer: 'Chill Out Beer Club', package: 'Quick Boost Gấp', price: '345.000 VND', date: '08/03/2026', status: 'active' },
     { id: 2, employer: 'Bia Sệt 123', package: 'Hot Search Gấp', price: '495.000 VND', date: '08/03/2026', status: 'active' },
-    { id: 3, employer: 'Beer Garden Phố', package: 'Spongit Banner Gấp', price: '895.000 VND', date: '07/03/2026', status: 'active' },
+    { id: 3, employer: 'Beer Garden Phố', package: 'Spotlight Banner Gấp', price: '895.000 VND', date: '07/03/2026', status: 'active' },
     { id: 4, employer: 'Nướng Ngói Gia Bảo', package: 'Top Spotlight Gấp', price: '1.495.000 VND', date: '07/03/2026', status: 'active' },
     { id: 5, employer: 'Lẩu Phan', package: 'Quick Boost Gấp', price: '345.000 VND', date: '06/03/2026', status: 'expired' },
   ];
@@ -761,7 +761,7 @@ const Reports = () => {
   // Package status for Job thường
   const standardPackageStatus = [
     { id: 1, employer: 'Lẩu Bò Sài Gòn Vi Vu', package: 'Hot Search', startDate: '08/03/2026', endDate: '10/03/2026', status: 'active' },
-    { id: 2, employer: 'Phở Gia Truyền 1954', package: 'Spongit Banner', startDate: '07/03/2026', endDate: '14/03/2026', status: 'active' },
+    { id: 2, employer: 'Phở Gia Truyền 1954', package: 'Spotlight Banner', startDate: '07/03/2026', endDate: '14/03/2026', status: 'active' },
     { id: 3, employer: 'Urban Coffee', package: 'Quick Boost', startDate: '06/03/2026', endDate: '07/03/2026', status: 'expired' },
     { id: 4, employer: 'Dimsum House', package: 'Top Spotlight', startDate: '05/03/2026', endDate: '19/03/2026', status: 'active' },
   ];
@@ -770,7 +770,7 @@ const Reports = () => {
   const urgentPackageStatus = [
     { id: 1, employer: 'Chill Out Beer Club', package: 'Quick Boost Gấp', startDate: '08/03/2026', endDate: '08/03/2026', status: 'active' },
     { id: 2, employer: 'Bia Sệt 123', package: 'Hot Search Gấp', startDate: '08/03/2026', endDate: '09/03/2026', status: 'active' },
-    { id: 3, employer: 'Beer Garden Phố', package: 'Spongit Banner Gấp', startDate: '07/03/2026', endDate: '10/03/2026', status: 'active' },
+    { id: 3, employer: 'Beer Garden Phố', package: 'Spotlight Banner Gấp', startDate: '07/03/2026', endDate: '10/03/2026', status: 'active' },
     { id: 4, employer: 'Nướng Ngói Gia Bảo', package: 'Top Spotlight Gấp', startDate: '07/03/2026', endDate: '14/03/2026', status: 'active' },
   ];
 

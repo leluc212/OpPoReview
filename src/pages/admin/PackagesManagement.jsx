@@ -429,7 +429,7 @@ const PackagesManagement = () => {
     {
       id: 3,
       employer: 'Katinat chi nhánh quận 8',
-      package: 'Spongit Banner',
+      package: 'Spotlight Banner',
       purchaseDate: '2026-02-01',
       expiryDate: '2026-05-01',
       status: 'active',
@@ -479,7 +479,7 @@ const PackagesManagement = () => {
     {
       id: 8,
       employer: 'Gong Cha chi nhánh quận 1',
-      package: 'Spongit Banner',
+      package: 'Spotlight Banner',
       purchaseDate: '2026-01-18',
       expiryDate: '2026-04-18',
       status: 'active',
@@ -530,7 +530,7 @@ const PackagesManagement = () => {
     {
       id: 13,
       employer: 'Bia Sệt 123',
-      package: 'Spongit Banner',
+      package: 'Spotlight Banner',
       purchaseDate: '2026-01-18',
       expiryDate: '2026-04-18',
       status: 'active',
@@ -570,7 +570,7 @@ const PackagesManagement = () => {
     {
       id: 17,
       employer: 'Sushi Sen Mini',
-      package: 'Spongit Banner',
+      package: 'Spotlight Banner',
       purchaseDate: '2026-01-22',
       expiryDate: '2026-04-22',
       status: 'active',
@@ -620,7 +620,7 @@ const PackagesManagement = () => {
     {
       id: 22,
       employer: 'Lẩu Phan',
-      package: 'Spongit Banner',
+      package: 'Spotlight Banner',
       purchaseDate: '2026-01-27',
       expiryDate: '2026-04-27',
       status: 'active',
@@ -650,7 +650,7 @@ const PackagesManagement = () => {
     {
       id: 25,
       employer: 'Cà Phê Cây Me',
-      package: 'Spongit Banner',
+      package: 'Spotlight Banner',
       purchaseDate: '2026-01-30',
       expiryDate: '2026-04-30',
       status: 'active',
@@ -700,7 +700,7 @@ const PackagesManagement = () => {
     {
       id: 30,
       employer: 'Urban Coffee',
-      package: 'Spongit Banner',
+      package: 'Spotlight Banner',
       purchaseDate: '2026-02-04',
       expiryDate: '2026-05-04',
       status: 'active',
@@ -750,7 +750,7 @@ const PackagesManagement = () => {
     {
       id: 35,
       employer: 'Cơm Tấm Cali',
-      package: 'Spongit Banner',
+      package: 'Spotlight Banner',
       purchaseDate: '2026-02-09',
       expiryDate: '2026-05-09',
       status: 'active',
@@ -790,7 +790,7 @@ const PackagesManagement = () => {
     {
       id: 39,
       employer: 'Blue Star Cocktail Bar',
-      package: 'Spongit Banner',
+      package: 'Spotlight Banner',
       purchaseDate: '2026-02-13',
       expiryDate: '2026-05-13',
       status: 'active',
@@ -811,7 +811,7 @@ const PackagesManagement = () => {
     {
       id: 41,
       employer: 'Ốc Đêm 79',
-      package: 'Spongit Banner',
+      package: 'Spotlight Banner',
       purchaseDate: '2026-02-15',
       expiryDate: '2026-05-15',
       status: 'active',
@@ -873,14 +873,14 @@ const PackagesManagement = () => {
   const packageColors = {
     'Quick Boost': '#3b82f6',
     'Hot Search': '#f59e0b',
-    'Spongit Banner': '#8b5cf6',
+    'Spotlight Banner': '#8b5cf6',
     'Top Spotlight': '#ef4444'
   };
 
   const packageIcons = {
     'Quick Boost': Zap,
     'Hot Search': TrendingUp,
-    'Spongit Banner': Star,
+    'Spotlight Banner': Star,
     'Top Spotlight': Package
   };
 
@@ -894,7 +894,7 @@ const PackagesManagement = () => {
   const filterOptions = [
     { value: 'Quick Boost', label: 'Quick Boost' },
     { value: 'Hot Search', label: 'Hot Search' },
-    { value: 'Spongit Banner', label: 'Spongit Banner' },
+    { value: 'Spotlight Banner', label: 'Spotlight Banner' },
     { value: 'Top Spotlight', label: 'Top Spotlight' },
     { value: 'active', label: language === 'vi' ? 'Đang hoạt động' : 'Active' },
     { value: 'expiring', label: language === 'vi' ? 'Sắp hết hạn' : 'Expiring' },
@@ -945,7 +945,7 @@ const PackagesManagement = () => {
   const packageCounts = {
     'Quick Boost': purchases.filter(p => p.package === 'Quick Boost').length,
     'Hot Search': purchases.filter(p => p.package === 'Hot Search').length,
-    'Spongit Banner': purchases.filter(p => p.package === 'Spongit Banner').length,
+    'Spotlight Banner': purchases.filter(p => p.package === 'Spotlight Banner').length,
     'Top Spotlight': purchases.filter(p => p.package === 'Top Spotlight').length,
   };
 
@@ -1035,7 +1035,7 @@ const PackagesManagement = () => {
                     </Bar>
                     <Bar 
                       $height={(data.spotlight / maxValue) * 100} 
-                      $color={packageColors['Spongit Banner']}
+                      $color={packageColors['Spotlight Banner']}
                       title={`Banner nổi bật 1: ${data.spotlight}`}
                     >
                       <BarValue>{data.spotlight}</BarValue>

@@ -326,7 +326,7 @@ const EmployerProfileView = () => {
   };
 
   return (
-    <DashboardLayout role="candidate">
+    <DashboardLayout role="employee">
       <ProfileContainer>
         <BackButton onClick={() => navigate(-1)}>
           <ArrowLeft />
@@ -465,7 +465,7 @@ const EmployerProfileView = () => {
             <Card>
               <h3>Quick Links</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <Button $variant="secondary" $fullWidth onClick={() => navigate('/candidate/jobs')}>
+                <Button $variant="secondary" $fullWidth onClick={() => navigate('/employee/jobs')}>
                   <Briefcase style={{ width: '18px', height: '18px' }} />
                   View All Jobs
                 </Button>

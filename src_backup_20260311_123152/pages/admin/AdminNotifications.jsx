@@ -456,7 +456,7 @@ const AdminNotifications = () => {
       icon: DollarSign,
       color: '#10b981',
       title: language === 'vi' ? 'Mua bài' : 'Package purchase',
-      message: language === 'vi' ? 'Phở Gia Truyền 1954 đã mua gói Spongit Banner trị giá 745.000 VND cho chiến dịch tuyển dụng.' : 'Phở Gia Truyền 1954 purchased Spongit Banner package worth 745,000 VND for recruitment campaign.',
+      message: language === 'vi' ? 'Phở Gia Truyền 1954 đã mua gói Spotlight Banner trị giá 745.000 VND cho chiến dịch tuyển dụng.' : 'Phở Gia Truyền 1954 purchased Spotlight Banner package worth 745,000 VND for recruitment campaign.',
       time: language === 'vi' ? '1 ngày trước' : '1 day ago',
       unread: false,
       actionRequired: false

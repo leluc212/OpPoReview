@@ -475,7 +475,7 @@ const EmployerSupport = () => {
                   <div className="ci-icon"><Mail /></div>
                   <div className="ci-info">
                     <h4>Email</h4>
-                    <p>support@oppo.vn</p>
+                    <p>oppohiringplatform@gmail.com</p>
                   </div>
                 </ContactItem>
                 <ContactItem>

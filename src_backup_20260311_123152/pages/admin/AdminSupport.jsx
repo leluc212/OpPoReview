@@ -197,7 +197,7 @@ const AdminSupport = () => {
     {
       id: 5,
       question: language === 'vi' ? 'Cách xử lý sự cố kỹ thuật nghiêm trọng?' : 'How to handle critical technical issues?',
-      answer: language === 'vi' ? 'Trong trường hợp khẩn cấp, vui lòng liên hệ ngay với bộ phận kỹ thuật qua hotline: 0909 123 456 hoặc email: tech-support@oppo.vn. Mô tả chi tiết sự cố và các bước đã thực hiện.' : 'In emergencies, please contact technical support immediately via hotline: 0909 123 456 or email: tech-support@oppo.vn. Describe the issue and steps taken in detail.'
+      answer: language === 'vi' ? 'Trong trường hợp khẩn cấp, vui lòng liên hệ ngay với bộ phận kỹ thuật qua hotline: 0909 123 456 hoặc email: tech-oppohiringplatform@gmail.com. Mô tả chi tiết sự cố và các bước đã thực hiện.' : 'In emergencies, please contact technical support immediately via hotline: 0909 123 456 or email: tech-oppohiringplatform@gmail.com. Describe the issue and steps taken in detail.'
     }
   ];
 
@@ -333,7 +333,7 @@ const AdminSupport = () => {
                 </IconWrapper>
                 <ContactInfo>
                   <ContactLabel>Email hỗ trợ</ContactLabel>
-                  <ContactValue>admin-support@oppo.vn</ContactValue>
+                  <ContactValue>admin-oppohiringplatform@gmail.com</ContactValue>
                 </ContactInfo>
               </ContactItem>
 
