@@ -45,7 +45,7 @@ const getJobPosts = (language) => [
     id: 3,
     title: language === 'vi' ? 'Nhân viên Thu Ngân' : 'Cashier',
     location: language === 'vi' ? 'Quận 7, TP.HCM' : 'District 7, HCMC',
-    salary: language === 'vi' ? '50.000 VNĐ/giờ' : '$2/hour',
+    salary: language === 'vi' ? '160.000 VNĐ' : '$2/hour',
     type: language === 'vi' ? 'Bán thời gian' : 'Part-time',
     applicants: 15,
     views: 203,
@@ -53,7 +53,7 @@ const getJobPosts = (language) => [
     postedDate: language === 'vi' ? '1 tuần trước' : '1 week ago',
     deadline: language === 'vi' ? '20 ngày nữa' : '20 days left',
     description: language === 'vi'
-      ? 'Tuyển thu ngân bán thời gian làm việc tại cửa hàng cà phê. Công việc chính là thu tiền, đối soát cuối ca và hỗ trợ các công việc khác khi cần.\n\nYêu cầu:\n• Trung thực, cẩn thận trong công việc\n• Có kỹ năng giao tiếp cơ bản\n• Có thể làm việc 4-6 giờ/ngày\n• Ưu tiên sinh viên, học sinh\n\nQuyền lợi:\n• Lương: 50.000 VNĐ/giờ\n• Linh hoạt thời gian làm việc\n• Môi trường thân thiện\n• Được hưởng đồ uống miễn phí trong ca'
+      ? 'Tuyển thu ngân bán thời gian làm việc tại cửa hàng cà phê. Công việc chính là thu tiền, đối soát cuối ca và hỗ trợ các công việc khác khi cần.\n\nYêu cầu:\n• Trung thực, cẩn thận trong công việc\n• Có kỹ năng giao tiếp cơ bản\n• Có thể làm việc 4-6 giờ/ngày\n• Ưu tiên sinh viên, học sinh\n\nQuyền lợi:\n• Lương: 160.000 VNĐ\n• Linh hoạt thời gian làm việc\n• Môi trường thân thiện\n• Được hưởng đồ uống miễn phí trong ca'
       : 'Hiring part-time cashier to work at coffee shop. Main tasks include cash handling, end-of-shift reconciliation and other support when needed.\n\nRequirements:\n• Honest, careful in work\n• Basic communication skills\n• Can work 4-6 hours/day\n• Priority for students\n\nBenefits:\n• Salary: $2/hour\n• Flexible working hours\n• Friendly environment\n• Free drinks during shift'
   }
 ];
