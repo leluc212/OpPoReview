@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import Modal from '../../components/Modal';
 import {
-  Search, MapPin, Briefcase, DollarSign, Clock, Star, TrendingUp,
+  Search, MapPin, Briefcase, Clock, Star, TrendingUp,
   ChevronDown, Building2, Bookmark, Eye, ArrowUpRight, Filter,
   X, SlidersHorizontal, Grid, List, Sparkles, Zap, Navigation, Target,
   Power, XCircle, AlertCircle, CheckCircle
@@ -3354,7 +3354,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, onApply, delay = 0, sho
         </JobTags>
 
         <JobSalary>
-          <DollarSign />
+          <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span>
           <span>{translateSalary(job.category === 'shift' ? calculateShiftSalary(job) : job.salary, language)}</span>
         </JobSalary>
       </JobCardBody>

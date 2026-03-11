@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
-import { Bookmark, MapPin, Briefcase, DollarSign, Clock, Building2, Eye, ArrowUpRight, Star, Trash2 } from 'lucide-react';
+import { Bookmark, MapPin, Briefcase, Clock, Building2, Eye, ArrowUpRight, Star, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import StatusBadge from '../../components/StatusBadge';
@@ -421,7 +421,7 @@ const SavedJobs = () => {
                   </JobTags>
                   
                   <JobSalary>
-                    <DollarSign />
+                    <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span>
                     <span>{job.salary}</span>
                   </JobSalary>
                 </JobCardBody>
