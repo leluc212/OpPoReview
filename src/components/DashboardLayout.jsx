@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
@@ -10,10 +10,17 @@ const LayoutContainer = styled.div`
   background-attachment: fixed;
 `;
 
+const SidebarWrapper = styled.div`
+  width: ${props => props.$isHovered ? '260px' : '80px'};
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+`;
+
 const MainContent = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 `;
 
 const ContentArea = styled.main`
@@ -25,9 +32,16 @@ const ContentArea = styled.main`
 `;
 
 const DashboardLayout = ({ children, role, showSearch = true }) => {
+  const [isSidebarHovered, setIsSidebarHovered] = useState(false);
+
   return (
     <LayoutContainer>
-      <Sidebar role={role} />
+      <SidebarWrapper $isHovered={isSidebarHovered}>
+        <Sidebar 
+          role={role} 
+          onHoverChange={setIsSidebarHovered}
+        />
+      </SidebarWrapper>
       <MainContent>
         <Navbar showSearch={showSearch} />
         <ContentArea>{children}</ContentArea>
