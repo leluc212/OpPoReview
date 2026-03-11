@@ -17,8 +17,8 @@ const getJobPosts = (language) => [
     id: 1,
     title: language === 'vi' ? 'Cửa hàng trưởng' : 'Store Manager',
     location: language === 'vi' ? 'Quận 8, TP.HCM' : 'District 8, HCMC',
-    salary: language === 'vi' ? '15.000.000 VNĐ' : '$600/month',
-    type: language === 'vi' ? 'Toàn thời gian' : 'Full-time',
+    salary: language === 'vi' ? '405.000 VNĐ' : '$27/day',
+    type: language === 'vi' ? 'Bán thời gian' : 'Part-time',
     shift: '08:00 - 17:00',
     workDays: language === 'vi' ? '20/03/2026' : '03/20/2026',
     applicants: 12,
@@ -34,8 +34,8 @@ const getJobPosts = (language) => [
     id: 2,
     title: language === 'vi' ? 'Nhân viên Pha Chế' : 'Barista',
     location: language === 'vi' ? 'Quận 1, TP.HCM' : 'District 1, HCMC',
-    salary: language === 'vi' ? '8.000.000 VNĐ' : '$320/month',
-    type: language === 'vi' ? 'Toàn thời gian' : 'Full-time',
+    salary: language === 'vi' ? '280.000 VNĐ' : '$16/day',
+    type: language === 'vi' ? 'Bán thời gian' : 'Part-time',
     shift: '07:00 - 15:00',
     workDays: language === 'vi' ? '18/03/2026' : '03/18/2026',
     applicants: 28,
@@ -51,7 +51,7 @@ const getJobPosts = (language) => [
     id: 3,
     title: language === 'vi' ? 'Nhân viên Thu Ngân' : 'Cashier',
     location: language === 'vi' ? 'Quận 7, TP.HCM' : 'District 7, HCMC',
-    salary: language === 'vi' ? '50.000 VNĐ/giờ' : '$2/hour',
+    salary: language === 'vi' ? '250.000 VNĐ' : '$10/day',
     type: language === 'vi' ? 'Bán thời gian' : 'Part-time',
     shift: '13:00 - 18:00',
     workDays: language === 'vi' ? '15/03/2026' : '03/15/2026',
@@ -61,7 +61,7 @@ const getJobPosts = (language) => [
     postedDate: language === 'vi' ? '1 tuần trước' : '1 week ago',
     deadline: language === 'vi' ? '20 ngày nữa' : '20 days left',
     description: language === 'vi'
-      ? 'Tuyển thu ngân bán thời gian làm việc tại cửa hàng cà phê. Công việc chính là thu tiền, đối soát cuối ca và hỗ trợ các công việc khác khi cần.\n\nYêu cầu:\n• Trung thực, cẩn thận trong công việc\n• Có kỹ năng giao tiếp cơ bản\n• Có thể làm việc 4-6 giờ/ngày\n• Ưu tiên sinh viên, học sinh\n\nQuyền lợi:\n• Lương: 50.000 VNĐ/giờ\n• Linh hoạt thời gian làm việc\n• Môi trường thân thiện\n• Được hưởng đồ uống miễn phí trong ca'
+      ? 'Tuyển thu ngân bán thời gian làm việc tại cửa hàng cà phê. Công việc chính là thu tiền, đối soát cuối ca và hỗ trợ các công việc khác khi cần.\n\nYêu cầu:\n• Trung thực, cẩn thận trong công việc\n• Có kỹ năng giao tiếp cơ bản\n• Có thể làm việc 4-6 giờ/ngày\n• Ưu tiên sinh viên, học sinh\n\nQuyền lợi:\n• Lương: 160.000 VNĐ\n• Linh hoạt thời gian làm việc\n• Môi trường thân thiện\n• Được hưởng đồ uống miễn phí trong ca'
       : 'Hiring part-time cashier to work at coffee shop. Main tasks include cash handling, end-of-shift reconciliation and other support when needed.\n\nRequirements:\n• Honest, careful in work\n• Basic communication skills\n• Can work 4-6 hours/day\n• Priority for students\n\nBenefits:\n• Salary: $2/hour\n• Flexible working hours\n• Friendly environment\n• Free drinks during shift'
   }
 ];
@@ -500,14 +500,26 @@ const JobPostButton = styled(motion.button)`
 `;
 
 const JobStatusBadge = styled.div`
-  padding: 6px 12px;
-  border-radius: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
   font-size: 12px;
   font-weight: 700;
   background: ${props => props.$status === 'active' ? '#D1FAE5' : '#F1F5F9'};
   color: ${props => props.$status === 'active' ? '#047857' : '#64748B'};
-  border: 1px solid ${props => props.$status === 'active' ? '#10B981' : '#CBD5E1'};
+  border: 1.5px solid ${props => props.$status === 'active' ? '#10B981' : '#CBD5E1'};
   white-space: nowrap;
+  letter-spacing: 0.3px;
+`;
+
+const JobTypeBadge = styled.div`
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: ${props => props.$partTime ? '#FFF7ED' : '#EFF6FF'};
+  color: ${props => props.$partTime ? '#C2410C' : '#1D4ED8'};
+  border: 1.5px solid ${props => props.$partTime ? '#FDBA74' : '#BFDBFE'};
 `;
 
 // --- Section Header for Posts ---
@@ -2350,11 +2362,16 @@ const Applications = () => {
                         )}
                       </JobPostMeta>
                     </div>
-                    <JobStatusBadge $status={post.status}>
-                      {post.status === 'active' 
-                        ? (language === 'vi' ? 'Đang tuyển' : 'Active') 
-                        : (language === 'vi' ? 'Đã đóng' : 'Closed')}
-                    </JobStatusBadge>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
+                      <JobStatusBadge $status={post.status}>
+                        {post.status === 'active' 
+                          ? (language === 'vi' ? 'Đang tuyển' : 'Active') 
+                          : (language === 'vi' ? 'Đã đóng' : 'Closed')}
+                      </JobStatusBadge>
+                      <JobTypeBadge $partTime={post.type === 'Bán thời gian' || post.type === 'Part-time'}>
+                        {(post.type === 'Bán thời gian' || post.type === 'Part-time') ? 'Part-time' : 'Full-time'}
+                      </JobTypeBadge>
+                    </div>
                   </JobPostHeader>
                   
                   <JobPostStats>
