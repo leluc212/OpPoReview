@@ -2446,7 +2446,7 @@ const HRManagement = () => {
       const mockQuickJobs = [
         {
           id: 1709870123456,
-          title: 'Ca Tối - Nhân viên Phục vụ',
+          title: 'Nhân viên Phục vụ',
           location: 'Quận 1, TP.HCM',
           hourlyRate: 35000,
           startTime: '18:00',
@@ -2463,7 +2463,7 @@ const HRManagement = () => {
         },
         {
           id: 1709783123456,
-          title: 'Ca Trưa - Nhân viên Phụ bếp',
+          title: 'Nhân viên Phụ bếp',
           location: 'Quận 3, TP.HCM',
           hourlyRate: 32000,
           startTime: '10:00',
@@ -2480,7 +2480,7 @@ const HRManagement = () => {
         },
         {
           id: 1709696123456,
-          title: 'Ca Chiều - Nhân viên Pha chế',
+          title: 'Nhân viên Pha chế',
           location: 'Quận 7, TP.HCM',
           hourlyRate: 38000,
           startTime: '14:00',
@@ -2497,7 +2497,7 @@ const HRManagement = () => {
         },
         {
           id: 1709609123456,
-          title: 'Ca Sáng - Nhân viên Bán hàng',
+          title: 'Nhân viên Bán hàng',
           location: 'Quận 10, TP.HCM',
           hourlyRate: 33000,
           startTime: '07:00',
@@ -2514,7 +2514,7 @@ const HRManagement = () => {
         },
         {
           id: 1709522123456,
-          title: 'Ca Tối - Nhân viên Thu ngân',
+          title: 'Nhân viên Thu ngân',
           location: 'Quận 2, TP.HCM',
           hourlyRate: 36000,
           startTime: '17:00',
@@ -2531,7 +2531,7 @@ const HRManagement = () => {
         },
         {
           id: 1709435123456,
-          title: 'Ca Tối - Nhân viên Rửa chén',
+          title: 'Nhân viên Rửa chén',
           location: 'Quận 5, TP.HCM',
           hourlyRate: 32000,
           startTime: '19:00',
