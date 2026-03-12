@@ -19,6 +19,12 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api-employer/, ''),
         secure: true
+      },
+      '/api-jobs': {
+        target: 'https://dlidp35x33.execute-api.ap-southeast-1.amazonaws.com/prod',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-jobs/, ''),
+        secure: true
       }
     }
   },

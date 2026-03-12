@@ -13,6 +13,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import StatusBadge from '../../components/StatusBadge';
 import { useLanguage } from '../../context/LanguageContext';
 import candidateProfileService from '../../services/candidateProfileService';
+import jobPostService from '../../services/jobPostService';
 
 // Animations
 const fadeIn = `
@@ -1201,10 +1202,66 @@ const translateTimePosted = (timeStr, language) => {
     .replace(/1\s*hours ago/g, '1 hour ago');
 };
 
+// Format ISO date to readable format (for DynamoDB jobs)
+const formatPostedDate = (isoDate, language) => {
+  try {
+    // Parse ISO date - DynamoDB stores in UTC
+    const date = new Date(isoDate);
+    const now = new Date();
+    
+    // Calculate difference in milliseconds
+    const diffMs = now - date;
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
+    
+    // Return relative time
+    if (diffMinutes < 1) {
+      return language === 'vi' ? 'Vừa xong' : 'Just now';
+    } else if (diffMinutes < 60) {
+      return language === 'vi' ? `${diffMinutes} phút trước` : `${diffMinutes} minutes ago`;
+    } else if (diffHours < 24) {
+      return language === 'vi' ? `${diffHours} giờ trước` : `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`;
+    } else if (diffDays < 7) {
+      return language === 'vi' ? `${diffDays} ngày trước` : `${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago`;
+    } else if (diffDays < 30) {
+      const weeks = Math.floor(diffDays / 7);
+      return language === 'vi' ? `${weeks} tuần trước` : `${weeks} ${weeks === 1 ? 'week' : 'weeks'} ago`;
+    } else {
+      // Format as date in local timezone
+      return date.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        timeZone: 'Asia/Ho_Chi_Minh'
+      });
+    }
+  } catch (e) {
+    console.error('Error formatting date:', e, isoDate);
+    return isoDate;
+  }
+};
+
 // Parse time posted to hours for sorting (newer = smaller number)
 const parseTimeToHours = (timeStr) => {
-  // Extract number from string
-  const match = timeStr.match(/(\d+)/);
+  // Handle undefined or null
+  if (!timeStr) return 999999;
+  
+  // Handle ISO date format (from DynamoDB)
+  if (timeStr.includes('T') && timeStr.includes('Z')) {
+    try {
+      const date = new Date(timeStr);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffHours = diffMs / (1000 * 60 * 60);
+      return diffHours;
+    } catch (e) {
+      return 999999;
+    }
+  }
+  
+  // Handle text format (e.g., "2 giờ trước", "3 days ago")
+  const match = String(timeStr).match(/(\d+)/);
   if (!match) return 999999; // Unknown time goes to end
 
   const num = parseInt(match[1]);
@@ -1406,7 +1463,9 @@ const getStoredJobs = () => {
     if (storedJobs) {
       const jobs = JSON.parse(storedJobs);
       // Transform employer jobs to candidate job format
-      return jobs.map(job => ({
+      return jobs
+        .filter(job => job.salaryMin || job.salaryMax) // Filter out jobs without salary
+        .map(job => ({
         id: job.id,
         title: job.title,
         company: job.department || 'Công ty',
@@ -2276,12 +2335,71 @@ const JobListing = () => {
   const [selectedLocation, setSelectedLocation] = useState('');
   const [jobCategory, setJobCategory] = useState('standard'); // 'standard' or 'shift'
   const [candidateProfile, setCandidateProfile] = useState(null);
+  const [dynamoDBJobs, setDynamoDBJobs] = useState([]);
+  const [isLoadingDynamoJobs, setIsLoadingDynamoJobs] = useState(true);
 
-  // Merge stored jobs with default jobs data
+  // Load jobs from DynamoDB
+  useEffect(() => {
+    const loadDynamoDBJobs = async () => {
+      try {
+        setIsLoadingDynamoJobs(true);
+        console.log('📥 Loading jobs from DynamoDB for candidate view...');
+        const jobs = await jobPostService.getAllActiveJobs();
+        console.log('✅ Loaded DynamoDB jobs:', jobs);
+        
+        // Transform DynamoDB jobs to match JOBS_DATA format
+        const transformedJobs = jobs
+          .filter(job => job && job.idJob && job.title && job.salary) // Filter out invalid jobs and jobs without salary
+          .map(job => {
+            try {
+              return {
+                id: `dynamo-${job.idJob}`,
+                idJob: job.idJob,
+                title: String(job.title || 'Untitled Job'),
+                company: String(job.employerName || job.employerEmail || 'Công ty'),
+                location: String(job.location || ''),
+                salary: job.salary ? `${parseInt(job.salary).toLocaleString()} VNĐ/h` : (language === 'vi' ? 'Thỏa thuận' : 'Negotiable'),
+                type: job.jobType === 'part-time' ? (language === 'vi' ? 'Bán thời gian' : 'Part-time') : (language === 'vi' ? 'Toàn thời gian' : 'Full-time'),
+                category: String(job.category || 'standard'), // Use category from DynamoDB
+                tags: job.tags ? String(job.tags).split(',').map(t => String(t).trim()).filter(t => t) : [],
+                postedDate: String(job.createdAt || new Date().toISOString()),
+                postedAt: formatPostedDate(job.createdAt || new Date().toISOString(), language), // Add formatted text
+                applicants: parseInt(job.applicants) || 0,
+                views: parseInt(job.views) || 0,
+                description: String(job.description || ''),
+                responsibilities: String(job.responsibilities || ''),
+                requirements: String(job.requirements || ''),
+                benefits: String(job.benefits || ''),
+                workHours: String(job.workHours || ''),
+                workDays: String(job.workDays || ''),
+                status: String(job.status || 'active'),
+                isFromDynamoDB: true // Flag to identify DynamoDB jobs
+              };
+            } catch (err) {
+              console.error('Error transforming job:', job, err);
+              return null;
+            }
+          })
+          .filter(job => job !== null); // Remove failed transformations
+        
+        setDynamoDBJobs(transformedJobs);
+        console.log('✅ Transformed DynamoDB jobs:', transformedJobs);
+      } catch (error) {
+        console.error('❌ Error loading DynamoDB jobs:', error);
+        setDynamoDBJobs([]);
+      } finally {
+        setIsLoadingDynamoJobs(false);
+      }
+    };
+    
+    loadDynamoDBJobs();
+  }, [language]);
+
+  // Merge stored jobs with default jobs data AND DynamoDB jobs
   const allJobs = useMemo(() => {
     const storedJobs = getStoredJobs();
-    return [...storedJobs, ...JOBS_DATA];
-  }, []); // Re-calculate when component mounts
+    return [...storedJobs, ...JOBS_DATA, ...dynamoDBJobs];
+  }, [dynamoDBJobs]); // Re-calculate when DynamoDB jobs are loaded
 
   const [quickFilter, setQuickFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
@@ -3285,18 +3403,25 @@ const JobListing = () => {
               </div>
               <div className="info-row">
                 <span className="info-label">{language === 'vi' ? 'Ngày đăng' : 'Posted'}:</span>
-                <span className="info-value">{translateTimePosted(applyModal.job.postedAt, language)}</span>
+                <span className="info-value">
+                  {applyModal.job.postedAt 
+                    ? translateTimePosted(applyModal.job.postedAt, language)
+                    : applyModal.job.postedDate 
+                      ? formatPostedDate(applyModal.job.postedDate, language)
+                      : '-'
+                  }
+                </span>
               </div>
               <div className="info-row">
                 <span className="info-label">{language === 'vi' ? 'Ngày làm' : 'Work Date'}:</span>
                 <span className="info-value">
-                  {applyModal.job.shiftDetails?.date || (applyModal.job.urgent ? getUrgentJobWorkDate() : getStandardJobWorkDate())}
+                  {applyModal.job.workDays || applyModal.job.shiftDetails?.date || (applyModal.job.urgent ? getUrgentJobWorkDate() : getStandardJobWorkDate())}
                 </span>
               </div>
               <div className="info-row">
                 <span className="info-label">{language === 'vi' ? 'Thời gian' : 'Time'}:</span>
                 <span className="info-value">
-                  {applyModal.job.shiftDetails?.time || applyModal.job.type?.match(/\((.*?)\)/)?.[1] || '06:00 - 14:00'}
+                  {applyModal.job.workHours || applyModal.job.shiftDetails?.time || applyModal.job.type?.match(/\((.*?)\)/)?.[1] || '-'}
                 </span>
               </div>
             </div>
@@ -3409,19 +3534,64 @@ const JobListing = () => {
               <strong>{translateJobTitle(jobDescriptionModal.job.title, language)}</strong> - {jobDescriptionModal.job.company}
             </p>
 
-            <div style={{ marginTop: '16px', padding: '20px', background: '#f3f4f6', borderRadius: '12px', border: '1px solid #e5e7eb', maxHeight: '350px', overflowY: 'auto' }}>
-              <div style={{ fontSize: '16px', color: '#374151', lineHeight: '1.8', whiteSpace: 'pre-line', textAlign: 'left' }}>
-                {(jobDescriptionModal.job.description || generateJobDescription(jobDescriptionModal.job, language))
-                  .split('\n')
-                  .map((line, index) => {
-                    // Make YÊU CẦU:, CHẾ ĐỘ PHÚC LỢI:, REQUIREMENTS:, and BENEFITS: bold
-                    if (line.trim() === 'YÊU CẦU:' || line.trim() === 'CHẾ ĐỘ PHÚC LỢI:' || 
-                        line.trim() === 'REQUIREMENTS:' || line.trim() === 'BENEFITS:') {
-                      return <div key={index} style={{ fontWeight: 'bold', marginTop: index > 0 ? '12px' : '0' }}>{line}</div>;
+            <div style={{ marginTop: '16px', padding: '24px', background: '#f3f4f6', borderRadius: '12px', border: '1px solid #e5e7eb', height: '300px', width: '100%', overflowY: 'auto' }}>
+              <div style={{ fontSize: '15px', color: '#1f2937', lineHeight: '1.7', whiteSpace: 'pre-line', textAlign: 'left', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
+                {/* Mô tả công việc */}
+                {jobDescriptionModal.job.description && (
+                  <div style={{ marginBottom: '20px' }}>
+                    <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '10px', color: '#1e40af', letterSpacing: '0.5px' }}>
+                      {language === 'vi' ? 'MÔ TẢ CÔNG VIỆC' : 'JOB DESCRIPTION'}
+                    </div>
+                    <div style={{ color: '#4b5563', lineHeight: '1.8' }}>{jobDescriptionModal.job.description}</div>
+                  </div>
+                )}
+                
+                {/* Trách nhiệm */}
+                {jobDescriptionModal.job.responsibilities && (
+                  <div style={{ marginBottom: '20px' }}>
+                    <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '10px', color: '#1e40af', letterSpacing: '0.5px' }}>
+                      {language === 'vi' ? 'TRÁCH NHIỆM' : 'RESPONSIBILITIES'}
+                    </div>
+                    <div style={{ color: '#4b5563', lineHeight: '1.8' }}>{jobDescriptionModal.job.responsibilities}</div>
+                  </div>
+                )}
+                
+                {/* Yêu cầu */}
+                {jobDescriptionModal.job.requirements && (
+                  <div style={{ marginBottom: '20px' }}>
+                    <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '10px', color: '#1e40af', letterSpacing: '0.5px' }}>
+                      {language === 'vi' ? 'YÊU CẦU' : 'REQUIREMENTS'}
+                    </div>
+                    <div style={{ color: '#4b5563', lineHeight: '1.8' }}>{jobDescriptionModal.job.requirements}</div>
+                  </div>
+                )}
+                
+                {/* Quyền lợi */}
+                {jobDescriptionModal.job.benefits && (
+                  <div style={{ marginBottom: '20px' }}>
+                    <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '10px', color: '#1e40af', letterSpacing: '0.5px' }}>
+                      {language === 'vi' ? 'QUYỀN LỢI' : 'BENEFITS'}
+                    </div>
+                    <div style={{ color: '#4b5563', lineHeight: '1.8' }}>{jobDescriptionModal.job.benefits}</div>
+                  </div>
+                )}
+                
+                {/* Fallback to generated description if no data */}
+                {!jobDescriptionModal.job.description && !jobDescriptionModal.job.responsibilities && 
+                 !jobDescriptionModal.job.requirements && !jobDescriptionModal.job.benefits && (
+                  <div>
+                    {generateJobDescription(jobDescriptionModal.job, language)
+                      .split('\n')
+                      .map((line, index) => {
+                        if (line.trim() === 'YÊU CẦU:' || line.trim() === 'CHẾ ĐỘ PHÚC LỢI:' || 
+                            line.trim() === 'REQUIREMENTS:' || line.trim() === 'BENEFITS:') {
+                          return <div key={index} style={{ fontWeight: 'bold', marginTop: index > 0 ? '12px' : '0' }}>{line}</div>;
+                        }
+                        return <div key={index}>{line}</div>;
+                      })
                     }
-                    return <div key={index}>{line}</div>;
-                  })
-                }
+                  </div>
+                )}
               </div>
             </div>
 

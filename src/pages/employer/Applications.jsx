@@ -10,6 +10,7 @@ import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { initializeMultipleSampleCVs } from '../../utils/sampleCVGenerator';
+import jobPostService from '../../services/jobPostService';
 
 // Mock job posts data
 const getJobPosts = (language) => [
@@ -354,31 +355,21 @@ const JobPostsGrid = styled.div`
 
 const JobPostCard = styled(motion.div)`
   background: #ffffff;
-  border: 1.5px solid #E8EFFF;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.06);
+  border: 2px solid #E2E8F0;
+  border-left: 4px solid ${props => props.$status === 'active' ? '#10B981' : '#94A3B8'};
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
   position: relative;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: ${props => props.$status === 'active' ? '#10B981' : '#94A3B8'};
-    border-radius: 16px 0 0 16px;
-  }
+  gap: 16px;
   
   &:hover {
     border-color: #BFDBFE;
-    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.13);
+    border-left-color: ${props => props.$status === 'active' ? '#10B981' : '#94A3B8'};
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.15);
     transform: translateY(-2px);
   }
 `;
@@ -2027,7 +2018,8 @@ const Applications = () => {
   const [statusFilters, setStatusFilters] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [applications, setApplications] = useState(() => getInitialApplications(language));
-  const [jobPosts, setJobPosts] = useState(() => getJobPosts(language));
+  const [jobPosts, setJobPosts] = useState([]);
+  const [isLoadingJobs, setIsLoadingJobs] = useState(true);
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [deleteJobId, setDeleteJobId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -2041,6 +2033,82 @@ const Applications = () => {
   const [isWalletConnected] = useState(() => {
     return localStorage.getItem('employer_wallet_connected') === 'true';
   });
+
+  // Load job posts from DynamoDB
+  useEffect(() => {
+    const loadJobPosts = async () => {
+      try {
+        setIsLoadingJobs(true);
+        console.log('📥 Loading job posts from DynamoDB...');
+        
+        // Get only employer's own jobs
+        let jobs = await jobPostService.getMyJobPosts();
+        console.log('✅ Loaded jobs:', jobs);
+        
+        // Transform DynamoDB data to match UI format
+        const transformedJobs = jobs.map(job => ({
+          id: job.idJob,
+          idJob: job.idJob,
+          title: job.title,
+          location: job.location,
+          salary: job.salary ? `${job.salary.toLocaleString()} VNĐ/h` : (language === 'vi' ? 'Thỏa thuận' : 'Negotiable'),
+          type: job.jobType === 'part-time' ? (language === 'vi' ? 'Bán thời gian' : 'Part-time') : (language === 'vi' ? 'Toàn thời gian' : 'Full-time'),
+          shift: job.workHours,
+          workDays: job.workDays,
+          applicants: job.applicants || 0,
+          views: job.views || 0,
+          status: job.status,
+          postedDate: formatDate(job.createdAt, language),
+          deadline: calculateDeadline(job.workDays, language),
+          description: job.description,
+          responsibilities: job.responsibilities,
+          requirements: job.requirements,
+          benefits: job.benefits,
+          tags: job.tags
+        }));
+        
+        console.log('📦 Transformed jobs:', transformedJobs);
+        setJobPosts(transformedJobs);
+      } catch (error) {
+        console.error('❌ Error loading job posts:', error);
+        setJobPosts([]);
+      } finally {
+        setIsLoadingJobs(false);
+      }
+    };
+    
+    loadJobPosts();
+  }, [language]);
+
+  // Helper function to format date
+  const formatDate = (isoDate, lang) => {
+    const date = new Date(isoDate);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return lang === 'vi' ? 'Hôm nay' : 'Today';
+    if (diffDays === 1) return lang === 'vi' ? 'Hôm qua' : 'Yesterday';
+    if (diffDays < 7) return lang === 'vi' ? `${diffDays} ngày trước` : `${diffDays} days ago`;
+    if (diffDays < 30) {
+      const weeks = Math.floor(diffDays / 7);
+      return lang === 'vi' ? `${weeks} tuần trước` : `${weeks} weeks ago`;
+    }
+    return date.toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'en-US');
+  };
+  
+  // Helper function to calculate deadline
+  const calculateDeadline = (workDays, lang) => {
+    const workDate = new Date(workDays);
+    const now = new Date();
+    const diffTime = workDate - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) return lang === 'vi' ? 'Đã hết hạn' : 'Expired';
+    if (diffDays === 0) return lang === 'vi' ? 'Hôm nay' : 'Today';
+    if (diffDays === 1) return lang === 'vi' ? 'Ngày mai' : 'Tomorrow';
+    return lang === 'vi' ? `${diffDays} ngày nữa` : `${diffDays} days left`;
+  };
 
   useEffect(() => {
     setApplications(getInitialApplications(language));
@@ -2196,19 +2264,34 @@ const Applications = () => {
     
     setIsDeleting(true);
     
-    // Simulate async operation for better UX
-    await new Promise(resolve => setTimeout(resolve, 600));
-
-    // Remove job from state
-    setJobPosts(prev => prev.filter(job => job.id !== deleteJobId));
-    
-    // Show success toast
-    setSuccessMessage(language === 'vi' ? 'Đã xóa bài đăng thành công!' : 'Post deleted successfully!');
-    setShowSuccessToast(true);
-    setTimeout(() => setShowSuccessToast(false), 3000);
-    
-    setIsDeleting(false);
-    setDeleteJobId(null);
+    try {
+      // Find the job to get its idJob
+      const job = jobPosts.find(j => j.id === deleteJobId);
+      const jobId = job?.idJob || job?.id;
+      
+      console.log('🗑️ Deleting job:', jobId);
+      
+      // Delete from DynamoDB
+      await jobPostService.deleteJobPost(jobId);
+      
+      // Remove job from state
+      setJobPosts(prev => prev.filter(job => job.id !== deleteJobId));
+      
+      // Show success toast
+      setSuccessMessage(language === 'vi' ? 'Đã xóa bài đăng thành công!' : 'Post deleted successfully!');
+      setShowSuccessToast(true);
+      setTimeout(() => setShowSuccessToast(false), 3000);
+      
+      console.log('✅ Job deleted successfully');
+    } catch (error) {
+      console.error('❌ Error deleting job:', error);
+      setSuccessMessage(language === 'vi' ? 'Lỗi khi xóa bài đăng!' : 'Error deleting post!');
+      setShowSuccessToast(true);
+      setTimeout(() => setShowSuccessToast(false), 3000);
+    } finally {
+      setIsDeleting(false);
+      setDeleteJobId(null);
+    }
   };
 
   // Cancel delete
@@ -2229,27 +2312,9 @@ const Applications = () => {
   const handleEditJob = (jobId) => {
     const job = jobPosts.find(j => j.id === jobId);
     if (job) {
-      setEditJobId(jobId);
-      setEditJobData({ ...job });
+      // Navigate to PostJob page with job data
+      navigate('/employer/post-job', { state: { job } });
     }
-  };
-
-  // Save edited job
-  const handleSaveEdit = () => {
-    if (!editJobData) return;
-
-    // Update job in state
-    setJobPosts(prev => prev.map(job => 
-      job.id === editJobId ? { ...job, ...editJobData } : job
-    ));
-    
-    // Show success toast
-    setSuccessMessage(language === 'vi' ? 'Đã sửa bài đăng thành công!' : 'Post updated successfully!');
-    setShowSuccessToast(true);
-    setTimeout(() => setShowSuccessToast(false), 3000);
-    
-    setEditJobId(null);
-    setEditJobData(null);
   };
 
   // Cancel edit
@@ -2312,112 +2377,129 @@ const Applications = () => {
           </StandardJobsGrid>
         </StandardJobsSection>
 
+        {/* Job Posts Section - Always visible */}
+        <PostsSectionHeader>
+          <PostsSectionTitle>
+            <Newspaper />
+            {language === 'vi' ? 'Các bài đăng tuyển dụng' : 'Job Postings'}
+          </PostsSectionTitle>
+          <CreatePostButton
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => navigate('/employer/post-job')}
+          >
+            <Plus />
+            {language === 'vi' ? 'Đăng bài mới' : 'Post New Job'}
+          </CreatePostButton>
+        </PostsSectionHeader>
+        
+        {isLoadingJobs ? (
+          <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+            <div style={{ fontSize: '14px' }}>{language === 'vi' ? 'Đang tải...' : 'Loading...'}</div>
+          </div>
+        ) : jobPosts.length === 0 ? (
+          <EmptyState
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="icon">📋</div>
+            <h3>{language === 'vi' ? 'Chưa có bài đăng nào' : 'No job posts yet'}</h3>
+            <p>{language === 'vi' ? 'Bấm "Đăng bài mới" để tạo bài đăng tuyển dụng đầu tiên' : 'Click "Post New Job" to create your first job posting'}</p>
+          </EmptyState>
+        ) : (
+          <JobPostsGrid>
+            <AnimatePresence>
+              {jobPosts.map((post, index) => (
+              <JobPostCard
+                key={post.id}
+                $status={post.status}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <JobPostHeader>
+                  <div>
+                    <JobPostTitle>{post.title}</JobPostTitle>
+                    <JobPostMeta>
+                      <div className="meta-item">
+                        <MapPin /><span>{post.location}</span>
+                      </div>
+                      <div className="meta-item">
+                        <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span> <span>{post.salary}</span>
+                      </div>
+                      {post.shift && (
+                        <div className="meta-item">
+                          <Clock /><span>{post.shift}</span>
+                        </div>
+                      )}
+                      {post.workDays && (
+                        <div className="meta-item">
+                          <Calendar /><span>{language === 'vi' ? 'Ngày làm: ' : 'Work date: '}{post.workDays}</span>
+                        </div>
+                      )}
+                    </JobPostMeta>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
+                    <JobStatusBadge $status={post.status}>
+                      {post.status === 'active' 
+                        ? (language === 'vi' ? 'Đang tuyển' : 'Active') 
+                        : (language === 'vi' ? 'Đã đóng' : 'Closed')}
+                    </JobStatusBadge>
+                    <JobTypeBadge $partTime={post.type === 'Bán thời gian' || post.type === 'Part-time'}>
+                      {(post.type === 'Bán thời gian' || post.type === 'Part-time') ? 'Part-time' : 'Full-time'}
+                    </JobTypeBadge>
+                  </div>
+                </JobPostHeader>
+                
+                <JobPostStats>
+                  <div className="stat">
+                    <div className="stat-value">{post.applicants}</div>
+                    <div className="stat-label">{language === 'vi' ? 'Ứng viên' : 'Applicants'}</div>
+                  </div>
+                  <div className="stat">
+                    <div className="stat-value">{post.views}</div>
+                    <div className="stat-label">{language === 'vi' ? 'Lượt xem' : 'Views'}</div>
+                  </div>
+                  <div className="stat" style={{ marginLeft: 'auto' }}>
+                    <div className="stat-label">{language === 'vi' ? 'Đăng' : 'Posted'}</div>
+                    <div className="stat-label" style={{ color: '#1e40af', fontWeight: 700 }}>{post.postedDate}</div>
+                  </div>
+                </JobPostStats>
+                
+                <JobPostActions>
+                  <JobPostButton
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleViewJob(post.id)}
+                  >
+                    <Eye />{language === 'vi' ? 'Xem' : 'View'}
+                  </JobPostButton>
+                  <JobPostButton
+                    $variant="primary"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleEditJob(post.id)}
+                  >
+                    <Edit />{language === 'vi' ? 'Sửa' : 'Edit'}
+                  </JobPostButton>
+                  <JobPostButton
+                    $variant="danger"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleDeleteJob(post.id)}
+                  >
+                    <Trash2 />
+                  </JobPostButton>
+                </JobPostActions>
+              </JobPostCard>
+            ))}
+          </AnimatePresence>
+        </JobPostsGrid>
+        )}
+
         {/* Conditional Content */}
         {activeSection === 'posts' && (
           <>
-            <PostsSectionHeader>
-              <PostsSectionTitle>
-                <Newspaper />
-                {language === 'vi' ? 'Các bài đăng tuyển dụng' : 'Job Postings'}
-              </PostsSectionTitle>
-              <CreatePostButton
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => navigate('/employer/post-job')}
-              >
-                <Plus />
-                {language === 'vi' ? 'Đăng bài mới' : 'Post New Job'}
-              </CreatePostButton>
-            </PostsSectionHeader>
-            
-            <JobPostsGrid>
-              <AnimatePresence>
-                {jobPosts.map((post, index) => (
-                <JobPostCard
-                  key={post.id}
-                  $status={post.status}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <JobPostHeader>
-                    <div>
-                      <JobPostTitle>{post.title}</JobPostTitle>
-                      <JobPostMeta>
-                        <div className="meta-item">
-                          <MapPin /><span>{post.location}</span>
-                        </div>
-                        <div className="meta-item">
-                          <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span> <span>{post.salary}</span>
-                        </div>
-                        {post.shift && (
-                          <div className="meta-item">
-                            <Clock /><span>{post.shift}</span>
-                          </div>
-                        )}
-                        {post.workDays && (
-                          <div className="meta-item">
-                            <Calendar /><span>{language === 'vi' ? 'Ngày làm: ' : 'Work date: '}{post.workDays}</span>
-                          </div>
-                        )}
-                      </JobPostMeta>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-                      <JobStatusBadge $status={post.status}>
-                        {post.status === 'active' 
-                          ? (language === 'vi' ? 'Đang tuyển' : 'Active') 
-                          : (language === 'vi' ? 'Đã đóng' : 'Closed')}
-                      </JobStatusBadge>
-                      <JobTypeBadge $partTime={post.type === 'Bán thời gian' || post.type === 'Part-time'}>
-                        {(post.type === 'Bán thời gian' || post.type === 'Part-time') ? 'Part-time' : 'Full-time'}
-                      </JobTypeBadge>
-                    </div>
-                  </JobPostHeader>
-                  
-                  <JobPostStats>
-                    <div className="stat">
-                      <div className="stat-value">{post.applicants}</div>
-                      <div className="stat-label">{language === 'vi' ? 'Ứng viên' : 'Applicants'}</div>
-                    </div>
-                    <div className="stat">
-                      <div className="stat-value">{post.views}</div>
-                      <div className="stat-label">{language === 'vi' ? 'Lượt xem' : 'Views'}</div>
-                    </div>
-                    <div className="stat" style={{ marginLeft: 'auto' }}>
-                      <div className="stat-label">{language === 'vi' ? 'Đăng' : 'Posted'}</div>
-                      <div className="stat-label" style={{ color: '#1e40af', fontWeight: 700 }}>{post.postedDate}</div>
-                    </div>
-                  </JobPostStats>
-                  
-                  <JobPostActions>
-                    <JobPostButton
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => handleViewJob(post.id)}
-                    >
-                      <Eye />{language === 'vi' ? 'Xem' : 'View'}
-                    </JobPostButton>
-                    <JobPostButton
-                      $variant="primary"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => handleEditJob(post.id)}
-                    >
-                      <Edit />{language === 'vi' ? 'Sửa' : 'Edit'}
-                    </JobPostButton>
-                    <JobPostButton
-                      $variant="danger"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => handleDeleteJob(post.id)}
-                    >
-                      <Trash2 />
-                    </JobPostButton>
-                  </JobPostActions>
-                </JobPostCard>
-              ))}
-            </AnimatePresence>
-          </JobPostsGrid>
           </>
         )}
 
@@ -2613,6 +2695,42 @@ const Applications = () => {
                 </h4>
                 <div style={{ fontSize: '14px', color: '#475569', lineHeight: '1.7', whiteSpace: 'pre-line', background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                   {selectedJobView.description}
+                </div>
+              </div>
+            )}
+
+            {selectedJobView.responsibilities && (
+              <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '20px' }}>
+                <h4 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '12px', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Briefcase size={18} />
+                  {language === 'vi' ? 'Trách nhiệm công việc' : 'Job Responsibilities'}
+                </h4>
+                <div style={{ fontSize: '14px', color: '#475569', lineHeight: '1.7', whiteSpace: 'pre-line', background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  {selectedJobView.responsibilities}
+                </div>
+              </div>
+            )}
+
+            {selectedJobView.requirements && (
+              <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '20px' }}>
+                <h4 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '12px', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <CheckCircle size={18} />
+                  {language === 'vi' ? 'Yêu cầu ứng viên' : 'Requirements'}
+                </h4>
+                <div style={{ fontSize: '14px', color: '#475569', lineHeight: '1.7', whiteSpace: 'pre-line', background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  {selectedJobView.requirements}
+                </div>
+              </div>
+            )}
+
+            {selectedJobView.benefits && (
+              <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '20px' }}>
+                <h4 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '12px', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Star size={18} />
+                  {language === 'vi' ? 'Quyền lợi' : 'Benefits'}
+                </h4>
+                <div style={{ fontSize: '14px', color: '#475569', lineHeight: '1.7', whiteSpace: 'pre-line', background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  {selectedJobView.benefits}
                 </div>
               </div>
             )}

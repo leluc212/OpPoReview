@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Jobs API - Browser</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1e40af;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #1e40af;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 10px 10px 0;
+        }
+        button:hover {
+            background: #1e3a8a;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+        }
+        .success {
+            border-color: #10b981;
+            background: #d1fae5;
+        }
+        .error {
+            border-color: #ef4444;
+            background: #fee2e2;
+        }
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        .job-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .job-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+        .job-meta {
+            color: #64748b;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            background: #d1fae5;
+            color: #047857;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Jobs API từ Browser</h1>
+        <p>Test CORS và API endpoints trực tiếp từ browser</p>
+        
+        <div>
+            <button onclick="testGetActiveJobs()">GET /jobs/active</button>
+            <button onclick="testGetEmployerJobs()">GET /jobs/employer/{id}</button>
+            <button onclick="clearResults()">Xóa kết quả</button>
+        </div>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://dlidp35x33.execute-api.ap-southeast-1.amazonaws.com/prod';
+        
+        function showResult(title, data, isError = false) {
+            const resultDiv = document.getElementById('result');
+            const className = isError ? 'result error' : 'result success';
+            
+            let html = `<div class="${className}">`;
+            html += `<h3>${title}</h3>`;
+            
+            if (typeof data === 'object') {
+                // If it's job data, show nicely formatted cards
+                if (data.success && data.data && Array.isArray(data.data)) {
+                    html += `<p><strong>✅ Thành công!</strong> Tìm thấy ${data.data.length} công việc</p>`;
+                    
+                    data.data.forEach(job => {
+                        html += `
+                            <div class="job-card">
+                                <div class="job-title">${job.title}</div>
+                                <div class="job-meta">📍 ${job.location}</div>
+                                <div class="job-meta">💰 ${job.salary ? job.salary.toLocaleString() + ' VNĐ/h' : 'Thỏa thuận'}</div>
+                                <div class="job-meta">⏰ ${job.workHours}</div>
+                                <div class="job-meta">📅 ${job.workDays}</div>
+                                <div class="job-meta">👥 ${job.applicants || 0} ứng viên | 👁️ ${job.views || 0} lượt xem</div>
+                                <div class="job-meta"><span class="status">${job.status}</span></div>
+                                <div class="job-meta" style="margin-top: 10px; font-size: 13px;">ID: ${job.idJob}</div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                html += '<h4>Raw JSON Response:</h4>';
+                html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } else {
+                html += `<p>${data}</p>`;
+            }
+            
+            html += '</div>';
+            resultDiv.innerHTML = html;
+        }
+        
+        async function testGetActiveJobs() {
+            try {
+                showResult('⏳ Đang tải...', 'Gọi GET /jobs/active...');
+                
+                const response = await fetch(`${API_URL}/jobs/active`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    mode: 'cors'
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                showResult('✅ GET /jobs/active', data, false);
+            } catch (error) {
+                console.error('Error:', error);
+                showResult('❌ Lỗi GET /jobs/active', {
+                    error: error.message,
+                    stack: error.stack
+                }, true);
+            }
+        }
+        
+        async function testGetEmployerJobs() {
+            try {
+                showResult('⏳ Đang tải...', 'Gọi GET /jobs/employer/direct-test-user...');
+                
+                const employerId = 'direct-test-user';
+                const response = await fetch(`${API_URL}/jobs/employer/${employerId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    mode: 'cors'
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                showResult('✅ GET /jobs/employer/{id}', data, false);
+            } catch (error) {
+                console.error('Error:', error);
+                showResult('❌ Lỗi GET /jobs/employer/{id}', {
+                    error: error.message,
+                    stack: error.stack
+                }, true);
+            }
+        }
+        
+        function clearResults() {
+            document.getElementById('result').innerHTML = '';
+        }
+        
+        // Auto-test on load
+        window.addEventListener('load', () => {
+            console.log('Page loaded, ready to test!');
+        });
+    </script>
+</body>
+</html>

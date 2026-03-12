@@ -787,9 +787,25 @@ const EmployersManagement = () => {
                   <td>{employer.type}</td>
                   <td>{employer.email}</td>
                   <td>
-                    <StatusBadge $status={getApprovalStatusVariant(employer.approvalStatus)}>
-                      {getApprovalStatusText(employer.approvalStatus)}
-                    </StatusBadge>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <StatusBadge $status={getApprovalStatusVariant(employer.approvalStatus)}>
+                        {getApprovalStatusText(employer.approvalStatus)}
+                      </StatusBadge>
+                      {employer.approvalStatus === 'pending' && (
+                        <ActionButton
+                          $variant="approve"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // TODO: Open approval modal or navigate to verification page
+                            navigate(`/admin/verification?employerId=${employer.id}`);
+                          }}
+                          style={{ background: '#10b981' }}
+                        >
+                          <CheckCircle />
+                          {language === 'vi' ? 'Duyệt' : 'Approve'}
+                        </ActionButton>
+                      )}
+                    </div>
                   </td>
                   <td>
                     <DateText>

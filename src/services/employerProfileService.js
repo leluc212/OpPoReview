@@ -343,6 +343,150 @@ class EmployerProfileService {
   }
 
   /**
+   * Submit verification request
+   */
+  async submitVerification(verificationData) {
+    try {
+      const session = await fetchAuthSession();
+      
+      if (!session || !session.tokens) {
+        throw new Error('User not authenticated - no session');
+      }
+      
+      const idTokenPayload = session.tokens.idToken?.payload;
+      const userId = idTokenPayload?.sub;
+      
+      if (!userId) {
+        throw new Error('User not authenticated - no userId in token');
+      }
+
+      const payload = {
+        verificationData,
+        status: 'pending',
+        submittedAt: new Date().toISOString()
+      };
+
+      const result = await this.makeRequest(`/profile/${userId}/verification`, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      
+      if (result.success) {
+        console.log('✅ Verification request submitted');
+        return result.data;
+      }
+
+      throw new Error('Failed to submit verification');
+    } catch (error) {
+      console.error('❌ Error submitting verification:', error);
+      
+      // Fallback to localStorage
+      if (error.message.includes('Cannot connect to API') || 
+          error.message.includes('offline mode')) {
+        localStorage.setItem('companyVerificationStatus', 'pending');
+        localStorage.setItem('companyVerificationData', JSON.stringify(verificationData));
+        console.log('✅ Verification saved to localStorage (fallback)');
+        return { status: 'pending', submittedAt: new Date().toISOString() };
+      }
+      
+      throw error;
+    }
+  }
+
+  /**
+   * Approve verification (Admin only)
+   */
+  async approveVerification(userId, approvalData) {
+    try {
+      const payload = {
+        status: 'approved',
+        approvedAt: new Date().toISOString(),
+        approvedBy: approvalData.approvedBy,
+        notes: approvalData.notes || ''
+      };
+
+      const result = await this.makeRequest(`/profile/${userId}/verification/approve`, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      
+      if (result.success) {
+        console.log('✅ Verification approved');
+        return result.data;
+      }
+
+      throw new Error('Failed to approve verification');
+    } catch (error) {
+      console.error('❌ Error approving verification:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Reject verification (Admin only)
+   */
+  async rejectVerification(userId, rejectionData) {
+    try {
+      const payload = {
+        status: 'rejected',
+        rejectedAt: new Date().toISOString(),
+        rejectedBy: rejectionData.rejectedBy,
+        reason: rejectionData.reason || ''
+      };
+
+      const result = await this.makeRequest(`/profile/${userId}/verification/reject`, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      
+      if (result.success) {
+        console.log('✅ Verification rejected');
+        return result.data;
+      }
+
+      throw new Error('Failed to reject verification');
+    } catch (error) {
+      console.error('❌ Error rejecting verification:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get verification status
+   */
+  async getVerificationStatus(userId) {
+    try {
+      const result = await this.makeRequest(`/profile/${userId}/verification`);
+      
+      if (result.success && result.data) {
+        return result.data;
+      }
+
+      return null;
+    } catch (error) {
+      console.error('❌ Error getting verification status:', error);
+      
+      // Fallback to localStorage
+      if (error.message.includes('Cannot connect to API') || 
+          error.message.includes('offline mode') ||
+          error.message.includes('not found')) {
+        const status = localStorage.getItem('companyVerificationStatus');
+        const data = localStorage.getItem('companyVerificationData');
+        
+        if (status && data) {
+          return {
+            status,
+            data: JSON.parse(data),
+            submittedAt: new Date().toISOString()
+          };
+        }
+      }
+      
+      return null;
+    }
+  }
+
+  /**
    * Calculate profile completion percentage
    */
   calculateCompletion(profileData) {

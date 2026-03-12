@@ -270,7 +270,7 @@ const PostJob = () => {
     <DashboardLayout role="employer" showSearch={false} key={language}>
       <PostJobContainer>
         <BackButton onClick={() => navigate('/employer/dashboard')}>
-          <ArrowLeft /> {language === 'vi' ? 'Quay lại Dashboard' : 'Back to Dashboard'}
+          <ArrowLeft /> {language === 'vi' ? 'Quay lại trang chủ' : 'Back to main page'}
         </BackButton>
 
         {/* Verification Warning */}

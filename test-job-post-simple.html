@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Job Post API - Simple</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        button { padding: 10px 20px; margin: 10px; font-size: 16px; }
+        pre { background: #f5f5f5; padding: 15px; border-radius: 5px; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Test Job Post API</h1>
+    
+    <button onclick="testAPI()">Test Create Job</button>
+    <button onclick="testGetActive()">Test Get Active Jobs</button>
+    
+    <div id="result"></div>
+
+    <script>
+        const API_URL = 'https://dlidp35x33.execute-api.ap-southeast-1.amazonaws.com/prod';
+        
+        function generateJobId() {
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let randomStr = '';
+            for (let i = 0; i < 5; i++) {
+                randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            
+            return `JOB-${year}${month}${day}-${randomStr}`;
+        }
+        
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Testing API...</p>';
+            
+            try {
+                const jobId = generateJobId();
+                const payload = {
+                    idJob: jobId,
+                    employerId: 'test-browser-user',
+                    employerEmail: 'browser@test.com',
+                    title: 'Test từ Browser',
+                    location: 'Hà Nội',
+                    jobType: 'part-time',
+                    workDays: '2026-03-15',
+                    workHours: '8:00 - 17:00',
+                    salary: 30000,
+                    description: 'Test job post từ browser',
+                    tags: 'Test, Browser',
+                    status: 'active',
+                    applicants: 0,
+                    views: 0,
+                    responseRate: 0,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                
+                console.log('Sending request:', payload);
+                
+                const response = await fetch(`${API_URL}/jobs`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ Success!</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p class="error">❌ Error: ${response.status}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <p class="error">❌ Error: ${error.message}</p>
+                    <pre>${error.stack}</pre>
+                `;
+            }
+        }
+        
+        async function testGetActive() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Getting active jobs...</p>';
+            
+            try {
+                const response = await fetch(`${API_URL}/jobs/active`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ Found ${data.data ? data.data.length : 0} active jobs</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p class="error">❌ Error: ${response.status}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <p class="error">❌ Error: ${error.message}</p>
+                    <pre>${error.stack}</pre>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

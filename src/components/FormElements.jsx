@@ -3,14 +3,14 @@ import styled from 'styled-components';
 
 export const Button = styled.button`
   padding: ${props => {
-    if (props.$size === 'small') return '6px 12px';
-    if (props.$size === 'large') return '12px 24px';
-    return '10px 20px';
+    if (props.$size === 'small') return '8px 16px';
+    if (props.$size === 'large') return '14px 28px';
+    return '12px 24px';
   }};
   font-size: ${props => props.$size === 'small' ? '13px' : '15px'};
-  font-weight: 500;
-  border-radius: ${props => props.theme.borderRadius.md};
-  transition: all ${props => props.theme.transitions.normal};
+  font-weight: 700;
+  border-radius: 10px;
+  transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -19,71 +19,65 @@ export const Button = styled.button`
   border: none;
   
   ${props => props.$variant === 'primary' && `
-    background: #60A5FA;
+    background: #1e40af;
     color: white;
-    box-shadow: 0 8px 24px rgba(96, 165, 250, 0.4);
-    font-weight: 700;
-    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25);
     
     &:hover:not(:disabled) {
-      transform: translateY(-2px) scale(1.03);
-      box-shadow: 0 12px 36px rgba(96, 165, 250, 0.5);
-      background: #1e40af;
+      background: #1e3a8a;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(30, 64, 175, 0.35);
     }
     
     &:active:not(:disabled) {
-      transform: translateY(0) scale(1);
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(30, 64, 175, 0.25);
     }
   `}
   
   ${props => props.$variant === 'secondary' && `
-    background: ${props.theme.colors.bgLight};
-    color: ${props.theme.colors.text};
-    border: 2px solid ${props.theme.colors.border};
-    font-weight: 600;
+    background: #FFFFFF;
+    color: #64748B;
+    border: 2px solid #E8EFFF;
     
     &:hover:not(:disabled) {
-      border-color: ${props.theme.colors.primary};
-      color: ${props.theme.colors.primary};
-      background: ${props.theme.colors.bgLight};
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-color: #1e40af;
+      color: #1e40af;
+      background: #EFF6FF;
     }
   `}
   
   ${props => props.$variant === 'outline' && `
-    background: rgba(255, 255, 255, 1);
-    color: #60A5FA;
-    border: 2px solid #60A5FA;
-    font-weight: 700;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 6px 20px rgba(96, 165, 250, 0.2);
+    background: #FFFFFF;
+    color: #1e40af;
+    border: 2px solid #1e40af;
     
     &:hover:not(:disabled) {
       background: #EFF6FF;
-      border-color: #1e40af;
-      color: #1e40af;
       transform: translateY(-2px);
-      box-shadow: 0 8px 28px rgba(30, 64, 175, 0.25);
+      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.15);
     }
   `}
   
   ${props => props.$variant === 'ghost' && `
     background: transparent;
-    color: ${props.theme.colors.textLight};
+    color: #64748B;
     
     &:hover:not(:disabled) {
-      background: ${props.theme.colors.bgDark};
-      color: ${props.theme.colors.text};
+      background: #F8FAFC;
+      color: #1E293B;
     }
   `}
   
   ${props => props.$variant === 'danger' && `
-    background: ${props.theme.colors.error};
+    background: #EF4444;
     color: white;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
     
     &:hover:not(:disabled) {
-      background: ${props.theme.colors.error};
-      opacity: 0.9;
+      background: #DC2626;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
     }
   `}
   
@@ -98,37 +92,46 @@ export const Button = styled.button`
 `;
 
 export const Input = styled.input`
-  padding: 10px 14px;
+  padding: 14px 16px;
   font-size: 15px;
-  border: 2px solid ${props => props.theme.colors.border};
-  border-radius: ${props => props.theme.borderRadius.md};
-  background: ${props => props.theme.colors.bgLight};
-  color: ${props => props.theme.colors.text};
-  transition: all ${props => props.theme.transitions.fast};
+  border: 2px solid #E8EFFF;
+  border-radius: 12px;
+  background: #FFFFFF;
+  color: #1E293B;
+  transition: all 0.2s ease;
   width: 100%;
-  font-weight: 600;
+  font-weight: 500;
   
   &:focus {
-    border-color: ${props => props.theme.colors.primary};
-    box-shadow: 0 0 0 3px ${props => props.theme.colors.primary}20;
-    background: ${props => props.theme.colors.bgLight};
+    border-color: #1e40af;
+    box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1);
+    background: #FFFFFF;
+    outline: none;
+  }
+  
+  &:hover:not(:focus):not(:disabled) {
+    border-color: #BFDBFE;
   }
   
   &::placeholder {
-    color: ${props => props.theme.colors.textLight};
+    color: #94A3B8;
     font-weight: 400;
   }
   
   &:disabled {
-    background: ${props => props.theme.colors.bgDark};
-    color: ${props => props.theme.colors.textDark};
+    background: #F8FAFC;
+    color: #64748B;
     cursor: not-allowed;
     opacity: 1;
-    font-weight: 700;
+    border-color: #E2E8F0;
   }
   
   ${props => props.$error && `
-    border-color: ${props.theme.colors.error};
+    border-color: #EF4444;
+    
+    &:focus {
+      box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+    }
   `}
 
   &[type="date"]::-webkit-datetime-edit {
@@ -139,84 +142,104 @@ export const Input = styled.input`
   &[type="date"]::-webkit-datetime-edit-month-field { order: 3; }
   &[type="date"]::-webkit-datetime-edit-text:last-of-type { order: 4; }
   &[type="date"]::-webkit-datetime-edit-year-field { order: 5; }
+  
+  &[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    
+    &:hover {
+      opacity: 1;
+    }
+  }
 `;
 
 export const TextArea = styled.textarea`
-  padding: 12px 16px;
-  font-size: 16px;
-  border: 2px solid ${props => props.theme.colors.border};
-  border-radius: ${props => props.theme.borderRadius.md};
-  background: ${props => props.theme.colors.bgLight};
-  color: ${props => props.theme.colors.text};
-  transition: all ${props => props.theme.transitions.fast};
+  padding: 14px 16px;
+  font-size: 15px;
+  border: 2px solid #E8EFFF;
+  border-radius: 12px;
+  background: #FFFFFF;
+  color: #1E293B;
+  transition: all 0.2s ease;
   width: 100%;
   resize: vertical;
   min-height: 120px;
   font-family: inherit;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.6;
   
   &:focus {
-    border-color: ${props => props.theme.colors.primary};
-    box-shadow: 0 0 0 3px ${props => props.theme.colors.primary}20;
-    background: ${props => props.theme.colors.bgLight};
+    border-color: #1e40af;
+    box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1);
+    background: #FFFFFF;
+    outline: none;
+  }
+  
+  &:hover:not(:focus):not(:disabled) {
+    border-color: #BFDBFE;
   }
   
   &::placeholder {
-    color: ${props => props.theme.colors.textLight};
+    color: #94A3B8;
     font-weight: 400;
   }
   
   &:disabled {
-    background: ${props => props.theme.colors.bgDark};
-    color: ${props => props.theme.colors.textDark};
+    background: #F8FAFC;
+    color: #64748B;
     cursor: not-allowed;
     opacity: 1;
-    font-weight: 700;
+    border-color: #E2E8F0;
   }
 `;
 
 export const Select = styled.select`
-  padding: 10px 14px;
+  padding: 14px 16px;
   font-size: 15px;
-  border: 2px solid ${props => props.theme.colors.border};
-  border-radius: ${props => props.theme.borderRadius.md};
-  background: ${props => props.theme.colors.bgLight};
-  color: ${props => props.theme.colors.text};
-  transition: all ${props => props.theme.transitions.fast};
+  border: 2px solid #E8EFFF;
+  border-radius: 12px;
+  background: #FFFFFF;
+  color: #1E293B;
+  transition: all 0.2s ease;
   width: 100%;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 500;
   
   &:focus {
-    border-color: ${props => props.theme.colors.primary};
-    box-shadow: 0 0 0 3px ${props => props.theme.colors.primary}20;
-    background: ${props => props.theme.colors.bgLight};
+    border-color: #1e40af;
+    box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1);
+    background: #FFFFFF;
+    outline: none;
+  }
+  
+  &:hover:not(:focus):not(:disabled) {
+    border-color: #BFDBFE;
   }
   
   /* Style for empty/placeholder option */
   &:invalid,
   option[value=""] {
-    color: ${props => props.theme.colors.textLight};
+    color: #94A3B8;
     font-weight: 400;
   }
   
   option {
-    background: ${props => props.theme.colors.bgLight};
-    color: ${props => props.theme.colors.text};
-    font-weight: 600;
+    background: #FFFFFF;
+    color: #1E293B;
+    font-weight: 500;
   }
   
   option[value=""] {
-    color: ${props => props.theme.colors.textLight};
+    color: #94A3B8;
     font-weight: 400;
   }
 `;
 
 export const Label = styled.label`
   font-size: 13px;
-  font-weight: 800;
-  color: ${props => props.theme.colors.textDark};
+  font-weight: 700;
+  color: #1E293B;
   margin-bottom: 8px;
   display: block;
   text-transform: uppercase;

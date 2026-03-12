@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test User ID</title>
+    <script src="https://cdn.jsdelivr.net/npm/aws-amplify@6/dist/aws-amplify.min.js"></script>
+</head>
+<body>
+    <h1>Check Current User ID</h1>
+    <button onclick="checkUser()">Check User</button>
+    <pre id="result"></pre>
+
+    <script type="module">
+        import { Amplify } from 'https://cdn.jsdelivr.net/npm/aws-amplify@6/+esm';
+        import { fetchAuthSession, getCurrentUser } from 'https://cdn.jsdelivr.net/npm/aws-amplify@6/auth/+esm';
+
+        // Configure Amplify
+        Amplify.configure({
+            Auth: {
+                Cognito: {
+                    userPoolId: 'ap-southeast-1_YugMgAr7H',
+                    userPoolClientId: '6n4a6kg7ugq6gah4o8k5dt7dhhh9f',
+                    identityPoolId: 'ap-southeast-1:0f7a1zq3t00q5u8r8a1r8qw7zk'
+                }
+            }
+        });
+
+        window.checkUser = async function() {
+            try {
+                const session = await fetchAuthSession();
+                const user = await getCurrentUser();
+                
+                const result = {
+                    userId: user.userId,
+                    username: user.username,
+                    signInDetails: user.signInDetails,
+                    idToken: session.tokens?.idToken?.payload,
+                    accessToken: session.tokens?.accessToken?.payload
+                };
+                
+                document.getElementById('result').textContent = JSON.stringify(result, null, 2);
+                console.log('User info:', result);
+            } catch (error) {
+                document.getElementById('result').textContent = 'Error: ' + error.message;
+                console.error('Error:', error);
+            }
+        };
+    </script>
+</body>
+</html>

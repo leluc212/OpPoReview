@@ -1,0 +1,20 @@
+[
+  {
+    "Create": {
+      "IndexName": "EmployerIndex",
+      "KeySchema": [
+        {
+          "AttributeName": "employerId",
+          "KeyType": "HASH"
+        },
+        {
+          "AttributeName": "createdAt",
+          "KeyType": "RANGE"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      }
+    }
+  }
+]
