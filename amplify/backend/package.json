@@ -1,0 +1,11 @@
+{
+  "name": "candidate-profile-lambda",
+  "version": "1.0.0",
+  "description": "Lambda function for Candidate Profile API",
+  "main": "api-candidate-profile.cjs",
+  "type": "commonjs",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.515.0",
+    "@aws-sdk/lib-dynamodb": "^3.515.0"
+  }
+}

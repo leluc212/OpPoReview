@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { Bell, Search, LogOut, User, Users, Briefcase, DollarSign, AlertCircle, Settings } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import candidateProfileService from '../services/candidateProfileService';
 
 const NavbarContainer = styled.nav`
   height: 80px;
@@ -367,6 +368,7 @@ const Navbar = ({ showSearch = true }) => {
   const [companyLogo, setCompanyLogo] = useState(() => localStorage.getItem('companyLogo') || '/OpPoReview/images/katinatlogo.jpg');
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationTab, setNotificationTab] = useState('all');
+  const [candidateProfile, setCandidateProfile] = useState(null);
   const notificationRef = useRef(null);
 
   // Sample notifications data
@@ -416,6 +418,22 @@ const Navbar = ({ showSearch = true }) => {
     window.addEventListener('logoChanged', handleLogoChange);
     return () => window.removeEventListener('logoChanged', handleLogoChange);
   }, []);
+  
+  // Fetch candidate profile if user is a candidate
+  useEffect(() => {
+    const fetchCandidateProfile = async () => {
+      if (user?.role === 'candidate') {
+        try {
+          const profile = await candidateProfileService.getMyProfile();
+          setCandidateProfile(profile);
+        } catch (error) {
+          console.error('Error fetching candidate profile:', error);
+        }
+      }
+    };
+    
+    fetchCandidateProfile();
+  }, [user]);
   
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -573,12 +591,14 @@ const Navbar = ({ showSearch = true }) => {
           <Avatar>
             {user?.role === 'employer' ? (
               <img src={companyLogo} alt="Logo" style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
+            ) : user?.role === 'candidate' && candidateProfile?.profileImage ? (
+              <img src={candidateProfile.profileImage} alt="Profile" style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
             ) : (
-              user?.name?.charAt(0).toUpperCase() || 'U'
+              (candidateProfile?.fullName?.charAt(0) || user?.name?.charAt(0) || 'U').toUpperCase()
             )}
           </Avatar>
           <UserInfo>
-            <span>{user?.role === 'employer' ? 'Katinat Quận 8' : (user?.name || 'User')}</span>
+            <span>{user?.role === 'employer' ? 'Katinat Quận 8' : (candidateProfile?.fullName || user?.name || 'User')}</span>
             <span>{getRoleTranslation(user?.role) || 'Role'}</span>
           </UserInfo>
         </UserMenu>

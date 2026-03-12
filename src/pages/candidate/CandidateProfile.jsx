@@ -4,8 +4,12 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import Modal from '../../components/Modal';
+import Toast from '../../components/Toast';
+import { useToast } from '../../hooks/useToast';
 import { Button, Input, TextArea, FormGroup, Label } from '../../components/FormElements';
 import { useLanguage } from '../../context/LanguageContext';
+import { fetchAuthSession } from 'aws-amplify/auth';
+import candidateProfileService from '../../services/candidateProfileService';
 import { 
   Upload, 
   Save, 
@@ -30,6 +34,7 @@ import {
   Trash2,
   Download,
   Eye,
+  X,
 } from 'lucide-react';
 
 // Custom Zalo Icon Component - Based on official Zalo logo
@@ -54,6 +59,48 @@ const ZaloIcon = ({ size = 24, color = "#0068FF", ...props }) => (
       d="M15 15L33 15L33 19L22 28H33V33H15V29L26 20H15V15Z" 
       fill="white"
     />
+  </svg>
+);
+
+// Facebook Icon Component
+const FacebookIcon = ({ size = 24, ...props }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 48 48" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <circle cx="24" cy="24" r="22" fill="#1877F2"/>
+    <path 
+      d="M29.5 15.5H26.5C25.12 15.5 24 16.62 24 18V21H21V25H24V35H28V25H31L32 21H28V19C28 18.45 28.45 18 29 18H31.5V15.5H29.5Z" 
+      fill="white"
+    />
+  </svg>
+);
+
+// Instagram Icon Component
+const InstagramIcon = ({ size = 24, ...props }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 48 48" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <defs>
+      <linearGradient id="instagramGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+        <stop offset="0%" style={{stopColor: '#FD5949', stopOpacity: 1}} />
+        <stop offset="50%" style={{stopColor: '#D6249F', stopOpacity: 1}} />
+        <stop offset="100%" style={{stopColor: '#285AEB', stopOpacity: 1}} />
+      </linearGradient>
+    </defs>
+    <rect x="2" y="2" width="44" height="44" rx="12" fill="url(#instagramGradient)"/>
+    <circle cx="24" cy="24" r="7" stroke="white" strokeWidth="2.5" fill="none"/>
+    <circle cx="35" cy="13" r="2" fill="white"/>
+    <rect x="11" y="11" width="26" height="26" rx="6" stroke="white" strokeWidth="2.5" fill="none"/>
   </svg>
 );
 
@@ -927,57 +974,123 @@ const ModalButtons = styled.div`
 const CandidateProfile = () => {
   const { language, t } = useLanguage();
   const navigate = useNavigate();
+  const toast = useToast();
   const [isEditing, setIsEditing] = useState(false);
-  const [profileImage, setProfileImage] = useState(() => {
-    return localStorage.getItem('profileImage') || null;
-  });
+  const [profileImage, setProfileImage] = useState(null); // Will be loaded from DynamoDB
+  const [cognitoEmail, setCognitoEmail] = useState('');
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   
-  // Default profile data
+  // Default profile data - empty for new users
   const defaultFormData = {
-    fullName: 'Lực Thứ Hai',
-    email: 'lucthuhai@gmail.com',
-    phone: '+84 379784509',
-    location: 'Thủ Đức, TP.HCM',
+    fullName: '',
+    email: '', // Will be set from Cognito
+    phone: '',
+    location: '',
     cccd: '',
     dateOfBirth: '',
-    title: 'Nhân viên Phục Vụ / Pha Chế',
-    bio: 'Có kinh nghiệm xử lý tình huống thực tế, làm việc nhóm tốt. Nhanh nhẹn, chăm chỉ, mong muốn tìm cơ hội phát triển lâu dài trong ngành dịch vụ nhà hàng và đồ uống.',
-    // Đã loại bỏ các trường mạng xã hội khác ngoài Google
+    title: '',
+    bio: '',
+    socialLinks: {
+      facebook: '',
+      instagram: '',
+      zalo: '',
+      website: ''
+    }
   };
   
-  const [formData, setFormData] = useState(() => {
-    const savedData = localStorage.getItem('candidateProfile');
-    let data = savedData ? JSON.parse(savedData) : defaultFormData;
-    if (data.title === 'Senior React Developer') {
-        data.title = defaultFormData.title;
-        data.bio = defaultFormData.bio;
-        localStorage.setItem('candidateProfile', JSON.stringify(data));
-    }
-    return data;
-  });
+  const [formData, setFormData] = useState(defaultFormData);
   
-  const [originalFormData, setOriginalFormData] = useState(formData);
+  const [originalFormData, setOriginalFormData] = useState(defaultFormData);
 
-  // Track if CCCD and DOB are locked (can only be set once)
+  // Track if CCCD, DOB, and EMAIL are locked
   const [isLockedFields, setIsLockedFields] = useState(() => {
     const saved = localStorage.getItem('lockedProfileFields');
-    return saved ? JSON.parse(saved) : { cccd: false, dateOfBirth: false };
+    return saved ? JSON.parse(saved) : { cccd: false, dateOfBirth: false, email: true }; // Email is always locked
   });
 
-  const defaultSkills = [
-    'Pha chế cơ bản', 'Giao tiếp khách hàng', 'Làm việc nhóm', 'Xử lý tình huống', 'Tiếng Anh giao tiếp',
-    'Chăm sóc khách hàng', 'Sử dụng máy POS', 'Bán hàng', 'Quản lý thời gian', 'Vệ sinh an toàn TP'
-  ];
+  // Load Cognito email and profile from DynamoDB on mount
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        setIsLoadingProfile(true);
+        
+        // Get Cognito email
+        const session = await fetchAuthSession();
+        const email = session.tokens?.idToken?.payload?.email;
+        
+        if (email) {
+          setCognitoEmail(email);
+          
+          // Set email in form
+          setFormData(prev => ({ ...prev, email }));
+          setOriginalFormData(prev => ({ ...prev, email }));
+          
+          // Try to load profile from DynamoDB
+          try {
+            const profile = await candidateProfileService.getMyProfile();
+            
+            if (profile) {
+              // Profile exists in DynamoDB, use it
+              const profileData = {
+                fullName: profile.fullName || '',
+                email: profile.email, // Always use DynamoDB email (which is from Cognito)
+                phone: profile.phone || '',
+                location: profile.location || '',
+                cccd: profile.cccd || '',
+                dateOfBirth: profile.dateOfBirth || '',
+                title: profile.title || '',
+                bio: profile.bio || '',
+                socialLinks: profile.socialLinks || {
+                  facebook: '',
+                  instagram: '',
+                  zalo: '',
+                  website: ''
+                }
+              };
+              
+              setFormData(profileData);
+              setOriginalFormData(profileData);
+              
+              // Update locked fields
+              const locked = {
+                email: true, // Always locked
+                cccd: !!profile.cccd,
+                dateOfBirth: !!profile.dateOfBirth
+              };
+              setIsLockedFields(locked);
+              
+              // Load skills
+              if (profile.skills && profile.skills.length > 0) {
+                setSkills(profile.skills);
+              }
+              
+              // Load profile image
+              if (profile.profileImage) {
+                setProfileImage(profile.profileImage);
+              }
+              
+              console.log('✅ Profile loaded from DynamoDB');
+            } else {
+              console.log('ℹ️ No profile in DynamoDB yet. User needs to create one.');
+            }
+          } catch (error) {
+            console.error('Error loading profile from DynamoDB:', error);
+            // Profile doesn't exist yet, that's OK - user will create it
+          }
+        }
+      } catch (error) {
+        console.error('Error loading Cognito session:', error);
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    };
+    
+    loadProfile();
+  }, []);
+
+  const defaultSkills = [];
   
-  const [skills, setSkills] = useState(() => {
-    const savedSkills = localStorage.getItem('candidateSkills');
-    let data = savedSkills ? JSON.parse(savedSkills) : defaultSkills;
-    if (data.includes('React') || data.includes('Node.js')) {
-        data = defaultSkills;
-        localStorage.setItem('candidateSkills', JSON.stringify(data));
-    }
-    return data;
-  });
+  const [skills, setSkills] = useState(defaultSkills);
   
   const [newSkill, setNewSkill] = useState('');
   const [isEditingSkills, setIsEditingSkills] = useState(false);
@@ -1039,28 +1152,35 @@ const CandidateProfile = () => {
   const calculateProfileCompletion = () => {
     let completion = 0;
     
-    // Basic info (50% total)
-    if (formData.fullName && formData.fullName.trim()) completion += 10;
-    if (formData.email && formData.email.trim()) completion += 10;
-    if (formData.phone && formData.phone.trim()) completion += 10;
-    if (formData.cccd && formData.cccd.trim()) completion += 10;
-    if (formData.dateOfBirth && formData.dateOfBirth.trim()) completion += 10;
+    // Basic info (40% total - 8% each)
+    if (formData.fullName && formData.fullName.trim()) completion += 8;
+    if (formData.email && formData.email.trim()) completion += 8;
+    if (formData.phone && formData.phone.trim()) completion += 8;
+    if (formData.cccd && formData.cccd.trim()) completion += 8;
+    if (formData.dateOfBirth && formData.dateOfBirth.trim()) completion += 8;
     
-    // Professional info (30% total)
-    if (formData.location && formData.location.trim()) completion += 10;
-    if (formData.title && formData.title.trim()) completion += 10;
-    if (formData.bio && formData.bio.trim()) completion += 10;
+    // Professional info (24% total - 8% each)
+    if (formData.location && formData.location.trim()) completion += 8;
+    if (formData.title && formData.title.trim()) completion += 8;
+    if (formData.bio && formData.bio.trim()) completion += 8;
     
-    // Profile image (15%)
-    if (profileImage) completion += 15;
+    // Profile image (10%)
+    if (profileImage) completion += 10;
     
-    // Social links (not counted towards completion)
-    // Đã loại bỏ các completion mạng xã hội khác ngoài Google
+    // Social links (6% total - at least 1 link)
+    const hasSocialLinks = formData.socialLinks?.facebook?.trim() || 
+                          formData.socialLinks?.instagram?.trim() || 
+                          formData.socialLinks?.zalo?.trim() || 
+                          formData.socialLinks?.website?.trim();
+    if (hasSocialLinks) completion += 6;
     
-    // Skills (5%)
-    if (skills && skills.length >= 3) completion += 5;
+    // Skills (10% - at least 3 skills)
+    if (skills && skills.length >= 3) completion += 10;
     
-    return completion;
+    // eKYC verification (10%)
+    if (kycCompleted) completion += 10;
+    
+    return Math.min(completion, 100); // Cap at 100%
   };
   
   const profileCompletion = calculateProfileCompletion();
@@ -1107,7 +1227,7 @@ const CandidateProfile = () => {
           
           const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
           setProfileImage(compressedBase64);
-          localStorage.setItem('profileImage', compressedBase64);
+          // Image will be saved to DynamoDB when user clicks Save button
         };
         img.src = reader.result;
       };
@@ -1117,30 +1237,148 @@ const CandidateProfile = () => {
 
   const handleDeleteImage = () => {
     setProfileImage(null);
-    localStorage.removeItem('profileImage');
+    // Image will be removed from DynamoDB when user clicks Save button
   };
 
-  const handleSave = () => {
-    // Check if CCCD or DOB are being set for the first time
-    const newLockedFields = { ...isLockedFields };
-    
-    if (formData.cccd && formData.cccd.trim() && !isLockedFields.cccd) {
-      newLockedFields.cccd = true;
+  const handleSave = async () => {
+    try {
+      setIsLoadingProfile(true);
+      
+      // Check if CCCD or DOB are being set for the first time
+      const newLockedFields = { ...isLockedFields };
+      
+      if (formData.cccd && formData.cccd.trim() && !isLockedFields.cccd) {
+        newLockedFields.cccd = true;
+      }
+      
+      if (formData.dateOfBirth && formData.dateOfBirth.trim() && !isLockedFields.dateOfBirth) {
+        newLockedFields.dateOfBirth = true;
+      }
+      
+      // Save locked state
+      if (newLockedFields.cccd !== isLockedFields.cccd || newLockedFields.dateOfBirth !== isLockedFields.dateOfBirth) {
+        setIsLockedFields(newLockedFields);
+      }
+      
+      // Prepare data for DynamoDB (email will be set from Cognito in service)
+      const profileData = {
+        ...formData,
+        skills,
+        profileImage,
+        kycCompleted // Include eKYC status
+      };
+      
+      // Save to DynamoDB
+      try {
+        // Check if profile exists
+        const existingProfile = await candidateProfileService.getMyProfile();
+        
+        if (existingProfile) {
+          // Update existing profile
+          const updatedProfile = await candidateProfileService.updateProfile(profileData);
+          console.log('✅ Profile updated in DynamoDB');
+          
+          // Update local state with returned data
+          if (updatedProfile) {
+            setFormData({
+              fullName: updatedProfile.fullName || '',
+              email: updatedProfile.email,
+              phone: updatedProfile.phone || '',
+              location: updatedProfile.location || '',
+              cccd: updatedProfile.cccd || '',
+              dateOfBirth: updatedProfile.dateOfBirth || '',
+              title: updatedProfile.title || '',
+              bio: updatedProfile.bio || '',
+              socialLinks: updatedProfile.socialLinks || {
+                facebook: '',
+                instagram: '',
+                zalo: '',
+                website: ''
+              }
+            });
+            setOriginalFormData({
+              fullName: updatedProfile.fullName || '',
+              email: updatedProfile.email,
+              phone: updatedProfile.phone || '',
+              location: updatedProfile.location || '',
+              cccd: updatedProfile.cccd || '',
+              dateOfBirth: updatedProfile.dateOfBirth || '',
+              title: updatedProfile.title || '',
+              bio: updatedProfile.bio || '',
+              socialLinks: updatedProfile.socialLinks || {
+                facebook: '',
+                instagram: '',
+                zalo: '',
+                website: ''
+              }
+            });
+          }
+        } else {
+          // Create new profile
+          const newProfile = await candidateProfileService.createProfile(profileData);
+          console.log('✅ Profile created in DynamoDB');
+          
+          // Update local state with returned data
+          if (newProfile) {
+            setFormData({
+              fullName: newProfile.fullName || '',
+              email: newProfile.email,
+              phone: newProfile.phone || '',
+              location: newProfile.location || '',
+              cccd: newProfile.cccd || '',
+              dateOfBirth: newProfile.dateOfBirth || '',
+              title: newProfile.title || '',
+              bio: newProfile.bio || '',
+              socialLinks: newProfile.socialLinks || {
+                facebook: '',
+                instagram: '',
+                zalo: '',
+                website: ''
+              }
+            });
+            setOriginalFormData({
+              fullName: newProfile.fullName || '',
+              email: newProfile.email,
+              phone: newProfile.phone || '',
+              location: newProfile.location || '',
+              cccd: newProfile.cccd || '',
+              dateOfBirth: newProfile.dateOfBirth || '',
+              title: newProfile.title || '',
+              bio: newProfile.bio || '',
+              socialLinks: newProfile.socialLinks || {
+                facebook: '',
+                instagram: '',
+                zalo: '',
+                website: ''
+              }
+            });
+          }
+        }
+        
+        setIsEditing(false);
+        toast.success(
+          language === 'vi' ? 'Hồ sơ đã được lưu thành công vào DynamoDB!' : 'Profile saved successfully to DynamoDB!',
+          language === 'vi' ? 'Thành công' : 'Success'
+        );
+        
+      } catch (error) {
+        console.error('❌ Error saving to DynamoDB:', error);
+        toast.error(
+          language === 'vi' 
+            ? `Lỗi khi lưu vào DynamoDB: ${error.message}. Vui lòng thử lại sau.` 
+            : `Error saving to DynamoDB: ${error.message}. Please try again later.`,
+          language === 'vi' ? 'Lỗi' : 'Error'
+        );
+      }
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      toast.error(
+        language === 'vi' ? 'Lỗi khi lưu hồ sơ' : 'Error saving profile',
+        language === 'vi' ? 'Lỗi' : 'Error'
+      );
+    } finally {
+      setIsLoadingProfile(false);
     }
-    
-    if (formData.dateOfBirth && formData.dateOfBirth.trim() && !isLockedFields.dateOfBirth) {
-      newLockedFields.dateOfBirth = true;
-    }
-    
-    // Save locked state
-    if (newLockedFields.cccd !== isLockedFields.cccd || newLockedFields.dateOfBirth !== isLockedFields.dateOfBirth) {
-      setIsLockedFields(newLockedFields);
-      localStorage.setItem('lockedProfileFields', JSON.stringify(newLockedFields));
-    }
-    
-    localStorage.setItem('candidateProfile', JSON.stringify(formData));
-    setOriginalFormData(formData);
-    setIsEditing(false);
   };
   
   const handleCancel = () => {
@@ -1178,13 +1416,19 @@ const CandidateProfile = () => {
       // Check file type
       const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
       if (!allowedTypes.includes(file.type)) {
-        alert(language === 'vi' ? 'Chỉ chấp nhận file PDF, DOC, DOCX' : 'Only PDF, DOC, DOCX files are accepted');
+        toast.warning(
+          language === 'vi' ? 'Chỉ chấp nhận file PDF, DOC, DOCX' : 'Only PDF, DOC, DOCX files are accepted',
+          language === 'vi' ? 'Định dạng không hợp lệ' : 'Invalid Format'
+        );
         return;
       }
       
       // Check file size (max 3MB)
       if (file.size > 3 * 1024 * 1024) {
-        alert(language === 'vi' ? 'File không được vượt quá 3MB' : 'File size should not exceed 3MB');
+        toast.warning(
+          language === 'vi' ? 'File không được vượt quá 3MB' : 'File size should not exceed 3MB',
+          language === 'vi' ? 'File quá lớn' : 'File Too Large'
+        );
         return;
       }
       
@@ -1200,14 +1444,23 @@ const CandidateProfile = () => {
         try {
           localStorage.setItem('candidateCV', JSON.stringify(cvData));
           setCvFile(cvData);
-          alert(language === 'vi' ? 'Tải CV thành công!' : 'CV uploaded successfully!');
+          toast.success(
+            language === 'vi' ? 'CV đã được tải lên thành công!' : 'CV uploaded successfully!',
+            language === 'vi' ? 'Thành công' : 'Success'
+          );
         } catch (error) {
           if (error.name === 'QuotaExceededError') {
-            alert(language === 'vi' 
-              ? 'Lỗi: Dung lượng lưu trữ không đủ. Vui lòng sử dụng file nhỏ hơn hoặc xóa dữ liệu cũ.'
-              : 'Error: Not enough storage. Please use a smaller file or delete old data.');
+            toast.error(
+              language === 'vi' 
+                ? 'Dung lượng lưu trữ không đủ. Vui lòng sử dụng file nhỏ hơn hoặc xóa dữ liệu cũ.'
+                : 'Not enough storage. Please use a smaller file or delete old data.',
+              language === 'vi' ? 'Lỗi lưu trữ' : 'Storage Error'
+            );
           } else {
-            alert(language === 'vi' ? 'Lỗi khi tải CV' : 'Error uploading CV');
+            toast.error(
+              language === 'vi' ? 'Lỗi khi tải CV' : 'Error uploading CV',
+              language === 'vi' ? 'Lỗi' : 'Error'
+            );
           }
         }
       };
@@ -1274,7 +1527,10 @@ const CandidateProfile = () => {
 
   const handleKYCSubmit = () => {
     if (!validateKYCForm()) {
-      alert(language === 'vi' ? 'Vui lòng điền đầy đủ thông tin và tải lên tất cả ảnh bắt buộc' : 'Please fill all required fields and upload all required photos');
+      toast.warning(
+        language === 'vi' ? 'Vui lòng điền đầy đủ thông tin và tải lên tất cả ảnh bắt buộc' : 'Please fill all required fields and upload all required photos',
+        language === 'vi' ? 'Thiếu thông tin' : 'Missing Information'
+      );
       return;
     }
 
@@ -1286,7 +1542,10 @@ const CandidateProfile = () => {
     
     setKycCompleted(true);
     setShowKYCModal(false);
-    alert(language === 'vi' ? '✅ Xác minh eKYC hoàn tất!' : '✅ eKYC verification completed!');
+    toast.success(
+      language === 'vi' ? 'Xác minh eKYC đã hoàn tất!' : 'eKYC verification completed!',
+      language === 'vi' ? 'Thành công' : 'Success'
+    );
   };
 
   const resetKYC = () => {
@@ -1316,7 +1575,10 @@ const CandidateProfile = () => {
         video.srcObject = stream;
       }
     } catch (error) {
-      alert(language === 'vi' ? 'Không thể truy cập camera' : 'Cannot access camera');
+      toast.error(
+        language === 'vi' ? 'Không thể truy cập camera' : 'Cannot access camera',
+        language === 'vi' ? 'Lỗi camera' : 'Camera Error'
+      );
     }
   };
 
@@ -1338,7 +1600,9 @@ const CandidateProfile = () => {
   };
 
   return (
-    <DashboardLayout role="candidate" showSearch={false} key={language}>
+    <>
+      <Toast toasts={toast.toasts} removeToast={toast.removeToast} />
+      <DashboardLayout role="candidate" showSearch={false} key={language}>
       <ProfileContainer>
         <ProfileHeader
           initial={{ opacity: 0, y: 20 }}
@@ -1364,50 +1628,77 @@ const CandidateProfile = () => {
                   'JD'
                 )}
               </Avatar>
-              {profileImage && (
+              {isEditing && profileImage && (
                 <DeleteButton onClick={handleDeleteImage}>
                   <X />
                 </DeleteButton>
               )}
-              <AvatarUpload>
-                <Camera />
-                <input type="file" accept="image/*" onChange={handleImageUpload} />
-              </AvatarUpload>
+              {isEditing && (
+                <AvatarUpload>
+                  <Camera />
+                  <input type="file" accept="image/*" onChange={handleImageUpload} />
+                </AvatarUpload>
+              )}
             </AvatarWrapper>
 
             <HeaderInfo>
-              <h1>{formData.fullName}</h1>
-              <div className="title">{formData.title}</div>
+              <h1>{formData.fullName || (language === 'vi' ? 'Ứng viên mới' : 'New Candidate')}</h1>
+              <div className="title">{formData.title || (language === 'vi' ? 'Chưa cập nhật vị trí' : 'Position not updated')}</div>
               
               <div className="info-row">
                 <div className="info-item">
                   <Mail />
-                  {formData.email}
+                  {formData.email || (language === 'vi' ? 'Chưa có email' : 'No email')}
                 </div>
                 <div className="info-item">
                   <Phone />
-                  {formData.phone}
+                  {formData.phone || (language === 'vi' ? 'Chưa có SĐT' : 'No phone')}
                 </div>
                 <div className="info-item">
                   <MapPin />
-                  {formData.location}
+                  {formData.location || (language === 'vi' ? 'Chưa có địa điểm' : 'No location')}
                 </div>
               </div>
 
-              <ProgressSection>
-                <div className="progress-header">
-                  <div className="label">{language === 'vi' ? 'Hoàn thiện hồ sơ' : 'Profile Completion'}</div>
-                  <div className="percentage">{profileCompletion}%</div>
-                </div>
-                <div className="progress-bar">
-                  <motion.div 
-                    className="progress-fill" 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${profileCompletion}%` }}
-                    transition={{ duration: 1, delay: 0.5 }}
-                  />
-                </div>
-              </ProgressSection>
+              {profileCompletion < 100 && (
+                <ProgressSection>
+                  <div className="progress-header">
+                    <div className="label">{language === 'vi' ? 'Hoàn thiện hồ sơ' : 'Profile Completion'}</div>
+                    <div className="percentage">{profileCompletion}%</div>
+                  </div>
+                  <div className="progress-bar">
+                    <motion.div 
+                      className="progress-fill" 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${profileCompletion}%` }}
+                      transition={{ duration: 1, delay: 0.5 }}
+                    />
+                  </div>
+                </ProgressSection>
+              )}
+              
+              {profileCompletion === 100 && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                  style={{
+                    marginTop: '20px',
+                    padding: '12px 20px',
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    borderRadius: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    border: '2px solid rgba(16, 185, 129, 0.3)'
+                  }}
+                >
+                  <CheckCircle size={20} style={{ color: '#10B981' }} />
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#10B981' }}>
+                    {language === 'vi' ? '🎉 Hồ sơ đã hoàn thiện 100%!' : '🎉 Profile 100% Complete!'}
+                  </span>
+                </motion.div>
+              )}
             </HeaderInfo>
           </div>
         </ProfileHeader>
@@ -1435,7 +1726,19 @@ const CandidateProfile = () => {
 
                   <FormGroup>
                     <Label>{t.profile.email}</Label>
-                    <Input name="email" type="email" value={formData.email} onChange={handleChange} />
+                    <Input 
+                      name="email" 
+                      type="email" 
+                      value={formData.email} 
+                      onChange={handleChange}
+                      disabled={true}
+                      style={{ 
+                        backgroundColor: '#f3f4f6', 
+                        cursor: 'not-allowed',
+                        opacity: 0.7 
+                      }}
+                      title={language === 'vi' ? 'Email không thể thay đổi (từ tài khoản đã xác thực)' : 'Email cannot be changed (from verified account)'}
+                    />
                   </FormGroup>
 
                   <FormGroup>
@@ -1494,7 +1797,7 @@ const CandidateProfile = () => {
                       </div>
                       <div className="label">{language === 'vi' ? 'Họ và Tên' : 'Full Name'}</div>
                     </div>
-                    <div className="value">{formData.fullName}</div>
+                    <div className="value">{formData.fullName || (language === 'vi' ? 'Chưa cập nhật' : 'Not updated')}</div>
                   </InfoCard>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
@@ -1508,7 +1811,7 @@ const CandidateProfile = () => {
                         </div>
                         <div className="label">Email</div>
                       </div>
-                      <div className="value" style={{ fontSize: '14px' }}>{formData.email}</div>
+                      <div className="value" style={{ fontSize: '14px' }}>{formData.email || (language === 'vi' ? 'Chưa cập nhật' : 'Not updated')}</div>
                     </InfoCard>
 
                     <InfoCard
@@ -1521,7 +1824,7 @@ const CandidateProfile = () => {
                         </div>
                         <div className="label">{language === 'vi' ? 'Điện Thoại' : 'Phone'}</div>
                       </div>
-                      <div className="value">{formData.phone}</div>
+                      <div className="value">{formData.phone || (language === 'vi' ? 'Chưa cập nhật' : 'Not updated')}</div>
                     </InfoCard>
                   </div>
 
@@ -1572,7 +1875,7 @@ const CandidateProfile = () => {
                       </div>
                       <div className="label">{language === 'vi' ? 'Địa Điểm' : 'Location'}</div>
                     </div>
-                    <div className="value">{formData.location}</div>
+                    <div className="value">{formData.location || (language === 'vi' ? 'Chưa cập nhật' : 'Not updated')}</div>
                   </InfoCard>
 
                   <InfoCard
@@ -1585,7 +1888,7 @@ const CandidateProfile = () => {
                       </div>
                       <div className="label">{language === 'vi' ? 'Vị Trí Mong Muốn' : 'Desired Position'}</div>
                     </div>
-                    <div className="value">{formData.title}</div>
+                    <div className="value">{formData.title || (language === 'vi' ? 'Chưa cập nhật' : 'Not updated')}</div>
                   </InfoCard>
 
                   <InfoCard
@@ -1598,7 +1901,7 @@ const CandidateProfile = () => {
                       </div>
                       <div className="label">{language === 'vi' ? 'Giới Thiệu' : 'Bio'}</div>
                     </div>
-                    <div className="value" style={{ lineHeight: '1.6' }}>{formData.bio}</div>
+                    <div className="value" style={{ lineHeight: '1.6' }}>{formData.bio || (language === 'vi' ? 'Chưa cập nhật' : 'Not updated')}</div>
                   </InfoCard>
                 </div>
               )}
@@ -1618,15 +1921,105 @@ const CandidateProfile = () => {
 
               {isEditing ? (
                 <FormGrid>
-                  {/* Đã loại bỏ các trường mạng xã hội khác ngoài Google */}
+                  <FormGroup>
+                    <Label>Facebook</Label>
+                    <Input 
+                      name="facebook" 
+                      value={formData.socialLinks?.facebook || ''} 
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        socialLinks: {
+                          ...formData.socialLinks,
+                          facebook: e.target.value
+                        }
+                      })}
+                      placeholder="https://facebook.com/yourprofile"
+                    />
+                  </FormGroup>
+
+                  <FormGroup>
+                    <Label>Instagram</Label>
+                    <Input 
+                      name="instagram" 
+                      value={formData.socialLinks?.instagram || ''} 
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        socialLinks: {
+                          ...formData.socialLinks,
+                          instagram: e.target.value
+                        }
+                      })}
+                      placeholder="https://instagram.com/yourprofile"
+                    />
+                  </FormGroup>
+
+                  <FormGroup>
+                    <Label>Zalo</Label>
+                    <Input 
+                      name="zalo" 
+                      value={formData.socialLinks?.zalo || ''} 
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        socialLinks: {
+                          ...formData.socialLinks,
+                          zalo: e.target.value
+                        }
+                      })}
+                      placeholder="0123456789"
+                    />
+                  </FormGroup>
+
+                  <FormGroup>
+                    <Label>Website</Label>
+                    <Input 
+                      name="website" 
+                      value={formData.socialLinks?.website || ''} 
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        socialLinks: {
+                          ...formData.socialLinks,
+                          website: e.target.value
+                        }
+                      })}
+                      placeholder="https://yourwebsite.com"
+                    />
+                  </FormGroup>
                 </FormGrid>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {/* Đã loại bỏ các InfoCard mạng xã hội khác ngoài Google */}
+                  {formData.socialLinks?.facebook && formData.socialLinks.facebook.trim() && (
+                    <InfoCard $color="#1877F2" whileHover={{ scale: 1.01 }}>
+                      <div className="info-header">
+                        <div className="icon">
+                          <FacebookIcon size={20} />
+                        </div>
+                        <div className="label">Facebook</div>
+                      </div>
+                      <div className="value">
+                        <a href={formData.socialLinks.facebook} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>
+                          {formData.socialLinks.facebook}
+                        </a>
+                      </div>
+                    </InfoCard>
+                  )}
 
-                  {/* Đã loại bỏ Facebook */}
+                  {formData.socialLinks?.instagram && formData.socialLinks.instagram.trim() && (
+                    <InfoCard $color="#E4405F" whileHover={{ scale: 1.01 }}>
+                      <div className="info-header">
+                        <div className="icon">
+                          <InstagramIcon size={20} />
+                        </div>
+                        <div className="label">Instagram</div>
+                      </div>
+                      <div className="value">
+                        <a href={formData.socialLinks.instagram} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>
+                          {formData.socialLinks.instagram}
+                        </a>
+                      </div>
+                    </InfoCard>
+                  )}
 
-                  {formData.zalo && formData.zalo.trim() && (
+                  {formData.socialLinks?.zalo && formData.socialLinks.zalo.trim() && (
                     <InfoCard $color="#0068FF" whileHover={{ scale: 1.01 }}>
                       <div className="info-header">
                         <div className="icon">
@@ -1634,11 +2027,11 @@ const CandidateProfile = () => {
                         </div>
                         <div className="label">Zalo</div>
                       </div>
-                      <div className="value">{formData.zalo}</div>
+                      <div className="value">{formData.socialLinks.zalo}</div>
                     </InfoCard>
                   )}
 
-                  {formData.website && formData.website.trim() && (
+                  {formData.socialLinks?.website && formData.socialLinks.website.trim() && (
                     <InfoCard $color="#1e40af" whileHover={{ scale: 1.01 }}>
                       <div className="info-header">
                         <div className="icon">
@@ -1646,11 +2039,18 @@ const CandidateProfile = () => {
                         </div>
                         <div className="label">Website</div>
                       </div>
-                      <div className="value">{formData.website}</div>
+                      <div className="value">
+                        <a href={formData.socialLinks.website} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>
+                          {formData.socialLinks.website}
+                        </a>
+                      </div>
                     </InfoCard>
                   )}
 
-                  {!formData.linkedin?.trim() && !formData.github?.trim() && !formData.zalo?.trim() && !formData.website?.trim() && (
+                  {!formData.socialLinks?.facebook?.trim() && 
+                   !formData.socialLinks?.instagram?.trim() && 
+                   !formData.socialLinks?.zalo?.trim() && 
+                   !formData.socialLinks?.website?.trim() && (
                     <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94A3B8' }}>
                       <LinkIcon size={48} style={{ marginBottom: '12px', opacity: 0.5 }} />
                       <p style={{ fontSize: '14px', fontWeight: '600' }}>
@@ -2140,6 +2540,7 @@ const CandidateProfile = () => {
         </Modal>
       </ProfileContainer>
     </DashboardLayout>
+    </>
   );
 };
 
