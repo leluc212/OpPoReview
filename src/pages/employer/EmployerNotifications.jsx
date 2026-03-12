@@ -427,7 +427,7 @@ const getNotifications = (language) => ([
     id: 4,
     type: 'system',
     title: language === 'vi' ? 'Tin tuyển dụng sắp hết hạn' : 'Job post expiring soon',
-    message: language === 'vi' ? 'Tin tuyển dụng "Nhân viên Thu Ngân" sẽ hết hạn vào 27/03/2026. Gia hạn ngay để tiếp tục tuyển dụng.' : 'Job post "Cashier" will expire on 27/03/2026. Renew now to continue recruiting.',
+    message: language === 'vi' ? 'Tin tuyển dụng "Nhân viên Thu Ngân" sẽ hết hạn vào 17/03/2026' : 'The "Cashier" job post will expire on 17/03/2026',
     time: language === 'vi' ? '3 giờ trước' : '3 hours ago',
     read: true,
     icon: AlertCircle

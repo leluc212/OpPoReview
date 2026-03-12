@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { Bell, Search, LogOut, User, Users, Briefcase, DollarSign, AlertCircle, Settings } from 'lucide-react';
+import { Bell, Search, LogOut, User, Users, Briefcase, DollarSign, AlertCircle, Settings, Eye, CheckCircle, Star, UserPlus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -493,6 +493,7 @@ const Navbar = ({ showSearch = true }) => {
   };
 
   const notifications = getNotifications();
+  const filteredNotifications = notifications;
 
   useEffect(() => {
     const handleLogoChange = () => {
@@ -600,7 +601,7 @@ const Navbar = ({ showSearch = true }) => {
         <div style={{ position: 'relative' }} ref={notificationRef}>
           <IconButton onClick={toggleNotifications}>
             <Bell />
-            <Badge>{notifications.filter(n => n.unread).length}</Badge>
+            <Badge>{filteredNotifications.filter(n => n.unread).length}</Badge>
           </IconButton>
           
           {showNotifications && (
@@ -626,7 +627,7 @@ const Navbar = ({ showSearch = true }) => {
               </NotificationTabs>
               
               <NotificationList>
-                {notifications
+                {filteredNotifications
                   .filter(n => notificationTab === 'all' || n.unread)
                   .map((notification) => (
                     <NotificationItem 
