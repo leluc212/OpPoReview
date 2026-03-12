@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Briefcase, MapPin, Clock, Bookmark } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { getCompanyLogo, getCompanyInitial } from '../data/companyLogos';
 
 // Translate salary string based on language
 const translateSalary = (salaryStr, language) => {
@@ -148,7 +149,7 @@ const CompanyLogo = styled(motion.div)`
   width: 72px;
   height: 72px;
   border-radius: ${props => props.theme.borderRadius.xl};
-  background: ${props => props.theme.colors.primary};
+  background: ${props => props.$hasImage ? 'white' : props.theme.colors.primary};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -160,6 +161,13 @@ const CompanyLogo = styled(motion.div)`
     0 8px 24px ${props => props.theme.colors.primary}40,
     0 0 0 4px ${props => props.theme.colors.primary}15;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
   
   ${CardWrapper}:hover & {
     transform: rotate(-5deg) scale(1.1);
@@ -301,10 +309,15 @@ const JobCard = ({ job, onClick, onSave, saved = false }) => {
       <CardHeader>
         <div style={{ display: 'flex', flex: 1 }}>
           <CompanyLogo
+            $hasImage={!!getCompanyLogo(job.company)}
             whileHover={{ rotate: -10, scale: 1.1 }}
             transition={{ duration: 0.3 }}
           >
-            {job.company.charAt(0).toUpperCase()}
+            {getCompanyLogo(job.company) ? (
+              <img src={getCompanyLogo(job.company)} alt={job.company} />
+            ) : (
+              getCompanyInitial(job.company)
+            )}
           </CompanyLogo>
           <CardContent>
             <JobTitle>{translateJobTitle(job.title, language)}</JobTitle>

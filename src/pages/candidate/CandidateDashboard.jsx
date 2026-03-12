@@ -442,33 +442,17 @@ const BoostBannerWrap = styled(motion.div)`
   overflow: hidden;
   box-shadow: 0 10px 40px rgba(0,0,0,0.15);
   cursor: pointer;
-  background: #1e293b;
-  
-  .banner-image-container {
-    position: relative;
-    width: 100%;
-    padding-bottom: 42%;
-    overflow: hidden;
-  }
+  background: #f3f4f6;
 
   img {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    will-change: opacity;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-    -webkit-font-smoothing: antialiased;
+    height: auto;
+    display: block;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  &:hover .banner-image-container img {
-    transform: scale(1.02) translateZ(0);
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  &:hover img {
+    transform: scale(1.02);
   }
 `;
 
@@ -1328,7 +1312,7 @@ const CandidateDashboard = () => {
 
   const banners = [
     { src: "/OpPoReview/images/seoul.jpg", alt: "Seoul Vua Mì Cay" },
-    { src: "/OpPoReview/images/unnamed (1).jpg", alt: "Banner" },
+    { src: "/OpPoReview/images/unnamed1.jpg", alt: "Banner" },
     { src: "/OpPoReview/images/unnamed.jpg", alt: "Banner" }
   ];
 
@@ -1913,22 +1897,18 @@ const CandidateDashboard = () => {
           whileHover={{ y: -2 }}
         >
           <BoostTag>🔥Đề xuất</BoostTag>
-          <div className="banner-image-container">
-            <AnimatePresence initial={false}>
-              <motion.img 
-                key={currentBannerIndex}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ 
-                  duration: 0.7,
-                  ease: [0.25, 0.1, 0.25, 1]
-                }}
-                src={banners[currentBannerIndex].src} 
-                alt={banners[currentBannerIndex].alt}
-              />
-            </AnimatePresence>
-          </div>
+          <motion.img 
+            key={currentBannerIndex}
+            initial={{ opacity: currentBannerIndex === 0 ? 1 : 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ 
+              duration: 0.7,
+              ease: [0.25, 0.1, 0.25, 1]
+            }}
+            src={banners[currentBannerIndex].src} 
+            alt={banners[currentBannerIndex].alt}
+            style={{ width: '100%', height: 'auto', display: 'block' }}
+          />
           <BannerDots>
             {banners.map((_, idx) => (
               <BannerDot 
