@@ -122,13 +122,12 @@ const getHRStaff = (language) => {
       { id: 1, employer: language === 'vi' ? 'Nhà hàng Hương Việt' : 'Huong Viet Restaurant', position: language === 'vi' ? 'Nhân viên phục vụ' : 'Server', rating: 4, date: language === 'vi' ? 'Tháng 11/2024' : 'Nov 2024', comment: language === 'vi' ? 'Nhanh nhẹn, thân thiện.' : 'Quick and friendly.' }
     ],
     changeRequest: {
-      type: 'shift_change',
-      typeLabel: language === 'vi' ? 'Đổi ca làm' : 'Shift Change',
-      from: '18:00 - 22:00',
-      to: '14:00 - 18:00',
-      reason: language === 'vi' ? 'Có lịch học buổi tối từ tuần này, xin đổi sang ca chiều' : 'Have evening classes starting this week, requesting afternoon shift',
+      type: 'staff_replacement',
+      typeLabel: language === 'vi' ? 'Đổi người' : 'Staff Replacement',
+      reason: language === 'vi' ? 'Có lịch thi giữa kỳ đột xuất, không thể đi làm ca này, xin nhờ người thay' : 'Unexpected midterm exam schedule, unable to work this shift, requesting a replacement',
       requestedAt: language === 'vi' ? `${today} - 07:45` : `${today} - 07:45`,
-      urgency: 'urgent'
+      urgency: 'urgent',
+      sentToAdmin: true
     }
   },
   {
@@ -3145,6 +3144,12 @@ const HRManagement = () => {
                                 <Clock />{staff.changeRequest.from}
                                 <ArrowRight />
                                 {staff.changeRequest.to}
+                              </div>
+                            )}
+                            {staff.changeRequest.type === 'staff_replacement' && (
+                              <div className="cr-shift-row">
+                                <User size={16} />
+                                {language === 'vi' ? 'Yêu cầu đổi người làm thay' : 'Requesting a replacement worker'}
                               </div>
                             )}
                             <div className="cr-reason">"{staff.changeRequest.reason}"</div>

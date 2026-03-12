@@ -1,3 +1,4 @@
+import React, { useRef } from 'react';
 import styled from 'styled-components';
 
 export const Button = styled.button`
@@ -129,6 +130,15 @@ export const Input = styled.input`
   ${props => props.$error && `
     border-color: ${props.theme.colors.error};
   `}
+
+  &[type="date"]::-webkit-datetime-edit {
+    display: flex;
+  }
+  &[type="date"]::-webkit-datetime-edit-day-field { order: 1; }
+  &[type="date"]::-webkit-datetime-edit-text:first-of-type { order: 2; }
+  &[type="date"]::-webkit-datetime-edit-month-field { order: 3; }
+  &[type="date"]::-webkit-datetime-edit-text:last-of-type { order: 4; }
+  &[type="date"]::-webkit-datetime-edit-year-field { order: 5; }
 `;
 
 export const TextArea = styled.textarea`
@@ -223,3 +233,110 @@ export const ErrorText = styled.span`
   margin-top: 3px;
   display: block;
 `;
+
+// ── DateInput component ──────────────────────────────────────────────────────
+const DateInputWrapper = styled.div`
+  position: relative;
+  width: 100%;
+
+  input[type="text"] {
+    padding-right: 40px;
+  }
+
+  input[type="date"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 1px;
+    height: 1px;
+    top: 0;
+    left: 0;
+  }
+
+  .cal-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: #64748B;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: color 0.15s;
+    &:hover { color: #2563EB; }
+  }
+`;
+
+const maskDate = (raw) => {
+  const digits = raw.replace(/\D/g, '').slice(0, 8);
+  let out = '';
+  for (let i = 0; i < digits.length; i++) {
+    if (i === 2 || i === 4) out += '/';
+    out += digits[i];
+  }
+  return out;
+};
+
+// Convert dd/mm/yyyy ↔ yyyy-mm-dd
+const toNative = (dmy) => {
+  const p = dmy.split('/');
+  if (p.length !== 3 || p[2].length !== 4) return '';
+  return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+};
+const fromNative = (ymd) => {
+  if (!ymd) return '';
+  const [y, m, d] = ymd.split('-');
+  return `${d}/${m}/${y}`;
+};
+
+export const DateInput = ({ value, onChange, required, style, $error, placeholder = 'dd/mm/yyyy' }) => {
+  const nativeRef = useRef(null);
+
+  const handleText = (e) => {
+    onChange(maskDate(e.target.value));
+  };
+
+  const handleNative = (e) => {
+    onChange(fromNative(e.target.value));
+  };
+
+  const openPicker = () => {
+    const el = nativeRef.current;
+    if (!el) return;
+    el.value = toNative(value || '');
+    el.showPicker?.();
+  };
+
+  return (
+    <DateInputWrapper>
+      <Input
+        type="text"
+        value={value || ''}
+        onChange={handleText}
+        placeholder={placeholder}
+        required={required}
+        style={style}
+        $error={$error}
+        inputMode="numeric"
+        maxLength={10}
+      />
+      <input
+        ref={nativeRef}
+        type="date"
+        onChange={handleNative}
+        tabIndex={-1}
+        aria-hidden="true"
+      />
+      <button type="button" className="cal-btn" onClick={openPicker} tabIndex={-1}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      </button>
+    </DateInputWrapper>
+  );
+};

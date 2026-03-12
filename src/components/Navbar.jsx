@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { Bell, Search, LogOut, User, Users, Briefcase, DollarSign, AlertCircle, Settings } from 'lucide-react';
+import { Bell, Search, LogOut, User, Users, Briefcase, DollarSign, AlertCircle, Settings, Eye, CheckCircle, Star, UserPlus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -369,45 +369,32 @@ const Navbar = ({ showSearch = true }) => {
   const [notificationTab, setNotificationTab] = useState('all');
   const notificationRef = useRef(null);
 
-  // Sample notifications data
-  const notifications = [
-    {
-      id: 1,
-      icon: Users,
-      color: '#1e40af',
-      title: 'Người dùng mới đăng ký',
-      message: '15 ứng viên và 3 nhà tuyển dụng mới đã đăng ký trong 24h qua',
-      time: '2 giờ trước',
-      unread: true
-    },
-    {
-      id: 2,
-      icon: Briefcase,
-      color: '#f59e0b',
-      title: 'Yêu cầu phê duyệt nhà tuyển dụng',
-      message: 'Katinat chi nhánh quận 8 đang chờ phê duyệt',
-      time: '3 giờ trước',
-      unread: true
-    },
-    {
-      id: 3,
-      icon: AlertCircle,
-      color: '#ef4444',
-      title: 'Bài đăng bị cảnh báo',
-      message: '5 bài đăng tuyển nhân viên phục vụ bị cảnh báo',
-      time: '5 giờ trước',
-      unread: true
-    },
-    {
-      id: 4,
-      icon: DollarSign,
-      color: '#10b981',
-      title: 'Thanh toán mới',
-      message: 'The Coffee House đã thanh toán gói Banner nổi bật 2',
-      time: '1 ngày trước',
-      unread: false
-    },
+  // Role-specific notifications
+  const candidateNotifications = [
+    { id: 1, icon: Eye, color: '#1e40af', title: 'Hồ sơ đã được xem', message: 'FPT Software đã xem hồ sơ ứng tuyển Senior React Developer của bạn', time: '2 giờ trước', unread: true },
+    { id: 2, icon: CheckCircle, color: '#10b981', title: 'Hồ sơ được chấp nhận', message: 'Hồ sơ Nhân viên tại Highlands của bạn đã được chấp nhận', time: '1 ngày trước', unread: false },
+    { id: 3, icon: Briefcase, color: '#1e40af', title: 'Công việc phù hợp với bạn', message: 'Có 3 công việc mới phù hợp với kỹ năng React, Node.js của bạn', time: '3 giờ trước', unread: true },
+    { id: 4, icon: CheckCircle, color: '#10b981', title: 'CV ứng tuyển được duyệt', message: 'Katinat quận 8 đã duyệt CV ứng tuyển gấp của bạn', time: '3 ngày trước', unread: false },
   ];
+
+  const employerNotifications = [
+    { id: 1, icon: UserPlus, color: '#1e40af', title: 'Ứng viên mới ứng tuyển', message: 'Nguyễn Văn A đã ứng tuyển', time: '5 phút trước', unread: true },
+    { id: 2, icon: UserPlus, color: '#1e40af', title: 'Ứng viên mới ứng tuyển', message: 'Trần Thị B đã ứng tuyển', time: '15 phút trước', unread: true },
+    { id: 3, icon: Star, color: '#f59e0b', title: 'Đánh giá nhân viên mới', message: 'Phạm Thị D đã hoàn thành công việc. Vui lòng đánh giá nhân viên.', time: '2 giờ trước', unread: true },
+  ];
+
+  const adminNotifications = [
+    { id: 1, icon: Users, color: '#1e40af', title: 'Người dùng mới đăng ký', message: '15 ứng viên và 3 nhà tuyển dụng mới đã đăng ký trong 24h qua', time: '2 giờ trước', unread: true },
+    { id: 2, icon: Briefcase, color: '#f59e0b', title: 'Yêu cầu phê duyệt nhà tuyển dụng', message: 'Katinat chi nhánh quận 8 đang chờ phê duyệt', time: '3 giờ trước', unread: true },
+    { id: 3, icon: AlertCircle, color: '#ef4444', title: 'Bài đăng bị cảnh báo', message: '5 bài đăng tuyển nhân viên phục vụ bị cảnh báo', time: '5 giờ trước', unread: true },
+    { id: 4, icon: DollarSign, color: '#10b981', title: 'Thanh toán mới', message: 'The Coffee House đã thanh toán gói Banner nổi bật 2', time: '1 ngày trước', unread: false },
+  ];
+
+  const filteredNotifications = user?.role === 'candidate'
+    ? candidateNotifications
+    : user?.role === 'employer'
+    ? employerNotifications
+    : adminNotifications;
 
   useEffect(() => {
     const handleLogoChange = () => {
@@ -515,7 +502,7 @@ const Navbar = ({ showSearch = true }) => {
         <div style={{ position: 'relative' }} ref={notificationRef}>
           <IconButton onClick={toggleNotifications}>
             <Bell />
-            <Badge>{notifications.filter(n => n.unread).length}</Badge>
+            <Badge>{filteredNotifications.filter(n => n.unread).length}</Badge>
           </IconButton>
           
           {showNotifications && (
@@ -541,7 +528,7 @@ const Navbar = ({ showSearch = true }) => {
               </NotificationTabs>
               
               <NotificationList>
-                {notifications
+                {filteredNotifications
                   .filter(n => notificationTab === 'all' || n.unread)
                   .map((notification) => (
                     <NotificationItem 
