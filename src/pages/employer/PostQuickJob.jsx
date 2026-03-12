@@ -388,12 +388,12 @@ const PostQuickJob = () => {
       const mockQuickJobs = [
         {
           id: 1709870123456,
-          title: 'Ca Tối - Nhân viên Phục vụ',
+          title: 'Nhân viên Phục vụ',
           location: 'Quận 1, TP.HCM',
           hourlyRate: 35000,
           startTime: '18:00',
           endTime: '23:00',
-          description: 'Cần nhân viên phục vụ ca tối, làm việc tại quán ăn khu vực trung tâm. Yêu cầu nhiệt tình, nhanh nhẹn.',
+          description: 'Cần nhân viên phục vụ, làm việc tại quán ăn khu vực trung tâm. Yêu cầu nhiệt tình, nhanh nhẹn.',
           contactPhone: '0901234567',
           createdAt: new Date('2026-03-08T10:30:00').toISOString(),
           type: 'quick',
@@ -405,12 +405,12 @@ const PostQuickJob = () => {
         },
         {
           id: 1709783123456,
-          title: 'Ca Trưa - Nhân viên Phụ bếp',
+          title: 'Nhân viên Phụ bếp',
           location: 'Quận 3, TP.HCM',
           hourlyRate: 32000,
           startTime: '10:00',
           endTime: '14:30',
-          description: 'Tuyển phụ bếp làm ca trưa, hỗ trợ bếp chính chuẩn bị món ăn. Không yêu cầu kinh nghiệm.',
+          description: 'Tuyển phụ bếp, hỗ trợ bếp chính chuẩn bị món ăn. Không yêu cầu kinh nghiệm.',
           contactPhone: '0912345678',
           createdAt: new Date('2026-03-07T08:15:00').toISOString(),
           type: 'quick',
@@ -422,12 +422,12 @@ const PostQuickJob = () => {
         },
         {
           id: 1709696123456,
-          title: 'Ca Chiều - Nhân viên Pha chế',
+          title: 'Nhân viên Pha chế',
           location: 'Quận 7, TP.HCM',
           hourlyRate: 38000,
           startTime: '14:00',
           endTime: '18:00',
-          description: 'Cần barista pha chế đồ uống ca chiều. Ưu tiên có kinh nghiệm pha cà phê và trà sữa.',
+          description: 'Cần barista pha chế đồ uống. Ưu tiên có kinh nghiệm pha cà phê và trà sữa.',
           contactPhone: '0923456789',
           createdAt: new Date('2026-03-06T14:20:00').toISOString(),
           type: 'quick',
@@ -439,12 +439,12 @@ const PostQuickJob = () => {
         },
         {
           id: 1709609123456,
-          title: 'Ca Sáng - Nhân viên Bán hàng',
+          title: 'Nhân viên Bán hàng',
           location: 'Quận 10, TP.HCM',
           hourlyRate: 33000,
           startTime: '07:00',
           endTime: '12:00',
-          description: 'Tuyển nhân viên bán hàng ca sáng tại tiệm bánh. Làm việc từ thứ 2 đến thứ 6.',
+          description: 'Tuyển nhân viên bán hàng tại tiệm bánh. Làm việc từ thứ 2 đến thứ 6.',
           contactPhone: '0934567890',
           createdAt: new Date('2026-03-05T06:00:00').toISOString(),
           type: 'quick',
@@ -456,12 +456,12 @@ const PostQuickJob = () => {
         },
         {
           id: 1709522123456,
-          title: 'Ca Tối - Nhân viên Thu ngân',
+          title: 'Nhân viên Thu ngân',
           location: 'Quận 2, TP.HCM',
           hourlyRate: 36000,
           startTime: '17:00',
           endTime: '22:00',
-          description: 'Cần thu ngân ca tối, yêu cầu thành thạo máy tính và giao tiếp tốt với khách hàng.',
+          description: 'Cần thu ngân, yêu cầu thành thạo máy tính và giao tiếp tốt với khách hàng.',
           contactPhone: '0945678901',
           createdAt: new Date('2026-03-04T16:45:00').toISOString(),
           type: 'quick',
@@ -473,12 +473,12 @@ const PostQuickJob = () => {
         },
         {
           id: 1709435123456,
-          title: 'Ca Tối - Nhân viên Rửa chén',
+          title: 'Nhân viên Rửa chén',
           location: 'Quận 5, TP.HCM',
           hourlyRate: 32000,
           startTime: '19:00',
           endTime: '23:00',
-          description: 'Tuyển nhân viên rửa chén ca tối tại nhà hàng. Công việc đơn giản, phù hợp sinh viên.',
+          description: 'Tuyển nhân viên rửa chén tại nhà hàng. Công việc đơn giản, phù hợp sinh viên.',
           contactPhone: '0956789012',
           createdAt: new Date('2026-03-03T12:00:00').toISOString(),
           type: 'quick',
@@ -491,7 +491,7 @@ const PostQuickJob = () => {
       ];
       localStorage.setItem('quickJobs', JSON.stringify(mockQuickJobs));
     }
-    
+
     // Load draft from localStorage on mount
     const savedDraft = localStorage.getItem('quickJobDraft');
     if (savedDraft) {
@@ -504,9 +504,9 @@ const PostQuickJob = () => {
     return {
       title: '',
       location: '',
-      hourlyRate: '', // Lương theo giờ
-      startTime: '', // Thời gian bắt đầu ca
-      endTime: '', // Thời gian kết thúc ca
+      hourlyRate: '',
+      startTime: '',
+      endTime: '',
       description: '',
       contactPhone: ''
     };
@@ -592,9 +592,9 @@ const PostQuickJob = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Validation
-    if (!formData.title || !formData.location || !formData.hourlyRate) {
+    if (!formData.title || !formData.location || !formData.hourlyRate || !formData.description) {
       setModalType('error');
       setShowModal(true);
       return;
@@ -614,7 +614,7 @@ const PostQuickJob = () => {
       setModalType('error');
       setPaymentInfo({
         error: true,
-        message: language === 'vi' 
+        message: language === 'vi'
           ? 'Vui lòng điền đầy đủ khung giờ làm việc.'
           : 'Please fill in the working hours.'
       });
@@ -744,10 +744,10 @@ const PostQuickJob = () => {
       urgentBadge: 'Tuyển gấp',
       infoTitle: 'Lưu ý về tuyển gấp',
       infoText: 'Bài đăng tuyển gấp sẽ được ưu tiên hiển thị và có thời hạn ngắn (2-7 ngày). Phù hợp cho các vị trí cần tuyển ngay lập tức.',
-      
+
       // Form labels
       jobTitle: 'Tiêu đề công việc',
-      jobTitlePlaceholder: 'VD: Nhân viên Phục Vụ - Cần ngay',
+      jobTitlePlaceholder: 'VD: Nhân viên Phục Vụ ',
       location: 'Địa điểm làm việc',
       locationPlaceholder: 'VD: Quận 1, TP.HCM',
       hourlyRate: 'Lương (VND)',
@@ -758,21 +758,21 @@ const PostQuickJob = () => {
       endTime: 'Đến',
       startTimePlaceholder: '',
       endTimePlaceholder: '',
-      
+
       totalSalary: 'Tổng lương ước tính',
       totalSalaryEmpty: 'Nhập lương và khung giờ để xem tổng',
       hoursWorked: 'giờ làm việc',
-      
+
       description: 'Mô tả công việc',
       descriptionPlaceholder: 'Mô tả ngắn gọn về công việc cần tuyển...',
-      
+
       contactPhone: 'Số điện thoại liên hệ',
       contactPhonePlaceholder: '0123 456 789',
-      
+
       // Buttons
       cancelButton: 'Hủy',
       submitButton: 'Đăng bài ngay',
-      
+
       // Modal
       successTitle: 'Đăng bài thành công!',
       successMessage: 'Bài đăng tuyển gấp của bạn đã được tạo và sẽ hiển thị trong vài phút.',
@@ -789,7 +789,7 @@ const PostQuickJob = () => {
       urgentBadge: 'Urgent Hiring',
       infoTitle: 'About Urgent Jobs',
       infoText: 'Urgent job postings will be prioritized and have shorter duration (2-7 days). Suitable for positions that need immediate filling.',
-      
+
       // Form labels
       jobTitle: 'Job Title',
       jobTitlePlaceholder: 'e.g., Server - Immediate Need',
@@ -803,21 +803,21 @@ const PostQuickJob = () => {
       endTime: 'To',
       startTimePlaceholder: '',
       endTimePlaceholder: '',
-      
+
       totalSalary: 'Estimated Total Salary',
       totalSalaryEmpty: 'Enter salary and hours to see total',
       hoursWorked: 'hours worked',
-      
+
       description: 'Job Description',
       descriptionPlaceholder: 'Brief description of the job...',
-      
+
       contactPhone: 'Contact Phone',
       contactPhonePlaceholder: '0123 456 789',
-      
+
       // Buttons
       cancelButton: 'Cancel',
       submitButton: 'Post Now',
-      
+
       // Modal
       successTitle: 'Posted Successfully!',
       successMessage: 'Your urgent job posting has been created and will be visible in a few minutes.',
@@ -942,7 +942,7 @@ const PostQuickJob = () => {
                   </div>
                 </FormRow>
               </FormGroup>
-              
+
               {/* Total Salary Display */}
               <FormGroup>
                 <Label style={{ opacity: 0, pointerEvents: 'none' }}>-</Label>
@@ -959,9 +959,9 @@ const PostQuickJob = () => {
                     {salaryCalculation ? (
                       <>
                         <span className="amount">
-                          {salaryCalculation.total.toLocaleString('vi-VN', { 
+                          {salaryCalculation.total.toLocaleString('vi-VN', {
                             minimumFractionDigits: 0,
-                            maximumFractionDigits: 0 
+                            maximumFractionDigits: 0
                           })}
                         </span>
                         <span className="currency">VNĐ</span>
@@ -977,13 +977,14 @@ const PostQuickJob = () => {
             </FormRow>
 
             <FormGroup>
-              <Label>{t.description}</Label>
+              <Label required>{t.description}</Label>
               <TextArea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
                 placeholder={t.descriptionPlaceholder}
                 rows={4}
+                required
               />
             </FormGroup>
 

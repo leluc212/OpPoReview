@@ -219,7 +219,7 @@ const getQuickJobPosts = (language) => [
   },
   {
     id: 2,
-    title: language === 'vi' ? 'Nhân viên Thu Ngân - Cần ngay' : 'Cashier - Immediate',
+    title: language === 'vi' ? 'Nhân viên Thu Ngân ' : 'Cashier - Immediate',
     location: language === 'vi' ? 'Quận 7, TP.HCM' : 'District 7, HCMC',
     salary: language === 'vi' ? '8-12 triệu' : '$320-480',
     type: language === 'vi' ? 'Tuyển gấp' : 'Urgent',

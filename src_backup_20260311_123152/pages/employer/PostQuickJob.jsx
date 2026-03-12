@@ -637,7 +637,7 @@ const PostQuickJob = () => {
       
       // Form labels
       jobTitle: 'Tiêu đề công việc',
-      jobTitlePlaceholder: 'VD: Nhân viên Phục Vụ - Cần ngay',
+      jobTitlePlaceholder: 'VD: Nhân viên Phục Vụ ',
       location: 'Địa điểm làm việc',
       locationPlaceholder: 'VD: Quận 1, TP.HCM',
       hourlyRate: 'Lương (VND)',
