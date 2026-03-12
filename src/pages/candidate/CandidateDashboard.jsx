@@ -7,6 +7,7 @@ import JobCard from '../../components/JobCard';
 import StatusBadge from '../../components/StatusBadge';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
+import candidateProfileService from '../../services/candidateProfileService';
 import { 
   Briefcase, 
   FileText, 
@@ -414,9 +415,9 @@ const TopInfoRow = styled.div`
 
 const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: ${props => props.$fullWidth ? 'repeat(4, 1fr)' : 'repeat(2, 1fr)'};
   gap: 10px;
-  flex: 2;
+  flex: ${props => props.$fullWidth ? '1' : '2'};
   min-width: 0;
 
   @media (max-width: 768px) {
@@ -1301,7 +1302,6 @@ const CandidateDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [currentTime] = useState(new Date());
-  const [profileCompletion] = useState(75);
   const [showJobDetail, setShowJobDetail] = useState(false);
   const [jobCompleted, setJobCompleted] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -1309,6 +1309,7 @@ const CandidateDashboard = () => {
   const [ratings, setRatings] = useState({ overall: 0, environment: 0, attitude: 0, accuracy: 0 });
   const [reviewText, setReviewText] = useState('');
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+  const [candidateProfile, setCandidateProfile] = useState(null);
 
   const banners = [
     { src: "/OpPoReview/images/seoul.jpg", alt: "Seoul Vua Mì Cay" },
@@ -1322,6 +1323,20 @@ const CandidateDashboard = () => {
     }, 4000);
     return () => clearInterval(bannerInterval);
   }, [banners.length]);
+
+  // Fetch candidate profile
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const profile = await candidateProfileService.getMyProfile();
+        setCandidateProfile(profile);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+    
+    fetchProfile();
+  }, []);
 
   const handleSubmitReview = () => {
     setReviewSubmitted(true);
@@ -1523,6 +1538,10 @@ const CandidateDashboard = () => {
 
   const bubbleX = useMotionValue(typeof window !== 'undefined' ? window.innerWidth - 96 : 800);
   const bubbleY = useMotionValue(typeof window !== 'undefined' ? window.innerHeight - 96 : 600);
+  
+  // Get profile completion from DynamoDB
+  const profileCompletion = candidateProfile?.profileCompletion || 0;
+  
   const getGreeting = () => {
     const hour = currentTime.getHours();    if (language === 'en') {
       if (hour < 12) return 'Good morning';
@@ -1544,7 +1563,7 @@ const CandidateDashboard = () => {
           transition={{ duration: 0.5 }}
         >
           <WelcomeContent>
-            <h1>{getGreeting()}, {language === 'vi' ? 'Ứng Viên' : 'Candidate'}! 👋</h1>
+            <h1>{getGreeting()}, {candidateProfile?.fullName || (language === 'vi' ? 'Ứng Viên' : 'Candidate')}! 👋</h1>
             <p>{language === 'vi' ? 'Chúc bạn một ngày làm việc hiệu quả!' : 'Have a productive day!'}</p>
             <QuickActions>
               <ActionButton
@@ -1611,7 +1630,7 @@ const CandidateDashboard = () => {
             </ProfileCompletionBanner>
           )}
 
-          <StatsGrid>
+          <StatsGrid $fullWidth={profileCompletion >= 100}>
             <StatsCard
               title={language === 'vi' ? 'Hồ Sơ Đã Nộp' : 'Applications'}
               value="24"

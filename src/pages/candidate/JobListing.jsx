@@ -12,6 +12,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import StatusBadge from '../../components/StatusBadge';
 import { useLanguage } from '../../context/LanguageContext';
+import candidateProfileService from '../../services/candidateProfileService';
 
 // Animations
 const fadeIn = `
@@ -2274,6 +2275,7 @@ const JobListing = () => {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
   const [jobCategory, setJobCategory] = useState('standard'); // 'standard' or 'shift'
+  const [candidateProfile, setCandidateProfile] = useState(null);
 
   // Merge stored jobs with default jobs data
   const allJobs = useMemo(() => {
@@ -2345,6 +2347,20 @@ const JobListing = () => {
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('savedJobs') || '[]');
     setSavedJobs(saved.map(job => job.id));
+  }, []);
+
+  // Fetch candidate profile
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const profile = await candidateProfileService.getMyProfile();
+        setCandidateProfile(profile);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+    
+    fetchProfile();
   }, []);
 
   // Handle search from Navbar

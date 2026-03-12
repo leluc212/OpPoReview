@@ -6,10 +6,14 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "create-profile-table": "node amplify/backend/create-candidate-profile-table.js",
+    "create-profile-table:ps": "powershell -ExecutionPolicy Bypass -File amplify/backend/create-candidate-profile-table.ps1"
   },
   "dependencies": {
     "@aws-amplify/core": "^6.16.1",
+    "@aws-sdk/client-dynamodb": "^3.1006.0",
+    "@aws-sdk/lib-dynamodb": "^3.1006.0",
     "@popperjs/core": "^2.11.8",
     "aws-amplify": "^6.16.2",
     "framer-motion": "^11.0.5",
