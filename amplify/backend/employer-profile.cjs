@@ -1,0 +1,231 @@
+// DynamoDB table definition for Employer Profiles
+// This table stores company information for each employer user
+
+const { DynamoDB } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBDocument } = require('@aws-sdk/lib-dynamodb');
+
+/**
+ * Employer Profile Table Schema
+ * 
+ * Primary Key: userId (String) - Cognito user ID
+ * 
+ * Attributes:
+ * - userId: String (Primary Key) - Unique identifier from Cognito
+ * - companyName: String - Company name
+ * - email: String - Company email address
+ * - phone: String - Company phone number
+ * - address: String - Company address/location
+ * - website: String - Company website URL
+ * - industry: String - Industry/business type (F&B, Retail, etc.)
+ * - companySize: String - Company size (1-10, 11-50, 51-200, 200+)
+ * - foundedYear: String - Year company was founded
+ * - description: String - Company description/about
+ * - companyLogo: String - Base64 encoded logo image or S3 URL
+ * - taxCode: String - Business tax code (locked after first set)
+ * - businessLicense: String - Business license number (locked after first set)
+ * - createdAt: String - ISO timestamp when profile was created
+ * - updatedAt: String - ISO timestamp when profile was last updated
+ * - profileCompletion: Number - Percentage of profile completion (0-100)
+ * - isActive: Boolean - Whether the profile is active
+ * - isVerified: Boolean - Whether company is verified
+ */
+
+const tableName = process.env.EMPLOYER_PROFILE_TABLE || 'EmployerProfiles';
+
+// Initialize DynamoDB client
+const dynamoDb = DynamoDBDocument.from(new DynamoDB({
+  region: process.env.AWS_REGION || 'ap-southeast-1'
+}));
+
+class EmployerProfileService {
+  /**
+   * Create new employer profile
+   */
+  async createProfile(profileData) {
+    const timestamp = new Date().toISOString();
+    
+    const profile = {
+      userId: profileData.userId,
+      companyName: profileData.companyName || '',
+      email: profileData.email,
+      phone: profileData.phone || '',
+      address: profileData.address || '',
+      website: profileData.website || '',
+      industry: profileData.industry || '',
+      companySize: profileData.companySize || '',
+      foundedYear: profileData.foundedYear || '',
+      description: profileData.description || '',
+      companyLogo: profileData.companyLogo || '',
+      taxCode: profileData.taxCode || '',
+      businessLicense: profileData.businessLicense || '',
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      profileCompletion: this.calculateCompletion(profileData),
+      isActive: true,
+      isVerified: false
+    };
+
+    await dynamoDb.put({
+      TableName: tableName,
+      Item: profile,
+      ConditionExpression: 'attribute_not_exists(userId)'
+    });
+
+    return profile;
+  }
+
+  /**
+   * Get employer profile by userId
+   */
+  async getProfile(userId) {
+    const result = await dynamoDb.get({
+      TableName: tableName,
+      Key: { userId }
+    });
+
+    if (!result.Item) {
+      throw new Error('No profile exists for this user ID');
+    }
+
+    return result.Item;
+  }
+
+  /**
+   * Update employer profile
+   */
+  async updateProfile(userId, updates, currentProfile) {
+    const timestamp = new Date().toISOString();
+    
+    // Fields that cannot be updated
+    const { 
+      userId: _,
+      createdAt: __, 
+      email: ___,
+      profileCompletion: ____,
+      updatedAt: _____,
+      ...allowedUpdates 
+    } = updates;
+
+    // Check if taxCode or businessLicense are being changed (should be locked after first set)
+    if (currentProfile.taxCode && updates.taxCode && updates.taxCode !== currentProfile.taxCode) {
+      delete allowedUpdates.taxCode;
+    }
+    if (currentProfile.businessLicense && updates.businessLicense && updates.businessLicense !== currentProfile.businessLicense) {
+      delete allowedUpdates.businessLicense;
+    }
+
+    // Build update expression
+    const updateExpressions = [];
+    const expressionAttributeNames = {};
+    const expressionAttributeValues = {};
+    
+    let index = 0;
+    for (const [key, value] of Object.entries(allowedUpdates)) {
+      updateExpressions.push(`#field${index} = :value${index}`);
+      expressionAttributeNames[`#field${index}`] = key;
+      expressionAttributeValues[`:value${index}`] = value;
+      index++;
+    }
+
+    // Add updatedAt
+    const updatedAtIndex = index;
+    updateExpressions.push(`#field${updatedAtIndex} = :value${updatedAtIndex}`);
+    expressionAttributeNames[`#field${updatedAtIndex}`] = 'updatedAt';
+    expressionAttributeValues[`:value${updatedAtIndex}`] = timestamp;
+
+    // Add profileCompletion
+    const completionIndex = updatedAtIndex + 1;
+    updateExpressions.push(`#field${completionIndex} = :value${completionIndex}`);
+    expressionAttributeNames[`#field${completionIndex}`] = 'profileCompletion';
+    expressionAttributeValues[`:value${completionIndex}`] = this.calculateCompletion({
+      ...currentProfile,
+      ...allowedUpdates
+    });
+
+    const params = {
+      TableName: tableName,
+      Key: { userId },
+      UpdateExpression: `SET ${updateExpressions.join(', ')}`,
+      ExpressionAttributeNames: expressionAttributeNames,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ReturnValues: 'ALL_NEW'
+    };
+
+    const result = await dynamoDb.update(params);
+    return result.Attributes;
+  }
+
+  /**
+   * Delete employer profile (soft delete)
+   */
+  async deleteProfile(userId) {
+    await dynamoDb.update({
+      TableName: tableName,
+      Key: { userId },
+      UpdateExpression: 'SET isActive = :false, updatedAt = :timestamp',
+      ExpressionAttributeValues: {
+        ':false': false,
+        ':timestamp': new Date().toISOString()
+      }
+    });
+
+    return { success: true };
+  }
+
+  /**
+   * Calculate profile completion percentage
+   */
+  calculateCompletion(profileData) {
+    let completion = 0;
+    
+    // Basic info (40% total - 10% each)
+    if (profileData.companyName?.trim()) completion += 10;
+    if (profileData.email?.trim()) completion += 10;
+    if (profileData.phone?.trim()) completion += 10;
+    if (profileData.address?.trim()) completion += 10;
+    
+    // Business info (30% total - 10% each)
+    if (profileData.industry?.trim()) completion += 10;
+    if (profileData.companySize?.trim()) completion += 10;
+    if (profileData.description?.trim()) completion += 10;
+    
+    // Company logo (15%)
+    if (profileData.companyLogo) completion += 15;
+    
+    // Website (5%)
+    if (profileData.website?.trim()) completion += 5;
+    
+    // Legal documents (20% - 10% each)
+    if (profileData.taxCode?.trim()) completion += 10;
+    if (profileData.businessLicense?.trim()) completion += 10;
+    
+    return Math.min(completion, 100);
+  }
+
+  /**
+   * List all active employer profiles
+   */
+  async listProfiles(limit = 50, lastEvaluatedKey = null) {
+    const params = {
+      TableName: tableName,
+      FilterExpression: 'isActive = :true',
+      ExpressionAttributeValues: {
+        ':true': true
+      },
+      Limit: limit
+    };
+
+    if (lastEvaluatedKey) {
+      params.ExclusiveStartKey = lastEvaluatedKey;
+    }
+
+    const result = await dynamoDb.scan(params);
+    
+    return {
+      profiles: result.Items || [],
+      lastEvaluatedKey: result.LastEvaluatedKey
+    };
+  }
+}
+
+module.exports = new EmployerProfileService();

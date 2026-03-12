@@ -3,6 +3,8 @@ import styled, { keyframes } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
+import Toast from '../../components/Toast';
+import { useToast } from '../../hooks/useToast';
 import { Input, TextArea, Button, Label, FormGroup } from '../../components/FormElements';
 import { 
   Building2, 
@@ -28,6 +30,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
+import employerProfileService from '../../services/employerProfileService';
 
 const fadeIn = keyframes`
   from {
@@ -57,7 +60,6 @@ const PageTitleGroup = styled.div`
   align-items: center;
   gap: 16px;
 `;
-
 const PageIconBox = styled.div`
   width: 52px;
   height: 52px;
@@ -123,7 +125,6 @@ const CompanyLogoCard = styled.div`
     border-color: #BFDBFE;
   }
 `;
-
 const LogoUploadArea = styled.div`
   width: 160px;
   height: 160px;
@@ -205,7 +206,6 @@ const DeleteLogoButton = styled(motion.button)`
     height: 16px;
   }
 `;
-
 const CompanyName = styled.h2`
   font-size: 20px;
   font-weight: 700;
@@ -308,7 +308,6 @@ const VerifyActionCard = styled(motion.div)`
     }
   }
 `;
-
 const StatItem = styled.div`
   text-align: center;
   padding: 16px;
@@ -384,7 +383,6 @@ const FormRow = styled.div`
   gap: 20px;
   margin-bottom: 24px;
 `;
-
 const InputWrapper = styled.div`
   position: relative;
   
@@ -447,49 +445,18 @@ const SaveButton = styled(motion.button)`
   }
 `;
 
-const SuccessMessage = styled(motion.div)`
-  padding: 16px 20px;
-  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-  color: white;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 20px;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-  
-  svg {
-    width: 20px;
-    height: 20px;
-  }
-`;
-
 const DocumentsSection = styled.div`
   margin-top: 32px;
   padding-top: 32px;
   border-top: 2px solid #E8EFFF;
 `;
 
-const VerificationBadge = styled.div`
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-  color: white;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 700;
-  margin-left: 12px;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-  
-  svg {
-    width: 14px;
-    height: 14px;
-  }
+const DocumentsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
 `;
-
 const VerificationDocumentCard = styled(motion.div)`
   background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
   border: 2px solid #93C5FD;
@@ -540,13 +507,6 @@ const VerificationDocumentCard = styled(motion.div)`
   }
 `;
 
-const DocumentsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
-  margin-top: 20px;
-`;
-
 const DocumentCard = styled(motion.div)`
   background: #ffffff;
   border: 2px solid #E8EFFF;
@@ -569,7 +529,6 @@ const DocumentHeader = styled.div`
   align-items: flex-start;
   gap: 12px;
 `;
-
 const DocumentIconBox = styled.div`
   width: 48px;
   height: 48px;
@@ -651,7 +610,6 @@ const DocumentButton = styled.button`
     height: 14px;
   }
 `;
-
 const DocumentUploadButton = styled(motion.button)`
   padding: 12px 24px;
   background: linear-gradient(135deg, #10B981 0%, #059669 100%);
@@ -730,137 +688,168 @@ const InfoBox = styled.div`
     }
   }
 `;
-
-const getInitialFormData = (language) => ({
-  companyName: language === 'vi' ? 'Katinat Quận 8' : 'Katinat District 8',
-  email: 'contact@katinat.vn',
-  phone: '0379784509',
-  address: language === 'vi' ? 'Quận 8, TP.HCM' : 'District 8, HCMC',
-  website: 'https://katinat.vn',
-  description: language === 'vi' ? 'Hệ thống cửa hàng cà phê và trà Katinat.' : 'Katinat Coffee and Tea Store Chain.',
-  industry: 'F&B',
-  size: language === 'vi' ? '50-100 nhân viên' : '50-100 employees',
-  foundedYear: '2020'
-});
-
 const EmployerProfile = () => {
   const { language } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
   const [isEditing, setIsEditing] = useState(false);
-  const [companyLogo, setCompanyLogo] = useState(() => {
-    return localStorage.getItem('companyLogo') || '/OpPoReview/images/katinatlogo.jpg';
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+  
+  // Form data state
+  const [formData, setFormData] = useState({
+    companyName: '',
+    email: '',
+    phone: '',
+    address: '',
+    website: '',
+    industry: '',
+    companySize: '',
+    foundedYear: '',
+    description: '',
+    taxCode: '',
+    businessLicense: ''
   });
   
-  const [documents, setDocuments] = useState(() => {
-    const saved = localStorage.getItem('companyDocuments');
-    return saved ? JSON.parse(saved) : [];
+  const [originalFormData, setOriginalFormData] = useState({});
+  const [companyLogo, setCompanyLogo] = useState('');
+  const [isLockedFields, setIsLockedFields] = useState({
+    taxCode: false,
+    businessLicense: false
   });
+  const [documents, setDocuments] = useState([]);
+  const [verificationDocuments, setVerificationDocuments] = useState([]);
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   
-  const [verificationDocuments, setVerificationDocuments] = useState(() => {
-    const verificationData = localStorage.getItem('companyVerificationData');
-    if (!verificationData) return [];
-    
-    try {
-      const parsed = JSON.parse(verificationData);
-      const docs = [];
-      
-      // Step 1: Business License
-      if (parsed.step1?.businessLicense) {
-        docs.push({
-          id: 'business-license',
-          name: language === 'vi' ? 'Giấy phép kinh doanh' : 'Business License',
-          type: 'verification',
-          uploadDate: parsed.submittedAt ? new Date(parsed.submittedAt).toLocaleDateString('vi-VN') : 'N/A',
-          fileData: parsed.step1.businessLicense,
-          metadata: {
-            licenseNumber: parsed.step1.licenseNumber,
-            issueDate: parsed.step1.issueDate,
-            expiryDate: parsed.step1.expiryDate
-          }
-        });
-      }
-      
-      // Step 3: ID Front
-      if (parsed.step3?.idFrontImage) {
-        docs.push({
-          id: 'id-front',
-          name: language === 'vi' ? 'CCCD/CMND mặt trước' : 'ID Card (Front)',
-          type: 'verification',
-          uploadDate: parsed.submittedAt ? new Date(parsed.submittedAt).toLocaleDateString('vi-VN') : 'N/A',
-          fileData: parsed.step3.idFrontImage,
-          metadata: {
-            representativeName: parsed.step3.representativeName,
-            idNumber: parsed.step3.idNumber
-          }
-        });
-      }
-      
-      // Step 3: ID Back
-      if (parsed.step3?.idBackImage) {
-        docs.push({
-          id: 'id-back',
-          name: language === 'vi' ? 'CCCD/CMND mặt sau' : 'ID Card (Back)',
-          type: 'verification',
-          uploadDate: parsed.submittedAt ? new Date(parsed.submittedAt).toLocaleDateString('vi-VN') : 'N/A',
-          fileData: parsed.step3.idBackImage,
-          metadata: {
-            representativeName: parsed.step3.representativeName,
-            idNumber: parsed.step3.idNumber
-          }
-        });
-      }
-      
-      // Step 3: Authorization Letter
-      if (parsed.step3?.authorizationLetter) {
-        docs.push({
-          id: 'authorization-letter',
-          name: language === 'vi' ? 'Giấy ủy quyền' : 'Authorization Letter',
-          type: 'verification',
-          uploadDate: parsed.submittedAt ? new Date(parsed.submittedAt).toLocaleDateString('vi-VN') : 'N/A',
-          fileData: parsed.step3.authorizationLetter
-        });
-      }
-      
-      return docs;
-    } catch (e) {
-      console.error('Error parsing verification data:', e);
-      return [];
-    }
-  });
-  
-  const [formData, setFormData] = useState(() => {
-    const savedData = localStorage.getItem('employerProfile');
-    if (savedData) {
-      try {
-        const parsed = JSON.parse(savedData);
-        if (parsed.companyName === 'Công Ty TNHH Một Mình Tui' || parsed.companyName === 'Solo Company LLC') {
-          return getInitialFormData(language);
-        }
-        return parsed;
-      } catch (e) {
-        console.error('Error parsing saved data:', e);
-        return getInitialFormData(language);
-      }
-    }
-    return getInitialFormData(language);
-  });
-  
-  const [originalFormData, setOriginalFormData] = useState(formData);
-
+  // Load profile data on mount
   useEffect(() => {
-    const savedData = localStorage.getItem('employerProfile');
-    if (!savedData) {
-      const initialData = getInitialFormData(language);
-      setFormData(initialData);
-      setOriginalFormData(initialData);
-      // Save initial data to localStorage so it's always available
-      localStorage.setItem('employerProfile', JSON.stringify(initialData));
+    const loadProfile = async () => {
+      // Wait for user to be authenticated
+      if (!user) {
+        console.log('⏳ Waiting for user authentication...');
+        return;
+      }
+      
+      // Prevent multiple loads
+      if (isLoadingProfile) {
+        return;
+      }
+      
+      try {
+        setIsLoadingProfile(true);
+        console.log('🔄 Loading employer profile for user:', user.username);
+        
+        let profile = null;
+        
+        // Try to load from API first
+        try {
+          profile = await employerProfileService.getMyProfile();
+          if (profile) {
+            console.log('✅ Employer profile loaded from API');
+            setIsOfflineMode(false);
+          }
+        } catch (apiError) {
+          console.log('❌ API failed, trying localStorage fallback:', apiError.message);
+          setIsOfflineMode(true);
+          
+          // Fallback to localStorage
+          const savedData = localStorage.getItem('employerProfile');
+          const savedLogo = localStorage.getItem('companyLogo');
+          
+          if (savedData) {
+            try {
+              profile = JSON.parse(savedData);
+              if (savedLogo) {
+                profile.companyLogo = savedLogo;
+              }
+              console.log('✅ Employer profile loaded from localStorage (fallback)');
+            } catch (parseError) {
+              console.error('Error parsing localStorage data:', parseError);
+            }
+          }
+        }
+        
+        if (profile) {
+          const profileData = {
+            companyName: profile.companyName || '',
+            email: profile.email || '',
+            phone: profile.phone || '',
+            address: profile.address || '',
+            website: profile.website || '',
+            industry: profile.industry || '',
+            companySize: profile.companySize || '',
+            foundedYear: profile.foundedYear || '',
+            description: profile.description || '',
+            taxCode: profile.taxCode || '',
+            businessLicense: profile.businessLicense || ''
+          };
+          
+          setFormData(profileData);
+          setOriginalFormData(profileData);
+          setCompanyLogo(profile.companyLogo || '');
+          
+          // Set locked fields
+          setIsLockedFields({
+            taxCode: !!profile.taxCode,
+            businessLicense: !!profile.businessLicense
+          });
+          
+          console.log('✅ Employer profile loaded successfully');
+        } else {
+          console.log('ℹ️ No employer profile found - new user');
+          
+          // Set empty data for new employers - they will fill it themselves
+          const emptyData = {
+            companyName: '',
+            email: user?.attributes?.email || '',
+            phone: '',
+            address: '',
+            website: '',
+            industry: '',
+            companySize: '',
+            foundedYear: '',
+            description: '',
+            taxCode: '',
+            businessLicense: ''
+          };
+          
+          setFormData(emptyData);
+          setOriginalFormData(emptyData);
+          
+          // Auto-enable editing mode for new users
+          setIsEditing(true);
+          
+          // Show welcome message for new users
+          setTimeout(() => {
+            toast.info(language === 'vi' 
+              ? '👋 Chào mừng! Vui lòng điền thông tin công ty của bạn để bắt đầu.' 
+              : '👋 Welcome! Please fill in your company information to get started.');
+          }, 500);
+        }
+      } catch (error) {
+        console.error('❌ Error loading employer profile:', error);
+        
+        // Don't show error toast for authentication issues
+        if (!error.message.includes('not authenticated') && 
+            !error.message.includes('Forbidden') &&
+            !error.message.includes('Cannot connect to API')) {
+          toast.error(language === 'vi' ? 'Không thể tải hồ sơ công ty' : 'Failed to load company profile');
+        }
+      } finally {
+        setIsLoadingProfile(false);
+        setHasLoadedOnce(true);
+      }
+    };
+    
+    // Only load once when user is available
+    if (user && !isLoadingProfile) {
+      loadProfile();
     }
     
-    // Reload verification documents when language changes
+    // Load verification documents only once
     const verificationData = localStorage.getItem('companyVerificationData');
-    if (verificationData) {
+    if (verificationData && verificationDocuments.length === 0) {
       try {
         const parsed = JSON.parse(verificationData);
         const docs = [];
@@ -927,71 +916,192 @@ const EmployerProfile = () => {
         console.error('Error parsing verification data:', e);
       }
     }
-  }, [language]);
-
+  }, [user?.username]); // Only depend on user.username to prevent infinite loops
+  
+  // Handle save profile
+  const handleSave = async () => {
+    try {
+      setIsLoadingProfile(true);
+      
+      // Check if taxCode or businessLicense are being set for the first time
+      const newLockedFields = { ...isLockedFields };
+      
+      if (formData.taxCode && formData.taxCode.trim() && !isLockedFields.taxCode) {
+        newLockedFields.taxCode = true;
+      }
+      
+      if (formData.businessLicense && formData.businessLicense.trim() && !isLockedFields.businessLicense) {
+        newLockedFields.businessLicense = true;
+      }
+      
+      // Save locked state
+      if (newLockedFields.taxCode !== isLockedFields.taxCode || newLockedFields.businessLicense !== isLockedFields.businessLicense) {
+        setIsLockedFields(newLockedFields);
+      }
+      
+      // Prepare data for saving
+      const profileData = {
+        ...formData,
+        companyLogo
+      };
+      
+      // Try to save to DynamoDB first, fallback to localStorage if API fails
+      try {
+        const existingProfile = await employerProfileService.getMyProfile();
+        
+        let savedProfile;
+        if (existingProfile) {
+          // Update existing profile
+          savedProfile = await employerProfileService.updateProfile(profileData);
+          console.log('✅ Employer profile updated');
+        } else {
+          // Create new profile
+          savedProfile = await employerProfileService.createProfile(profileData);
+          console.log('✅ Employer profile created');
+        }
+        
+        if (savedProfile) {
+          setOriginalFormData({
+            companyName: savedProfile.companyName || '',
+            email: savedProfile.email || '',
+            phone: savedProfile.phone || '',
+            address: savedProfile.address || '',
+            website: savedProfile.website || '',
+            industry: savedProfile.industry || '',
+            companySize: savedProfile.companySize || '',
+            foundedYear: savedProfile.foundedYear || '',
+            description: savedProfile.description || '',
+            taxCode: savedProfile.taxCode || '',
+            businessLicense: savedProfile.businessLicense || ''
+          });
+        }
+        
+        setIsEditing(false);
+        toast.success(language === 'vi' ? 'Đã cập nhật hồ sơ công ty thành công!' : 'Company profile updated successfully!');
+        
+      } catch (apiError) {
+        console.error('❌ API Error, using localStorage fallback:', apiError);
+        setIsOfflineMode(true);
+        
+        // Fallback to localStorage
+        try {
+          const fallbackData = {
+            ...profileData,
+            updatedAt: new Date().toISOString(),
+            profileCompletion: calculateProfileCompletion(profileData)
+          };
+          
+          localStorage.setItem('employerProfile', JSON.stringify(fallbackData));
+          localStorage.setItem('companyLogo', companyLogo || '');
+          
+          setOriginalFormData({
+            companyName: fallbackData.companyName || '',
+            email: fallbackData.email || '',
+            phone: fallbackData.phone || '',
+            address: fallbackData.address || '',
+            website: fallbackData.website || '',
+            industry: fallbackData.industry || '',
+            companySize: fallbackData.companySize || '',
+            foundedYear: fallbackData.foundedYear || '',
+            description: fallbackData.description || '',
+            taxCode: fallbackData.taxCode || '',
+            businessLicense: fallbackData.businessLicense || ''
+          });
+          
+          setIsEditing(false);
+          toast.success(language === 'vi' ? 'Đã lưu hồ sơ công ty (chế độ offline)!' : 'Company profile saved (offline mode)!');
+          
+        } catch (localError) {
+          console.error('❌ localStorage fallback failed:', localError);
+          toast.error(language === 'vi' ? 'Không thể lưu hồ sơ công ty' : 'Failed to save company profile');
+        }
+      }
+      
+    } catch (error) {
+      console.error('❌ Error in handleSave:', error);
+      toast.error(language === 'vi' ? 'Có lỗi xảy ra khi lưu hồ sơ' : 'An error occurred while saving profile');
+    } finally {
+      setIsLoadingProfile(false);
+    }
+  };
+  
+  // Calculate profile completion
+  const calculateProfileCompletion = (data) => {
+    let completion = 0;
+    
+    // Basic info (40% total - 10% each)
+    if (data.companyName?.trim()) completion += 10;
+    if (data.email?.trim()) completion += 10;
+    if (data.phone?.trim()) completion += 10;
+    if (data.address?.trim()) completion += 10;
+    
+    // Business info (30% total - 10% each)
+    if (data.industry?.trim()) completion += 10;
+    if (data.companySize?.trim()) completion += 10;
+    if (data.description?.trim()) completion += 10;
+    
+    // Company logo (15%)
+    if (data.companyLogo) completion += 15;
+    
+    // Website (5%)
+    if (data.website?.trim()) completion += 5;
+    
+    // Legal documents (20% - 10% each)
+    if (data.taxCode?.trim()) completion += 10;
+    if (data.businessLicense?.trim()) completion += 10;
+    
+    return completion;
+  };
+  
+  // Handle cancel editing
+  const handleCancel = () => {
+    setFormData(originalFormData);
+    setIsEditing(false);
+  };
+  
+  // Handle input change
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+  
+  // Handle form change
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
   };
-
-  const handleSave = () => {
-    localStorage.setItem('employerProfile', JSON.stringify(formData));
-    setOriginalFormData(formData);
-    setIsEditing(false);
-  };
   
-  const handleCancel = () => {
-    setFormData(originalFormData);
-    setIsEditing(false);
-  };
-
-  const handleLogoUpload = (e) => {
-    const file = e.target.files[0];
+  // Handle logo upload
+  const handleLogoUpload = (event) => {
+    const file = event.target.files[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast.error(language === 'vi' ? 'Kích thước file không được vượt quá 5MB' : 'File size must not exceed 5MB');
+        return;
+      }
+      
       const reader = new FileReader();
-      reader.onloadend = () => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 400;
-          const MAX_HEIGHT = 400;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height *= MAX_WIDTH / width;
-              width = MAX_WIDTH;
-            }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width *= MAX_HEIGHT / height;
-              height = MAX_HEIGHT;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-          
-          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-          setCompanyLogo(compressedBase64);
-          localStorage.setItem('companyLogo', compressedBase64);
-          window.dispatchEvent(new Event('logoChanged'));
-        };
-        img.src = reader.result;
+      reader.onload = (e) => {
+        const logoData = e.target.result;
+        setCompanyLogo(logoData);
+        // Save to localStorage immediately for offline access
+        localStorage.setItem('companyLogo', logoData);
+        console.log('✅ Company logo saved to localStorage');
       };
       reader.readAsDataURL(file);
     }
   };
-
+  
+  // Handle delete logo
   const handleDeleteLogo = () => {
-    setCompanyLogo('/OpPoReview/images/katinatlogo.jpg');
+    setCompanyLogo('');
+    // Remove from localStorage
     localStorage.removeItem('companyLogo');
-    window.dispatchEvent(new Event('logoChanged'));
+    console.log('✅ Company logo removed from localStorage');
   };
 
   const handleDocumentUpload = (e) => {
@@ -1077,44 +1187,88 @@ const EmployerProfile = () => {
       }
     }
   };
-
   return (
     <DashboardLayout role="employer" key={language}>
       <ProfileContainer>
-        <PageHeader>
-          <PageTitleGroup>
-            <PageIconBox>
-              <Building2 />
-            </PageIconBox>
-            <PageTitleText>
-              <h1>{language === 'vi' ? 'Hồ Sơ Công Ty' : 'Company Profile'}</h1>
-              <p>{language === 'vi' ? 'Quản lý thông tin công ty' : 'Manage your company information'}</p>
-            </PageTitleText>
-          </PageTitleGroup>
-          
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={isEditing ? handleCancel : () => setIsEditing(true)}
-            style={{
-              padding: '12px 24px',
-              borderRadius: '12px',
-              background: isEditing ? '#6B7280' : '#1e40af',
-              color: 'white',
-              border: 'none',
-              fontWeight: '700',
-              fontSize: '15px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              cursor: 'pointer',
-              boxShadow: isEditing ? 'none' : '0 4px 12px rgba(30, 64, 175, 0.2)'
-            }}
-          >
-            <Edit3 size={18} />
-            {isEditing ? (language === 'vi' ? 'Hủy' : 'Cancel') : (language === 'vi' ? 'Chỉnh Sửa' : 'Edit')}
-          </motion.button>
-        </PageHeader>
+        {!user || !hasLoadedOnce ? (
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            height: '400px',
+            flexDirection: 'column',
+            gap: '16px'
+          }}>
+            <div style={{ 
+              width: '40px', 
+              height: '40px', 
+              border: '4px solid #E8EFFF', 
+              borderTop: '4px solid #1e40af', 
+              borderRadius: '50%', 
+              animation: 'spin 1s linear infinite' 
+            }}></div>
+            <p style={{ color: '#6B7280', fontSize: '16px' }}>
+              {!user ? 
+                (language === 'vi' ? 'Đang xác thực...' : 'Authenticating...') :
+                (language === 'vi' ? 'Đang tải hồ sơ...' : 'Loading profile...')
+              }
+            </p>
+          </div>
+        ) : (
+          <>
+            <PageHeader>
+              {isOfflineMode && (
+                <div style={{
+                  position: 'absolute',
+                  top: '-40px',
+                  left: '0',
+                  right: '0',
+                  background: '#FEF3C7',
+                  color: '#92400E',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  textAlign: 'center',
+                  border: '1px solid #FCD34D',
+                  marginBottom: '16px'
+                }}>
+                  ⚠️ {language === 'vi' ? 'Chế độ offline - Dữ liệu được lưu cục bộ' : 'Offline mode - Data saved locally'}
+                </div>
+              )}
+              <PageTitleGroup>
+                <PageIconBox>
+                  <Building2 />
+                </PageIconBox>
+                <PageTitleText>
+                  <h1>{language === 'vi' ? 'Hồ Sơ Công Ty' : 'Company Profile'}</h1>
+                  <p>{language === 'vi' ? 'Quản lý thông tin công ty' : 'Manage your company information'}</p>
+                </PageTitleText>
+              </PageTitleGroup>
+              
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={isEditing ? handleCancel : () => setIsEditing(true)}
+                style={{
+                  padding: '12px 24px',
+                  borderRadius: '12px',
+                  background: isEditing ? '#6B7280' : '#1e40af',
+                  color: 'white',
+                  border: 'none',
+                  fontWeight: '700',
+                  fontSize: '15px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  boxShadow: isEditing ? 'none' : '0 4px 12px rgba(30, 64, 175, 0.2)'
+                }}
+              >
+                <Edit3 size={18} />
+                {isEditing ? (language === 'vi' ? 'Hủy' : 'Cancel') : (language === 'vi' ? 'Chỉnh Sửa' : 'Edit')}
+              </motion.button>
+            </PageHeader>
 
         <ProfileContent>
           <SidePanel
@@ -1129,7 +1283,7 @@ const EmployerProfile = () => {
                 ) : (
                   <Building2 size={64} color="white" />
                 )}
-                {companyLogo && companyLogo !== '/OpPoReview/images/katinatlogo.jpg' && (
+                {companyLogo && isEditing && (
                   <DeleteLogoButton
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
@@ -1138,18 +1292,19 @@ const EmployerProfile = () => {
                     <X />
                   </DeleteLogoButton>
                 )}
-                <UploadButton
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Camera />
-                  <input type="file" accept="image/*" onChange={handleLogoUpload} />
-                </UploadButton>
+                {isEditing && (
+                  <UploadButton
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Camera />
+                    <input type="file" accept="image/*" onChange={handleLogoUpload} />
+                  </UploadButton>
+                )}
               </LogoUploadArea>
-              <CompanyName>{formData.companyName}</CompanyName>
-              <CompanyType>{formData.industry}</CompanyType>
+              <CompanyName>{formData.companyName || (language === 'vi' ? 'Chưa cập nhật tên công ty' : 'Company name not set')}</CompanyName>
+              <CompanyType>{formData.industry || (language === 'vi' ? 'Chưa cập nhật lĩnh vực' : 'Industry not set')}</CompanyType>
             </CompanyLogoCard>
-
             <StatsCard>
               <StatGrid>
                 <StatItem>
@@ -1204,7 +1359,7 @@ const EmployerProfile = () => {
                       name="companyName"
                       value={formData.companyName}
                       onChange={handleChange}
-                      placeholder={language === 'vi' ? 'Nhập tên công ty' : 'Enter company name'}
+                      placeholder={language === 'vi' ? 'Ví dụ: Công ty TNHH ABC' : 'e.g., ABC Company Ltd'}
                       disabled={!isEditing}
                     />
                   </InputWrapper>
@@ -1222,7 +1377,7 @@ const EmployerProfile = () => {
                       type="email"
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder="email@company.com"
+                      placeholder="contact@company.com"
                       disabled={!isEditing}
                     />
                   </InputWrapper>
@@ -1237,13 +1392,12 @@ const EmployerProfile = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      placeholder="0123456789"
+                      placeholder={language === 'vi' ? 'Ví dụ: 028 1234 5678' : 'e.g., 028 1234 5678'}
                       disabled={!isEditing}
                     />
                   </InputWrapper>
                 </FormGroup>
               </FormRow>
-
               <FormRow $columns="1fr">
                 <FormGroup>
                   <Label htmlFor="address">{language === 'vi' ? 'Địa chỉ' : 'Address'}</Label>
@@ -1254,7 +1408,7 @@ const EmployerProfile = () => {
                       name="address"
                       value={formData.address}
                       onChange={handleChange}
-                      placeholder={language === 'vi' ? 'Địa chỉ công ty' : 'Company address'}
+                      placeholder={language === 'vi' ? 'Ví dụ: 123 Đường ABC, Quận 1, TP.HCM' : 'e.g., 123 ABC Street, District 1, HCMC'}
                       disabled={!isEditing}
                     />
                   </InputWrapper>
@@ -1271,7 +1425,7 @@ const EmployerProfile = () => {
                       name="website"
                       value={formData.website}
                       onChange={handleChange}
-                      placeholder="https://yourwebsite.com"
+                      placeholder={language === 'vi' ? 'Ví dụ: https://congty.vn' : 'e.g., https://company.com'}
                       disabled={!isEditing}
                     />
                   </InputWrapper>
@@ -1288,22 +1442,22 @@ const EmployerProfile = () => {
                       name="industry"
                       value={formData.industry}
                       onChange={handleChange}
-                      placeholder={language === 'vi' ? 'Lĩnh vực hoạt động' : 'Business industry'}
+                      placeholder={language === 'vi' ? 'Ví dụ: F&B, Công nghệ, Bán lẻ' : 'e.g., F&B, Technology, Retail'}
                       disabled={!isEditing}
                     />
                   </InputWrapper>
                 </FormGroup>
 
                 <FormGroup>
-                  <Label htmlFor="size">{language === 'vi' ? 'Quy mô' : 'Company size'}</Label>
+                  <Label htmlFor="companySize">{language === 'vi' ? 'Quy mô' : 'Company size'}</Label>
                   <InputWrapper>
                     <Users className="input-icon" />
                     <Input
-                      id="size"
-                      name="size"
-                      value={formData.size}
+                      id="companySize"
+                      name="companySize"
+                      value={formData.companySize}
                       onChange={handleChange}
-                      placeholder={language === 'vi' ? 'Số lượng nhân viên' : 'Number of employees'}
+                      placeholder={language === 'vi' ? 'Ví dụ: 1-10, 11-50, 51-200 nhân viên' : 'e.g., 1-10, 11-50, 51-200 employees'}
                       disabled={!isEditing}
                     />
                   </InputWrapper>
@@ -1318,10 +1472,59 @@ const EmployerProfile = () => {
                       name="foundedYear"
                       value={formData.foundedYear}
                       onChange={handleChange}
-                      placeholder="2015"
+                      placeholder={language === 'vi' ? 'Ví dụ: 2020' : 'e.g., 2020'}
                       disabled={!isEditing}
                     />
                   </InputWrapper>
+                </FormGroup>
+              </FormRow>
+              <FormRow $columns="1fr 1fr">
+                <FormGroup>
+                  <Label htmlFor="taxCode">{language === 'vi' ? 'Mã số thuế' : 'Tax Code'}</Label>
+                  <InputWrapper>
+                    <FileText className="input-icon" />
+                    <Input
+                      id="taxCode"
+                      name="taxCode"
+                      value={formData.taxCode}
+                      onChange={handleChange}
+                      placeholder={language === 'vi' ? 'Mã số thuế công ty' : 'Company tax code'}
+                      disabled={!isEditing || isLockedFields.taxCode}
+                      style={{
+                        backgroundColor: isLockedFields.taxCode ? '#F3F4F6' : undefined,
+                        cursor: isLockedFields.taxCode ? 'not-allowed' : undefined
+                      }}
+                    />
+                  </InputWrapper>
+                  {isLockedFields.taxCode && (
+                    <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>
+                      {language === 'vi' ? 'Mã số thuế đã được khóa sau lần đầu thiết lập' : 'Tax code is locked after first setup'}
+                    </p>
+                  )}
+                </FormGroup>
+
+                <FormGroup>
+                  <Label htmlFor="businessLicense">{language === 'vi' ? 'Số giấy phép kinh doanh' : 'Business License Number'}</Label>
+                  <InputWrapper>
+                    <FileText className="input-icon" />
+                    <Input
+                      id="businessLicense"
+                      name="businessLicense"
+                      value={formData.businessLicense}
+                      onChange={handleChange}
+                      placeholder={language === 'vi' ? 'Số giấy phép kinh doanh' : 'Business license number'}
+                      disabled={!isEditing || isLockedFields.businessLicense}
+                      style={{
+                        backgroundColor: isLockedFields.businessLicense ? '#F3F4F6' : undefined,
+                        cursor: isLockedFields.businessLicense ? 'not-allowed' : undefined
+                      }}
+                    />
+                  </InputWrapper>
+                  {isLockedFields.businessLicense && (
+                    <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>
+                      {language === 'vi' ? 'Số giấy phép đã được khóa sau lần đầu thiết lập' : 'Business license is locked after first setup'}
+                    </p>
+                  )}
                 </FormGroup>
               </FormRow>
 
@@ -1333,7 +1536,7 @@ const EmployerProfile = () => {
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
-                    placeholder={language === 'vi' ? 'Giới thiệu về công ty...' : 'Introduce your company...'}
+                    placeholder={language === 'vi' ? 'Mô tả về công ty, sản phẩm/dịch vụ, văn hóa làm việc...' : 'Describe your company, products/services, work culture...'}
                     rows={5}
                     disabled={!isEditing}
                   />
@@ -1346,12 +1549,12 @@ const EmployerProfile = () => {
                   onClick={handleSave}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.98 }}
+                  disabled={isLoadingProfile}
                 >
                   <Save />
-                  {language === 'vi' ? 'Lưu Thay Đổi' : 'Save Changes'}
+                  {isLoadingProfile ? (language === 'vi' ? 'Đang lưu...' : 'Saving...') : (language === 'vi' ? 'Lưu Thay Đổi' : 'Save Changes')}
                 </SaveButton>
               )}
-
               {/* Documents Section - Combined Verification & Regular Documents */}
               <DocumentsSection>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
@@ -1436,7 +1639,6 @@ const EmployerProfile = () => {
                           </DocumentActions>
                         </VerificationDocumentCard>
                       ))}
-
                       {/* Regular Documents */}
                       {documents.map((doc) => (
                         <DocumentCard
@@ -1486,10 +1688,17 @@ const EmployerProfile = () => {
             </form>
           </MainPanel>
         </ProfileContent>
+        </>
+        )}
       </ProfileContainer>
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </DashboardLayout>
   );
 };
 
 export default EmployerProfile;
-

@@ -5,6 +5,7 @@ import { Bell, Search, LogOut, User, Users, Briefcase, DollarSign, AlertCircle, 
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import candidateProfileService from '../services/candidateProfileService';
+import employerProfileService from '../services/employerProfileService';
 
 const NavbarContainer = styled.nav`
   height: 80px;
@@ -369,6 +370,7 @@ const Navbar = ({ showSearch = true }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationTab, setNotificationTab] = useState('all');
   const [candidateProfile, setCandidateProfile] = useState(null);
+  const [employerProfile, setEmployerProfile] = useState(null);
   const notificationRef = useRef(null);
 
   // Get notifications based on user role
@@ -498,6 +500,22 @@ const Navbar = ({ showSearch = true }) => {
     };
     
     fetchCandidateProfile();
+  }, [user]);
+  
+  // Fetch employer profile if user is an employer
+  useEffect(() => {
+    const fetchEmployerProfile = async () => {
+      if (user?.role === 'employer') {
+        try {
+          const profile = await employerProfileService.getMyProfile();
+          setEmployerProfile(profile);
+        } catch (error) {
+          console.error('Error fetching employer profile:', error);
+        }
+      }
+    };
+    
+    fetchEmployerProfile();
   }, [user]);
   
   // Close dropdown when clicking outside
@@ -655,7 +673,11 @@ const Navbar = ({ showSearch = true }) => {
         <UserMenu onClick={handleProfileClick}>
           <Avatar>
             {user?.role === 'employer' ? (
-              <img src={companyLogo} alt="Logo" style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
+              employerProfile?.companyLogo ? (
+                <img src={employerProfile.companyLogo} alt="Company Logo" style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
+              ) : (
+                <img src={companyLogo} alt="Logo" style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
+              )
             ) : user?.role === 'candidate' && candidateProfile?.profileImage ? (
               <img src={candidateProfile.profileImage} alt="Profile" style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
             ) : (
@@ -663,7 +685,7 @@ const Navbar = ({ showSearch = true }) => {
             )}
           </Avatar>
           <UserInfo>
-            <span>{user?.role === 'employer' ? 'Katinat Quận 8' : (candidateProfile?.fullName || user?.name || 'User')}</span>
+            <span>{user?.role === 'employer' ? (employerProfile?.companyName || 'Chưa cập nhật tên công ty') : (candidateProfile?.fullName || user?.name || 'User')}</span>
             <span>{getRoleTranslation(user?.role) || 'Role'}</span>
           </UserInfo>
         </UserMenu>

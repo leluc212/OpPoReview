@@ -1316,7 +1316,7 @@ const CandidateProfile = () => {
         } else {
           // Create new profile
           const newProfile = await candidateProfileService.createProfile(profileData);
-          console.log('✅ Profile created in DynamoDB');
+          console.log('✅ Profile created');
           
           // Update local state with returned data
           if (newProfile) {
@@ -1357,12 +1357,12 @@ const CandidateProfile = () => {
         
         setIsEditing(false);
         toast.success(
-          language === 'vi' ? 'Hồ sơ đã được lưu thành công vào DynamoDB!' : 'Profile saved successfully to DynamoDB!',
+          language === 'vi' ? 'Hồ sơ đã được lưu thành công!' : 'Profile saved successfully!',
           language === 'vi' ? 'Thành công' : 'Success'
         );
         
       } catch (error) {
-        console.error('❌ Error saving to DynamoDB:', error);
+        console.error('❌ Error saving:', error);
         toast.error(
           language === 'vi' 
             ? `Lỗi khi lưu vào DynamoDB: ${error.message}. Vui lòng thử lại sau.` 

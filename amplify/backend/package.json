@@ -6,6 +6,7 @@
   "type": "commonjs",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.515.0",
-    "@aws-sdk/lib-dynamodb": "^3.515.0"
+    "@aws-sdk/lib-dynamodb": "^3.515.0",
+    "jsonwebtoken": "^9.0.3"
   }
 }

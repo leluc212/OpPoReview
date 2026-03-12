@@ -7,6 +7,7 @@ import StatsCard from '../../components/StatsCard';
 import StatusBadge from '../../components/StatusBadge';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
+import employerProfileService from '../../services/employerProfileService';
 import {
   Briefcase,
   Users,
@@ -433,6 +434,36 @@ const EmployerDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [employerProfile, setEmployerProfile] = useState(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
+  // Load employer profile
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!user) return;
+      
+      try {
+        setIsLoadingProfile(true);
+        const profile = await employerProfileService.getMyProfile();
+        setEmployerProfile(profile);
+      } catch (error) {
+        console.error('Error loading employer profile:', error);
+        // Fallback to localStorage
+        const savedProfile = localStorage.getItem('employerProfile');
+        if (savedProfile) {
+          try {
+            setEmployerProfile(JSON.parse(savedProfile));
+          } catch (e) {
+            console.error('Error parsing saved profile:', e);
+          }
+        }
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    };
+    
+    loadProfile();
+  }, [user]);
 
   const getRecentApplications = () => [
     { 
@@ -490,6 +521,22 @@ const EmployerDashboard = () => {
     return language === 'vi' ? 'Chào buổi tối' : 'Good evening';
   };
 
+  // Get company name from profile or fallback
+  const getCompanyName = () => {
+    if (employerProfile?.companyName) {
+      return employerProfile.companyName;
+    }
+    return language === 'vi' ? 'Nhà tuyển dụng' : 'Employer';
+  };
+
+  // Get company logo from profile or fallback
+  const getCompanyLogo = () => {
+    if (employerProfile?.companyLogo) {
+      return employerProfile.companyLogo;
+    }
+    return '/OpPoReview/images/katinatlogo.jpg';
+  };
+
   return (
     <DashboardLayout role="employer" key={language}>
       <DashboardContainer>
@@ -500,8 +547,8 @@ const EmployerDashboard = () => {
           transition={{ duration: 0.5 }}
         >
           <WelcomeContent>
-            <h1>{getGreeting()}, {user?.role === 'employer' ? (language === 'vi' ? 'Katinat Quận 8' : 'Katinat District 8') : (user?.name || 'User')}! 👋</h1>
-            <p>{language === 'vi' ? 'Hôm nay bạn có 3 ứng viên mới' : 'You have 3 new candidates'}</p>
+            <h1>{getGreeting()}, {getCompanyName()}! 👋</h1>
+            <p>{language === 'vi' ? 'Hôm nay bạn có 3 ứng viên mới' : 'You have 3 new candidates today'}</p>
             <QuickActions>
               <ActionButton
                 $variant="primary"
@@ -518,12 +565,12 @@ const EmployerDashboard = () => {
                 onClick={() => navigate('/employer/profile')}
               >
                 <FileText />
-                {language === 'vi' ? 'Xem Hồ Sơ' : 'View Applications'}
+                {language === 'vi' ? 'Xem Hồ Sơ' : 'View Profile'}
               </ActionButton>
             </QuickActions>
           </WelcomeContent>
           <IllustrationContainer>
-            <img src="/OpPoReview/images/katinatlogo.jpg" alt="Katinat Logo" />
+            <img src={getCompanyLogo()} alt={getCompanyName()} />
           </IllustrationContainer>
         </WelcomeBanner>
 
