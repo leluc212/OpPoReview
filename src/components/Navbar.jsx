@@ -422,6 +422,7 @@ const Navbar = ({ showSearch = true }) => {
           color: '#1e40af',
           title: 'Ứng viên mới ứng tuyển',
           message: 'Nguyễn Hùng Anh đã ứng tuyển',
+          jobTitle: 'Nhân viên Bán Hàng',
           time: '5 phút trước',
           unread: true
         },
@@ -431,6 +432,7 @@ const Navbar = ({ showSearch = true }) => {
           color: '#1e40af',
           title: 'Ứng viên mới ứng tuyển',
           message: 'Trương Tú Phương đã ứng tuyển',
+          jobTitle: 'Nhân viên Hành Chính',
           time: '15 phút trước',
           unread: true
         },
@@ -655,7 +657,12 @@ const Navbar = ({ showSearch = true }) => {
                       </NotificationIcon>
                       <NotificationContent>
                         <div className="title">{notification.title}</div>
-                        <div className="message">{notification.message}</div>
+                        <div className="message">
+                          {notification.message}
+                          {notification.jobTitle && (
+                            <span> — {notification.jobTitle}</span>
+                          )}
+                        </div>
                         <div className="time">{notification.time}</div>
                       </NotificationContent>
                       {notification.unread && <NotificationDot />}

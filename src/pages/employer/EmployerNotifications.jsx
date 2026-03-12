@@ -401,6 +401,7 @@ const getNotifications = (language) => ([
     type: 'application',
     title: language === 'vi' ? 'Ứng viên mới ứng tuyển' : 'New candidate application',
     message: language === 'vi' ? 'Nguyễn Hùng Anh đã ứng tuyển' : 'Nguyen Van A has applied',
+    jobTitle: language === 'vi' ? 'Nhân viên Bán Hàng' : 'Sales Staff',
     time: language === 'vi' ? '5 phút trước' : '5 minutes ago',
     read: false,
     isQuickJob: true,
@@ -411,6 +412,7 @@ const getNotifications = (language) => ([
     type: 'application',
     title: language === 'vi' ? 'Ứng viên mới ứng tuyển' : 'New candidate application',
     message: language === 'vi' ? 'Trương Tú Phương đã ứng tuyển' : 'Tran Thi B has applied',
+    jobTitle: language === 'vi' ? 'Nhân viên Hành Chính' : 'Administrative Staff',
     time: language === 'vi' ? '15 phút trước' : '15 minutes ago',
     read: false,
     isQuickJob: true,
@@ -421,6 +423,7 @@ const getNotifications = (language) => ([
     type: 'application',
     title: language === 'vi' ? 'Nhận hồ sơ ứng tuyển' : 'Application received',
     message: language === 'vi' ? 'Lê Văn Minh đã ứng tuyển' : 'Le Van Minh has applied',
+    jobTitle: language === 'vi' ? 'Kỹ sư Phần mềm' : 'Software Engineer',
     time: language === 'vi' ? '1 giờ trước' : '1 hour ago',
     read: false,
     isQuickJob: true,
@@ -546,7 +549,12 @@ const EmployerNotifications = () => {
                 
                 <NotificationContent>
                   <NotificationTitle>{notification.title}</NotificationTitle>
-                  <NotificationMessage>{notification.message}</NotificationMessage>
+                  <NotificationMessage>
+                    {notification.message}
+                    {notification.jobTitle && (
+                      <span> — {notification.jobTitle}</span>
+                    )}
+                  </NotificationMessage>
                   <NotificationMeta>
                     <div className="meta-item">
                       <Clock />
