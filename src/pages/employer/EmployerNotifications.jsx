@@ -400,55 +400,41 @@ const getNotifications = (language) => ([
     id: 1,
     type: 'application',
     title: language === 'vi' ? 'Ứng viên mới ứng tuyển' : 'New candidate application',
-    message: language === 'vi' ? 'Nguyễn Hùng Anh vị trí Nhân viên phục vụ ca tối. Hồ sơ đang chờ xem xét.' : 'Nguyen Van A applied for Evening Shift Server position. Application pending review.',
+    message: language === 'vi' ? 'Nguyễn Hùng Anh đã ứng tuyển' : 'Nguyen Van A has applied',
     time: language === 'vi' ? '5 phút trước' : '5 minutes ago',
     read: false,
+    isQuickJob: true,
     icon: UserPlus
   },
   {
     id: 2,
     type: 'application',
     title: language === 'vi' ? 'Ứng viên mới ứng tuyển' : 'New candidate application',
-    message: language === 'vi' ? 'Trương Tú Phương đã ứng tuyển vị trí Nhân viên pha chế. Kinh nghiệm 2 năm tại Highlands Coffee.' : 'Tran Thi B applied for Barista position. 2 years experience at Highlands Coffee.',
+    message: language === 'vi' ? 'Trương Tú Phương đã ứng tuyển' : 'Tran Thi B has applied',
     time: language === 'vi' ? '15 phút trước' : '15 minutes ago',
     read: false,
+    isQuickJob: true,
     icon: UserPlus
   },
   {
     id: 3,
-    type: 'rating',
-    title: language === 'vi' ? 'Đánh giá nhân viên' : 'Rate employee',
-    message: language === 'vi' ? 'Phạm Lê Duy đã hoàn thành ca làm việc ngày 10/03/2026. Vui lòng đánh giá nhân viên để hoàn tất quy trình.' : 'Pham Thi D completed work shift on 10/03/2026. Please rate the employee to complete the process.',
-    time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
+    type: 'application',
+    title: language === 'vi' ? 'Nhận hồ sơ ứng tuyển' : 'Application received',
+    message: language === 'vi' ? 'Lê Văn Minh đã ứng tuyển' : 'Le Van Minh has applied',
+    time: language === 'vi' ? '1 giờ trước' : '1 hour ago',
     read: false,
-    icon: Star
+    isQuickJob: true,
+    icon: UserPlus
   },
   {
     id: 4,
     type: 'system',
-    title: language === 'vi' ? 'Tin tuyển dụng sắp hết hạn' : 'Job post expiring soon',
-    message: language === 'vi' ? 'Tin tuyển dụng "Nhân viên Thu Ngân" sẽ hết hạn vào 17/03/2026' : 'The "Cashier" job post will expire on 17/03/2026',
-    time: language === 'vi' ? '3 giờ trước' : '3 hours ago',
-    read: true,
-    icon: AlertCircle
-  },
-  {
-    id: 5,
-    type: 'application',
-    title: language === 'vi' ? 'Tin tuyển dụng được quan tâm' : 'Job post getting attention',
-    message: language === 'vi' ? '12 ứng viên mới đã xem tin tuyển dụng "Nhân viên phục vụ" của bạn trong 24 giờ qua.' : '12 new candidates viewed your "Server" job post in the last 24 hours.',
-    time: language === 'vi' ? '4 giờ trước' : '4 hours ago',
-    read: true,
-    icon: Eye
-  },
-  {
-    id: 6,
-    type: 'system',
-    title: language === 'vi' ? 'Tin tuyển dụng đã được duyệt' : 'Job post approved',
-    message: language === 'vi' ? 'Tin tuyển dụng "Nhân viên bếp" đã được admin phê duyệt và đang hiển thị công khai.' : 'Job post "Kitchen Staff" has been approved by admin and is now publicly visible.',
+    title: language === 'vi' ? 'Gói sắp hết hạn' : 'Package expiring soon',
+    message: language === 'vi' ? 'Gói Banner Nổi Bật của bạn sẽ hết hạn vào 20/03/2026' : 'Your Featured Banner package will expire on 20/03/2026',
     time: language === 'vi' ? '1 ngày trước' : '1 day ago',
-    read: true,
-    icon: CheckCircle
+    read: false,
+    isQuickJob: false,
+    icon: AlertCircle
   }
 ]);
 
@@ -475,6 +461,8 @@ const EmployerNotifications = () => {
   ];
 
   const filteredNotifications = notifications.filter(notification => {
+    // Show quick job notifications and system notifications (like package expiring)
+    if (!notification.isQuickJob && notification.type !== 'system') return false;
     if (activeTab === 'all') return true;
     if (activeTab === 'unread') return !notification.read;
     return notification.type === activeTab;

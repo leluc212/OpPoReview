@@ -407,10 +407,12 @@ function CandidateNotifications() {
       type: 'application',
       icon: Eye,
       color: '#1e40af',
-      title: language === 'vi' ? 'Nhà tuyển dụng đã xem hồ sơ' : 'Employer viewed profile',
+      // Quick job (system-internal) notification — do not show "Quick Job" label or mention interviews
+      isQuickJob: true,
+      title: language === 'vi' ? 'Nhà tuyển dụng đã xem hồ sơ' : 'Employer viewed your application',
       message: language === 'vi'
-        ? 'Highlands Coffee đã xem hồ sơ ứng tuyển Nhân viên pha chế của bạn. Hãy chuẩn bị sẵn sàng cho cuộc phỏng vấn.'
-        : 'Highlands Coffee viewed your Barista application. Be ready for the interview.',
+        ? 'Highlands Coffee đã xem hồ sơ ứng tuyển của bạn.'
+        : 'Highlands Coffee viewed your application.',
       time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
       unread: true
     },
@@ -419,10 +421,12 @@ function CandidateNotifications() {
       type: 'success',
       icon: CheckCircle,
       color: '#10B981',
+      // Quick job (system-internal) notification (accepted)
+      isQuickJob: true,
       title: language === 'vi' ? 'Hồ sơ được chấp nhận' : 'Application accepted',
       message: language === 'vi'
-        ? 'Chúc mừng! Hồ sơ ứng tuyển Nhân viên phục vụ tại Katinat Quận 8 đã được chấp nhận. Nhà tuyển dụng sẽ liên hệ với bạn sớm.'
-        : 'Congratulations! Your Server application at Katinat District 8 has been accepted. The employer will contact you soon.',
+        ? 'Hồ sơ của bạn tại Katinat Q8 đã được chấp nhận. Nhà tuyển dụng sẽ liên hệ.'
+        : 'Your application at Katinat Q8 has been accepted. Employer will contact you.',
       time: language === 'vi' ? '1 ngày trước' : '1 day ago',
       unread: false
     },
@@ -431,10 +435,11 @@ function CandidateNotifications() {
       type: 'application',
       icon: Briefcase,
       color: '#1e40af',
+      isQuickJob: false,
       title: language === 'vi' ? 'Công việc phù hợp với bạn' : 'Jobs matching your profile',
       message: language === 'vi'
-        ? 'Có 5 công việc mới phù hợp với kỹ năng Pha chế, Phục vụ của bạn tại khu vực Quận 1, Quận 3.'
-        : '5 new jobs match your Barista, Server skills in District 1, District 3 area.',
+        ? 'Có 5 công việc phù hợp với kỹ năng của bạn tại Quận 1 và Quận 3.'
+        : '5 new jobs match your skills in District 1 and District 3.',
       time: language === 'vi' ? '3 giờ trước' : '3 hours ago',
       unread: true
     },
@@ -443,10 +448,11 @@ function CandidateNotifications() {
       type: 'success',
       icon: CheckCircle,
       color: '#10B981',
+      isQuickJob: false,
       title: language === 'vi' ? 'Hồ sơ ứng tuyển được duyệt' : 'Application approved',
       message: language === 'vi'
-        ? 'The Coffee House đã duyệt hồ sơ ứng tuyển ca tối của bạn. Bạn có thể liên hệ với nhà tuyển dụng qua tin nhắn để xác nhận lịch làm việc.'
-        : 'The Coffee House approved your evening shift application. You can contact the employer via message to confirm the work schedule.',
+        ? 'The Coffee House đã duyệt hồ sơ ứng tuyển ca tối của bạn. Liên hệ nhà tuyển dụng để xác nhận.'
+        : 'The Coffee House approved your application. Contact the employer to confirm.',
       time: language === 'vi' ? '3 ngày trước' : '3 days ago',
       unread: false
     },
@@ -493,13 +499,16 @@ function CandidateNotifications() {
     ));
   };
 
+  // Only show quick job notifications
+  const quickJobNotifications = notifications.filter(n => n.isQuickJob);
+  
   const filteredNotifications = filter === 'all'
-    ? notifications
+    ? quickJobNotifications
     : filter === 'unread'
-      ? notifications.filter(n => n.unread)
-      : notifications.filter(n => n.type === filter);
+      ? quickJobNotifications.filter(n => n.unread)
+      : quickJobNotifications.filter(n => n.type === filter);
 
-  const unreadCount = notifications.filter(n => n.unread).length;
+  const unreadCount = quickJobNotifications.filter(n => n.unread).length;
 
   return (
     <DashboardLayout role="candidate" showSearch={false} key={language}>
@@ -631,7 +640,7 @@ function CandidateNotifications() {
                     <span className="stat-label">{language === 'vi' ? 'Thông báo hôm nay' : 'Today\'s notifications'}</span>
                     <Bell />
                   </div>
-                  <div className="stat-value">{notifications.filter(n => n.time.includes(language === 'vi' ? 'giờ trước' : 'hours ago')).length}</div>
+                  <div className="stat-value">{quickJobNotifications.filter(n => n.time.includes(language === 'vi' ? 'giờ trước' : 'hours ago')).length}</div>
                 </StatItem>
 
                 <StatItem $color="#10B981">
@@ -639,15 +648,15 @@ function CandidateNotifications() {
                     <span className="stat-label">{language === 'vi' ? 'Lượt xem hồ sơ' : 'Profile views'}</span>
                     <Eye />
                   </div>
-                  <div className="stat-value">{notifications.filter(n => n.type === 'application' && (n.title.includes('xem') || n.title.includes('viewed'))).length}</div>
+                  <div className="stat-value">{quickJobNotifications.filter(n => n.type === 'application' && (n.title.includes('xem') || n.title.includes('viewed'))).length}</div>
                 </StatItem>
 
                 <StatItem $color="#10B981">
                   <div className="stat-header">
-                    <span className="stat-label">{language === 'vi' ? 'Công việc phù hợp' : 'Matching jobs'}</span>
-                    <Briefcase />
+                    <span className="stat-label">{language === 'vi' ? 'Hồ sơ được chấp nhận' : 'Accepted applications'}</span>
+                    <CheckCircle />
                   </div>
-                  <div className="stat-value">{notifications.filter(n => n.title.includes('phù hợp') || n.title.includes('matching')).length}</div>
+                  <div className="stat-value">{quickJobNotifications.filter(n => n.type === 'success' && n.title.includes(language === 'vi' ? 'chấp nhận' : 'accepted')).length}</div>
                 </StatItem>
               </QuickStats>
             </Card>

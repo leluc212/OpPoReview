@@ -482,15 +482,14 @@ const EmployerSupport = () => {
                   <div className="ci-icon"><Phone /></div>
                   <div className="ci-info">
                     <h4>Hotline</h4>
-                    <p>1900 xxxx</p>
+                    <p>0563 518 922</p>
                   </div>
                 </ContactItem>
                 <ContactItem>
                   <div className="ci-icon"><Clock /></div>
                   <div className="ci-info">
                     <h4>{language === 'vi' ? 'Giờ làm việc' : 'Working hours'}</h4>
-                    <p>{language === 'vi' ? 'T2 - T6: 8:00 - 17:00' : 'Mon - Fri: 8:00 - 17:00'}</p>
-                    <p>{language === 'vi' ? 'T7: 8:00 - 12:00' : 'Sat: 8:00 - 12:00'}</p>
+                    <p>{language === 'vi' ? 'T2 - T7: 7h - 23h' : 'Mon - Sat: 7:00 - 23:00'}</p>
                   </div>
                 </ContactItem>
               </ContactList>

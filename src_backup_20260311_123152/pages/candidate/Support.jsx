@@ -803,7 +803,7 @@ function Support() {
                 </div>
                 <div className="info">
                   <div className="label">{language === 'vi' ? 'Điện Thoại' : 'Phone'}</div>
-                  <div className="value">1900 xxxx</div>
+                  <div className="value">0563 518 922</div>
                 </div>
               </ContactInfo>
 
@@ -817,7 +817,7 @@ function Support() {
                 </div>
                 <div className="info">
                   <div className="label">{language === 'vi' ? 'Giờ Làm Việc' : 'Working Hours'}</div>
-                  <div className="value">{language === 'vi' ? '24/7 - Mọi lúc' : '24/7 - Anytime'}</div>
+                  <div className="value">{language === 'vi' ? '7h - 23h' : '24/7 - Anytime'}</div>
                 </div>
               </ContactInfo>
               

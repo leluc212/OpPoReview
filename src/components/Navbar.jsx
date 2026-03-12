@@ -417,7 +417,7 @@ const Navbar = ({ showSearch = true }) => {
           icon: User,
           color: '#1e40af',
           title: 'Ứng viên mới ứng tuyển',
-          message: 'Nguyễn Hùng Anh đã ứng tuyển vị trí Nhân viên phục vụ ca tối',
+          message: 'Nguyễn Hùng Anh đã ứng tuyển',
           time: '5 phút trước',
           unread: true
         },
@@ -426,39 +426,34 @@ const Navbar = ({ showSearch = true }) => {
           icon: User,
           color: '#1e40af',
           title: 'Ứng viên mới ứng tuyển',
-          message: 'Trương Tú Phương đã ứng tuyển vị trí Nhân viên pha chế',
+          message: 'Trương Tú Phương đã ứng tuyển',
           time: '15 phút trước',
           unread: true
         },
         {
           id: 3,
           icon: AlertCircle,
-          color: '#F59E0B',
-          title: 'Đánh giá nhân viên',
-          message: 'Phạm Lê Duy đã hoàn thành ca làm việc. Vui lòng đánh giá',
-          time: '2 giờ trước',
+          color: '#f59e0b',
+          title: 'Gói sắp hết hạn',
+          message: 'Gói Banner Nổi Bật của bạn sẽ hết hạn vào 20/03/2026',
+          time: '1 ngày trước',
           unread: true
         },
-        {
-          id: 4,
-          icon: AlertCircle,
-          color: '#ef4444',
-          title: 'Tin tuyển dụng sắp hết hạn',
-          message: 'Tin "Nhân viên Thu Ngân" sẽ hết hạn vào 27/03/2026',
-          time: '3 giờ trước',
-          unread: false
-        },
+        // Rating notification removed from navbar
       ];
     } else if (user?.role === 'candidate') {
+      // Only show quick-job related application/receive notifications
       return [
         {
           id: 1,
           icon: Briefcase,
           color: '#1e40af',
           title: 'Nhà tuyển dụng đã xem hồ sơ',
-          message: 'Highlands Coffee đã xem hồ sơ ứng tuyển Nhân viên pha chế của bạn',
+          message: 'Highlands Coffee đã xem hồ sơ ứng tuyển của bạn',
           time: '2 giờ trước',
-          unread: true
+          unread: true,
+          isQuickJob: true,
+          type: 'application'
         },
         {
           id: 2,
@@ -467,26 +462,10 @@ const Navbar = ({ showSearch = true }) => {
           title: 'Hồ sơ được chấp nhận',
           message: 'Hồ sơ ứng tuyển tại Katinat Quận 8 đã được chấp nhận',
           time: '1 ngày trước',
-          unread: true
-        },
-        {
-          id: 3,
-          icon: Briefcase,
-          color: '#1e40af',
-          title: 'Công việc phù hợp với bạn',
-          message: 'Có 5 công việc mới phù hợp với kỹ năng của bạn',
-          time: '3 giờ trước',
-          unread: true
-        },
-        {
-          id: 4,
-          icon: AlertCircle,
-          color: '#10B981',
-          title: 'Hồ sơ ứng tuyển được duyệt',
-          message: 'The Coffee House đã duyệt hồ sơ ứng tuyển ca tối của bạn',
-          time: '3 ngày trước',
-          unread: false
-        },
+          unread: true,
+          isQuickJob: true,
+          type: 'success'
+        }
       ];
     }
     return [];

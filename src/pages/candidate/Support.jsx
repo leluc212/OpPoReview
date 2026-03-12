@@ -341,6 +341,7 @@ const ContactInfo = styled(motion.div)`
   
   .info {
     flex: 1;
+    min-width: 0;
     
     .label {
       font-size: 12px;
@@ -353,6 +354,8 @@ const ContactInfo = styled(motion.div)`
       font-size: 15px;
       font-weight: 700;
       color: ${props => props.theme.colors.text};
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
   }
 `;
@@ -399,6 +402,9 @@ const InfoBox = styled(motion.div)`
     color: ${props => props.theme.colors.textLight};
     line-height: 1.7;
     margin-left: 32px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 `;
 
@@ -803,7 +809,7 @@ function Support() {
                 </div>
                 <div className="info">
                   <div className="label">{language === 'vi' ? 'Điện Thoại' : 'Phone'}</div>
-                  <div className="value">1900 xxxx</div>
+                  <div className="value">0563 518 922</div>
                 </div>
               </ContactInfo>
 
@@ -817,7 +823,7 @@ function Support() {
                 </div>
                 <div className="info">
                   <div className="label">{language === 'vi' ? 'Giờ Làm Việc' : 'Working Hours'}</div>
-                  <div className="value">{language === 'vi' ? '24/7 - Mọi lúc' : '24/7 - Anytime'}</div>
+                  <div className="value">{language === 'vi' ? '7h - 23h' : '24/7 - Anytime'}</div>
                 </div>
               </ContactInfo>
               

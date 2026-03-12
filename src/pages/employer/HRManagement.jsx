@@ -3088,26 +3088,36 @@ const HRManagement = () => {
                             <StaffPosition>{staff.position}</StaffPosition>
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
-                            {isCurrentlyWorking(staff.shift) && !staff.pendingRating ? (
-                              <StaffStatus $status="active">
-                                {language === 'vi' ? 'Đang làm' : 'Working'}
-                              </StaffStatus>
-                            ) : staff.pendingRating ? (
-                              <StaffStatus $status="pending">
-                                {language === 'vi' ? 'Chờ đánh giá' : 'Pending Review'}
-                              </StaffStatus>
-                            ) : (
-                              <StaffStatus $status={staff.status}>
-                                {staff.status === 'active' 
-                                  ? (language === 'vi' ? 'Đang làm' : 'Active')
-                                  : staff.status === 'completed'
-                                  ? (language === 'vi' ? 'Hoàn thành' : 'Completed')
-                                  : staff.status === 'pending_confirmation'
-                                  ? (language === 'vi' ? 'Chờ xác nhận' : 'Pending Confirm')
-                                  : staff.status === 'pending_change'
-                                  ? (language === 'vi' ? 'Chờ thay đổi' : 'Pending Change')
-                                  : (language === 'vi' ? 'Đang làm' : 'Active')}
-                              </StaffStatus>
+                            {/* Hide the small 'Đang làm' badge only when viewing the 'Đang làm' (working) tab.
+                                When viewing 'Chờ xác nhận', always show 'Chờ xác nhận' regardless of shift time. */}
+                            {staffTabFilter === 'working' ? null : (
+                              staffTabFilter === 'pending_confirm' ? (
+                                <StaffStatus $status="pending_confirmation">
+                                  {language === 'vi' ? 'Chờ xác nhận' : 'Pending Confirm'}
+                                </StaffStatus>
+                              ) : (
+                                isCurrentlyWorking(staff.shift) && !staff.pendingRating ? (
+                                  <StaffStatus $status="active">
+                                    {language === 'vi' ? 'Đang làm' : 'Working'}
+                                  </StaffStatus>
+                                ) : staff.pendingRating ? (
+                                  <StaffStatus $status="pending">
+                                    {language === 'vi' ? 'Chờ đánh giá' : 'Pending Review'}
+                                  </StaffStatus>
+                                ) : (
+                                  <StaffStatus $status={staff.status}>
+                                    {staff.status === 'active' 
+                                      ? (language === 'vi' ? 'Đang làm' : 'Active')
+                                      : staff.status === 'completed'
+                                      ? (language === 'vi' ? 'Hoàn thành' : 'Completed')
+                                      : staff.status === 'pending_confirmation'
+                                      ? (language === 'vi' ? 'Chờ xác nhận' : 'Pending Confirm')
+                                      : staff.status === 'pending_change'
+                                      ? (language === 'vi' ? 'Chờ thay đổi' : 'Pending Change')
+                                      : (language === 'vi' ? 'Đang làm' : 'Active')}
+                                  </StaffStatus>
+                                )
+                              )
                             )}
                           </div>
                         </StaffHeader>
