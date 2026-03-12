@@ -2413,7 +2413,10 @@ const JobListing = () => {
               const jobId = job.jobID || job.idJob;
               const hourlyRate = parseInt(job.hourlyRate) || 0;
               const totalHours = parseFloat(job.totalHours) || 0;
-              const totalSalary = hourlyRate * totalHours;
+              const totalSalary = parseInt(job.totalSalary) || (hourlyRate * totalHours);
+              
+              // Calculate candidate income (85% of totalSalary - 15% platform fee)
+              const candidateIncome = Math.round(totalSalary * 0.85);
               
               // Map jobType from database to display format
               const jobType = job.jobType === 'part-time' 
@@ -2428,9 +2431,9 @@ const JobListing = () => {
                 title: String(job.title || 'Untitled Job'),
                 company: String(job.companyName || 'Công ty'),
                 location: String(job.location || ''),
-                salary: totalSalary > 0 
-                  ? `${Math.round(totalSalary).toLocaleString()} VNĐ/${totalHours}h`
-                  : `${hourlyRate.toLocaleString()} VNĐ/giờ`,
+                salary: candidateIncome > 0 
+                  ? `${candidateIncome.toLocaleString()} VNĐ/${totalHours}h`
+                  : `${Math.round(hourlyRate * 0.85).toLocaleString()} VNĐ/giờ`,
                 type: jobType, // Use jobType from database
                 category: 'shift', // Quick jobs are shift-based
                 tags: ['Tuyển gấp', 'Làm ngay'],

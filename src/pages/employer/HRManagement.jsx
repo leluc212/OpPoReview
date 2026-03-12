@@ -2408,7 +2408,7 @@ const HRManagement = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeSection, setActiveSection] = useState('hr');
+  const [activeSection, setActiveSection] = useState('posts'); // Default to 'posts' (Quản lý bài đăng)
   const [hrStaff, setHrStaff] = useState(() => getHRStaff(language).map(s => ({ ...s, rated: false, pendingRating: false })));
   const [selectedStaff, setSelectedStaff] = useState(null);
   
@@ -2819,12 +2819,41 @@ const HRManagement = () => {
       // Clear any previous errors
       setShowErrorNotification(false);
       
+      // Calculate totalHours and totalSalary
+      let totalHours = 0;
+      let totalSalary = 0;
+      
+      if (editJobData.startTime && editJobData.endTime) {
+        const [startHour, startMin] = editJobData.startTime.split(':').map(Number);
+        const [endHour, endMin] = editJobData.endTime.split(':').map(Number);
+        
+        if (!isNaN(startHour) && !isNaN(startMin) && !isNaN(endHour) && !isNaN(endMin)) {
+          let hoursWorked = (endHour + endMin / 60) - (startHour + startMin / 60);
+          
+          // Handle overnight shifts
+          if (hoursWorked < 0) {
+            hoursWorked += 24;
+          }
+          
+          totalHours = hoursWorked;
+          totalSalary = Math.round(hourlyRate * hoursWorked);
+        }
+      }
+      
       // Get the actual job ID for API (idJob or jobID)
       const job = quickJobPosts.find(j => j.id === editJobId);
       const apiJobId = job?.idJob || editJobId;
       
+      // Prepare update data with recalculated values
+      const updateData = {
+        ...editJobData,
+        hourlyRate: hourlyRate,
+        totalHours: totalHours,
+        totalSalary: totalSalary
+      };
+      
       // Update job in DynamoDB via API
-      await quickJobService.updateQuickJob(apiJobId, editJobData);
+      await quickJobService.updateQuickJob(apiJobId, updateData);
       
       // Reload jobs from DynamoDB
       await loadQuickJobsFromDynamoDB();
