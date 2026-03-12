@@ -303,7 +303,7 @@ const PostJob = () => {
           <FormHeader>
             <h1>{isEditing 
               ? (language === 'vi' ? 'Chỉnh Sửa Tin Tuyển Dụng' : 'Edit Job Posting')
-              : (language === 'vi' ? 'Đăng Tin Tuyển Dụng Mới' : 'Post New Job')}
+              : (language === 'vi' ? 'Đăng Bài Tiêu Chuẩn ' : 'Post New Job')}
             </h1>
             <p>{isEditing
               ? (language === 'vi' ? 'Cập nhật thông tin tin tuyển dụng' : 'Update job posting details')

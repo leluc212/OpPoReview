@@ -1,0 +1,7 @@
+﻿{
+  "apiId": "6zw89pkuxb",
+  "apiEndpoint": "https://6zw89pkuxb.execute-api.ap-southeast-1.amazonaws.com",
+  "lambdaName": "quick-job-handler",
+  "tableName": "PostQuickJob",
+  "region": "ap-southeast-1"
+}

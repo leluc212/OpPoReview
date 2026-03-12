@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -6,6 +6,8 @@ import Modal from '../../components/Modal';
 import { Button, Input, TextArea, Select, FormGroup, Label } from '../../components/FormElements';
 import { Save, ArrowLeft, AlertCircle, CheckCircle, Clock, Zap } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import quickJobService from '../../services/quickJobService';
+import employerProfileService from '../../services/employerProfileService';
 
 // Keyframe animations
 const fadeIn = keyframes`
@@ -52,6 +54,8 @@ const countUp = keyframes`
 
 const PostJobContainer = styled.div`
   max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px;
   animation: ${fadeIn} 0.4s ease-out;
 `;
 
@@ -382,116 +386,6 @@ const PostQuickJob = () => {
   };
 
   const [formData, setFormData] = useState(() => {
-    // Initialize mock quick jobs if not exists
-    const existingQuickJobs = localStorage.getItem('quickJobs');
-    if (!existingQuickJobs) {
-      const mockQuickJobs = [
-        {
-          id: 1709870123456,
-          title: 'Ca Tối - Nhân viên Phục vụ',
-          location: 'Quận 1, TP.HCM',
-          hourlyRate: 35000,
-          startTime: '18:00',
-          endTime: '23:00',
-          description: 'Cần nhân viên phục vụ ca tối, làm việc tại quán ăn khu vực trung tâm. Yêu cầu nhiệt tình, nhanh nhẹn.',
-          contactPhone: '0901234567',
-          createdAt: new Date('2026-03-08T10:30:00').toISOString(),
-          type: 'quick',
-          status: 'active',
-          fee: 17500,
-          totalHours: 5,
-          applicants: 12,
-          views: 45
-        },
-        {
-          id: 1709783123456,
-          title: 'Ca Trưa - Nhân viên Phụ bếp',
-          location: 'Quận 3, TP.HCM',
-          hourlyRate: 32000,
-          startTime: '10:00',
-          endTime: '14:30',
-          description: 'Tuyển phụ bếp làm ca trưa, hỗ trợ bếp chính chuẩn bị món ăn. Không yêu cầu kinh nghiệm.',
-          contactPhone: '0912345678',
-          createdAt: new Date('2026-03-07T08:15:00').toISOString(),
-          type: 'quick',
-          status: 'active',
-          fee: 14400,
-          totalHours: 4.5,
-          applicants: 8,
-          views: 32
-        },
-        {
-          id: 1709696123456,
-          title: 'Ca Chiều - Nhân viên Pha chế',
-          location: 'Quận 7, TP.HCM',
-          hourlyRate: 38000,
-          startTime: '14:00',
-          endTime: '18:00',
-          description: 'Cần barista pha chế đồ uống ca chiều. Ưu tiên có kinh nghiệm pha cà phê và trà sữa.',
-          contactPhone: '0923456789',
-          createdAt: new Date('2026-03-06T14:20:00').toISOString(),
-          type: 'quick',
-          status: 'completed',
-          fee: 15200,
-          totalHours: 4,
-          applicants: 15,
-          views: 58
-        },
-        {
-          id: 1709609123456,
-          title: 'Ca Sáng - Nhân viên Bán hàng',
-          location: 'Quận 10, TP.HCM',
-          hourlyRate: 33000,
-          startTime: '07:00',
-          endTime: '12:00',
-          description: 'Tuyển nhân viên bán hàng ca sáng tại tiệm bánh. Làm việc từ thứ 2 đến thứ 6.',
-          contactPhone: '0934567890',
-          createdAt: new Date('2026-03-05T06:00:00').toISOString(),
-          type: 'quick',
-          status: 'active',
-          fee: 16500,
-          totalHours: 5,
-          applicants: 6,
-          views: 28
-        },
-        {
-          id: 1709522123456,
-          title: 'Ca Tối - Nhân viên Thu ngân',
-          location: 'Quận 2, TP.HCM',
-          hourlyRate: 36000,
-          startTime: '17:00',
-          endTime: '22:00',
-          description: 'Cần thu ngân ca tối, yêu cầu thành thạo máy tính và giao tiếp tốt với khách hàng.',
-          contactPhone: '0945678901',
-          createdAt: new Date('2026-03-04T16:45:00').toISOString(),
-          type: 'quick',
-          status: 'expired',
-          fee: 18000,
-          totalHours: 5,
-          applicants: 4,
-          views: 22
-        },
-        {
-          id: 1709435123456,
-          title: 'Ca Tối - Nhân viên Rửa chén',
-          location: 'Quận 5, TP.HCM',
-          hourlyRate: 32000,
-          startTime: '19:00',
-          endTime: '23:00',
-          description: 'Tuyển nhân viên rửa chén ca tối tại nhà hàng. Công việc đơn giản, phù hợp sinh viên.',
-          contactPhone: '0956789012',
-          createdAt: new Date('2026-03-03T12:00:00').toISOString(),
-          type: 'quick',
-          status: 'active',
-          fee: 12800,
-          totalHours: 4,
-          applicants: 10,
-          views: 38
-        }
-      ];
-      localStorage.setItem('quickJobs', JSON.stringify(mockQuickJobs));
-    }
-    
     // Load draft from localStorage on mount
     const savedDraft = localStorage.getItem('quickJobDraft');
     if (savedDraft) {
@@ -504,10 +398,13 @@ const PostQuickJob = () => {
     return {
       title: '',
       location: '',
+      jobType: '', // Loại hình công việc
       hourlyRate: '', // Lương theo giờ
       startTime: '', // Thời gian bắt đầu ca
       endTime: '', // Thời gian kết thúc ca
+      workDate: '', // Ngày làm việc
       description: '',
+      requirements: '', // Yêu cầu
       contactPhone: ''
     };
   });
@@ -519,8 +416,8 @@ const PostQuickJob = () => {
     if (name === 'hourlyRate') {
       const numValue = parseHourlyRateInput(value);
 
-      // Show error if value is entered and <= 31875
-      if (value !== '' && !isNaN(numValue) && numValue <= 31875) {
+      // Show error if value is entered and < 31875
+      if (value !== '' && !isNaN(numValue) && numValue < 31875) {
         setSalaryError(true);
       } else {
         setSalaryError(false);
@@ -542,7 +439,7 @@ const PostQuickJob = () => {
     }
 
     const rate = parseHourlyRateInput(hourlyRate);
-    if (isNaN(rate) || rate <= 31875) {
+    if (isNaN(rate) || rate < 31875) {
       return null;
     }
 
@@ -590,7 +487,7 @@ const PostQuickJob = () => {
     }
   }, [salaryCalculation?.total]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validation
@@ -600,9 +497,9 @@ const PostQuickJob = () => {
       return;
     }
 
-    // Validate hourly rate must be > 31875
+    // Validate hourly rate must be >= 31875
     const rate = parseHourlyRateInput(formData.hourlyRate);
-    if (isNaN(rate) || rate <= 31875) {
+    if (isNaN(rate) || rate < 31875) {
       setSalaryError(true);
       setModalType('error');
       setShowModal(true);
@@ -654,79 +551,119 @@ const PostQuickJob = () => {
       return;
     }
 
-    // Deduct fee from wallet
-    const newBalance = currentBalance - totalFee;
-    walletData.balance = newBalance;
-    localStorage.setItem('employer_wallet', JSON.stringify(walletData));
+    try {
+      // Deduct fee from wallet
+      const newBalance = currentBalance - totalFee;
+      walletData.balance = newBalance;
+      localStorage.setItem('employer_wallet', JSON.stringify(walletData));
 
-    // Save transaction (wallet debit)
-    const transaction = {
-      id: Date.now(),
-      type: 'debit',
-      amount: totalFee,
-      description: language === 'vi' 
-        ? `Escrow - Đăng bài: ${formData.title} (${calculation.hours.toFixed(1)}h x ${rate.toLocaleString('vi-VN')} VNĐ)`
-        : `Escrow - Post job: ${formData.title} (${calculation.hours.toFixed(1)}h x ${rate.toLocaleString('vi-VN')} VND)`,
-      date: new Date().toISOString(),
-      balanceAfter: newBalance
-    };
+      // Save transaction (wallet debit)
+      const transaction = {
+        id: Date.now(),
+        type: 'debit',
+        amount: totalFee,
+        description: language === 'vi' 
+          ? `Escrow - Đăng bài: ${formData.title} (${calculation.hours.toFixed(1)}h x ${rate.toLocaleString('vi-VN')} VNĐ)`
+          : `Escrow - Post job: ${formData.title} (${calculation.hours.toFixed(1)}h x ${rate.toLocaleString('vi-VN')} VND)`,
+        date: new Date().toISOString(),
+        balanceAfter: newBalance
+      };
 
-    const transactions = JSON.parse(localStorage.getItem('employer_transactions') || '[]');
-    transactions.unshift(transaction);
-    localStorage.setItem('employer_transactions', JSON.stringify(transactions));
+      const transactions = JSON.parse(localStorage.getItem('employer_transactions') || '[]');
+      transactions.unshift(transaction);
+      localStorage.setItem('employer_transactions', JSON.stringify(transactions));
 
-    // Save to posted jobs list in localStorage
-    const jobId = Date.now();
-    const jobData = {
-      ...formData,
-      hourlyRate: rate,
-      id: jobId,
-      createdAt: new Date().toISOString(),
-      type: 'quick',
-      status: 'pending',
-      fee: totalFee,
-      totalHours: calculation.hours
-    };
+      // Get company name from employer profile
+      let companyName = 'Unknown Company';
+      try {
+        const profile = await employerProfileService.getMyProfile();
+        if (profile && (profile.companyName || profile.businessName)) {
+          companyName = profile.companyName || profile.businessName;
+          console.log('✅ Company name from profile:', companyName);
+        }
+      } catch (error) {
+        console.warn('⚠️ Could not get company name from profile:', error);
+        // Try localStorage as fallback
+        const cachedProfile = localStorage.getItem('employerProfile');
+        if (cachedProfile) {
+          const parsed = JSON.parse(cachedProfile);
+          companyName = parsed.companyName || parsed.businessName || 'Unknown Company';
+        }
+      }
 
-    // Get existing jobs
-    const existingJobs = JSON.parse(localStorage.getItem('quickJobs') || '[]');
-    existingJobs.unshift(jobData);
-    localStorage.setItem('quickJobs', JSON.stringify(existingJobs));
+      // Prepare job data for DynamoDB
+      const jobData = {
+        title: formData.title,
+        location: formData.location,
+        jobType: formData.jobType || 'part-time',
+        hourlyRate: rate,
+        startTime: formData.startTime,
+        endTime: formData.endTime,
+        totalHours: calculation.hours,
+        totalSalary: totalFee,
+        description: formData.description || '',
+        requirements: formData.requirements || '',
+        contactPhone: formData.contactPhone || '',
+        companyName: companyName,  // Add company name here
+        status: 'active',  // Set to 'active' so it appears in candidate job listings
+        workDate: formData.workDate || '' // Store work date in workDate attribute
+      };
 
-    // Save to escrow - hold the funds by job ID
-    const escrowJob = {
-      jobId: jobId,
-      jobTitle: formData.title,
-      amount: totalFee,
-      status: 'held',
-      employerConfirmed: false,
-      candidateConfirmed: false,
-      createdAt: new Date().toISOString(),
-      totalHours: calculation.hours,
-      hourlyRate: rate
-    };
+      console.log('🚀 Submitting quick job to DynamoDB:', jobData);
 
-    const escrowJobs = JSON.parse(localStorage.getItem('escrow_jobs') || '[]');
-    escrowJobs.unshift(escrowJob);
-    localStorage.setItem('escrow_jobs', JSON.stringify(escrowJobs));
+      // Save to DynamoDB via quickJobService
+      const savedJob = await quickJobService.createQuickJob(jobData);
 
-    // Clear draft
-    localStorage.removeItem('quickJobDraft');
+      console.log('✅ Quick job saved:', savedJob);
 
-    // Set payment info for success message
-    setPaymentInfo({
-      fee: totalFee,
-      hours: calculation.hours,
-      hourlyRate: rate,
-      previousBalance: currentBalance,
-      newBalance: newBalance,
-      escrow: true
-    });
+      // Save to escrow - hold the funds by job ID
+      const escrowJob = {
+        jobId: savedJob.idJob || savedJob.id,
+        jobTitle: formData.title,
+        amount: totalFee,
+        status: 'held',
+        employerConfirmed: false,
+        candidateConfirmed: false,
+        createdAt: new Date().toISOString(),
+        totalHours: calculation.hours,
+        hourlyRate: rate
+      };
 
-    console.log('Quick Job Saved:', jobData);
-    console.log('Payment:', transaction);
-    setModalType('success');
-    setShowModal(true);
+      const escrowJobs = JSON.parse(localStorage.getItem('escrow_jobs') || '[]');
+      escrowJobs.unshift(escrowJob);
+      localStorage.setItem('escrow_jobs', JSON.stringify(escrowJobs));
+
+      // Clear draft
+      localStorage.removeItem('quickJobDraft');
+
+      // Set payment info for success message
+      setPaymentInfo({
+        fee: totalFee,
+        hours: calculation.hours,
+        hourlyRate: rate,
+        previousBalance: currentBalance,
+        newBalance: newBalance,
+        escrow: true
+      });
+
+      setModalType('success');
+      setShowModal(true);
+    } catch (error) {
+      console.error('❌ Error creating quick job:', error);
+      
+      // Rollback wallet deduction
+      walletData.balance = currentBalance;
+      localStorage.setItem('employer_wallet', JSON.stringify(walletData));
+      
+      setModalType('error');
+      setPaymentInfo({
+        error: true,
+        message: language === 'vi' 
+          ? `Lỗi khi tạo bài đăng: ${error.message}`
+          : `Error creating job post: ${error.message}`
+      });
+      setShowModal(true);
+    }
   };
 
   const handleModalClose = () => {
@@ -750,9 +687,15 @@ const PostQuickJob = () => {
       jobTitlePlaceholder: 'VD: Nhân viên Phục Vụ - Cần ngay',
       location: 'Địa điểm làm việc',
       locationPlaceholder: 'VD: Quận 1, TP.HCM',
+      jobType: 'Loại hình công việc *',
+      jobTypePartTime: 'Bán thời gian',
+      jobTypeFullTime: 'Toàn thời gian',
+      jobTypePlaceholder: 'Chọn loại hình',
       hourlyRate: 'Lương (VND)',
       hourlyRatePlaceholder: '',
-      hourlyRateMin: 'Phải lớn hơn 31.875 VNĐ',
+      hourlyRateMin: 'Phải lớn hơn hoặc bằng 31.875 VNĐ',
+      workDate: 'Ngày làm',
+      workDatePlaceholder: 'Chọn ngày làm việc',
       workingHours: 'Khung giờ làm việc',
       startTime: 'Từ',
       endTime: 'Đến',
@@ -765,6 +708,9 @@ const PostQuickJob = () => {
       
       description: 'Mô tả công việc',
       descriptionPlaceholder: 'Mô tả ngắn gọn về công việc cần tuyển...',
+      
+      requirements: 'Yêu cầu',
+      requirementsPlaceholder: 'Liệt kê các yêu cầu cần thiết cho ứng viên...',
       
       contactPhone: 'Số điện thoại liên hệ',
       contactPhonePlaceholder: '0123 456 789',
@@ -795,9 +741,15 @@ const PostQuickJob = () => {
       jobTitlePlaceholder: 'e.g., Server - Immediate Need',
       location: 'Work Location',
       locationPlaceholder: 'e.g., District 1, HCMC',
+      jobType: 'Job Type *',
+      jobTypePartTime: 'Part-time',
+      jobTypeFullTime: 'Full-time',
+      jobTypePlaceholder: 'Select type',
       hourlyRate: 'Salary (VND)',
       hourlyRatePlaceholder: '',
-      hourlyRateMin: 'Must be greater than 31.875 VND',
+      hourlyRateMin: 'Must be greater than or equal to 31,875 VND',
+      workDate: 'Work Date',
+      workDatePlaceholder: 'Select work date',
       workingHours: 'Working Hours',
       startTime: 'From',
       endTime: 'To',
@@ -810,6 +762,9 @@ const PostQuickJob = () => {
       
       description: 'Job Description',
       descriptionPlaceholder: 'Brief description of the job...',
+      
+      requirements: 'Requirements',
+      requirementsPlaceholder: 'List the necessary requirements for candidates...',
       
       contactPhone: 'Contact Phone',
       contactPhonePlaceholder: '0123 456 789',
@@ -889,6 +844,22 @@ const PostQuickJob = () => {
               </FormGroup>
 
               <FormGroup>
+                <Label required>{t.jobType}</Label>
+                <Select
+                  name="jobType"
+                  value={formData.jobType}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">{t.jobTypePlaceholder}</option>
+                  <option value="part-time">{t.jobTypePartTime}</option>
+                  <option value="full-time">{t.jobTypeFullTime}</option>
+                </Select>
+              </FormGroup>
+            </FormRow>
+
+            <FormRow $columns="1fr 1fr">
+              <FormGroup>
                 <Label required>{t.hourlyRate}</Label>
                 <Input
                   name="hourlyRate"
@@ -906,13 +877,26 @@ const PostQuickJob = () => {
                 />
                 {salaryError ? (
                   <small style={{ color: '#DC2626', fontSize: '12px', marginTop: '4px', display: 'block', fontWeight: '600' }}>
-                    ⚠️ {language === 'vi' ? 'Lương phải lớn hơn 31.875 VNĐ' : 'Salary must be greater than 31.875 VND'}
+                    ⚠️ {language === 'vi' ? 'Lương phải lớn hơn hoặc bằng 31.875 VNĐ' : 'Salary must be >= 31,875 VND'}
                   </small>
                 ) : (
                   <small style={{ color: '#000000', fontSize: '12px', marginTop: '4px', display: 'block' }}>
                     {t.hourlyRateMin}
                   </small>
                 )}
+              </FormGroup>
+
+              <FormGroup>
+                <Label required>{t.workDate}</Label>
+                <Input
+                  name="workDate"
+                  type="date"
+                  value={formData.workDate}
+                  onChange={handleChange}
+                  placeholder={t.workDatePlaceholder}
+                  min={new Date().toISOString().split('T')[0]}
+                  required
+                />
               </FormGroup>
             </FormRow>
 
@@ -988,13 +972,13 @@ const PostQuickJob = () => {
             </FormGroup>
 
             <FormGroup>
-              <Label>{t.contactPhone}</Label>
-              <Input
-                name="contactPhone"
-                value={formData.contactPhone}
+              <Label>{t.requirements}</Label>
+              <TextArea
+                name="requirements"
+                value={formData.requirements}
                 onChange={handleChange}
-                placeholder={t.contactPhonePlaceholder}
-                type="tel"
+                placeholder={t.requirementsPlaceholder}
+                rows={3}
               />
             </FormGroup>
 

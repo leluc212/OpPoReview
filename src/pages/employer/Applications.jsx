@@ -2377,21 +2377,23 @@ const Applications = () => {
           </StandardJobsGrid>
         </StandardJobsSection>
 
-        {/* Job Posts Section - Always visible */}
-        <PostsSectionHeader>
-          <PostsSectionTitle>
-            <Newspaper />
-            {language === 'vi' ? 'Các bài đăng tuyển dụng' : 'Job Postings'}
-          </PostsSectionTitle>
-          <CreatePostButton
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => navigate('/employer/post-job')}
-          >
-            <Plus />
-            {language === 'vi' ? 'Đăng bài mới' : 'Post New Job'}
-          </CreatePostButton>
-        </PostsSectionHeader>
+        {/* Job Posts Section - Only visible when activeSection is 'posts' */}
+        {activeSection === 'posts' && (
+          <>
+            <PostsSectionHeader>
+              <PostsSectionTitle>
+                <Newspaper />
+                {language === 'vi' ? 'Các bài đăng tuyển dụng' : 'Job Postings'}
+              </PostsSectionTitle>
+              <CreatePostButton
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate('/employer/post-job')}
+              >
+                <Plus />
+                {language === 'vi' ? 'Đăng bài mới' : 'Post New Job'}
+              </CreatePostButton>
+            </PostsSectionHeader>
         
         {isLoadingJobs ? (
           <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
@@ -2496,10 +2498,6 @@ const Applications = () => {
           </AnimatePresence>
         </JobPostsGrid>
         )}
-
-        {/* Conditional Content */}
-        {activeSection === 'posts' && (
-          <>
           </>
         )}
 

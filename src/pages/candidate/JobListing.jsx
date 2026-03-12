@@ -14,6 +14,7 @@ import StatusBadge from '../../components/StatusBadge';
 import { useLanguage } from '../../context/LanguageContext';
 import candidateProfileService from '../../services/candidateProfileService';
 import jobPostService from '../../services/jobPostService';
+import quickJobService from '../../services/quickJobService';
 
 // Animations
 const fadeIn = `
@@ -2336,6 +2337,7 @@ const JobListing = () => {
   const [jobCategory, setJobCategory] = useState('standard'); // 'standard' or 'shift'
   const [candidateProfile, setCandidateProfile] = useState(null);
   const [dynamoDBJobs, setDynamoDBJobs] = useState([]);
+  const [quickJobs, setQuickJobs] = useState([]);
   const [isLoadingDynamoJobs, setIsLoadingDynamoJobs] = useState(true);
 
   // Load jobs from DynamoDB
@@ -2395,11 +2397,79 @@ const JobListing = () => {
     loadDynamoDBJobs();
   }, [language]);
 
-  // Merge stored jobs with default jobs data AND DynamoDB jobs
+  // Load quick jobs from PostQuickJob table
+  useEffect(() => {
+    const loadQuickJobs = async () => {
+      try {
+        console.log('📥 Loading quick jobs from PostQuickJob table...');
+        const jobs = await quickJobService.getAllActiveQuickJobs();
+        console.log('✅ Loaded quick jobs:', jobs);
+        
+        // Transform quick jobs to match JOBS_DATA format
+        const transformedQuickJobs = jobs
+          .filter(job => job && (job.jobID || job.idJob) && job.title)
+          .map(job => {
+            try {
+              const jobId = job.jobID || job.idJob;
+              const hourlyRate = parseInt(job.hourlyRate) || 0;
+              const totalHours = parseFloat(job.totalHours) || 0;
+              const totalSalary = hourlyRate * totalHours;
+              
+              // Map jobType from database to display format
+              const jobType = job.jobType === 'part-time' 
+                ? 'Part-time' 
+                : job.jobType === 'full-time' 
+                  ? 'Full-time' 
+                  : job.jobType || 'Part-time';
+              
+              return {
+                id: `quick-${jobId}`,
+                idJob: jobId,
+                title: String(job.title || 'Untitled Job'),
+                company: String(job.companyName || 'Công ty'),
+                location: String(job.location || ''),
+                salary: totalSalary > 0 
+                  ? `${Math.round(totalSalary).toLocaleString()} VNĐ/${totalHours}h`
+                  : `${hourlyRate.toLocaleString()} VNĐ/giờ`,
+                type: jobType, // Use jobType from database
+                category: 'shift', // Quick jobs are shift-based
+                tags: ['Tuyển gấp', 'Làm ngay'],
+                postedDate: String(job.createdAt || new Date().toISOString()),
+                postedAt: formatPostedDate(job.createdAt || new Date().toISOString(), language),
+                applicants: parseInt(job.applicants) || 0,
+                views: parseInt(job.views) || 0,
+                description: String(job.description || ''),
+                requirements: String(job.requirements || ''),
+                workHours: job.startTime && job.endTime ? `${job.startTime} - ${job.endTime}` : '',
+                workDate: job.workDate || '',
+                status: String(job.status || 'active'),
+                isQuickJob: true, // Flag to identify quick jobs
+                urgent: true, // Mark as urgent to show red badge
+                isUrgent: true
+              };
+            } catch (err) {
+              console.error('Error transforming quick job:', job, err);
+              return null;
+            }
+          })
+          .filter(job => job !== null);
+        
+        setQuickJobs(transformedQuickJobs);
+        console.log('✅ Transformed quick jobs:', transformedQuickJobs);
+      } catch (error) {
+        console.error('❌ Error loading quick jobs:', error);
+        setQuickJobs([]);
+      }
+    };
+    
+    loadQuickJobs();
+  }, [language]);
+
+  // Merge stored jobs with default jobs data AND DynamoDB jobs AND quick jobs
   const allJobs = useMemo(() => {
     const storedJobs = getStoredJobs();
-    return [...storedJobs, ...JOBS_DATA, ...dynamoDBJobs];
-  }, [dynamoDBJobs]); // Re-calculate when DynamoDB jobs are loaded
+    return [...storedJobs, ...JOBS_DATA, ...dynamoDBJobs, ...quickJobs];
+  }, [dynamoDBJobs, quickJobs]); // Re-calculate when DynamoDB jobs or quick jobs are loaded
 
   const [quickFilter, setQuickFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
@@ -3404,10 +3474,10 @@ const JobListing = () => {
               <div className="info-row">
                 <span className="info-label">{language === 'vi' ? 'Ngày đăng' : 'Posted'}:</span>
                 <span className="info-value">
-                  {applyModal.job.postedAt 
-                    ? translateTimePosted(applyModal.job.postedAt, language)
-                    : applyModal.job.postedDate 
-                      ? formatPostedDate(applyModal.job.postedDate, language)
+                  {applyModal.job.postedDate 
+                    ? formatPostedDate(applyModal.job.postedDate, language)
+                    : applyModal.job.postedAt 
+                      ? translateTimePosted(applyModal.job.postedAt, language)
                       : '-'
                   }
                 </span>
@@ -3415,7 +3485,22 @@ const JobListing = () => {
               <div className="info-row">
                 <span className="info-label">{language === 'vi' ? 'Ngày làm' : 'Work Date'}:</span>
                 <span className="info-value">
-                  {applyModal.job.workDays || applyModal.job.shiftDetails?.date || (applyModal.job.urgent ? getUrgentJobWorkDate() : getStandardJobWorkDate())}
+                  {applyModal.job.workDate 
+                    ? (() => {
+                        // Format workDate from YYYY-MM-DD to DD/MM/YYYY
+                        try {
+                          const [year, month, day] = applyModal.job.workDate.split('-');
+                          return `${day}/${month}/${year}`;
+                        } catch (e) {
+                          return applyModal.job.workDate;
+                        }
+                      })()
+                    : applyModal.job.workDays 
+                      ? applyModal.job.workDays
+                      : applyModal.job.shiftDetails?.date 
+                        ? applyModal.job.shiftDetails.date
+                        : (applyModal.job.urgent ? getUrgentJobWorkDate() : getStandardJobWorkDate())
+                  }
                 </span>
               </div>
               <div className="info-row">

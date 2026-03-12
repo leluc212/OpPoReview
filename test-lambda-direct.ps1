@@ -1,46 +1,36 @@
-# Test Lambda directly (bypass API Gateway)
-Write-Host "Testing Lambda function directly..." -ForegroundColor Cyan
+# Test Lambda function directly
+Write-Host "=== Testing Lambda Function ===" -ForegroundColor Cyan
 
-$FUNCTION_NAME = "EmployerProfileAPI"
-$REGION = "ap-southeast-1"
-
-# Create test event
-$testEvent = @{
-    httpMethod = "GET"
-    path = "/profile/test-user-123"
-    pathParameters = @{
-        userId = "test-user-123"
+$payload = @{
+    requestContext = @{
+        http = @{
+            method = "GET"
+            path = "/quick-jobs/active"
+        }
     }
-    headers = @{
-        Authorization = "Bearer eyJraWQiOiJ0ZXN0IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJ0ZXN0LXVzZXItMTIzIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIn0.test"
-    }
-    body = $null
+    rawPath = "/quick-jobs/active"
 } | ConvertTo-Json -Depth 10
 
-Write-Host "Test event:" -ForegroundColor Yellow
-Write-Host $testEvent
-Write-Host ""
+Write-Host "`nPayload:" -ForegroundColor Yellow
+Write-Host $payload
 
-# Invoke Lambda
-Write-Host "Invoking Lambda..." -ForegroundColor Yellow
+$payload | Out-File -FilePath "test-payload.json" -Encoding utf8
 
-# Save payload to file first
-$testEvent | Out-File -FilePath "test-payload.json" -Encoding utf8
-
-$result = aws lambda invoke `
-    --function-name $FUNCTION_NAME `
+Write-Host "`nInvoking Lambda..." -ForegroundColor Yellow
+aws lambda invoke `
+    --function-name quick-job-handler `
     --payload file://test-payload.json `
-    --region $REGION `
     response.json
 
-Write-Host ""
-if (Test-Path response.json) {
-    Write-Host "Response:" -ForegroundColor Green
-    Get-Content response.json | ConvertFrom-Json | ConvertTo-Json -Depth 10
-    Remove-Item response.json -ErrorAction SilentlyContinue
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "`n✅ Lambda invoked successfully" -ForegroundColor Green
+    Write-Host "`nResponse:" -ForegroundColor Yellow
+    Get-Content response.json
 } else {
-    Write-Host "No response file created" -ForegroundColor Red
+    Write-Host "`n❌ Lambda invocation failed" -ForegroundColor Red
 }
 
-# Cleanup
-Remove-Item test-payload.json -ErrorAction SilentlyContinue
+Remove-Item -Path "test-payload.json" -ErrorAction SilentlyContinue
+Remove-Item -Path "response.json" -ErrorAction SilentlyContinue
+
+Write-Host "`n=== Test Complete ===" -ForegroundColor Cyan

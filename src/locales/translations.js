@@ -130,7 +130,7 @@ export const translations = {
           hired: 'Đã Tuyển',
         },
         recentApplications: 'Hồ Sơ Ứng Tuyển Gần Đây',
-        postNewJob: 'Đăng Tin Tuyển Dụng Mới',
+        postNewJob: 'Đăng Bài Tiêu Chuẩn ',
       },
       admin: {
         title: 'Bảng Điều Khiển Quản Trị',
@@ -244,7 +244,7 @@ export const translations = {
       tableTime: 'Thời Gian',
       activityRegisteredEmployer: 'Đăng ký nhà tuyển dụng',
       activityApplied: 'Ứng tuyển Senior Developer',
-      activityPostedJob: 'Đăng tin tuyển dụng mới',
+      activityPostedJob: 'Đăng Bài Tiêu Chuẩn ',
       time2h: '2 giờ trước',
       time3h: '3 giờ trước',
       time5h: '5 giờ trước',

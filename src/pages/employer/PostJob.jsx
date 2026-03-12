@@ -1,52 +1,77 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import Modal from '../../components/Modal';
 import { Button, Input, TextArea, Select, FormGroup, Label } from '../../components/FormElements';
-import { Save, ArrowLeft, AlertCircle } from 'lucide-react';
+import { Save, ArrowLeft, AlertCircle, Briefcase, Clock } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import jobPostService from '../../services/jobPostService';
 import { fetchAuthSession } from 'aws-amplify/auth';
 
+// Keyframe animations
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
 const PostJobContainer = styled.div`
-  max-width: 1000px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 0 20px;
+  animation: ${fadeIn} 0.4s ease-out;
 `;
 
 const BackButton = styled.button`
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #64748B;
-  font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 32px;
+  color: ${props => props.theme.colors.textLight};
+  font-weight: 500;
+  margin-bottom: 24px;
   background: none;
-  border: none;
-  cursor: pointer;
   transition: all 0.2s ease;
-  padding: 8px 12px;
-  border-radius: 8px;
   
   &:hover {
-    color: #1e40af;
-    background: #EFF6FF;
+    color: ${props => props.theme.colors.primary};
+    transform: translateX(-4px);
   }
   
   svg {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
+    transition: transform 0.2s ease;
+  }
+  
+  &:hover svg {
+    transform: translateX(-2px);
   }
 `;
 
 const FormCard = styled.div`
-  background: #FFFFFF;
-  border-radius: 20px;
-  padding: 48px;
-  border: 2px solid #E8EFFF;
-  box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
+  background: ${props => props.theme.colors.bgLight};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  padding: 40px;
+  border: 1px solid ${props => props.theme.colors.border};
+  position: relative;
+  overflow: hidden;
+  animation: ${fadeIn} 0.5s ease-out;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #1e40af 0%, #2563eb 100%);
+  }
   
   @media (max-width: 768px) {
     padding: 32px 24px;
@@ -55,26 +80,94 @@ const FormCard = styled.div`
 `;
 
 const FormHeader = styled.div`
-  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
   padding-bottom: 24px;
-  border-bottom: 2px solid #F1F5F9;
+  border-bottom: 2px solid #E8EFFF;
   
-  h1 {
-    font-size: 32px;
-    font-weight: 800;
-    margin-bottom: 8px;
-    color: #1E293B;
-    letter-spacing: -0.5px;
+  .icon-box {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+    border: 2px solid #BFDBFE;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
     
-    @media (max-width: 768px) {
-      font-size: 26px;
+    svg {
+      width: 28px;
+      height: 28px;
+      color: #1e40af;
     }
   }
   
-  p {
-    color: #64748B;
-    font-size: 15px;
-    font-weight: 500;
+  .header-content {
+    flex: 1;
+    
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      color: #1E293B;
+      letter-spacing: -0.5px;
+      
+      @media (max-width: 768px) {
+        font-size: 24px;
+      }
+    }
+    
+    p {
+      color: #64748B;
+      font-size: 14px;
+      font-weight: 500;
+    }
+  }
+`;
+
+const InfoBox = styled.div`
+  background: #EFF6FF;
+  border: 2px solid #BFDBFE;
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 24px;
+  animation: ${fadeIn} 0.7s ease-out;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.1);
+  }
+  
+  svg {
+    width: 20px;
+    height: 20px;
+    color: #1e40af;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  
+  .info-content {
+    flex: 1;
+    
+    .info-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e3a8a;
+      margin-bottom: 4px;
+    }
+    
+    .info-text {
+      font-size: 13px;
+      color: #1e3a8a;
+      line-height: 1.6;
+    }
   }
 `;
 
@@ -414,8 +507,8 @@ const PostJob = () => {
   return (
     <DashboardLayout role="employer" showSearch={false} key={language}>
       <PostJobContainer>
-        <BackButton onClick={() => navigate('/employer/dashboard')}>
-          <ArrowLeft /> {language === 'vi' ? 'Quay lại trang chủ' : 'Back to main page'}
+        <BackButton onClick={() => navigate(-1)}>
+          <ArrowLeft /> {language === 'vi' ? 'Quay lại' : 'Back'}
         </BackButton>
 
         {/* Verification Warning */}
@@ -446,15 +539,32 @@ const PostJob = () => {
 
         <FormCard>
           <FormHeader>
-            <h1>{isEditing 
-              ? (language === 'vi' ? 'Chỉnh Sửa Tin Tuyển Dụng' : 'Edit Job Posting')
-              : (language === 'vi' ? 'Đăng Tin Tuyển Dụng Mới' : 'Post New Job')}
-            </h1>
-            <p>{isEditing
-              ? (language === 'vi' ? 'Cập nhật thông tin tin tuyển dụng' : 'Update job posting details')
-              : (language === 'vi' ? 'Điền thông tin để tạo tin tuyển dụng' : 'Fill in the details to create a job posting')}
-            </p>
+            <div className="icon-box">
+              <Briefcase />
+            </div>
+            <div className="header-content">
+              <h1>{isEditing 
+                ? (language === 'vi' ? 'Chỉnh Sửa Tin Tuyển Dụng' : 'Edit Job Posting')
+                : (language === 'vi' ? 'Đăng Bài Tiêu Chuẩn ' : 'Post New Job')}
+              </h1>
+              <p>{isEditing
+                ? (language === 'vi' ? 'Cập nhật thông tin tin tuyển dụng' : 'Update job posting details')
+                : (language === 'vi' ? 'Điền thông tin để tạo tin tuyển dụng' : 'Fill in the details to create a job posting')}
+              </p>
+            </div>
           </FormHeader>
+
+          <InfoBox>
+            <Clock />
+            <div className="info-content">
+              <div className="info-title">{language === 'vi' ? 'Lưu ý về bài đăng' : 'Posting Guidelines'}</div>
+              <div className="info-text">
+                {language === 'vi' 
+                  ? 'Bài đăng sẽ được ưu tiên hiển thị và có thời hạn tuyển dụng linh hoạt. Phù hợp cho các vị trí cần tuyển dụng lâu dài.'
+                  : 'Posts will be prioritized and have flexible recruitment deadlines. Suitable for long-term recruitment positions.'}
+              </div>
+            </div>
+          </InfoBox>
 
           <form onSubmit={handleSubmit}>
             <FormGrid>

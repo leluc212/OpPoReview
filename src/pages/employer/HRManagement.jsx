@@ -7,6 +7,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Edit3, Trash2, Eye, CheckCircle, Send, Search, Calendar, Newspaper, TrendingUp, AlertCircle, User, Plus, X, Wallet, Save, Award, Star, Briefcase, Zap, Banknote, ThumbsUp, ThumbsDown, ArrowRight, RefreshCw } from 'lucide-react';
 import Modal from '../../components/Modal';
+import quickJobService from '../../services/quickJobService';
 
 // Helper: tính số giờ từ chuỗi shift "HH:MM - HH:MM"
 const calcShiftHours = (shift) => {
@@ -808,21 +809,10 @@ const QuickJobPostCard = styled(motion.div)`
   position: relative;
   overflow: hidden;
   
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: ${props => props.$status === 'active' ? '#F59E0B' : '#94A3B8'};
-    border-radius: 16px 0 0 16px;
-  }
-  
   &:hover {
     border-color: #BFDBFE;
     box-shadow: 0 8px 24px rgba(30, 64, 175, 0.13);
-    transform: translateY(-2px);
+    transform: translateY(-4px);
   }
 `;
 
@@ -834,53 +824,62 @@ const QuickJobPostHeader = styled.div`
 `;
 
 const QuickJobPostTitle = styled.h3`
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: ${props => props.theme.colors.text};
-  margin-bottom: 8px;
+  margin-bottom: 0;
+  line-height: 1.3;
 `;
 
 const QuickJobPostMeta = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 16px;
+  margin-bottom: 12px;
   
   .meta-item {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 13px;
+    gap: 8px;
+    font-size: 14px;
     color: ${props => props.theme.colors.textLight};
+    font-weight: 500;
     
     svg {
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
+      color: #1e40af;
+      flex-shrink: 0;
     }
   }
 `;
 
 const QuickJobPostStats = styled.div`
   display: flex;
-  gap: 20px;
-  padding: 16px 0;
+  gap: 24px;
+  padding: 20px;
   border-top: 1px solid #E8EFFF;
   border-bottom: 1px solid #E8EFFF;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+  border-radius: 12px;
   
   .stat {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
+    align-items: center;
+    flex: 1;
     
     .stat-value {
-      font-size: 20px;
+      font-size: 28px;
       font-weight: 800;
-      color: ${props => props.theme.colors.text};
+      color: #1e40af;
+      line-height: 1;
     }
     
     .stat-label {
-      font-size: 12px;
+      font-size: 13px;
       color: ${props => props.theme.colors.textLight};
       font-weight: 600;
     }
@@ -894,20 +893,22 @@ const QuickJobPostActions = styled.div`
 
 const QuickJobPostButton = styled(motion.button)`
   flex: 1;
-  padding: 10px 16px;
-  border-radius: 10px;
-  font-size: 13px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 14px;
   font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   transition: all 0.2s ease;
+  cursor: pointer;
+  white-space: nowrap;
   
   background: ${props => {
-    if (props.$variant === 'primary') return '#F59E0B';
-    if (props.$variant === 'danger') return '#EF4444';
-    return '#EFF6FF';
+    if (props.$variant === 'primary') return 'linear-gradient(135deg, #F59E0B 0%, #F97316 100%)';
+    if (props.$variant === 'danger') return 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)';
+    return 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)';
   }};
   
   color: ${props => props.$variant === 'primary' || props.$variant === 'danger' ? 'white' : '#1e40af'};
@@ -918,17 +919,21 @@ const QuickJobPostButton = styled(motion.button)`
   }};
   
   svg {
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
   }
   
   &:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
     box-shadow: ${props => {
-      if (props.$variant === 'primary') return '0 4px 12px rgba(245, 158, 11, 0.3)';
-      if (props.$variant === 'danger') return '0 4px 12px rgba(239, 68, 68, 0.3)';
-      return '0 4px 12px rgba(30, 64, 175, 0.15)';
+      if (props.$variant === 'primary') return '0 6px 16px rgba(245, 158, 11, 0.4)';
+      if (props.$variant === 'danger') return '0 6px 16px rgba(239, 68, 68, 0.4)';
+      return '0 6px 16px rgba(30, 64, 175, 0.2)';
     }};
+  }
+  
+  &:active {
+    transform: translateY(0);
   }
 `;
 
@@ -1797,6 +1802,51 @@ const SuccessToast = styled(motion.div)`
   }
 `;
 
+const ErrorNotification = styled(motion.div)`
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  color: white;
+  padding: 18px 28px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 10px 40px rgba(239, 68, 68, 0.4);
+  z-index: 10000;
+  font-weight: 600;
+  font-size: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  max-width: 400px;
+
+  svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+  
+  .error-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    
+    .error-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+    
+    .error-message {
+      font-size: 14px;
+      font-weight: 500;
+      opacity: 0.95;
+      line-height: 1.4;
+    }
+  }
+`;
+
 // ─── Profile Modal Styled Components ───────────────────────
 const ProfileHeader = styled.div`
   position: relative;
@@ -2436,164 +2486,81 @@ const HRManagement = () => {
     handleOpenChat(staff.id);
   };
   
-  // Load quick jobs from localStorage
-  const [quickJobPosts, setQuickJobPosts] = useState(() => {
-    let savedJobs = localStorage.getItem('quickJobs');
-    
-    // Initialize mock quick jobs if not exists
-    if (!savedJobs) {
-      const mockQuickJobs = [
-        {
-          id: 1709870123456,
-          title: 'Nhân viên Phục vụ',
-          location: 'Quận 1, TP.HCM',
-          hourlyRate: 35000,
-          startTime: '18:00',
-          endTime: '23:00',
-          description: 'Cần nhân viên phục vụ ca tối, làm việc tại quán ăn khu vực trung tâm. Yêu cầu nhiệt tình, nhanh nhẹn.',
-          contactPhone: '0901234567',
-          createdAt: new Date('2026-03-08T10:30:00').toISOString(),
-          type: 'quick',
-          status: 'active',
-          fee: 17500,
-          totalHours: 5,
-          applicants: 12,
-          views: 45
-        },
-        {
-          id: 1709783123456,
-          title: 'Nhân viên Phụ bếp',
-          location: 'Quận 3, TP.HCM',
-          hourlyRate: 32000,
-          startTime: '10:00',
-          endTime: '14:30',
-          description: 'Tuyển phụ bếp làm ca trưa, hỗ trợ bếp chính chuẩn bị món ăn. Không yêu cầu kinh nghiệm.',
-          contactPhone: '0912345678',
-          createdAt: new Date('2026-03-07T08:15:00').toISOString(),
-          type: 'quick',
-          status: 'active',
-          fee: 14400,
-          totalHours: 4.5,
-          applicants: 8,
-          views: 32
-        },
-        {
-          id: 1709696123456,
-          title: 'Nhân viên Pha chế',
-          location: 'Quận 7, TP.HCM',
-          hourlyRate: 38000,
-          startTime: '14:00',
-          endTime: '18:00',
-          description: 'Cần barista pha chế đồ uống ca chiều. Ưu tiên có kinh nghiệm pha cà phê và trà sữa.',
-          contactPhone: '0923456789',
-          createdAt: new Date('2026-03-06T14:20:00').toISOString(),
-          type: 'quick',
-          status: 'completed',
-          fee: 15200,
-          totalHours: 4,
-          applicants: 15,
-          views: 58
-        },
-        {
-          id: 1709609123456,
-          title: 'Nhân viên Bán hàng',
-          location: 'Quận 10, TP.HCM',
-          hourlyRate: 33000,
-          startTime: '07:00',
-          endTime: '12:00',
-          description: 'Tuyển nhân viên bán hàng ca sáng tại tiệm bánh. Làm việc từ thứ 2 đến thứ 6.',
-          contactPhone: '0934567890',
-          createdAt: new Date('2026-03-05T06:00:00').toISOString(),
-          type: 'quick',
-          status: 'active',
-          fee: 16500,
-          totalHours: 5,
-          applicants: 6,
-          views: 28
-        },
-        {
-          id: 1709522123456,
-          title: 'Nhân viên Thu ngân',
-          location: 'Quận 2, TP.HCM',
-          hourlyRate: 36000,
-          startTime: '17:00',
-          endTime: '22:00',
-          description: 'Cần thu ngân ca tối, yêu cầu thành thạo máy tính và giao tiếp tốt với khách hàng.',
-          contactPhone: '0945678901',
-          createdAt: new Date('2026-03-04T16:45:00').toISOString(),
-          type: 'quick',
-          status: 'expired',
-          fee: 18000,
-          totalHours: 5,
-          applicants: 4,
-          views: 22
-        },
-        {
-          id: 1709435123456,
-          title: 'Nhân viên Rửa chén',
-          location: 'Quận 5, TP.HCM',
-          hourlyRate: 32000,
-          startTime: '19:00',
-          endTime: '23:00',
-          description: 'Tuyển nhân viên rửa chén ca tối tại nhà hàng. Công việc đơn giản, phù hợp sinh viên.',
-          contactPhone: '0956789012',
-          createdAt: new Date('2026-03-03T12:00:00').toISOString(),
-          type: 'quick',
-          status: 'active',
-          fee: 12800,
-          totalHours: 4,
-          applicants: 10,
-          views: 38
-        }
-      ];
-      localStorage.setItem('quickJobs', JSON.stringify(mockQuickJobs));
-      savedJobs = JSON.stringify(mockQuickJobs);
+  // Load quick jobs from DynamoDB
+  const [quickJobPosts, setQuickJobPosts] = useState([]);
+  const [loadingJobs, setLoadingJobs] = useState(true);
+  
+  // Load jobs from DynamoDB on mount
+  useEffect(() => {
+    loadQuickJobsFromDynamoDB();
+  }, []);
+  
+  const loadQuickJobsFromDynamoDB = async () => {
+    try {
+      setLoadingJobs(true);
+      console.log('📥 Loading quick jobs from DynamoDB...');
+      
+      const jobs = await quickJobService.getMyQuickJobs();
+      console.log('✅ Loaded jobs:', jobs);
+      
+      // Format jobs for display
+      const formattedJobs = jobs.map(job => ({
+        id: job.id || job.idJob || job.jobID,
+        idJob: job.idJob || job.jobID,
+        title: job.title,
+        location: job.location,
+        hourlyRate: job.hourlyRate,
+        startTime: job.startTime,
+        endTime: job.endTime,
+        totalHours: job.totalHours,
+        workDate: job.workDate || '', // Map workDate from DB
+        jobType: job.jobType || 'part-time',
+        salary: (() => {
+          if (job.hourlyRate && job.totalHours) {
+            const total = Math.round(parseInt(job.hourlyRate) * job.totalHours);
+            const h = Number.isInteger(job.totalHours) ? job.totalHours : parseFloat(job.totalHours.toFixed(1));
+            return `${total.toLocaleString('vi-VN')} VNĐ/${h}h`;
+          }
+          if (job.hourlyRate) {
+            return `${parseInt(job.hourlyRate).toLocaleString('vi-VN')} VNĐ/giờ`;
+          }
+          return language === 'vi' ? 'Thỏa thuận' : 'Negotiable';
+        })(),
+        shift: job.startTime && job.endTime ? `${job.startTime} - ${job.endTime}` : '',
+        deadline: (() => {
+          // Use workDate from database instead of calculating from createdAt
+          if (job.workDate) {
+            try {
+              const workDateObj = new Date(job.workDate);
+              const day = workDateObj.getDate().toString().padStart(2, '0');
+              const month = (workDateObj.getMonth() + 1).toString().padStart(2, '0');
+              const year = workDateObj.getFullYear();
+              return language === 'vi' ? `${day}/${month}/${year}` : `${month}/${day}/${year}`;
+            } catch (e) {
+              return job.workDate; // Return as-is if parsing fails
+            }
+          }
+          return language === 'vi' ? 'Chưa xác định' : 'Not specified';
+        })(),
+        description: job.description,
+        requirements: job.requirements,
+        contactPhone: job.contactPhone,
+        companyName: job.companyName,
+        status: job.status,
+        applicants: job.applicants || 0,
+        views: job.views || 0,
+        createdAt: job.createdAt,
+        updatedAt: job.updatedAt
+      }));
+      
+      setQuickJobPosts(formattedJobs);
+    } catch (error) {
+      console.error('❌ Error loading quick jobs:', error);
+      setQuickJobPosts([]);
+    } finally {
+      setLoadingJobs(false);
     }
-    
-    if (savedJobs) {
-      try {
-        const jobs = JSON.parse(savedJobs);
-        // Format jobs for display
-        return jobs.map(job => ({
-          id: job.id,
-          title: job.title,
-          location: job.location,
-          salary: (() => {
-            if (job.hourlyRate && job.totalHours) {
-              const total = Math.round(parseInt(job.hourlyRate) * job.totalHours);
-              const h = Number.isInteger(job.totalHours) ? job.totalHours : parseFloat(job.totalHours.toFixed(1));
-              return `${total.toLocaleString('vi-VN')} VNĐ/${h}h`;
-            }
-            if (job.hourlyRate) {
-              return `${parseInt(job.hourlyRate).toLocaleString('vi-VN')} VNĐ/giờ`;
-            }
-            return language === 'vi' ? 'Thỏa thuận' : 'Negotiable';
-          })(),
-          shift: job.startTime && job.endTime ? `${job.startTime} - ${job.endTime}` : '',
-          type: language === 'vi' ? 'Tuyển gấp' : 'Urgent',
-          applicants: job.applicants || 0,
-          views: job.views || 0,
-          status: job.status || 'active',
-          deadline: (() => {
-            const created = new Date(job.createdAt);
-            const now = new Date();
-            const diffTime = 7 * 24 * 60 * 60 * 1000 - (now - created); // 7 days validity
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            if (diffDays > 0) {
-              return language === 'vi' ? `${diffDays} ngày nữa` : `${diffDays} days left`;
-            }
-            return language === 'vi' ? 'Hết hạn' : 'Expired';
-          })(),
-          contactPhone: job.contactPhone,
-          description: job.description,
-          createdAt: job.createdAt
-        }));
-      } catch (e) {
-        console.error('Error loading quick jobs:', e);
-      }
-    }
-    return [];
-  });
+  };
   
   const [chatConversations] = useState(() => getChatConversations(language));
   const [activeChatId, setActiveChatId] = useState(null);
@@ -2603,6 +2570,9 @@ const HRManagement = () => {
   const [deleteJobId, setDeleteJobId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [successToastMessage, setSuccessToastMessage] = useState('');
+  const [showErrorNotification, setShowErrorNotification] = useState(false);
+  const [errorNotificationMessage, setErrorNotificationMessage] = useState('');
   const [confirmCompleteStaff, setConfirmCompleteStaff] = useState(null);
   const [showCompleteToast, setShowCompleteToast] = useState(false);
   const [completedStaffSummary, setCompletedStaffSummary] = useState(null);
@@ -2771,84 +2741,37 @@ const HRManagement = () => {
     navigate('/employer/post-quick-job');
   };
 
-  // Reload jobs from localStorage
-  const loadJobsFromLocalStorage = () => {
-    const savedJobs = localStorage.getItem('quickJobs');
-    if (savedJobs) {
-      try {
-        const jobs = JSON.parse(savedJobs);
-        const formattedJobs = jobs.map(job => ({
-          id: job.id,
-          title: job.title,
-          location: job.location,
-          salary: (() => {
-            if (job.hourlyRate && job.totalHours) {
-              const total = Math.round(parseInt(job.hourlyRate) * job.totalHours);
-              const h = Number.isInteger(job.totalHours) ? job.totalHours : parseFloat(job.totalHours.toFixed(1));
-              return `${total.toLocaleString('vi-VN')} VN\u0110/${h}h`;
-            }
-            if (job.hourlyRate) {
-              return `${parseInt(job.hourlyRate).toLocaleString('vi-VN')} VN\u0110/gi\u1edd`;
-            }
-            return language === 'vi' ? 'Th\u1ecfa thu\u1eadn' : 'Negotiable';
-          })(),
-          shift: job.startTime && job.endTime ? `${job.startTime} - ${job.endTime}` : '',
-          type: language === 'vi' ? 'Tuy\u1ec3n g\u1ea5p' : 'Urgent',
-          applicants: job.applicants || 0,
-          views: job.views || 0,
-          status: job.status || 'active',
-          deadline: (() => {
-            const created = new Date(job.createdAt);
-            const now = new Date();
-            const diffTime = 7 * 24 * 60 * 60 * 1000 - (now - created);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            if (diffDays > 0) {
-              return language === 'vi' ? `${diffDays} ng\u00e0y n\u1eefa` : `${diffDays} days left`;
-            }
-            return language === 'vi' ? 'H\u1ebft h\u1ea1n' : 'Expired';
-          })(),
-          contactPhone: job.contactPhone,
-          description: job.description,
-          createdAt: job.createdAt
-        }));
-        setQuickJobPosts(formattedJobs);
-      } catch (e) {
-        console.error('Error loading quick jobs:', e);
-        setQuickJobPosts([]);
-      }
-    } else {
-      setQuickJobPosts([]);
-    }
-  };
-
   // Open delete confirmation modal
   const handleDeleteJob = (jobId) => {
     setDeleteJobId(jobId);
   };
 
-  // Confirm and delete job from localStorage
+  // Confirm and delete job from DynamoDB
   const confirmDeleteJob = async () => {
     if (!deleteJobId) return;
     
     setIsDeleting(true);
     
-    // Simulate async operation for better UX
-    await new Promise(resolve => setTimeout(resolve, 600));
-
-    const savedJobs = localStorage.getItem('quickJobs');
-    if (savedJobs) {
-      try {
-        const jobs = JSON.parse(savedJobs);
-        const updatedJobs = jobs.filter(job => job.id !== deleteJobId);
-        localStorage.setItem('quickJobs', JSON.stringify(updatedJobs));
-        loadJobsFromLocalStorage();
-        
-        // Show success toast
-        setShowSuccessToast(true);
-        setTimeout(() => setShowSuccessToast(false), 3000);
-      } catch (e) {
-        console.error('Error deleting job:', e);
-      }
+    try {
+      // Get the actual job ID for API (idJob or jobID)
+      const job = quickJobPosts.find(j => j.id === deleteJobId);
+      const apiJobId = job?.idJob || deleteJobId;
+      
+      // Delete job from DynamoDB via API
+      await quickJobService.deleteQuickJob(apiJobId);
+      
+      // Reload jobs from DynamoDB
+      await loadQuickJobsFromDynamoDB();
+      
+      // Show success toast with correct message
+      setSuccessToastMessage(language === 'vi' ? 'Đã xóa bài đăng thành công!' : 'Post deleted successfully!');
+      setShowSuccessToast(true);
+      setTimeout(() => setShowSuccessToast(false), 3000);
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      setErrorNotificationMessage(language === 'vi' ? 'Lỗi khi xóa công việc' : 'Error deleting job');
+      setShowErrorNotification(true);
+      setTimeout(() => setShowErrorNotification(false), 3000);
     }
     
     setIsDeleting(false);
@@ -2879,28 +2802,44 @@ const HRManagement = () => {
   };
 
   // Save edited job
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editJobData) return;
 
-    const savedJobs = localStorage.getItem('quickJobs');
-    if (savedJobs) {
-      try {
-        const jobs = JSON.parse(savedJobs);
-        const updatedJobs = jobs.map(job => 
-          job.id === editJobId ? { ...job, ...editJobData } : job
-        );
-        localStorage.setItem('quickJobs', JSON.stringify(updatedJobs));
-        loadJobsFromLocalStorage();
-        
-        // Show success toast
-        setShowSuccessToast(true);
-        setTimeout(() => setShowSuccessToast(false), 3000);
-        
-        setEditJobId(null);
-        setEditJobData(null);
-      } catch (e) {
-        console.error('Error updating job:', e);
-      }
+    // Validate hourly rate
+    const hourlyRate = parseFloat(editJobData.hourlyRate);
+    if (isNaN(hourlyRate) || hourlyRate < 31875) {
+      setErrorNotificationMessage(language === 'vi' 
+        ? 'Lương phải lớn hơn hoặc bằng 31.875 VNĐ/giờ' 
+        : 'Hourly rate must be greater than or equal to 31,875 VND');
+      setShowErrorNotification(true);
+      return;
+    }
+
+    try {
+      // Clear any previous errors
+      setShowErrorNotification(false);
+      
+      // Get the actual job ID for API (idJob or jobID)
+      const job = quickJobPosts.find(j => j.id === editJobId);
+      const apiJobId = job?.idJob || editJobId;
+      
+      // Update job in DynamoDB via API
+      await quickJobService.updateQuickJob(apiJobId, editJobData);
+      
+      // Reload jobs from DynamoDB
+      await loadQuickJobsFromDynamoDB();
+      
+      // Show success toast with correct message
+      setSuccessToastMessage(language === 'vi' ? 'Đã cập nhật bài đăng!' : 'Post updated!');
+      setShowSuccessToast(true);
+      setTimeout(() => setShowSuccessToast(false), 3000);
+      
+      setEditJobId(null);
+      setEditJobData(null);
+    } catch (error) {
+      console.error('Error updating job:', error);
+      setErrorNotificationMessage(language === 'vi' ? 'Lỗi khi cập nhật công việc' : 'Error updating job');
+      setShowErrorNotification(true);
     }
   };
 
@@ -2908,18 +2847,19 @@ const HRManagement = () => {
   const handleCancelEdit = () => {
     setEditJobId(null);
     setEditJobData(null);
+    setShowErrorNotification(false);
   };
 
   // Reload jobs when page becomes visible
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        loadJobsFromLocalStorage();
+        loadQuickJobsFromDynamoDB();
       }
     };
 
     const handleFocus = () => {
-      loadJobsFromLocalStorage();
+      loadQuickJobsFromDynamoDB();
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -2953,22 +2893,6 @@ const HRManagement = () => {
         <QuickJobsSection>
           <QuickJobsGrid>
             <QuickJobCard
-              $color="#1e40af"
-              $active={activeSection === 'hr'}
-              onClick={() => setActiveSection('hr')}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <QuickJobIcon $color="#1e40af">
-                <UsersRound />
-              </QuickJobIcon>
-              <QuickJobLabel>{language === 'vi' ? 'Quản lý nhân sự' : 'HR Management'}</QuickJobLabel>
-              <QuickJobDescription>
-                {language === 'vi' ? 'Quản lý và theo dõi nhân viên đang làm việc' : 'Manage and track your workforce'}
-              </QuickJobDescription>
-            </QuickJobCard>
-            
-            <QuickJobCard
               $color="#10B981"
               $active={activeSection === 'posts'}
               onClick={() => setActiveSection('posts')}
@@ -2981,6 +2905,22 @@ const HRManagement = () => {
               <QuickJobLabel>{language === 'vi' ? 'Quản lý bài đăng' : 'Post Management'}</QuickJobLabel>
               <QuickJobDescription>
                 {language === 'vi' ? 'Tạo và quản lý các tin tuyển dụng' : 'Create and manage job postings'}
+              </QuickJobDescription>
+            </QuickJobCard>
+            
+            <QuickJobCard
+              $color="#1e40af"
+              $active={activeSection === 'hr'}
+              onClick={() => setActiveSection('hr')}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <QuickJobIcon $color="#1e40af">
+                <UsersRound />
+              </QuickJobIcon>
+              <QuickJobLabel>{language === 'vi' ? 'Quản lý nhân sự' : 'HR Management'}</QuickJobLabel>
+              <QuickJobDescription>
+                {language === 'vi' ? 'Quản lý và theo dõi nhân viên đang làm việc' : 'Manage and track your workforce'}
               </QuickJobDescription>
             </QuickJobCard>
           </QuickJobsGrid>
@@ -3288,8 +3228,8 @@ const HRManagement = () => {
                     REALTIME
                   </span>
                   {language === 'vi' 
-                    ? 'Bài đăng tức thời • Hiệu lực 7 ngày' 
-                    : 'Instant posts • Valid for 7 days'}
+                    ? 'Bài đăng tuyển gấp • Hiệu lực 7 ngày' 
+                    : 'Shift posts • Valid for 7 days'}
                 </p>
               </div>
               <PostJobButton
@@ -3329,8 +3269,27 @@ const HRManagement = () => {
                       transition={{ delay: index * 0.1 }}
                     >
                       <QuickJobPostHeader>
-                        <div>
-                          <QuickJobPostTitle>{post.title}</QuickJobPostTitle>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                            <QuickJobPostTitle style={{ margin: 0, flex: 1 }}>{post.title}</QuickJobPostTitle>
+                            <div style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              padding: '6px 12px',
+                              background: 'linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%)',
+                              border: '2px solid #EF4444',
+                              borderRadius: '100px',
+                              fontSize: '12px',
+                              fontWeight: '700',
+                              color: '#991B1B',
+                              whiteSpace: 'nowrap',
+                              flexShrink: 0
+                            }}>
+                              <Zap size={12} style={{ color: '#EF4444' }} />
+                              {language === 'vi' ? 'Tuyển gấp' : 'Urgent'}
+                            </div>
+                          </div>
                           <QuickJobPostMeta>
                             <div className="meta-item">
                               <MapPin />{post.location}
@@ -3338,6 +3297,8 @@ const HRManagement = () => {
                             <div className="meta-item">
                               <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Mức lương:' : 'Salary:'}</span> {post.salary}
                             </div>
+                          </QuickJobPostMeta>
+                          <QuickJobPostMeta>
                             {post.shift && (
                               <div className="meta-item">
                                 <Clock />{post.shift}
@@ -3348,11 +3309,6 @@ const HRManagement = () => {
                             </div>
                           </QuickJobPostMeta>
                         </div>
-                        <QuickJobStatusBadge $status={post.status}>
-                          {post.status === 'active'
-                            ? (language === 'vi' ? 'Đang tuyển' : 'Active')
-                            : (language === 'vi' ? 'Đã đóng' : 'Closed')}
-                        </QuickJobStatusBadge>
                       </QuickJobPostHeader>
                       
                       <QuickJobPostStats>
@@ -3372,7 +3328,7 @@ const HRManagement = () => {
                           whileTap={{ scale: 0.98 }}
                           onClick={() => handleViewJob(post.id)}
                         >
-                          <Eye />{language === 'vi' ? 'Xem' : 'View'}
+                          <Eye />{language === 'vi' ? 'Xem mô tả' : 'View'}
                         </QuickJobPostButton>
                         <QuickJobPostButton
                           $variant="primary"
@@ -4150,8 +4106,30 @@ const HRManagement = () => {
               exit={{ opacity: 0, x: 100 }}
             >
               <CheckCircle />
-              {language === 'vi' ? (editJobId ? 'Đã cập nhật bài đăng!' : 'Đã xóa bài đăng thành công!') : (editJobId ? 'Post updated!' : 'Post deleted successfully!')}
+              {successToastMessage}
             </SuccessToast>
+          )}
+        </AnimatePresence>
+
+        {/* Error Notification */}
+        <AnimatePresence>
+          {showErrorNotification && (
+            <ErrorNotification
+              initial={{ opacity: 0, y: -20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9, y: -20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            >
+              <AlertCircle />
+              <div className="error-content">
+                <div className="error-title">
+                  {language === 'vi' ? 'Có lỗi xảy ra' : 'Error Occurred'}
+                </div>
+                <div className="error-message">
+                  {errorNotificationMessage}
+                </div>
+              </div>
+            </ErrorNotification>
           )}
         </AnimatePresence>
 
@@ -4163,64 +4141,259 @@ const HRManagement = () => {
             title={language === 'vi' ? 'Chi tiết bài đăng' : 'Job Post Details'}
             size="large"
           >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {/* Header with Title and Urgent Badge */}
               <div>
-                <h3 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '16px', color: '#1e293b' }}>
-                  {selectedJobView.title}
-                </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '20px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
-                    <MapPin size={16} />
-                    <span>{selectedJobView.location}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                  <h3 style={{ fontSize: '24px', fontWeight: '700', color: '#1e293b', flex: 1, margin: 0 }}>
+                    {selectedJobView.title}
+                  </h3>
+                  <div style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 16px',
+                    background: 'linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%)',
+                    border: '2px solid #EF4444',
+                    borderRadius: '100px',
+                    fontSize: '13px',
+                    fontWeight: '700',
+                    color: '#991B1B',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    <Zap size={14} style={{ color: '#EF4444' }} />
+                    {language === 'vi' ? 'Tuyển gấp' : 'Urgent'}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
-                    <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Mức lương:' : 'Salary:'}</span>
-                    <span>{selectedJobView.salary}</span>
+                </div>
+                
+                {/* Meta Information Grid */}
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(2, 1fr)', 
+                  gap: '12px',
+                  padding: '20px',
+                  background: 'linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%)',
+                  borderRadius: '12px',
+                  border: '1px solid #E2E8F0'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#475569', fontSize: '14px' }}>
+                    <div style={{ 
+                      width: '36px', 
+                      height: '36px', 
+                      borderRadius: '10px', 
+                      background: '#EFF6FF', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      border: '1px solid #BFDBFE'
+                    }}>
+                      <MapPin size={18} style={{ color: '#1e40af' }} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '11px', color: '#94A3B8', fontWeight: '600', marginBottom: '2px' }}>
+                        {language === 'vi' ? 'Địa điểm' : 'Location'}
+                      </div>
+                      <div style={{ fontWeight: '600', color: '#334155' }}>{selectedJobView.location}</div>
+                    </div>
                   </div>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#475569', fontSize: '14px' }}>
+                    <div style={{ 
+                      width: '36px', 
+                      height: '36px', 
+                      borderRadius: '10px', 
+                      background: '#F0FDF4', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      border: '1px solid #BBF7D0'
+                    }}>
+                      <Banknote size={18} style={{ color: '#16A34A' }} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '11px', color: '#94A3B8', fontWeight: '600', marginBottom: '2px' }}>
+                        {language === 'vi' ? 'Mức lương' : 'Salary'}
+                      </div>
+                      <div style={{ fontWeight: '700', color: '#16A34A' }}>{selectedJobView.salary}</div>
+                    </div>
+                  </div>
+                  
                   {selectedJobView.shift && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
-                      <Clock size={16} />
-                      <span>{selectedJobView.shift}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#475569', fontSize: '14px' }}>
+                      <div style={{ 
+                        width: '36px', 
+                        height: '36px', 
+                        borderRadius: '10px', 
+                        background: '#FEF3C7', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        border: '1px solid #FDE047'
+                      }}>
+                        <Clock size={18} style={{ color: '#CA8A04' }} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '11px', color: '#94A3B8', fontWeight: '600', marginBottom: '2px' }}>
+                          {language === 'vi' ? 'Giờ làm' : 'Working Hours'}
+                        </div>
+                        <div style={{ fontWeight: '600', color: '#334155' }}>{selectedJobView.shift}</div>
+                      </div>
                     </div>
                   )}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
-                    <Calendar size={16} />
-                    <span>{selectedJobView.deadline}</span>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#475569', fontSize: '14px' }}>
+                    <div style={{ 
+                      width: '36px', 
+                      height: '36px', 
+                      borderRadius: '10px', 
+                      background: '#FCE7F3', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      border: '1px solid #FBCFE8'
+                    }}>
+                      <Calendar size={18} style={{ color: '#BE185D' }} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '11px', color: '#94A3B8', fontWeight: '600', marginBottom: '2px' }}>
+                        {language === 'vi' ? 'Ngày làm' : 'Work Date'}
+                      </div>
+                      <div style={{ fontWeight: '600', color: '#334155' }}>{selectedJobView.deadline}</div>
+                    </div>
                   </div>
+                  
                   {selectedJobView.contactPhone && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
-                      <Phone size={16} />
-                      <span>{selectedJobView.contactPhone}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#475569', fontSize: '14px', gridColumn: 'span 2' }}>
+                      <div style={{ 
+                        width: '36px', 
+                        height: '36px', 
+                        borderRadius: '10px', 
+                        background: '#E0E7FF', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        border: '1px solid #C7D2FE'
+                      }}>
+                        <Phone size={18} style={{ color: '#4F46E5' }} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '11px', color: '#94A3B8', fontWeight: '600', marginBottom: '2px' }}>
+                          {language === 'vi' ? 'Liên hệ' : 'Contact'}
+                        </div>
+                        <div style={{ fontWeight: '600', color: '#334155' }}>{selectedJobView.contactPhone}</div>
+                      </div>
                     </div>
                   )}
                 </div>
               </div>
               
+              {/* Description Section */}
               {selectedJobView.description && (
-                <div>
-                  <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: '#334155' }}>
-                    {language === 'vi' ? 'Mô tả công việc' : 'Job Description'}
-                  </h4>
-                  <p style={{ fontSize: '14px', lineHeight: '1.7', color: '#64748b', whiteSpace: 'pre-wrap' }}>
+                <div style={{
+                  padding: '20px',
+                  background: '#FFFFFF',
+                  borderRadius: '12px',
+                  border: '1px solid #E2E8F0'
+                }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '8px', 
+                    marginBottom: '12px',
+                    paddingBottom: '12px',
+                    borderBottom: '2px solid #E2E8F0'
+                  }}>
+                    <FileText size={18} style={{ color: '#1e40af' }} />
+                    <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b', margin: 0 }}>
+                      {language === 'vi' ? 'Mô tả công việc' : 'Job Description'}
+                    </h4>
+                  </div>
+                  <p style={{ 
+                    fontSize: '14px', 
+                    lineHeight: '1.8', 
+                    color: '#475569', 
+                    whiteSpace: 'pre-wrap',
+                    margin: 0
+                  }}>
                     {selectedJobView.description}
                   </p>
                 </div>
               )}
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', padding: '20px', background: '#f8fafc', borderRadius: '12px' }}>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '24px', fontWeight: '700', color: '#1e40af', marginBottom: '4px' }}>
-                    {selectedJobView.applicants}
+              {/* Requirements Section */}
+              {selectedJobView.requirements && (
+                <div style={{
+                  padding: '20px',
+                  background: '#FFFFFF',
+                  borderRadius: '12px',
+                  border: '1px solid #E2E8F0'
+                }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '8px', 
+                    marginBottom: '12px',
+                    paddingBottom: '12px',
+                    borderBottom: '2px solid #E2E8F0'
+                  }}>
+                    <Briefcase size={18} style={{ color: '#1e40af' }} />
+                    <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b', margin: 0 }}>
+                      {language === 'vi' ? 'Yêu cầu công việc' : 'Job Requirements'}
+                    </h4>
                   </div>
-                  <div style={{ fontSize: '13px', color: '#64748b' }}>
+                  <p style={{ 
+                    fontSize: '14px', 
+                    lineHeight: '1.8', 
+                    color: '#475569', 
+                    whiteSpace: 'pre-wrap',
+                    margin: 0
+                  }}>
+                    {selectedJobView.requirements}
+                  </p>
+                </div>
+              )}
+
+              {/* Stats Section */}
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(2, 1fr)', 
+                gap: '16px', 
+                padding: '24px', 
+                background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)', 
+                borderRadius: '12px',
+                border: '2px solid #BFDBFE'
+              }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    gap: '8px',
+                    marginBottom: '8px'
+                  }}>
+                    <Users size={20} style={{ color: '#1e40af' }} />
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#1e40af' }}>
+                      {selectedJobView.applicants}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#1e40af', fontWeight: '600' }}>
                     {language === 'vi' ? 'Ứng viên' : 'Applicants'}
                   </div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '24px', fontWeight: '700', color: '#1e40af', marginBottom: '4px' }}>
-                    {selectedJobView.views}
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    gap: '8px',
+                    marginBottom: '8px'
+                  }}>
+                    <Eye size={20} style={{ color: '#1e40af' }} />
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#1e40af' }}>
+                      {selectedJobView.views}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '13px', color: '#64748b' }}>
+                  <div style={{ fontSize: '13px', color: '#1e40af', fontWeight: '600' }}>
                     {language === 'vi' ? 'Lượt xem' : 'Views'}
                   </div>
                 </div>
@@ -4238,6 +4411,38 @@ const HRManagement = () => {
             size="large"
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Error Banner */}
+              <AnimatePresence>
+                {showErrorNotification && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10, height: 0 }}
+                    animate={{ opacity: 1, y: 0, height: 'auto' }}
+                    exit={{ opacity: 0, y: -10, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    style={{
+                      background: 'linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%)',
+                      border: '2px solid #EF4444',
+                      borderRadius: '12px',
+                      padding: '16px 20px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      marginBottom: '8px'
+                    }}
+                  >
+                    <AlertCircle style={{ width: '24px', height: '24px', color: '#DC2626', flexShrink: 0 }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '15px', fontWeight: '700', color: '#991B1B', marginBottom: '4px', whiteSpace: 'nowrap' }}>
+                        {language === 'vi' ? 'Có lỗi xảy ra' : 'Error Occurred'}
+                      </div>
+                      <div style={{ fontSize: '14px', fontWeight: '500', color: '#B91C1C', lineHeight: '1.4', whiteSpace: 'nowrap' }}>
+                        {errorNotificationMessage}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <div>
                 <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
                   {language === 'vi' ? 'Tiêu đề' : 'Title'}
@@ -4264,13 +4469,60 @@ const HRManagement = () => {
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
-                    {language === 'vi' ? 'Mức lương' : 'Salary'}
+                    {language === 'vi' ? 'Loại hình công việc' : 'Job Type'}
+                  </label>
+                  <select
+                    value={editJobData.jobType || 'part-time'}
+                    onChange={(e) => setEditJobData({ ...editJobData, jobType: e.target.value })}
+                    style={{ width: '100%', padding: '12px 16px', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', background: 'white' }}
+                  >
+                    <option value="part-time">{language === 'vi' ? 'Bán thời gian' : 'Part-time'}</option>
+                    <option value="full-time">{language === 'vi' ? 'Toàn thời gian' : 'Full-time'}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
+                    {language === 'vi' ? 'Lương (VNĐ/giờ)' : 'Hourly Rate (VND)'}
                   </label>
                   <input
-                    type="text"
-                    value={editJobData.salary || ''}
-                    onChange={(e) => setEditJobData({ ...editJobData, salary: e.target.value })}
+                    type="number"
+                    value={editJobData.hourlyRate || ''}
+                    onChange={(e) => {
+                      setEditJobData({ ...editJobData, hourlyRate: e.target.value });
+                      // Clear error when user starts typing
+                      if (showErrorNotification && errorNotificationMessage.includes('Lương') || errorNotificationMessage.includes('Hourly')) {
+                        setShowErrorNotification(false);
+                      }
+                    }}
+                    style={{ 
+                      width: '100%', 
+                      padding: '12px 16px', 
+                      border: `2px solid ${editJobData.hourlyRate && parseFloat(editJobData.hourlyRate) < 31875 ? '#EF4444' : '#e2e8f0'}`, 
+                      borderRadius: '12px', 
+                      fontSize: '14px',
+                      background: editJobData.hourlyRate && parseFloat(editJobData.hourlyRate) < 31875 ? '#FEE2E2' : 'white'
+                    }}
+                    min="31875"
+                  />
+                  {editJobData.hourlyRate && parseFloat(editJobData.hourlyRate) < 31875 && (
+                    <small style={{ color: '#DC2626', fontSize: '12px', marginTop: '4px', display: 'block', fontWeight: '600' }}>
+                      ⚠️ {language === 'vi' ? 'Lương phải lớn hơn hoặc bằng 31.875 VNĐ' : 'Salary must be >= 31,875 VND'}
+                    </small>
+                  )}
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
+                    {language === 'vi' ? 'Ngày làm' : 'Work Date'}
+                  </label>
+                  <input
+                    type="date"
+                    value={editJobData.workDate || ''}
+                    onChange={(e) => setEditJobData({ ...editJobData, workDate: e.target.value })}
                     style={{ width: '100%', padding: '12px 16px', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '14px' }}
+                    min={new Date().toISOString().split('T')[0]}
                   />
                 </div>
               </div>
@@ -4278,23 +4530,23 @@ const HRManagement = () => {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
-                    {language === 'vi' ? 'Ca làm việc' : 'Shift'}
+                    {language === 'vi' ? 'Giờ bắt đầu' : 'Start Time'}
                   </label>
                   <input
-                    type="text"
-                    value={editJobData.shift || ''}
-                    onChange={(e) => setEditJobData({ ...editJobData, shift: e.target.value })}
+                    type="time"
+                    value={editJobData.startTime || ''}
+                    onChange={(e) => setEditJobData({ ...editJobData, startTime: e.target.value })}
                     style={{ width: '100%', padding: '12px 16px', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '14px' }}
                   />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
-                    {language === 'vi' ? 'Số điện thoại' : 'Phone'}
+                    {language === 'vi' ? 'Giờ kết thúc' : 'End Time'}
                   </label>
                   <input
-                    type="text"
-                    value={editJobData.contactPhone || ''}
-                    onChange={(e) => setEditJobData({ ...editJobData, contactPhone: e.target.value })}
+                    type="time"
+                    value={editJobData.endTime || ''}
+                    onChange={(e) => setEditJobData({ ...editJobData, endTime: e.target.value })}
                     style={{ width: '100%', padding: '12px 16px', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '14px' }}
                   />
                 </div>
@@ -4302,13 +4554,27 @@ const HRManagement = () => {
 
               <div>
                 <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
-                  {language === 'vi' ? 'Mô tả công việc' : 'Description'}
+                  {language === 'vi' ? 'Mô tả công việc' : 'Job Description'}
                 </label>
                 <textarea
                   value={editJobData.description || ''}
                   onChange={(e) => setEditJobData({ ...editJobData, description: e.target.value })}
-                  rows={6}
+                  rows={4}
                   style={{ width: '100%', padding: '12px 16px', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', resize: 'vertical' }}
+                  placeholder={language === 'vi' ? 'Mô tả ngắn gọn về công việc...' : 'Brief description of the job...'}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
+                  {language === 'vi' ? 'Yêu cầu' : 'Requirements'}
+                </label>
+                <textarea
+                  value={editJobData.requirements || ''}
+                  onChange={(e) => setEditJobData({ ...editJobData, requirements: e.target.value })}
+                  rows={3}
+                  style={{ width: '100%', padding: '12px 16px', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', resize: 'vertical' }}
+                  placeholder={language === 'vi' ? 'Liệt kê các yêu cầu cần thiết...' : 'List necessary requirements...'}
                 />
               </div>
 

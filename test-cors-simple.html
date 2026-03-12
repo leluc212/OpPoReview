@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test CORS - Quick Job API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success { background: #d1fae5; border: 1px solid #10b981; }
+        .error { background: #fee2e2; border: 1px solid #ef4444; }
+        button {
+            background: #1e40af;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test CORS - Quick Job API</h1>
+    
+    <button onclick="testOptions()">Test OPTIONS (Preflight)</button>
+    <button onclick="testGet()">Test GET</button>
+    <button onclick="testPost()">Test POST</button>
+    
+    <div id="result"></div>
+
+    <script>
+        const API_URL = 'https://6zw89pkuxb.execute-api.ap-southeast-1.amazonaws.com';
+        
+        async function testOptions() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="result">Testing OPTIONS...</div>';
+            
+            try {
+                const response = await fetch(`${API_URL}/quick-jobs`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const headers = {};
+                response.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+                
+                resultDiv.innerHTML = `
+                    <div class="result success">
+                        ✅ OPTIONS Request Success
+                        
+Status: ${response.status}
+Status Text: ${response.statusText}
+
+Response Headers:
+${JSON.stringify(headers, null, 2)}
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        ❌ OPTIONS Request Failed
+                        
+Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        async function testGet() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="result">Testing GET...</div>';
+            
+            try {
+                const response = await fetch(`${API_URL}/quick-jobs/active`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="result success">
+                        ✅ GET Request Success
+                        
+Status: ${response.status}
+
+Response:
+${JSON.stringify(data, null, 2)}
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        ❌ GET Request Failed
+                        
+Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        async function testPost() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="result">Testing POST...</div>';
+            
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0].replace(/-/g, '');
+            const randomStr = Math.random().toString(36).substring(2, 7).toUpperCase();
+            const jobId = `QJOB-${dateStr}-${randomStr}`;
+            
+            const payload = {
+                idJob: jobId,
+                employerId: 'test-employer-123',
+                employerEmail: 'test@example.com',
+                companyName: 'Test Company',
+                title: 'Test Job',
+                location: 'Test Location',
+                jobType: 'part-time',
+                hourlyRate: 35000,
+                startTime: '18:00',
+                endTime: '22:00',
+                totalHours: 4,
+                totalSalary: 140000,
+                description: 'Test description',
+                requirements: 'Test requirements',
+                status: 'active',
+                workDate: '2026-03-14',
+                createdAt: now.toISOString(),
+                updatedAt: now.toISOString()
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/quick-jobs`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            ✅ POST Request Success
+                            
+Status: ${response.status}
+
+Response:
+${JSON.stringify(data, null, 2)}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            ❌ POST Request Failed
+                            
+Status: ${response.status}
+
+Response:
+${JSON.stringify(data, null, 2)}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        ❌ POST Request Failed
+                        
+Error: ${error.message}
+Stack: ${error.stack}
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Quick Job API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #64748b;
+            font-size: 16px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            font-size: 20px;
+            color: #1e293b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge.post { background: #dbeafe; color: #1e40af; }
+        .badge.get { background: #d1fae5; color: #059669; }
+        .badge.put { background: #fef3c7; color: #d97706; }
+        .badge.delete { background: #fee2e2; color: #dc2626; }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(30, 64, 175, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .response {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .response.success {
+            background: #d1fae5;
+            border-color: #059669;
+        }
+        
+        .response.error {
+            background: #fee2e2;
+            border-color: #dc2626;
+        }
+        
+        .response pre {
+            margin: 0;
+            font-size: 13px;
+            line-height: 1.6;
+            overflow-x: auto;
+            color: #1e293b;
+        }
+        
+        .info-box {
+            background: #eff6ff;
+            border: 2px solid #bfdbfe;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #1e3a8a;
+        }
+        
+        .info-box strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #1e40af;
+        }
+        
+        .calculated {
+            background: #eff6ff;
+            border: 2px solid #1e40af;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .calculated span {
+            font-size: 14px;
+            color: #1e3a8a;
+            font-weight: 600;
+        }
+        
+        .calculated .amount {
+            font-size: 20px;
+            color: #1e40af;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Test Quick Job API</h1>
+            <p>Kiểm tra API tạo và quản lý tin tuyển dụng gấp</p>
+        </div>
+
+        <div class="info-box">
+            <strong>📝 Hướng dẫn:</strong>
+            1. Cập nhật API_ENDPOINT bên dưới với URL từ quick-job-api-config.json<br>
+            2. Điền thông tin công việc vào form<br>
+            3. Bấm "Tạo Quick Job" để test API
+        </div>
+
+        <!-- Create Quick Job -->
+        <div class="card">
+            <h2>
+                <span class="badge post">POST</span>
+                Tạo Quick Job Mới
+            </h2>
+            
+            <div class="form-group">
+                <label>API Endpoint</label>
+                <input type="text" id="apiEndpoint" value="https://YOUR_API_ID.execute-api.ap-southeast-1.amazonaws.com" placeholder="Nhập API endpoint từ config">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Tiêu đề công việc *</label>
+                    <input type="text" id="title" value="Ca Tối - Nhân viên Phục vụ" placeholder="VD: Ca Tối - Nhân viên Phục vụ">
+                </div>
+                <div class="form-group">
+                    <label>Địa điểm *</label>
+                    <input type="text" id="location" value="Quận 1, TP.HCM" placeholder="VD: Quận 1, TP.HCM">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Lương theo giờ (VNĐ) *</label>
+                    <input type="number" id="hourlyRate" value="35000" placeholder="35000" min="31876">
+                </div>
+                <div class="form-group">
+                    <label>Loại công việc</label>
+                    <input type="text" id="jobType" value="part-time" placeholder="part-time hoặc full-time">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Giờ bắt đầu *</label>
+                    <input type="time" id="startTime" value="18:00">
+                </div>
+                <div class="form-group">
+                    <label>Giờ kết thúc *</label>
+                    <input type="time" id="endTime" value="23:00">
+                </div>
+            </div>
+
+            <div id="salaryCalculation" class="calculated" style="display: none;">
+                <span>Tổng lương ước tính:</span>
+                <span class="amount" id="totalSalary">0 VNĐ</span>
+            </div>
+
+            <div class="form-group">
+                <label>Mô tả công việc</label>
+                <textarea id="description" placeholder="Mô tả chi tiết về công việc...">Cần nhân viên phục vụ ca tối, làm việc tại quán ăn khu vực trung tâm. Nhiệt tình, nhanh nhẹn.</textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Yêu cầu</label>
+                <textarea id="requirements" placeholder="Yêu cầu đối với ứng viên...">Nhiệt tình, nhanh nhẹn, có kinh nghiệm ưu tiên</textarea>
+            </div>
+
+            <button onclick="createQuickJob()">🚀 Tạo Quick Job</button>
+
+            <div id="createResponse"></div>
+        </div>
+
+        <!-- Get Active Quick Jobs -->
+        <div class="card">
+            <h2>
+                <span class="badge get">GET</span>
+                Lấy danh sách Quick Jobs đang active
+            </h2>
+            
+            <button onclick="getActiveQuickJobs()">📋 Lấy danh sách</button>
+
+            <div id="activeResponse"></div>
+        </div>
+    </div>
+
+    <script>
+        // Calculate total salary when inputs change
+        function calculateSalary() {
+            const hourlyRate = parseFloat(document.getElementById('hourlyRate').value) || 0;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+
+            if (hourlyRate > 0 && startTime && endTime) {
+                const [startHour, startMin] = startTime.split(':').map(Number);
+                const [endHour, endMin] = endTime.split(':').map(Number);
+
+                let hours = (endHour + endMin / 60) - (startHour + startMin / 60);
+                if (hours < 0) hours += 24;
+
+                const total = hourlyRate * hours;
+                
+                document.getElementById('salaryCalculation').style.display = 'flex';
+                document.getElementById('totalSalary').textContent = 
+                    total.toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' VNĐ';
+            } else {
+                document.getElementById('salaryCalculation').style.display = 'none';
+            }
+        }
+
+        // Add event listeners
+        document.getElementById('hourlyRate').addEventListener('input', calculateSalary);
+        document.getElementById('startTime').addEventListener('change', calculateSalary);
+        document.getElementById('endTime').addEventListener('change', calculateSalary);
+
+        // Calculate on page load
+        calculateSalary();
+
+        // Generate job ID
+        function generateJobId() {
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let randomStr = '';
+            for (let i = 0; i < 5; i++) {
+                randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            
+            return `QJOB-${year}${month}${day}-${randomStr}`;
+        }
+
+        // Calculate hours and total salary
+        function calculateHoursAndSalary(startTime, endTime, hourlyRate) {
+            const [startHour, startMin] = startTime.split(':').map(Number);
+            const [endHour, endMin] = endTime.split(':').map(Number);
+
+            let hours = (endHour + endMin / 60) - (startHour + startMin / 60);
+            if (hours < 0) hours += 24;
+
+            return {
+                totalHours: hours,
+                totalSalary: hourlyRate * hours
+            };
+        }
+
+        async function createQuickJob() {
+            const apiEndpoint = document.getElementById('apiEndpoint').value;
+            const title = document.getElementById('title').value;
+            const location = document.getElementById('location').value;
+            const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
+            const jobType = document.getElementById('jobType').value;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            const description = document.getElementById('description').value;
+            const requirements = document.getElementById('requirements').value;
+
+            if (!title || !location || !hourlyRate || !startTime || !endTime) {
+                showResponse('createResponse', 'error', 'Vui lòng điền đầy đủ các trường bắt buộc (*)');
+                return;
+            }
+
+            if (hourlyRate <= 31875) {
+                showResponse('createResponse', 'error', 'Lương theo giờ phải lớn hơn 31.875 VNĐ');
+                return;
+            }
+
+            const { totalHours, totalSalary } = calculateHoursAndSalary(startTime, endTime, hourlyRate);
+
+            const payload = {
+                idJob: generateJobId(),
+                employerId: 'test-employer-' + Date.now(),
+                employerEmail: 'test@example.com',
+                companyName: 'Test Company',
+                title: title,
+                location: location,
+                jobType: jobType,
+                hourlyRate: hourlyRate,
+                startTime: startTime,
+                endTime: endTime,
+                totalHours: totalHours,
+                totalSalary: totalSalary,
+                description: description,
+                requirements: requirements,
+                status: 'active',
+                category: 'quick-jobs',
+                applicants: 0,
+                views: 0,
+                fee: totalSalary,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch(`${apiEndpoint}/quick-jobs`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResponse('createResponse', 'success', JSON.stringify(data, null, 2));
+                } else {
+                    showResponse('createResponse', 'error', JSON.stringify(data, null, 2));
+                }
+            } catch (error) {
+                showResponse('createResponse', 'error', 'Error: ' + error.message);
+            }
+        }
+
+        async function getActiveQuickJobs() {
+            const apiEndpoint = document.getElementById('apiEndpoint').value;
+
+            try {
+                const response = await fetch(`${apiEndpoint}/quick-jobs/active`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResponse('activeResponse', 'success', JSON.stringify(data, null, 2));
+                } else {
+                    showResponse('activeResponse', 'error', JSON.stringify(data, null, 2));
+                }
+            } catch (error) {
+                showResponse('activeResponse', 'error', 'Error: ' + error.message);
+            }
+        }
+
+        function showResponse(elementId, type, message) {
+            const element = document.getElementById(elementId);
+            element.className = `response ${type}`;
+            element.innerHTML = `<pre>${message}</pre>`;
+        }
+    </script>
+</body>
+</html>

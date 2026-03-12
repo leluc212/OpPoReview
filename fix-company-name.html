@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Company Name</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+        }
+        .label {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 10px;
+            display: block;
+        }
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        button {
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(30, 64, 175, 0.4);
+        }
+        button.secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        button.secondary:hover {
+            background: #d1d5db;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .success {
+            background: #d1fae5;
+            border: 2px solid #059669;
+            color: #065f46;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .error {
+            background: #fee2e2;
+            border: 2px solid #dc2626;
+            color: #991b1b;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .info {
+            background: #dbeafe;
+            border: 2px solid #3b82f6;
+            color: #1e40af;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏢 Fix Company Name</h1>
+        <p class="subtitle">Cập nhật tên công ty trong employer profile</p>
+
+        <div class="info">
+            💡 Tên công ty này sẽ được sử dụng khi đăng Quick Job
+        </div>
+
+        <div class="section">
+            <label class="label">Current Profile Data</label>
+            <pre id="currentProfile">Loading...</pre>
+        </div>
+
+        <div class="section">
+            <label class="label">Update Company Name</label>
+            <input type="text" id="companyNameInput" placeholder="Nhập tên công ty (VD: Công ty TNHH ABC)">
+            <input type="text" id="businessNameInput" placeholder="Tên doanh nghiệp (optional)">
+            <button onclick="updateProfile()">💾 Cập nhật</button>
+            <button class="secondary" onclick="loadProfile()">🔄 Refresh</button>
+        </div>
+
+        <div id="message"></div>
+
+        <div class="section">
+            <label class="label">Test Company Name Retrieval</label>
+            <button onclick="testGetCompanyInfo()">🧪 Test getCompanyInfo()</button>
+            <pre id="testResult"></pre>
+        </div>
+    </div>
+
+    <script>
+        function loadProfile() {
+            const profile = localStorage.getItem('employerProfile');
+            if (profile) {
+                const data = JSON.parse(profile);
+                document.getElementById('currentProfile').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('companyNameInput').value = data.companyName || '';
+                document.getElementById('businessNameInput').value = data.businessName || '';
+            } else {
+                document.getElementById('currentProfile').textContent = 'No profile found in localStorage';
+            }
+        }
+
+        function updateProfile() {
+            const companyName = document.getElementById('companyNameInput').value.trim();
+            const businessName = document.getElementById('businessNameInput').value.trim();
+
+            if (!companyName) {
+                showMessage('error', 'Vui lòng nhập tên công ty!');
+                return;
+            }
+
+            // Get existing profile or create new
+            let profile = {};
+            const existing = localStorage.getItem('employerProfile');
+            if (existing) {
+                profile = JSON.parse(existing);
+            }
+
+            // Update company info
+            profile.companyName = companyName;
+            if (businessName) {
+                profile.businessName = businessName;
+            }
+
+            // Save to localStorage
+            localStorage.setItem('employerProfile', JSON.stringify(profile));
+
+            showMessage('success', `✅ Đã cập nhật tên công ty: ${companyName}`);
+            loadProfile();
+        }
+
+        function showMessage(type, text) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = type;
+            messageDiv.textContent = text;
+            setTimeout(() => {
+                messageDiv.className = '';
+                messageDiv.textContent = '';
+            }, 5000);
+        }
+
+        async function testGetCompanyInfo() {
+            const testResult = document.getElementById('testResult');
+            testResult.textContent = 'Testing...';
+
+            try {
+                // Simulate the getCompanyInfo function
+                const cachedProfile = localStorage.getItem('employerProfile');
+                if (cachedProfile) {
+                    const profile = JSON.parse(cachedProfile);
+                    const companyName = profile.companyName || profile.businessName || 'Unknown Company';
+                    
+                    testResult.textContent = JSON.stringify({
+                        success: true,
+                        source: 'localStorage',
+                        companyName: companyName,
+                        fullProfile: profile
+                    }, null, 2);
+                } else {
+                    testResult.textContent = JSON.stringify({
+                        success: false,
+                        message: 'No profile found',
+                        companyName: 'Unknown Company'
+                    }, null, 2);
+                }
+            } catch (error) {
+                testResult.textContent = JSON.stringify({
+                    success: false,
+                    error: error.message
+                }, null, 2);
+            }
+        }
+
+        // Load on page load
+        loadProfile();
+    </script>
+</body>
+</html>

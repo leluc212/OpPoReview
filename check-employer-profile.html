@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Employer Profile</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #4ec9b0;
+        }
+        pre {
+            background: #252526;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid #3e3e42;
+        }
+        .key {
+            color: #9cdcfe;
+        }
+        .string {
+            color: #ce9178;
+        }
+        .number {
+            color: #b5cea8;
+        }
+        button {
+            background: #0e639c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1177bb;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #252526;
+            border-radius: 5px;
+            border: 1px solid #3e3e42;
+        }
+        .label {
+            color: #4ec9b0;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Check Employer Profile Data</h1>
+        
+        <div class="section">
+            <div class="label">employerProfile (localStorage)</div>
+            <pre id="employerProfile"></pre>
+        </div>
+
+        <div class="section">
+            <div class="label">Cognito Session</div>
+            <pre id="cognitoSession"></pre>
+        </div>
+
+        <div class="section">
+            <div class="label">Actions</div>
+            <button onclick="refreshData()">🔄 Refresh</button>
+            <button onclick="clearProfile()">🗑️ Clear Profile</button>
+            <button onclick="setTestProfile()">✏️ Set Test Profile</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { fetchAuthSession } from 'https://cdn.jsdelivr.net/npm/aws-amplify@6/auth/+esm';
+
+        window.refreshData = async function() {
+            // Check localStorage
+            const employerProfile = localStorage.getItem('employerProfile');
+            document.getElementById('employerProfile').textContent = employerProfile 
+                ? JSON.stringify(JSON.parse(employerProfile), null, 2)
+                : 'No employerProfile found in localStorage';
+
+            // Check Cognito session
+            try {
+                const session = await fetchAuthSession();
+                if (session && session.tokens && session.tokens.idToken) {
+                    const payload = session.tokens.idToken.payload;
+                    document.getElementById('cognitoSession').textContent = JSON.stringify({
+                        sub: payload.sub,
+                        email: payload.email,
+                        companyName: payload['custom:companyName'] || payload.companyName || 'Not set',
+                        allAttributes: payload
+                    }, null, 2);
+                } else {
+                    document.getElementById('cognitoSession').textContent = 'No Cognito session found';
+                }
+            } catch (error) {
+                document.getElementById('cognitoSession').textContent = 'Error: ' + error.message;
+            }
+        };
+
+        window.clearProfile = function() {
+            localStorage.removeItem('employerProfile');
+            alert('Profile cleared!');
+            refreshData();
+        };
+
+        window.setTestProfile = function() {
+            const testProfile = {
+                companyName: 'Công ty TNHH ABC',
+                businessName: 'ABC Company Ltd',
+                email: 'test@abc.com',
+                phone: '0901234567'
+            };
+            localStorage.setItem('employerProfile', JSON.stringify(testProfile));
+            alert('Test profile set!');
+            refreshData();
+        };
+
+        // Auto refresh on load
+        refreshData();
+    </script>
+</body>
+</html>
