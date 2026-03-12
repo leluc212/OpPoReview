@@ -337,7 +337,7 @@ const DropdownMenu = styled(motion.div)`
 
 const LargeDropdownMenu = styled(motion.div)`
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 4px);
   left: 0;
   background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.98)' : 'white'};
   border-radius: 16px;
@@ -353,6 +353,15 @@ const LargeDropdownMenu = styled(motion.div)`
   display: flex;
   gap: 20px;
   backdrop-filter: blur(20px);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 0;
+    right: 0;
+    height: 8px;
+  }
   transition: background 0.3s ease;
   
   @media (max-width: 1024px) {
@@ -401,7 +410,7 @@ const GreenSectionTitle = styled.h3`
   }
 `;
 
-const CVTemplateItem = styled(motion.div)`
+const CVTemplateItem = styled(motion(Link))`
   display: flex;
   align-items: center;
   gap: 8px;
@@ -2677,6 +2686,8 @@ const LandingPage = () => {
 
   const jobDropdownRef = useRef(null);
   const companyDropdownRef = useRef(null);
+  const jobDropdownTimer = useRef(null);
+  const companyDropdownTimer = useRef(null);
   const scrollContainerRef = useRef(null);
   const heroRef = useRef(null);
   const companyRef = useRef(null);
@@ -2810,8 +2821,8 @@ const LandingPage = () => {
           <NavLinks $isDark={isDarkMode}>
             <DropdownContainer
               ref={jobDropdownRef}
-              onMouseEnter={() => setIsJobDropdownOpen(true)}
-              onMouseLeave={() => setIsJobDropdownOpen(false)}
+              onMouseEnter={() => { clearTimeout(jobDropdownTimer.current); setIsJobDropdownOpen(true); }}
+              onMouseLeave={() => { jobDropdownTimer.current = setTimeout(() => setIsJobDropdownOpen(false), 200); }}
             >
               <DropdownButton
                 $isOpen={isJobDropdownOpen}
@@ -2838,7 +2849,7 @@ const LandingPage = () => {
                         <Search />
                         Tìm việc làm
                       </CVTemplateItem>
-                      <CVTemplateItem to="/candidate/saved-jobs" $isDark={isDarkMode}>
+                      <CVTemplateItem to="/candidate/jobs?tab=saved" $isDark={isDarkMode}>
                         <Bookmark />
                         Việc làm đã lưu
                       </CVTemplateItem>
@@ -2888,8 +2899,8 @@ const LandingPage = () => {
 
             <DropdownContainer
               ref={companyDropdownRef}
-              onMouseEnter={() => setIsCompanyDropdownOpen(true)}
-              onMouseLeave={() => setIsCompanyDropdownOpen(false)}
+              onMouseEnter={() => { companyDropdownTimer.current = setTimeout(() => setIsCompanyDropdownOpen(true), 300); }}
+              onMouseLeave={() => { clearTimeout(companyDropdownTimer.current); setIsCompanyDropdownOpen(false); }}
             >
               <DropdownButton
                 $isOpen={isCompanyDropdownOpen}

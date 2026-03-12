@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Edit3, Trash2, Eye, CheckCircle, Send, Search, Calendar, Newspaper, TrendingUp, AlertCircle, User, Plus, X, Wallet, Save, Award, Star, Briefcase, Zap, Banknote } from 'lucide-react';
+import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Edit3, Trash2, Eye, CheckCircle, Send, Search, Calendar, Newspaper, TrendingUp, AlertCircle, User, Plus, X, Wallet, Save, Award, Star, Briefcase, Zap, Banknote, ThumbsUp, ThumbsDown, ArrowRight, RefreshCw } from 'lucide-react';
 import Modal from '../../components/Modal';
 
 // Helper: tính số giờ từ chuỗi shift "HH:MM - HH:MM"
@@ -82,7 +82,7 @@ const getHRStaff = (language) => {
     phone: '0987 654 321',
     email: 'phamthuhuong@example.com',
     startDate: language === 'vi' ? '20/02/2024' : '02/20/2024',
-    status: 'active',
+    status: 'pending_confirmation',
     shift: '09:00 - 17:00',
     hourlyRate: 20000,
     confirmedAt: `${oldDate} - ${oldTimeStr}`,
@@ -106,7 +106,7 @@ const getHRStaff = (language) => {
     phone: '0909 111 222',
     email: 'tranquocbao@example.com',
     startDate: language === 'vi' ? '10/03/2024' : '03/10/2024',
-    status: 'active',
+    status: 'pending_change',
     shift: '18:00 - 22:00',
     hourlyRate: 20000,
     confirmedAt: `${today} - ${recentTimeStr}`,
@@ -120,7 +120,15 @@ const getHRStaff = (language) => {
     bio: language === 'vi' ? 'Sinh viên kiêm việc, nhiệt tình và nhanh nhẹn.' : 'Student with part-time work, enthusiastic and agile.',
     reviews: [
       { id: 1, employer: language === 'vi' ? 'Nhà hàng Hương Việt' : 'Huong Viet Restaurant', position: language === 'vi' ? 'Nhân viên phục vụ' : 'Server', rating: 4, date: language === 'vi' ? 'Tháng 11/2024' : 'Nov 2024', comment: language === 'vi' ? 'Nhanh nhẹn, thân thiện.' : 'Quick and friendly.' }
-    ]
+    ],
+    changeRequest: {
+      type: 'staff_replacement',
+      typeLabel: language === 'vi' ? 'Đổi người' : 'Staff Replacement',
+      reason: language === 'vi' ? 'Có lịch thi giữa kỳ đột xuất, không thể đi làm ca này, xin nhờ người thay' : 'Unexpected midterm exam schedule, unable to work this shift, requesting a replacement',
+      requestedAt: language === 'vi' ? `${today} - 07:45` : `${today} - 07:45`,
+      urgency: 'urgent',
+      sentToAdmin: true
+    }
   },
   {
     id: 4,
@@ -509,16 +517,22 @@ const StaffStatus = styled.div`
     props.$status === 'active' ? '#D1FAE5' : 
     props.$status === 'completed' ? '#E0E7FF' : 
     props.$status === 'pending' ? '#FEF9C3' :
+    props.$status === 'pending_confirmation' ? '#FEE2E2' :
+    props.$status === 'pending_change' ? '#FFEDD5' :
     '#FEF3C7'};
   color: ${props => 
     props.$status === 'active' ? '#047857' : 
     props.$status === 'completed' ? '#3730A3' : 
     props.$status === 'pending' ? '#854D0E' :
+    props.$status === 'pending_confirmation' ? '#B91C1C' :
+    props.$status === 'pending_change' ? '#C2410C' :
     '#92400E'};
   border: 1px solid ${props => 
     props.$status === 'active' ? '#10B981' : 
     props.$status === 'completed' ? '#818CF8' : 
     props.$status === 'pending' ? '#EAB308' :
+    props.$status === 'pending_confirmation' ? '#EF4444' :
+    props.$status === 'pending_change' ? '#F97316' :
     '#F59E0B'};
 `;
 
@@ -551,6 +565,126 @@ const StaffActions = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+`;
+
+const StaffTabBar = styled.div`
+  display: inline-flex;
+  gap: 8px;
+  margin-bottom: 28px;
+`;
+
+const StaffTabButton = styled.button`
+  padding: 10px 24px;
+  cursor: pointer;
+  border-radius: 10px;
+  border: 1.5px solid ${props => props.$active ? props.$color : '#E2E8F0'};
+  background: ${props => props.$active ? props.$color + '10' : '#FFFFFF'};
+  color: ${props => props.$active ? props.$color : '#94A3B8'};
+  font-size: 13px;
+  font-weight: ${props => props.$active ? '700' : '500'};
+  box-shadow: ${props => props.$active ? `0 2px 10px ${props.$color}25` : '0 1px 4px rgba(0,0,0,0.06)'};
+  transition: all 0.18s ease;
+  white-space: nowrap;
+
+  &:hover {
+    border-color: ${props => props.$color};
+    color: ${props => props.$color};
+    background: ${props => props.$color + '08'};
+    box-shadow: 0 3px 12px ${props => props.$color}20;
+  }
+`;
+
+const ChangeRequestBanner = styled.div`
+  background: linear-gradient(135deg, #FFF7ED, #FFEDD5);
+  border: 1.5px solid #FDBA74;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+
+  .cr-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .cr-urgency-urgent {
+    font-size: 11px;
+    font-weight: 700;
+    color: #991B1B;
+    background: #FEE2E2;
+    border: 1px solid #FCA5A5;
+    padding: 2px 7px;
+    border-radius: 5px;
+  }
+
+  .cr-urgency-normal {
+    font-size: 11px;
+    font-weight: 700;
+    color: #92400E;
+    background: #FEF3C7;
+    border: 1px solid #FCD34D;
+    padding: 2px 7px;
+    border-radius: 5px;
+  }
+
+  .cr-shift-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #7C2D12;
+    margin-bottom: 6px;
+    svg { width: 14px; height: 14px; color: #F97316; }
+  }
+
+  .cr-reason {
+    font-size: 12px;
+    color: #92400E;
+    line-height: 1.5;
+    font-style: italic;
+    margin-bottom: 6px;
+  }
+
+  .cr-time {
+    font-size: 11px;
+    color: #B45309;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    svg { width: 11px; height: 11px; }
+  }
+`;
+
+const ChangeTypeGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+`;
+
+const ChangeTypeButton = styled.button`
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1.5px solid ${props => props.$selected ? '#F59E0B' : '#E5E7EB'};
+  background: ${props => props.$selected ? 'linear-gradient(135deg, #FFFBEB, #FEF3C7)' : '#FAFAFA'};
+  color: ${props => props.$selected ? '#D97706' : '#6B7280'};
+
+  svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+  &:hover {
+    border-color: #F59E0B;
+    background: linear-gradient(135deg, #FFFBEB, #FEF3C7);
+    color: #D97706;
+  }
 `;
 
 const StaffButton = styled(motion.button)`
@@ -2311,7 +2445,7 @@ const HRManagement = () => {
       const mockQuickJobs = [
         {
           id: 1709870123456,
-          title: 'Ca Tối - Nhân viên Phục vụ',
+          title: 'Nhân viên Phục vụ',
           location: 'Quận 1, TP.HCM',
           hourlyRate: 35000,
           startTime: '18:00',
@@ -2328,7 +2462,7 @@ const HRManagement = () => {
         },
         {
           id: 1709783123456,
-          title: 'Ca Trưa - Nhân viên Phụ bếp',
+          title: 'Nhân viên Phụ bếp',
           location: 'Quận 3, TP.HCM',
           hourlyRate: 32000,
           startTime: '10:00',
@@ -2345,7 +2479,7 @@ const HRManagement = () => {
         },
         {
           id: 1709696123456,
-          title: 'Ca Chiều - Nhân viên Pha chế',
+          title: 'Nhân viên Pha chế',
           location: 'Quận 7, TP.HCM',
           hourlyRate: 38000,
           startTime: '14:00',
@@ -2362,7 +2496,7 @@ const HRManagement = () => {
         },
         {
           id: 1709609123456,
-          title: 'Ca Sáng - Nhân viên Bán hàng',
+          title: 'Nhân viên Bán hàng',
           location: 'Quận 10, TP.HCM',
           hourlyRate: 33000,
           startTime: '07:00',
@@ -2379,7 +2513,7 @@ const HRManagement = () => {
         },
         {
           id: 1709522123456,
-          title: 'Ca Tối - Nhân viên Thu ngân',
+          title: 'Nhân viên Thu ngân',
           location: 'Quận 2, TP.HCM',
           hourlyRate: 36000,
           startTime: '17:00',
@@ -2396,7 +2530,7 @@ const HRManagement = () => {
         },
         {
           id: 1709435123456,
-          title: 'Ca Tối - Nhân viên Rửa chén',
+          title: 'Nhân viên Rửa chén',
           location: 'Quận 5, TP.HCM',
           hourlyRate: 32000,
           startTime: '19:00',
@@ -2481,6 +2615,8 @@ const HRManagement = () => {
   const [showChangeRequestToast, setShowChangeRequestToast] = useState(false);
   const [changeRequestStaff, setChangeRequestStaff] = useState(null);
   const [changeRequestReason, setChangeRequestReason] = useState('');
+  const [changeRequestType, setChangeRequestType] = useState('');
+  const [staffTabFilter, setStaffTabFilter] = useState('working');
   const [showChangeRequestSuccess, setShowChangeRequestSuccess] = useState(false);
   const [selectedJobView, setSelectedJobView] = useState(null);
   const [editJobId, setEditJobId] = useState(null);
@@ -2590,6 +2726,26 @@ const HRManagement = () => {
         localStorage.removeItem(`chat_${activeChatId}`);
       }
     }
+  };
+
+  const handleConfirmCV = (staffId) => {
+    setHrStaff(prev => prev.map(s =>
+      s.id === staffId ? { ...s, status: 'active' } : s
+    ));
+  };
+
+  const handleApproveChange = (staffId) => {
+    setHrStaff(prev => prev.map(s => {
+      if (s.id !== staffId) return s;
+      const newShift = s.changeRequest?.to || s.shift;
+      return { ...s, status: 'active', shift: newShift, changeRequest: null };
+    }));
+  };
+
+  const handleRejectChange = (staffId) => {
+    setHrStaff(prev => prev.map(s =>
+      s.id === staffId ? { ...s, status: 'active', changeRequest: null } : s
+    ));
   };
 
   const handleCreatePost = () => {
@@ -2870,8 +3026,30 @@ const HRManagement = () => {
                 </p>
               </div>
             </SectionHeader>
-            
-            {hrStaff.filter(staff => staff.isWithinTimeWindow).length === 0 ? (
+
+            <StaffTabBar>
+              {[
+                { key: 'working',         label: language === 'vi' ? 'Đang làm'     : 'Working',              color: '#10B981', status: 'active' },
+                { key: 'pending_confirm', label: language === 'vi' ? 'Chờ xác nhận' : 'Pending Confirmation', color: '#EF4444', status: 'pending_confirmation' },
+                { key: 'pending_change',  label: language === 'vi' ? 'Chờ thay đổi' : 'Pending Changes',      color: '#F97316', status: 'pending_change' },
+              ].map(tab => (
+                <StaffTabButton
+                  key={tab.key}
+                  $active={staffTabFilter === tab.key}
+                  $color={tab.color}
+                  onClick={() => setStaffTabFilter(tab.key)}
+                >
+                  {tab.label}
+                </StaffTabButton>
+              ))}
+            </StaffTabBar>
+
+            {hrStaff.filter(staff => {
+              if (staffTabFilter === 'working')         return staff.status === 'active';
+              if (staffTabFilter === 'pending_confirm') return staff.status === 'pending_confirmation';
+              if (staffTabFilter === 'pending_change')  return staff.status === 'pending_change';
+              return false;
+            }).length === 0 ? (
               <div style={{
                 padding: '60px 20px',
                 textAlign: 'center',
@@ -2879,19 +3057,24 @@ const HRManagement = () => {
               }}>
                 <Clock style={{ width: '48px', height: '48px', margin: '0 auto 16px', opacity: 0.3 }} />
                 <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px', color: '#334155' }}>
-                  {language === 'vi' ? 'Không có nhân sự trong khung giờ' : 'No staff in time window'}
+                  {language === 'vi' ? 'Không có nhân sự' : 'No staff'}
                 </h3>
                 <p style={{ fontSize: '14px' }}>
-                  {language === 'vi' 
-                    ? 'Tất cả thông tin nhân sự đã quá 1 giờ và đã bị xóa tự động' 
-                    : 'All staff information has exceeded 1 hour and been automatically removed'}
+                  {language === 'vi'
+                    ? 'Không có nhân sự nào trong mục này'
+                    : 'No staff in this category'}
                 </p>
               </div>
             ) : (
               <StaffGrid>
                 <AnimatePresence>
                   {hrStaff
-                    .filter(staff => staff.isWithinTimeWindow) // Only show staff within 1 hour time window
+                    .filter(staff => {
+                      if (staffTabFilter === 'working')         return staff.status === 'active';
+                      if (staffTabFilter === 'pending_confirm') return staff.status === 'pending_confirmation';
+                      if (staffTabFilter === 'pending_change')  return staff.status === 'pending_change';
+                      return false;
+                    })
                     .map((staff, index) => (
                       <StaffCard
                         key={staff.id}
@@ -2919,7 +3102,11 @@ const HRManagement = () => {
                                   ? (language === 'vi' ? 'Đang làm' : 'Active')
                                   : staff.status === 'completed'
                                   ? (language === 'vi' ? 'Hoàn thành' : 'Completed')
-                                  : (language === 'vi' ? 'Nghỉ phép' : 'On Leave')}
+                                  : staff.status === 'pending_confirmation'
+                                  ? (language === 'vi' ? 'Chờ xác nhận' : 'Pending Confirm')
+                                  : staff.status === 'pending_change'
+                                  ? (language === 'vi' ? 'Chờ thay đổi' : 'Pending Change')
+                                  : (language === 'vi' ? 'Đang làm' : 'Active')}
                               </StaffStatus>
                             )}
                           </div>
@@ -2942,7 +3129,36 @@ const HRManagement = () => {
                             <Banknote />{language === 'vi' ? 'Số tiền chi:' : 'Amount paid:'} {staff.totalPaid.toLocaleString('vi-VN')} VNĐ
                           </div>
                         </StaffMeta>
-                        
+
+                        {staff.status === 'pending_change' && staff.changeRequest && (
+                          <ChangeRequestBanner>
+                            <div className="cr-header">
+                              <span className={staff.changeRequest.urgency === 'urgent' ? 'cr-urgency-urgent' : 'cr-urgency-normal'}>
+                                {staff.changeRequest.urgency === 'urgent'
+                                  ? (language === 'vi' ? '🔴 Khẩn cấp' : '🔴 Urgent')
+                                  : (language === 'vi' ? 'Bình thường' : 'Normal')}
+                              </span>
+                            </div>
+                            {staff.changeRequest.type === 'shift_change' && (
+                              <div className="cr-shift-row">
+                                <Clock />{staff.changeRequest.from}
+                                <ArrowRight />
+                                {staff.changeRequest.to}
+                              </div>
+                            )}
+                            {staff.changeRequest.type === 'staff_replacement' && (
+                              <div className="cr-shift-row">
+                                <User size={16} />
+                                {language === 'vi' ? 'Yêu cầu đổi người làm thay' : 'Requesting a replacement worker'}
+                              </div>
+                            )}
+                            <div className="cr-reason">"{staff.changeRequest.reason}"</div>
+                            <div className="cr-time">
+                              <Clock />{language === 'vi' ? 'Gửi lúc:' : 'Sent at:'} {staff.changeRequest.requestedAt}
+                            </div>
+                          </ChangeRequestBanner>
+                        )}
+
                         <StaffActions>
                           <StaffButton
                             whileHover={{ scale: 1.02 }}
@@ -2966,7 +3182,17 @@ const HRManagement = () => {
                               <MessageSquare />{language === 'vi' ? 'Nhắn tin' : 'Chat'}
                             </StaffButton>
                           )}
-                          {staff.canRequestChange && (
+                          {staff.status === 'pending_confirmation' ? (
+                            <StaffButton
+                              $variant="success"
+                              style={{ background: 'linear-gradient(135deg, #10B981, #059669)', color: '#fff', border: 'none' }}
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => handleConfirmCV(staff.id)}
+                            >
+                              <CheckCircle />{language === 'vi' ? 'Đồng ý CV' : 'Approve CV'}
+                            </StaffButton>
+                          ) : staff.canRequestChange && (
                             <StaffButton
                               $variant="warning"
                               whileHover={{ scale: 1.02 }}
@@ -2974,6 +3200,7 @@ const HRManagement = () => {
                               onClick={() => {
                                 setChangeRequestStaff(staff);
                                 setChangeRequestReason('');
+                                setChangeRequestType('');
                               }}
                             >
                               <AlertCircle />{language === 'vi' ? 'Yêu cầu thay đổi' : 'Request change'}
@@ -3505,6 +3732,33 @@ const HRManagement = () => {
                     </div>
                   </div>
 
+                  {/* Change type selector */}
+                  <RateCategory>
+                    <div className="category-label">
+                      <RefreshCw />{language === 'vi' ? 'Loại yêu cầu thay đổi' : 'Type of change'}
+                    </div>
+                    <ChangeTypeGrid>
+                      {[
+                        { value: 'shift_change', label: language === 'vi' ? 'Đổi ca làm' : 'Shift Change', icon: Clock },
+                        { value: 'salary_change', label: language === 'vi' ? 'Điều chỉnh lương' : 'Salary Adjustment', icon: Banknote },
+                        { value: 'role_change', label: language === 'vi' ? 'Đổi vị trí' : 'Role Change', icon: User },
+                        { value: 'cancel', label: language === 'vi' ? 'Huỷ ca làm' : 'Cancel Shift', icon: X },
+                      ].map(opt => {
+                        const Icon = opt.icon;
+                        return (
+                          <ChangeTypeButton
+                            key={opt.value}
+                            type="button"
+                            $selected={changeRequestType === opt.value}
+                            onClick={() => setChangeRequestType(opt.value)}
+                          >
+                            <Icon />{opt.label}
+                          </ChangeTypeButton>
+                        );
+                      })}
+                    </ChangeTypeGrid>
+                  </RateCategory>
+
                   {/* Reason input */}
                   <RateCategory>
                     <div className="category-label">
@@ -3524,15 +3778,16 @@ const HRManagement = () => {
                       as={motion.button}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      disabled={!changeRequestReason.trim()}
+                      disabled={!changeRequestReason.trim() || !changeRequestType}
                       onClick={() => {
-                        if (!changeRequestReason.trim()) return;
+                        if (!changeRequestReason.trim() || !changeRequestType) return;
                         setChangeRequestStaff(null);
                         setChangeRequestReason('');
+                        setChangeRequestType('');
                         setShowChangeRequestSuccess(true);
                       }}
                       style={{
-                        background: changeRequestReason.trim()
+                        background: changeRequestReason.trim() && changeRequestType
                           ? 'linear-gradient(135deg, #F59E0B, #D97706)'
                           : undefined,
                         transition: 'background 0.2s'

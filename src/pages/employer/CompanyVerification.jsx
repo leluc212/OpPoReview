@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
-import { Button, Input, TextArea, FormGroup, Label } from '../../components/FormElements';
+import { Button, Input, TextArea, FormGroup, Label, DateInput } from '../../components/FormElements';
 import { 
   CheckCircle, 
   Circle, 
@@ -560,7 +560,8 @@ const CompanyVerification = () => {
         if (!step1Data.issuingAuthority || String(step1Data.issuingAuthority).trim() === '') {
           missingFields.push(language === 'vi' ? 'Cơ quan cấp' : 'Issuing Authority');
         }
-        if (step1Data.expiryDate && step1Data.issueDate && step1Data.expiryDate <= step1Data.issueDate) {
+        const parseDate = (s) => { if (!s) return null; const [d,m,y] = s.split('/'); return new Date(+y, +m-1, +d); };
+        if (step1Data.expiryDate && step1Data.issueDate && parseDate(step1Data.expiryDate) <= parseDate(step1Data.issueDate)) {
           setExpiryDateError(true);
           return false;
         }
@@ -779,25 +780,22 @@ const CompanyVerification = () => {
               <FormGrid>
                 <FormGroup>
                   <Label>{language === 'vi' ? 'Ngày cấp' : 'Issue Date'} *</Label>
-                  <Input
-                    type="date"
+                  <DateInput
                     value={step1Data.issueDate}
-                    onChange={(e) => setStep1Data(prev => ({ ...prev, issueDate: e.target.value }))}
+                    onChange={(val) => setStep1Data(prev => ({ ...prev, issueDate: val }))}
                     required
                   />
                 </FormGroup>
 
                 <FormGroup>
                   <Label>{language === 'vi' ? 'Ngày hết hạn (nếu có)' : 'Expiry Date (if any)'}</Label>
-                  <Input
-                    type="date"
+                  <DateInput
                     value={step1Data.expiryDate}
-                    min={step1Data.issueDate || undefined}
-                    onChange={(e) => {
+                    onChange={(val) => {
                       setExpiryDateError(false);
-                      setStep1Data(prev => ({ ...prev, expiryDate: e.target.value }));
+                      setStep1Data(prev => ({ ...prev, expiryDate: val }));
                     }}
-                    style={expiryDateError ? { borderColor: '#DC2626' } : {}}
+                    $error={expiryDateError}
                   />
                   <AnimatePresence>
                     {expiryDateError && (
@@ -996,7 +994,7 @@ const CompanyVerification = () => {
                     type="text"
                     value={step3Data.representativeName}
                     onChange={(e) => setStep3Data({ ...step3Data, representativeName: e.target.value })}
-                    placeholder={language === 'vi' ? 'Nguyễn Văn A' : 'John Doe'}
+                    placeholder={language === 'vi' ? 'Nguyễn Hùng Anh' : 'John Doe'}
                     required
                   />
                 </FormGroup>

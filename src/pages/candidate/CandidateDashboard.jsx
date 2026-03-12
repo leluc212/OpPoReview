@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
-import { motion, useMotionValue } from 'framer-motion';
+import { motion, useMotionValue, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
 import JobCard from '../../components/JobCard';
@@ -443,6 +443,7 @@ const BoostBannerWrap = styled(motion.div)`
   overflow: hidden;
   box-shadow: 0 10px 40px rgba(0,0,0,0.15);
   cursor: pointer;
+  background: #f3f4f6;
 
   img {
     width: 100%;
@@ -1312,8 +1313,8 @@ const CandidateDashboard = () => {
 
   const banners = [
     { src: "/OpPoReview/images/seoul.jpg", alt: "Seoul Vua Mì Cay" },
-    { src: "/OpPoReview/images/bamosbanner.jpg", alt: "Bamos Coffee" },
-    { src: "/OpPoReview/images/lebanner.jpg", alt: "Le Banner" }
+    { src: "/OpPoReview/images/unnamed1.jpg", alt: "Banner" },
+    { src: "/OpPoReview/images/unnamed.jpg", alt: "Banner" }
   ];
 
   useEffect(() => {
@@ -1917,12 +1918,15 @@ const CandidateDashboard = () => {
           <BoostTag>🔥Đề xuất</BoostTag>
           <motion.img 
             key={currentBannerIndex}
-            initial={{ opacity: 0.8, scale: 1.05 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6 }}
+            initial={{ opacity: currentBannerIndex === 0 ? 1 : 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ 
+              duration: 0.7,
+              ease: [0.25, 0.1, 0.25, 1]
+            }}
             src={banners[currentBannerIndex].src} 
-            alt={banners[currentBannerIndex].alt} 
-            style={{ width: '100%', height: 'auto', display: 'block' }} 
+            alt={banners[currentBannerIndex].alt}
+            style={{ width: '100%', height: 'auto', display: 'block' }}
           />
           <BannerDots>
             {banners.map((_, idx) => (

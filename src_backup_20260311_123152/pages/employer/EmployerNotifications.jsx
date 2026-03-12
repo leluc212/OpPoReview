@@ -400,7 +400,7 @@ const getNotifications = (language) => ([
     id: 1,
     type: 'application',
     title: language === 'vi' ? 'Ứng viên mới ứng tuyển' : 'New candidate application',
-    message: language === 'vi' ? 'Nguyễn Văn A đã ứng tuyển vào vị trí Senior React Developer' : 'Nguyen Van A applied for Senior React Developer',
+    message: language === 'vi' ? 'Nguyễn Hùng Anh đã ứng tuyển vào vị trí Senior React Developer' : 'Nguyen Van A applied for Senior React Developer',
     time: language === 'vi' ? '5 phút trước' : '5 minutes ago',
     read: false,
     icon: UserPlus
@@ -409,7 +409,7 @@ const getNotifications = (language) => ([
     id: 2,
     type: 'application',
     title: language === 'vi' ? 'Ứng viên mới ứng tuyển' : 'New candidate application',
-    message: language === 'vi' ? 'Trần Thị B đã ứng tuyển vào vị trí Nhân viên Marketing' : 'Tran Thi B applied for Marketing Executive',
+    message: language === 'vi' ? 'Trương Tú Phương đã ứng tuyển vào vị trí Nhân viên Marketing' : 'Tran Thi B applied for Marketing Executive',
     time: language === 'vi' ? '15 phút trước' : '15 minutes ago',
     read: false,
     icon: UserPlus
@@ -418,7 +418,7 @@ const getNotifications = (language) => ([
     id: 3,
     type: 'rating',
     title: language === 'vi' ? 'Đánh giá nhân viên mới' : 'Rate new employee',
-    message: language === 'vi' ? 'Phạm Thị D đã hoàn thành công việc. Vui lòng đánh giá nhân viên.' : 'Pham Thi D has completed the job. Please provide a rating.',
+    message: language === 'vi' ? 'Phạm Lê Duy đã hoàn thành công việc. Vui lòng đánh giá nhân viên.' : 'Pham Thi D has completed the job. Please provide a rating.',
     time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
     read: false,
     icon: Star

@@ -6,7 +6,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 import Modal from '../../components/Modal';
 import Toast from '../../components/Toast';
 import { useToast } from '../../hooks/useToast';
-import { Button, Input, TextArea, FormGroup, Label } from '../../components/FormElements';
+import { Button, Input, TextArea, FormGroup, Label, DateInput } from '../../components/FormElements';
 import { useLanguage } from '../../context/LanguageContext';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import candidateProfileService from '../../services/candidateProfileService';
@@ -2340,10 +2340,9 @@ const CandidateProfile = () => {
                 </FormGroup>
                 <FormGroup>
                   <Label>{language === 'vi' ? 'Ngày cấp *' : 'Issue Date *'}</Label>
-                  <Input
-                    type="date"
+                  <DateInput
                     value={kycFormData.idIssueDate}
-                    onChange={(e) => handleKYCFormChange('idIssueDate', e.target.value)}
+                    onChange={(val) => handleKYCFormChange('idIssueDate', val)}
                     required
                   />
                 </FormGroup>

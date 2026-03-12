@@ -224,8 +224,8 @@ const UserManagement = () => {
   const [candidates] = useState([
     { 
       id: 1,
-      name: 'Nguyễn Văn A', 
-      email: 'nguyenvana@example.com', 
+      name: 'Nguyễn Hùng Anh', 
+      email: 'anhhung@gmail.com', 
       ekycVerified: true,
       approvalStatus: 'approved',
       joined: '2025-01-15',
@@ -233,8 +233,8 @@ const UserManagement = () => {
     },
     { 
       id: 2,
-      name: 'Trần Thị B', 
-      email: 'tranthib@example.com', 
+      name: 'Trương Tú Phương', 
+      email: 'truongphuong2125@gmail.com', 
       ekycVerified: true,
       approvalStatus: 'pending',
       joined: '2025-01-20',
@@ -242,8 +242,8 @@ const UserManagement = () => {
     },
     { 
       id: 3,
-      name: 'Lê Văn C', 
-      email: 'levanc@example.com', 
+      name: 'Lê Thành', 
+      email: 'lethanh2327@gmail.com', 
       ekycVerified: false,
       approvalStatus: 'rejected',
       joined: '2025-01-05',

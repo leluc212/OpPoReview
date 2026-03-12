@@ -31,12 +31,13 @@ const SidebarContainer = styled.aside`
   background: ${props => props.theme.colors.white};
   border-right: 1px solid ${props => props.theme.colors.border};
   height: 100vh;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
   display: flex;
   flex-direction: column;
   box-shadow: 2px 0 12px rgba(0, 0, 0, 0.04);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: visible;
   z-index: 100;
   
@@ -295,12 +296,20 @@ const NavLink = styled.div`
   }
 `;
 
-const Sidebar = ({ role }) => {
+const Sidebar = ({ role, onHoverChange }) => {
   const { t, language } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const navRef = useRef(null);
   const isNavigatingRef = useRef(false);
+  
+  const handleMouseEnter = () => {
+    if (onHoverChange) onHoverChange(true);
+  };
+  
+  const handleMouseLeave = () => {
+    if (onHoverChange) onHoverChange(false);
+  };
   
   // Save scroll position to sessionStorage whenever it changes
   useEffect(() => {
@@ -419,7 +428,10 @@ const Sidebar = ({ role }) => {
     : adminLinks;
   
   return (
-    <SidebarContainer>
+    <SidebarContainer 
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <Logo>
         <img src="/OpPoReview/images/logo.png" alt="Ốp Pờ" style={{ height: '60px' }} />
         <LogoText>Ốp Pờ</LogoText>

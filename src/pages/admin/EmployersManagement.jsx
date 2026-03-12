@@ -695,7 +695,7 @@ const EmployersManagement = () => {
 
         <StatsGrid>
           <StatsCard
-            title={language === 'vi' ? 'Tổng NTD' : 'Total Employers'}
+            title={language === 'vi' ? 'Tổng Nhà Tuyển Dụng' : 'Total Employers'}
             value={stats.total.toString()}
             icon={Building2}
             color="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"

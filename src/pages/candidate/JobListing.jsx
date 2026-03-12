@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import Modal from '../../components/Modal';
 import {
@@ -793,6 +793,7 @@ const BoostBannerWrap = styled.div`
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(0,0,0,0.12);
   cursor: pointer;
+  background: #f3f4f6;
 
   img {
     width: 100%;
@@ -1239,7 +1240,6 @@ const translateJobTitle = (titleStr, language) => {
     'Nhân viên pha chế': 'Barista',
     'Nhân viên phục vụ nhà hàng': 'Restaurant Server',
     'Đầu bếp chính': 'Head Chef',
-    'Nhân viên pha chế': 'Barista',
     'Thu ngân nhà hàng': 'Restaurant Cashier',
     'Nhân viên phục vụ': 'Service Staff',
     'Pha chế trà sữa': 'Bubble Tea Barista',
@@ -1251,7 +1251,6 @@ const translateJobTitle = (titleStr, language) => {
     'Shift Supervisor': 'Shift Supervisor',
     'Nhân viên giao đồ ăn': 'Food Delivery',
     'Nhân viên bán hàng': 'Sales Staff',
-    'Thu ngân nhà hàng': 'Restaurant Cashier',
     'Phục vụ nhà hàng': 'Restaurant Server',
     'Giao đồ ăn nhanh': 'Fast Food Delivery',
     'Nhân viên Café': 'Café Staff',
@@ -2316,8 +2315,8 @@ const JobListing = () => {
 
   const banners = [
     { src: "/OpPoReview/images/seoul.jpg", alt: "Seoul Vua Mì Cay" },
-    { src: "/OpPoReview/images/bamosbanner.jpg", alt: "Bamos Coffee" },
-    { src: "/OpPoReview/images/lebanner.jpg", alt: "Le Banner" }
+    { src: "/OpPoReview/images/unnamed1.jpg", alt: "Banner" },
+    { src: "/OpPoReview/images/unnamed.jpg", alt: "Banner" }
   ];
 
   useEffect(() => {
@@ -2336,10 +2335,13 @@ const JobListing = () => {
     setShowConfirmModal(false);
   };
 
-  // Check if we're on saved jobs page
+  // Check if we're on saved jobs tab via query param
   useEffect(() => {
-    // Removed - no longer using separate route for saved jobs
-  }, [location.pathname]);
+    const params = new URLSearchParams(location.search);
+    if (params.get('tab') === 'saved') {
+      setShowSavedJobsOnly(true);
+    }
+  }, [location.search]);
 
   // Load saved jobs from localStorage on mount
   useEffect(() => {
@@ -3109,11 +3111,15 @@ const JobListing = () => {
               <BoostTag>🔥Hot deal</BoostTag>
               <motion.img 
                 key={currentBannerIndex}
-                initial={{ opacity: 0.8, scale: 1.05 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6 }}
+                initial={{ opacity: currentBannerIndex === 0 ? 1 : 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ 
+                  duration: 0.7,
+                  ease: [0.25, 0.1, 0.25, 1]
+                }}
                 src={banners[currentBannerIndex].src} 
-                alt={banners[currentBannerIndex].alt} 
+                alt={banners[currentBannerIndex].alt}
+                style={{ width: '100%', height: 'auto', display: 'block' }}
               />
               <BannerDots>
                 {banners.map((_, idx) => (

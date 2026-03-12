@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
-import { Button, Input, FormGroup, Label } from '../../components/FormElements';
+import { Button, Input, FormGroup, Label, DateInput } from '../../components/FormElements';
 import { 
   CheckCircle, 
   Upload, 
@@ -980,10 +980,9 @@ const CandidateKYC = () => {
 
                 <FormGroup>
                   <Label>{language === 'vi' ? 'Ngày cấp' : 'Issue Date'} *</Label>
-                  <Input
-                    type="date"
+                  <DateInput
                     value={step1Data.idIssueDate}
-                    onChange={(e) => setStep1Data({ ...step1Data, idIssueDate: e.target.value })}
+                    onChange={(val) => setStep1Data({ ...step1Data, idIssueDate: val })}
                     required
                   />
                 </FormGroup>

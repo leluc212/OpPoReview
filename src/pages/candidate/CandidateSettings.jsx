@@ -599,7 +599,7 @@ function CandidateSettings() {
                   <input 
                     type="checkbox" 
                     checked={isDarkMode}
-                    onChange={toggleTheme}
+                    onChange={() => setIsDevModalOpen(true)}
                   />
                   <span></span>
                 </Toggle>
