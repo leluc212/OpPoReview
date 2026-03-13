@@ -2353,6 +2353,7 @@ const JobListing = () => {
         // Transform DynamoDB jobs to match JOBS_DATA format
         const transformedJobs = jobs
           .filter(job => job && job.idJob && job.title && job.salary) // Filter out invalid jobs and jobs without salary
+          .filter(job => job.status !== 'deleted') // Filter out deleted jobs
           .map(job => {
             try {
               return {
@@ -2409,6 +2410,7 @@ const JobListing = () => {
         // Transform quick jobs to match JOBS_DATA format
         const transformedQuickJobs = jobs
           .filter(job => job && (job.jobID || job.idJob) && job.title)
+          .filter(job => job.status !== 'deleted') // Filter out deleted jobs
           .map(job => {
             try {
               const jobId = job.jobID || job.idJob;

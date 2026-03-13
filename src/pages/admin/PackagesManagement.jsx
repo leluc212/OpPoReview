@@ -220,6 +220,34 @@ const LegendValue = styled.div`
   color: ${props => props.theme.colors.text};
 `;
 
+const TabsContainer = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid ${props => props.theme.colors.border};
+`;
+
+const Tab = styled.button`
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  color: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.textLight};
+  background: ${props => props.$active ? props.theme.colors.bgLight : 'transparent'};
+  border: none;
+  border-bottom: 3px solid ${props => props.$active ? props.theme.colors.primary : 'transparent'};
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: -2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    color: ${props => props.theme.colors.primary};
+    background: ${props => props.theme.colors.bgLight};
+  }
+`;
+
 const TableWrapper = styled.div`
   background: ${props => props.theme.colors.bgLight};
   border-radius: ${props => props.theme.borderRadius.lg};
@@ -396,15 +424,41 @@ const PageEllipsis = styled.span`
   padding: 0 4px;
 `;
 
+const ApproveButton = styled.button`
+  padding: 6px 16px;
+  border: none;
+  border-radius: ${props => props.theme.borderRadius.md};
+  background: #10b981;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  
+  &:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
 const PackagesManagement = () => {
   const { language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [activeTab, setActiveTab] = useState('pending'); // 'pending' or 'approved'
   const itemsPerPage = 20;
 
   // Dữ liệu gói dịch vụ đã mua (từ 30 nhà tuyển dụng)
-  const [purchases] = useState([
+  const [purchases, setPurchases] = useState([
     // 9 gói cũ (giữ nguyên)
     {
       id: 1,
@@ -414,7 +468,8 @@ const PackagesManagement = () => {
       expiryDate: '2026-02-15',
       status: 'active',
       price: 145000,
-      duration: '7 ngày'
+      duration: '7 ngày',
+      approvalStatus: 'approved' // Đã duyệt
     },
     {
       id: 2,
@@ -424,7 +479,8 @@ const PackagesManagement = () => {
       expiryDate: '2026-03-20',
       status: 'active',
       price: 745000,
-      duration: '7 ngày'
+      duration: '7 ngày',
+      approvalStatus: 'approved' // Đã duyệt
     },
     {
       id: 3,
@@ -434,7 +490,8 @@ const PackagesManagement = () => {
       expiryDate: '2026-05-01',
       status: 'active',
       price: 495000,
-      duration: '7 ngày'
+      duration: '7 ngày',
+      approvalStatus: 'approved' // Đã duyệt
     },
     {
       id: 4,
@@ -444,7 +501,8 @@ const PackagesManagement = () => {
       expiryDate: '2026-02-10',
       status: 'expired',
       price: 745000,
-      duration: '7 ngày'
+      duration: '7 ngày',
+      approvalStatus: 'approved' // Đã duyệt
     },
     {
       id: 5,
@@ -454,7 +512,8 @@ const PackagesManagement = () => {
       expiryDate: '2026-04-25',
       status: 'active',
       price: 745000,
-      duration: '7 ngày'
+      duration: '7 ngày',
+      approvalStatus: 'approved' // Đã duyệt
     },
     {
       id: 6,
@@ -858,16 +917,72 @@ const PackagesManagement = () => {
       price: 745000,
       duration: '7 ngày'
     },
+    // Các gói mới mua - Chờ duyệt
+    {
+      id: 46,
+      employer: 'Nhà hàng Hải Sản Biển Đông',
+      package: 'Top Spotlight',
+      purchaseDate: '2026-03-13',
+      expiryDate: null,
+      status: 'pending',
+      price: 745000,
+      duration: '7 ngày',
+      approvalStatus: 'pending'
+    },
+    {
+      id: 47,
+      employer: 'Quán Ăn Vặt 24/7',
+      package: 'Quick Boost',
+      purchaseDate: '2026-03-13',
+      expiryDate: null,
+      status: 'pending',
+      price: 145000,
+      duration: '7 ngày',
+      approvalStatus: 'pending'
+    },
+    {
+      id: 48,
+      employer: 'Lẩu Thái Tomyum',
+      package: 'Spotlight Banner',
+      purchaseDate: '2026-03-13',
+      expiryDate: null,
+      status: 'pending',
+      price: 495000,
+      duration: '7 ngày',
+      approvalStatus: 'pending'
+    },
+    {
+      id: 49,
+      employer: 'Bún Bò Huế Mẹ Tròn',
+      package: 'Hot Search',
+      purchaseDate: '2026-03-13',
+      expiryDate: null,
+      status: 'pending',
+      price: 245000,
+      duration: '7 ngày',
+      approvalStatus: 'pending'
+    },
+    {
+      id: 50,
+      employer: 'Cơm Tấm Sườn Nướng',
+      package: 'Quick Boost',
+      purchaseDate: '2026-03-13',
+      expiryDate: null,
+      status: 'pending',
+      price: 145000,
+      duration: '7 ngày',
+      approvalStatus: 'pending'
+    },
   ]);
 
   // Dữ liệu theo tháng cho biểu đồ (6 tháng gần nhất)
   const monthlyData = [
-    { month: 'T9/23', quickBoost: 8, hotSearch: 5, spotlight: 3, topSpotlight: 2 },
-    { month: 'T10/23', quickBoost: 12, hotSearch: 7, spotlight: 4, topSpotlight: 3 },
-    { month: 'T11/23', quickBoost: 15, hotSearch: 9, spotlight: 6, topSpotlight: 4 },
-    { month: 'T12/23', quickBoost: 18, hotSearch: 11, spotlight: 7, topSpotlight: 5 },
-    { month: 'T1/24', quickBoost: 22, hotSearch: 14, spotlight: 9, topSpotlight: 6 },
-    { month: 'T2/24', quickBoost: 25, hotSearch: 16, spotlight: 11, topSpotlight: 8 },
+    { month: 'T9/25', quickBoost: 8, hotSearch: 5, spotlight: 3, topSpotlight: 2 },
+    { month: 'T10/25', quickBoost: 12, hotSearch: 7, spotlight: 4, topSpotlight: 3 },
+    { month: 'T11/25', quickBoost: 15, hotSearch: 9, spotlight: 6, topSpotlight: 4 },
+    { month: 'T12/25', quickBoost: 18, hotSearch: 11, spotlight: 7, topSpotlight: 5 },
+    { month: 'T1/26', quickBoost: 22, hotSearch: 14, spotlight: 9, topSpotlight: 6 },
+    { month: 'T2/26', quickBoost: 25, hotSearch: 16, spotlight: 11, topSpotlight: 8 },
   ];
 
   const packageColors = {
@@ -903,6 +1018,13 @@ const PackagesManagement = () => {
 
   const filteredPurchases = useMemo(() => {
     return purchases.filter(purchase => {
+      // Filter by approval status based on active tab
+      // "Chờ duyệt" = gói chưa có status (pending approval)
+      // "Đã duyệt" = gói đã có status (active, expiring, expired)
+      const matchesTab = activeTab === 'pending' 
+        ? (purchase.approvalStatus === 'pending' || purchase.status === 'pending')
+        : (purchase.status === 'active' || purchase.status === 'expiring' || purchase.status === 'expired');
+      
       const matchesSearch = searchTerm === '' || 
         purchase.employer.toLowerCase().includes(searchTerm.toLowerCase()) ||
         purchase.package.toLowerCase().includes(searchTerm.toLowerCase());
@@ -911,9 +1033,9 @@ const PackagesManagement = () => {
         filters.includes(purchase.package) ||
         filters.includes(purchase.status);
       
-      return matchesSearch && matchesFilters;
+      return matchesTab && matchesSearch && matchesFilters;
     });
-  }, [purchases, searchTerm, filters]);
+  }, [purchases, searchTerm, filters, activeTab]);
 
   // Pagination
   const totalPages = Math.ceil(filteredPurchases.length / itemsPerPage);
@@ -932,6 +1054,32 @@ const PackagesManagement = () => {
         ? prev.filter(f => f !== filterValue)
         : [...prev, filterValue]
     );
+  };
+
+  const handleApprove = (purchaseId) => {
+    console.log('Approving purchase:', purchaseId);
+    setPurchases(prev => {
+      const updated = prev.map(purchase => {
+        if (purchase.id === purchaseId) {
+          // Calculate expiry date (7 days from now)
+          const purchaseDate = new Date();
+          const expiryDate = new Date(purchaseDate);
+          expiryDate.setDate(expiryDate.getDate() + 7);
+          
+          console.log('Updating purchase from pending to active');
+          return {
+            ...purchase,
+            status: 'active',
+            approvalStatus: 'approved',
+            purchaseDate: purchaseDate.toISOString().split('T')[0],
+            expiryDate: expiryDate.toISOString().split('T')[0]
+          };
+        }
+        return purchase;
+      });
+      console.log('Updated purchases:', updated.filter(p => p.id === purchaseId));
+      return updated;
+    });
   };
 
   const stats = {
@@ -1098,6 +1246,23 @@ const PackagesManagement = () => {
           </ChartCard>
         </ChartsContainer>
 
+        <TabsContainer>
+          <Tab 
+            $active={activeTab === 'pending'}
+            onClick={() => setActiveTab('pending')}
+          >
+            <Clock size={18} style={{ marginRight: '8px' }} />
+            {language === 'vi' ? 'Chờ duyệt' : 'Pending Approval'}
+          </Tab>
+          <Tab 
+            $active={activeTab === 'approved'}
+            onClick={() => setActiveTab('approved')}
+          >
+            <CheckCircle size={18} style={{ marginRight: '8px' }} />
+            {language === 'vi' ? 'Đã duyệt' : 'Approved'}
+          </Tab>
+        </TabsContainer>
+
         <TableFilter 
           searchValue={searchTerm}
           onSearchChange={setSearchTerm}
@@ -1154,9 +1319,16 @@ const PackagesManagement = () => {
                       </div>
                     </td>
                     <td>
-                      <StatusBadge $status={purchase.status}>
-                        {getStatusText(purchase.status)}
-                      </StatusBadge>
+                      {activeTab === 'pending' ? (
+                        <ApproveButton onClick={() => handleApprove(purchase.id)}>
+                          <CheckCircle size={16} />
+                          {language === 'vi' ? 'Duyệt' : 'Approve'}
+                        </ApproveButton>
+                      ) : (
+                        <StatusBadge $status={purchase.status}>
+                          {getStatusText(purchase.status)}
+                        </StatusBadge>
+                      )}
                     </td>
                     <td>
                       <ActionButtons>
