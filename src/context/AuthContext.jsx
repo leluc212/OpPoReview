@@ -38,10 +38,14 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = async () => {
       try {
         setIsLoading(true);
+        console.log('🔍 Checking authentication...');
         
         // Try to get current Cognito user
         const currentUser = await getCurrentUser();
         const session = await fetchAuthSession();
+        
+        console.log('✅ Cognito user found:', currentUser);
+        console.log('✅ Session tokens:', session.tokens ? 'Present' : 'Missing');
         
         if (currentUser && session.tokens) {
           // User is authenticated with Cognito
@@ -50,34 +54,50 @@ export const AuthProvider = ({ children }) => {
           if (savedUser) {
             // Use saved user data from localStorage
             const userData = JSON.parse(savedUser);
+            console.log('✅ Restored user from localStorage:', userData.email, 'Role:', userData.role);
             setUser(userData);
             setIsAuthenticated(true);
           } else {
-            // Create user data from Cognito
+            // Create user data from Cognito tokens
+            const userGroups = session.tokens.accessToken.payload['cognito:groups'] || [];
+            let userRole = 'candidate'; // default
+            
+            if (userGroups.includes('Admin')) {
+              userRole = 'admin';
+            } else if (userGroups.includes('Employer')) {
+              userRole = 'employer';
+            } else if (userGroups.includes('Candidate')) {
+              userRole = 'candidate';
+            }
+            
             const userData = {
               username: currentUser.username,
               userId: currentUser.userId,
               email: session.tokens.idToken.payload.email,
-              role: session.tokens.idToken.payload['custom:role'] || 'candidate'
+              role: userRole,
+              approved: true
             };
+            console.log('✅ Created user from Cognito:', userData.email, 'Role:', userData.role);
             setUser(userData);
             setIsAuthenticated(true);
             localStorage.setItem('user', JSON.stringify(userData));
           }
         } else {
           // No valid Cognito session
+          console.log('❌ No valid Cognito session');
           setUser(null);
           setIsAuthenticated(false);
           localStorage.removeItem('user');
         }
       } catch (error) {
-        console.log('No authenticated user:', error);
+        console.log('❌ No authenticated user:', error.name, error.message);
         // No authenticated user, clear state
         setUser(null);
         setIsAuthenticated(false);
         localStorage.removeItem('user');
       } finally {
         setIsLoading(false);
+        console.log('✅ Auth check complete. Authenticated:', isAuthenticated);
       }
     };
 

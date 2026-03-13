@@ -10,8 +10,12 @@ import {
   confirmResetPassword
 } from 'aws-amplify/auth';
 import { Amplify } from 'aws-amplify';
+import { cognitoUserPoolsTokenProvider } from 'aws-amplify/auth/cognito';
 
-// Configure Amplify v6 - correct syntax
+// Configure token storage to use localStorage
+cognitoUserPoolsTokenProvider.setKeyValueStorage(window.localStorage);
+
+// Configure Amplify v6 with proper storage
 Amplify.configure({
   Auth: {
     Cognito: {
@@ -24,7 +28,7 @@ Amplify.configure({
   }
 });
 
-console.info('✅ Amplify v6 configured successfully');
+console.info('✅ Amplify v6 configured with localStorage for token persistence');
 
 // Export Auth functions for v6
 export const Auth = {
