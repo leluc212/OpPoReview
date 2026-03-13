@@ -1,0 +1,1 @@
+{"httpMethod":"POST","path":"/applications","body":"{\"jobId\":\"TEST-JOB-123\",\"cvUrl\":\"https://test.s3.amazonaws.com/cv.pdf\",\"cvFilename\":\"test.pdf\"}","requestContext":{"authorizer":{"claims":{"sub":"test-user-123","email":"test@example.com"}}}}

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Application API</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+        }
+        .input-group {
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 100px;
+            font-family: monospace;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .error {
+            border-left-color: #f44336;
+            background: #ffebee;
+            color: #c62828;
+        }
+        .success {
+            border-left-color: #4CAF50;
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .info {
+            background: #e3f2fd;
+            border-left-color: #2196F3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Application API</h1>
+        
+        <div class="info">
+            <strong>📝 Note:</strong> Replace API_ENDPOINT with your actual API Gateway endpoint
+        </div>
+
+        <div class="input-group">
+            <label>API Endpoint:</label>
+            <input type="text" id="apiEndpoint" placeholder="https://YOUR_API_ID.execute-api.us-east-1.amazonaws.com" />
+        </div>
+
+        <div class="input-group">
+            <label>JWT Token (from Cognito):</label>
+            <textarea id="jwtToken" placeholder="Paste your JWT token here"></textarea>
+        </div>
+
+        <div class="section">
+            <h2>1️⃣ Submit Application</h2>
+            <div class="input-group">
+                <label>Job ID:</label>
+                <input type="text" id="jobId" placeholder="JOB-20260313-XXXXX" />
+            </div>
+            <div class="input-group">
+                <label>CV URL (S3):</label>
+                <input type="text" id="cvUrl" placeholder="https://s3.amazonaws.com/bucket/cv.pdf" />
+            </div>
+            <div class="input-group">
+                <label>CV Filename:</label>
+                <input type="text" id="cvFilename" placeholder="CV.pdf" value="CV.pdf" />
+            </div>
+            <button onclick="submitApplication()">Submit Application</button>
+            <div id="submitResult" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="section">
+            <h2>2️⃣ Get My Applications (Candidate)</h2>
+            <button onclick="getMyCandidateApplications()">Get My Applications</button>
+            <div id="myAppsResult" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="section">
+            <h2>3️⃣ Get Job Applications (Employer)</h2>
+            <div class="input-group">
+                <label>Job ID:</label>
+                <input type="text" id="jobIdForApps" placeholder="JOB-20260313-XXXXX" />
+            </div>
+            <button onclick="getJobApplications()">Get Job Applications</button>
+            <div id="jobAppsResult" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="section">
+            <h2>4️⃣ Update Application Status (Employer)</h2>
+            <div class="input-group">
+                <label>Application ID:</label>
+                <input type="text" id="applicationId" placeholder="APP-20260313-XXXXX" />
+            </div>
+            <div class="input-group">
+                <label>New Status:</label>
+                <select id="newStatus">
+                    <option value="pending">Pending</option>
+                    <option value="reviewed">Reviewed</option>
+                    <option value="accepted">Accepted</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+            <button onclick="updateApplicationStatus()">Update Status</button>
+            <div id="updateResult" class="result" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        function getApiEndpoint() {
+            const endpoint = document.getElementById('apiEndpoint').value.trim();
+            if (!endpoint) {
+                alert('Please enter API endpoint');
+                return null;
+            }
+            return endpoint;
+        }
+
+        function getJwtToken() {
+            const token = document.getElementById('jwtToken').value.trim();
+            if (!token) {
+                alert('Please enter JWT token');
+                return null;
+            }
+            return token;
+        }
+
+        function showResult(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = 'result ' + (isError ? 'error' : 'success');
+            element.textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function submitApplication() {
+            const endpoint = getApiEndpoint();
+            const token = getJwtToken();
+            if (!endpoint || !token) return;
+
+            const jobId = document.getElementById('jobId').value.trim();
+            const cvUrl = document.getElementById('cvUrl').value.trim();
+            const cvFilename = document.getElementById('cvFilename').value.trim();
+
+            if (!jobId || !cvUrl) {
+                alert('Please fill in Job ID and CV URL');
+                return;
+            }
+
+            try {
+                console.log('📤 Submitting application...');
+                const response = await fetch(`${endpoint}/applications`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token
+                    },
+                    body: JSON.stringify({
+                        jobId,
+                        cvUrl,
+                        cvFilename
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Request failed');
+                }
+
+                console.log('✅ Success:', data);
+                showResult('submitResult', data);
+            } catch (error) {
+                console.error('❌ Error:', error);
+                showResult('submitResult', { error: error.message }, true);
+            }
+        }
+
+        async function getMyCandidateApplications() {
+            const endpoint = getApiEndpoint();
+            const token = getJwtToken();
+            if (!endpoint || !token) return;
+
+            try {
+                // Extract userId from token
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const userId = payload.sub;
+
+                console.log('📥 Getting my applications...');
+                const response = await fetch(`${endpoint}/applications/candidate/${userId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Request failed');
+                }
+
+                console.log('✅ Success:', data);
+                showResult('myAppsResult', data);
+            } catch (error) {
+                console.error('❌ Error:', error);
+                showResult('myAppsResult', { error: error.message }, true);
+            }
+        }
+
+        async function getJobApplications() {
+            const endpoint = getApiEndpoint();
+            const token = getJwtToken();
+            if (!endpoint || !token) return;
+
+            const jobId = document.getElementById('jobIdForApps').value.trim();
+            if (!jobId) {
+                alert('Please enter Job ID');
+                return;
+            }
+
+            try {
+                console.log('📥 Getting job applications...');
+                const response = await fetch(`${endpoint}/applications/job/${jobId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Request failed');
+                }
+
+                console.log('✅ Success:', data);
+                showResult('jobAppsResult', data);
+            } catch (error) {
+                console.error('❌ Error:', error);
+                showResult('jobAppsResult', { error: error.message }, true);
+            }
+        }
+
+        async function updateApplicationStatus() {
+            const endpoint = getApiEndpoint();
+            const token = getJwtToken();
+            if (!endpoint || !token) return;
+
+            const applicationId = document.getElementById('applicationId').value.trim();
+            const newStatus = document.getElementById('newStatus').value;
+
+            if (!applicationId) {
+                alert('Please enter Application ID');
+                return;
+            }
+
+            try {
+                console.log('📝 Updating application status...');
+                const response = await fetch(`${endpoint}/applications/${applicationId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token
+                    },
+                    body: JSON.stringify({
+                        status: newStatus
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Request failed');
+                }
+
+                console.log('✅ Success:', data);
+                showResult('updateResult', data);
+            } catch (error) {
+                console.error('❌ Error:', error);
+                showResult('updateResult', { error: error.message }, true);
+            }
+        }
+    </script>
+</body>
+</html>

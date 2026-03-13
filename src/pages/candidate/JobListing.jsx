@@ -15,6 +15,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import candidateProfileService from '../../services/candidateProfileService';
 import jobPostService from '../../services/jobPostService';
 import quickJobService from '../../services/quickJobService';
+import { fetchAuthSession } from 'aws-amplify/auth';
 
 // Animations
 const fadeIn = `
@@ -2503,6 +2504,9 @@ const JobListing = () => {
   const [jobDescriptionModal, setJobDescriptionModal] = useState(null); // { job } or null
   const [applySuccess, setApplySuccess] = useState(false);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+  const [errorModal, setErrorModal] = useState({ show: false, message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastSubmitTime, setLastSubmitTime] = useState(null);
 
   const banners = [
     { src: "/OpPoReview/images/seoul.jpg", alt: "Seoul Vua Mì Cay" },
@@ -2666,10 +2670,114 @@ const JobListing = () => {
     if (job) setApplyModal({ job });
   };
 
-  const confirmApply = () => {
-    setApplyModal(null);
-    setApplySuccess(true);
-    setTimeout(() => setApplySuccess(false), 3000);
+  const confirmApply = async () => {
+    // Check if already submitting
+    if (isSubmitting) {
+      setErrorModal({
+        show: true,
+        message: 'Đang xử lý, vui lòng đợi...'
+      });
+      return;
+    }
+
+    // Rate limiting: 30 seconds between applications
+    const now = Date.now();
+    const RATE_LIMIT_MS = 30 * 1000; // 30 seconds
+    
+    if (lastSubmitTime && (now - lastSubmitTime) < RATE_LIMIT_MS) {
+      const remainingSeconds = Math.ceil((RATE_LIMIT_MS - (now - lastSubmitTime)) / 1000);
+      setErrorModal({
+        show: true,
+        message: `Vui lòng đợi ${remainingSeconds} giây trước khi gửi CV tiếp theo`
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      // Get CV info from candidate profile
+      const session = await fetchAuthSession();
+      const userId = session.tokens?.idToken?.payload?.sub;
+      
+      if (!userId) {
+        setErrorModal({
+          show: true,
+          message: 'Vui lòng đăng nhập để ứng tuyển'
+        });
+        return;
+      }
+      
+      // Get CV info
+      const { getCVInfo } = await import('../../services/cvUploadService');
+      const cvInfo = await getCVInfo(userId);
+      
+      if (!cvInfo || !cvInfo.cvUrl) {
+        setErrorModal({
+          show: true,
+          message: 'Bạn chưa có CV. Vui lòng tải CV lên trong phần Hồ sơ trước khi ứng tuyển.'
+        });
+        return;
+      }
+      
+      // Submit application
+      const applicationService = (await import('../../services/applicationService')).default;
+      const jobId = applyModal.job.idJob || applyModal.job.id;
+      
+      if (!jobId) {
+        setErrorModal({
+          show: true,
+          message: 'Không tìm thấy ID công việc'
+        });
+        return;
+      }
+      
+      await applicationService.submitApplication(
+        jobId,
+        cvInfo.cvUrl,
+        cvInfo.cvFileName || 'CV.pdf'
+      );
+      
+      // Update last submit time
+      setLastSubmitTime(now);
+      
+      setApplyModal(null);
+      setApplySuccess(true);
+      setTimeout(() => setApplySuccess(false), 3000);
+    } catch (error) {
+      console.error('Error applying for job:', error);
+      
+      // Handle specific error codes from backend
+      let errorMessage;
+      
+      if (error.message.includes('ALREADY_APPLIED')) {
+        errorMessage = 'Bạn đã ứng tuyển công việc này rồi!';
+      } else if (error.message.includes('RATE_LIMITED')) {
+        errorMessage = 'Bạn gửi CV quá nhanh! Vui lòng đợi 30 giây trước khi gửi tiếp.';
+      } else if (error.message.includes('429')) {
+        errorMessage = 'Bạn gửi CV quá nhanh! Vui lòng đợi 30 giây trước khi gửi tiếp.';
+      } else if (error.message.includes('409')) {
+        errorMessage = 'Bạn đã ứng tuyển công việc này rồi!';
+      } else {
+        // Check if this is a demo/mock job (no idJob field or starts with 'mock')
+        const jobId = applyModal.job.idJob || applyModal.job.id;
+        const isDemo = !applyModal.job.idJob || jobId.toString().startsWith('mock') || jobId.toString().startsWith('demo');
+        
+        if (isDemo) {
+          errorMessage = 'Không thể gửi, đây chỉ là công việc mẫu. Xin thông cảm ạ!';
+        } else {
+          errorMessage = 'Không thể gửi CV. Bạn đã ứng tuyển công việc này rồi.';
+        }
+      }
+      
+      // Don't close applyModal here - let user close it manually after seeing error
+      setErrorModal({
+        show: true,
+        message: errorMessage
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const toggleFilter = (filterName) => {
@@ -3701,7 +3809,96 @@ const JobListing = () => {
           boxShadow: '0 8px 24px rgba(16,185,129,0.4)',
           display: 'flex', alignItems: 'center', gap: '10px'
         }}>
-          ✅ {language === 'vi' ? 'Gửi CV thành công! Nhà tuyển dụng sẽ liên hệ sớm.' : 'CV sent! The employer will contact you soon.'}
+           {language === 'vi' ? 'Gửi CV thành công! Nhà tuyển dụng sẽ liên hệ sớm.' : 'CV sent! The employer will contact you soon.'}
+        </div>
+      )}
+
+      {/* Error Modal */}
+      {errorModal.show && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000,
+            backdropFilter: 'blur(4px)'
+          }}
+          onClick={() => {
+            setErrorModal({ show: false, message: '' });
+            setApplyModal(null); // Close apply modal when clicking backdrop
+          }}
+        >
+          <div
+            style={{
+              background: 'white',
+              borderRadius: '20px',
+              padding: '40px',
+              maxWidth: '480px',
+              width: '90%',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+              textAlign: 'center',
+              animation: 'slideIn 0.3s ease-out'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{
+              width: '80px',
+              height: '80px',
+              background: 'linear-gradient(135deg, #fef3c7 0%, #fbbf24 100%)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 24px',
+              fontSize: '40px'
+            }}>
+              ⚠️
+            </div>
+            <h3 style={{
+              fontSize: '22px',
+              fontWeight: '700',
+              color: '#1f2937',
+              marginBottom: '16px',
+              lineHeight: '1.4'
+            }}>
+              {errorModal.message}
+            </h3>
+            <button
+              onClick={() => {
+                setErrorModal({ show: false, message: '' });
+                setApplyModal(null); // Close apply modal when clicking button
+              }}
+              style={{
+                marginTop: '24px',
+                padding: '14px 40px',
+                background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 6px 16px rgba(59, 130, 246, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
+              }}
+            >
+              Đã hiểu
+            </button>
+          </div>
         </div>
       )}
 
@@ -3714,6 +3911,17 @@ const GlobalStyles = `
   @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+  }
+  
+  @keyframes slideIn {
+    0% {
+      opacity: 0;
+      transform: translateY(-20px) scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
   }
 `;
 

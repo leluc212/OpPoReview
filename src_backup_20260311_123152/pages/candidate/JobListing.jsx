@@ -3270,7 +3270,7 @@ const JobListing = () => {
           boxShadow: '0 8px 24px rgba(16,185,129,0.4)',
           display: 'flex', alignItems: 'center', gap: '10px'
         }}>
-          ✅ {language === 'vi' ? 'Gửi CV thành công! Nhà tuyển dụng sẽ liên hệ sớm.' : 'CV sent! The employer will contact you soon.'}
+           {language === 'vi' ? 'Gửi CV thành công! Nhà tuyển dụng sẽ liên hệ sớm.' : 'CV sent! The employer will contact you soon.'}
         </div>
       )}
 

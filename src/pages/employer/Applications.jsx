@@ -11,6 +11,8 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { initializeMultipleSampleCVs } from '../../utils/sampleCVGenerator';
 import jobPostService from '../../services/jobPostService';
+import applicationService from '../../services/applicationService';
+import CVPreviewModal from '../../components/CVPreviewModal';
 
 // Mock job posts data
 const getJobPosts = (language) => [
@@ -1456,6 +1458,8 @@ const StarRating = ({ rating }) => (
 // Profile Detail Modal Component
 const ProfileDetailModal = React.memo(({ candidate, onClose }) => {
   const { language } = useLanguage();
+  const [showCVPreview, setShowCVPreview] = useState(false);
+  
   const initials = candidate.candidate
     .split(' ')
     .map(n => n[0])
@@ -1467,11 +1471,8 @@ const ProfileDetailModal = React.memo(({ candidate, onClose }) => {
     ? (candidate.reviews.reduce((s, r) => s + r.rating, 0) / candidate.reviews.length)
     : null;
 
-  // Read CV from localStorage - only load candidate-specific CV
-  const candidateCV = JSON.parse(
-    localStorage.getItem(`candidateCV_${candidate.id}`) ||
-    'null'
-  );
+  // Check if candidate has CV from S3
+  const hasCV = candidate.cvUrl && candidate.cvUrl.trim() !== '';
 
   // State for feedback
   const [feedback, setFeedback] = useState(() => {
@@ -1479,15 +1480,17 @@ const ProfileDetailModal = React.memo(({ candidate, onClose }) => {
     return savedFeedback ? JSON.parse(savedFeedback) : { note: '', date: null };
   });
 
-  const handleCVDownload = () => {
-    if (!candidateCV) return;
+  const handleCVView = () => {
+    if (hasCV) {
+      setShowCVPreview(true);
+    }
+  };
 
-    const link = document.createElement('a');
-    link.href = candidateCV.data;
-    link.download = candidateCV.name;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleCVDownload = () => {
+    if (!hasCV) return;
+
+    // Open CV in new tab for download
+    window.open(candidate.cvUrl, '_blank');
   };
 
   const handleSaveFeedback = () => {
@@ -1518,7 +1521,8 @@ const ProfileDetailModal = React.memo(({ candidate, onClose }) => {
 
   return (
     <>
-      <ProfileHeader>
+      {/* COMMENTED OUT - Profile Header */}
+      {/* <ProfileHeader>
         <ProfileAvatarRow>
           <ProfileAvatar>{initials}</ProfileAvatar>
           <ProfileHeaderInfo>
@@ -1540,11 +1544,12 @@ const ProfileDetailModal = React.memo(({ candidate, onClose }) => {
             )}
           </ProfileHeaderInfo>
         </ProfileAvatarRow>
-      </ProfileHeader>
+      </ProfileHeader> */}
 
       <ProfileContent>
         <ProfileInner>
-          <ProfileSection>
+          {/* COMMENTED OUT - Contact Info */}
+          {/* <ProfileSection>
             <h3><FileText /> {language === 'vi' ? 'Thông tin liên hệ' : 'Contact'}</h3>
             <InfoGrid>
               <InfoCard>
@@ -1576,9 +1581,10 @@ const ProfileDetailModal = React.memo(({ candidate, onClose }) => {
                 </InfoItem>
               </InfoCard>
             </InfoGrid>
-          </ProfileSection>
+          </ProfileSection> */}
 
-          <ProfileSection>
+          {/* COMMENTED OUT - Education & Experience */}
+          {/* <ProfileSection>
             <h3><Award /> {language === 'vi' ? 'Học vấn & Kinh nghiệm' : 'Education & Experience'}</h3>
             <InfoGrid>
               <InfoCard>
@@ -1596,18 +1602,20 @@ const ProfileDetailModal = React.memo(({ candidate, onClose }) => {
                 </InfoItem>
               </InfoCard>
             </InfoGrid>
-          </ProfileSection>
+          </ProfileSection> */}
 
-          <ProfileSection>
+          {/* COMMENTED OUT - Skills */}
+          {/* <ProfileSection>
             <h3><Star /> {language === 'vi' ? 'Kỹ năng' : 'Skills'}</h3>
             <SkillsWrap>
               {candidate.skills.map((skill, index) => (
                 <SkillTag key={index}>{skill}</SkillTag>
               ))}
             </SkillsWrap>
-          </ProfileSection>
+          </ProfileSection> */}
 
-          <ProfileSection>
+          {/* COMMENTED OUT - Reviews */}
+          {/* <ProfileSection>
             <h3><Star /> {language === 'vi' ? 'Lịch sử & Đánh giá' : 'History & Reviews'}</h3>
             {candidate.reviews && candidate.reviews.length > 0 ? (
               <ReviewList>
@@ -1636,38 +1644,51 @@ const ProfileDetailModal = React.memo(({ candidate, onClose }) => {
                 <p>{language === 'vi' ? 'Chưa có đánh giá nào từ nhà tuyển dụng.' : 'No employer reviews yet.'}</p>
               </EmptyReviews>
             )}
-          </ProfileSection>
+          </ProfileSection> */}
 
-          <ProfileSection>
+          {/* COMMENTED OUT - Bio */}
+          {/* <ProfileSection>
             <h3><FileText /> {language === 'vi' ? 'Giới thiệu bản thân' : 'About'}</h3>
             <BioText>{candidate.bio}</BioText>
-          </ProfileSection>
+          </ProfileSection> */}
 
+          {/* ONLY SHOW CV SECTION */}
           <ProfileSection>
             <h3><FileText /> {language === 'vi' ? 'Hồ sơ CV' : 'CV Document'}</h3>
-            {candidateCV ? (
+            {hasCV ? (
               <>
                 <CVCard>
                   <CVIconBox>
                     <FileText />
                   </CVIconBox>
                   <CVInfo>
-                    <div className="cv-name">{candidateCV.name}</div>
+                    <div className="cv-name">{candidate.cvFileName || 'CV.pdf'}</div>
                     <div className="cv-meta">
-                      <span>{formatFileSize(candidateCV.size)}</span>
+                      <span>{language === 'vi' ? 'Từ ứng viên' : 'From candidate'}</span>
                       <span>•</span>
-                      <span>{language === 'vi' ? 'Tải lên:' : 'Uploaded:'} {formatDate(candidateCV.uploadDate)}</span>
+                      <span>{language === 'vi' ? 'Đã tải lên' : 'Uploaded'}</span>
                     </div>
                   </CVInfo>
-                  <CVDownloadButton
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleCVDownload}
-                  >
-                    <Download />
-                    {language === 'vi' ? 'Tải xuống' : 'Download'}
-                  </CVDownloadButton>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <CVDownloadButton
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleCVDownload}
+                    >
+                      <Eye />
+                      {language === 'vi' ? 'Xem hồ sơ' : 'View CV'}
+                    </CVDownloadButton>
+                  </div>
                 </CVCard>
+                
+                {showCVPreview && (
+                  <CVPreviewModal
+                    cvUrl={candidate.cvUrl}
+                    fileName={candidate.cvFileName || 'CV.pdf'}
+                    onClose={() => setShowCVPreview(false)}
+                    onDownload={handleCVDownload}
+                  />
+                )}
               </>
             ) : (
               <EmptyCV>
@@ -2018,6 +2039,8 @@ const Applications = () => {
   const [statusFilters, setStatusFilters] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [applications, setApplications] = useState(() => getInitialApplications(language));
+  const [realApplications, setRealApplications] = useState([]); // Real applications from DynamoDB
+  const [isLoadingApplications, setIsLoadingApplications] = useState(false);
   const [jobPosts, setJobPosts] = useState([]);
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
   const [showWalletModal, setShowWalletModal] = useState(false);
@@ -2028,6 +2051,8 @@ const Applications = () => {
   const [selectedJobView, setSelectedJobView] = useState(null);
   const [editJobId, setEditJobId] = useState(null);
   const [editJobData, setEditJobData] = useState(null);
+  const [showCVModal, setShowCVModal] = useState(false);
+  const [selectedCV, setSelectedCV] = useState(null);
 
   // Mock wallet connection status - in real app, get from user context or API
   const [isWalletConnected] = useState(() => {
@@ -2114,6 +2139,68 @@ const Applications = () => {
     setApplications(getInitialApplications(language));
   }, [language]);
 
+  // Load real applications from DynamoDB when switching to applications tab
+  useEffect(() => {
+    const loadApplications = async () => {
+      if (activeSection !== 'applications') return;
+      
+      try {
+        setIsLoadingApplications(true);
+        console.log('📥 Loading applications from DynamoDB...');
+        
+        // Get all applications for all employer's jobs
+        const allApplications = [];
+        
+        for (const job of jobPosts) {
+          try {
+            const jobApplications = await applicationService.getJobApplications(job.idJob);
+            allApplications.push(...jobApplications);
+          } catch (error) {
+            console.error(`Error loading applications for job ${job.idJob}:`, error);
+          }
+        }
+        
+        console.log('✅ Loaded applications:', allApplications);
+        
+        // Transform to UI format
+        const transformedApplications = allApplications.map(app => ({
+          id: app.applicationId,
+          applicationId: app.applicationId,
+          candidate: app.candidateEmail || 'Unknown',
+          candidateId: app.candidateId,
+          candidateEmail: app.candidateEmail,
+          job: app.jobTitle || 'Unknown Position',
+          jobId: app.jobId,
+          applied: new Date(app.appliedAt).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US'),
+          status: app.status || 'pending',
+          cvUrl: app.cvUrl,
+          cvFileName: app.cvFilename || 'CV.pdf',
+          email: app.candidateEmail,
+          phone: '-',
+          location: '-',
+          education: '-',
+          experience: '-',
+          skills: [],
+          bio: '-',
+          reviews: [],
+          marked: false
+        }));
+        
+        setRealApplications(transformedApplications);
+        console.log('✅ Transformed applications:', transformedApplications);
+      } catch (error) {
+        console.error('❌ Error loading applications:', error);
+        setRealApplications([]);
+      } finally {
+        setIsLoadingApplications(false);
+      }
+    };
+    
+    if (jobPosts.length > 0) {
+      loadApplications();
+    }
+  }, [activeSection, jobPosts, language]);
+
   // Comprehensive screenshot prevention
   useEffect(() => {
     let blurTimeout;
@@ -2198,7 +2285,10 @@ const Applications = () => {
   }, [location.state, applications, navigate, location.pathname]);
 
   const filteredApplications = useMemo(() => {
-    return applications.filter(app => {
+    // Use real applications if available, otherwise use mock data
+    const applicationsToFilter = realApplications.length > 0 ? realApplications : applications;
+    
+    return applicationsToFilter.filter(app => {
       const matchesSearch = !searchTerm ||
         app.candidate.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.job.toLowerCase().includes(searchTerm.toLowerCase());
@@ -2209,7 +2299,7 @@ const Applications = () => {
 
       return matchesSearch && matchesStatus;
     });
-  }, [applications, searchTerm, statusFilters]);
+  }, [applications, realApplications, searchTerm, statusFilters]);
 
   const handleFilterToggle = useCallback((filterValue) => {
     setStatusFilters(prev =>
@@ -2512,22 +2602,38 @@ const Applications = () => {
               searchPlaceholder={language === 'vi' ? 'Tìm kiếm theo ứng viên hoặc vị trí...' : 'Search by candidate or position...'}
             />
 
-            <CardGrid>
-              <AnimatePresence>
-                {filteredApplications.map((app, index) => (
-                  <ApplicationRow
-                    key={app.id}
-                    app={app}
-                    onViewProfile={handleViewProfile}
-                    onCompleteJob={handleCompleteJob}
-                    onMarkCandidate={handleMarkCandidate}
-                    onApprove={handleApproveApplication}
-                    onReject={handleRejectApplication}
-                    index={index}
-                  />
-                ))}
-              </AnimatePresence>
-            </CardGrid>
+            {isLoadingApplications ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+                <div style={{ fontSize: '14px' }}>{language === 'vi' ? 'Đang tải hồ sơ...' : 'Loading applications...'}</div>
+              </div>
+            ) : filteredApplications.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>📋</div>
+                <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>
+                  {language === 'vi' ? 'Chưa có hồ sơ ứng tuyển' : 'No applications yet'}
+                </div>
+                <div style={{ fontSize: '14px' }}>
+                  {language === 'vi' ? 'Hồ sơ ứng tuyển sẽ hiển thị ở đây khi có ứng viên apply' : 'Applications will appear here when candidates apply'}
+                </div>
+              </div>
+            ) : (
+              <CardGrid>
+                <AnimatePresence>
+                  {filteredApplications.map((app, index) => (
+                    <ApplicationRow
+                      key={app.id}
+                      app={app}
+                      onViewProfile={handleViewProfile}
+                      onCompleteJob={handleCompleteJob}
+                      onMarkCandidate={handleMarkCandidate}
+                      onApprove={handleApproveApplication}
+                      onReject={handleRejectApplication}
+                      index={index}
+                    />
+                  ))}
+                </AnimatePresence>
+              </CardGrid>
+            )}
           </>
         )}
       </ApplicationsContainer>

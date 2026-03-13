@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Application Submit</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1e40af;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        textarea {
+            min-height: 100px;
+            font-family: monospace;
+        }
+        button {
+            background: #1e40af;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #1e3a8a;
+        }
+        button.secondary {
+            background: #10b981;
+        }
+        button.secondary:hover {
+            background: #059669;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+            color: #065f46;
+        }
+        .error {
+            background: #fee2e2;
+            border: 1px solid #ef4444;
+            color: #991b1b;
+        }
+        .info {
+            background: #dbeafe;
+            border: 1px solid #3b82f6;
+            color: #1e40af;
+        }
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f9fafb;
+            border-left: 3px solid #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Application Submit API</h1>
+        
+        <div class="form-group">
+            <label>API Endpoint:</label>
+            <input type="text" id="apiEndpoint" value="https://zbkgla009i.execute-api.us-east-1.amazonaws.com/applications">
+        </div>
+
+        <div class="form-group">
+            <label>JWT Token (từ Cognito):</label>
+            <textarea id="jwtToken" placeholder="Paste your JWT token here..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Job ID:</label>
+            <input type="text" id="jobId" placeholder="JOB-20260313-ABC123">
+        </div>
+
+        <div class="form-group">
+            <label>CV URL (S3):</label>
+            <input type="text" id="cvUrl" placeholder="https://kfc-cv-bucket.s3.amazonaws.com/...">
+        </div>
+
+        <div class="form-group">
+            <label>CV Filename:</label>
+            <input type="text" id="cvFilename" value="CV.pdf">
+        </div>
+
+        <button onclick="testSubmitApplication()">📤 Submit Application</button>
+        <button class="secondary" onclick="testGetCandidateApplications()">📋 Get My Applications</button>
+        <button class="secondary" onclick="clearResult()">🗑️ Clear</button>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function showResult(message, type = 'info') {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = `result ${type}`;
+            resultDiv.textContent = message;
+        }
+
+        function showStep(step) {
+            const resultDiv = document.getElementById('result');
+            const stepDiv = document.createElement('div');
+            stepDiv.className = 'step';
+            stepDiv.textContent = step;
+            resultDiv.appendChild(stepDiv);
+        }
+
+        function clearResult() {
+            document.getElementById('result').innerHTML = '';
+        }
+
+        async function testSubmitApplication() {
+            clearResult();
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = 'result info';
+
+            const apiEndpoint = document.getElementById('apiEndpoint').value;
+            const jwtToken = document.getElementById('jwtToken').value.trim();
+            const jobId = document.getElementById('jobId').value.trim();
+            const cvUrl = document.getElementById('cvUrl').value.trim();
+            const cvFilename = document.getElementById('cvFilename').value.trim();
+
+            if (!jwtToken) {
+                showResult('❌ Vui lòng nhập JWT Token', 'error');
+                return;
+            }
+
+            if (!jobId || !cvUrl) {
+                showResult('❌ Vui lòng nhập Job ID và CV URL', 'error');
+                return;
+            }
+
+            try {
+                showStep('📤 Đang gửi application...');
+                
+                const requestBody = {
+                    jobId: jobId,
+                    cvUrl: cvUrl,
+                    cvFilename: cvFilename
+                };
+
+                showStep('📦 Request Body: ' + JSON.stringify(requestBody, null, 2));
+
+                const response = await fetch(apiEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': jwtToken
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                showStep(`📊 Response Status: ${response.status} ${response.statusText}`);
+
+                const responseText = await response.text();
+                showStep('📄 Response Body (raw): ' + responseText);
+
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                    showStep('✅ Response JSON: ' + JSON.stringify(data, null, 2));
+                } catch (e) {
+                    showStep('⚠️ Response is not JSON: ' + responseText);
+                }
+
+                if (response.ok) {
+                    showStep('✅ SUCCESS! Application submitted');
+                    if (data && data.applicationId) {
+                        showStep('🎉 Application ID: ' + data.applicationId);
+                    }
+                } else {
+                    showStep('❌ ERROR: ' + (data?.error || responseText));
+                }
+
+            } catch (error) {
+                showStep('❌ Exception: ' + error.message);
+                console.error('Error:', error);
+            }
+        }
+
+        async function testGetCandidateApplications() {
+            clearResult();
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = 'result info';
+
+            const jwtToken = document.getElementById('jwtToken').value.trim();
+
+            if (!jwtToken) {
+                showResult('❌ Vui lòng nhập JWT Token', 'error');
+                return;
+            }
+
+            try {
+                showStep('📥 Đang lấy danh sách applications...');
+
+                // Parse JWT to get user ID
+                const tokenParts = jwtToken.split('.');
+                if (tokenParts.length !== 3) {
+                    showStep('❌ Invalid JWT format');
+                    return;
+                }
+
+                const payload = JSON.parse(atob(tokenParts[1]));
+                const userId = payload.sub;
+                showStep('👤 User ID: ' + userId);
+
+                const apiEndpoint = `https://zbkgla009i.execute-api.us-east-1.amazonaws.com/applications/candidate/${userId}`;
+                showStep('🔗 Endpoint: ' + apiEndpoint);
+
+                const response = await fetch(apiEndpoint, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': jwtToken
+                    }
+                });
+
+                showStep(`📊 Response Status: ${response.status} ${response.statusText}`);
+
+                const responseText = await response.text();
+                
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                    showStep('✅ Response JSON: ' + JSON.stringify(data, null, 2));
+                    
+                    if (data.applications && data.applications.length > 0) {
+                        showStep(`📋 Found ${data.applications.length} applications`);
+                    } else {
+                        showStep('📋 No applications found');
+                    }
+                } catch (e) {
+                    showStep('⚠️ Response is not JSON: ' + responseText);
+                }
+
+            } catch (error) {
+                showStep('❌ Exception: ' + error.message);
+                console.error('Error:', error);
+            }
+        }
+
+        // Auto-load token from localStorage if available
+        window.addEventListener('load', () => {
+            const savedToken = localStorage.getItem('testJwtToken');
+            if (savedToken) {
+                document.getElementById('jwtToken').value = savedToken;
+            }
+        });
+
+        // Save token to localStorage when changed
+        document.getElementById('jwtToken').addEventListener('change', (e) => {
+            localStorage.setItem('testJwtToken', e.target.value);
+        });
+    </script>
+</body>
+</html>
