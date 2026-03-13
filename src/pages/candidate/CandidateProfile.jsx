@@ -640,6 +640,17 @@ const CVCard = styled(motion.div)`
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
     transform: translateY(-2px);
   }
+
+  @media (max-width: 768px) {
+    padding: 12px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 480px) {
+    padding: 10px;
+    gap: 10px;
+  }
 `;
 
 const CVIconBox = styled.div`
@@ -657,11 +668,32 @@ const CVIconBox = styled.div`
     height: 28px;
     color: white;
   }
+
+  @media (max-width: 768px) {
+    width: 48px;
+    height: 48px;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    width: 42px;
+    height: 42px;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
 `;
 
 const CVInfo = styled.div`
   flex: 1;
   min-width: 0;
+  max-width: 100%;
 
   .cv-name {
     font-size: 14px;
@@ -671,6 +703,7 @@ const CVInfo = styled.div`
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    max-width: 100%;
   }
 
   .cv-meta {
@@ -678,6 +711,33 @@ const CVInfo = styled.div`
     color: #94a3b8;
     display: flex;
     gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    flex-basis: 100%;
+    order: 2;
+
+    .cv-name {
+      font-size: 13px;
+    }
+
+    .cv-meta {
+      font-size: 11px;
+      gap: 8px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .cv-name {
+      font-size: 12px;
+    }
+
+    .cv-meta {
+      font-size: 10px;
+      gap: 6px;
+    }
   }
 `;
 
@@ -685,6 +745,15 @@ const CVActions = styled.div`
   display: flex;
   gap: 8px;
   flex-shrink: 0;
+
+  @media (max-width: 768px) {
+    order: 1;
+    margin-left: auto;
+  }
+
+  @media (max-width: 480px) {
+    gap: 6px;
+  }
 `;
 
 const CVButton = styled.button`
@@ -708,6 +777,26 @@ const CVButton = styled.button`
   svg {
     width: 18px;
     height: 18px;
+  }
+
+  @media (max-width: 768px) {
+    width: 32px;
+    height: 32px;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    width: 30px;
+    height: 30px;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
   }
 `;
 

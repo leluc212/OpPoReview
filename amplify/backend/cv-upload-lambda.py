@@ -23,8 +23,13 @@ def lambda_handler(event, context):
         'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS'
     }
     
-    # Handle OPTIONS request
-    if event.get('httpMethod') == 'OPTIONS':
+    # Handle OPTIONS request (though API Gateway should handle this)
+    http_method = event.get('requestContext', {}).get('http', {}).get('method')
+    if not http_method:
+        # Fallback for API Gateway REST API format
+        http_method = event.get('httpMethod')
+    
+    if http_method == 'OPTIONS':
         return {
             'statusCode': 200,
             'headers': headers,
@@ -33,12 +38,13 @@ def lambda_handler(event, context):
     
     try:
         # Parse request
-        http_method = event.get('httpMethod')
-        path = event.get('path', '')
+        path = event.get('rawPath', event.get('path', ''))
+        
+        print(f"HTTP Method: {http_method}, Path: {path}")
         
         # GET /cv/{userId} - Get CV info
         if http_method == 'GET' and '/cv/' in path:
-            user_id = path.split('/cv/')[-1]
+            user_id = path.split('/cv/')[-1].replace('/prod', '').strip('/')
             return get_cv_info(user_id, headers)
         
         # POST /cv/upload - Upload CV
@@ -48,10 +54,11 @@ def lambda_handler(event, context):
         
         # DELETE /cv/{userId} - Delete CV
         elif http_method == 'DELETE' and '/cv/' in path:
-            user_id = path.split('/cv/')[-1]
+            user_id = path.split('/cv/')[-1].replace('/prod', '').strip('/')
             return delete_cv(user_id, headers)
         
         else:
+            print(f"No matching route for {http_method} {path}")
             return {
                 'statusCode': 404,
                 'headers': headers,
@@ -114,22 +121,33 @@ def upload_cv(body, headers):
     
     # Upload to S3
     try:
+        # Convert filename to ASCII-safe format for metadata
+        import unicodedata
+        safe_filename = unicodedata.normalize('NFKD', file_name).encode('ascii', 'ignore').decode('ascii')
+        if not safe_filename:
+            safe_filename = 'cv_file' + file_ext
+        
         s3_client.put_object(
             Bucket=BUCKET_NAME,
             Key=s3_key,
             Body=file_data,
             ContentType=file_type,
+            ContentDisposition=f'inline; filename="{file_name}"',  # Preserve original name for download
             Metadata={
                 'userId': user_id,
-                'originalFileName': file_name,
+                'originalFileName': safe_filename,  # ASCII-safe version
                 'uploadDate': datetime.now().isoformat()
             }
         )
         
-        # Generate presigned URL (valid for 7 days)
+        # Generate presigned URL (valid for 7 days) - use inline for viewing
         cv_url = s3_client.generate_presigned_url(
             'get_object',
-            Params={'Bucket': BUCKET_NAME, 'Key': s3_key},
+            Params={
+                'Bucket': BUCKET_NAME, 
+                'Key': s3_key,
+                'ResponseContentDisposition': f'inline; filename="{file_name}"'  # Changed to inline for viewing
+            },
             ExpiresIn=604800  # 7 days
         )
         
@@ -190,9 +208,16 @@ def get_cv_info(user_id, headers):
         # If CV exists and URL is expired, generate new presigned URL
         if cv_info.get('s3Key'):
             try:
+                # Get original filename from DynamoDB
+                original_filename = item.get('cvFileName', 'cv_file.pdf')
+                
                 new_url = s3_client.generate_presigned_url(
                     'get_object',
-                    Params={'Bucket': BUCKET_NAME, 'Key': cv_info['s3Key']},
+                    Params={
+                        'Bucket': BUCKET_NAME, 
+                        'Key': cv_info['s3Key'],
+                        'ResponseContentDisposition': f'inline; filename="{original_filename}"'  # Changed to inline for viewing
+                    },
                     ExpiresIn=604800  # 7 days
                 )
                 cv_info['cvUrl'] = new_url

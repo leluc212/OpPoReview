@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test CV Upload Direct</title>
+</head>
+<body>
+    <h1>Test CV Upload API</h1>
+    
+    <div>
+        <h3>1. Test OPTIONS (CORS Preflight)</h3>
+        <button onclick="testOptions()">Test OPTIONS</button>
+        <pre id="optionsResult"></pre>
+    </div>
+    
+    <div>
+        <h3>2. Upload CV</h3>
+        <input type="file" id="fileInput" accept=".pdf,.doc,.docx">
+        <button onclick="uploadCV()">Upload</button>
+        <pre id="uploadResult"></pre>
+    </div>
+    
+    <div>
+        <h3>3. Get CV Info</h3>
+        <input type="text" id="userId" placeholder="User ID" value="296aa58c-30a1-70cc-44ed-b829e33a8245">
+        <button onclick="getCVInfo()">Get Info</button>
+        <pre id="getResult"></pre>
+    </div>
+
+    <script>
+        const API_URL = 'https://v56v542h8f.execute-api.ap-southeast-1.amazonaws.com/prod';
+        const TEST_USER_ID = '296aa58c-30a1-70cc-44ed-b829e33a8245';
+
+        async function testOptions() {
+            const result = document.getElementById('optionsResult');
+            try {
+                result.textContent = 'Testing OPTIONS...';
+                
+                const response = await fetch(`${API_URL}/cv/upload`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': 'https://leluc213.github.io',
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'content-type'
+                    }
+                });
+                
+                result.textContent = `Status: ${response.status}\n\n`;
+                result.textContent += 'Headers:\n';
+                response.headers.forEach((value, key) => {
+                    result.textContent += `${key}: ${value}\n`;
+                });
+                
+                const text = await response.text();
+                result.textContent += `\nBody: ${text}`;
+            } catch (error) {
+                result.textContent = `Error: ${error.message}\n${error.stack}`;
+            }
+        }
+
+        async function uploadCV() {
+            const result = document.getElementById('uploadResult');
+            const fileInput = document.getElementById('fileInput');
+            
+            if (!fileInput.files[0]) {
+                result.textContent = 'Please select a file first';
+                return;
+            }
+            
+            try {
+                result.textContent = 'Uploading...';
+                
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = async function(e) {
+                    const base64Content = e.target.result.split(',')[1];
+                    
+                    const payload = {
+                        userId: TEST_USER_ID,
+                        fileName: file.name,
+                        fileContent: base64Content,
+                        fileType: file.type
+                    };
+                    
+                    console.log('Payload:', payload);
+                    
+                    const response = await fetch(`${API_URL}/cv/upload`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Origin': 'https://leluc213.github.io'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    result.textContent = `Status: ${response.status}\n\n`;
+                    
+                    const data = await response.json();
+                    result.textContent += JSON.stringify(data, null, 2);
+                };
+                
+                reader.readAsDataURL(file);
+                
+            } catch (error) {
+                result.textContent = `Error: ${error.message}\n${error.stack}`;
+            }
+        }
+
+        async function getCVInfo() {
+            const result = document.getElementById('getResult');
+            const userId = document.getElementById('userId').value;
+            
+            try {
+                result.textContent = 'Getting CV info...';
+                
+                const response = await fetch(`${API_URL}/cv/${userId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                result.textContent = `Status: ${response.status}\n\n`;
+                
+                const data = await response.json();
+                result.textContent += JSON.stringify(data, null, 2);
+                
+            } catch (error) {
+                result.textContent = `Error: ${error.message}\n${error.stack}`;
+            }
+        }
+    </script>
+</body>
+</html>

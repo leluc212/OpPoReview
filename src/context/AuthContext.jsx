@@ -58,16 +58,24 @@ export const AuthProvider = ({ children }) => {
         
         if (currentUser && session.tokens) {
           // User is authenticated with Cognito
+          const userIdFromToken = session.tokens.idToken.payload.sub; // Always get userId from token
+          const emailFromToken = session.tokens.idToken.payload.email;
           const savedUser = localStorage.getItem('user');
           
           if (savedUser) {
-            // Use saved user data from localStorage
+            // Use saved user data from localStorage but ensure userId and email are from token
             const userData = JSON.parse(savedUser);
-            console.log('✅ [AuthContext] Restored user from localStorage:', userData.email, 'Role:', userData.role);
+            userData.userId = userIdFromToken; // Override with token userId
+            userData.email = emailFromToken; // Override with token email
+            userData.username = currentUser.username; // Override with current username
+            
+            console.log('✅ [AuthContext] Restored user from localStorage:', userData.email, 'Role:', userData.role, 'UserId:', userData.userId);
             
             if (isMounted) {
               setUser(userData);
               setIsAuthenticated(true);
+              // Update localStorage with userId
+              localStorage.setItem('user', JSON.stringify(userData));
             }
           } else {
             // Create user data from Cognito tokens
@@ -84,12 +92,12 @@ export const AuthProvider = ({ children }) => {
             
             const userData = {
               username: currentUser.username,
-              userId: currentUser.userId,
+              userId: session.tokens.idToken.payload.sub, // Use 'sub' from token as userId
               email: session.tokens.idToken.payload.email,
               role: userRole,
               approved: true
             };
-            console.log('✅ [AuthContext] Created user from Cognito:', userData.email, 'Role:', userData.role);
+            console.log('✅ [AuthContext] Created user from Cognito:', userData.email, 'Role:', userData.role, 'UserId:', userData.userId);
             
             if (isMounted) {
               setUser(userData);

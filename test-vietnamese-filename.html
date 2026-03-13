@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Vietnamese Filename Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 14px;
+        }
+        input[type="text"] {
+            width: 400px;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        .result {
+            background: white;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        .success {
+            background: #d1fae5;
+            color: #059669;
+        }
+        .info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Vietnamese Filename Upload</h1>
+    
+    <div class="section">
+        <h3>Test Filename Sanitization</h3>
+        <p>Test các tên file tiếng Việt:</p>
+        <div id="sanitizeTests" class="result info"></div>
+    </div>
+
+    <div class="section">
+        <h3>Upload CV với tên tiếng Việt</h3>
+        <input type="text" id="userId" placeholder="User ID" value="296aa58c-30a1-70cc-44ed-b829e33a8245">
+        <input type="file" id="fileInput" accept=".pdf,.doc,.docx">
+        <button onclick="uploadCV()">Upload CV</button>
+        <div id="uploadResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://v56v542h8f.execute-api.ap-southeast-1.amazonaws.com/prod';
+
+        // Sanitize filename function (same as in cvUploadService.js)
+        function sanitizeFilename(filename) {
+            const lastDot = filename.lastIndexOf('.');
+            const name = lastDot > 0 ? filename.substring(0, lastDot) : filename;
+            const ext = lastDot > 0 ? filename.substring(lastDot) : '';
+            
+            let safeName = name
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+                .replace(/[^a-zA-Z0-9\s_-]/g, '_')
+                .replace(/\s+/g, '_')
+                .replace(/_+/g, '_')
+                .substring(0, 100);
+            
+            return safeName + ext;
+        }
+
+        // Test sanitization with various Vietnamese filenames
+        function testSanitization() {
+            const testCases = [
+                'CV_Bá_Hoàng_Hiếu.pdf',
+                'Hồ sơ xin việc - Nguyễn Văn A.docx',
+                'CV-Lê-Tấn-Lực-2026.pdf',
+                'Đơn xin việc (Trần Thị B).doc',
+                'Resume_Phạm_Minh_Đức.pdf',
+                'CV@#$%^&*()Nguyễn.pdf',
+                'Hồ   sơ   nhiều   khoảng   trắng.pdf'
+            ];
+
+            let output = 'Filename Sanitization Tests:\n\n';
+            testCases.forEach(original => {
+                const sanitized = sanitizeFilename(original);
+                output += `Original:  ${original}\n`;
+                output += `Sanitized: ${sanitized}\n\n`;
+            });
+
+            document.getElementById('sanitizeTests').textContent = output;
+        }
+
+        // Upload CV
+        async function uploadCV() {
+            const userId = document.getElementById('userId').value;
+            const fileInput = document.getElementById('fileInput');
+            const resultDiv = document.getElementById('uploadResult');
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = 'Please select a file';
+                return;
+            }
+
+            const file = fileInput.files[0];
+            
+            try {
+                resultDiv.textContent = 'Uploading...';
+                resultDiv.className = 'result';
+                
+                // Sanitize filename
+                const safeFileName = sanitizeFilename(file.name);
+                console.log('Original filename:', file.name);
+                console.log('Safe filename:', safeFileName);
+                
+                // Convert to base64
+                const base64Content = await fileToBase64(file);
+                
+                const payload = {
+                    userId,
+                    fileName: safeFileName,
+                    fileContent: base64Content.split(',')[1],
+                    fileType: file.type
+                };
+                
+                console.log('Uploading with payload:', {
+                    userId: payload.userId,
+                    fileName: payload.fileName,
+                    fileType: payload.fileType,
+                    fileContentLength: payload.fileContent.length
+                });
+                
+                const response = await fetch(`${API_BASE_URL}/cv/upload`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ Upload successful!\n\n` +
+                        `Original filename: ${file.name}\n` +
+                        `Sanitized filename: ${safeFileName}\n` +
+                        `Saved as: ${data.cvFileName}\n\n` +
+                        `Response:\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ Upload failed!\n\n${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ Error: ' + error.message;
+            }
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = (error) => reject(error);
+            });
+        }
+
+        // Run tests on page load
+        testSanitization();
+    </script>
+</body>
+</html>
