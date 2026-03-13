@@ -10,6 +10,7 @@ import { Button, Input, TextArea, FormGroup, Label, DateInput } from '../../comp
 import { useLanguage } from '../../context/LanguageContext';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import CVUpload from '../../components/CVUpload';
+import candidateProfileService from '../../services/candidateProfileService';
 import { 
   Upload, 
   Save, 
