@@ -17,35 +17,44 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const login = (userData) => {
+    console.log('🔐 Login called with:', userData);
     setUser(userData);
     setIsAuthenticated(true);
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
   const logout = () => {
+    console.log('🚪 Logout called');
     setUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('user');
   };
 
   const updateUser = (userData) => {
+    console.log('📝 Update user called with:', userData);
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
   // Check Cognito session on mount and after refresh
   useEffect(() => {
+    let isMounted = true;
+    
     const checkAuth = async () => {
       try {
-        setIsLoading(true);
-        console.log('🔍 Checking authentication...');
+        console.log('🔍 [AuthContext] Starting authentication check...');
         
         // Try to get current Cognito user
         const currentUser = await getCurrentUser();
         const session = await fetchAuthSession();
         
-        console.log('✅ Cognito user found:', currentUser);
-        console.log('✅ Session tokens:', session.tokens ? 'Present' : 'Missing');
+        if (!isMounted) {
+          console.log('⚠️ Component unmounted, skipping auth update');
+          return;
+        }
+        
+        console.log('✅ [AuthContext] Cognito user found:', currentUser.username);
+        console.log('✅ [AuthContext] Session tokens:', session.tokens ? 'Present' : 'Missing');
         
         if (currentUser && session.tokens) {
           // User is authenticated with Cognito
@@ -54,9 +63,12 @@ export const AuthProvider = ({ children }) => {
           if (savedUser) {
             // Use saved user data from localStorage
             const userData = JSON.parse(savedUser);
-            console.log('✅ Restored user from localStorage:', userData.email, 'Role:', userData.role);
-            setUser(userData);
-            setIsAuthenticated(true);
+            console.log('✅ [AuthContext] Restored user from localStorage:', userData.email, 'Role:', userData.role);
+            
+            if (isMounted) {
+              setUser(userData);
+              setIsAuthenticated(true);
+            }
           } else {
             // Create user data from Cognito tokens
             const userGroups = session.tokens.accessToken.payload['cognito:groups'] || [];
@@ -77,31 +89,45 @@ export const AuthProvider = ({ children }) => {
               role: userRole,
               approved: true
             };
-            console.log('✅ Created user from Cognito:', userData.email, 'Role:', userData.role);
-            setUser(userData);
-            setIsAuthenticated(true);
-            localStorage.setItem('user', JSON.stringify(userData));
+            console.log('✅ [AuthContext] Created user from Cognito:', userData.email, 'Role:', userData.role);
+            
+            if (isMounted) {
+              setUser(userData);
+              setIsAuthenticated(true);
+              localStorage.setItem('user', JSON.stringify(userData));
+            }
           }
         } else {
           // No valid Cognito session
-          console.log('❌ No valid Cognito session');
+          console.log('❌ [AuthContext] No valid Cognito session');
+          if (isMounted) {
+            setUser(null);
+            setIsAuthenticated(false);
+            localStorage.removeItem('user');
+          }
+        }
+      } catch (error) {
+        console.log('❌ [AuthContext] No authenticated user:', error.name, error.message);
+        // No authenticated user, clear state
+        if (isMounted) {
           setUser(null);
           setIsAuthenticated(false);
           localStorage.removeItem('user');
         }
-      } catch (error) {
-        console.log('❌ No authenticated user:', error.name, error.message);
-        // No authenticated user, clear state
-        setUser(null);
-        setIsAuthenticated(false);
-        localStorage.removeItem('user');
       } finally {
-        setIsLoading(false);
-        console.log('✅ Auth check complete. Authenticated:', isAuthenticated);
+        if (isMounted) {
+          setIsLoading(false);
+          console.log('✅ [AuthContext] Auth check complete');
+        }
       }
     };
 
     checkAuth();
+    
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
