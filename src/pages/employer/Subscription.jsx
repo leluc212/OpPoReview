@@ -1,8 +1,9 @@
 import React from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
-import { Check, Zap, Star, Rocket, Sparkles, X, HelpCircle, CreditCard, Shield, Clock } from 'lucide-react';
+import { Check, Zap, Star, Rocket, Sparkles, X, HelpCircle, CreditCard, Shield, Clock, CheckCircle } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 // ─── Animations ───────────────────────────────────────────────
@@ -181,6 +182,15 @@ const PriceOption = styled.div`
   margin-bottom: 8px;
   position: relative;
   z-index: 1;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+  
+  &:hover {
+    background: #F8FAFC;
+    border-color: ${p => p.$color || '#1e40af'};
+    transform: translateX(4px);
+  }
   
   &:last-child {
     margin-bottom: 0;
@@ -297,10 +307,379 @@ const FAQItem = styled(motion.div)`
   p { font-size: 13px; color: ${p => p.theme.colors.textLight}; line-height: 1.65; padding-left: 23px; }
 `;
 
+// ─── Modal Styles ─────────────────────────────────────────────
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+`;
+
+const ModalContent = styled.div`
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+`;
+
+const ModalHeader = styled.div`
+  padding: 20px 24px;
+  border-bottom: 1px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
+  h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: ${p => p.theme.colors.text};
+  }
+`;
+
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: ${p => p.theme.colors.textLight};
+  transition: all 0.2s;
+  
+  &:hover {
+    color: ${p => p.theme.colors.text};
+    transform: rotate(90deg);
+  }
+  
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+`;
+
+const ModalBody = styled.div`
+  padding: 24px;
+`;
+
+const PackageInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #F8FAFC;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  
+  h4 {
+    font-size: 18px;
+    font-weight: 700;
+    color: ${p => p.theme.colors.text};
+    margin-bottom: 4px;
+  }
+  
+  p {
+    font-size: 13px;
+    color: ${p => p.theme.colors.textLight};
+  }
+`;
+
+const PurchaseDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+`;
+
+const DetailRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: white;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  
+  span {
+    font-size: 14px;
+    color: ${p => p.theme.colors.textLight};
+  }
+  
+  strong {
+    font-size: 16px;
+    font-weight: 700;
+    color: ${p => p.theme.colors.text};
+  }
+`;
+
+const InfoNote = styled.div`
+  padding: 12px 16px;
+  background: #FEF3C7;
+  border: 1px solid #FDE68A;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #92400E;
+  line-height: 1.6;
+`;
+
+const ModalFooter = styled.div`
+  padding: 16px 24px;
+  border-top: 1px solid #E2E8F0;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+`;
+
+const CancelButton = styled.button`
+  padding: 10px 20px;
+  border: 1.5px solid #E2E8F0;
+  background: white;
+  color: ${p => p.theme.colors.text};
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    border-color: #CBD5E1;
+    background: #F8FAFC;
+  }
+`;
+
+const ConfirmButton = styled.button`
+  padding: 10px 24px;
+  border: none;
+  background: #1e40af;
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: #1e3a8a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+  }
+`;
+
+const DurationOptions = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+`;
+
+const DurationOptionCard = styled.div`
+  padding: 20px;
+  background: white;
+  border: 2px solid #E2E8F0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  
+  &:hover {
+    border-color: ${p => p.$color};
+    background: ${p => p.$color}10;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px ${p => p.$color}20;
+  }
+`;
+
+const DurationLabel = styled.div`
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748B;
+  margin-bottom: 8px;
+`;
+
+const DurationPrice = styled.div`
+  font-size: 20px;
+  font-weight: 800;
+  color: ${p => p.$color};
+`;
+
+const SuccessModalContent = styled(motion.div)`
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 450px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+`;
+
+const SuccessIcon = styled(motion.div)`
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 24px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+`;
+
+const SuccessTitle = styled.h2`
+  font-size: 28px;
+  font-weight: 800;
+  color: #1e293b;
+  margin-bottom: 12px;
+`;
+
+const SuccessMessage = styled.p`
+  font-size: 15px;
+  color: #64748b;
+  line-height: 1.6;
+  margin-bottom: 28px;
+`;
+
+const SuccessButton = styled.button`
+  padding: 12px 32px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  }
+`;
+
+const InsufficientBalanceModalContent = styled(motion.div)`
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 450px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+`;
+
+const ErrorIcon = styled(motion.div)`
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 24px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+`;
+
+const ErrorTitle = styled.h2`
+  font-size: 28px;
+  font-weight: 800;
+  color: #1e293b;
+  margin-bottom: 12px;
+`;
+
+const ErrorMessage = styled.p`
+  font-size: 15px;
+  color: #64748b;
+  line-height: 1.6;
+  margin-bottom: 28px;
+`;
+
 // ─── Component ────────────────────────────────────────────────
 const Subscription = () => {
   const { language: lang } = useLanguage();
+  const navigate = useNavigate();
   const vi = lang === 'vi';
+  const [selectedPackage, setSelectedPackage] = React.useState(null);
+  const [selectedDuration, setSelectedDuration] = React.useState(null);
+  const [showConfirmModal, setShowConfirmModal] = React.useState(false);
+  const [showDurationModal, setShowDurationModal] = React.useState(false);
+  const [showSuccessModal, setShowSuccessModal] = React.useState(false);
+  const [showInsufficientBalanceModal, setShowInsufficientBalanceModal] = React.useState(false);
+
+  const handleSelectPackage = (plan, priceOption) => {
+    setSelectedPackage(plan);
+    setSelectedDuration(priceOption);
+    setShowConfirmModal(true);
+  };
+
+  const handleClickPackageButton = (plan) => {
+    setSelectedPackage(plan);
+    setShowDurationModal(true);
+  };
+
+  const handleSelectDuration = (priceOption) => {
+    setSelectedDuration(priceOption);
+    setShowDurationModal(false);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmPurchase = () => {
+    // Parse price from string (e.g., "495,000 VND" -> 495000)
+    const priceString = selectedDuration.amount.replace(/[^0-9]/g, '');
+    const packagePrice = parseInt(priceString);
+    
+    // Get wallet balance
+    const walletData = JSON.parse(localStorage.getItem('employer_wallet') || '{"balance": 0}');
+    const currentBalance = walletData.balance || 0;
+    
+    console.log('Package price:', packagePrice);
+    console.log('Current balance:', currentBalance);
+    
+    // Check if balance is sufficient
+    if (currentBalance < packagePrice) {
+      // Show insufficient balance modal
+      setShowConfirmModal(false);
+      setShowInsufficientBalanceModal(true);
+      return;
+    }
+    
+    // Deduct from wallet
+    const newBalance = currentBalance - packagePrice;
+    walletData.balance = newBalance;
+    localStorage.setItem('employer_wallet', JSON.stringify(walletData));
+    
+    console.log('New balance after purchase:', newBalance);
+    
+    // Create purchase record (will be sent to admin for approval)
+    const purchase = {
+      packageName: selectedPackage.name,
+      duration: selectedDuration.duration,
+      price: selectedDuration.amount,
+      purchaseDate: new Date().toISOString().split('T')[0],
+      status: 'pending',
+      approvalStatus: 'pending'
+    };
+    
+    // Save to localStorage for now (later will be sent to backend)
+    const existingPurchases = JSON.parse(localStorage.getItem('pendingPurchases') || '[]');
+    existingPurchases.push(purchase);
+    localStorage.setItem('pendingPurchases', JSON.stringify(existingPurchases));
+    
+    // Show success modal instead of alert
+    setShowConfirmModal(false);
+    setShowSuccessModal(true);
+    
+    // Auto close after 3 seconds
+    setTimeout(() => {
+      setShowSuccessModal(false);
+      setSelectedPackage(null);
+      setSelectedDuration(null);
+    }, 3000);
+  };
 
   const plans = [
     {
@@ -440,7 +819,11 @@ const Subscription = () => {
         <PriceBox>
           {plan.prices ? (
             plan.prices.map((priceOption, pi) => (
-              <PriceOption key={pi}>
+              <PriceOption 
+                key={pi}
+                $color={plan.color}
+                onClick={() => handleSelectPackage(plan, priceOption)}
+              >
                 <PriceDuration>{priceOption.duration}</PriceDuration>
                 <PriceAmount $c={plan.color}>{priceOption.amount}</PriceAmount>
               </PriceOption>
@@ -477,7 +860,11 @@ const Subscription = () => {
         viewport={{ once: true }}
         transition={{ delay: i * 0.1 + 0.45 }}
       >
-        <Btn $primary={plan.featured} whileTap={{ scale: 0.97 }}>
+        <Btn 
+          $primary={plan.featured} 
+          whileTap={{ scale: 0.97 }}
+          onClick={() => handleClickPackageButton(plan)}
+        >
           {plan.featured && <Sparkles />}
           {plan.featured ? (vi ? 'Bắt Đầu Ngay' : 'Start Now') : (vi ? 'Chọn Gói' : 'Select Plan')}
         </Btn>
@@ -567,6 +954,156 @@ const Subscription = () => {
             ))}
           </SectionCard>
         </Inner>
+
+        {/* Duration Selection Modal */}
+        {showDurationModal && selectedPackage && (
+          <ModalOverlay onClick={() => setShowDurationModal(false)}>
+            <ModalContent onClick={(e) => e.stopPropagation()}>
+              <ModalHeader>
+                <h3>{vi ? 'Chọn thời hạn gói' : 'Select Package Duration'}</h3>
+                <CloseButton onClick={() => setShowDurationModal(false)}>
+                  <X />
+                </CloseButton>
+              </ModalHeader>
+              <ModalBody>
+                <PackageInfo>
+                  <selectedPackage.Icon size={40} color={selectedPackage.color} />
+                  <div>
+                    <h4>{selectedPackage.name}</h4>
+                    <p>{selectedPackage.subtitle}</p>
+                  </div>
+                </PackageInfo>
+                <DurationOptions>
+                  {selectedPackage.prices.map((priceOption, idx) => (
+                    <DurationOptionCard 
+                      key={idx}
+                      $color={selectedPackage.color}
+                      onClick={() => handleSelectDuration(priceOption)}
+                    >
+                      <DurationLabel>{priceOption.duration}</DurationLabel>
+                      <DurationPrice $color={selectedPackage.color}>{priceOption.amount}</DurationPrice>
+                    </DurationOptionCard>
+                  ))}
+                </DurationOptions>
+              </ModalBody>
+            </ModalContent>
+          </ModalOverlay>
+        )}
+
+        {/* Confirmation Modal */}
+        {showConfirmModal && selectedPackage && selectedDuration && (
+          <ModalOverlay onClick={() => setShowConfirmModal(false)}>
+            <ModalContent onClick={(e) => e.stopPropagation()}>
+              <ModalHeader>
+                <h3>{vi ? 'Xác nhận mua gói' : 'Confirm Purchase'}</h3>
+                <CloseButton onClick={() => setShowConfirmModal(false)}>
+                  <X />
+                </CloseButton>
+              </ModalHeader>
+              <ModalBody>
+                <PackageInfo>
+                  <selectedPackage.Icon size={40} color={selectedPackage.color} />
+                  <div>
+                    <h4>{selectedPackage.name}</h4>
+                    <p>{selectedPackage.subtitle}</p>
+                  </div>
+                </PackageInfo>
+                <PurchaseDetails>
+                  <DetailRow>
+                    <span>{vi ? 'Thời hạn:' : 'Duration:'}</span>
+                    <strong>{selectedDuration.duration}</strong>
+                  </DetailRow>
+                  <DetailRow>
+                    <span>{vi ? 'Giá:' : 'Price:'}</span>
+                    <strong style={{ color: selectedPackage.color }}>{selectedDuration.amount}</strong>
+                  </DetailRow>
+                </PurchaseDetails>
+                <InfoNote>
+                  {vi 
+                    ? '⏳ Yêu cầu mua gói sẽ được gửi đến admin để duyệt. Bạn sẽ nhận được thông báo khi gói được kích hoạt.'
+                    : '⏳ Purchase request will be sent to admin for approval. You will be notified when the package is activated.'}
+                </InfoNote>
+              </ModalBody>
+              <ModalFooter>
+                <CancelButton onClick={() => setShowConfirmModal(false)}>
+                  {vi ? 'Hủy' : 'Cancel'}
+                </CancelButton>
+                <ConfirmButton onClick={handleConfirmPurchase}>
+                  {vi ? 'Xác nhận mua' : 'Confirm Purchase'}
+                </ConfirmButton>
+              </ModalFooter>
+            </ModalContent>
+          </ModalOverlay>
+        )}
+
+        {/* Success Modal */}
+        {showSuccessModal && (
+          <ModalOverlay>
+            <SuccessModalContent
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', duration: 0.5 }}
+            >
+              <SuccessIcon
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+              >
+                <CheckCircle size={60} />
+              </SuccessIcon>
+              <SuccessTitle>
+                {vi ? 'Thanh toán thành công!' : 'Payment Successful!'}
+              </SuccessTitle>
+              <SuccessMessage>
+                {vi 
+                  ? 'Yêu cầu mua gói của bạn đã được gửi đến admin. Bạn sẽ nhận được thông báo khi gói được kích hoạt.'
+                  : 'Your package purchase request has been sent to admin. You will be notified when the package is activated.'}
+              </SuccessMessage>
+              <SuccessButton onClick={() => setShowSuccessModal(false)}>
+                {vi ? 'Đóng' : 'Close'}
+              </SuccessButton>
+            </SuccessModalContent>
+          </ModalOverlay>
+        )}
+
+        {/* Insufficient Balance Modal */}
+        {showInsufficientBalanceModal && selectedPackage && selectedDuration && (
+          <ModalOverlay onClick={() => setShowInsufficientBalanceModal(false)}>
+            <InsufficientBalanceModalContent
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', duration: 0.5 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ErrorIcon
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+              >
+                <X size={60} />
+              </ErrorIcon>
+              <ErrorTitle>
+                {vi ? 'Số dư không đủ!' : 'Insufficient Balance!'}
+              </ErrorTitle>
+              <ErrorMessage>
+                {vi 
+                  ? `Bạn cần ${selectedDuration.amount} để mua gói này. Vui lòng nạp thêm tiền vào ví.`
+                  : `You need ${selectedDuration.amount} to purchase this package. Please top up your wallet.`}
+              </ErrorMessage>
+              <ModalFooter style={{ justifyContent: 'center', borderTop: 'none', paddingTop: 0 }}>
+                <CancelButton onClick={() => setShowInsufficientBalanceModal(false)}>
+                  {vi ? 'Đóng' : 'Close'}
+                </CancelButton>
+                <ConfirmButton onClick={() => {
+                  setShowInsufficientBalanceModal(false);
+                  navigate('/employer/wallet');
+                }}>
+                  {vi ? 'Nạp tiền ngay' : 'Top Up Now'}
+                </ConfirmButton>
+              </ModalFooter>
+            </InsufficientBalanceModalContent>
+          </ModalOverlay>
+        )}
       </PageContainer>
     </DashboardLayout>
   );
