@@ -1,36 +1,28 @@
 # Test Lambda function directly
-Write-Host "=== Testing Lambda Function ===" -ForegroundColor Cyan
+Write-Host "Testing CandidateProfileAPI Lambda function..." -ForegroundColor Cyan
 
-$payload = @{
-    requestContext = @{
-        http = @{
-            method = "GET"
-            path = "/quick-jobs/active"
-        }
+# Test GET profile
+$testEvent = @{
+    httpMethod = "GET"
+    path = "/profile/296aa58c-30a1-70cc-44ed-b829e33a8245"
+    pathParameters = @{
+        userId = "296aa58c-30a1-70cc-44ed-b829e33a8245"
     }
-    rawPath = "/quick-jobs/active"
-} | ConvertTo-Json -Depth 10
+    headers = @{}
+} | ConvertTo-Json -Compress
 
-Write-Host "`nPayload:" -ForegroundColor Yellow
-Write-Host $payload
-
-$payload | Out-File -FilePath "test-payload.json" -Encoding utf8
+Write-Host "`nTest Event:" -ForegroundColor Yellow
+Write-Host $testEvent
 
 Write-Host "`nInvoking Lambda..." -ForegroundColor Yellow
 aws lambda invoke `
-    --function-name quick-job-handler `
-    --payload file://test-payload.json `
+    --function-name CandidateProfileAPI `
+    --region ap-southeast-1 `
+    --payload $testEvent `
+    --cli-binary-format raw-in-base64-out `
     response.json
 
-if ($LASTEXITCODE -eq 0) {
-    Write-Host "`n✅ Lambda invoked successfully" -ForegroundColor Green
-    Write-Host "`nResponse:" -ForegroundColor Yellow
-    Get-Content response.json
-} else {
-    Write-Host "`n❌ Lambda invocation failed" -ForegroundColor Red
-}
+Write-Host "`nResponse:" -ForegroundColor Green
+Get-Content response.json | ConvertFrom-Json | ConvertTo-Json -Depth 10
 
-Remove-Item -Path "test-payload.json" -ErrorAction SilentlyContinue
-Remove-Item -Path "response.json" -ErrorAction SilentlyContinue
-
-Write-Host "`n=== Test Complete ===" -ForegroundColor Cyan
+Write-Host "`nDone!" -ForegroundColor Green

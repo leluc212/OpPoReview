@@ -1,0 +1,8 @@
+{
+  "httpMethod": "GET",
+  "path": "/profile/296aa58c-30a1-70cc-44ed-b829e33a8245",
+  "pathParameters": {
+    "userId": "296aa58c-30a1-70cc-44ed-b829e33a8245"
+  },
+  "headers": {}
+}
