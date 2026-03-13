@@ -49,7 +49,18 @@ export async function submitApplication(jobId, cvUrl, cvFilename) {
     
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Failed to submit application');
+      // Include status code and error code in the error message for better handling
+      const errorMsg = error.error || 'Failed to submit application';
+      const errorCode = error.code || '';
+      const statusCode = response.status;
+      
+      // Create error with all info
+      const err = new Error(errorMsg);
+      err.statusCode = statusCode;
+      err.errorCode = errorCode;
+      err.response = error;
+      
+      throw err;
     }
     
     const data = await response.json();

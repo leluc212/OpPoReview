@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Edit3, Trash2, Eye, CheckCircle, Send, Search, Calendar, Newspaper, TrendingUp, AlertCircle, User, Plus, X, Wallet, Save, Award, Star, Briefcase, Zap, Banknote, ThumbsUp, ThumbsDown, ArrowRight, RefreshCw } from 'lucide-react';
+import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Edit3, Trash2, Eye, CheckCircle, Send, Search, Calendar, Newspaper, TrendingUp, TrendingDown, AlertCircle, User, Plus, X, XCircle, Wallet, Save, Award, Star, Briefcase, Zap, Banknote, ThumbsUp, ThumbsDown, ArrowRight, RefreshCw } from 'lucide-react';
 import Modal from '../../components/Modal';
+import CVPreviewModal from '../../components/CVPreviewModal';
 import quickJobService from '../../services/quickJobService';
+import applicationService from '../../services/applicationService';
 
 // Helper: tính số giờ từ chuỗi shift "HH:MM - HH:MM"
 const calcShiftHours = (shift) => {
@@ -23,186 +25,10 @@ const calcShiftHours = (shift) => {
 };
 
 // Mock HR Staff Data
+// Mock HR Staff Data - REMOVED: Now using only real data from DynamoDB
 const getHRStaff = (language) => {
-  const now = new Date();
-  const today = language === 'vi' 
-    ? `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`
-    : `${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getDate().toString().padStart(2, '0')}/${now.getFullYear()}`;
-  
-  // Recent time: 30 minutes ago
-  const recentTime = new Date(now - 30 * 60 * 1000);
-  const recentTimeStr = `${recentTime.getHours().toString().padStart(2, '0')}:${recentTime.getMinutes().toString().padStart(2, '0')}`;
-  
-  // Old time: 2 hours ago (for testing hidden info) - lưu cả ngày
-  const oldTime = new Date(now - 2 * 60 * 60 * 1000);
-  const oldDate = language === 'vi' 
-    ? `${oldTime.getDate().toString().padStart(2, '0')}/${(oldTime.getMonth() + 1).toString().padStart(2, '0')}/${oldTime.getFullYear()}`
-    : `${(oldTime.getMonth() + 1).toString().padStart(2, '0')}/${oldTime.getDate().toString().padStart(2, '0')}/${oldTime.getFullYear()}`;
-  const oldTimeStr = `${oldTime.getHours().toString().padStart(2, '0')}:${oldTime.getMinutes().toString().padStart(2, '0')}`;
-  
-  console.log('📊 Mock data timestamps:', {
-    now: now.toLocaleString(),
-    today,
-    recentTimeStr,
-    oldDate,
-    oldTimeStr,
-    recentConfirmedAt: `${today} - ${recentTimeStr}`,
-    oldConfirmedAt: `${oldDate} - ${oldTimeStr}`
-  });
-  
-  return [
-  {
-    id: 1,
-    name: language === 'vi' ? 'Nguyễn Minh Tuấn' : 'Nguyen Minh Tuan',
-    position: language === 'vi' ? 'Nhân viên pha chế' : 'Barista',
-    location: language === 'vi' ? 'Quận 8' : 'District 8',
-    phone: '0123 456 789',
-    email: 'nguyenminhtuan@example.com',
-    startDate: language === 'vi' ? '15/01/2024' : '01/15/2024',
-    status: 'active',
-    shift: '06:00 - 08:00',
-    hourlyRate: 35000,
-    confirmedAt: `${today} - ${recentTimeStr}`,
-    totalPaid: 70000,
-    canRequestChange: true,
-    isWithinTimeWindow: true,
-    // Additional profile data
-    experience: language === 'vi' ? '3 năm' : '3 years',
-    education: language === 'vi' ? 'Trung cấp Pha chế' : 'Vocational Barista Training',
-    skills: language === 'vi' ? ['Pha chế', 'Latte Art', 'Dọn dẹp', 'Quản lý kho'] : ['Brewing', 'Latte Art', 'Cleaning', 'Inventory'],
-    bio: language === 'vi' ? 'Có kinh nghiệm 3 năm làm việc tại các quán cà phê lớn. Đam mê nghệ thuật pha chế và latte art.' : '3 years experience in major coffee shops. Passionate about brewing and latte art.',
-    reviews: [
-      { id: 1, employer: 'The Coffee House', position: language === 'vi' ? 'Nhân viên pha chế' : 'Barista', rating: 5, date: language === 'vi' ? 'Tháng 12/2024' : 'Dec 2024', comment: language === 'vi' ? 'Làm việc xuất sắc, nhiệt tình.' : 'Excellent work, very enthusiastic.' }
-    ]
-  },
-  {
-    id: 2,
-    name: language === 'vi' ? 'Phạm Thu Hương' : 'Pham Thu Huong',
-    position: language === 'vi' ? 'Thu ngân' : 'Cashier',
-    location: language === 'vi' ? 'Quận 1' : 'District 1',
-    phone: '0987 654 321',
-    email: 'phamthuhuong@example.com',
-    startDate: language === 'vi' ? '20/02/2024' : '02/20/2024',
-    status: 'pending_confirmation',
-    shift: '09:00 - 17:00',
-    hourlyRate: 20000,
-    confirmedAt: `${oldDate} - ${oldTimeStr}`,
-    totalPaid: 160000,
-    canRequestChange: true,
-    isWithinTimeWindow: false,
-    // Additional profile data
-    experience: language === 'vi' ? '2 năm' : '2 years',
-    education: language === 'vi' ? 'Cao đẳng Kinh tế' : 'College of Economics',
-    skills: language === 'vi' ? ['Kế toán', 'Excel', 'Giao tiếp', 'Quản lý tiền mặt'] : ['Accounting', 'Excel', 'Communication', 'Cash handling'],
-    bio: language === 'vi' ? 'Có kinh nghiệm thu ngân tại các cửa hàng bán lẻ. Cẩn thận và chính xác.' : 'Experienced cashier in retail stores. Careful and accurate.',
-    reviews: [
-      { id: 1, employer: 'CoopMart', position: language === 'vi' ? 'Thu ngân' : 'Cashier', rating: 4, date: language === 'vi' ? 'Tháng 10/2024' : 'Oct 2024', comment: language === 'vi' ? 'Cẩn thận, ít sai sót.' : 'Careful, few errors.' }
-    ]
-  },
-  {
-    id: 3,
-    name: language === 'vi' ? 'Trần Quốc Bảo' : 'Tran Quoc Bao',
-    position: language === 'vi' ? 'Nhân viên phục vụ' : 'Server',
-    location: language === 'vi' ? 'Quận 7' : 'District 7',
-    phone: '0909 111 222',
-    email: 'tranquocbao@example.com',
-    startDate: language === 'vi' ? '10/03/2024' : '03/10/2024',
-    status: 'pending_change',
-    shift: '18:00 - 22:00',
-    hourlyRate: 20000,
-    confirmedAt: `${today} - ${recentTimeStr}`,
-    totalPaid: 155000,
-    canRequestChange: true,
-    isWithinTimeWindow: true,
-    // Additional profile data
-    experience: language === 'vi' ? '1 năm' : '1 year',
-    education: language === 'vi' ? 'THPT' : 'High School',
-    skills: language === 'vi' ? ['Phục vụ khách hàng', 'Giao tiếp', 'Làm việc nhanh'] : ['Customer service', 'Communication', 'Fast worker'],
-    bio: language === 'vi' ? 'Sinh viên kiêm việc, nhiệt tình và nhanh nhẹn.' : 'Student with part-time work, enthusiastic and agile.',
-    reviews: [
-      { id: 1, employer: language === 'vi' ? 'Nhà hàng Hương Việt' : 'Huong Viet Restaurant', position: language === 'vi' ? 'Nhân viên phục vụ' : 'Server', rating: 4, date: language === 'vi' ? 'Tháng 11/2024' : 'Nov 2024', comment: language === 'vi' ? 'Nhanh nhẹn, thân thiện.' : 'Quick and friendly.' }
-    ],
-    changeRequest: {
-      type: 'staff_replacement',
-      typeLabel: language === 'vi' ? 'Đổi người' : 'Staff Replacement',
-      reason: language === 'vi' ? 'Có lịch thi giữa kỳ đột xuất, không thể đi làm ca này, xin nhờ người thay' : 'Unexpected midterm exam schedule, unable to work this shift, requesting a replacement',
-      requestedAt: language === 'vi' ? `${today} - 07:45` : `${today} - 07:45`,
-      urgency: 'urgent',
-      sentToAdmin: true
-    }
-  },
-  {
-    id: 4,
-    name: language === 'vi' ? 'Lê Thị Mai' : 'Le Thi Mai',
-    position: language === 'vi' ? 'Nhân viên bán hàng' : 'Sales Staff',
-    location: language === 'vi' ? 'Quận 3' : 'District 3',
-    phone: '0912 345 678',
-    email: 'lethimai@example.com',
-    startDate: today,
-    status: 'active',
-    shift: '14:00 - 18:00',
-    hourlyRate: 40000,
-    confirmedAt: `${today} - ${recentTimeStr}`,
-    totalPaid: 160000,
-    canRequestChange: true,
-    isWithinTimeWindow: true,
-    // Additional profile data
-    experience: language === 'vi' ? '2 năm' : '2 years',
-    education: language === 'vi' ? 'Cao đẳng Marketing' : 'Marketing College',
-    skills: language === 'vi' ? ['Bán hàng', 'Tư vấn khách hàng', 'Thu ngân'] : ['Sales', 'Customer consulting', 'Cashier'],
-    bio: language === 'vi' ? 'Có kinh nghiệm bán hàng tại các cửa hàng thời trang. Giao tiếp tốt.' : 'Sales experience in fashion stores. Good communication.',
-    reviews: [
-      { id: 1, employer: 'Canifa', position: language === 'vi' ? 'Nhân viên bán hàng' : 'Sales Staff', rating: 5, date: language === 'vi' ? 'Tháng 1/2025' : 'Jan 2025', comment: language === 'vi' ? 'Nhiệt tình, am hiểu sản phẩm.' : 'Enthusiastic, knowledgeable about products.' }
-    ]
-  },
-  {
-    id: 5,
-    name: language === 'vi' ? 'Võ Văn Hùng' : 'Vo Van Hung',
-    position: language === 'vi' ? 'Nhân viên bảo vệ' : 'Security Guard',
-    location: language === 'vi' ? 'Quận 5' : 'District 5',
-    phone: '0934 567 890',
-    email: 'vovanhung@example.com',
-    startDate: language === 'vi' ? '05/02/2024' : '02/05/2024',
-    status: 'completed',
-    shift: '22:00 - 06:00',
-    hourlyRate: 25000,
-    confirmedAt: `${oldDate} - ${oldTimeStr}`,
-    totalPaid: 200000,
-    canRequestChange: false,
-    isWithinTimeWindow: false,
-    experience: language === 'vi' ? '5 năm' : '5 years',
-    education: language === 'vi' ? 'THPT' : 'High School',
-    skills: language === 'vi' ? ['Bảo vệ', 'Kiểm soát', 'Xử lý tình huống'] : ['Security', 'Control', 'Situation handling'],
-    bio: language === 'vi' ? 'Có kinh nghiệm làm bảo vệ tại các khu chung cư và siêu thị.' : 'Experienced security guard in residential areas and supermarkets.',
-    reviews: [
-      { id: 1, employer: 'BigC', position: language === 'vi' ? 'Bảo vệ' : 'Security', rating: 5, date: language === 'vi' ? 'Tháng 9/2024' : 'Sep 2024', comment: language === 'vi' ? 'Có trách nhiệm, cẩn thận.' : 'Responsible and careful.' }
-    ]
-  },
-  {
-    id: 6,
-    name: language === 'vi' ? 'Đặng Thị Lan' : 'Dang Thi Lan',
-    position: language === 'vi' ? 'Nhân viên dọn dẹp' : 'Cleaner',
-    location: language === 'vi' ? 'Quận 2' : 'District 2',
-    phone: '0945 678 901',
-    email: 'dangthilan@example.com',
-    startDate: language === 'vi' ? '12/01/2024' : '01/12/2024',
-    status: 'completed',
-    shift: '07:00 - 11:00',
-    hourlyRate: 25000,
-    confirmedAt: `${oldDate} - ${oldTimeStr}`,
-    totalPaid: 100000,
-    canRequestChange: false,
-    isWithinTimeWindow: false,
-    experience: language === 'vi' ? '2 năm' : '2 years',
-    education: language === 'vi' ? 'THCS' : 'Secondary School',
-    skills: language === 'vi' ? ['Dọn dẹp', 'Vệ sinh', 'Cẩn thận'] : ['Cleaning', 'Hygiene', 'Careful'],
-    bio: language === 'vi' ? 'Có kinh nghiệm làm dọn dẹp văn phòng và nhà ở.' : 'Experienced in office and residential cleaning.',
-    reviews: [
-      { id: 1, employer: 'Lotte Mart', position: language === 'vi' ? 'Dọn dẹp' : 'Cleaner', rating: 4, date: language === 'vi' ? 'Tháng 8/2024' : 'Aug 2024', comment: language === 'vi' ? 'Làm việc tốt, sạch sẽ.' : 'Good work, clean.' }
-    ]
-  }
-];
-
+  // Return empty array - all staff data now comes from realApplications (DynamoDB)
+  return [];
 };
 
 // Mock Quick Job Posts Data
@@ -253,17 +79,6 @@ const getChatConversations = (language) => [
     unread: 0,
     status: 'online',
     position: language === 'vi' ? 'Nhân viên pha chế' : 'Barista',
-    messages: []
-  },
-  {
-    id: 2,
-    name: language === 'vi' ? 'Phạm Thu Hương' : 'Pham Thu Huong',
-    role: language === 'vi' ? 'Nhân viên' : 'Employee',
-    lastMessage: language === 'vi' ? 'Chưa có tin nhắn' : 'No messages yet',
-    time: language === 'vi' ? '25 phút trước' : '25 min ago',
-    unread: 0,
-    status: 'online',
-    position: language === 'vi' ? 'Thu ngân' : 'Cashier',
     messages: []
   },
   {
@@ -2482,18 +2297,29 @@ const HRManagement = () => {
   };
 
   const handleChatWithStaff = (staff) => {
-    // Open chat modal directly with staff ID
-    handleOpenChat(staff.id);
+    // Open chat modal with applicationId
+    handleOpenChat(staff.applicationId);
   };
   
   // Load quick jobs from DynamoDB
   const [quickJobPosts, setQuickJobPosts] = useState([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
   
+  // Load applications from Quick Jobs
+  const [realApplications, setRealApplications] = useState([]);
+  const [loadingApplications, setLoadingApplications] = useState(false);
+  
   // Load jobs from DynamoDB on mount
   useEffect(() => {
     loadQuickJobsFromDynamoDB();
   }, []);
+  
+  // Load applications when switching to HR section
+  useEffect(() => {
+    if (activeSection === 'hr' && quickJobPosts.length > 0) {
+      loadApplicationsFromQuickJobs();
+    }
+  }, [activeSection, quickJobPosts]);
   
   const loadQuickJobsFromDynamoDB = async () => {
     try {
@@ -2562,7 +2388,68 @@ const HRManagement = () => {
     }
   };
   
-  const [chatConversations] = useState(() => getChatConversations(language));
+  const loadApplicationsFromQuickJobs = async () => {
+    try {
+      setLoadingApplications(true);
+      console.log('📥 Loading applications from Quick Jobs...');
+      
+      // Import applicationService
+      const applicationService = (await import('../../services/applicationService')).default;
+      
+      // Load applications for each quick job
+      const allApplications = [];
+      
+      for (const job of quickJobPosts) {
+        try {
+          const jobApplications = await applicationService.getJobApplications(job.idJob);
+          
+          // Add job info to each application
+          const applicationsWithJobInfo = jobApplications.map(app => ({
+            ...app,
+            jobTitle: job.title,
+            jobLocation: job.location,
+            jobSalary: job.salary,
+            jobShift: job.shift,
+            jobWorkDate: job.deadline,
+            jobType: 'quick'
+          }));
+          
+          allApplications.push(...applicationsWithJobInfo);
+        } catch (error) {
+          console.error(`Error loading applications for job ${job.idJob}:`, error);
+        }
+      }
+      
+      console.log('✅ Loaded applications:', allApplications);
+      setRealApplications(allApplications);
+    } catch (error) {
+      console.error('❌ Error loading applications:', error);
+      setRealApplications([]);
+    } finally {
+      setLoadingApplications(false);
+    }
+  };
+  
+  // Create chat conversations from accepted staff (realApplications with status 'accepted')
+  const chatConversations = useMemo(() => {
+    if (!realApplications || !Array.isArray(realApplications)) {
+      return [];
+    }
+    
+    return realApplications
+      .filter(app => app.status === 'accepted')
+      .map(app => ({
+        id: app.applicationId, // Use applicationId as chat ID
+        name: app.candidateEmail || 'Ứng viên', // Use email as name for now
+        role: language === 'vi' ? 'Nhân viên' : 'Staff',
+        position: app.jobTitle || (language === 'vi' ? 'Vị trí' : 'Position'),
+        status: 'online', // Default to online
+        lastMessage: language === 'vi' ? 'Bắt đầu trò chuyện...' : 'Start conversation...',
+        time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+        unread: 0
+      }));
+  }, [realApplications, language]);
+  
   const [activeChatId, setActiveChatId] = useState(null);
   const [currentMessages, setCurrentMessages] = useState([]);
   const [messageInput, setMessageInput] = useState('');
@@ -2593,6 +2480,114 @@ const HRManagement = () => {
   const [editJobData, setEditJobData] = useState(null);
   const [showShiftEndedModal, setShowShiftEndedModal] = useState(false);
   const [shiftEndedShown, setShiftEndedShown] = useState(false);
+  const [showCVPreview, setShowCVPreview] = useState(false);
+  const [selectedCV, setSelectedCV] = useState(null);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectStaff, setRejectStaff] = useState(null);
+
+  // Convert applications to staff format for display
+  const staffFromApplications = useMemo(() => {
+    return realApplications
+      .filter(app => app.status === 'pending' || app.status === 'accepted') // Show pending in "Chờ xác nhận" and accepted in "Đang làm"
+      .map(app => {
+        // Calculate totalPaid from jobSalary
+        let totalPaid = 0;
+        let hourlyRate = 0;
+        
+        if (app.jobSalary) {
+          // Parse salary: "224.400 VNĐ/8h" or "28.000 VNĐ/giờ"
+          const salaryMatch = app.jobSalary.match(/([\d.]+)/);
+          if (salaryMatch) {
+            const salaryValue = parseInt(salaryMatch[1].replace(/\./g, ''));
+            
+            if (app.jobSalary.includes('/giờ') || app.jobSalary.includes('/hour')) {
+              // Hourly rate: calculate from shift hours
+              hourlyRate = salaryValue;
+              
+              // Parse shift hours: "09:00 - 17:00"
+              if (app.jobShift && app.jobShift.includes('-')) {
+                const [startTime, endTime] = app.jobShift.split('-').map(t => t.trim());
+                const [startH, startM] = startTime.split(':').map(Number);
+                const [endH, endM] = endTime.split(':').map(Number);
+                
+                let hours = (endH + endM / 60) - (startH + startM / 60);
+                if (hours < 0) hours += 24; // overnight shift
+                
+                totalPaid = Math.round(hourlyRate * hours);
+              }
+            } else {
+              // Total salary already calculated: "224.400 VNĐ/8h"
+              totalPaid = salaryValue;
+              
+              // Extract hourly rate if format includes hours
+              const hoursMatch = app.jobSalary.match(/\/([\d.]+)h/);
+              if (hoursMatch) {
+                const hours = parseFloat(hoursMatch[1]);
+                hourlyRate = Math.round(totalPaid / hours);
+              }
+            }
+          }
+        }
+        
+        // Use acceptedAt if available (when status is accepted), otherwise use appliedAt
+        const timeToUse = app.acceptedAt || app.appliedAt;
+        
+        // Format timestamp to readable format
+        let formattedTime = timeToUse;
+        if (timeToUse && !timeToUse.includes('/')) {
+          // Only format if it's ISO timestamp (not already formatted)
+          try {
+            const date = new Date(timeToUse);
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            
+            formattedTime = language === 'vi' 
+              ? `${day}/${month}/${year} - ${hours}:${minutes}`
+              : `${month}/${day}/${year} - ${hours}:${minutes}`;
+          } catch (error) {
+            console.error('Error formatting time:', error);
+          }
+        }
+        
+        // Map status: pending -> pending_confirmation, accepted -> active or pending_change (if has changeRequest)
+        const mappedStatus = app.status === 'pending' 
+          ? 'pending_confirmation' 
+          : (app.changeRequest ? 'pending_change' : 'active');
+        
+        return {
+          id: app.applicationId,
+          applicationId: app.applicationId,
+          name: app.candidateEmail?.split('@')[0] || 'Unknown', // Use email prefix as name
+          position: app.jobTitle,
+          location: app.jobLocation || 'N/A',
+          phone: '***-***-****', // Hidden until confirmed
+          email: '***@***.***', // Hidden until confirmed
+          startDate: app.jobWorkDate || 'N/A',
+          status: mappedStatus,
+          shift: app.jobShift || 'N/A',
+          hourlyRate: hourlyRate,
+          confirmedAt: formattedTime,
+          totalPaid: totalPaid,
+          canRequestChange: false,
+          isWithinTimeWindow: true,
+          cvUrl: app.cvUrl,
+          cvFilename: app.cvFilename || 'CV.pdf',
+          candidateId: app.candidateId,
+          candidateEmail: app.candidateEmail,
+          jobId: app.jobId,
+          changeRequest: app.changeRequest || null
+        };
+      });
+  }, [realApplications, language]);
+
+  // Combine mock staff with real applications
+  const allStaff = useMemo(() => {
+    // Keep mock staff for demo purposes, but add real applications
+    return [...hrStaff, ...staffFromApplications];
+  }, [hrStaff, staffFromApplications]);
 
   // Mock wallet connection status - in real app, get from user context or API
   const [isWalletConnected] = useState(() => {
@@ -2620,7 +2615,7 @@ const HRManagement = () => {
     }
   };
 
-  const activeChat = activeChatId
+  const activeChat = activeChatId && chatConversations
     ? chatConversations.find(chat => chat.id === activeChatId)
     : null;
 
@@ -2631,23 +2626,19 @@ const HRManagement = () => {
       if (savedMessages) {
         setCurrentMessages(JSON.parse(savedMessages));
       } else {
-        const chat = chatConversations.find(c => c.id === activeChatId);
+        const chat = chatConversations && chatConversations.find(c => c.id === activeChatId);
         if (chat) {
-          // If no messages yet, add initial greeting message
-          if (chat.messages.length === 0) {
-            const companyName = user?.role === 'employer' ? (language === 'vi' ? 'Katinat Quận 8' : 'Katinat District 8') : (user?.name || 'Company');
-            const greetingMessage = {
-              id: Date.now(),
-              sender: 'me',
-              text: language === 'vi' 
-                ? `Xin chào! ${companyName} đã duyệt CV ứng tuyển công việc tuyển gấp của bạn. Bạn có thể liên hệ với chúng tôi qua đây nhé! 😊`
-                : `Hello! ${companyName} has approved your urgent job application. You can contact us here! 😊`,
-              time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
-            };
-            setCurrentMessages([greetingMessage]);
-          } else {
-            setCurrentMessages(chat.messages);
-          }
+          // Add initial greeting message
+          const companyName = user?.role === 'employer' ? (language === 'vi' ? 'Katinat Quận Cam' : 'Katinat District Cam') : (user?.name || 'Company');
+          const greetingMessage = {
+            id: Date.now(),
+            sender: 'me',
+            text: language === 'vi' 
+              ? `Xin chào! ${companyName} đã duyệt CV ứng tuyển công việc tuyển gấp của bạn. Bạn có thể liên hệ với chúng tôi qua đây nhé! 😊`
+              : `Hello! ${companyName} has approved your urgent job application. You can contact us here! 😊`,
+            time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+          };
+          setCurrentMessages([greetingMessage]);
         }
       }
     }
@@ -2698,10 +2689,42 @@ const HRManagement = () => {
     }
   };
 
-  const handleConfirmCV = (staffId) => {
-    setHrStaff(prev => prev.map(s =>
-      s.id === staffId ? { ...s, status: 'active' } : s
-    ));
+  const handleConfirmCV = async (staffId) => {
+    // Find the staff member to get applicationId
+    const staff = allStaff.find(s => s.id === staffId);
+    if (!staff || !staff.applicationId) {
+      console.error('❌ Staff or applicationId not found');
+      return;
+    }
+    
+    try {
+      // Update application status to 'accepted' via API
+      await applicationService.updateApplicationStatus(staff.applicationId, 'accepted');
+      
+      // Update confirmedAt to current time in realApplications
+      const now = new Date();
+      const day = now.getDate().toString().padStart(2, '0');
+      const month = (now.getMonth() + 1).toString().padStart(2, '0');
+      const year = now.getFullYear();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      
+      const newConfirmedAt = language === 'vi' 
+        ? `${day}/${month}/${year} - ${hours}:${minutes}`
+        : `${month}/${day}/${year} - ${hours}:${minutes}`;
+      
+      // Update realApplications with new confirmedAt
+      setRealApplications(prev => prev.map(app => 
+        app.applicationId === staff.applicationId
+          ? { ...app, status: 'accepted', acceptedAt: newConfirmedAt }
+          : app
+      ));
+      
+      // Show success message
+      console.log('✅ Application accepted successfully at:', newConfirmedAt);
+    } catch (error) {
+      console.error('❌ Error accepting application:', error);
+    }
   };
 
   const handleApproveChange = (staffId) => {
@@ -2716,6 +2739,30 @@ const HRManagement = () => {
     setHrStaff(prev => prev.map(s =>
       s.id === staffId ? { ...s, status: 'active', changeRequest: null } : s
     ));
+  };
+
+  const handleRejectCV = async () => {
+    if (!rejectStaff) return;
+    
+    try {
+      // Update application status to 'rejected' via API
+      await applicationService.updateApplicationStatus(rejectStaff.applicationId, 'rejected');
+      
+      // Reload applications from DynamoDB
+      await loadApplicationsFromDynamoDB();
+      
+      // Show success message
+      console.log('✅ Application rejected successfully');
+      
+      // Close modal
+      setShowRejectModal(false);
+      setRejectStaff(null);
+    } catch (error) {
+      console.error('❌ Error rejecting application:', error);
+      // Still close modal even if error
+      setShowRejectModal(false);
+      setRejectStaff(null);
+    }
   };
 
   const handleCreatePost = () => {
@@ -3013,7 +3060,7 @@ const HRManagement = () => {
               ))}
             </StaffTabBar>
 
-            {hrStaff.filter(staff => {
+            {allStaff.filter(staff => {
               if (staffTabFilter === 'working')         return staff.status === 'active';
               if (staffTabFilter === 'pending_confirm') return staff.status === 'pending_confirmation';
               if (staffTabFilter === 'pending_change')  return staff.status === 'pending_change';
@@ -3037,7 +3084,7 @@ const HRManagement = () => {
             ) : (
               <StaffGrid>
                 <AnimatePresence>
-                  {hrStaff
+                  {allStaff
                     .filter(staff => {
                       if (staffTabFilter === 'working')         return staff.status === 'active';
                       if (staffTabFilter === 'pending_confirm') return staff.status === 'pending_confirmation';
@@ -3139,38 +3186,88 @@ const HRManagement = () => {
                         )}
 
                         <StaffActions>
-                          <StaffButton
+                          {/* Temporarily hidden - View profile button */}
+                          {/* <StaffButton
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={() => setSelectedStaff(staff)}
                           >
                             <User />{language === 'vi' ? 'Xem hồ sơ' : 'View profile'}
-                          </StaffButton>
-                          {/* Only show chat button when job is active */}
+                          </StaffButton> */}
+                          
+                          {/* Only show chat and request change buttons when job is active */}
                           {staff.status === 'active' && (
-                            <StaffButton
-                              $variant="success"
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              onClick={() => {
-                                const isWorking = isCurrentlyWorking(staff.shift);
-                                console.log(`👤 ${staff.name} - Đang làm việc:`, isWorking);
-                                handleChatWithStaff(staff);
-                              }}
-                            >
-                              <MessageSquare />{language === 'vi' ? 'Nhắn tin' : 'Chat'}
-                            </StaffButton>
+                            <>
+                              <StaffButton
+                                $variant="success"
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => {
+                                  const isWorking = isCurrentlyWorking(staff.shift);
+                                  console.log(`👤 ${staff.name} - Đang làm việc:`, isWorking);
+                                  handleChatWithStaff(staff);
+                                }}
+                              >
+                                <MessageSquare />{language === 'vi' ? 'Nhắn tin' : 'Chat'}
+                              </StaffButton>
+                              <StaffButton
+                                $variant="warning"
+                                whileHover={{ scale: hasPassedOneHourSinceConfirmed(staff.confirmedAt) ? 1 : 1.02 }}
+                                whileTap={{ scale: hasPassedOneHourSinceConfirmed(staff.confirmedAt) ? 1 : 0.98 }}
+                                onClick={() => {
+                                  if (hasPassedOneHourSinceConfirmed(staff.confirmedAt)) return;
+                                  setChangeRequestStaff(staff);
+                                  setChangeRequestReason('');
+                                  setChangeRequestType('');
+                                }}
+                                style={{
+                                  opacity: hasPassedOneHourSinceConfirmed(staff.confirmedAt) ? 0.5 : 1,
+                                  cursor: hasPassedOneHourSinceConfirmed(staff.confirmedAt) ? 'not-allowed' : 'pointer',
+                                  pointerEvents: hasPassedOneHourSinceConfirmed(staff.confirmedAt) ? 'none' : 'auto'
+                                }}
+                                title={hasPassedOneHourSinceConfirmed(staff.confirmedAt) 
+                                  ? (language === 'vi' ? 'Đã quá thời gian cho phép (1 giờ)' : 'Time limit exceeded (1 hour)')
+                                  : ''}
+                              >
+                                <AlertCircle />{language === 'vi' ? 'Yêu cầu thay đổi' : 'Request Change'}
+                              </StaffButton>
+                            </>
                           )}
                           {staff.status === 'pending_confirmation' ? (
-                            <StaffButton
-                              $variant="success"
-                              style={{ background: 'linear-gradient(135deg, #10B981, #059669)', color: '#fff', border: 'none' }}
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              onClick={() => handleConfirmCV(staff.id)}
-                            >
-                              <CheckCircle />{language === 'vi' ? 'Đồng ý CV' : 'Approve CV'}
-                            </StaffButton>
+                            <>
+                              {staff.cvUrl && (
+                                <StaffButton
+                                  whileHover={{ scale: 1.02 }}
+                                  whileTap={{ scale: 0.98 }}
+                                  onClick={() => {
+                                    setSelectedCV({ url: staff.cvUrl, filename: staff.cvFilename });
+                                    setShowCVPreview(true);
+                                  }}
+                                >
+                                  <Eye />{language === 'vi' ? 'Xem CV' : 'View CV'}
+                                </StaffButton>
+                              )}
+                              <StaffButton
+                                $variant="success"
+                                style={{ background: 'linear-gradient(135deg, #10B981, #059669)', color: '#fff', border: 'none' }}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => handleConfirmCV(staff.id)}
+                              >
+                                <CheckCircle />{language === 'vi' ? 'Đồng ý CV' : 'Approve CV'}
+                              </StaffButton>
+                              <StaffButton
+                                $variant="danger"
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => {
+                                  setRejectStaff(staff);
+                                  setShowRejectModal(true);
+                                }}
+                              >
+                                <XCircle />{language === 'vi' ? 'Từ chối CV' : 'Reject CV'}
+                              </StaffButton>
+                            </>
                           ) : staff.canRequestChange && (
                             <StaffButton
                               $variant="warning"
@@ -3730,14 +3827,14 @@ const HRManagement = () => {
                   {/* Change type selector */}
                   <RateCategory>
                     <div className="category-label">
-                      <RefreshCw />{language === 'vi' ? 'Loại yêu cầu thay đổi' : 'Type of change'}
+                      <RefreshCw />{language === 'vi' ? 'Lý do yêu cầu thay đổi' : 'Reason for change request'}
                     </div>
                     <ChangeTypeGrid>
                       {[
-                        { value: 'shift_change', label: language === 'vi' ? 'Đổi ca làm' : 'Shift Change', icon: Clock },
-                        { value: 'salary_change', label: language === 'vi' ? 'Điều chỉnh lương' : 'Salary Adjustment', icon: Banknote },
-                        { value: 'role_change', label: language === 'vi' ? 'Đổi vị trí' : 'Role Change', icon: User },
-                        { value: 'cancel', label: language === 'vi' ? 'Huỷ ca làm' : 'Cancel Shift', icon: X },
+                        { value: 'poor_performance', label: language === 'vi' ? 'Làm việc không hiệu quả' : 'Poor Performance', icon: TrendingDown },
+                        { value: 'attitude_issue', label: language === 'vi' ? 'Thái độ không phù hợp' : 'Attitude Issue', icon: AlertCircle },
+                        { value: 'skill_mismatch', label: language === 'vi' ? 'Kỹ năng không đáp ứng' : 'Skill Mismatch', icon: XCircle },
+                        { value: 'unreliable', label: language === 'vi' ? 'Không đáng tin cậy' : 'Unreliable', icon: Clock },
                       ].map(opt => {
                         const Icon = opt.icon;
                         return (
@@ -3776,6 +3873,40 @@ const HRManagement = () => {
                       disabled={!changeRequestReason.trim() || !changeRequestType}
                       onClick={() => {
                         if (!changeRequestReason.trim() || !changeRequestType) return;
+                        
+                        // Update staff status to pending_change in realApplications
+                        // For now, just update the local hrStaff state (for accepted applications from DynamoDB)
+                        const now = new Date();
+                        const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+                        const dateStr = language === 'vi'
+                          ? `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`
+                          : `${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getDate().toString().padStart(2, '0')}/${now.getFullYear()}`;
+                        
+                        // Map change type to label
+                        const typeLabels = {
+                          'poor_performance': language === 'vi' ? 'Làm việc không hiệu quả' : 'Poor Performance',
+                          'attitude_issue': language === 'vi' ? 'Thái độ không phù hợp' : 'Attitude Issue',
+                          'skill_mismatch': language === 'vi' ? 'Kỹ năng không đáp ứng' : 'Skill Mismatch',
+                          'unreliable': language === 'vi' ? 'Không đáng tin cậy' : 'Unreliable'
+                        };
+                        
+                        // Update realApplications to add changeRequest
+                        setRealApplications(prev => prev.map(app => 
+                          app.applicationId === changeRequestStaff.applicationId
+                            ? {
+                                ...app,
+                                changeRequest: {
+                                  type: changeRequestType,
+                                  typeLabel: typeLabels[changeRequestType],
+                                  reason: changeRequestReason,
+                                  requestedAt: `${dateStr} - ${timeStr}`,
+                                  urgency: 'normal',
+                                  sentToAdmin: true
+                                }
+                              }
+                            : app
+                        ));
+                        
                         setChangeRequestStaff(null);
                         setChangeRequestReason('');
                         setChangeRequestType('');
@@ -4137,6 +4268,65 @@ const HRManagement = () => {
               <CheckCircle />
               {successToastMessage}
             </SuccessToast>
+          )}
+        </AnimatePresence>
+
+        {/* Reject CV Confirmation Modal */}
+        <AnimatePresence>
+          {showRejectModal && rejectStaff && (
+            <DeleteModalOverlay
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                setShowRejectModal(false);
+                setRejectStaff(null);
+              }}
+            >
+              <DeleteModalContainer
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <DeleteModalIcon>
+                  <XCircle />
+                </DeleteModalIcon>
+                <DeleteModalTitle>
+                  {language === 'vi' ? 'Xác nhận từ chối CV' : 'Confirm Reject CV'}
+                </DeleteModalTitle>
+                <DeleteModalMessage>
+                  {language === 'vi'
+                    ? 'Bạn có chắc chắn muốn từ chối CV của ứng viên này? Hành động này không thể hoàn tác.'
+                    : 'Are you sure you want to reject this candidate\'s CV? This action cannot be undone.'}
+                </DeleteModalMessage>
+                <DeleteModalJobTitle>
+                  {rejectStaff.name} - {rejectStaff.position}
+                </DeleteModalJobTitle>
+                <DeleteModalActions>
+                  <DeleteModalButton
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      setShowRejectModal(false);
+                      setRejectStaff(null);
+                    }}
+                  >
+                    <X />
+                    {language === 'vi' ? 'Hủy' : 'Cancel'}
+                  </DeleteModalButton>
+                  <DeleteModalButton
+                    $variant="danger"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleRejectCV}
+                  >
+                    <XCircle />
+                    {language === 'vi' ? 'Từ chối CV' : 'Reject CV'}
+                  </DeleteModalButton>
+                </DeleteModalActions>
+              </DeleteModalContainer>
+            </DeleteModalOverlay>
           )}
         </AnimatePresence>
 
@@ -4643,6 +4833,34 @@ const HRManagement = () => {
               onClose={() => setSelectedStaff(null)}
             />
           </Modal>
+        )}
+
+        {/* CV Preview Modal */}
+        {showCVPreview && selectedCV && (
+          <CVPreviewModal
+            cvUrl={selectedCV.url}
+            fileName={selectedCV.filename}
+            onClose={() => {
+              setShowCVPreview(false);
+              setSelectedCV(null);
+            }}
+            onDownload={async () => {
+              try {
+                const response = await fetch(selectedCV.url);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = selectedCV.filename || 'CV.pdf';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+              } catch (error) {
+                console.error('Error downloading CV:', error);
+              }
+            }}
+          />
         )}
       </PageContainer>
     </DashboardLayout>

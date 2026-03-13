@@ -1505,7 +1505,7 @@ const CandidateDashboard = () => {
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
   const [chatMessages, setChatMessages] = useState([
-    { id: 1, mine: false, text: 'Xin chào! Katinat Quận 8 đã duyệt CV ứng tuyển công việc tuyển gấp của bạn. Bạn có thể liên hệ với chúng tôi qua đây nhé! 😊', time: '3 ngày trước' },
+    { id: 1, mine: false, text: 'Xin chào! Katinat Quận Cam đã duyệt CV ứng tuyển công việc tuyển gấp của bạn. Bạn có thể liên hệ với chúng tôi qua đây nhé! 😊', time: '3 ngày trước' },
   ]);
   const [hasUnread, setHasUnread] = useState(true);
 
@@ -2077,7 +2077,7 @@ const CandidateDashboard = () => {
           <ChatInputRow>
             <input
               type="text"
-              placeholder="Nhắn tin cho Katinat Quận 8..."
+              placeholder="Nhắn tin cho Katinat Quận Cam..."
               value={chatInput}
               onChange={e => setChatInput(e.target.value)}
               onKeyPress={e => e.key === 'Enter' && sendChatMessage()}

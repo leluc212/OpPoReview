@@ -178,7 +178,8 @@ def submit_application(event, candidate_id, candidate_email, headers):
         # Try quick jobs if not found
         if not job:
             try:
-                response = quick_jobs_table.get_item(Key={'idJob': job_id})
+                # PostQuickJob uses 'jobID' as primary key (capital D)
+                response = quick_jobs_table.get_item(Key={'jobID': job_id})
                 if 'Item' in response:
                     job = response['Item']
                     employer_id = job.get('employerId')
@@ -230,9 +231,10 @@ def submit_application(event, candidate_id, candidate_email, headers):
                     ':now': datetime.now().isoformat()
                 }
             )
-        else:
+        elif job_type == 'quick':
+            # PostQuickJob uses 'jobID' as primary key (capital D)
             quick_jobs_table.update_item(
-                Key={'idJob': job_id},
+                Key={'jobID': job_id},
                 UpdateExpression='SET applicants = if_not_exists(applicants, :zero) + :inc, updatedAt = :now',
                 ExpressionAttributeValues={
                     ':inc': 1,
@@ -303,7 +305,8 @@ def get_job_applications(job_id, user_id, headers):
         
         if not job:
             try:
-                response = quick_jobs_table.get_item(Key={'idJob': job_id})
+                # PostQuickJob uses 'jobID' as primary key (capital D)
+                response = quick_jobs_table.get_item(Key={'jobID': job_id})
                 if 'Item' in response:
                     job = response['Item']
             except:
@@ -382,14 +385,22 @@ def update_application_status(event, application_id, user_id, headers):
             }
         
         # Update status
+        update_expression = 'SET #status = :status, updatedAt = :now'
+        expression_values = {
+            ':status': new_status,
+            ':now': datetime.now().isoformat()
+        }
+        
+        # If status is 'accepted', also set acceptedAt timestamp
+        if new_status == 'accepted':
+            update_expression += ', acceptedAt = :acceptedAt'
+            expression_values[':acceptedAt'] = datetime.now().isoformat()
+        
         applications_table.update_item(
             Key={'applicationId': application_id},
-            UpdateExpression='SET #status = :status, updatedAt = :now',
+            UpdateExpression=update_expression,
             ExpressionAttributeNames={'#status': 'status'},
-            ExpressionAttributeValues={
-                ':status': new_status,
-                ':now': datetime.now().isoformat()
-            }
+            ExpressionAttributeValues=expression_values
         )
         
         return {

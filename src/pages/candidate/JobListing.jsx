@@ -2701,6 +2701,7 @@ const JobListing = () => {
       const userId = session.tokens?.idToken?.payload?.sub;
       
       if (!userId) {
+        setIsSubmitting(false);
         setErrorModal({
           show: true,
           message: 'Vui lòng đăng nhập để ứng tuyển'
@@ -2713,6 +2714,7 @@ const JobListing = () => {
       const cvInfo = await getCVInfo(userId);
       
       if (!cvInfo || !cvInfo.cvUrl) {
+        setIsSubmitting(false);
         setErrorModal({
           show: true,
           message: 'Bạn chưa có CV. Vui lòng tải CV lên trong phần Hồ sơ trước khi ứng tuyển.'
@@ -2725,6 +2727,7 @@ const JobListing = () => {
       const jobId = applyModal.job.idJob || applyModal.job.id;
       
       if (!jobId) {
+        setIsSubmitting(false);
         setErrorModal({
           show: true,
           message: 'Không tìm thấy ID công việc'
@@ -2750,7 +2753,14 @@ const JobListing = () => {
       // Handle specific error codes from backend
       let errorMessage;
       
-      if (error.message.includes('ALREADY_APPLIED')) {
+      // Check error code first (most reliable)
+      if (error.errorCode === 'ALREADY_APPLIED' || error.statusCode === 409) {
+        errorMessage = 'Bạn đã ứng tuyển công việc này rồi!';
+      } else if (error.errorCode === 'RATE_LIMITED' || error.statusCode === 429) {
+        errorMessage = 'Bạn gửi CV quá nhanh! Vui lòng đợi 30 giây trước khi gửi tiếp.';
+      } else if (error.statusCode === 404 || error.message.includes('No profile found') || error.message.includes('404')) {
+        errorMessage = 'Bạn chưa có CV. Vui lòng tải CV lên trong phần Hồ sơ trước khi ứng tuyển.';
+      } else if (error.message.includes('ALREADY_APPLIED')) {
         errorMessage = 'Bạn đã ứng tuyển công việc này rồi!';
       } else if (error.message.includes('RATE_LIMITED')) {
         errorMessage = 'Bạn gửi CV quá nhanh! Vui lòng đợi 30 giây trước khi gửi tiếp.';
@@ -2760,13 +2770,13 @@ const JobListing = () => {
         errorMessage = 'Bạn đã ứng tuyển công việc này rồi!';
       } else {
         // Check if this is a demo/mock job (no idJob field or starts with 'mock')
-        const jobId = applyModal.job.idJob || applyModal.job.id;
-        const isDemo = !applyModal.job.idJob || jobId.toString().startsWith('mock') || jobId.toString().startsWith('demo');
+        const jobId = applyModal?.job?.idJob || applyModal?.job?.id;
+        const isDemo = !applyModal?.job?.idJob || jobId?.toString().startsWith('mock') || jobId?.toString().startsWith('demo');
         
         if (isDemo) {
           errorMessage = 'Không thể gửi, đây chỉ là công việc mẫu. Xin thông cảm ạ!';
         } else {
-          errorMessage = 'Không thể gửi CV. Bạn đã ứng tuyển công việc này rồi.';
+          errorMessage = 'Không thể gửi CV. Vui lòng thử lại sau.';
         }
       }
       
