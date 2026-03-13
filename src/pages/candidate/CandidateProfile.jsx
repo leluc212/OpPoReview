@@ -9,7 +9,7 @@ import { useToast } from '../../hooks/useToast';
 import { Button, Input, TextArea, FormGroup, Label, DateInput } from '../../components/FormElements';
 import { useLanguage } from '../../context/LanguageContext';
 import { fetchAuthSession } from 'aws-amplify/auth';
-import candidateProfileService from '../../services/candidateProfileService';
+import CVUpload from '../../components/CVUpload';
 import { 
   Upload, 
   Save, 
@@ -2202,80 +2202,8 @@ const CandidateProfile = () => {
               </SkillsGrid>
             </Card>
             
-            {/* CV / Resume Section */}
-            <CVSection
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <div className="card-header">
-                <h2>
-                  <FileText />
-                  {language === 'vi' ? 'CV / Hồ Sơ' : 'CV / Resume'}
-                </h2>
-              </div>
-
-              <input
-                type="file"
-                id="cvUpload"
-                accept=".pdf,.doc,.docx"
-                style={{ display: 'none' }}
-                onChange={handleCVUpload}
-              />
-
-              {cvFile ? (
-                <CVCard
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <CVIconBox>
-                    <FileText />
-                  </CVIconBox>
-                  <CVInfo>
-                    <div className="cv-name">{cvFile.name}</div>
-                    <div className="cv-meta">
-                      <span>{formatFileSize(cvFile.size)}</span>
-                      <span>•</span>
-                      <span>
-                        {new Date(cvFile.uploadDate).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </span>
-                    </div>
-                  </CVInfo>
-                  <CVActions>
-                    <CVButton onClick={handleCVView} title={language === 'vi' ? 'Xem' : 'View'}>
-                      <Eye />
-                    </CVButton>
-                    <CVButton onClick={handleCVDownload} title={language === 'vi' ? 'Tải xuống' : 'Download'}>
-                      <Download />
-                    </CVButton>
-                    <CVButton $danger onClick={handleCVDelete} title={language === 'vi' ? 'Xóa' : 'Delete'}>
-                      <Trash2 />
-                    </CVButton>
-                  </CVActions>
-                </CVCard>
-              ) : (
-                <EmptyCV>
-                  <FileText />
-                  <p>{language === 'vi' ? 'Chưa có CV nào được tải lên' : 'No CV uploaded yet'}</p>
-                  <CVUploadButton onClick={() => document.getElementById('cvUpload').click()}>
-                    <Upload />
-                    {language === 'vi' ? 'Tải lên CV' : 'Upload CV'}
-                  </CVUploadButton>
-                </EmptyCV>
-              )}
-              
-              {cvFile && (
-                <CVUploadButton onClick={() => document.getElementById('cvUpload').click()} style={{ marginTop: '12px' }}>
-                  <Upload />
-                  {language === 'vi' ? 'Tải lên CV mới' : 'Upload New CV'}
-                </CVUploadButton>
-              )}
-            </CVSection>
+            {/* CV / Resume Section - Using real S3 upload */}
+            <CVUpload />
           </Sidebar>
         </ContentGrid>
 

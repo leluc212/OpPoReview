@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test CV Upload API</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        button.danger {
+            background: #ef4444;
+        }
+        button.danger:hover {
+            background: #dc2626;
+        }
+        pre {
+            background: #263238;
+            color: #aed581;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            background: #e8f5e9;
+            border-left-color: #4caf50;
+        }
+        .error {
+            background: #ffebee;
+            border-left-color: #f44336;
+        }
+        .info {
+            background: #e3f2fd;
+            border-left-color: #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test CV Upload API</h1>
+        <p style="color: #666; margin-bottom: 30px;">Test các endpoint của CV Upload API</p>
+
+        <div class="section">
+            <h3>📤 1. Upload CV</h3>
+            <input type="text" id="uploadUserId" placeholder="User ID (e.g., 296aa58c-30a1-70cc-44ed-b829e33a8245)" value="296aa58c-30a1-70cc-44ed-b829e33a8245">
+            <input type="file" id="cvFile" accept=".pdf,.doc,.docx">
+            <button onclick="uploadCV()">Upload CV</button>
+            <div id="uploadResult"></div>
+        </div>
+
+        <div class="section">
+            <h3>📥 2. Get CV Info</h3>
+            <input type="text" id="getUserId" placeholder="User ID" value="296aa58c-30a1-70cc-44ed-b829e33a8245">
+            <button onclick="getCVInfo()">Get CV Info</button>
+            <div id="getResult"></div>
+        </div>
+
+        <div class="section">
+            <h3>🗑️ 3. Delete CV</h3>
+            <input type="text" id="deleteUserId" placeholder="User ID" value="296aa58c-30a1-70cc-44ed-b829e33a8245">
+            <button class="danger" onclick="deleteCV()">Delete CV</button>
+            <div id="deleteResult"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://v56v542h8f.execute-api.ap-southeast-1.amazonaws.com/prod';
+
+        async function uploadCV() {
+            const userId = document.getElementById('uploadUserId').value;
+            const fileInput = document.getElementById('cvFile');
+            const resultDiv = document.getElementById('uploadResult');
+
+            if (!userId || !fileInput.files[0]) {
+                resultDiv.innerHTML = '<div class="section error"><strong>❌ Lỗi:</strong> Vui lòng nhập User ID và chọn file</div>';
+                return;
+            }
+
+            const file = fileInput.files[0];
+            resultDiv.innerHTML = '<div class="section info">⏳ Đang upload...</div>';
+
+            try {
+                // Convert file to base64
+                const base64 = await fileToBase64(file);
+                const base64Content = base64.split(',')[1]; // Remove data:...;base64, prefix
+
+                const response = await fetch(`${API_BASE_URL}/cv/upload`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: userId,
+                        fileName: file.name,
+                        fileContent: base64Content,
+                        fileType: file.type
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="section success">
+                            <strong>✅ Upload thành công!</strong>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="section error">
+                            <strong>❌ Upload thất bại:</strong>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="section error">
+                        <strong>❌ Lỗi:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function getCVInfo() {
+            const userId = document.getElementById('getUserId').value;
+            const resultDiv = document.getElementById('getResult');
+
+            if (!userId) {
+                resultDiv.innerHTML = '<div class="section error"><strong>❌ Lỗi:</strong> Vui lòng nhập User ID</div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="section info">⏳ Đang lấy thông tin...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/cv/${userId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="section success">
+                            <strong>✅ Lấy thông tin thành công!</strong>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                            ${data.cvUrl ? `<button onclick="window.open('${data.cvUrl}', '_blank')">📄 Xem CV</button>` : ''}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="section error">
+                            <strong>❌ Lỗi:</strong>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="section error">
+                        <strong>❌ Lỗi:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function deleteCV() {
+            const userId = document.getElementById('deleteUserId').value;
+            const resultDiv = document.getElementById('deleteResult');
+
+            if (!userId) {
+                resultDiv.innerHTML = '<div class="section error"><strong>❌ Lỗi:</strong> Vui lòng nhập User ID</div>';
+                return;
+            }
+
+            if (!confirm('Bạn có chắc muốn xóa CV này?')) {
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="section info">⏳ Đang xóa...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/cv/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="section success">
+                            <strong>✅ Xóa thành công!</strong>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="section error">
+                            <strong>❌ Xóa thất bại:</strong>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="section error">
+                        <strong>❌ Lỗi:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = (error) => reject(error);
+            });
+        }
+    </script>
+</body>
+</html>
