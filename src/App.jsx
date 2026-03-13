@@ -88,6 +88,24 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 };
 
 function AppRoutes() {
+  const { isLoading } = useAuth();
+  
+  // Show loading spinner while checking auth
+  if (isLoading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontSize: '18px',
+        color: '#1e40af'
+      }}>
+        <div>Đang tải...</div>
+      </div>
+    );
+  }
+  
   return (
     <Routes>
       {/* Public Routes */}
