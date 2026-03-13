@@ -445,6 +445,39 @@ const SaveButton = styled(motion.button)`
   }
 `;
 
+const MapContainer = styled.div`
+  margin-top: 8px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  
+  iframe {
+    display: block;
+    width: 100%;
+  }
+`;
+
+const MapInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-top: 1px solid #e5e7eb;
+  font-size: 14px;
+  color: #6b7280;
+  
+  svg {
+    color: #10b981;
+    flex-shrink: 0;
+  }
+  
+  span {
+    flex: 1;
+    font-weight: 500;
+  }
+`;
+
 const DocumentsSection = styled.div`
   margin-top: 32px;
   padding-top: 32px;
@@ -702,6 +735,8 @@ const EmployerProfile = () => {
     email: '',
     phone: '',
     address: '',
+    latitude: '',
+    longitude: '',
     website: '',
     industry: '',
     companySize: '',
@@ -713,6 +748,7 @@ const EmployerProfile = () => {
   
   const [originalFormData, setOriginalFormData] = useState({});
   const [companyLogo, setCompanyLogo] = useState('');
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [isLockedFields, setIsLockedFields] = useState({
     taxCode: false,
     businessLicense: false
@@ -776,6 +812,8 @@ const EmployerProfile = () => {
             email: profile.email || '',
             phone: profile.phone || '',
             address: profile.address || '',
+            latitude: profile.latitude || '',
+            longitude: profile.longitude || '',
             website: profile.website || '',
             industry: profile.industry || '',
             companySize: profile.companySize || '',
@@ -805,6 +843,8 @@ const EmployerProfile = () => {
             email: user?.attributes?.email || '',
             phone: '',
             address: '',
+            latitude: '',
+            longitude: '',
             website: '',
             industry: '',
             companySize: '',
@@ -966,6 +1006,8 @@ const EmployerProfile = () => {
             email: savedProfile.email || '',
             phone: savedProfile.phone || '',
             address: savedProfile.address || '',
+            latitude: savedProfile.latitude || '',
+            longitude: savedProfile.longitude || '',
             website: savedProfile.website || '',
             industry: savedProfile.industry || '',
             companySize: savedProfile.companySize || '',
@@ -999,6 +1041,8 @@ const EmployerProfile = () => {
             email: fallbackData.email || '',
             phone: fallbackData.phone || '',
             address: fallbackData.address || '',
+            latitude: fallbackData.latitude || '',
+            longitude: fallbackData.longitude || '',
             website: fallbackData.website || '',
             industry: fallbackData.industry || '',
             companySize: fallbackData.companySize || '',
@@ -1029,11 +1073,12 @@ const EmployerProfile = () => {
   const calculateProfileCompletion = (data) => {
     let completion = 0;
     
-    // Basic info (40% total - 10% each)
-    if (data.companyName?.trim()) completion += 10;
-    if (data.email?.trim()) completion += 10;
-    if (data.phone?.trim()) completion += 10;
-    if (data.address?.trim()) completion += 10;
+    // Basic info (35% total - 7% each)
+    if (data.companyName?.trim()) completion += 7;
+    if (data.email?.trim()) completion += 7;
+    if (data.phone?.trim()) completion += 7;
+    if (data.address?.trim()) completion += 7;
+    if (data.latitude?.trim() && data.longitude?.trim()) completion += 7; // GPS location
     
     // Business info (30% total - 10% each)
     if (data.industry?.trim()) completion += 10;
@@ -1069,10 +1114,75 @@ const EmployerProfile = () => {
   
   // Handle form change
   const handleChange = (e) => {
+    const { name, value } = e.target;
+    
+    // Validate GPS coordinates
+    if (name === 'latitude') {
+      const lat = parseFloat(value);
+      if (value && (isNaN(lat) || lat < -90 || lat > 90)) {
+        toast.error(language === 'vi' ? 'Vĩ độ phải từ -90 đến 90' : 'Latitude must be between -90 and 90');
+        return;
+      }
+    }
+    
+    if (name === 'longitude') {
+      const lng = parseFloat(value);
+      if (value && (isNaN(lng) || lng < -180 || lng > 180)) {
+        toast.error(language === 'vi' ? 'Kinh độ phải từ -180 đến 180' : 'Longitude must be between -180 and 180');
+        return;
+      }
+    }
+    
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+  };
+
+  // Get current GPS location
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error(language === 'vi' ? 'Trình duyệt không hỗ trợ định vị GPS' : 'Browser does not support GPS location');
+      return;
+    }
+
+    setIsGettingLocation(true);
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setFormData({
+          ...formData,
+          latitude: latitude.toFixed(6),
+          longitude: longitude.toFixed(6)
+        });
+        setIsGettingLocation(false);
+        toast.success(language === 'vi' ? 'Đã lấy vị trí GPS thành công!' : 'GPS location retrieved successfully!');
+      },
+      (error) => {
+        setIsGettingLocation(false);
+        let errorMessage = language === 'vi' ? 'Không thể lấy vị trí GPS' : 'Unable to get GPS location';
+        
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = language === 'vi' ? 'Bạn đã từ chối quyền truy cập vị trí' : 'Location access denied';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = language === 'vi' ? 'Thông tin vị trí không khả dụng' : 'Location information unavailable';
+            break;
+          case error.TIMEOUT:
+            errorMessage = language === 'vi' ? 'Hết thời gian chờ lấy vị trí' : 'Location request timeout';
+            break;
+        }
+        
+        toast.error(errorMessage);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000
+      }
+    );
   };
   
   // Handle logo upload
@@ -1412,6 +1522,112 @@ const EmployerProfile = () => {
                       disabled={!isEditing}
                     />
                   </InputWrapper>
+                </FormGroup>
+              </FormRow>
+
+              <FormRow $columns="1fr">
+                <FormGroup>
+                  <Label>{language === 'vi' ? 'Vị trí GPS công ty' : 'Company GPS Location'}</Label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '20px', alignItems: 'start' }}>
+                    {/* Left side - Button and info */}
+                    <div>
+                      <Button
+                        type="button"
+                        onClick={getCurrentLocation}
+                        disabled={!isEditing || isGettingLocation}
+                        style={{
+                          background: isGettingLocation ? '#6b7280' : '#10b981',
+                          border: 'none',
+                          color: 'white',
+                          padding: '12px 20px',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          cursor: isEditing && !isGettingLocation ? 'pointer' : 'not-allowed',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          width: '100%'
+                        }}
+                      >
+                        <MapPin size={16} />
+                        {isGettingLocation 
+                          ? (language === 'vi' ? 'Đang lấy vị trí...' : 'Getting location...') 
+                          : (language === 'vi' ? 'Lấy vị trí hiện tại' : 'Get Current Location')
+                        }
+                      </Button>
+                      {formData.latitude && formData.longitude && (
+                        <div style={{
+                          marginTop: '12px',
+                          padding: '10px 12px',
+                          background: '#f0f9ff',
+                          border: '1px solid #bae6fd',
+                          borderRadius: '6px',
+                          fontSize: '13px',
+                          color: '#0369a1'
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                            <MapPin size={14} />
+                            <strong>{language === 'vi' ? 'Đã lưu vị trí:' : 'Location saved:'}</strong>
+                          </div>
+                          <div style={{ fontSize: '12px', paddingLeft: '20px' }}>
+                            {parseFloat(formData.latitude).toFixed(4)}, {parseFloat(formData.longitude).toFixed(4)}
+                          </div>
+                        </div>
+                      )}
+                      {isEditing && !formData.latitude && (
+                        <div style={{ 
+                          marginTop: '12px', 
+                          fontSize: '12px', 
+                          color: '#6b7280',
+                          fontStyle: 'italic',
+                          lineHeight: '1.5'
+                        }}>
+                          💡 {language === 'vi' 
+                            ? 'Click nút trên để tự động lấy vị trí GPS của bạn' 
+                            : 'Click the button above to automatically get your GPS location'}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Right side - Map */}
+                    {formData.latitude && formData.longitude && (
+                      <MapContainer style={{ height: '200px' }}>
+                        <iframe
+                          src={`https://www.openstreetmap.org/export/embed.html?bbox=${parseFloat(formData.longitude) - 0.005},${parseFloat(formData.latitude) - 0.005},${parseFloat(formData.longitude) + 0.005},${parseFloat(formData.latitude) + 0.005}&layer=mapnik&marker=${formData.latitude},${formData.longitude}`}
+                          width="100%"
+                          height="200"
+                          frameBorder="0"
+                          style={{ borderRadius: '12px 12px 0 0', border: 'none' }}
+                          title={language === 'vi' ? 'Vị trí công ty' : 'Company Location'}
+                        />
+                        <MapInfo>
+                          <MapPin size={14} />
+                          <span style={{ fontSize: '12px' }}>
+                            {language === 'vi' ? 'Vị trí công ty' : 'Company Location'}
+                          </span>
+                          <a
+                            href={`https://www.openstreetmap.org/?mlat=${formData.latitude}&mlon=${formData.longitude}&zoom=16`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              color: '#3b82f6',
+                              textDecoration: 'none',
+                              fontSize: '12px',
+                              fontWeight: '500',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              marginLeft: 'auto'
+                            }}
+                          >
+                            {language === 'vi' ? 'Mở bản đồ lớn' : 'Open Full Map'} ↗
+                          </a>
+                        </MapInfo>
+                      </MapContainer>
+                    )}
+                  </div>
                 </FormGroup>
               </FormRow>
 
