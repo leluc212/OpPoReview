@@ -226,6 +226,87 @@ class EmployerProfileService {
       lastEvaluatedKey: result.LastEvaluatedKey
     };
   }
+
+  /**
+   * List ALL employer profiles (Admin only - no filters)
+   */
+  async listAllProfiles() {
+    const params = {
+      TableName: tableName
+    };
+
+    const result = await dynamoDb.scan(params);
+    
+    return {
+      profiles: result.Items || []
+    };
+  }
+
+  /**
+   * Update approval status (Admin only)
+   */
+  async updateApprovalStatus(userId, status, metadata = {}) {
+    const timestamp = new Date().toISOString();
+    
+    const updateExpressions = ['approvalStatus = :status', 'updatedAt = :timestamp'];
+    const expressionAttributeValues = {
+      ':status': status,
+      ':timestamp': timestamp
+    };
+
+    if (status === 'approved') {
+      updateExpressions.push('approvedAt = :approvedAt');
+      expressionAttributeValues[':approvedAt'] = metadata.approvedAt || timestamp;
+    } else if (status === 'rejected') {
+      updateExpressions.push('rejectedAt = :rejectedAt');
+      expressionAttributeValues[':rejectedAt'] = metadata.rejectedAt || timestamp;
+      
+      if (metadata.rejectionReason) {
+        updateExpressions.push('rejectionReason = :reason');
+        expressionAttributeValues[':reason'] = metadata.rejectionReason;
+      }
+    }
+
+    const params = {
+      TableName: tableName,
+      Key: { userId },
+      UpdateExpression: `SET ${updateExpressions.join(', ')}`,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ReturnValues: 'ALL_NEW'
+    };
+
+    const result = await dynamoDb.update(params);
+    return result.Attributes;
+  }
+
+  /**
+   * Update verification status (Admin only)
+   */
+  async updateVerificationStatus(userId, isVerified, metadata = {}) {
+    const timestamp = new Date().toISOString();
+    
+    const updateExpressions = ['isVerified = :verified', 'updatedAt = :timestamp'];
+    const expressionAttributeValues = {
+      ':verified': isVerified,
+      ':timestamp': timestamp
+    };
+
+    if (isVerified && metadata.verifiedAt) {
+      updateExpressions.push('verifiedAt = :verifiedAt');
+      expressionAttributeValues[':verifiedAt'] = metadata.verifiedAt;
+    }
+
+    const params = {
+      TableName: tableName,
+      Key: { userId },
+      UpdateExpression: `SET ${updateExpressions.join(', ')}`,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ReturnValues: 'ALL_NEW'
+    };
+
+    const result = await dynamoDb.update(params);
+    return result.Attributes;
+  }
 }
 
 module.exports = new EmployerProfileService();

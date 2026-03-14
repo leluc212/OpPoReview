@@ -79,7 +79,7 @@ export const uploadCV = async (userId, file) => {
 /**
  * Get CV information for a user
  * @param {string} userId - User ID
- * @returns {Promise<Object>} CV info with URL
+ * @returns {Promise<Object>} CV list with URLs
  */
 export const getCVInfo = async (userId) => {
   try {
@@ -92,14 +92,32 @@ export const getCVInfo = async (userId) => {
 
     if (!response.ok) {
       if (response.status === 404) {
-        return null; // No CV found
+        return { cvList: [], totalCVs: 0 }; // No CV found
       }
       const error = await response.json();
       throw new Error(error.error || 'Không thể lấy thông tin CV');
     }
 
     const data = await response.json();
-    return data;
+    
+    // Support both old format (single CV) and new format (multiple CVs)
+    if (data.cvList) {
+      // New format: multiple CVs
+      return data;
+    } else if (data.cvUrl) {
+      // Old format: single CV - convert to array
+      return {
+        cvList: [{
+          id: 1,
+          cvUrl: data.cvUrl,
+          cvFileName: data.cvFileName,
+          cvUploadDate: data.cvUploadDate
+        }],
+        totalCVs: 1
+      };
+    } else {
+      return { cvList: [], totalCVs: 0 };
+    }
   } catch (error) {
     console.error('Error getting CV info:', error);
     throw error;
@@ -109,11 +127,16 @@ export const getCVInfo = async (userId) => {
 /**
  * Delete CV
  * @param {string} userId - User ID
+ * @param {string} cvId - CV ID (optional, if not provided deletes all CVs)
  * @returns {Promise<Object>} Delete result
  */
-export const deleteCV = async (userId) => {
+export const deleteCV = async (userId, cvId = null) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/cv/${userId}`, {
+    const url = cvId 
+      ? `${API_BASE_URL}/cv/${userId}/${cvId}`  // Delete specific CV
+      : `${API_BASE_URL}/cv/${userId}`;          // Delete all CVs (backward compatibility)
+    
+    const response = await fetch(url, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

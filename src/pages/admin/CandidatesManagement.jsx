@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -12,8 +12,11 @@ import {
   Calendar,
   TrendingUp,
   Briefcase,
-  Zap
+  Zap,
+  RefreshCw
 } from 'lucide-react';
+
+const API_URL = import.meta.env.VITE_CANDIDATE_API_URL;
 
 const PageContainer = styled.div`
   animation: fadeIn 0.5s ease-in;
@@ -32,9 +35,18 @@ const PageContainer = styled.div`
 
 const PageHeader = styled.div`
   margin-bottom: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
   
   @media (max-width: 768px) {
     margin-bottom: 20px;
+    flex-direction: column;
+  }
+  
+  > div {
+    flex: 1;
   }
   
   h1 {
@@ -57,6 +69,53 @@ const PageHeader = styled.div`
       font-size: 14px;
     }
   }
+`;
+
+const ReloadButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: ${props => props.theme.colors.primary};
+  color: white;
+  border: none;
+  border-radius: ${props => props.theme.borderRadius.md};
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  
+  &:hover:not(:disabled) {
+    background: ${props => props.theme.colors.primaryDark || '#4338ca'};
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .spinning {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
+const LastUpdated = styled.div`
+  font-size: 13px;
+  color: ${props => props.theme.colors.textLight};
+  margin-bottom: 16px;
+  font-style: italic;
 `;
 
 const StatsGrid = styled.div`
@@ -428,109 +487,58 @@ const CandidatesManagement = () => {
   const [timeFilter, setTimeFilter] = useState('month'); // month, quarter, year
   const itemsPerPage = 20;
 
-  // Sample data
-  const candidates = [
-    { id: 1, name: 'Nguyễn Văn An', email: 'nguyen.an.01@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-01-15', reviewDate: '2026-01-20' },
-    { id: 2, name: 'Trần Thị Bình', email: 'tran.binh.02@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-01-16', reviewDate: '2026-01-21' },
-    { id: 3, name: 'Lê Minh Cường', email: 'le.cuong.03@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-01-17', reviewDate: null },
-    { id: 4, name: 'Phạm Hoàng Dũng', email: 'pham.dung.04@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-01-18', reviewDate: '2026-01-23' },
-    { id: 5, name: 'Hoàng Ngọc Lan', email: 'hoang.lan.05@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-01-19', reviewDate: '2026-01-24' },
-    { id: 6, name: 'Đỗ Văn Hùng', email: 'do.hung.06@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-01-20', reviewDate: null },
-    { id: 7, name: 'Bùi Thị Hương', email: 'bui.huong.07@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-01-21', reviewDate: '2026-01-26' },
-    { id: 8, name: 'Vũ Tuấn Kiệt', email: 'vu.kiet.08@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-01-22', reviewDate: '2026-01-27' },
-    { id: 9, name: 'Đặng Thanh Mai', email: 'dang.mai.09@gmail.com', ekycVerified: false, approvalStatus: 'rejected', joined: '2026-01-23', reviewDate: '2026-01-28' },
-    { id: 10, name: 'Ngô Văn Nam', email: 'ngo.nam.10@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-01-24', reviewDate: '2026-01-29' },
-    { id: 11, name: 'Hồ Thị Nga', email: 'ho.nga.11@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-01-25', reviewDate: '2026-01-30' },
-    { id: 12, name: 'Phan Đức Phúc', email: 'phan.phuc.12@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-01-26', reviewDate: null },
-    { id: 13, name: 'Huỳnh Phương Thảo', email: 'huynh.thao.13@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-01-27', reviewDate: '2026-02-01' },
-    { id: 14, name: 'Nguyễn Văn Tuấn', email: 'nguyen.tuan.14@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-01-28', reviewDate: '2026-02-02' },
-    { id: 15, name: 'Trần Thanh Tú', email: 'tran.tu.15@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-01-29', reviewDate: null },
-    { id: 16, name: 'Lê Thị Vân', email: 'le.van.16@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-01-30', reviewDate: '2026-02-04' },
-    { id: 17, name: 'Phạm Văn Vinh', email: 'pham.vinh.17@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-01-31', reviewDate: '2026-02-05' },
-    { id: 18, name: 'Hoàng Minh Vũ', email: 'hoang.vu.18@gmail.com', ekycVerified: false, approvalStatus: 'rejected', joined: '2026-02-01', reviewDate: '2026-02-06' },
-    { id: 19, name: 'Đỗ Thị Yến', email: 'do.yen.19@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-02-02', reviewDate: '2026-02-07' },
-    { id: 20, name: 'Bùi Văn Chung', email: 'bui.chung.20@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-02-03', reviewDate: '2026-02-08' },
-    { id: 21, name: 'Nguyễn Thị Duyên', email: 'nguyen.duyen.21@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-02-04', reviewDate: null },
-    { id: 22, name: 'Trần Văn Giang', email: 'tran.giang.22@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-02-05', reviewDate: '2026-02-10' },
-    { id: 23, name: 'Lê Thanh Hải', email: 'le.hai.23@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-02-06', reviewDate: '2026-02-11' },
-    { id: 24, name: 'Phạm Thị Hồng', email: 'pham.hong.24@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-02-07', reviewDate: null },
-    { id: 25, name: 'Hoàng Văn Huy', email: 'hoang.huy.25@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-02-08', reviewDate: '2026-02-13' },
-    { id: 26, name: 'Đặng Thị Kim', email: 'dang.kim.26@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-02-09', reviewDate: '2026-02-14' },
-    { id: 27, name: 'Ngô Thanh Lâm', email: 'ngo.lam.27@gmail.com', ekycVerified: false, approvalStatus: 'rejected', joined: '2026-02-10', reviewDate: '2026-02-15' },
-    { id: 28, name: 'Hồ Văn Lộc', email: 'ho.loc.28@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-02-11', reviewDate: '2026-02-16' },
-    { id: 29, name: 'Phan Thị Ly', email: 'phan.ly.29@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-02-12', reviewDate: '2026-02-17' },
-    { id: 30, name: 'Huỳnh Minh Nhật', email: 'huynh.nhat.30@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-02-13', reviewDate: null },
-    { id: 31, name: 'Nguyễn Thị Oanh', email: 'nguyen.oanh.31@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-02-14', reviewDate: '2026-02-19' },
-    { id: 32, name: 'Trần Văn Phong', email: 'tran.phong.32@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-02-15', reviewDate: '2026-02-20' },
-    { id: 33, name: 'Lê Thị Quyên', email: 'le.quyen.33@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-02-16', reviewDate: null },
-    { id: 34, name: 'Phạm Văn Sang', email: 'pham.sang.34@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-02-17', reviewDate: '2026-02-22' },
-    { id: 35, name: 'Hoàng Thị Tâm', email: 'hoang.tam.35@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-02-18', reviewDate: '2026-02-23' },
-    { id: 36, name: 'Đỗ Minh Thắng', email: 'do.thang.36@gmail.com', ekycVerified: false, approvalStatus: 'rejected', joined: '2026-02-19', reviewDate: '2026-02-24' },
-    { id: 37, name: 'Bùi Thị Thu', email: 'bui.thu.37@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-02-20', reviewDate: '2026-02-25' },
-    { id: 38, name: 'Vũ Văn Tiến', email: 'vu.tien.38@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-02-21', reviewDate: '2026-02-26' },
-    { id: 39, name: 'Đặng Thanh Tùng', email: 'dang.tung.39@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-02-22', reviewDate: null },
-    { id: 40, name: 'Ngô Thị Tuyết', email: 'ngo.tuyet.40@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-02-23', reviewDate: '2026-02-28' },
-    { id: 41, name: 'Hồ Văn Uyên', email: 'ho.uyen.41@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-02-24', reviewDate: '2026-03-01' },
-    { id: 42, name: 'Phan Minh Việt', email: 'phan.viet.42@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-02-25', reviewDate: null },
-    { id: 43, name: 'Huỳnh Thị Xoan', email: 'huynh.xoan.43@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-02-26', reviewDate: '2026-03-03' },
-    { id: 44, name: 'Nguyễn Văn Ý', email: 'nguyen.y.44@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-02-27', reviewDate: '2026-03-04' },
-    { id: 45, name: 'Trần Thanh Ân', email: 'tran.an.45@gmail.com', ekycVerified: false, approvalStatus: 'rejected', joined: '2026-02-28', reviewDate: '2026-03-05' },
-    { id: 46, name: 'Lê Thị Bích', email: 'le.bich.46@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-03-01', reviewDate: '2026-03-06' },
-    { id: 47, name: 'Phạm Văn Cảnh', email: 'pham.canh.47@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-03-02', reviewDate: '2026-03-07' },
-    { id: 48, name: 'Hoàng Minh Danh', email: 'hoang.danh.48@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-03-03', reviewDate: null },
-    { id: 49, name: 'Đỗ Thị Đào', email: 'do.dao.49@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-03-04', reviewDate: '2026-03-09' },
-    { id: 50, name: 'Bùi Văn Đạt', email: 'bui.dat.50@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-03-05', reviewDate: '2026-03-10' },
-    { id: 51, name: 'Nguyễn Thị Diệp', email: 'nguyen.diep.51@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-03-06', reviewDate: null },
-    { id: 52, name: 'Trần Văn Đông', email: 'tran.dong.52@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-03-07', reviewDate: '2026-03-12' },
-    { id: 53, name: 'Lê Thị Hà', email: 'le.ha.53@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-03-08', reviewDate: '2026-03-13' },
-    { id: 54, name: 'Phạm Văn Hiếu', email: 'pham.hieu.54@gmail.com', ekycVerified: false, approvalStatus: 'rejected', joined: '2026-03-09', reviewDate: '2026-03-14' },
-    { id: 55, name: 'Hoàng Thị Hoa', email: 'hoang.hoa.55@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-03-10', reviewDate: '2026-03-15' },
-    { id: 56, name: 'Đặng Văn Hùng', email: 'dang.hung.56@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-03-11', reviewDate: '2026-03-16' },
-    { id: 57, name: 'Ngô Thị Huyền', email: 'ngo.huyen.57@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-03-12', reviewDate: null },
-    { id: 58, name: 'Hồ Văn Khang', email: 'ho.khang.58@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-03-13', reviewDate: '2026-03-18' },
-    { id: 59, name: 'Phan Thị Lan', email: 'phan.lan.59@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-03-14', reviewDate: '2026-03-19' },
-    { id: 60, name: 'Huỳnh Minh Long', email: 'huynh.long.60@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-03-15', reviewDate: null },
-    { id: 61, name: 'Nguyễn Thị Minh', email: 'nguyen.minh.61@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-03-16', reviewDate: '2026-03-21' },
-    { id: 62, name: 'Trần Văn Nam', email: 'tran.nam.62@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-03-17', reviewDate: '2026-03-22' },
-    { id: 63, name: 'Lê Thị Ngọc', email: 'le.ngoc.63@gmail.com', ekycVerified: false, approvalStatus: 'rejected', joined: '2026-03-18', reviewDate: '2026-03-23' },
-    { id: 64, name: 'Phạm Văn Nghĩa', email: 'pham.nghia.64@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-03-19', reviewDate: '2026-03-24' },
-    { id: 65, name: 'Hoàng Thị Nhung', email: 'hoang.nhung.65@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-03-20', reviewDate: '2026-03-25' },
-    { id: 66, name: 'Đặng Văn Phong', email: 'dang.phong.66@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-03-21', reviewDate: null },
-    { id: 67, name: 'Ngô Thị Phương', email: 'ngo.phuong.67@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-03-22', reviewDate: '2026-03-27' },
-    { id: 68, name: 'Hồ Văn Quân', email: 'ho.quan.68@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-03-23', reviewDate: '2026-03-28' },
-    { id: 69, name: 'Phan Thị Quý', email: 'phan.quy.69@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-03-24', reviewDate: null },
-    { id: 70, name: 'Huỳnh Minh Sơn', email: 'huynh.son.70@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-03-25', reviewDate: '2026-03-30' },
-    { id: 71, name: 'Nguyễn Thị Tâm', email: 'nguyen.tam.71@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-03-26', reviewDate: '2026-03-31' },
-    { id: 72, name: 'Trần Văn Thành', email: 'tran.thanh.72@gmail.com', ekycVerified: false, approvalStatus: 'rejected', joined: '2026-03-27', reviewDate: '2026-04-01' },
-    { id: 73, name: 'Lê Thị Thúy', email: 'le.thuy.73@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-03-28', reviewDate: '2026-04-02' },
-    { id: 74, name: 'Phạm Văn Trí', email: 'pham.tri.74@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-03-29', reviewDate: '2026-04-03' },
-    { id: 75, name: 'Hoàng Thị Trúc', email: 'hoang.truc.75@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-03-30', reviewDate: null },
-    { id: 76, name: 'Đặng Văn Tú', email: 'dang.tu.76@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-03-31', reviewDate: '2026-04-05' },
-    { id: 77, name: 'Ngô Thị Tú Anh', email: 'ngo.tuanh.77@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-04-01', reviewDate: '2026-04-06' },
-    { id: 78, name: 'Hồ Văn Tùng', email: 'ho.tung.78@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-04-02', reviewDate: null },
-    { id: 79, name: 'Phan Thị Tươi', email: 'phan.tuoi.79@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-04-03', reviewDate: '2026-04-08' },
-    { id: 80, name: 'Huỳnh Minh Vĩnh', email: 'huynh.vinh.80@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-04-04', reviewDate: '2026-04-09' },
-    { id: 81, name: 'Nguyễn Thị Xuân', email: 'nguyen.xuan.81@gmail.com', ekycVerified: false, approvalStatus: 'rejected', joined: '2026-04-05', reviewDate: '2026-04-10' },
-    { id: 82, name: 'Trần Văn Ý', email: 'tran.y.82@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-04-06', reviewDate: '2026-04-11' },
-    { id: 83, name: 'Lê Thị Ánh', email: 'le.anh.83@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-04-07', reviewDate: '2026-04-12' },
-    { id: 84, name: 'Phạm Văn Bằng', email: 'pham.bang.84@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-04-08', reviewDate: null },
-    { id: 85, name: 'Hoàng Thị Cẩm', email: 'hoang.cam.85@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-04-09', reviewDate: '2026-04-14' },
-    { id: 86, name: 'Đặng Văn Dũng', email: 'dang.dung.86@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-04-10', reviewDate: '2026-04-15' },
-    { id: 87, name: 'Ngô Thị Duyên', email: 'ngo.duyen.87@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-04-11', reviewDate: null },
-    { id: 88, name: 'Hồ Văn Giang', email: 'ho.giang.88@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-04-12', reviewDate: '2026-04-17' },
-    { id: 89, name: 'Phan Thị Hạnh', email: 'phan.hanh.89@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-04-13', reviewDate: '2026-04-18' },
-    { id: 90, name: 'Huỳnh Minh Hậu', email: 'huynh.hau.90@gmail.com', ekycVerified: false, approvalStatus: 'rejected', joined: '2026-04-14', reviewDate: '2026-04-19' },
-    { id: 91, name: 'Nguyễn Thị Hiền', email: 'nguyen.hien.91@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-04-15', reviewDate: '2026-04-20' },
-    { id: 92, name: 'Trần Văn Hòa', email: 'tran.hoa.92@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-04-16', reviewDate: '2026-04-21' },
-    { id: 93, name: 'Lê Thị Huệ', email: 'le.hue.93@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-04-17', reviewDate: null },
-    { id: 94, name: 'Phạm Văn Hưng', email: 'pham.hung.94@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-04-18', reviewDate: '2026-04-23' },
-    { id: 95, name: 'Hoàng Thị Khuyên', email: 'hoang.khuyen.95@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-04-19', reviewDate: '2026-04-24' },
-    { id: 96, name: 'Đặng Văn Lợi', email: 'dang.loi.96@gmail.com', ekycVerified: false, approvalStatus: 'pending', joined: '2026-04-20', reviewDate: null },
-    { id: 97, name: 'Ngô Thị Mai', email: 'ngo.mai.97@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-04-21', reviewDate: '2026-04-26' },
-    { id: 98, name: 'Hồ Văn Minh', email: 'ho.minh.98@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-04-22', reviewDate: '2026-04-27' },
-    { id: 99, name: 'Phan Thị Mỹ', email: 'phan.my.99@gmail.com', ekycVerified: false, approvalStatus: 'rejected', joined: '2026-04-23', reviewDate: '2026-04-28' },
-    { id: 100, name: 'Huỳnh Minh Nhân', email: 'huynh.nhan.100@gmail.com', ekycVerified: true, approvalStatus: 'approved', joined: '2026-04-24', reviewDate: '2026-04-29' },
-  ];
+  // Load real data from DynamoDB
+  const [candidates, setCandidates] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  
+  const loadCandidates = async () => {
+    setLoading(true);
+    try {
+      // Fetch from API
+      const response = await fetch(`${API_URL}/candidates`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Check if data is valid array
+      if (!Array.isArray(data)) {
+        console.error('Data is not an array:', data);
+        setCandidates([]);
+        return;
+      }
+      
+      // Transform API data
+      const transformedData = data.map((item, index) => ({
+        id: item.userId || `candidate-${index}`,
+        name: item.fullName || 'N/A',
+        email: item.email || 'N/A',
+        phone: item.phone || 'N/A',
+        ekycVerified: item.kycCompleted || false,
+        approvalStatus: item.kycCompleted ? 'approved' : 'pending',
+        joined: item.createdAt ? new Date(item.createdAt).toISOString().split('T')[0] : '2026-03-01',
+        reviewDate: item.updatedAt ? new Date(item.updatedAt).toISOString().split('T')[0] : null,
+        location: item.location || 'N/A',
+        title: item.title || 'N/A'
+      }));
+      
+      setCandidates(transformedData);
+      setLastUpdated(new Date());
+    } catch (error) {
+      console.error('Error loading candidates:', error);
+      setCandidates([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    loadCandidates();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getApprovalStatusText = (status) => {
     if (status === 'approved') return language === 'vi' ? 'Đã duyệt' : 'Approved';
@@ -690,9 +698,18 @@ const CandidatesManagement = () => {
     <DashboardLayout role="admin" key={language}>
       <PageContainer>
         <PageHeader>
-          <h1>{language === 'vi' ? 'Quản Lý Ứng Viên' : 'Candidates Management'}</h1>
-          <p>{language === 'vi' ? 'Quản lý thông tin và trạng thái của tất cả ứng viên' : 'Manage information and status of all candidates'}</p>
+          <div>
+            <h1>{language === 'vi' ? 'Quản Lý Ứng Viên' : 'Candidates Management'}</h1>
+            <p>{language === 'vi' ? 'Quản lý thông tin và trạng thái của tất cả ứng viên' : 'Manage information and status of all candidates'}</p>
+          </div>
         </PageHeader>
+
+        {lastUpdated && (
+          <LastUpdated>
+            {language === 'vi' ? 'Cập nhật lần cuối: ' : 'Last updated: '}
+            {lastUpdated.toLocaleString(language === 'vi' ? 'vi-VN' : 'en-US')}
+          </LastUpdated>
+        )}
 
         <StatsGrid>
           {/* Main total stats - always shown */}
@@ -962,6 +979,13 @@ const CandidatesManagement = () => {
               onChange={handleSearchChange}
             />
           </SearchBox>
+          <ReloadButton onClick={loadCandidates} disabled={loading}>
+            <RefreshCw size={18} className={loading ? 'spinning' : ''} />
+            {loading 
+              ? (language === 'vi' ? 'Đang tải...' : 'Loading...') 
+              : (language === 'vi' ? 'Làm mới' : 'Refresh')
+            }
+          </ReloadButton>
         </FilterSection>
 
         <TableWrapper>
@@ -971,6 +995,7 @@ const CandidatesManagement = () => {
                 <th style={{ width: '60px', textAlign: 'center' }}>{language === 'vi' ? 'STT' : 'No.'}</th>
                 <th>{language === 'vi' ? 'Tên ứng viên' : 'Candidate Name'}</th>
                 <th>{language === 'vi' ? 'Email' : 'Email'}</th>
+                <th>{language === 'vi' ? 'Số điện thoại' : 'Phone Number'}</th>
                 <th>{language === 'vi' ? 'Xác nhận 4 bước eKYC' : 'eKYC 4 Steps Verification'}</th>
                 <th>{language === 'vi' ? 'Ngày tham gia' : 'Join Date'}</th>
               </tr>
@@ -987,6 +1012,9 @@ const CandidatesManagement = () => {
                   </td>
                   <td style={{ fontWeight: 600 }}>{candidate.name}</td>
                   <td>{candidate.email}</td>
+                  <td style={{ color: '#64748b' }}>
+                    {candidate.phone}
+                  </td>
                   <td>
                     <VerificationBadge $verified={candidate.ekycVerified}>
                       {candidate.ekycVerified ? <CheckSquare /> : <XSquare />}

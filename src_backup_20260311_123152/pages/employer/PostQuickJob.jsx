@@ -636,7 +636,7 @@ const PostQuickJob = () => {
       infoText: 'Bài đăng tuyển gấp sẽ được ưu tiên hiển thị và có thời hạn ngắn (2-7 ngày). Phù hợp cho các vị trí cần tuyển ngay lập tức.',
       
       // Form labels
-      jobTitle: 'Tiêu đề công việc',
+      jobTitle: 'Tiêu đề công việc - Vị trí công việc',
       jobTitlePlaceholder: 'VD: Nhân viên Phục Vụ ',
       location: 'Địa điểm làm việc',
       locationPlaceholder: 'VD: Quận 1, TP.HCM',

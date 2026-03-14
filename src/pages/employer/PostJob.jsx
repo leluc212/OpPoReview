@@ -4,7 +4,7 @@ import styled, { keyframes } from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import Modal from '../../components/Modal';
 import { Button, Input, TextArea, Select, FormGroup, Label } from '../../components/FormElements';
-import { Save, ArrowLeft, AlertCircle, Briefcase, Clock } from 'lucide-react';
+import { Save, ArrowLeft, AlertCircle, Briefcase, Clock, FileText, CheckSquare, ClipboardList, Gift } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import jobPostService from '../../services/jobPostService';
 import { fetchAuthSession } from 'aws-amplify/auth';
@@ -97,12 +97,25 @@ const FormHeader = styled.div`
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    
-    svg {
-      width: 28px;
-      height: 28px;
-      color: #1e40af;
-    }
+  }
+`;
+
+const LabelWithIcon = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1E293B;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  
+  svg {
+    width: 16px;
+    height: 16px;
+    color: #1e40af;
+    flex-shrink: 0;
   }
   
   .header-content {
@@ -334,6 +347,8 @@ const PostJob = () => {
     jobType: '',
     workDays: '',
     workHours: '',
+    startTime: '', // Thêm startTime
+    endTime: '', // Thêm endTime
     salary: '',
     tags: '',
     description: '',
@@ -365,12 +380,25 @@ const PostJob = () => {
   // Pre-fill form if editing
   useEffect(() => {
     if (editingJob) {
+      // Parse workHours if it exists (format: "HH:MM - HH:MM")
+      let startTime = '';
+      let endTime = '';
+      if (editingJob.workHours) {
+        const parts = editingJob.workHours.split('-').map(t => t.trim());
+        if (parts.length === 2) {
+          startTime = parts[0];
+          endTime = parts[1];
+        }
+      }
+      
       setFormData({
         title: editingJob.title || '',
         location: editingJob.location || '',
         jobType: editingJob.jobType || '',
         workDays: editingJob.workDays || '',
         workHours: editingJob.workHours || '',
+        startTime: startTime,
+        endTime: endTime,
         salary: editingJob.salary || '',
         tags: editingJob.tags || '',
         description: editingJob.description || '',
@@ -382,7 +410,26 @@ const PostJob = () => {
   }, [editingJob]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    
+    // Update formData
+    setFormData(prev => {
+      const updated = { ...prev, [name]: value };
+      
+      // Auto-combine startTime and endTime into workHours
+      if (name === 'startTime' || name === 'endTime') {
+        const start = name === 'startTime' ? value : prev.startTime;
+        const end = name === 'endTime' ? value : prev.endTime;
+        
+        if (start && end) {
+          updated.workHours = `${start} - ${end}`;
+        } else {
+          updated.workHours = '';
+        }
+      }
+      
+      return updated;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -569,13 +616,13 @@ const PostJob = () => {
           <form onSubmit={handleSubmit}>
             <FormGrid>
               <FormGroup>
-                <Label>{language === 'vi' ? 'Tiêu đề công việc *' : 'Job Title *'}</Label>
-                <Input name="title" placeholder={language === 'vi' ? 'Nhân viên dọn đẹp' : 'e.g., Waiter'} value={formData.title} onChange={handleChange} required />
+                <Label>{language === 'vi' ? 'Tiêu đề công việc - Vị trí công việc *' : 'Job Title - Position *'}</Label>
+                <Input name="title" placeholder={language === 'vi' ? 'Nhân viên pha chế' : 'e.g., Waiter'} value={formData.title} onChange={handleChange} required />
               </FormGroup>
 
               <FormGroup>
                 <Label>{language === 'vi' ? 'Địa điểm *' : 'Location *'}</Label>
-                <Input name="location" placeholder={language === 'vi' ? 'Quận Cam' : 'e.g., District Cam'} value={formData.location} onChange={handleChange} required />
+                <Input name="location" placeholder={language === 'vi' ? 'Quận 1' : 'e.g., District 1'} value={formData.location} onChange={handleChange} required />
               </FormGroup>
 
               <FormGroup>
@@ -600,18 +647,33 @@ const PostJob = () => {
               </FormGroup>
 
               <FormGroup>
-                <Label>{language === 'vi' ? 'Giờ làm *' : 'Work Hours *'}</Label>
-                <Input 
-                  name="workHours" 
-                  placeholder={language === 'vi' ? 'Ví dụ: 8:00 - 17:00' : 'e.g., 8:00 - 17:00'} 
-                  value={formData.workHours} 
-                  onChange={handleChange} 
-                  required 
-                />
+                <Label>{language === 'vi' ? 'Khung giờ làm việc *' : 'Working Hours *'}</Label>
+                <FormGrid style={{ gap: '12px' }}>
+                  <div>
+                    <Label style={{ fontSize: '13px', marginBottom: '8px' }}>{language === 'vi' ? 'Từ' : 'From'}</Label>
+                    <Input 
+                      name="startTime" 
+                      type="time"
+                      value={formData.startTime} 
+                      onChange={handleChange} 
+                      required 
+                    />
+                  </div>
+                  <div>
+                    <Label style={{ fontSize: '13px', marginBottom: '8px' }}>{language === 'vi' ? 'Đến' : 'To'}</Label>
+                    <Input 
+                      name="endTime" 
+                      type="time"
+                      value={formData.endTime} 
+                      onChange={handleChange} 
+                      required 
+                    />
+                  </div>
+                </FormGrid>
               </FormGroup>
 
               <FormGroup>
-                <Label>{language === 'vi' ? 'Mức lương (Không bắt buộc)' : 'Salary (Optional)'}</Label>
+                <Label>{language === 'vi' ? 'Mức lương' : 'Salary'}</Label>
                 <SalaryInputWrapper>
                   <Input 
                     name="salary" 
@@ -640,22 +702,34 @@ const PostJob = () => {
             </FormGrid>
 
             <FormGroup style={{ marginTop: '24px' }}>
-              <Label>{language === 'vi' ? 'Mô tả công việc *' : 'Job Description *'}</Label>
+              <LabelWithIcon>
+                <FileText />
+                <span>{language === 'vi' ? 'Mô tả công việc *' : 'Job Description *'}</span>
+              </LabelWithIcon>
               <TextArea name="description" placeholder={language === 'vi' ? 'Mô tả vị trí công việc...' : 'Describe the position...'} value={formData.description} onChange={handleChange} required />
             </FormGroup>
 
             <FormGroup>
-              <Label>{language === 'vi' ? 'Trách nhiệm' : 'Responsibilities'}</Label>
+              <LabelWithIcon>
+                <CheckSquare />
+                <span>{language === 'vi' ? 'Trách nhiệm' : 'Responsibilities'}</span>
+              </LabelWithIcon>
               <TextArea name="responsibilities" placeholder={language === 'vi' ? 'Liệt kê các trách nhiệm chính...' : 'List key responsibilities...'} value={formData.responsibilities} onChange={handleChange} />
             </FormGroup>
 
             <FormGroup>
-              <Label>{language === 'vi' ? 'Yêu cầu' : 'Requirements'}</Label>
+              <LabelWithIcon>
+                <ClipboardList />
+                <span>{language === 'vi' ? 'Yêu cầu' : 'Requirements'}</span>
+              </LabelWithIcon>
               <TextArea name="requirements" placeholder={language === 'vi' ? 'Liệt kê yêu cầu và trình độ...' : 'List requirements and qualifications...'} value={formData.requirements} onChange={handleChange} />
             </FormGroup>
 
             <FormGroup>
-              <Label>{language === 'vi' ? 'Quyền lợi' : 'Benefits'}</Label>
+              <LabelWithIcon>
+                <Gift />
+                <span>{language === 'vi' ? 'Quyền lợi' : 'Benefits'}</span>
+              </LabelWithIcon>
               <TextArea name="benefits" placeholder={language === 'vi' ? 'Liệt kê quyền lợi và phúc lợi...' : 'List benefits and perks...'} value={formData.benefits} onChange={handleChange} />
             </FormGroup>
 

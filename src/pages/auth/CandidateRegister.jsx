@@ -690,10 +690,34 @@ const CandidateRegister = () => {
 
   const pw = getPwStrength(form.password);
 
+  const validatePassword = (password) => {
+    if (!password) return '';
+    if (password.length < 8) return 'Mật khẩu phải có ít nhất 8 ký tự';
+    if (!/[A-Z]/.test(password)) return 'Mật khẩu phải có ít nhất 1 chữ hoa';
+    if (!/[a-z]/.test(password)) return 'Mật khẩu phải có ít nhất 1 chữ thường';
+    if (!/[0-9]/.test(password)) return 'Mật khẩu phải có ít nhất 1 số';
+    if (!/[^a-zA-Z0-9]/.test(password)) return 'Mật khẩu phải có ít nhất 1 ký tự đặc biệt (!@#$%^&*...)';
+    return '';
+  };
+
   const onChange = e => {
     const { name, value } = e.target;
     setForm(p => ({ ...p, [name]: value }));
-    if (errors[name]) setErrors(p => ({ ...p, [name]: '' }));
+    
+    // Real-time validation cho password
+    if (name === 'password') {
+      const pwError = validatePassword(value);
+      setErrors(p => ({ ...p, password: pwError }));
+    } else if (name === 'confirmPassword') {
+      // Real-time validation cho confirm password
+      if (value && value !== form.password) {
+        setErrors(p => ({ ...p, confirmPassword: 'Mật khẩu không khớp' }));
+      } else {
+        setErrors(p => ({ ...p, confirmPassword: '' }));
+      }
+    } else {
+      if (errors[name]) setErrors(p => ({ ...p, [name]: '' }));
+    }
   };
 
   const validate = () => {
@@ -701,8 +725,11 @@ const CandidateRegister = () => {
     if (!form.fullName) e.fullName = 'Vui lòng nhập họ tên';
     if (!form.email) e.email = 'Vui lòng nhập email';
     else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = 'Email không đúng định dạng';
+    
+    const pwError = validatePassword(form.password);
     if (!form.password) e.password = 'Vui lòng nhập mật khẩu';
-    else if (form.password.length < 6) e.password = 'Mật khẩu ít nhất 6 ký tự';
+    else if (pwError) e.password = pwError;
+    
     if (!form.confirmPassword) e.confirmPassword = 'Vui lòng xác nhận mật khẩu';
     else if (form.password !== form.confirmPassword) e.confirmPassword = 'Mật khẩu không khớp';
     if (!agreed) e.agreed = 'Bạn cần đồng ý điều khoản';
@@ -887,7 +914,7 @@ const CandidateRegister = () => {
               iconR={showPw ? <IcoEyeOff /> : <IcoEye />}
               onToggle={() => setShowPw(p => !p)} />
 
-            {form.password && pw && (
+            {form.password && pw && !errors.password && (
               <PwWrap>
                 <PwBars>
                   {[1, 2, 3, 4].map(i => <PwSeg key={i} $on={pw.n >= i} $c={pw.color} />)}
@@ -911,6 +938,7 @@ const CandidateRegister = () => {
               </ChkTxt>
             </ChkRow>
             {errors.agreed && <FErr style={{ marginTop: -8, marginBottom: 10 }}>{errors.agreed}</FErr>}
+            {errors.submit && <FErr style={{ marginTop: -8, marginBottom: 10, textAlign: 'center' }}>{errors.submit}</FErr>}
 
             <SubmitBtn
               type="submit"
