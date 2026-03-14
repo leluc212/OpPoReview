@@ -123,7 +123,7 @@ const LabelWithIcon = styled.label`
     
     h1 {
       font-size: 28px;
-      font-weight: 800;
+      font-weight: 700;
       margin-bottom: 6px;
       color: #1E293B;
       letter-spacing: -0.5px;
@@ -622,7 +622,13 @@ const PostJob = () => {
 
               <FormGroup>
                 <Label>{language === 'vi' ? 'Địa điểm *' : 'Location *'}</Label>
-                <Input name="location" placeholder={language === 'vi' ? 'Quận 1' : 'e.g., District 1'} value={formData.location} onChange={handleChange} required />
+                <Input 
+                  name="location" 
+                  placeholder={language === 'vi' ? 'Quận 1' : 'e.g., District 1'} 
+                  value={formData.location} 
+                  onChange={handleChange} 
+                  required 
+                />
               </FormGroup>
 
               <FormGroup>
