@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import TableFilter from '../../components/TableFilter';
@@ -457,523 +457,50 @@ const PackagesManagement = () => {
   const [activeTab, setActiveTab] = useState('pending'); // 'pending' or 'approved'
   const itemsPerPage = 20;
 
-  // Dữ liệu gói dịch vụ đã mua (từ 30 nhà tuyển dụng)
-  const [purchases, setPurchases] = useState([
-    // 9 gói cũ (giữ nguyên)
-    {
-      id: 1,
-      employer: 'Highlands Coffee',
-      package: 'Quick Boost',
-      purchaseDate: '2026-01-15',
-      expiryDate: '2026-02-15',
-      status: 'active',
-      price: 145000,
-      duration: '7 ngày',
-      approvalStatus: 'approved' // Đã duyệt
-    },
-    {
-      id: 2,
-      employer: 'Phúc Long',
-      package: 'Top Spotlight',
-      purchaseDate: '2026-01-20',
-      expiryDate: '2026-03-20',
-      status: 'active',
-      price: 745000,
-      duration: '7 ngày',
-      approvalStatus: 'approved' // Đã duyệt
-    },
-    {
-      id: 3,
-      employer: 'Katinat chi nhánh quận 8',
-      package: 'Spotlight Banner',
-      purchaseDate: '2026-02-01',
-      expiryDate: '2026-05-01',
-      status: 'active',
-      price: 495000,
-      duration: '7 ngày',
-      approvalStatus: 'approved' // Đã duyệt
-    },
-    {
-      id: 4,
-      employer: 'The Coffee House',
-      package: 'Top Spotlight',
-      purchaseDate: '2026-01-10',
-      expiryDate: '2026-02-10',
-      status: 'expired',
-      price: 745000,
-      duration: '7 ngày',
-      approvalStatus: 'approved' // Đã duyệt
-    },
-    {
-      id: 5,
-      employer: 'Starbucks chi nhánh quận 10',
-      package: 'Top Spotlight',
-      purchaseDate: '2026-01-25',
-      expiryDate: '2026-04-25',
-      status: 'active',
-      price: 745000,
-      duration: '7 ngày',
-      approvalStatus: 'approved' // Đã duyệt
-    },
-    {
-      id: 6,
-      employer: 'Talk Bread chi nhánh Thủ Đức',
-      package: 'Quick Boost',
-      purchaseDate: '2026-02-05',
-      expiryDate: '2026-02-12',
-      status: 'expiring',
-      price: 145000,
-      duration: '7 ngày'
-    },
-    {
-      id: 7,
-      employer: 'Trung Nguyên Legend',
-      package: 'Hot Search',
-      purchaseDate: '2026-01-10',
-      expiryDate: '2026-02-10',
-      status: 'expiring',
-      price: 245000,
-      duration: '7 ngày'
-    },
-    {
-      id: 8,
-      employer: 'Gong Cha chi nhánh quận 1',
-      package: 'Spotlight Banner',
-      purchaseDate: '2026-01-18',
-      expiryDate: '2026-04-18',
-      status: 'active',
-      price: 495000,
-      duration: '7 ngày'
-    },
-    {
-      id: 9,
-      employer: 'Quán nhậu OK 3 con dê quận 8',
-      package: 'Quick Boost',
-      purchaseDate: '2026-01-18',
-      expiryDate: '2026-04-18',
-      status: 'active',
-      price: 145000,
-      duration: '7 ngày'
-    },
-    // Gói mới từ 30 nhà tuyển dụng
-    {
-      id: 10,
-      employer: 'Lẩu Bò Sài Gòn Vi Vu',
-      package: 'Top Spotlight',
-      purchaseDate: '2026-01-15',
-      expiryDate: '2026-04-15',
-      status: 'active',
-      price: 745000,
-      duration: '7 ngày'
-    },
-    {
-      id: 11,
-      employer: 'Ốc Đêm 79',
-      package: 'Hot Search',
-      purchaseDate: '2026-01-16',
-      expiryDate: '2026-02-16',
-      status: 'active',
-      price: 245000,
-      duration: '7 ngày'
-    },
-    {
-      id: 12,
-      employer: 'Tiệm Trà Tháng Tư',
-      package: 'Quick Boost',
-      purchaseDate: '2026-01-17',
-      expiryDate: '2026-02-17',
-      status: 'active',
-      price: 145000,
-      duration: '7 ngày'
-    },
-    {
-      id: 13,
-      employer: 'Bia Sệt 123',
-      package: 'Spotlight Banner',
-      purchaseDate: '2026-01-18',
-      expiryDate: '2026-04-18',
-      status: 'active',
-      price: 495000,
-      duration: '7 ngày'
-    },
-    {
-      id: 14,
-      employer: 'Bếp Nhà Mẹ Nấu',
-      package: 'Quick Boost',
-      purchaseDate: '2026-01-19',
-      expiryDate: '2026-02-19',
-      status: 'active',
-      price: 145000,
-      duration: '7 ngày'
-    },
-    {
-      id: 15,
-      employer: 'Chill Out Beer Club',
-      package: 'Top Spotlight',
-      purchaseDate: '2026-01-20',
-      expiryDate: '2026-04-20',
-      status: 'active',
-      price: 745000,
-      duration: '7 ngày'
-    },
-    {
-      id: 16,
-      employer: 'Phở Gia Truyền 1954',
-      package: 'Hot Search',
-      purchaseDate: '2026-01-21',
-      expiryDate: '2026-02-21',
-      status: 'active',
-      price: 245000,
-      duration: '7 ngày'
-    },
-    {
-      id: 17,
-      employer: 'Sushi Sen Mini',
-      package: 'Spotlight Banner',
-      purchaseDate: '2026-01-22',
-      expiryDate: '2026-04-22',
-      status: 'active',
-      price: 495000,
-      duration: '7 ngày'
-    },
-    {
-      id: 18,
-      employer: 'High Tea & Coffee',
-      package: 'Quick Boost',
-      purchaseDate: '2026-01-23',
-      expiryDate: '2026-01-30',
-      status: 'expired',
-      price: 145000,
-      duration: '7 ngày'
-    },
-    {
-      id: 19,
-      employer: 'Gà Nướng Ò Ó O',
-      package: 'Hot Search',
-      purchaseDate: '2026-01-24',
-      expiryDate: '2026-02-24',
-      status: 'active',
-      price: 245000,
-      duration: '7 ngày'
-    },
-    {
-      id: 20,
-      employer: 'Nướng Ngói Gia Bảo',
-      package: 'Top Spotlight',
-      purchaseDate: '2026-01-25',
-      expiryDate: '2026-04-25',
-      status: 'active',
-      price: 745000,
-      duration: '7 ngày'
-    },
-    {
-      id: 21,
-      employer: 'The Morning Bakery',
-      package: 'Quick Boost',
-      purchaseDate: '2026-01-26',
-      expiryDate: '2026-02-26',
-      status: 'active',
-      price: 145000,
-      duration: '7 ngày'
-    },
-    {
-      id: 22,
-      employer: 'Lẩu Phan',
-      package: 'Spotlight Banner',
-      purchaseDate: '2026-01-27',
-      expiryDate: '2026-04-27',
-      status: 'active',
-      price: 495000,
-      duration: '7 ngày'
-    },
-    {
-      id: 23,
-      employer: 'Beer Garden Phố',
-      package: 'Hot Search',
-      purchaseDate: '2026-01-28',
-      expiryDate: '2026-02-28',
-      status: 'active',
-      price: 245000,
-      duration: '7 ngày'
-    },
-    {
-      id: 24,
-      employer: 'Mì Cay Sasin',
-      package: 'Quick Boost',
-      purchaseDate: '2026-01-29',
-      expiryDate: '2026-02-29',
-      status: 'active',
-      price: 145000,
-      duration: '7 ngày'
-    },
-    {
-      id: 25,
-      employer: 'Cà Phê Cây Me',
-      package: 'Spotlight Banner',
-      purchaseDate: '2026-01-30',
-      expiryDate: '2026-04-30',
-      status: 'active',
-      price: 495000,
-      duration: '7 ngày'
-    },
-    {
-      id: 26,
-      employer: 'Nhà Hàng Chay Sen Vàng',
-      package: 'Quick Boost',
-      purchaseDate: '2026-01-31',
-      expiryDate: '2026-02-07',
-      status: 'expired',
-      price: 145000,
-      duration: '7 ngày'
-    },
-    {
-      id: 27,
-      employer: 'Xiên Khè',
-      package: 'Hot Search',
-      purchaseDate: '2026-02-01',
-      expiryDate: '2026-03-01',
-      status: 'active',
-      price: 245000,
-      duration: '7 ngày'
-    },
-    {
-      id: 28,
-      employer: 'Dimsum House',
-      package: 'Top Spotlight',
-      purchaseDate: '2026-02-02',
-      expiryDate: '2026-05-02',
-      status: 'active',
-      price: 745000,
-      duration: '7 ngày'
-    },
-    {
-      id: 29,
-      employer: 'Bánh Mì PewPew',
-      package: 'Quick Boost',
-      purchaseDate: '2026-02-03',
-      expiryDate: '2026-03-03',
-      status: 'active',
-      price: 145000,
-      duration: '7 ngày'
-    },
-    {
-      id: 30,
-      employer: 'Urban Coffee',
-      package: 'Spotlight Banner',
-      purchaseDate: '2026-02-04',
-      expiryDate: '2026-05-04',
-      status: 'active',
-      price: 495000,
-      duration: '7 ngày'
-    },
-    {
-      id: 31,
-      employer: 'Lẩu Cá Kèo Bà Huyện',
-      package: 'Hot Search',
-      purchaseDate: '2026-02-05',
-      expiryDate: '2026-03-05',
-      status: 'active',
-      price: 245000,
-      duration: '7 ngày'
-    },
-    {
-      id: 32,
-      employer: 'Hủ Tiếu Nam Vang Thành Đạt',
-      package: 'Quick Boost',
-      purchaseDate: '2026-02-06',
-      expiryDate: '2026-03-06',
-      status: 'active',
-      price: 145000,
-      duration: '7 ngày'
-    },
-    {
-      id: 33,
-      employer: 'Draft Beer Sài Gòn',
-      package: 'Top Spotlight',
-      purchaseDate: '2026-02-07',
-      expiryDate: '2026-05-07',
-      status: 'active',
-      price: 745000,
-      duration: '7 ngày'
-    },
-    {
-      id: 34,
-      employer: 'Gòng Tea',
-      package: 'Quick Boost',
-      purchaseDate: '2026-02-08',
-      expiryDate: '2026-02-15',
-      status: 'expiring',
-      price: 145000,
-      duration: '7 ngày'
-    },
-    {
-      id: 35,
-      employer: 'Cơm Tấm Cali',
-      package: 'Spotlight Banner',
-      purchaseDate: '2026-02-09',
-      expiryDate: '2026-05-09',
-      status: 'active',
-      price: 495000,
-      duration: '7 ngày'
-    },
-    {
-      id: 36,
-      employer: 'Warning Zone',
-      package: 'Hot Search',
-      purchaseDate: '2026-02-10',
-      expiryDate: '2026-03-10',
-      status: 'active',
-      price: 245000,
-      duration: '7 ngày'
-    },
-    {
-      id: 37,
-      employer: 'Trà Chanh Bụi Phố',
-      package: 'Quick Boost',
-      purchaseDate: '2026-02-11',
-      expiryDate: '2026-02-18',
-      status: 'expiring',
-      price: 145000,
-      duration: '7 ngày'
-    },
-    {
-      id: 38,
-      employer: 'Quán Nướng Ngói Sapa',
-      package: 'Top Spotlight',
-      purchaseDate: '2026-02-12',
-      expiryDate: '2026-05-12',
-      status: 'active',
-      price: 745000,
-      duration: '7 ngày'
-    },
-    {
-      id: 39,
-      employer: 'Blue Star Cocktail Bar',
-      package: 'Spotlight Banner',
-      purchaseDate: '2026-02-13',
-      expiryDate: '2026-05-13',
-      status: 'active',
-      price: 495000,
-      duration: '7 ngày'
-    },
-    // Thêm một số gói mua nhiều lần
-    {
-      id: 40,
-      employer: 'Lẩu Bò Sài Gòn Vi Vu',
-      package: 'Hot Search',
-      purchaseDate: '2026-02-14',
-      expiryDate: '2026-03-14',
-      status: 'active',
-      price: 245000,
-      duration: '7 ngày'
-    },
-    {
-      id: 41,
-      employer: 'Ốc Đêm 79',
-      package: 'Spotlight Banner',
-      purchaseDate: '2026-02-15',
-      expiryDate: '2026-05-15',
-      status: 'active',
-      price: 495000,
-      duration: '7 ngày'
-    },
-    {
-      id: 42,
-      employer: 'Chill Out Beer Club',
-      package: 'Hot Search',
-      purchaseDate: '2026-02-16',
-      expiryDate: '2026-03-16',
-      status: 'active',
-      price: 245000,
-      duration: '7 ngày'
-    },
-    {
-      id: 43,
-      employer: 'Nướng Ngói Gia Bảo',
-      package: 'Quick Boost',
-      purchaseDate: '2026-02-17',
-      expiryDate: '2026-03-17',
-      status: 'active',
-      price: 145000,
-      duration: '7 ngày'
-    },
-    {
-      id: 44,
-      employer: 'Draft Beer Sài Gòn',
-      package: 'Hot Search',
-      purchaseDate: '2026-02-18',
-      expiryDate: '2026-03-18',
-      status: 'active',
-      price: 245000,
-      duration: '7 ngày'
-    },
-    {
-      id: 45,
-      employer: 'Blue Star Cocktail Bar',
-      package: 'Top Spotlight',
-      purchaseDate: '2026-02-19',
-      expiryDate: '2026-05-19',
-      status: 'active',
-      price: 745000,
-      duration: '7 ngày'
-    },
-    // Các gói mới mua - Chờ duyệt
-    {
-      id: 46,
-      employer: 'Nhà hàng Hải Sản Biển Đông',
-      package: 'Top Spotlight',
-      purchaseDate: '2026-03-13',
-      expiryDate: null,
-      status: 'pending',
-      price: 745000,
-      duration: '7 ngày',
-      approvalStatus: 'pending'
-    },
-    {
-      id: 47,
-      employer: 'Quán Ăn Vặt 24/7',
-      package: 'Quick Boost',
-      purchaseDate: '2026-03-13',
-      expiryDate: null,
-      status: 'pending',
-      price: 145000,
-      duration: '7 ngày',
-      approvalStatus: 'pending'
-    },
-    {
-      id: 48,
-      employer: 'Lẩu Thái Tomyum',
-      package: 'Spotlight Banner',
-      purchaseDate: '2026-03-13',
-      expiryDate: null,
-      status: 'pending',
-      price: 495000,
-      duration: '7 ngày',
-      approvalStatus: 'pending'
-    },
-    {
-      id: 49,
-      employer: 'Bún Bò Huế Mẹ Tròn',
-      package: 'Hot Search',
-      purchaseDate: '2026-03-13',
-      expiryDate: null,
-      status: 'pending',
-      price: 245000,
-      duration: '7 ngày',
-      approvalStatus: 'pending'
-    },
-    {
-      id: 50,
-      employer: 'Cơm Tấm Sườn Nướng',
-      package: 'Quick Boost',
-      purchaseDate: '2026-03-13',
-      expiryDate: null,
-      status: 'pending',
-      price: 145000,
-      duration: '7 ngày',
-      approvalStatus: 'pending'
-    },
-  ]);
+  // Dữ liệu gói dịch vụ đã mua - Load từ API
+  const [purchases, setPurchases] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Load subscriptions from API
+  useEffect(() => {
+    const loadSubscriptions = async () => {
+      try {
+        setLoading(true);
+        const API_ENDPOINT = import.meta.env.VITE_PACKAGE_SUBSCRIPTIONS_API;
+        const response = await fetch(`${API_ENDPOINT}/subscriptions`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch subscriptions');
+        }
+        
+        const data = await response.json();
+        
+        // Transform API data to match component format
+        const transformedData = data.map(item => ({
+          id: item.subscriptionId,
+          employer: item.companyName,
+          package: item.packageName,
+          purchaseDate: item.purchaseDate,
+          expiryDate: item.expiryDate,
+          status: item.status,
+          price: typeof item.price === 'number' ? item.price : parseFloat(item.price),
+          duration: item.duration,
+          approvalStatus: item.approvalStatus
+        }));
+        
+        setPurchases(transformedData);
+        setError(null);
+      } catch (err) {
+        console.error('Error loading subscriptions:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadSubscriptions();
+  }, []);
 
   // Dữ liệu theo tháng cho biểu đồ (6 tháng gần nhất)
   const monthlyData = [
@@ -1056,30 +583,46 @@ const PackagesManagement = () => {
     );
   };
 
-  const handleApprove = (purchaseId) => {
-    console.log('Approving purchase:', purchaseId);
-    setPurchases(prev => {
-      const updated = prev.map(purchase => {
-        if (purchase.id === purchaseId) {
-          // Calculate expiry date (7 days from now)
-          const purchaseDate = new Date();
-          const expiryDate = new Date(purchaseDate);
-          expiryDate.setDate(expiryDate.getDate() + 7);
-          
-          console.log('Updating purchase from pending to active');
-          return {
-            ...purchase,
-            status: 'active',
-            approvalStatus: 'approved',
-            purchaseDate: purchaseDate.toISOString().split('T')[0],
-            expiryDate: expiryDate.toISOString().split('T')[0]
-          };
-        }
-        return purchase;
+  const handleApprove = async (purchaseId) => {
+    try {
+      console.log('Approving purchase:', purchaseId);
+      
+      const API_ENDPOINT = import.meta.env.VITE_PACKAGE_SUBSCRIPTIONS_API;
+      const response = await fetch(`${API_ENDPOINT}/subscriptions/${purchaseId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          status: 'active',
+          approvalStatus: 'approved'
+        })
       });
-      console.log('Updated purchases:', updated.filter(p => p.id === purchaseId));
-      return updated;
-    });
+      
+      if (!response.ok) {
+        throw new Error('Failed to approve subscription');
+      }
+      
+      const updatedSubscription = await response.json();
+      console.log('Subscription approved:', updatedSubscription);
+      
+      // Update local state
+      setPurchases(prev => prev.map(purchase => 
+        purchase.id === purchaseId 
+          ? {
+              ...purchase,
+              status: updatedSubscription.status,
+              approvalStatus: updatedSubscription.approvalStatus,
+              purchaseDate: updatedSubscription.purchaseDate,
+              expiryDate: updatedSubscription.expiryDate
+            }
+          : purchase
+      ));
+      
+    } catch (error) {
+      console.error('Error approving subscription:', error);
+      alert('Có lỗi xảy ra khi duyệt gói. Vui lòng thử lại.');
+    }
   };
 
   const stats = {
@@ -1138,6 +681,25 @@ const PackagesManagement = () => {
           <p>{language === 'vi' ? 'Quản lý gói dịch vụ của nhà tuyển dụng F&B' : 'Manage F&B employer service packages'}</p>
         </PageHeader>
 
+        {loading && (
+          <div style={{ textAlign: 'center', padding: '40px', color: '#64748B' }}>
+            <div style={{ fontSize: '16px', fontWeight: '600' }}>
+              {language === 'vi' ? 'Đang tải dữ liệu...' : 'Loading data...'}
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div style={{ textAlign: 'center', padding: '40px', color: '#ef4444' }}>
+            <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>
+              {language === 'vi' ? 'Lỗi tải dữ liệu' : 'Error loading data'}
+            </div>
+            <div style={{ fontSize: '14px' }}>{error}</div>
+          </div>
+        )}
+
+        {!loading && !error && (
+          <>
         <StatsRow>
           <StatBox $color="#1e40af">
             <h3>{language === 'vi' ? 'Tổng gói đã bán' : 'Total Purchases'}</h3>
@@ -1394,6 +956,8 @@ const PackagesManagement = () => {
             </PageButton>
           </PaginationButtons>
         </PaginationContainer>
+        </>
+        )}
       </PageContainer>
     </DashboardLayout>
   );

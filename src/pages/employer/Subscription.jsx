@@ -627,7 +627,7 @@ const Subscription = () => {
     setShowConfirmModal(true);
   };
 
-  const handleConfirmPurchase = () => {
+  const handleConfirmPurchase = async () => {
     // Parse price from string (e.g., "495,000 VND" -> 495000)
     const priceString = selectedDuration.amount.replace(/[^0-9]/g, '');
     const packagePrice = parseInt(priceString);
@@ -636,8 +636,38 @@ const Subscription = () => {
     const walletData = JSON.parse(localStorage.getItem('employer_wallet') || '{"balance": 0}');
     const currentBalance = walletData.balance || 0;
     
+    // Get employerId from Cognito session
+    let employerId = 'unknown';
+    try {
+      const { fetchAuthSession } = await import('aws-amplify/auth');
+      const session = await fetchAuthSession();
+      if (session && session.tokens) {
+        const idTokenPayload = session.tokens.idToken?.payload;
+        employerId = idTokenPayload?.sub || 'unknown';
+      }
+    } catch (error) {
+      console.error('Error getting Cognito session:', error);
+    }
+    
+    // Get companyName from DynamoDB
+    let companyName = 'Unknown Company';
+    try {
+      const employerProfileService = (await import('../../services/employerProfileService')).default;
+      const profile = await employerProfileService.getMyProfile();
+      if (profile && (profile.companyName || profile.businessName)) {
+        companyName = profile.companyName || profile.businessName;
+      }
+    } catch (error) {
+      console.error('Error getting employer profile:', error);
+      // Fallback to localStorage if API fails
+      const employerProfile = JSON.parse(localStorage.getItem('employerProfile') || '{}');
+      companyName = employerProfile.companyName || 'Unknown Company';
+    }
+    
     console.log('Package price:', packagePrice);
     console.log('Current balance:', currentBalance);
+    console.log('Employer ID:', employerId);
+    console.log('Company Name:', companyName);
     
     // Check if balance is sufficient
     if (currentBalance < packagePrice) {
@@ -654,31 +684,53 @@ const Subscription = () => {
     
     console.log('New balance after purchase:', newBalance);
     
-    // Create purchase record (will be sent to admin for approval)
-    const purchase = {
-      packageName: selectedPackage.name,
-      duration: selectedDuration.duration,
-      price: selectedDuration.amount,
-      purchaseDate: new Date().toISOString().split('T')[0],
-      status: 'pending',
-      approvalStatus: 'pending'
-    };
-    
-    // Save to localStorage for now (later will be sent to backend)
-    const existingPurchases = JSON.parse(localStorage.getItem('pendingPurchases') || '[]');
-    existingPurchases.push(purchase);
-    localStorage.setItem('pendingPurchases', JSON.stringify(existingPurchases));
-    
-    // Show success modal instead of alert
-    setShowConfirmModal(false);
-    setShowSuccessModal(true);
-    
-    // Auto close after 3 seconds
-    setTimeout(() => {
-      setShowSuccessModal(false);
-      setSelectedPackage(null);
-      setSelectedDuration(null);
-    }, 3000);
+    // Create purchase record and send to API
+    try {
+      const API_ENDPOINT = import.meta.env.VITE_PACKAGE_SUBSCRIPTIONS_API;
+      
+      const purchaseData = {
+        employerId: employerId,
+        companyName: companyName,
+        packageName: selectedPackage.name,
+        duration: selectedDuration.duration
+      };
+      
+      console.log('Sending purchase to API:', purchaseData);
+      
+      const response = await fetch(`${API_ENDPOINT}/subscriptions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8'
+        },
+        body: JSON.stringify(purchaseData)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create subscription');
+      }
+      
+      const result = await response.json();
+      console.log('Subscription created:', result);
+      
+      // Show success modal
+      setShowConfirmModal(false);
+      setShowSuccessModal(true);
+      
+      // Auto close after 3 seconds
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        setSelectedPackage(null);
+        setSelectedDuration(null);
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Error creating subscription:', error);
+      alert(vi ? 'Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại.' : 'Error creating order. Please try again.');
+      
+      // Refund the balance
+      walletData.balance = currentBalance;
+      localStorage.setItem('employer_wallet', JSON.stringify(walletData));
+    }
   };
 
   const plans = [
