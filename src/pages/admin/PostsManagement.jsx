@@ -680,9 +680,19 @@ const PostsManagement = () => {
       endDate = String(endDay).padStart(2, '0') + '/' + String(endMonth).padStart(2, '0') + '/' + endYear;
     }
     
+    // Remove shift prefix from title (Ca Trưa -, Ca Tối -, Ca Sáng -, Ca Chiều -)
+    let cleanTitle = job.title;
+    const shiftPrefixes = ['Ca Trưa - ', 'Ca Tối - ', 'Ca Sáng - ', 'Ca Chiều - ', 'Ca Tối- ', 'Ca Trưa- ', 'Ca Sáng- ', 'Ca Chiều- '];
+    for (const prefix of shiftPrefixes) {
+      if (cleanTitle.startsWith(prefix)) {
+        cleanTitle = cleanTitle.substring(prefix.length);
+        break;
+      }
+    }
+    
     return {
       id: job.id,
-      title: job.title,
+      title: cleanTitle,
       employer: job.company,
       employerType: job.companyType,
       employerEmail: 'hr@' + job.company.toLowerCase().replace(/\s+/g, '') + '.vn',
