@@ -2519,7 +2519,7 @@ const JobListing = () => {
   useEffect(() => {
     const bannerInterval = setInterval(() => {
       setCurrentBannerIndex(prev => (prev + 1) % banners.length);
-    }, 4000);
+    }, 7000);
     return () => clearInterval(bannerInterval);
   }, [banners.length]);
 
@@ -3420,18 +3420,37 @@ const JobListing = () => {
 
             <BoostBannerWrap>
               <BoostTag>🔥Hot deal</BoostTag>
-              <motion.img 
-                key={currentBannerIndex}
-                initial={{ opacity: currentBannerIndex === 0 ? 1 : 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ 
-                  duration: 0.7,
-                  ease: [0.25, 0.1, 0.25, 1]
-                }}
-                src={banners[currentBannerIndex].src} 
-                alt={banners[currentBannerIndex].alt}
-                style={{ width: '100%', height: 'auto', display: 'block' }}
-              />
+              <div style={{ position: 'relative', width: '100%', lineHeight: 0 }}>
+                <AnimatePresence mode="sync">
+                  <motion.img 
+                    key={currentBannerIndex}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ 
+                      duration: 1.8,
+                      ease: 'easeInOut'
+                    }}
+                    src={banners[currentBannerIndex].src} 
+                    alt={banners[currentBannerIndex].alt}
+                    style={{ 
+                      width: '100%', 
+                      height: 'auto', 
+                      display: 'block',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0
+                    }}
+                  />
+                </AnimatePresence>
+                {/* Placeholder để giữ chiều cao container */}
+                <img 
+                  src={banners[currentBannerIndex].src} 
+                  alt=""
+                  style={{ width: '100%', height: 'auto', display: 'block', visibility: 'hidden' }}
+                  aria-hidden="true"
+                />
+              </div>
               <BannerDots>
                 {banners.map((_, idx) => (
                   <BannerDot 

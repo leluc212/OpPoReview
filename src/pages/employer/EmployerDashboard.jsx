@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
 import StatusBadge from '../../components/StatusBadge';
+import ProfileSetupPrompt from '../../components/ProfileSetupPrompt';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import employerProfileService from '../../services/employerProfileService';
@@ -441,7 +442,7 @@ const EmployerDashboard = () => {
   useEffect(() => {
     const loadProfile = async () => {
       if (!user) return;
-      
+
       try {
         setIsLoadingProfile(true);
         const profile = await employerProfileService.getMyProfile();
@@ -461,30 +462,30 @@ const EmployerDashboard = () => {
         setIsLoadingProfile(false);
       }
     };
-    
+
     loadProfile();
   }, [user]);
 
   const getRecentApplications = () => [
-    { 
+    {
       id: 1,
-      candidate: language === 'vi' ? 'Đỗ Hoàng Hiếu' : 'Hieu Do Hoang', 
-      job: language === 'vi' ? 'Nhân viên phụ bếp' : 'Kitchen Assistant', 
+      candidate: language === 'vi' ? 'Đỗ Hoàng Hiếu' : 'Hieu Do Hoang',
+      job: language === 'vi' ? 'Nhân viên phụ bếp' : 'Kitchen Assistant',
       applied: language === 'vi' ? '2 giờ trước' : '2 hours ago',
       status: 'pending',
       avatar: 'H'
     },
-    { 
+    {
       id: 2,
-      candidate: language === 'vi' ? 'Phạm Lê Duy' : 'Duy Pham Le', 
+      candidate: language === 'vi' ? 'Phạm Lê Duy' : 'Duy Pham Le',
       job: language === 'vi' ? 'Nhân viên Thu ngân' : 'Cashier',
       applied: language === 'vi' ? '5 giờ trước' : '5 hours ago',
       status: 'pending',
       avatar: 'D'
     },
-    { 
+    {
       id: 3,
-      candidate: 'Trần Phương Tuấn', 
+      candidate: 'Trần Phương Tuấn',
       job: language === 'vi' ? 'Nhân viên Pha chế' : 'Barista',
       applied: language === 'vi' ? '1 ngày trước' : '1 day ago',
       status: 'approved',
@@ -493,7 +494,7 @@ const EmployerDashboard = () => {
   ];
 
   const [recentApplications, setRecentApplications] = useState(getRecentApplications());
-  
+
   useEffect(() => {
     setRecentApplications(getRecentApplications());
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -539,6 +540,14 @@ const EmployerDashboard = () => {
 
   return (
     <DashboardLayout role="employer" key={language}>
+      {!isLoadingProfile && (
+        <ProfileSetupPrompt 
+          role="employer" 
+          userId={user?.email} 
+          profileName={employerProfile?.companyName || ''}
+          profilePhone={employerProfile?.phone || ''}
+        />
+      )}
       <DashboardContainer>
         {/* Welcome Banner */}
         <WelcomeBanner
@@ -632,7 +641,7 @@ const EmployerDashboard = () => {
                 <ArrowUpRight />
               </a>
             </SectionHeader>
-            
+
             {recentApplications.map((app, index) => (
               <ApplicationCard
                 key={app.id}
@@ -677,7 +686,7 @@ const EmployerDashboard = () => {
                 {language === 'vi' ? 'Hoạt Động Gần Đây' : 'Recent Activity'}
               </h2>
             </SectionHeader>
-            
+
             <ActivityFeed>
               {activities.map((activity, index) => {
                 const IconComponent = activity.icon;
@@ -715,7 +724,7 @@ const EmployerDashboard = () => {
               {language === 'vi' ? 'Hiệu Suất Tuyển Dụng' : 'Recruitment Performance'}
             </h2>
           </SectionHeader>
-          
+
           <PerformanceGrid>
             <PerformanceCard
               $color="#1e40af"

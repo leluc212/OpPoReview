@@ -28,6 +28,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('user');
+    sessionStorage.clear(); // Clear session khi đăng xuất
   };
 
   const updateUser = (userData) => {
