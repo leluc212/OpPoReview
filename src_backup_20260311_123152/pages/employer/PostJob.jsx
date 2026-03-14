@@ -314,7 +314,7 @@ const PostJob = () => {
           <form onSubmit={handleSubmit}>
             <FormGrid>
               <FormGroup>
-                <Label>{language === 'vi' ? 'Tiêu đề công việc *' : 'Job Title *'}</Label>
+                <Label>{language === 'vi' ? 'Tiêu đề công việc - Vị trí công việc *' : 'Job Title *'}</Label>
                 <Input name="title" placeholder={language === 'vi' ? 'Ví dụ: Lập trình viên React cấp cao' : 'e.g., Senior React Developer'} value={formData.title} onChange={handleChange} required />
               </FormGroup>
 
@@ -351,7 +351,7 @@ const PostJob = () => {
               </FormGroup>
 
               <FormGroup>
-                <Label>{language === 'vi' ? 'Mức lương (Không bắt buộc)' : 'Salary Range (Optional)'}</Label>
+                <Label>{language === 'vi' ? 'Mức lương' : 'Salary'}</Label>
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <SalaryInputWrapper>
                     <Input name="salaryMin" placeholder={language === 'vi' ? 'Tối thiểu' : 'Minimum'} value={formData.salaryMin} onChange={handleChange} />

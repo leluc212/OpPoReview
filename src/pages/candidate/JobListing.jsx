@@ -906,10 +906,19 @@ const BoostBannerWrap = styled.div`
     width: 100%;
     height: auto;
     display: block;
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: opacity 0.5s ease-in-out, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    
+    &.active {
+      opacity: 1;
+      position: relative;
+    }
   }
 
-  &:hover img {
+  &:hover img.active {
     transform: scale(1.01);
   }
 `;
@@ -3567,18 +3576,14 @@ const JobListing = () => {
 
             <BoostBannerWrap>
               <BoostTag>🔥Hot deal</BoostTag>
-              <motion.img 
-                key={currentBannerIndex}
-                initial={{ opacity: currentBannerIndex === 0 ? 1 : 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ 
-                  duration: 0.7,
-                  ease: [0.25, 0.1, 0.25, 1]
-                }}
-                src={banners[currentBannerIndex].src} 
-                alt={banners[currentBannerIndex].alt}
-                style={{ width: '100%', height: 'auto', display: 'block' }}
-              />
+              {banners.map((banner, idx) => (
+                <img
+                  key={idx}
+                  src={banner.src}
+                  alt={banner.alt}
+                  className={currentBannerIndex === idx ? 'active' : ''}
+                />
+              ))}
               <BannerDots>
                 {banners.map((_, idx) => (
                   <BannerDot 
