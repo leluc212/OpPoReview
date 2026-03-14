@@ -16,9 +16,10 @@ import {
   Calendar,
   Users,
   TrendingUp,
-  AlertCircle
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react';
-import employerProfilesData from '../../../employer-profiles-data.json';
+import adminEmployerService from '../../services/adminEmployerService';
 
 const PageContainer = styled.div``;
 
@@ -34,6 +35,60 @@ const PageHeader = styled.div`
   p {
     color: ${props => props.theme.colors.textLight};
     font-size: 16px;
+  }
+`;
+
+const FilterSection = styled.div`
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+`;
+
+const FilterWrapper = styled.div`
+  flex: 1;
+`;
+
+const RefreshButton = styled.button`
+  padding: 12px 24px;
+  border: 2px solid ${props => props.theme.colors.primary};
+  border-radius: ${props => props.theme.borderRadius.md};
+  background: ${props => props.$loading ? props.theme.colors.bgLight : props.theme.colors.primary};
+  color: ${props => props.$loading ? props.theme.colors.text : 'white'};
+  font-size: 14px;
+  font-weight: 600;
+  cursor: ${props => props.$loading ? 'not-allowed' : 'pointer'};
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  
+  svg {
+    animation: ${props => props.$loading ? 'spin 1s linear infinite' : 'none'};
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: center;
   }
 `;
 
@@ -449,49 +504,59 @@ const EmployersManagement = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Load employers from local data (from DynamoDB export)
+  // Load employers from DynamoDB via API
+  const loadEmployers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('📥 Fetching employer profiles from DynamoDB...');
+      const data = await adminEmployerService.getAllEmployers();
+      
+      // Transform data to match component structure
+      const transformedData = data.map(item => ({
+        id: item.userId,
+        companyName: item.companyName || 'N/A',
+        email: item.email || 'N/A',
+        phone: item.phone || 'N/A',
+        address: item.address || 'N/A',
+        industry: item.industry || 'N/A',
+        companySize: item.companySize || 'N/A',
+        foundedYear: item.foundedYear || 'N/A',
+        website: item.website || '',
+        companyLogo: item.companyLogo || '',
+        description: item.description || '',
+        isVerified: item.isVerified || false,
+        isActive: item.isActive !== false,
+        approvalStatus: item.approvalStatus || 'pending',
+        profileCompletion: item.profileCompletion || 0,
+        createdAt: item.createdAt || '',
+        updatedAt: item.updatedAt || ''
+      }));
+      
+      setEmployers(transformedData);
+      console.log(`✅ Loaded ${transformedData.length} employer profiles`);
+    } catch (err) {
+      console.error('❌ Error loading employers:', err);
+      setError(err.message || 'Failed to load employer data');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  // Initial load
   useEffect(() => {
-    const loadEmployers = () => {
-      try {
-        setLoading(true);
-        
-        // Use imported data
-        const data = employerProfilesData;
-        
-        // Transform data
-        const transformedData = Array.isArray(data) ? data.map(item => ({
-          id: item.userId,
-          companyName: item.companyName || 'N/A',
-          email: item.email || 'N/A',
-          phone: item.phone || 'N/A',
-          address: item.address || 'N/A',
-          industry: item.industry || 'N/A',
-          companySize: item.companySize || 'N/A',
-          foundedYear: item.foundedYear || 'N/A',
-          website: item.website || '',
-          companyLogo: item.companyLogo || '',
-          description: item.description || '',
-          isVerified: item.isVerified || false,
-          isActive: item.isActive !== false,
-          approvalStatus: item.approvalStatus || 'pending',
-          profileCompletion: item.profileCompletion || 0,
-          createdAt: item.createdAt || '',
-          updatedAt: item.updatedAt || ''
-        })) : [];
-        
-        setEmployers(transformedData);
-        setError(null);
-      } catch (err) {
-        console.error('Error loading employers:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
     loadEmployers();
   }, []);
+
+  // Refresh data
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadEmployers();
+  };
 
   const getStatusText = (status) => {
     if (status === 'approved') return language === 'vi' ? 'Đã duyệt' : 'Approved';
@@ -507,7 +572,10 @@ const EmployersManagement = () => {
 
   const handleApprove = async (employerId) => {
     try {
-      console.log('Approving employer:', employerId);
+      console.log('✅ Approving employer:', employerId);
+      
+      // Call API to update in DynamoDB
+      await adminEmployerService.approveEmployer(employerId);
       
       // Update local state
       setEmployers(prev => prev.map(employer => 
@@ -516,16 +584,13 @@ const EmployersManagement = () => {
           : employer
       ));
       
-      // TODO: Call API to update in DynamoDB
-      // const API_ENDPOINT = import.meta.env.VITE_EMPLOYER_API_URL;
-      // await fetch(`${API_ENDPOINT}/profile/${employerId}`, {
-      //   method: 'PUT',
-      //   body: JSON.stringify({ approvalStatus: 'approved' })
-      // });
-      
       setShowSuccessModal(true);
     } catch (error) {
-      console.error('Error approving employer:', error);
+      console.error('❌ Error approving employer:', error);
+      alert(language === 'vi' 
+        ? `Lỗi khi duyệt nhà tuyển dụng: ${error.message}`
+        : `Error approving employer: ${error.message}`
+      );
     }
   };
 
@@ -654,14 +719,25 @@ const EmployersManagement = () => {
               </Tab>
             </TabsContainer>
 
-            <TableFilter 
-              searchValue={searchTerm}
-              onSearchChange={setSearchTerm}
-              filterOptions={filterOptions}
-              activeFilters={filters}
-              onFilterToggle={handleFilterToggle}
-              searchPlaceholder={language === 'vi' ? 'Tìm kiếm công ty, email, ngành...' : 'Search company, email, industry...'}
-            />
+            <FilterSection>
+              <FilterWrapper>
+                <TableFilter 
+                  searchValue={searchTerm}
+                  onSearchChange={setSearchTerm}
+                  filterOptions={filterOptions}
+                  activeFilters={filters}
+                  onFilterToggle={handleFilterToggle}
+                  searchPlaceholder={language === 'vi' ? 'Tìm kiếm công ty, email, ngành...' : 'Search company, email, industry...'}
+                />
+              </FilterWrapper>
+              <RefreshButton onClick={handleRefresh} disabled={refreshing} $loading={refreshing}>
+                <RefreshCw size={18} />
+                {refreshing 
+                  ? (language === 'vi' ? 'Đang tải...' : 'Loading...') 
+                  : (language === 'vi' ? 'Làm mới' : 'Refresh')
+                }
+              </RefreshButton>
+            </FilterSection>
 
             <TableWrapper>
               <Table>

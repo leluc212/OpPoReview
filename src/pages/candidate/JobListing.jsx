@@ -464,6 +464,110 @@ const ApplyModalWrap = styled.div`
   }
 `;
 
+const CVSelectionSection = styled.div`
+  width: 100%;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 8px 0;
+  text-align: left;
+`;
+
+const CVSelectionTitle = styled.div`
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const CVOption = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: ${props => props.$selected ? '#eff6ff' : '#f8fafc'};
+  border: 2px solid ${props => props.$selected ? '#3b82f6' : '#e2e8f0'};
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 8px;
+
+  &:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+const CVRadio = styled.div`
+  width: 20px;
+  height: 20px;
+  border: 2px solid ${props => props.$selected ? '#3b82f6' : '#cbd5e1'};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  &::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #3b82f6;
+    opacity: ${props => props.$selected ? 1 : 0};
+    transition: opacity 0.2s;
+  }
+`;
+
+const CVOptionInfo = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
+
+const CVOptionName = styled.div`
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const CVOptionDate = styled.div`
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+`;
+
+const NoCVMessage = styled.div`
+  text-align: center;
+  padding: 16px;
+  background: #fef3c7;
+  border: 2px solid #fbbf24;
+  border-radius: 8px;
+  color: #92400e;
+  font-size: 13px;
+  line-height: 1.5;
+  
+  a {
+    color: #3b82f6;
+    text-decoration: underline;
+    font-weight: 600;
+    
+    &:hover {
+      color: #1e40af;
+    }
+  }
+`;
+
 const ConfirmationContent = styled.div`
   padding: 20px;
   
@@ -2499,9 +2603,12 @@ const JobListing = () => {
   const [showSavedJobsOnly, setShowSavedJobsOnly] = useState(false);
 
   // Job search status states
-  const [isAvailable, setIsAvailable] = useState(true);
+  const [isAvailable, setIsAvailable] = useState(false); // Mặc định TẮT
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [applyModal, setApplyModal] = useState(null); // { job } or null
+  const [selectedCV, setSelectedCV] = useState(null); // CV được chọn để ứng tuyển
+  const [candidateCVList, setCandidateCVList] = useState([]); // Danh sách CV của ứng viên
+  const [showCVSelectionModal, setShowCVSelectionModal] = useState(false); // Modal chọn CV
   const [detailModal, setDetailModal] = useState(null); // { job } or null
   const [jobDescriptionModal, setJobDescriptionModal] = useState(null); // { job } or null
   const [applySuccess, setApplySuccess] = useState(false);
@@ -2528,8 +2635,18 @@ const JobListing = () => {
   };
 
   const confirmToggle = () => {
-    setIsAvailable(!isAvailable);
+    const newStatus = !isAvailable;
+    setIsAvailable(newStatus);
     setShowConfirmModal(false);
+    
+    // Khi BẬT trạng thái tìm việc → tự động bật "Tìm việc gần tôi"
+    if (newStatus) {
+      getUserLocation();
+    } else {
+      // Khi TẮT → tắt luôn nearby jobs
+      setShowNearbyJobs(false);
+      setUserLocation(null);
+    }
   };
 
   // Check if we're on saved jobs tab via query param
@@ -2682,6 +2799,55 @@ const JobListing = () => {
       return;
     }
 
+    try {
+      // Get CV info from candidate profile
+      const session = await fetchAuthSession();
+      const userId = session.tokens?.idToken?.payload?.sub;
+      
+      if (!userId) {
+        setErrorModal({
+          show: true,
+          message: 'Vui lòng đăng nhập để ứng tuyển'
+        });
+        return;
+      }
+      
+      // Get CV list
+      const { getCVInfo } = await import('../../services/cvUploadService');
+      const cvData = await getCVInfo(userId);
+      
+      if (!cvData || !cvData.cvList || cvData.cvList.length === 0) {
+        setErrorModal({
+          show: true,
+          message: 'Bạn chưa có CV. Vui lòng tải CV lên trong phần Hồ sơ trước khi ứng tuyển.'
+        });
+        return;
+      }
+      
+      // Set CV list and show selection modal
+      setCandidateCVList(cvData.cvList);
+      setSelectedCV(null); // Reset selection
+      setShowCVSelectionModal(true); // Show CV selection modal
+      
+    } catch (error) {
+      console.error('Error loading CV:', error);
+      setErrorModal({
+        show: true,
+        message: 'Không thể tải thông tin CV. Vui lòng thử lại.'
+      });
+    }
+  };
+  
+  // Function to actually submit the application with selected CV
+  const submitApplicationWithCV = async () => {
+    if (!selectedCV) {
+      setErrorModal({
+        show: true,
+        message: 'Vui lòng chọn CV để gửi'
+      });
+      return;
+    }
+
     // Rate limiting: 30 seconds between applications
     const now = Date.now();
     const RATE_LIMIT_MS = 30 * 1000; // 30 seconds
@@ -2698,30 +2864,10 @@ const JobListing = () => {
     setIsSubmitting(true);
     
     try {
-      // Get CV info from candidate profile
-      const session = await fetchAuthSession();
-      const userId = session.tokens?.idToken?.payload?.sub;
+      const selectedCVData = candidateCVList.find(cv => cv.id === selectedCV);
       
-      if (!userId) {
-        setIsSubmitting(false);
-        setErrorModal({
-          show: true,
-          message: 'Vui lòng đăng nhập để ứng tuyển'
-        });
-        return;
-      }
-      
-      // Get CV info
-      const { getCVInfo } = await import('../../services/cvUploadService');
-      const cvInfo = await getCVInfo(userId);
-      
-      if (!cvInfo || !cvInfo.cvUrl) {
-        setIsSubmitting(false);
-        setErrorModal({
-          show: true,
-          message: 'Bạn chưa có CV. Vui lòng tải CV lên trong phần Hồ sơ trước khi ứng tuyển.'
-        });
-        return;
+      if (!selectedCVData) {
+        throw new Error('CV không tồn tại');
       }
       
       // Submit application
@@ -2739,13 +2885,15 @@ const JobListing = () => {
       
       await applicationService.submitApplication(
         jobId,
-        cvInfo.cvUrl,
-        cvInfo.cvFileName || 'CV.pdf'
+        selectedCVData.cvUrl,
+        selectedCVData.cvFileName || 'CV.pdf'
       );
       
       // Update last submit time
       setLastSubmitTime(now);
       
+      // Close both modals
+      setShowCVSelectionModal(false);
       setApplyModal(null);
       setApplySuccess(true);
       setTimeout(() => setApplySuccess(false), 3000);
@@ -2782,7 +2930,6 @@ const JobListing = () => {
         }
       }
       
-      // Don't close applyModal here - let user close it manually after seeing error
       setErrorModal({
         show: true,
         message: errorMessage
@@ -3824,6 +3971,75 @@ const JobListing = () => {
            {language === 'vi' ? 'Gửi CV thành công! Nhà tuyển dụng sẽ liên hệ sớm.' : 'CV sent! The employer will contact you soon.'}
         </div>
       )}
+
+      {/* CV Selection Modal */}
+      <Modal
+        isOpen={showCVSelectionModal}
+        onClose={() => setShowCVSelectionModal(false)}
+        title=""
+      >
+        <ApplyModalWrap onClick={e => e.stopPropagation()}>
+          <div className="apply-emoji">📄</div>
+          <h3>{language === 'vi' ? 'Chọn CV để gửi' : 'Select CV to Send'}</h3>
+          <p className="apply-desc">
+            {language === 'vi' 
+              ? 'Chọn 1 trong các CV của bạn để gửi cho nhà tuyển dụng'
+              : 'Select one of your CVs to send to the employer'
+            }
+          </p>
+
+          <CVSelectionSection>
+            {candidateCVList.length > 0 ? (
+              candidateCVList.map(cv => (
+                <CVOption
+                  key={cv.id}
+                  $selected={selectedCV === cv.id}
+                  onClick={() => setSelectedCV(cv.id)}
+                >
+                  <CVRadio $selected={selectedCV === cv.id} />
+                  <CVOptionInfo>
+                    <CVOptionName>📄 {cv.cvFileName}</CVOptionName>
+                    <CVOptionDate>
+                      {language === 'vi' ? 'Tải lên: ' : 'Uploaded: '}
+                      {new Date(cv.cvUploadDate).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US')}
+                    </CVOptionDate>
+                  </CVOptionInfo>
+                </CVOption>
+              ))
+            ) : (
+              <NoCVMessage>
+                ⚠️ {language === 'vi' 
+                  ? <>Bạn chưa có CV nào. <a href="/candidate/profile">Tải lên CV</a> để ứng tuyển.</>
+                  : <>You don't have any CV. <a href="/candidate/profile">Upload CV</a> to apply.</>
+                }
+              </NoCVMessage>
+            )}
+          </CVSelectionSection>
+
+          <div className="apply-buttons">
+            <button 
+              className="btn-cancel" 
+              onClick={() => setShowCVSelectionModal(false)}
+            >
+              {language === 'vi' ? 'Hủy' : 'Cancel'}
+            </button>
+            <button 
+              className="btn-confirm" 
+              onClick={submitApplicationWithCV}
+              disabled={!selectedCV || isSubmitting}
+              style={{
+                opacity: !selectedCV || isSubmitting ? 0.5 : 1,
+                cursor: !selectedCV || isSubmitting ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {isSubmitting 
+                ? (language === 'vi' ? 'Đang gửi...' : 'Sending...') 
+                : (language === 'vi' ? 'Gửi CV ngay' : 'Send CV Now')
+              }
+            </button>
+          </div>
+        </ApplyModalWrap>
+      </Modal>
 
       {/* Error Modal */}
       {errorModal.show && (
