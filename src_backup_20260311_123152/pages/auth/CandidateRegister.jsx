@@ -818,7 +818,7 @@ const CandidateRegister = () => {
 
           <HeroSub>
             Hàng ngàn công việc part-time linh hoạt đang chờ bạn.
-            Đăng ký miễn phí — ứng tuyển ngay hôm nay.
+            Đăng ký miễn phí ngay để bắt đầu ứng tuyển.
           </HeroSub>
 
           {/* Job preview cards */}

@@ -5,17 +5,18 @@ import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
 import JobCard from '../../components/JobCard';
 import StatusBadge from '../../components/StatusBadge';
+import ProfileSetupPrompt from '../../components/ProfileSetupPrompt';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import candidateProfileService from '../../services/candidateProfileService';
-import { 
-  Briefcase, 
-  FileText, 
-  Star, 
-  TrendingUp, 
-  Search, 
-  CheckCircle, 
-  Clock, 
+import {
+  Briefcase,
+  FileText,
+  Star,
+  TrendingUp,
+  Search,
+  CheckCircle,
+  Clock,
   Calendar,
   Target,
   Award,
@@ -1310,6 +1311,7 @@ const CandidateDashboard = () => {
   const [reviewText, setReviewText] = useState('');
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [candidateProfile, setCandidateProfile] = useState(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
   const banners = [
     { src: "/OpPoReview/images/seoul.jpg", alt: "Seoul Vua Mì Cay" },
@@ -1320,7 +1322,7 @@ const CandidateDashboard = () => {
   useEffect(() => {
     const bannerInterval = setInterval(() => {
       setCurrentBannerIndex(prev => (prev + 1) % banners.length);
-    }, 4000);
+    }, 7000);
     return () => clearInterval(bannerInterval);
   }, [banners.length]);
 
@@ -1328,13 +1330,16 @@ const CandidateDashboard = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
+        setIsLoadingProfile(true);
         const profile = await candidateProfileService.getMyProfile();
         setCandidateProfile(profile);
       } catch (error) {
         console.error('Error fetching profile:', error);
+      } finally {
+        setIsLoadingProfile(false);
       }
     };
-    
+
     fetchProfile();
   }, []);
 
@@ -1491,25 +1496,25 @@ const CandidateDashboard = () => {
   ];
 
   const recentApplications = [
-    { 
-      id: 1, 
-      title: 'Nhân viên Phục vụ', 
-      company: 'Pizza 4P\'s', 
-      appliedDate: '2 ngày trước', 
-      status: 'unseen' 
+    {
+      id: 1,
+      title: 'Nhân viên Phục vụ',
+      company: 'Pizza 4P\'s',
+      appliedDate: '2 ngày trước',
+      status: 'unseen'
     },
-    { 
-      id: 2, 
-      title: 'Nhân viên Pha chế', 
-      company: 'Phúc Long Coffee & Tea', 
-      appliedDate: '5 ngày trước', 
-      status: 'seen' 
+    {
+      id: 2,
+      title: 'Nhân viên Pha chế',
+      company: 'Phúc Long Coffee & Tea',
+      appliedDate: '5 ngày trước',
+      status: 'seen'
     },
-    { 
-      id: 3, 
-      title: 'Nhân viên Phục vụ', 
-      company: 'Katinat Quận Cam', 
-      appliedDate: '1 giờ trước', 
+    {
+      id: 3,
+      title: 'Nhân viên Phục vụ',
+      company: 'Katinat Quận Cam',
+      appliedDate: '1 giờ trước',
       status: 'approved',
       urgent: true
     },
@@ -1538,16 +1543,16 @@ const CandidateDashboard = () => {
 
   const bubbleX = useMotionValue(typeof window !== 'undefined' ? window.innerWidth - 96 : 800);
   const bubbleY = useMotionValue(typeof window !== 'undefined' ? window.innerHeight - 96 : 600);
-  
+
   // Get profile completion from DynamoDB
   const profileCompletion = candidateProfile?.profileCompletion || 0;
-  
+
   const getGreeting = () => {
-    const hour = currentTime.getHours();    if (language === 'en') {
+    const hour = currentTime.getHours(); if (language === 'en') {
       if (hour < 12) return 'Good morning';
       if (hour < 18) return 'Good afternoon';
       return 'Good evening';
-    }    if (hour < 12) return 'Chào buổi sáng';
+    } if (hour < 12) return 'Chào buổi sáng';
     if (hour < 18) return 'Chào buổi chiều';
     return 'Chào buổi tối';
   };
@@ -1555,513 +1560,540 @@ const CandidateDashboard = () => {
   return (
     <>
     <DashboardLayout role="candidate" key={language}>
+      {!isLoadingProfile && (
+        <ProfileSetupPrompt 
+          role="candidate" 
+          userId={user?.email} 
+          profileName={candidateProfile?.fullName}
+          profilePhone={candidateProfile?.phone}
+        />
+      )}
       <DashboardContainer>
-        {/* Welcome Banner */}
-        <WelcomeBanner
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <WelcomeContent>
-            <h1>{getGreeting()}, {candidateProfile?.fullName || (language === 'vi' ? 'Ứng Viên' : 'Candidate')}! 👋</h1>
-            <p>{language === 'vi' ? 'Chúc bạn một ngày làm việc hiệu quả!' : 'Have a productive day!'}</p>
-            <QuickActions>
-              <ActionButton
-                as={motion.a}
-                href="/candidate/jobs"
-                onClick={(e) => { e.preventDefault(); navigate('/candidate/jobs'); }}
-                $variant="primary"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Search />
-                {language === 'vi' ? 'Tìm Việc Làm' : 'Find Jobs'}
-              </ActionButton>
-              <ActionButton
-                as={motion.a}
-                href="/candidate/profile"
-                onClick={(e) => { e.preventDefault(); navigate('/candidate/profile'); }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Edit3 />
-                {language === 'vi' ? 'Cập Nhật CV' : 'Update CV'}
-              </ActionButton>
-            </QuickActions>
-          </WelcomeContent>
-          <IllustrationContainer>
-            <Briefcase size={180} color="rgba(255,255,255,0.3)" />
-          </IllustrationContainer>
-        </WelcomeBanner>
-
-        {/* Profile + Stats Row */}
-        <TopInfoRow>
-          {profileCompletion < 100 && (
-            <ProfileCompletionBanner
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <div className="banner-content">
-                <h3>
-                  <Sparkles />
-                  {language === 'vi' ? 'Hoàn thiện hồ sơ để tăng cơ hội được tuyển dụng' : 'Complete your profile to increase hiring chances'}
-                </h3>
-                <p>{language === 'vi' ? `Hồ sơ của bạn đã hoàn thành` : `Your profile is ${profileCompletion}% complete`}</p>
-                <div className="progress-row">
-                  <ProgressBar $progress={profileCompletion} />
-                  <span className="progress-percent">{profileCompletion}%</span>
-                </div>
-              </div>
-              <div className="banner-action">
+          {/* Welcome Banner */}
+          <WelcomeBanner
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <WelcomeContent>
+              <h1>{getGreeting()}, {candidateProfile?.fullName || (language === 'vi' ? 'Ứng Viên' : 'Candidate')}! 👋</h1>
+              <p>{language === 'vi' ? 'Chúc bạn một ngày làm việc hiệu quả!' : 'Have a productive day!'}</p>
+              <QuickActions>
+                <ActionButton
+                  as={motion.a}
+                  href="/candidate/jobs"
+                  onClick={(e) => { e.preventDefault(); navigate('/candidate/jobs'); }}
+                  $variant="primary"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Search />
+                  {language === 'vi' ? 'Tìm Việc Làm' : 'Find Jobs'}
+                </ActionButton>
                 <ActionButton
                   as={motion.a}
                   href="/candidate/profile"
                   onClick={(e) => { e.preventDefault(); navigate('/candidate/profile'); }}
-                  $variant="primary"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.98 }}
-                  style={{ padding: '10px 20px', fontSize: '13px', background: 'white', color: '#1e40af', fontWeight: 700, borderRadius: '12px', whiteSpace: 'nowrap' }}
                 >
-                  <Upload />
-                  {language === 'vi' ? 'Hoàn Thiện Ngay' : 'Complete Now'}
+                  <Edit3 />
+                  {language === 'vi' ? 'Cập Nhật CV' : 'Update CV'}
                 </ActionButton>
-              </div>
-            </ProfileCompletionBanner>
+              </QuickActions>
+            </WelcomeContent>
+            <IllustrationContainer>
+              <Briefcase size={180} color="rgba(255,255,255,0.3)" />
+            </IllustrationContainer>
+          </WelcomeBanner>
+
+          {/* Profile + Stats Row */}
+          <TopInfoRow>
+            {profileCompletion < 100 && (
+              <ProfileCompletionBanner
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <div className="banner-content">
+                  <h3>
+                    <Sparkles />
+                    {language === 'vi' ? 'Hoàn thiện hồ sơ để tăng cơ hội được tuyển dụng' : 'Complete your profile to increase hiring chances'}
+                  </h3>
+                  <p>{language === 'vi' ? `Hồ sơ của bạn đã hoàn thành` : `Your profile is ${profileCompletion}% complete`}</p>
+                  <div className="progress-row">
+                    <ProgressBar $progress={profileCompletion} />
+                    <span className="progress-percent">{profileCompletion}%</span>
+                  </div>
+                </div>
+                <div className="banner-action">
+                  <ActionButton
+                    as={motion.a}
+                    href="/candidate/profile"
+                    onClick={(e) => { e.preventDefault(); navigate('/candidate/profile'); }}
+                    $variant="primary"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
+                    style={{ padding: '10px 20px', fontSize: '13px', background: 'white', color: '#1e40af', fontWeight: 700, borderRadius: '12px', whiteSpace: 'nowrap' }}
+                  >
+                    <Upload />
+                    {language === 'vi' ? 'Hoàn Thiện Ngay' : 'Complete Now'}
+                  </ActionButton>
+                </div>
+              </ProfileCompletionBanner>
+            )}
+
+            <StatsGrid $fullWidth={profileCompletion >= 100}>
+              <StatsCard
+                title={language === 'vi' ? 'Hồ Sơ Đã Nộp' : 'Applications'}
+                value="24"
+                change="+12%"
+                changeText={language === 'vi' ? 'từ tháng trước' : 'from last month'}
+                icon={FileText}
+                color="#1e40af"
+                positive
+              />
+              <StatsCard
+                title={language === 'vi' ? 'Việc Đã Lưu' : 'Saved Jobs'}
+                value="18"
+                change="+3"
+                changeText={language === 'vi' ? 'tuần này' : 'this week'}
+                icon={Star}
+                color="#F59E0B"
+                positive
+              />
+              <StatsCard
+                title={language === 'vi' ? 'Lượt Xem Hồ Sơ' : 'Profile Views'}
+                value="156"
+                change="+28%"
+                changeText={language === 'vi' ? 'từ tuần trước' : 'from last week'}
+                icon={Eye}
+                color="#10B981"
+                positive
+              />
+              <StatsCard
+                title={language === 'vi' ? 'Job Match Thành Công' : 'Successful Matches'}
+                value="8"
+                change="+2"
+                changeText={language === 'vi' ? 'tháng này' : 'this month'}
+                icon={CheckCircle}
+                color="#1e40af"
+                positive
+              />
+            </StatsGrid>
+          </TopInfoRow>
+
+          {/* Công việc hiện tại */}
+          <CurrentJobSection
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <CurrentJobHeader>
+              <Briefcase />
+              <h2>{language === 'vi' ? 'Công Việc Tuyển Gấp Hiện Tại' : 'Current Shift Job'}</h2>
+            </CurrentJobHeader>
+            <CurrentJobCard
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: 'spring', stiffness: 300 }}
+            >
+              <CurrentJobLogo>K</CurrentJobLogo>
+              <CurrentJobInfo>
+                <h3>{language === 'vi' ? 'Nhân viên phục vụ' : 'Service Staff'}</h3>
+                <p>Katinat - Quận 8</p>
+                <CurrentJobMeta>
+                  <span><MapPin />{language === 'vi' ? 'Quận 8, TP.HCM' : 'District 8, HCMC'}</span>
+                  <span><Clock />{language === 'vi' ? '06:00 - 14:00' : '06:00 am - 02:00 pm'}</span>
+                  <span><span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span> 224.400 VNĐ</span>
+                  <span><Calendar />{language === 'vi' ? 'Từ 05/03/2026' : 'Since Mar 05, 2026'}</span>
+                </CurrentJobMeta>
+              </CurrentJobInfo>
+              <CurrentJobBadge>
+                <CheckCircle />
+                {language === 'vi' ? 'Đang làm việc' : 'Active'}
+              </CurrentJobBadge>
+              <ViewDetailButton
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowJobDetail(true)}
+              >
+                <Eye />
+                {language === 'vi' ? 'Xem chi tiết' : 'Details'}
+              </ViewDetailButton>
+            </CurrentJobCard>
+          </CurrentJobSection>
+
+          {/* Modal chi tiết công việc */}
+          {showJobDetail && (
+            <ModalOverlay
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => { if (canCloseModal) handleCloseModal(); }}
+            >
+              <ModalContent
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ModalHeader>
+                  <h2><Briefcase />{language === 'vi' ? (showReviewForm ? 'Đánh Giá Nhà Tuyển Dụng' : 'Chi Tiết Công Việc Tuyển Gấp') : (showReviewForm ? 'Rate Employer' : 'Shift Job Details')}</h2>
+                  {canCloseModal && <button onClick={handleCloseModal}><X size={18} /></button>}
+                </ModalHeader>
+                <ModalBody>
+                  {!jobCompleted ? (
+                    <>
+                      <JobDetailRow>
+                        <Briefcase />
+                        <span className="label">{language === 'vi' ? 'Vị trí' : 'Position'}</span>
+                        <span className="value">{language === 'vi' ? 'Nhân viên phục vụ' : 'Service Staff'}</span>
+                      </JobDetailRow>
+                      <JobDetailRow>
+                        <Building2 />
+                        <span className="label">{language === 'vi' ? 'Công ty' : 'Company'}</span>
+                        <span className="value">Katinat - Quận 8</span>
+                      </JobDetailRow>
+                      <JobDetailRow>
+                        <MapPin />
+                        <span className="label">{language === 'vi' ? 'Địa điểm' : 'Location'}</span>
+                        <span className="value">{language === 'vi' ? 'Quận 8, TP.HCM' : 'District 8, HCMC'}</span>
+                      </JobDetailRow>
+                      <JobDetailRow>
+                        <Clock />
+                        <span className="label">{language === 'vi' ? 'Giờ làm' : 'Shift'}</span>
+                        <span className="value">{language === 'vi' ? '06:00 - 14:00' : '06:00 am - 02:00 pm'}</span>
+                      </JobDetailRow>
+                      <JobDetailRow>
+                        <span style={{ fontWeight: '500', minWidth: '80px' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span>
+                        <span className="value">224.400 VNĐ</span>
+                      </JobDetailRow>
+                      <JobDetailRow>
+                        <Calendar />
+                        <span className="label">{language === 'vi' ? 'Ngày bắt đầu' : 'Start date'}</span>
+                        <span className="value">05/03/2026</span>
+                      </JobDetailRow>
+                      <JobDetailRow>
+                        <CheckCircle />
+                        <span className="label">{language === 'vi' ? 'Trạng thái' : 'Status'}</span>
+                        <JobStatusTag>
+                          <Clock />
+                          {language === 'vi' ? 'Đang thực hiện' : 'In Progress'}
+                        </JobStatusTag>
+                      </JobDetailRow>
+                      <ModalActions>
+                        <ModalButton
+                          className="secondary"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setShowJobDetail(false)}
+                        >
+                          {language === 'vi' ? 'Đóng' : 'Close'}
+                        </ModalButton>
+                        <ModalButton
+                          className="success"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setJobCompleted(true)}
+                        >
+                          <CheckCircle />
+                          {language === 'vi' ? 'Xác nhận hoàn thành' : 'Confirm Completion'}
+                        </ModalButton>
+                      </ModalActions>
+                    </>
+                  ) : !showReviewForm ? (
+                    <>
+                      <SuccessMessage
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ type: 'spring', stiffness: 300 }}
+                      >
+                        <div className="icon-wrapper">
+                          <CheckCircle />
+                        </div>
+                        <h3>{language === 'vi' ? 'Công việc đã hoàn thành!' : 'Job Completed!'}</h3>
+                        <p>{language === 'vi' ? 'Lương của bạn sẽ được chuyển vào ví trong vòng 48h.' : 'Your salary will be transferred to your wallet within 48 hours.'}</p>
+                      </SuccessMessage>
+                      <ModalActions>
+                        <ModalButton
+                          className="primary"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setShowReviewForm(true)}
+                        >
+                          <Star />
+                          {language === 'vi' ? 'Đánh giá Nhà tuyển dụng' : 'Rate Employer'}
+                        </ModalButton>
+                      </ModalActions>
+                    </>
+                  ) : !reviewSubmitted ? (
+                    <>
+                      <ReviewForm
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                      >
+                        <p style={{ fontSize: '14px', color: 'inherit', marginBottom: '12px', fontWeight: 600 }}>
+                          Katinat - Quận 8
+                        </p>
+                        <ReviewCategory style={{ background: 'linear-gradient(135deg, #FEF3C7, #FDE68A40)', padding: '14px 16px', borderRadius: '12px', border: '2px solid #F59E0B30', marginBottom: '16px' }}>
+                          <div className="category-label" style={{ fontSize: '15px', fontWeight: 700, color: '#B45309' }}>
+
+                            {language === 'vi' ? '⭐ Đánh giá tổng quan' : '⭐ Overall Rating'}
+                          </div>
+                          {renderStars('overall')}
+                        </ReviewCategory>
+                        <ReviewCategory>
+                          <div className="category-label">
+                            <Building2 />
+                            {language === 'vi' ? 'Môi trường làm việc' : 'Work Environment'}
+                          </div>
+                          {renderStars('environment')}
+                        </ReviewCategory>
+                        <ReviewCategory>
+                          <div className="category-label">
+                            <Users />
+                            {language === 'vi' ? 'Thái độ nhà tuyển dụng' : 'Employer Attitude'}
+                          </div>
+                          {renderStars('attitude')}
+                        </ReviewCategory>
+                        <ReviewCategory>
+                          <div className="category-label">
+                            <CheckCircle />
+                            {language === 'vi' ? 'Công việc đúng với mô tả' : 'Job Matches Description'}
+                          </div>
+                          {renderStars('accuracy')}
+                        </ReviewCategory>
+                        <ReviewCategory>
+                          <div className="category-label">
+                            <Edit3 />
+                            {language === 'vi' ? 'Nhận xét của bạn' : 'Your Review'}
+                          </div>
+                          <ReviewTextArea
+                            placeholder={language === 'vi' ? 'Chia sẻ trải nghiệm làm việc của bạn...' : 'Share your work experience...'}
+                            value={reviewText}
+                            onChange={(e) => setReviewText(e.target.value)}
+                          />
+                        </ReviewCategory>
+                      </ReviewForm>
+                      <ModalActions>
+                        <ModalButton
+                          className="primary"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={handleSubmitReview}
+                          style={{ opacity: (ratings.overall && ratings.environment && ratings.attitude && ratings.accuracy) ? 1 : 0.5 }}
+                          disabled={!ratings.overall || !ratings.environment || !ratings.attitude || !ratings.accuracy}
+                        >
+                          <CheckCircle />
+                          {language === 'vi' ? 'Gửi đánh giá' : 'Submit Review'}
+                        </ModalButton>
+                      </ModalActions>
+                    </>
+                  ) : (
+                    <>
+                      <ReviewSubmittedMessage
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ type: 'spring', stiffness: 300 }}
+                      >
+                        <div className="icon-wrapper">
+                          <CheckCircle />
+                        </div>
+                        <h3>{language === 'vi' ? 'Cảm ơn bạn đã đánh giá!' : 'Thank you for your review!'}</h3>
+                        <p>{language === 'vi' ? 'Đánh giá của bạn sẽ giúp cộng đồng ứng viên tìm được công việc tốt hơn.' : 'Your review helps other candidates find better jobs.'}</p>
+                      </ReviewSubmittedMessage>
+                      <ModalActions>
+                        <ModalButton
+                          className="primary"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={handleCloseModal}
+                        >
+                          {language === 'vi' ? 'Hoàn tất' : 'Done'}
+                        </ModalButton>
+                      </ModalActions>
+                    </>
+                  )}
+                </ModalBody>
+              </ModalContent>
+            </ModalOverlay>
           )}
 
-          <StatsGrid $fullWidth={profileCompletion >= 100}>
-            <StatsCard
-              title={language === 'vi' ? 'Hồ Sơ Đã Nộp' : 'Applications'}
-              value="24"
-              change="+12%"
-              changeText={language === 'vi' ? 'từ tháng trước' : 'from last month'}
-              icon={FileText}
-              color="#1e40af"
-              positive
-            />
-            <StatsCard
-              title={language === 'vi' ? 'Việc Đã Lưu' : 'Saved Jobs'}
-              value="18"
-              change="+3"
-              changeText={language === 'vi' ? 'tuần này' : 'this week'}
-              icon={Star}
-              color="#F59E0B"
-              positive
-            />
-            <StatsCard
-              title={language === 'vi' ? 'Lượt Xem Hồ Sơ' : 'Profile Views'}
-              value="156"
-              change="+28%"
-              changeText={language === 'vi' ? 'từ tuần trước' : 'from last week'}
-              icon={Eye}
-              color="#10B981"
-              positive
-            />
-            <StatsCard
-              title={language === 'vi' ? 'Job Match Thành Công' : 'Successful Matches'}
-              value="8"
-              change="+2"
-              changeText={language === 'vi' ? 'tháng này' : 'this month'}
-              icon={CheckCircle}
-              color="#1e40af"
-              positive
-            />
-          </StatsGrid>
-        </TopInfoRow>
+          <ContentGrid>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {/* Bamos Boost Banner */}
+              <BoostBannerWrap
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.22 }}
+                whileHover={{ y: -2 }}
+              >
+                <BoostTag>🔥Đề xuất</BoostTag>
+                <div style={{ position: 'relative', width: '100%', lineHeight: 0 }}>
+                  <AnimatePresence mode="sync">
+                    <motion.img
+                      key={currentBannerIndex}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{
+                        duration: 1.8,
+                        ease: 'easeInOut'
+                      }}
+                      src={banners[currentBannerIndex].src}
+                      alt={banners[currentBannerIndex].alt}
+                      style={{
+                        width: '100%',
+                        height: 'auto',
+                        display: 'block',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0
+                      }}
+                    />
+                  </AnimatePresence>
+                  {/* Placeholder để giữ chiều cao container */}
+                  <img
+                    src={banners[currentBannerIndex].src}
+                    alt=""
+                    style={{ width: '100%', height: 'auto', display: 'block', visibility: 'hidden' }}
+                    aria-hidden="true"
+                  />
+                </div>
+                <BannerDots>
+                  {banners.map((_, idx) => (
+                    <BannerDot
+                      key={idx}
+                      $active={currentBannerIndex === idx}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentBannerIndex(idx);
+                      }}
+                    />
+                  ))}
+                </BannerDots>
+              </BoostBannerWrap>
 
-        {/* Công việc hiện tại */}
-        <CurrentJobSection
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          <CurrentJobHeader>
-            <Briefcase />
-            <h2>{language === 'vi' ? 'Công Việc Tuyển Gấp Hiện Tại' : 'Current Shift Job'}</h2>
-          </CurrentJobHeader>
-          <CurrentJobCard
-            whileHover={{ scale: 1.01 }}
-            transition={{ type: 'spring', stiffness: 300 }}
-          >
-            <CurrentJobLogo>K</CurrentJobLogo>
-            <CurrentJobInfo>
-              <h3>{language === 'vi' ? 'Nhân viên phục vụ' : 'Service Staff'}</h3>
-              <p>Katinat - Quận 8</p>
-              <CurrentJobMeta>
-                <span><MapPin />{language === 'vi' ? 'Quận 8, TP.HCM' : 'District 8, HCMC'}</span>
-                <span><Clock />{language === 'vi' ? '06:00 - 14:00' : '06:00 am - 02:00 pm'}</span>
-                <span><span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span> 224.400 VNĐ</span>
-                <span><Calendar />{language === 'vi' ? 'Từ 05/03/2026' : 'Since Mar 05, 2026'}</span>
-              </CurrentJobMeta>
-            </CurrentJobInfo>
-            <CurrentJobBadge>
-              <CheckCircle />
-              {language === 'vi' ? 'Đang làm việc' : 'Active'}
-            </CurrentJobBadge>
-            <ViewDetailButton
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowJobDetail(true)}
-            >
-              <Eye />
-              {language === 'vi' ? 'Xem chi tiết' : 'Details'}
-            </ViewDetailButton>
-          </CurrentJobCard>
-        </CurrentJobSection>
-
-        {/* Modal chi tiết công việc */}
-        {showJobDetail && (
-          <ModalOverlay
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => { if (canCloseModal) handleCloseModal(); }}
-          >
-            <ModalContent
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <ModalHeader>
-                <h2><Briefcase />{language === 'vi' ? (showReviewForm ? 'Đánh Giá Nhà Tuyển Dụng' : 'Chi Tiết Công Việc Tuyển Gấp') : (showReviewForm ? 'Rate Employer' : 'Shift Job Details')}</h2>
-                {canCloseModal && <button onClick={handleCloseModal}><X size={18} /></button>}
-              </ModalHeader>
-              <ModalBody>
-                {!jobCompleted ? (
-                  <>
-                    <JobDetailRow>
-                      <Briefcase />
-                      <span className="label">{language === 'vi' ? 'Vị trí' : 'Position'}</span>
-                      <span className="value">{language === 'vi' ? 'Nhân viên phục vụ' : 'Service Staff'}</span>
-                    </JobDetailRow>
-                    <JobDetailRow>
-                      <Building2 />
-                      <span className="label">{language === 'vi' ? 'Công ty' : 'Company'}</span>
-                      <span className="value">Katinat - Quận 8</span>
-                    </JobDetailRow>
-                    <JobDetailRow>
-                      <MapPin />
-                      <span className="label">{language === 'vi' ? 'Địa điểm' : 'Location'}</span>
-                      <span className="value">{language === 'vi' ? 'Quận 8, TP.HCM' : 'District 8, HCMC'}</span>
-                    </JobDetailRow>
-                    <JobDetailRow>
-                      <Clock />
-                      <span className="label">{language === 'vi' ? 'Giờ làm' : 'Shift'}</span>
-                      <span className="value">{language === 'vi' ? '06:00 - 14:00' : '06:00 am - 02:00 pm'}</span>
-                    </JobDetailRow>
-                    <JobDetailRow>
-                      <span style={{ fontWeight: '500', minWidth: '80px' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span>
-                      <span className="value">224.400 VNĐ</span>
-                    </JobDetailRow>
-                    <JobDetailRow>
-                      <Calendar />
-                      <span className="label">{language === 'vi' ? 'Ngày bắt đầu' : 'Start date'}</span>
-                      <span className="value">05/03/2026</span>
-                    </JobDetailRow>
-                    <JobDetailRow>
-                      <CheckCircle />
-                      <span className="label">{language === 'vi' ? 'Trạng thái' : 'Status'}</span>
-                      <JobStatusTag>
-                        <Clock />
-                        {language === 'vi' ? 'Đang thực hiện' : 'In Progress'}
-                      </JobStatusTag>
-                    </JobDetailRow>
-                    <ModalActions>
-                      <ModalButton
-                        className="secondary"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setShowJobDetail(false)}
-                      >
-                        {language === 'vi' ? 'Đóng' : 'Close'}
-                      </ModalButton>
-                      <ModalButton
-                        className="success"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setJobCompleted(true)}
-                      >
-                        <CheckCircle />
-                        {language === 'vi' ? 'Xác nhận hoàn thành' : 'Confirm Completion'}
-                      </ModalButton>
-                    </ModalActions>
-                  </>
-                ) : !showReviewForm ? (
-                  <>
-                    <SuccessMessage
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ type: 'spring', stiffness: 300 }}
-                    >
-                      <div className="icon-wrapper">
-                        <CheckCircle />
-                      </div>
-                      <h3>{language === 'vi' ? 'Công việc đã hoàn thành!' : 'Job Completed!'}</h3>
-                      <p>{language === 'vi' ? 'Lương của bạn sẽ được chuyển vào ví trong vòng 48h.' : 'Your salary will be transferred to your wallet within 48 hours.'}</p>
-                    </SuccessMessage>
-                    <ModalActions>
-                      <ModalButton
-                        className="primary"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setShowReviewForm(true)}
-                      >
-                        <Star />
-                        {language === 'vi' ? 'Đánh giá Nhà tuyển dụng' : 'Rate Employer'}
-                      </ModalButton>
-                    </ModalActions>
-                  </>
-                ) : !reviewSubmitted ? (
-                  <>
-                    <ReviewForm
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                    >
-                      <p style={{ fontSize: '14px', color: 'inherit', marginBottom: '12px', fontWeight: 600 }}>
-                        Katinat - Quận 8
-                      </p>
-                      <ReviewCategory style={{ background: 'linear-gradient(135deg, #FEF3C7, #FDE68A40)', padding: '14px 16px', borderRadius: '12px', border: '2px solid #F59E0B30', marginBottom: '16px' }}>
-                        <div className="category-label" style={{ fontSize: '15px', fontWeight: 700, color: '#B45309' }}>
-  
-                          {language === 'vi' ? '⭐ Đánh giá tổng quan' : '⭐ Overall Rating'}
-                        </div>
-                        {renderStars('overall')}
-                      </ReviewCategory>
-                      <ReviewCategory>
-                        <div className="category-label">
-                          <Building2 />
-                          {language === 'vi' ? 'Môi trường làm việc' : 'Work Environment'}
-                        </div>
-                        {renderStars('environment')}
-                      </ReviewCategory>
-                      <ReviewCategory>
-                        <div className="category-label">
-                          <Users />
-                          {language === 'vi' ? 'Thái độ nhà tuyển dụng' : 'Employer Attitude'}
-                        </div>
-                        {renderStars('attitude')}
-                      </ReviewCategory>
-                      <ReviewCategory>
-                        <div className="category-label">
-                          <CheckCircle />
-                          {language === 'vi' ? 'Công việc đúng với mô tả' : 'Job Matches Description'}
-                        </div>
-                        {renderStars('accuracy')}
-                      </ReviewCategory>
-                      <ReviewCategory>
-                        <div className="category-label">
-                          <Edit3 />
-                          {language === 'vi' ? 'Nhận xét của bạn' : 'Your Review'}
-                        </div>
-                        <ReviewTextArea
-                          placeholder={language === 'vi' ? 'Chia sẻ trải nghiệm làm việc của bạn...' : 'Share your work experience...'}
-                          value={reviewText}
-                          onChange={(e) => setReviewText(e.target.value)}
-                        />
-                      </ReviewCategory>
-                    </ReviewForm>
-                    <ModalActions>
-                      <ModalButton
-                        className="primary"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleSubmitReview}
-                        style={{ opacity: (ratings.overall && ratings.environment && ratings.attitude && ratings.accuracy) ? 1 : 0.5 }}
-                        disabled={!ratings.overall || !ratings.environment || !ratings.attitude || !ratings.accuracy}
-                      >
-                        <CheckCircle />
-                        {language === 'vi' ? 'Gửi đánh giá' : 'Submit Review'}
-                      </ModalButton>
-                    </ModalActions>
-                  </>
-                ) : (
-                  <>
-                    <ReviewSubmittedMessage
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ type: 'spring', stiffness: 300 }}
-                    >
-                      <div className="icon-wrapper">
-                        <CheckCircle />
-                      </div>
-                      <h3>{language === 'vi' ? 'Cảm ơn bạn đã đánh giá!' : 'Thank you for your review!'}</h3>
-                      <p>{language === 'vi' ? 'Đánh giá của bạn sẽ giúp cộng đồng ứng viên tìm được công việc tốt hơn.' : 'Your review helps other candidates find better jobs.'}</p>
-                    </ReviewSubmittedMessage>
-                    <ModalActions>
-                      <ModalButton
-                        className="primary"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleCloseModal}
-                      >
-                        {language === 'vi' ? 'Hoàn tất' : 'Done'}
-                      </ModalButton>
-                    </ModalActions>
-                  </>
-                )}
-              </ModalBody>
-            </ModalContent>
-          </ModalOverlay>
-        )}
-
-        <ContentGrid>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        {/* Bamos Boost Banner */}
-        <BoostBannerWrap
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.22 }}
-          whileHover={{ y: -2 }}
-        >
-          <BoostTag>🔥Đề xuất</BoostTag>
-          <motion.img 
-            key={currentBannerIndex}
-            initial={{ opacity: currentBannerIndex === 0 ? 1 : 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ 
-              duration: 0.7,
-              ease: [0.25, 0.1, 0.25, 1]
-            }}
-            src={banners[currentBannerIndex].src} 
-            alt={banners[currentBannerIndex].alt}
-            style={{ width: '100%', height: 'auto', display: 'block' }}
-          />
-          <BannerDots>
-            {banners.map((_, idx) => (
-              <BannerDot 
-                key={idx} 
-                $active={currentBannerIndex === idx}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setCurrentBannerIndex(idx);
-                }}
-              />
-            ))}
-          </BannerDots>
-        </BoostBannerWrap>
-
-        {/* Recent Applications - compact */}
-        <Section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.25 }}
-        >
-          <SectionHeader>
-            <h2>
-              <FileText />
-              {language === 'vi' ? 'Đơn Ứng Tuyển Của Bạn Gần Đây' : 'Your Recent Applications'}
-            </h2>
-          </SectionHeader>
-
-          {recentApplications.map((app, index) => (
-            <ApplicationCard
-              key={app.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + index * 0.08 }}
-              whileHover={{ scale: 1.01 }}
-            >
-              <ApplicationHeader>
-                <ApplicationInfo>
-                  <h4>{app.title} {app.urgent && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', background: '#FEE2E2', color: '#EF4444', borderRadius: '20px', fontSize: '10px', fontWeight: 700, marginLeft: '6px', border: '1px solid #FECACA' }}>● {language === 'vi' ? 'Tuyển Gấp' : 'Urgent'}</span>}</h4>
-                  <p>{app.company}</p>
-                </ApplicationInfo>
-                <StatusBadge status={app.status} />
-              </ApplicationHeader>
-              <ApplicationMeta>
-                <span>
-                  <Clock />
-                  {app.appliedDate}
-                </span>
-                <span>
-                  <Eye />
-                  {language === 'vi' ? 'Xem chi tiết' : 'View details'}
-                </span>
-              </ApplicationMeta>
-            </ApplicationCard>
-          ))}
-        </Section>
-
-        {/* Stats Overview moved to TopInfoRow */}
-
-        {/* Recommended Jobs - Full Width */}
-        <Section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          <SectionHeader>
-            <h2>
-              <Target />
-              {language === 'vi' ? 'Việc Làm Phù Hợp Với Bạn' : 'Recommended Jobs'}
-            </h2>
-            <Link to="/candidate/jobs">
-              {language === 'vi' ? 'Xem tất cả' : 'View all'}
-              <ArrowUpRight />
-            </Link>
-          </SectionHeader>
-          
-          <JobsGrid>
-            {recommendedJobs.map((job, index) => (
-              <RecommendedJobCard
-                key={job.id}
+              {/* Recent Applications - compact */}
+              <Section
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 + index * 0.1 }}
-                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.5, delay: 0.25 }}
               >
-                <JobHeader>
-                  <CompanyLogo>
-                    {job.company.charAt(0)}
-                  </CompanyLogo>
-                  <JobInfo>
-                    <h4>{translateJobTitle(job.title)}</h4>
-                    <p>{job.company}</p>
-                  </JobInfo>
-                </JobHeader>
-                <JobDetails>
-                  <span>
-                    <MapPin />
-                    {translateLocation(job.location)}
-                  </span>
-                  <span>
-                    <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span>
-                    {translateSalary(job.salary)}
-                  </span>
-                  <span>
-                    <Clock />
-                    {translatePostedAt(job.postedAt)}
-                  </span>
-                </JobDetails>
-                <JobTags>
-                  {job.tags.map((tag, idx) => (
-                    <span key={idx}>{translateTag(tag)}</span>
+                <SectionHeader>
+                  <h2>
+                    <FileText />
+                    {language === 'vi' ? 'Đơn Ứng Tuyển Của Bạn Gần Đây' : 'Your Recent Applications'}
+                  </h2>
+                </SectionHeader>
+
+                {recentApplications.map((app, index) => (
+                  <ApplicationCard
+                    key={app.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 + index * 0.08 }}
+                    whileHover={{ scale: 1.01 }}
+                  >
+                    <ApplicationHeader>
+                      <ApplicationInfo>
+                        <h4>{app.title} {app.urgent && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', background: '#FEE2E2', color: '#EF4444', borderRadius: '20px', fontSize: '10px', fontWeight: 700, marginLeft: '6px', border: '1px solid #FECACA' }}>● {language === 'vi' ? 'Tuyển Gấp' : 'Urgent'}</span>}</h4>
+                        <p>{app.company}</p>
+                      </ApplicationInfo>
+                      <StatusBadge status={app.status} />
+                    </ApplicationHeader>
+                    <ApplicationMeta>
+                      <span>
+                        <Clock />
+                        {app.appliedDate}
+                      </span>
+                      <span>
+                        <Eye />
+                        {language === 'vi' ? 'Xem chi tiết' : 'View details'}
+                      </span>
+                    </ApplicationMeta>
+                  </ApplicationCard>
+                ))}
+              </Section>
+
+              {/* Stats Overview moved to TopInfoRow */}
+
+              {/* Recommended Jobs - Full Width */}
+              <Section
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <SectionHeader>
+                  <h2>
+                    <Target />
+                    {language === 'vi' ? 'Việc Làm Phù Hợp Với Bạn' : 'Recommended Jobs'}
+                  </h2>
+                  <Link to="/candidate/jobs">
+                    {language === 'vi' ? 'Xem tất cả' : 'View all'}
+                    <ArrowUpRight />
+                  </Link>
+                </SectionHeader>
+
+                <JobsGrid>
+                  {recommendedJobs.map((job, index) => (
+                    <RecommendedJobCard
+                      key={job.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 + index * 0.1 }}
+                      whileHover={{ scale: 1.02 }}
+                    >
+                      <JobHeader>
+                        <CompanyLogo>
+                          {job.company.charAt(0)}
+                        </CompanyLogo>
+                        <JobInfo>
+                          <h4>{translateJobTitle(job.title)}</h4>
+                          <p>{job.company}</p>
+                        </JobInfo>
+                      </JobHeader>
+                      <JobDetails>
+                        <span>
+                          <MapPin />
+                          {translateLocation(job.location)}
+                        </span>
+                        <span>
+                          <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span>
+                          {translateSalary(job.salary)}
+                        </span>
+                        <span>
+                          <Clock />
+                          {translatePostedAt(job.postedAt)}
+                        </span>
+                      </JobDetails>
+                      <JobTags>
+                        {job.tags.map((tag, idx) => (
+                          <span key={idx}>{translateTag(tag)}</span>
+                        ))}
+                      </JobTags>
+                    </RecommendedJobCard>
                   ))}
-                </JobTags>
-              </RecommendedJobCard>
-            ))}
-          </JobsGrid>
-        </Section>
-          </div>
+                </JobsGrid>
+              </Section>
+            </div>
 
-          {/* Side Banners */}
-          <SidebarCol>
-            <SideAdWrap
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              whileHover={{ y: -3 }}
-            >
-              <SideAdTag>✨ Hot Hot Hot</SideAdTag>
-              <img src="/OpPoReview/images/phucloctho.jpg" alt="Phúc Lộc Thọ" />
-            </SideAdWrap>
-          </SidebarCol>
-        </ContentGrid>
+            {/* Side Banners */}
+            <SidebarCol>
+              <SideAdWrap
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                whileHover={{ y: -3 }}
+              >
+                <SideAdTag>✨ Hot Hot Hot</SideAdTag>
+                <img src="/OpPoReview/images/phucloctho.jpg" alt="Phúc Lộc Thọ" />
+              </SideAdWrap>
+            </SidebarCol>
+          </ContentGrid>
 
-      </DashboardContainer>
-    </DashboardLayout>
+        </DashboardContainer>
+      </DashboardLayout>
 
       {/* Katinat Chat Bubble */}
       <ChatBubbleBtn

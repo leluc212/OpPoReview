@@ -577,7 +577,7 @@ const LanguageToggle = styled.button`
 
 const HeroSection = styled(motion.section)`
   width: 100%;
-  padding: 100px 50px 100px;
+  padding: 40px 50px 80px;
   text-align: center;
   position: relative;
   min-height: 100vh;
@@ -588,19 +588,19 @@ const HeroSection = styled(motion.section)`
   scroll-snap-align: start;
   scroll-snap-stop: always;
   overflow: hidden;
-  
+
   @media (max-width: 1024px) {
-    padding: 90px 40px 80px;
+    padding: 40px 40px 60px;
   }
-  
+
   @media (max-width: 768px) {
-    padding: 70px 20px 40px;
+    padding: 35px 20px 40px;
     height: auto;
     min-height: auto;
   }
-  
+
   @media (max-width: 480px) {
-    padding: 62px 16px 30px;
+    padding: 30px 16px 30px;
   }
 `;
 

@@ -54,7 +54,7 @@ const Shell = styled.div`
    LEFT  ─ Candidate Hero Panel
 ═══════════════════════════════════════════════════════════════ */
 const LeftPanel = styled.div`
-  width: 46%;
+  width: 48%;
   height: 100vh;
   position: fixed;
   left: 0;
@@ -64,7 +64,8 @@ const LeftPanel = styled.div`
   animation: ${gradMove} 10s ease infinite;
   display: flex;
   flex-direction: column;
-  padding: 52px 52px 40px;
+  justify-content: center;
+  padding: 40px 48px;
   overflow: hidden;
 
   @media (max-width: 960px) { display: none; }
@@ -117,7 +118,7 @@ const Brand = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  margin-bottom: 48px;
+  margin-bottom: 24px;
   position: relative;
   z-index: 2;
 `;
@@ -148,7 +149,6 @@ const BrandText = styled.span`
 const Hero = styled.div`
   position: relative;
   z-index: 2;
-  flex: 1;
 `;
 
 const HeroEyebrow = styled.div`
@@ -268,7 +268,7 @@ const TickerTrack = styled.div`
   display: flex;
   gap: 28px;
   white-space: nowrap;
-  animation: ${tickerMove} 22s linear infinite;
+  animation: ${tickerMove} 35s linear infinite;
 `;
 
 const TickerItem = styled.span`
@@ -286,12 +286,12 @@ const TickerItem = styled.span`
 ═══════════════════════════════════════════════════════════════ */
 const RightPanel = styled.div`
   flex: 1;
-  margin-left: 46%;
+  margin-left: 48%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 32px;
+  padding: 40px 32px;
   position: relative;
   height: 100vh;
   overflow: hidden;
@@ -896,7 +896,7 @@ const CandidateRegister = () => {
 
           <HeroSub>
             Hàng ngàn công việc part-time linh hoạt đang chờ bạn.
-            Đăng ký miễn phí — ứng tuyển ngay hôm nay.
+            Đăng ký miễn phí ngay để bắt đầu ứng tuyển.
           </HeroSub>
 
           {/* Job preview cards */}
