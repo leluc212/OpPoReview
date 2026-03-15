@@ -781,9 +781,15 @@ function pwStrength(pw) {
 }
 
 /* ── Floating input component ── */
-function FInput({ id, name, type = 'text', label, value, onChange, error, iconL, iconR, onToggle }) {
+function FInput({ id, name, type = 'text', label, value, onChange, error, iconL, iconR, onToggle, onBlur }) {
   const [focused, setFocused] = useState(false);
   const up = focused || !!value;
+  
+  const handleBlur = () => {
+    setFocused(false);
+    if (onBlur) onBlur();
+  };
+  
   return (
     <Field>
       {iconL && <FieldIconLeft $focused={focused}>{iconL}</FieldIconLeft>}
@@ -791,7 +797,7 @@ function FInput({ id, name, type = 'text', label, value, onChange, error, iconL,
         id={id} name={name} type={type}
         value={value} onChange={onChange}
         onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
+        onBlur={handleBlur}
         $icon={!!iconL} $right={!!iconR}
         $focused={focused} $err={!!error}
         autoComplete="off"
@@ -861,8 +867,40 @@ const EmployerRegister = () => {
       } else {
         setErrors(p => ({ ...p, confirmPassword: '' }));
       }
+    } else if (name === 'email') {
+      // Clear error khi user đang nhập
+      if (errors[name]) setErrors(p => ({ ...p, [name]: '' }));
     } else {
       if (errors[name]) setErrors(p => ({ ...p, [name]: '' }));
+    }
+  };
+  
+  // Check if email exists when user leaves email field
+  const handleEmailBlur = async () => {
+    if (!form.email || !/\S+@\S+\.\S+/.test(form.email)) return;
+    
+    try {
+      const { Auth } = await import('../../utils/amplifyClient');
+      
+      // Try to check if user exists by attempting to resend confirmation code
+      try {
+        await Auth.resendSignUpCode({ username: form.email });
+        // If this succeeds, user exists but not confirmed
+        setErrors(p => ({ ...p, email: 'Email này đã được đăng ký nhưng chưa xác thực. Vui lòng kiểm tra email để xác thực.' }));
+      } catch (err) {
+        if (err.name === 'UserNotFoundException') {
+          // User doesn't exist - good!
+          setErrors(p => ({ ...p, email: '' }));
+        } else if (err.name === 'InvalidParameterException' && err.message?.includes('confirmed')) {
+          // User exists and is already confirmed
+          setErrors(p => ({ ...p, email: 'Email này đã được đăng ký. Vui lòng đăng nhập hoặc sử dụng email khác.' }));
+        } else {
+          // Other errors - ignore
+          console.warn('Email check error:', err);
+        }
+      }
+    } catch (err) {
+      console.error('Error checking email:', err);
     }
   };
 
@@ -1107,6 +1145,7 @@ const EmployerRegister = () => {
                 <FInput id="email" name="email" type="email"
                   label="Email công ty *" value={form.email}
                   onChange={handleChange} error={errors.email}
+                  onBlur={handleEmailBlur}
                   iconL={<IconMail />} />
 
                 <FInput id="password" name="password"

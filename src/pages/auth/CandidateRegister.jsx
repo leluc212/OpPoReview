@@ -655,9 +655,15 @@ const IcoArrow = () => <svg fill="none" viewBox="0 0 24 24" stroke="currentColor
 const IcoCheck = () => <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>;
 
 /* floating input component */
-function FloatInput({ id, name, type = 'text', label, value, onChange, error, iconL, iconR, onToggle }) {
+function FloatInput({ id, name, type = 'text', label, value, onChange, error, iconL, iconR, onToggle, onBlur }) {
   const [focused, setFocused] = useState(false);
   const up = focused || !!value;
+  
+  const handleBlur = () => {
+    setFocused(false);
+    if (onBlur) onBlur();
+  };
+  
   return (
     <FieldWrap>
       {iconL && <FIconL $on={focused}>{iconL}</FIconL>}
@@ -665,7 +671,7 @@ function FloatInput({ id, name, type = 'text', label, value, onChange, error, ic
         id={id} name={name} type={type}
         value={value} onChange={onChange}
         onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
+        onBlur={handleBlur}
         $ic={!!iconL} $ir={!!iconR}
         $on={focused} $err={!!error}
         autoComplete="off"
@@ -715,8 +721,53 @@ const CandidateRegister = () => {
       } else {
         setErrors(p => ({ ...p, confirmPassword: '' }));
       }
+    } else if (name === 'email') {
+      // Clear error khi user đang nhập
+      if (errors[name]) setErrors(p => ({ ...p, [name]: '' }));
     } else {
       if (errors[name]) setErrors(p => ({ ...p, [name]: '' }));
+    }
+  };
+  
+  // Check if email exists when user leaves email field
+  const handleEmailBlur = async () => {
+    console.log('🔍 handleEmailBlur called with email:', form.email);
+    
+    if (!form.email || !/\S+@\S+\.\S+/.test(form.email)) {
+      console.log('⚠️ Email empty or invalid format');
+      return;
+    }
+    
+    try {
+      console.log('📡 Importing Auth...');
+      const { Auth } = await import('../../utils/amplifyClient');
+      
+      console.log('🔎 Checking if email exists:', form.email);
+      
+      // Try to check if user exists by attempting to resend confirmation code
+      try {
+        await Auth.resendSignUpCode({ username: form.email });
+        // If this succeeds, user exists but not confirmed
+        console.log('⚠️ User exists but not confirmed');
+        setErrors(p => ({ ...p, email: 'Email này đã được đăng ký nhưng chưa xác thực. Vui lòng kiểm tra email để xác thực.' }));
+      } catch (err) {
+        console.log('📋 resendSignUpCode error:', err.name, err.message);
+        
+        if (err.name === 'UserNotFoundException') {
+          // User doesn't exist - good!
+          console.log('✅ Email available');
+          setErrors(p => ({ ...p, email: '' }));
+        } else if (err.name === 'InvalidParameterException' && err.message?.includes('confirmed')) {
+          // User exists and is already confirmed
+          console.log('❌ Email already registered and confirmed');
+          setErrors(p => ({ ...p, email: 'Email này đã được đăng ký. Vui lòng đăng nhập hoặc sử dụng email khác.' }));
+        } else {
+          // Other errors - ignore
+          console.warn('⚠️ Email check error (ignored):', err);
+        }
+      }
+    } catch (err) {
+      console.error('❌ Error checking email:', err);
     }
   };
 

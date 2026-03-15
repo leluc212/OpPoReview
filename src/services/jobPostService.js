@@ -153,6 +153,8 @@ class JobPostService {
         employerEmail: employerEmail,
         title: jobData.title,
         location: jobData.location,
+        latitude: jobData.latitude || null,
+        longitude: jobData.longitude || null,
         jobType: jobData.jobType,
         workDays: jobData.workDays,
         workHours: jobData.workHours,

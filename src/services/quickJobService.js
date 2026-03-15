@@ -203,6 +203,8 @@ class QuickJobService {
         companyName: companyName,
         title: jobData.title,
         location: jobData.location,
+        latitude: jobData.latitude || null,
+        longitude: jobData.longitude || null,
         jobType: jobData.jobType || 'part-time',
         hourlyRate: jobData.hourlyRate,
         startTime: jobData.startTime,

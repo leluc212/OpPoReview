@@ -361,8 +361,7 @@ const PostJob = () => {
   useEffect(() => {
     const status = localStorage.getItem('companyVerificationStatus') || 'not_started';
     
-    // AUTO-APPROVE for development: Automatically approve if pending or not started
-    // TODO: Remove this in production - verification should be done by admin
+    // AUTO-APPROVE for development
     if (status === 'pending' || status === 'not_started') {
       console.log('🚀 AUTO-APPROVE: Setting verification status to approved for development');
       localStorage.setItem('companyVerificationStatus', 'approved');

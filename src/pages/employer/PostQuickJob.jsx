@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import Modal from '../../components/Modal';
+import AddressInput from '../../components/AddressInput';
 import { Button, Input, TextArea, Select, FormGroup, Label } from '../../components/FormElements';
-import { Save, ArrowLeft, AlertCircle, CheckCircle, Clock, Zap } from 'lucide-react';
+import { Save, ArrowLeft, AlertCircle, CheckCircle, Clock, Zap, Globe } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import quickJobService from '../../services/quickJobService';
 import employerProfileService from '../../services/employerProfileService';
@@ -398,6 +399,8 @@ const PostQuickJob = () => {
     return {
       title: '',
       location: '',
+      latitude: '', // GPS latitude
+      longitude: '', // GPS longitude
       jobType: '', // Loại hình công việc
       hourlyRate: '', // Lương theo giờ
       startTime: '', // Thời gian bắt đầu ca
@@ -428,6 +431,26 @@ const PostQuickJob = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  // Handle address change from AddressInput component
+  const handleAddressChange = (address) => {
+    setFormData(prev => ({
+      ...prev,
+      location: address
+    }));
+  };
+
+  // Handle coordinates change from AddressInput component
+  const handleCoordinatesChange = (coordinates) => {
+    if (coordinates) {
+      setFormData(prev => ({
+        ...prev,
+        latitude: coordinates.lat.toString(),
+        longitude: coordinates.lng.toString()
+      }));
+      console.log('✅ GPS coordinates updated:', coordinates);
+    }
   };
 
   // Calculate total salary based on hourly rate and working hours
@@ -595,6 +618,8 @@ const PostQuickJob = () => {
       const jobData = {
         title: formData.title,
         location: formData.location,
+        latitude: formData.latitude ? parseFloat(formData.latitude) : null,
+        longitude: formData.longitude ? parseFloat(formData.longitude) : null,
         jobType: formData.jobType || 'part-time',
         hourlyRate: rate,
         startTime: formData.startTime,
@@ -834,12 +859,13 @@ const PostQuickJob = () => {
             <FormRow $columns="1fr 1fr">
               <FormGroup>
                 <Label required>{t.location}</Label>
-                <Input
-                  name="location"
+                <AddressInput
                   value={formData.location}
-                  onChange={handleChange}
+                  onChange={handleAddressChange}
+                  onCoordinatesChange={handleCoordinatesChange}
                   placeholder={t.locationPlaceholder}
                   required
+                  showCoordinates={true}
                 />
               </FormGroup>
 

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import Toast from '../../components/Toast';
+import AddressInput from '../../components/AddressInput';
 import { useToast } from '../../hooks/useToast';
 import { Input, TextArea, Button, Label, FormGroup } from '../../components/FormElements';
 import { 
@@ -1139,6 +1140,27 @@ const EmployerProfile = () => {
     });
   };
 
+  // Handle address change from AddressInput component
+  const handleAddressChange = (address) => {
+    setFormData(prev => ({
+      ...prev,
+      address: address
+    }));
+  };
+
+  // Handle coordinates change from AddressInput component
+  const handleCoordinatesChange = (coordinates) => {
+    if (coordinates) {
+      setFormData(prev => ({
+        ...prev,
+        latitude: coordinates.lat.toFixed(6),
+        longitude: coordinates.lng.toFixed(6)
+      }));
+      console.log('✅ GPS coordinates updated:', coordinates);
+      toast.success(language === 'vi' ? 'Đã cập nhật tọa độ GPS từ địa chỉ!' : 'GPS coordinates updated from address!');
+    }
+  };
+
   // Get current GPS location
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -1511,17 +1533,14 @@ const EmployerProfile = () => {
               <FormRow $columns="1fr">
                 <FormGroup>
                   <Label htmlFor="address">{language === 'vi' ? 'Địa chỉ' : 'Address'}</Label>
-                  <InputWrapper>
-                    <MapPin className="input-icon" />
-                    <Input
-                      id="address"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleChange}
-                      placeholder={language === 'vi' ? 'Ví dụ: 123 Đường ABC, Quận 1, TP.HCM' : 'e.g., 123 ABC Street, District 1, HCMC'}
-                      disabled={!isEditing}
-                    />
-                  </InputWrapper>
+                  <AddressInput
+                    value={formData.address}
+                    onChange={handleAddressChange}
+                    onCoordinatesChange={handleCoordinatesChange}
+                    placeholder={language === 'vi' ? 'Ví dụ: số 47 đường 5B, Long Bình, Thủ Đức' : 'e.g., 47 5B Street, Long Binh, Thu Duc'}
+                    disabled={!isEditing}
+                    showCoordinates={true}
+                  />
                 </FormGroup>
               </FormRow>
 

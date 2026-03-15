@@ -1,0 +1,329 @@
+// OpenStreetMap Nominatim Geocoding Service
+// Miễn phí, không cần API key, nhưng có giới hạn rate limit
+
+class OpenStreetMapService {
+  constructor() {
+    // Nominatim API - miễn phí từ OpenStreetMap
+    this.baseUrl = 'https://nominatim.openstreetmap.org';
+    this.searchUrl = `${this.baseUrl}/search`;
+    this.reverseUrl = `${this.baseUrl}/reverse`;
+    
+    // Rate limiting: 1 request per second
+    this.lastRequestTime = 0;
+    this.minInterval = 1000; // 1 second
+    
+    console.log('🗺️ OpenStreetMapService initialized (FREE)');
+  }
+
+  /**
+   * Rate limiting để tránh bị block
+   */
+  async waitForRateLimit() {
+    const now = Date.now();
+    const timeSinceLastRequest = now - this.lastRequestTime;
+    
+    if (timeSinceLastRequest < this.minInterval) {
+      const waitTime = this.minInterval - timeSinceLastRequest;
+      console.log(`⏳ Rate limiting: waiting ${waitTime}ms`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+    
+    this.lastRequestTime = Date.now();
+  }
+
+  /**
+   * Chuyển đổi địa chỉ thành tọa độ GPS (Geocoding)
+   * @param {string} address - Địa chỉ cần chuyển đổi
+   * @returns {Promise<Object>} - {lat, lng, formattedAddress, components}
+   */
+  async geocodeAddress(address) {
+    if (!address || !address.trim()) {
+      throw new Error('Địa chỉ không được để trống');
+    }
+
+    await this.waitForRateLimit();
+
+    try {
+      console.log('🔍 OSM Geocoding address:', address);
+      
+      const params = new URLSearchParams({
+        q: address,
+        format: 'json',
+        addressdetails: '1',
+        limit: '1',
+        countrycodes: 'vn', // Giới hạn trong Việt Nam
+        'accept-language': 'vi,en'
+      });
+      
+      const url = `${this.searchUrl}?${params}`;
+      
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'OpPoReview-JobPlatform/1.0' // Required by Nominatim
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+
+      if (data && data.length > 0) {
+        const result = data[0];
+        
+        const geocodeResult = {
+          lat: parseFloat(result.lat),
+          lng: parseFloat(result.lon),
+          formattedAddress: result.display_name,
+          components: this.parseAddressComponents(result.address),
+          placeId: result.place_id,
+          osmType: result.osm_type,
+          osmId: result.osm_id,
+          importance: result.importance
+        };
+
+        console.log('✅ OSM Geocoding successful:', geocodeResult);
+        return geocodeResult;
+      } else {
+        throw new Error('Không tìm thấy địa chỉ phù hợp');
+      }
+    } catch (error) {
+      console.error('❌ OSM Geocoding error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Chuyển đổi tọa độ GPS thành địa chỉ (Reverse Geocoding)
+   * @param {number} lat - Latitude
+   * @param {number} lng - Longitude
+   * @returns {Promise<Object>} - {address, components}
+   */
+  async reverseGeocode(lat, lng) {
+    if (!lat || !lng) {
+      throw new Error('Tọa độ không hợp lệ');
+    }
+
+    await this.waitForRateLimit();
+
+    try {
+      console.log('🔍 OSM Reverse geocoding:', lat, lng);
+      
+      const params = new URLSearchParams({
+        lat: lat.toString(),
+        lon: lng.toString(),
+        format: 'json',
+        addressdetails: '1',
+        'accept-language': 'vi,en'
+      });
+      
+      const url = `${this.reverseUrl}?${params}`;
+      
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'OpPoReview-JobPlatform/1.0'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+
+      if (data && data.display_name) {
+        const reverseResult = {
+          address: data.display_name,
+          components: this.parseAddressComponents(data.address),
+          placeId: data.place_id,
+          osmType: data.osm_type,
+          osmId: data.osm_id
+        };
+
+        console.log('✅ OSM Reverse geocoding successful:', reverseResult);
+        return reverseResult;
+      } else {
+        throw new Error('Không tìm thấy địa chỉ cho tọa độ này');
+      }
+    } catch (error) {
+      console.error('❌ OSM Reverse geocoding error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Tìm kiếm địa điểm với gợi ý (Search)
+   * @param {string} input - Từ khóa tìm kiếm
+   * @returns {Promise<Array>} - Danh sách gợi ý địa điểm
+   */
+  async searchPlaces(input) {
+    if (!input || !input.trim()) {
+      return [];
+    }
+
+    await this.waitForRateLimit();
+
+    try {
+      console.log('🔍 OSM Searching places:', input);
+      
+      const params = new URLSearchParams({
+        q: input,
+        format: 'json',
+        addressdetails: '1',
+        limit: '5', // Giới hạn 5 kết quả
+        countrycodes: 'vn',
+        'accept-language': 'vi,en'
+      });
+      
+      const url = `${this.searchUrl}?${params}`;
+      
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'OpPoReview-JobPlatform/1.0'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+
+      if (data && data.length > 0) {
+        const suggestions = data.map(item => ({
+          description: item.display_name,
+          placeId: item.place_id,
+          lat: parseFloat(item.lat),
+          lng: parseFloat(item.lon),
+          type: item.type,
+          class: item.class,
+          importance: item.importance,
+          components: this.parseAddressComponents(item.address)
+        }));
+
+        console.log('✅ OSM Places search successful:', suggestions.length, 'results');
+        return suggestions;
+      } else {
+        console.log('ℹ️ OSM No results found');
+        return [];
+      }
+    } catch (error) {
+      console.error('❌ OSM Places search error:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Parse address components từ Nominatim API
+   * @param {Object} address - Address object từ API
+   * @returns {Object} - Parsed components
+   */
+  parseAddressComponents(address) {
+    if (!address) return {};
+
+    const parsed = {
+      houseNumber: address.house_number || '',
+      road: address.road || '',
+      suburb: address.suburb || address.neighbourhood || '',
+      ward: address.quarter || address.suburb || '',
+      district: address.city_district || address.county || '',
+      city: address.city || address.town || address.village || '',
+      province: address.state || '',
+      country: address.country || '',
+      postcode: address.postcode || ''
+    };
+
+    return parsed;
+  }
+
+  /**
+   * Format địa chỉ cho Việt Nam từ components
+   * @param {Object} components - Address components
+   * @returns {string} - Formatted address
+   */
+  formatVietnameseAddress(components) {
+    const parts = [];
+    
+    if (components.houseNumber && components.road) {
+      parts.push(`${components.houseNumber} ${components.road}`);
+    } else if (components.road) {
+      parts.push(components.road);
+    }
+    
+    if (components.ward) {
+      parts.push(components.ward);
+    }
+    
+    if (components.district) {
+      parts.push(components.district);
+    }
+    
+    if (components.city || components.province) {
+      parts.push(components.city || components.province);
+    }
+
+    return parts.join(', ');
+  }
+
+  /**
+   * Validate tọa độ GPS
+   * @param {number} lat - Latitude
+   * @param {number} lng - Longitude
+   * @returns {boolean}
+   */
+  isValidCoordinates(lat, lng) {
+    return (
+      typeof lat === 'number' && 
+      typeof lng === 'number' &&
+      lat >= -90 && lat <= 90 &&
+      lng >= -180 && lng <= 180
+    );
+  }
+
+  /**
+   * Kiểm tra service có sẵn sàng không
+   * @returns {boolean}
+   */
+  isConfigured() {
+    return true; // OSM không cần API key
+  }
+
+  /**
+   * So sánh với Google Maps
+   * @returns {Object} - Comparison info
+   */
+  getServiceInfo() {
+    return {
+      name: 'OpenStreetMap Nominatim',
+      cost: 'Miễn phí',
+      apiKey: 'Không cần',
+      rateLimit: '1 request/second',
+      coverage: 'Toàn cầu',
+      accuracy: 'Tốt (nhưng kém hơn Google)',
+      features: {
+        geocoding: true,
+        reverseGeocoding: true,
+        search: true,
+        autocomplete: false, // Không có autocomplete thực sự
+        placeDetails: false
+      },
+      pros: [
+        'Hoàn toàn miễn phí',
+        'Không cần API key',
+        'Dữ liệu mở',
+        'Hỗ trợ Việt Nam tốt'
+      ],
+      cons: [
+        'Rate limit nghiêm ngặt (1 req/s)',
+        'Độ chính xác kém hơn Google',
+        'Không có autocomplete',
+        'Ít chi tiết hơn'
+      ]
+    };
+  }
+}
+
+// Export singleton instance
+const openStreetMapService = new OpenStreetMapService();
+export default openStreetMapService;

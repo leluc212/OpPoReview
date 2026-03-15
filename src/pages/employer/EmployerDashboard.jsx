@@ -5,8 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
 import StatusBadge from '../../components/StatusBadge';
+import CompanyProfileSetupModal from '../../components/CompanyProfileSetupModal';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
+import { useCompanyProfileCompletion } from '../../hooks/useCompanyProfileCompletion';
 import employerProfileService from '../../services/employerProfileService';
 import {
   Briefcase,
@@ -433,9 +435,11 @@ const EmployerDashboard = () => {
   const { language } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { isProfileComplete, isLoading: isLoadingProfileCompletion, profileCompletion } = useCompanyProfileCompletion();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [employerProfile, setEmployerProfile] = useState(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [showProfileSetupModal, setShowProfileSetupModal] = useState(false);
 
   // Load employer profile
   useEffect(() => {
@@ -464,6 +468,20 @@ const EmployerDashboard = () => {
     
     loadProfile();
   }, [user]);
+
+  // Check if should show profile setup modal
+  useEffect(() => {
+    // Only show modal for authenticated users with incomplete profiles
+    // and only if we're not already loading profile data
+    if (user && !isLoadingProfileCompletion && !isProfileComplete) {
+      // Add a small delay to ensure smooth page load
+      const timer = setTimeout(() => {
+        setShowProfileSetupModal(true);
+      }, 2000); // Show after 2 seconds for better UX
+      
+      return () => clearTimeout(timer);
+    }
+  }, [user, isLoadingProfileCompletion, isProfileComplete]);
 
   const getRecentApplications = () => [
     { 
@@ -762,6 +780,13 @@ const EmployerDashboard = () => {
             </PerformanceCard>
           </PerformanceGrid>
         </Section>
+
+        {/* Company Profile Setup Modal */}
+        <CompanyProfileSetupModal
+          isOpen={showProfileSetupModal}
+          onClose={() => setShowProfileSetupModal(false)}
+          profileCompletion={profileCompletion}
+        />
       </DashboardContainer>
     </DashboardLayout>
   );
