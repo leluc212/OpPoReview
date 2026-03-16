@@ -2679,10 +2679,13 @@ const JobListing = () => {
     fetchProfile();
   }, []);
 
-  // Handle search from Navbar
+  // Handle search from Navbar or LandingPage
   useEffect(() => {
     if (location.state?.searchKeyword) {
       setSearchKeyword(location.state.searchKeyword);
+    }
+    if (location.state?.searchLocation) {
+      setSelectedLocation(location.state.searchLocation);
     }
   }, [location.state]);
 
@@ -3074,30 +3077,20 @@ const JobListing = () => {
     // Search by keyword
     if (searchKeyword.trim()) {
       const keyword = searchKeyword.toLowerCase().trim();
-      result = result.filter(job => {
-        const locationParts = job.location.toLowerCase().split(',').map(part => part.trim());
-        const locationMatch = locationParts.some(part =>
-          part === keyword || part.startsWith(keyword + ' ') || part.includes(keyword)
-        );
-        return (
-          job.title.toLowerCase().includes(keyword) ||
-          job.company.toLowerCase().includes(keyword) ||
-          job.tags.some(tag => tag.toLowerCase().includes(keyword)) ||
-          locationMatch
-        );
-      });
+      result = result.filter(job =>
+        (job.title || '').toLowerCase().includes(keyword) ||
+        (job.company || '').toLowerCase().includes(keyword) ||
+        (job.tags || []).some(tag => tag.toLowerCase().includes(keyword)) ||
+        (job.location || '').toLowerCase().includes(keyword)
+      );
     }
 
     // Filter by location
     if (selectedLocation.trim()) {
-      const location = selectedLocation.toLowerCase().trim();
-      result = result.filter(job => {
-        const locationParts = job.location.toLowerCase().split(',').map(part => part.trim());
-        // Exact match or starts with search term followed by space
-        return locationParts.some(part => {
-          return part === location || part.startsWith(location + ' ');
-        });
-      });
+      const loc = selectedLocation.toLowerCase().trim();
+      result = result.filter(job =>
+        (job.location || '').toLowerCase().includes(loc)
+      );
     }
 
     // Filter by job type

@@ -3432,7 +3432,7 @@ const HRManagement = () => {
                               <MapPin />{post.location}
                             </div>
                             <div className="meta-item">
-                              <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Mức lương:' : 'Salary:'}</span> {post.salary}
+                              <Wallet size={15} style={{ strokeWidth: 1.5 }} />{post.salary}
                             </div>
                           </QuickJobPostMeta>
                           <QuickJobPostMeta>

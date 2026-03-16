@@ -81,27 +81,52 @@ const FormCard = styled.div`
 `;
 
 const FormHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 16px;
   margin-bottom: 32px;
-  padding-bottom: 24px;
-  border-bottom: 2px solid #E8EFFF;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
   
   .icon-box {
     width: 56px;
     height: 56px;
     border-radius: 14px;
     background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
-    border: 2px solid #BFDBFE;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    border: 2px solid #BFDBFE;
+    
+    svg {
+      width: 28px;
+      height: 28px;
+      color: #1e40af;
+    }
+  }
+  
+  .header-text {
+    flex: 1;
+    
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: ${props => props.theme.colors.text};
+      
+      @media (max-width: 768px) {
+        font-size: 24px;
+      }
+    }
+    
+    p {
+      color: ${props => props.theme.colors.textLight};
+      font-size: 15px;
+      line-height: 1.6;
+    }
   }
 `;
 
-const LabelWithIcon = styled.label`
+const SectionLabel = styled.label`
   display: flex;
   align-items: center;
   gap: 8px;
@@ -118,27 +143,22 @@ const LabelWithIcon = styled.label`
     color: #1e40af;
     flex-shrink: 0;
   }
+`;
+
+const SubmitButton = styled(Button)`
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+  border: none;
+  transition: all 0.3s ease;
   
-  .header-content {
-    flex: 1;
-    
-    h1 {
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 6px;
-      color: #1E293B;
-      letter-spacing: -0.5px;
-      
-      @media (max-width: 768px) {
-        font-size: 24px;
-      }
-    }
-    
-    p {
-      color: #64748B;
-      font-size: 14px;
-      font-weight: 500;
-    }
+  &:hover {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(30, 64, 175, 0.4);
+  }
+  
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3);
   }
 `;
 
@@ -185,15 +205,24 @@ const InfoBox = styled.div`
   }
 `;
 
-const FormGrid = styled.div`
+const FormRow = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  grid-template-columns: ${props => props.$columns || '1fr'};
+  gap: 20px;
+  margin-bottom: 24px;
   
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: 20px;
   }
+`;
+
+const FormActions = styled.div`
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 2px solid ${props => props.theme.colors.border};
 `;
 
 const SalaryInputWrapper = styled.div`
@@ -599,10 +628,10 @@ const PostJob = () => {
             <div className="icon-box">
               <Briefcase />
             </div>
-            <div className="header-content">
+            <div className="header-text">
               <h1>{isEditing 
                 ? (language === 'vi' ? 'Chỉnh Sửa Tin Tuyển Dụng' : 'Edit Job Posting')
-                : (language === 'vi' ? 'Đăng Bài Tiêu Chuẩn ' : 'Post New Job')}
+                : (language === 'vi' ? 'Đăng Bài Tiêu Chuẩn' : 'Post New Job')}
               </h1>
               <p>{isEditing
                 ? (language === 'vi' ? 'Cập nhật thông tin tin tuyển dụng' : 'Update job posting details')
@@ -624,7 +653,7 @@ const PostJob = () => {
           </InfoBox>
 
           <form onSubmit={handleSubmit}>
-            <FormGrid>
+            <FormRow $columns="1fr 1fr">
               <FormGroup>
                 <Label>{language === 'vi' ? 'Tiêu đề công việc - Vị trí công việc *' : 'Job Title - Position *'}</Label>
                 <Input name="title" placeholder={language === 'vi' ? 'Nhân viên pha chế' : 'e.g., Waiter'} value={formData.title} onChange={handleChange} required />
@@ -665,7 +694,7 @@ const PostJob = () => {
 
               <FormGroup>
                 <Label>{language === 'vi' ? 'Khung giờ làm việc *' : 'Working Hours *'}</Label>
-                <FormGrid style={{ gap: '12px' }}>
+                <FormRow $columns="1fr 1fr" style={{ marginBottom: 0 }}>
                   <div>
                     <Label style={{ fontSize: '13px', marginBottom: '8px' }}>{language === 'vi' ? 'Từ' : 'From'}</Label>
                     <Input 
@@ -686,7 +715,7 @@ const PostJob = () => {
                       required 
                     />
                   </div>
-                </FormGrid>
+                </FormRow>
               </FormGroup>
 
               <FormGroup>
@@ -716,50 +745,50 @@ const PostJob = () => {
                     : 'Enter tags separated by commas. Example: Barista, F&B, Coffee'}
                 </p>
               </FormGroup>
-            </FormGrid>
+            </FormRow>
 
-            <FormGroup style={{ marginTop: '24px' }}>
-              <LabelWithIcon>
+            <FormGroup style={{ marginTop: '8px' }}>
+              <SectionLabel>
                 <FileText />
                 <span>{language === 'vi' ? 'Mô tả công việc *' : 'Job Description *'}</span>
-              </LabelWithIcon>
+              </SectionLabel>
               <TextArea name="description" placeholder={language === 'vi' ? 'Mô tả vị trí công việc...' : 'Describe the position...'} value={formData.description} onChange={handleChange} required />
             </FormGroup>
 
             <FormGroup>
-              <LabelWithIcon>
+              <SectionLabel>
                 <CheckSquare />
                 <span>{language === 'vi' ? 'Trách nhiệm' : 'Responsibilities'}</span>
-              </LabelWithIcon>
+              </SectionLabel>
               <TextArea name="responsibilities" placeholder={language === 'vi' ? 'Liệt kê các trách nhiệm chính...' : 'List key responsibilities...'} value={formData.responsibilities} onChange={handleChange} />
             </FormGroup>
 
             <FormGroup>
-              <LabelWithIcon>
+              <SectionLabel>
                 <ClipboardList />
                 <span>{language === 'vi' ? 'Yêu cầu' : 'Requirements'}</span>
-              </LabelWithIcon>
+              </SectionLabel>
               <TextArea name="requirements" placeholder={language === 'vi' ? 'Liệt kê yêu cầu và trình độ...' : 'List requirements and qualifications...'} value={formData.requirements} onChange={handleChange} />
             </FormGroup>
 
             <FormGroup>
-              <LabelWithIcon>
+              <SectionLabel>
                 <Gift />
                 <span>{language === 'vi' ? 'Quyền lợi' : 'Benefits'}</span>
-              </LabelWithIcon>
+              </SectionLabel>
               <TextArea name="benefits" placeholder={language === 'vi' ? 'Liệt kê quyền lợi và phúc lợi...' : 'List benefits and perks...'} value={formData.benefits} onChange={handleChange} />
             </FormGroup>
 
-            <div style={{ display: 'flex', gap: '12px', marginTop: '32px' }}>
+            <FormActions>
               <Button type="button" $variant="secondary" onClick={() => navigate('/employer/dashboard')}>
                 {language === 'vi' ? 'Hủy' : 'Cancel'}
               </Button>
-              <Button type="submit" $variant="primary" $size="large">
+              <SubmitButton type="submit" $variant="primary" $size="large">
                 <Save /> {isEditing 
                   ? (language === 'vi' ? 'Cập Nhật' : 'Update Job')
                   : (language === 'vi' ? 'Đăng Tin' : 'Post Job')}
-              </Button>
-            </div>
+              </SubmitButton>
+            </FormActions>
           </form>
         </FormCard>
       </PostJobContainer>

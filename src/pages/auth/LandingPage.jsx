@@ -3637,6 +3637,7 @@ const LandingPage = () => {
                   placeholder="Vị trí công việc hoặc công ty"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && navigate('/candidate/jobs', { state: { searchKeyword: searchTerm, searchLocation: location } })}
                 />
               </SearchInput>
 
@@ -3647,10 +3648,13 @@ const LandingPage = () => {
                   placeholder="Địa điểm"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && navigate('/candidate/jobs', { state: { searchKeyword: searchTerm, searchLocation: location } })}
                 />
               </SearchInput>
 
-              <Button $variant="primary" onClick={() => navigate('/candidate/jobs')}>
+              <Button $variant="primary" onClick={() => navigate('/candidate/jobs', {
+                state: { searchKeyword: searchTerm, searchLocation: location }
+              })}>
                 Tìm việc
               </Button>
             </SearchContainer>

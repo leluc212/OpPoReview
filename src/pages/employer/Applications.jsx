@@ -6,7 +6,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
 import TableFilter from '../../components/TableFilter';
 import Modal from '../../components/Modal';
-import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText, Clock, Users, Newspaper, Edit, Trash2, TrendingUp, Plus, X, XCircle, Wallet, AlertCircle, Save, Download, MessageSquare } from 'lucide-react';
+import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText, Clock, Users, Newspaper, Edit, Trash2, TrendingUp, Plus, X, XCircle, Wallet, Banknote, AlertCircle, Save, Download, MessageSquare, Search } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { initializeMultipleSampleCVs } from '../../utils/sampleCVGenerator';
@@ -178,7 +178,6 @@ const FILTER_OPTIONS = (language) => ([
   { value: 'today', label: language === 'vi' ? 'Hôm nay' : 'Today' },
   { value: 'week', label: language === 'vi' ? 'Tuần này' : 'This week' },
   { value: 'month', label: language === 'vi' ? 'Tháng này' : 'This month' },
-  { value: 'older', label: language === 'vi' ? 'Cũ hơn' : 'Older' },
 ]);
 
 const ApplicationsContainer = styled(motion.div)`
@@ -345,7 +344,7 @@ const EmptyState = styled(motion.div)`
 // --- Job Posts Styles ---
 const JobPostsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
   gap: 20px;
   align-items: stretch;
   
@@ -356,22 +355,21 @@ const JobPostsGrid = styled.div`
 
 const JobPostCard = styled(motion.div)`
   background: #ffffff;
-  border: 2px solid #E2E8F0;
-  border-left: 4px solid ${props => props.$status === 'active' ? '#10B981' : '#94A3B8'};
-  border-radius: 12px;
-  padding: 20px 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1.5px solid #E8EFFF;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.06);
   transition: all 0.3s ease;
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  overflow: hidden;
   
   &:hover {
     border-color: #BFDBFE;
-    border-left-color: ${props => props.$status === 'active' ? '#10B981' : '#94A3B8'};
-    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.15);
-    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.13);
+    transform: translateY(-4px);
   }
 `;
 
@@ -383,62 +381,62 @@ const JobPostHeader = styled.div`
 `;
 
 const JobPostTitle = styled.h3`
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: ${props => props.theme.colors.text};
-  margin-bottom: 8px;
+  margin-bottom: 0;
+  line-height: 1.3;
 `;
 
 const JobPostMeta = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 12px;
   
   .meta-item {
     display: flex;
     align-items: center;
-    gap: 4px;
-    font-size: 11.5px;
+    gap: 8px;
+    font-size: 14px;
     color: ${props => props.theme.colors.textLight};
-    white-space: nowrap;
-    overflow: hidden;
+    font-weight: 500;
     
     svg {
-      width: 13px;
-      height: 13px;
+      width: 16px;
+      height: 16px;
+      color: #1e40af;
       flex-shrink: 0;
-    }
-    
-    /* Allow text to truncate if too long */
-    span {
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
   }
 `;
 
 const JobPostStats = styled.div`
   display: flex;
-  gap: 20px;
-  padding: 16px 0;
+  gap: 24px;
+  padding: 20px;
   border-top: 1px solid #E8EFFF;
   border-bottom: 1px solid #E8EFFF;
-  margin-bottom: 16px;
+  margin-bottom: 4px;
+  background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+  border-radius: 12px;
   
   .stat {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
+    align-items: center;
+    flex: 1;
     
     .stat-value {
-      font-size: 20px;
+      font-size: 28px;
       font-weight: 800;
-      color: ${props => props.theme.colors.text};
+      color: #1e40af;
+      line-height: 1;
     }
     
     .stat-label {
-      font-size: 12px;
+      font-size: 13px;
       color: ${props => props.theme.colors.textLight};
       font-weight: 600;
     }
@@ -453,20 +451,22 @@ const JobPostActions = styled.div`
 
 const JobPostButton = styled(motion.button)`
   flex: 1;
-  padding: 10px 16px;
-  border-radius: 10px;
-  font-size: 13px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 14px;
   font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   transition: all 0.2s ease;
+  cursor: pointer;
+  white-space: nowrap;
   
   background: ${props => {
-    if (props.$variant === 'primary') return '#1e40af';
-    if (props.$variant === 'danger') return '#EF4444';
-    return '#EFF6FF';
+    if (props.$variant === 'primary') return 'linear-gradient(135deg, #1e40af 0%, #2563eb 100%)';
+    if (props.$variant === 'danger') return 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)';
+    return 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)';
   }};
   
   color: ${props => props.$variant === 'primary' || props.$variant === 'danger' ? 'white' : '#1e40af'};
@@ -484,10 +484,14 @@ const JobPostButton = styled(motion.button)`
   &:hover {
     transform: translateY(-2px);
     box-shadow: ${props => {
-      if (props.$variant === 'primary') return '0 4px 12px rgba(30, 64, 175, 0.3)';
-      if (props.$variant === 'danger') return '0 4px 12px rgba(239, 68, 68, 0.3)';
-      return '0 4px 12px rgba(30, 64, 175, 0.15)';
+      if (props.$variant === 'primary') return '0 6px 16px rgba(30, 64, 175, 0.4)';
+      if (props.$variant === 'danger') return '0 6px 16px rgba(239, 68, 68, 0.4)';
+      return '0 6px 16px rgba(30, 64, 175, 0.2)';
     }};
+  }
+  
+  &:active {
+    transform: translateY(0);
   }
 `;
 
@@ -517,18 +521,15 @@ const JobTypeBadge = styled.div`
 // --- Section Header for Posts ---
 const PostsSectionHeader = styled.div`
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
-  padding: 16px 20px;
-  background: #ffffff;
-  border-radius: 12px;
-  border: 1.5px solid #E8EFFF;
-  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.06);
+  padding: 16px 0;
+  border-bottom: 2px solid #E8EFFF;
 `;
 
 const PostsSectionTitle = styled.h2`
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: ${props => props.theme.colors.text};
   display: flex;
@@ -2036,6 +2037,8 @@ const Applications = () => {
   const [activeSection, setActiveSection] = useState('posts');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilters, setStatusFilters] = useState([]);
+  const [timeFilter, setTimeFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [applications, setApplications] = useState(() => getInitialApplications(language));
   const [realApplications, setRealApplications] = useState([]); // Real applications from DynamoDB
@@ -2085,6 +2088,7 @@ const Applications = () => {
           views: job.views || 0,
           status: job.status,
           postedDate: formatDate(job.createdAt, language),
+          _createdAt: job.createdAt,
           deadline: calculateDeadline(job.workDays, language),
           description: job.description,
           responsibilities: job.responsibilities,
@@ -2288,59 +2292,42 @@ const Applications = () => {
   const filteredApplications = useMemo(() => {
     const applicationsToFilter = realApplications.length > 0 ? realApplications : applications;
 
-    // Parse "applied" string → số giờ tương đối
     const toHours = (applied = '') => {
       const s = applied.toLowerCase();
-      if (s.includes('phút') || s.includes('minute')) {
-        const m = s.match(/(\d+)/);
-        return m ? parseInt(m[1]) / 60 : 0;
-      }
-      if (s.includes('giờ') || s.includes('hour')) {
-        const m = s.match(/(\d+)/);
-        return m ? parseInt(m[1]) : 0;
-      }
-      if (s.includes('ngày') || s.includes('day')) {
-        const m = s.match(/(\d+)/);
-        return m ? parseInt(m[1]) * 24 : 24;
-      }
-      if (s.includes('tuần') || s.includes('week')) {
-        const m = s.match(/(\d+)/);
-        return m ? parseInt(m[1]) * 24 * 7 : 24 * 7;
-      }
-      if (s.includes('tháng') || s.includes('month')) {
-        const m = s.match(/(\d+)/);
-        return m ? parseInt(m[1]) * 24 * 30 : 24 * 30;
-      }
+      if (s.includes('phút') || s.includes('minute')) { const m = s.match(/(\d+)/); return m ? parseInt(m[1]) / 60 : 0; }
+      if (s.includes('giờ') || s.includes('hour'))    { const m = s.match(/(\d+)/); return m ? parseInt(m[1]) : 0; }
+      if (s.includes('ngày') || s.includes('day'))    { const m = s.match(/(\d+)/); return m ? parseInt(m[1]) * 24 : 24; }
+      if (s.includes('tuần') || s.includes('week'))   { const m = s.match(/(\d+)/); return m ? parseInt(m[1]) * 24 * 7 : 24 * 7; }
+      if (s.includes('tháng') || s.includes('month')) { const m = s.match(/(\d+)/); return m ? parseInt(m[1]) * 24 * 30 : 24 * 30; }
       return 0;
     };
 
     return applicationsToFilter.filter(app => {
+      // Search: tên ứng viên hoặc vị trí
       const matchesSearch = !searchTerm ||
         app.candidate.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.job.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesTime = statusFilters.length === 0 || (() => {
-        const hours = toHours(app.applied || app.appliedAt);
-        return statusFilters.some(f => {
-          if (f === 'today')  return hours < 24;
-          if (f === 'week')   return hours < 24 * 7;
-          if (f === 'month')  return hours < 24 * 30;
-          if (f === 'older')  return hours >= 24 * 30;
-          return true;
-        });
-      })();
+      // Time filter (single select)
+      const hours = toHours(app.applied || app.appliedAt);
+      const matchesTime =
+        timeFilter === 'all'   ? true :
+        timeFilter === 'today' ? hours < 24 :
+        timeFilter === 'week'  ? hours < 24 * 7 :
+        timeFilter === 'month' ? hours < 24 * 30 : true;
 
-      return matchesSearch && matchesTime;
+      // Status filter (single select)
+      const matchesStatus =
+        statusFilter === 'all'      ? true :
+        statusFilter === 'pending'  ? app.status === 'pending' :
+        statusFilter === 'approved' ? app.status === 'approved' :
+        statusFilter === 'rejected' ? app.status === 'rejected' : true;
+
+      return matchesSearch && matchesTime && matchesStatus;
     });
-  }, [applications, realApplications, searchTerm, statusFilters]);
+  }, [applications, realApplications, searchTerm, timeFilter, statusFilter]);
 
-  const handleFilterToggle = useCallback((filterValue) => {
-    setStatusFilters(prev =>
-      prev.includes(filterValue)
-        ? prev.filter(f => f !== filterValue)
-        : [...prev, filterValue]
-    );
-  }, []);
+  const handleFilterToggle = useCallback(() => {}, []);
 
   const handleCompleteJob = useCallback((id) => {
     setApplications(prev => prev.map(app =>
@@ -2428,19 +2415,32 @@ const Applications = () => {
   // Filter job posts by time and search
   const filteredJobPosts = useMemo(() => {
     const now = new Date();
+
+    // Parse postedDate → Date object (handles both ISO timestamp and relative string)
+    const toDate = (post) => {
+      // Real data: has _createdAt ISO string
+      if (post._createdAt) return new Date(post._createdAt);
+      // Mock data: relative string like "5 ngày trước", "2 days ago"
+      const s = (post.postedDate || '').toLowerCase();
+      const m = s.match(/(\d+)/);
+      const n = m ? parseInt(m[1]) : 1;
+      if (s.includes('phút') || s.includes('minute')) return new Date(now - n * 60 * 1000);
+      if (s.includes('giờ') || s.includes('hour'))    return new Date(now - n * 3600 * 1000);
+      if (s.includes('ngày') || s.includes('day'))    return new Date(now - n * 86400 * 1000);
+      if (s.includes('tuần') || s.includes('week'))   return new Date(now - n * 7 * 86400 * 1000);
+      if (s.includes('tháng') || s.includes('month')) return new Date(now - n * 30 * 86400 * 1000);
+      return new Date(0);
+    };
+
     return jobPosts.filter(post => {
-      // Search filter
       if (postSearchTerm) {
         const term = postSearchTerm.toLowerCase();
         if (!post.title?.toLowerCase().includes(term) && !post.location?.toLowerCase().includes(term)) return false;
       }
-      // Time filter
       if (postTimeFilter === 'all') return true;
-      const posted = new Date(post.postedDate || post.createdAt || 0);
-      const diffMs = now - posted;
-      const diffDays = diffMs / (1000 * 60 * 60 * 24);
+      const diffDays = (now - toDate(post)) / (1000 * 60 * 60 * 24);
       if (postTimeFilter === 'today') return diffDays < 1;
-      if (postTimeFilter === 'week') return diffDays < 7;
+      if (postTimeFilter === 'week')  return diffDays < 7;
       if (postTimeFilter === 'month') return diffDays < 30;
       return true;
     });
@@ -2488,14 +2488,14 @@ const Applications = () => {
         <StandardJobsSection>
           <StandardJobsGrid>
             <StandardJobCard
-              $color="#1e40af"
+              $color="#10B981"
               $active={activeSection === 'posts'}
               onClick={() => setActiveSection('posts')}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
             >
-              <StandardJobIcon $color="#1e40af">
-                <Newspaper />
+              <StandardJobIcon $color="#10B981">
+                <FileText />
               </StandardJobIcon>
               <StandardJobLabel>{language === 'vi' ? 'Quản lý bài đăng' : 'Post Management'}</StandardJobLabel>
               <StandardJobDescription>
@@ -2504,13 +2504,13 @@ const Applications = () => {
             </StandardJobCard>
 
             <StandardJobCard
-              $color="#10B981"
+              $color="#1e40af"
               $active={activeSection === 'applications'}
               onClick={() => setActiveSection('applications')}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
             >
-              <StandardJobIcon $color="#10B981">
+              <StandardJobIcon $color="#1e40af">
                 <Users />
               </StandardJobIcon>
               <StandardJobLabel>{language === 'vi' ? 'Hồ sơ ứng tuyển' : 'Applications'}</StandardJobLabel>
@@ -2607,36 +2607,49 @@ const Applications = () => {
                 transition={{ delay: index * 0.1 }}
               >
                 <JobPostHeader>
-                  <div>
-                    <JobPostTitle>{post.title}</JobPostTitle>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                      <JobPostTitle style={{ margin: 0, flex: 1 }}>{post.title}</JobPostTitle>
+                      <JobStatusBadge $status={post.status}>
+                        {post.status === 'active' 
+                          ? (language === 'vi' ? 'Đang tuyển' : 'Active') 
+                          : (language === 'vi' ? 'Đã đóng' : 'Closed')}
+                      </JobStatusBadge>
+                    </div>
                     <JobPostMeta>
                       <div className="meta-item">
-                        <MapPin /><span>{post.location}</span>
+                        <MapPin />{post.location}
                       </div>
                       <div className="meta-item">
-                        <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span> <span>{post.salary}</span>
+                        <Wallet size={15} style={{ strokeWidth: 1.5 }} />{post.salary}
                       </div>
                       {post.shift && (
                         <div className="meta-item">
-                          <Clock /><span>{post.shift}</span>
+                          <Clock />{post.shift}
                         </div>
                       )}
                       {post.workDays && (
                         <div className="meta-item">
-                          <Calendar /><span>{language === 'vi' ? 'Ngày làm: ' : 'Work date: '}{post.workDays}</span>
+                          <Calendar />{language === 'vi' ? 'Ngày làm: ' : 'Work date: '}{post.workDays}
                         </div>
                       )}
                     </JobPostMeta>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-                    <JobStatusBadge $status={post.status}>
-                      {post.status === 'active' 
-                        ? (language === 'vi' ? 'Đang tuyển' : 'Active') 
-                        : (language === 'vi' ? 'Đã đóng' : 'Closed')}
-                    </JobStatusBadge>
-                    <JobTypeBadge $partTime={post.type === 'Bán thời gian' || post.type === 'Part-time'}>
-                      {(post.type === 'Bán thời gian' || post.type === 'Part-time') ? 'Part-time' : 'Full-time'}
-                    </JobTypeBadge>
+                    <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                      <JobTypeBadge $partTime={post.type === 'Bán thời gian' || post.type === 'Part-time'}>
+                        {(post.type === 'Bán thời gian' || post.type === 'Part-time') ? 'Part-time' : 'Full-time'}
+                      </JobTypeBadge>
+                      {post.postedDate && (
+                        <span style={{
+                          display: 'flex', alignItems: 'center', gap: '5px',
+                          fontSize: '12px', fontWeight: '600', color: '#1e40af',
+                          background: '#EFF6FF', border: '1.5px solid #BFDBFE',
+                          borderRadius: '20px', padding: '4px 10px'
+                        }}>
+                          <Clock size={12} />
+                          {language === 'vi' ? 'Đăng ' : 'Posted '}{post.postedDate}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </JobPostHeader>
                 
@@ -2649,10 +2662,6 @@ const Applications = () => {
                     <div className="stat-value">{post.views}</div>
                     <div className="stat-label">{language === 'vi' ? 'Lượt xem' : 'Views'}</div>
                   </div>
-                  <div className="stat" style={{ marginLeft: 'auto' }}>
-                    <div className="stat-label">{language === 'vi' ? 'Đăng' : 'Posted'}</div>
-                    <div className="stat-label" style={{ color: '#1e40af', fontWeight: 700 }}>{post.postedDate}</div>
-                  </div>
                 </JobPostStats>
                 
                 <JobPostActions>
@@ -2661,7 +2670,7 @@ const Applications = () => {
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleViewJob(post.id)}
                   >
-                    <Eye />{language === 'vi' ? 'Xem' : 'View'}
+                    <Eye />{language === 'vi' ? 'Xem mô tả' : 'View'}
                   </JobPostButton>
                   <JobPostButton
                     $variant="primary"
@@ -2690,14 +2699,39 @@ const Applications = () => {
 
         {activeSection === 'applications' && (
           <>
-            <TableFilter
-              searchValue={searchTerm}
-              onSearchChange={setSearchTerm}
-              filterOptions={FILTER_OPTIONS(language)}
-              activeFilters={statusFilters}
-              onFilterToggle={handleFilterToggle}
-              searchPlaceholder={language === 'vi' ? 'Tìm kiếm theo ứng viên hoặc vị trí...' : 'Search by candidate or position...'}
-            />
+            {/* Filter bar */}
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+              <input
+                type="text"
+                placeholder={language === 'vi' ? 'Tìm ứng viên, vị trí...' : 'Search candidate, position...'}
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                style={{
+                  flex: 1, minWidth: '180px', padding: '8px 14px', borderRadius: '8px',
+                  border: '1.5px solid #e2e8f0', fontSize: '14px', outline: 'none',
+                  background: '#f8fafc', color: '#1e293b'
+                }}
+              />
+              {['all', 'today', 'week', 'month'].map(f => (
+                <button
+                  key={f}
+                  onClick={() => setTimeFilter(f)}
+                  style={{
+                    padding: '7px 14px', borderRadius: '8px', fontSize: '13px', fontWeight: '600',
+                    border: '1.5px solid',
+                    borderColor: timeFilter === f ? '#1e40af' : '#e2e8f0',
+                    background: timeFilter === f ? '#1e40af' : '#f8fafc',
+                    color: timeFilter === f ? '#fff' : '#64748b',
+                    cursor: 'pointer', transition: 'all 0.15s'
+                  }}
+                >
+                  {f === 'all'   ? (language === 'vi' ? 'Tất cả'    : 'All')
+                  : f === 'today' ? (language === 'vi' ? 'Hôm nay'   : 'Today')
+                  : f === 'week'  ? (language === 'vi' ? 'Tuần này'  : 'This week')
+                  :                 (language === 'vi' ? 'Tháng này' : 'This month')}
+                </button>
+              ))}
+            </div>
 
             {isLoadingApplications ? (
               <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
