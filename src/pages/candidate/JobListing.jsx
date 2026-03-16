@@ -3415,7 +3415,7 @@ const JobListing = () => {
                           checked={selectedJobTypes.includes('sáng')}
                           onChange={() => toggleJobType('sáng')}
                         />
-                        <span>{language === 'vi' ? 'Ca sáng (6h-14h)' : 'Morning Shift (6AM-2PM)'}</span>
+                        <span>{language === 'vi' ? '6h - 14h' : '6AM - 2PM'}</span>
                         <small>8</small>
                       </FilterOption>
                       <FilterOption>
@@ -3425,7 +3425,7 @@ const JobListing = () => {
                           checked={selectedJobTypes.includes('chiều')}
                           onChange={() => toggleJobType('chiều')}
                         />
-                        <span>{language === 'vi' ? 'Ca chiều (14h-22h)' : 'Afternoon Shift (2PM-10PM)'}</span>
+                        <span>{language === 'vi' ? '14h - 22h' : '2PM - 10PM'}</span>
                         <small>5</small>
                       </FilterOption>
                       <FilterOption>
@@ -3435,7 +3435,7 @@ const JobListing = () => {
                           checked={selectedJobTypes.includes('đêm')}
                           onChange={() => toggleJobType('đêm')}
                         />
-                        <span>{language === 'vi' ? 'Ca đêm (22h-6h)' : 'Night Shift (10PM-6AM)'}</span>
+                        <span>{language === 'vi' ? '22h - 6h' : '10PM - 6AM'}</span>
                         <small>5</small>
                       </FilterOption>
 

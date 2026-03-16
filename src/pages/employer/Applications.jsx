@@ -175,11 +175,10 @@ const getInitialApplications = (language) => [
 ];
 
 const FILTER_OPTIONS = (language) => ([
-  { value: 'pending', label: language === 'vi' ? 'Chờ duyệt' : 'Pending' },
-  { value: 'approved', label: language === 'vi' ? 'Chấp nhận' : 'Approved' },
-  { value: 'rejected', label: language === 'vi' ? 'Từ chối' : 'Rejected' },
-  { value: 'completed', label: language === 'vi' ? 'Hoàn thành' : 'Completed' },
-  { value: 'marked', label: language === 'vi' ? 'Đã đánh dấu' : 'Marked' },
+  { value: 'today', label: language === 'vi' ? 'Hôm nay' : 'Today' },
+  { value: 'week', label: language === 'vi' ? 'Tuần này' : 'This week' },
+  { value: 'month', label: language === 'vi' ? 'Tháng này' : 'This month' },
+  { value: 'older', label: language === 'vi' ? 'Cũ hơn' : 'Older' },
 ]);
 
 const ApplicationsContainer = styled(motion.div)`
@@ -2053,6 +2052,8 @@ const Applications = () => {
   const [editJobData, setEditJobData] = useState(null);
   const [showCVModal, setShowCVModal] = useState(false);
   const [selectedCV, setSelectedCV] = useState(null);
+  const [postTimeFilter, setPostTimeFilter] = useState('all'); // 'all' | 'today' | 'week' | 'month'
+  const [postSearchTerm, setPostSearchTerm] = useState('');
 
   // Mock wallet connection status - in real app, get from user context or API
   const [isWalletConnected] = useState(() => {
@@ -2285,19 +2286,51 @@ const Applications = () => {
   }, [location.state, applications, navigate, location.pathname]);
 
   const filteredApplications = useMemo(() => {
-    // Use real applications if available, otherwise use mock data
     const applicationsToFilter = realApplications.length > 0 ? realApplications : applications;
-    
+
+    // Parse "applied" string → số giờ tương đối
+    const toHours = (applied = '') => {
+      const s = applied.toLowerCase();
+      if (s.includes('phút') || s.includes('minute')) {
+        const m = s.match(/(\d+)/);
+        return m ? parseInt(m[1]) / 60 : 0;
+      }
+      if (s.includes('giờ') || s.includes('hour')) {
+        const m = s.match(/(\d+)/);
+        return m ? parseInt(m[1]) : 0;
+      }
+      if (s.includes('ngày') || s.includes('day')) {
+        const m = s.match(/(\d+)/);
+        return m ? parseInt(m[1]) * 24 : 24;
+      }
+      if (s.includes('tuần') || s.includes('week')) {
+        const m = s.match(/(\d+)/);
+        return m ? parseInt(m[1]) * 24 * 7 : 24 * 7;
+      }
+      if (s.includes('tháng') || s.includes('month')) {
+        const m = s.match(/(\d+)/);
+        return m ? parseInt(m[1]) * 24 * 30 : 24 * 30;
+      }
+      return 0;
+    };
+
     return applicationsToFilter.filter(app => {
       const matchesSearch = !searchTerm ||
         app.candidate.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.job.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesStatus = statusFilters.length === 0 ||
-        statusFilters.includes(app.status) ||
-        (statusFilters.includes('marked') && app.marked);
+      const matchesTime = statusFilters.length === 0 || (() => {
+        const hours = toHours(app.applied || app.appliedAt);
+        return statusFilters.some(f => {
+          if (f === 'today')  return hours < 24;
+          if (f === 'week')   return hours < 24 * 7;
+          if (f === 'month')  return hours < 24 * 30;
+          if (f === 'older')  return hours >= 24 * 30;
+          return true;
+        });
+      })();
 
-      return matchesSearch && matchesStatus;
+      return matchesSearch && matchesTime;
     });
   }, [applications, realApplications, searchTerm, statusFilters]);
 
@@ -2392,6 +2425,27 @@ const Applications = () => {
   // Get job title for delete confirmation
   const jobToDelete = deleteJobId ? jobPosts.find(job => job.id === deleteJobId) : null;
 
+  // Filter job posts by time and search
+  const filteredJobPosts = useMemo(() => {
+    const now = new Date();
+    return jobPosts.filter(post => {
+      // Search filter
+      if (postSearchTerm) {
+        const term = postSearchTerm.toLowerCase();
+        if (!post.title?.toLowerCase().includes(term) && !post.location?.toLowerCase().includes(term)) return false;
+      }
+      // Time filter
+      if (postTimeFilter === 'all') return true;
+      const posted = new Date(post.postedDate || post.createdAt || 0);
+      const diffMs = now - posted;
+      const diffDays = diffMs / (1000 * 60 * 60 * 24);
+      if (postTimeFilter === 'today') return diffDays < 1;
+      if (postTimeFilter === 'week') return diffDays < 7;
+      if (postTimeFilter === 'month') return diffDays < 30;
+      return true;
+    });
+  }, [jobPosts, postTimeFilter, postSearchTerm]);
+
   // View job details
   const handleViewJob = (jobId) => {
     const job = jobPosts.find(j => j.id === jobId);
@@ -2484,6 +2538,40 @@ const Applications = () => {
                 {language === 'vi' ? 'Đăng bài mới' : 'Post New Job'}
               </CreatePostButton>
             </PostsSectionHeader>
+
+            {/* Filter bar for job posts */}
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+              <input
+                type="text"
+                placeholder={language === 'vi' ? 'Tìm theo tên việc, địa điểm...' : 'Search by title, location...'}
+                value={postSearchTerm}
+                onChange={e => setPostSearchTerm(e.target.value)}
+                style={{
+                  flex: 1, minWidth: '180px', padding: '8px 14px', borderRadius: '8px',
+                  border: '1.5px solid #e2e8f0', fontSize: '14px', outline: 'none',
+                  background: '#f8fafc', color: '#1e293b'
+                }}
+              />
+              {['all', 'today', 'week', 'month'].map(f => (
+                <button
+                  key={f}
+                  onClick={() => setPostTimeFilter(f)}
+                  style={{
+                    padding: '7px 14px', borderRadius: '8px', fontSize: '13px', fontWeight: '600',
+                    border: '1.5px solid',
+                    borderColor: postTimeFilter === f ? '#1e40af' : '#e2e8f0',
+                    background: postTimeFilter === f ? '#1e40af' : '#f8fafc',
+                    color: postTimeFilter === f ? '#fff' : '#64748b',
+                    cursor: 'pointer', transition: 'all 0.15s'
+                  }}
+                >
+                  {f === 'all' ? (language === 'vi' ? 'Tất cả' : 'All')
+                    : f === 'today' ? (language === 'vi' ? 'Hôm nay' : 'Today')
+                    : f === 'week' ? (language === 'vi' ? 'Tuần này' : 'This week')
+                    : (language === 'vi' ? 'Tháng này' : 'This month')}
+                </button>
+              ))}
+            </div>
         
         {isLoadingJobs ? (
           <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
@@ -2498,10 +2586,19 @@ const Applications = () => {
             <h3>{language === 'vi' ? 'Chưa có bài đăng nào' : 'No job posts yet'}</h3>
             <p>{language === 'vi' ? 'Bấm "Đăng bài mới" để tạo bài đăng tuyển dụng đầu tiên' : 'Click "Post New Job" to create your first job posting'}</p>
           </EmptyState>
+        ) : filteredJobPosts.length === 0 ? (
+          <EmptyState
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="icon">🔍</div>
+            <h3>{language === 'vi' ? 'Không tìm thấy bài đăng phù hợp' : 'No matching posts found'}</h3>
+            <p>{language === 'vi' ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm' : 'Try changing the filter or search term'}</p>
+          </EmptyState>
         ) : (
           <JobPostsGrid>
             <AnimatePresence>
-              {jobPosts.map((post, index) => (
+              {filteredJobPosts.map((post, index) => (
               <JobPostCard
                 key={post.id}
                 $status={post.status}

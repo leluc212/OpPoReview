@@ -30,8 +30,24 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      external: []
-    }
+      external: [],
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('lucide-react')) return 'vendor_lucide';
+            if (id.includes('html2canvas')) return 'vendor_html2canvas';
+            if (id.includes('purify')) return 'vendor_purify';
+            if (id.includes('node_modules/react/')) return 'vendor_react';
+            if (id.includes('node_modules/react-dom/')) return 'vendor_react_dom';
+            if (id.includes('node_modules/styled-components/')) return 'vendor_styled';
+            if (id.includes('node_modules/framer-motion/')) return 'vendor_framer';
+            if (id.includes('node_modules/react-router')) return 'vendor_router';
+            return 'vendor';
+          }
+        }
+      }
+    },
+    chunkSizeWarningLimit: 2000 // raise limit to reduce noisy warnings (KB)
   },
   optimizeDeps: {
     include: ['@popperjs/core']

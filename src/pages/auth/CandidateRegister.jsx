@@ -709,7 +709,7 @@ const CandidateRegister = () => {
   const onChange = e => {
     const { name, value } = e.target;
     setForm(p => ({ ...p, [name]: value }));
-    
+
     // Real-time validation cho password
     if (name === 'password') {
       const pwError = validatePassword(value);
@@ -776,11 +776,11 @@ const CandidateRegister = () => {
     if (!form.fullName) e.fullName = 'Vui lòng nhập họ tên';
     if (!form.email) e.email = 'Vui lòng nhập email';
     else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = 'Email không đúng định dạng';
-    
+
     const pwError = validatePassword(form.password);
     if (!form.password) e.password = 'Vui lòng nhập mật khẩu';
     else if (pwError) e.password = pwError;
-    
+
     if (!form.confirmPassword) e.confirmPassword = 'Vui lòng xác nhận mật khẩu';
     else if (form.password !== form.confirmPassword) e.confirmPassword = 'Mật khẩu không khớp';
     if (!agreed) e.agreed = 'Bạn cần đồng ý điều khoản';
@@ -794,9 +794,9 @@ const CandidateRegister = () => {
     try {
       // Import Auth functions from amplifyClient (v6 compatible)
       const { Auth } = await import('../../utils/amplifyClient');
-      
+
       console.log('Calling signUp for candidate:', form.email);
-      
+
       // AWS Amplify v6 signUp syntax with role in user attributes
       const result = await Auth.signUp({
         username: form.email,
@@ -814,20 +814,20 @@ const CandidateRegister = () => {
           }
         }
       });
-      
+
       console.log('SignUp successful:', result);
-      
+
       // Check if user needs to confirm (email verification)
       if (result.isSignUpComplete === false || result.nextStep?.signUpStep === 'CONFIRM_SIGN_UP') {
         console.log('User needs to confirm email with OTP');
         // Redirect to OTP verification page
-        navigate('/verify-otp', { 
-          state: { 
-            email: form.email, 
+        navigate('/verify-otp', {
+          state: {
+            email: form.email,
             password: form.password,
             role: 'candidate',
             fromRegistration: true
-          } 
+          }
         });
       } else {
         // User is auto-confirmed (shouldn't happen with new Lambda)
@@ -837,18 +837,20 @@ const CandidateRegister = () => {
       }
     } catch (err) {
       console.error('SignUp error:', err);
-      
+
       let errorMessage = '';
-      if (err.name === 'UsernameExistsException' || err.message?.includes('User already exists')) {
-        errorMessage = 'Email này đã được đăng ký. Vui lòng đăng nhập hoặc sử dụng email khác.';
+      if (err.name === 'UsernameExistsException' || err.message?.includes('User already') || err.message?.includes('already exists')) {
+        errorMessage = 'Tài khoản này đã tồn tại';
       } else if (err.name === 'InvalidPasswordException') {
         errorMessage = 'Mật khẩu không đủ mạnh. Vui lòng thử mật khẩu khác.';
       } else if (err.name === 'InvalidParameterException') {
         errorMessage = 'Thông tin không hợp lệ. Vui lòng kiểm tra lại.';
+      } else if (err.name === 'LimitExceededException' || err.message?.includes('Exceeded daily email limit')) {
+        errorMessage = 'Hệ thống gửi Email OTP đã đạt giới hạn trong ngày (giới hạn AWS Sandbox). Vui lòng thử lại vào ngày mai!';
       } else {
         errorMessage = err.message || 'Đăng ký thất bại';
       }
-      
+
       setErrors({ submit: errorMessage });
     }
   };

@@ -855,7 +855,7 @@ const EmployerRegister = () => {
   const handleChange = e => {
     const { name, value } = e.target;
     setForm(p => ({ ...p, [name]: value }));
-    
+
     // Real-time validation cho password
     if (name === 'password') {
       const pwError = validatePassword(value);
@@ -909,11 +909,11 @@ const EmployerRegister = () => {
     if (!form.fullName) e.fullName = 'Vui lòng nhập họ và tên';
     if (!form.email) e.email = 'Vui lòng nhập email công ty';
     else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = 'Email không đúng định dạng';
-    
+
     const pwError = validatePassword(form.password);
     if (!form.password) e.password = 'Vui lòng nhập mật khẩu';
     else if (pwError) e.password = pwError;
-    
+
     if (!form.confirmPassword) e.confirmPassword = 'Vui lòng xác nhận mật khẩu';
     else if (form.password !== form.confirmPassword) e.confirmPassword = 'Mật khẩu không khớp';
     return e;
@@ -942,9 +942,9 @@ const EmployerRegister = () => {
     try {
       // Import Auth functions from amplifyClient (v6 compatible)
       const { Auth } = await import('../../utils/amplifyClient');
-      
+
       console.log('Calling signUp for employer:', form.email);
-      
+
       // AWS Amplify v6 signUp syntax with role in user attributes
       const result = await Auth.signUp({
         username: form.email,
@@ -963,20 +963,20 @@ const EmployerRegister = () => {
           }
         }
       });
-      
+
       console.log('SignUp successful:', result);
-      
+
       // Check if user needs to confirm (email verification)
       if (result.isSignUpComplete === false || result.nextStep?.signUpStep === 'CONFIRM_SIGN_UP') {
         console.log('User needs to confirm email with OTP');
         // Redirect to OTP verification page
-        navigate('/verify-otp', { 
-          state: { 
-            email: form.email, 
+        navigate('/verify-otp', {
+          state: {
+            email: form.email,
             password: form.password,
             role: 'employer',
             fromRegistration: true
-          } 
+          }
         });
       } else {
         // User is auto-confirmed (shouldn't happen with new Lambda)
@@ -986,18 +986,20 @@ const EmployerRegister = () => {
       }
     } catch (err) {
       console.error('Employer signUp error:', err);
-      
+
       let errorMessage = '';
-      if (err.name === 'UsernameExistsException' || err.message?.includes('User already exists')) {
-        errorMessage = 'Email này đã được đăng ký. Vui lòng đăng nhập hoặc sử dụng email khác.';
+      if (err.name === 'UsernameExistsException' || err.message?.includes('User already') || err.message?.includes('already exists')) {
+        errorMessage = 'Tài khoản này đã tồn tại';
       } else if (err.name === 'InvalidPasswordException') {
         errorMessage = 'Mật khẩu không đủ mạnh. Vui lòng thử mật khẩu khác.';
       } else if (err.name === 'InvalidParameterException') {
         errorMessage = 'Thông tin không hợp lệ. Vui lòng kiểm tra lại.';
+      } else if (err.name === 'LimitExceededException' || err.message?.includes('Exceeded daily email limit')) {
+        errorMessage = 'Hệ thống gửi Email OTP đã đạt giới hạn trong ngày (giới hạn AWS Sandbox). Vui lòng thử lại vào ngày mai!';
       } else {
         errorMessage = err.message || 'Đăng ký thất bại';
       }
-      
+
       setErrors({ submit: errorMessage });
     }
   };
@@ -1225,6 +1227,7 @@ const EmployerRegister = () => {
                   </CheckText>
                 </CheckRow>
                 {errors.agreed && <FieldErr style={{ marginTop: -8, marginBottom: 10 }}>⚠ {errors.agreed}</FieldErr>}
+                {errors.submit && <FieldErr style={{ marginTop: -4, marginBottom: 14, textAlign: 'center', display: 'block', fontSize: '13.5px' }}>⚠ {errors.submit}</FieldErr>}
 
                 <form onSubmit={handleSubmit}>
                   <SubmitBtn
@@ -1236,7 +1239,7 @@ const EmployerRegister = () => {
                 </form>
 
                 <BackBtn type="button" onClick={() => setStep(1)}>
-                   Quay lại
+                  Quay lại
                 </BackBtn>
 
                 <FootNote>

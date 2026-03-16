@@ -3,6 +3,7 @@ import styled, { keyframes, css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
+import employerProfileService from '../../services/employerProfileService';
 import { Check, Zap, Star, Rocket, Sparkles, X, HelpCircle, CreditCard, Shield, Clock, CheckCircle } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -652,7 +653,6 @@ const Subscription = () => {
     // Get companyName from DynamoDB
     let companyName = 'Unknown Company';
     try {
-      const employerProfileService = (await import('../../services/employerProfileService')).default;
       const profile = await employerProfileService.getMyProfile();
       if (profile && (profile.companyName || profile.businessName)) {
         companyName = profile.companyName || profile.businessName;

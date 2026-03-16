@@ -7,6 +7,7 @@ import { Button, Input, TextArea, Select, FormGroup, Label } from '../../compone
 import { Save, ArrowLeft, AlertCircle, Briefcase, Clock, FileText, CheckSquare, ClipboardList, Gift } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import jobPostService from '../../services/jobPostService';
+import employerProfileService from '../../services/employerProfileService';
 import { fetchAuthSession } from 'aws-amplify/auth';
 
 // Keyframe animations
@@ -434,6 +435,17 @@ const PostJob = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Validate work date is not in the past
+    if (formData.workDays) {
+      const today = new Date().toISOString().split('T')[0];
+      if (formData.workDays < today) {
+        alert(language === 'vi' 
+          ? 'Ngày làm việc không được ở trong quá khứ.' 
+          : 'Work date cannot be in the past.');
+        return;
+      }
+    }
+    
     console.log('🔥🔥🔥 SUBMIT BUTTON CLICKED');
     console.log('📦 Form data:', formData);
     console.log('📝 Is editing:', isEditing);
@@ -465,7 +477,6 @@ const PostJob = () => {
           
           // Try to get company name from EmployerProfile
           try {
-            const employerProfileService = (await import('../../services/employerProfileService')).default;
             const profile = await employerProfileService.getMyProfile();
             if (profile && profile.companyName) {
               employerName = profile.companyName;
@@ -644,6 +655,7 @@ const PostJob = () => {
                 <Input 
                   name="workDays" 
                   type="date"
+                  min={new Date().toISOString().split('T')[0]}
                   placeholder={language === 'vi' ? 'Chọn ngày' : 'Select date'} 
                   value={formData.workDays} 
                   onChange={handleChange} 

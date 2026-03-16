@@ -2393,8 +2393,7 @@ const HRManagement = () => {
       setLoadingApplications(true);
       console.log('📥 Loading applications from Quick Jobs...');
       
-      // Import applicationService
-      const applicationService = (await import('../../services/applicationService')).default;
+      // applicationService is statically imported at the top of this file
       
       // Load applications for each quick job
       const allApplications = [];
@@ -2860,6 +2859,18 @@ const HRManagement = () => {
         : 'Hourly rate must be greater than or equal to 31,875 VND');
       setShowErrorNotification(true);
       return;
+    }
+
+    // Validate work date
+    if (editJobData.workDate) {
+      const today = new Date().toISOString().split('T')[0];
+      if (editJobData.workDate < today) {
+        setErrorNotificationMessage(language === 'vi' 
+          ? 'Ngày làm việc không được ở trong quá khứ.' 
+          : 'Work date cannot be in the past.');
+        setShowErrorNotification(true);
+        return;
+      }
     }
 
     try {
