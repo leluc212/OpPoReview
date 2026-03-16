@@ -1686,7 +1686,7 @@ const JOBS_DATA = [
     lng: 106.7004,
     type: 'Full-time',
     category: 'standard',
-    salary: '6 triệu VND',
+    salary: '25.000 VNĐ/giờ',
     postedAt: '1 ngày trước',
     tags: ['Pha chế', 'Full-time', 'F&B'],
     featured: false,
@@ -2982,25 +2982,48 @@ const JobListing = () => {
     return match ? parseInt(match[0]) : 0;
   };
 
+  // Dynamic counts for filter options
+  const filterCounts = useMemo(() => {
+    // Base: category + keyword + location filters applied (same as filteredJobs before type/salary filters)
+    let base = allJobs.filter(j => j.category === jobCategory);
+
+    if (searchKeyword.trim()) {
+      const kw = searchKeyword.toLowerCase().trim();
+      base = base.filter(j =>
+        (j.title || '').toLowerCase().includes(kw) ||
+        (j.company || '').toLowerCase().includes(kw) ||
+        (j.tags || []).some(t => t.toLowerCase().includes(kw)) ||
+        (j.location || '').toLowerCase().includes(kw)
+      );
+    }
+    if (selectedLocation.trim()) {
+      const loc = selectedLocation.toLowerCase().trim();
+      base = base.filter(j => (j.location || '').toLowerCase().includes(loc));
+    }
+
+    const count = (fn) => base.filter(fn).length;
+    return {
+      fulltime:  count(j => (j.type || '').toLowerCase().includes('full-time') || (j.type || '').toLowerCase().includes('toàn thời gian')),
+      parttime:  count(j => (j.type || '').toLowerCase().includes('part-time') || (j.type || '').toLowerCase().includes('bán thời gian')),
+      morning:   count(j => (j.type || '').toLowerCase().includes('sáng')),
+      afternoon: count(j => (j.type || '').toLowerCase().includes('chiều')),
+      night:     count(j => (j.type || '').toLowerCase().includes('đêm')),
+      hourly:    count(j => (j.salary || '').toLowerCase().includes('giờ') || (j.salary || '').toLowerCase().includes('/h')),
+      under25k:  count(j => { const v = getSalaryValue(j.salary); return v > 0 && v < 25; }),
+      '25to30k': count(j => { const v = getSalaryValue(j.salary); return v >= 25 && v < 30; }),
+      '30to35k': count(j => { const v = getSalaryValue(j.salary); return v >= 30 && v <= 35; }),
+      over35k:   count(j => getSalaryValue(j.salary) > 35),
+    };
+  }, [allJobs, jobCategory, searchKeyword, selectedLocation]);
+
   const isInSalaryRange = (salary, range) => {
     const value = getSalaryValue(salary);
-
-    if (jobCategory === 'standard') {
-      const isHourly = salary.toLowerCase().includes('giờ') || salary.toLowerCase().includes('hour');
-      switch (range) {
-        case 'hourly': return isHourly;
-        case 'under-10m': return !isHourly && value < 5;
-        case '10m-20m': return !isHourly && value >= 5 && value <= 10;
-        case 'over-20m': return !isHourly && value > 10;
-        default: return true;
-      }
-    } else {
-      switch (range) {
-        case '26-30k': return value >= 26 && value < 30;
-        case '30-35k': return value >= 30 && value <= 35;
-        case '35k+': return value > 35;
-        default: return true;
-      }
+    switch (range) {
+      case 'under-25k': return value > 0 && value < 25;
+      case '25k-30k':   return value >= 25 && value < 30;
+      case '30k-35k':   return value >= 30 && value <= 35;
+      case 'over-35k':  return value > 35;
+      default: return true;
     }
   };
 
@@ -3079,9 +3102,14 @@ const JobListing = () => {
 
     // Filter by job type
     if (selectedJobTypes.length > 0) {
-      result = result.filter(job =>
-        selectedJobTypes.some(type => job.type.toLowerCase().includes(type.toLowerCase()))
-      );
+      result = result.filter(job => {
+        const t = (job.type || '').toLowerCase();
+        return selectedJobTypes.some(type => {
+          if (type === 'full-time') return t.includes('full-time') || t.includes('toàn thời gian');
+          if (type === 'part-time') return t.includes('part-time') || t.includes('bán thời gian');
+          return t.includes(type.toLowerCase());
+        });
+      });
     }
 
     // Filter by salary range
@@ -3363,11 +3391,10 @@ const JobListing = () => {
               <ClearButton onClick={clearAllFilters}>{language === 'vi' ? 'Xóa' : 'Clear'}</ClearButton>
             </FilterHeader>
 
+            {jobCategory === 'standard' && (
             <FilterSection>
               <FilterTitle onClick={() => toggleFilter('jobType')} $expanded={expandedFilters.jobType}>
-                <h4>{jobCategory === 'standard'
-                  ? (language === 'vi' ? 'Loại hình công việc' : 'Job Type')
-                  : (language === 'vi' ? 'Loại ca làm việc' : 'Shift Type')}</h4>
+                <h4>{language === 'vi' ? 'Loại hình công việc' : 'Job Type'}</h4>
                 <ChevronDown />
               </FilterTitle>
               {expandedFilters.jobType && (
@@ -3376,73 +3403,66 @@ const JobListing = () => {
                   animate={{ height: 'auto' }}
                   exit={{ height: 0 }}
                 >
-                  {jobCategory === 'standard' ? (
-                    <>
-                      <FilterOption>
-                        <input
-                          type="checkbox"
-                          id="fulltime"
-                          checked={selectedJobTypes.includes('full-time')}
-                          onChange={() => toggleJobType('full-time')}
-                        />
-                        <span>{language === 'vi' ? 'Toàn thời gian' : 'Full-time'}</span>
-                        <small>28</small>
-                      </FilterOption>
-                      <FilterOption>
-                        <input
-                          type="checkbox"
-                          id="parttime"
-                          checked={selectedJobTypes.includes('part-time')}
-                          onChange={() => toggleJobType('part-time')}
-                        />
-                        <span>{language === 'vi' ? 'Bán thời gian' : 'Part-time'}</span>
-                        <small>12</small>
-                      </FilterOption>
-                    </>
-                  ) : (
-                    <>
-                      <FilterOption>
-                        <input
-                          type="checkbox"
-                          id="morning"
-                          checked={selectedJobTypes.includes('sáng')}
-                          onChange={() => toggleJobType('sáng')}
-                        />
-                        <span>{language === 'vi' ? '6h - 14h' : '6AM - 2PM'}</span>
-                        <small>8</small>
-                      </FilterOption>
-                      <FilterOption>
-                        <input
-                          type="checkbox"
-                          id="afternoon"
-                          checked={selectedJobTypes.includes('chiều')}
-                          onChange={() => toggleJobType('chiều')}
-                        />
-                        <span>{language === 'vi' ? '14h - 22h' : '2PM - 10PM'}</span>
-                        <small>5</small>
-                      </FilterOption>
-                      <FilterOption>
-                        <input
-                          type="checkbox"
-                          id="night"
-                          checked={selectedJobTypes.includes('đêm')}
-                          onChange={() => toggleJobType('đêm')}
-                        />
-                        <span>{language === 'vi' ? '22h - 6h' : '10PM - 6AM'}</span>
-                        <small>5</small>
-                      </FilterOption>
-
-                    </>
-                  )}
+                  <FilterOption>
+                    <input type="checkbox" id="fulltime"
+                      checked={selectedJobTypes.includes('full-time')}
+                      onChange={() => toggleJobType('full-time')} />
+                    <span>{language === 'vi' ? 'Toàn thời gian' : 'Full-time'}</span>
+                    <small>{filterCounts.fulltime}</small>
+                  </FilterOption>
+                  <FilterOption>
+                    <input type="checkbox" id="parttime"
+                      checked={selectedJobTypes.includes('part-time')}
+                      onChange={() => toggleJobType('part-time')} />
+                    <span>{language === 'vi' ? 'Bán thời gian' : 'Part-time'}</span>
+                    <small>{filterCounts.parttime}</small>
+                  </FilterOption>
                 </FilterOptions>
               )}
             </FilterSection>
+            )}
+
+            {jobCategory === 'shift' && (
+            <FilterSection>
+              <FilterTitle onClick={() => toggleFilter('jobType')} $expanded={expandedFilters.jobType}>
+                <h4>{language === 'vi' ? 'Loại ca làm việc' : 'Shift Type'}</h4>
+                <ChevronDown />
+              </FilterTitle>
+              {expandedFilters.jobType && (
+                <FilterOptions
+                  initial={{ height: 0 }}
+                  animate={{ height: 'auto' }}
+                  exit={{ height: 0 }}
+                >
+                  <FilterOption>
+                    <input type="checkbox" id="morning"
+                      checked={selectedJobTypes.includes('sáng')}
+                      onChange={() => toggleJobType('sáng')} />
+                    <span>{language === 'vi' ? '6h - 14h' : '6AM - 2PM'}</span>
+                    <small>{filterCounts.morning}</small>
+                  </FilterOption>
+                  <FilterOption>
+                    <input type="checkbox" id="afternoon"
+                      checked={selectedJobTypes.includes('chiều')}
+                      onChange={() => toggleJobType('chiều')} />
+                    <span>{language === 'vi' ? '14h - 22h' : '2PM - 10PM'}</span>
+                    <small>{filterCounts.afternoon}</small>
+                  </FilterOption>
+                  <FilterOption>
+                    <input type="checkbox" id="night"
+                      checked={selectedJobTypes.includes('đêm')}
+                      onChange={() => toggleJobType('đêm')} />
+                    <span>{language === 'vi' ? '22h - 6h' : '10PM - 6AM'}</span>
+                    <small>{filterCounts.night}</small>
+                  </FilterOption>
+                </FilterOptions>
+              )}
+            </FilterSection>
+            )}
 
             <FilterSection>
               <FilterTitle onClick={() => toggleFilter('salary')} $expanded={expandedFilters.salary}>
-                <h4>{jobCategory === 'standard'
-                  ? (language === 'vi' ? 'Mức lương' : 'Salary')
-                  : (language === 'vi' ? 'Thu nhập/giờ' : 'Income/Shift')}</h4>
+                <h4>{language === 'vi' ? 'Thu nhập/giờ' : 'Hourly Rate'}</h4>
                 <ChevronDown />
               </FilterTitle>
               {expandedFilters.salary && (
@@ -3451,73 +3471,34 @@ const JobListing = () => {
                   animate={{ height: 'auto' }}
                   exit={{ height: 0 }}
                 >
-                  {jobCategory === 'standard' ? (
-                    <>
-                      <FilterOption>
-                        <input
-                          type="checkbox"
-                          id="hourly"
-                          checked={selectedSalaryRanges.includes('hourly')}
-                          onChange={() => toggleSalaryRange('hourly')}
-                        />
-                        <span>{language === 'vi' ? 'Trả theo giờ' : 'Hourly wage'}</span>
-                        <small>8</small>
-                      </FilterOption>
-                      <FilterOption>
-                        <input
-                          type="checkbox"
-                          id="under-10m"
-                          checked={selectedSalaryRanges.includes('under-10m')}
-                          onChange={() => toggleSalaryRange('under-10m')}
-                        />
-                        <span>{language === 'vi' ? 'Dưới 5 triệu' : 'Under 5 million'}</span>
-                        <small>4</small>
-                      </FilterOption>
-                      <FilterOption>
-                        <input
-                          type="checkbox"
-                          id="10m-20m"
-                          checked={selectedSalaryRanges.includes('10m-20m')}
-                          onChange={() => toggleSalaryRange('10m-20m')}
-                        />
-                        <span>{language === 'vi' ? '5 - 10 triệu' : '5 - 10 million'}</span>
-                        <small>0</small>
-                      </FilterOption>
-                      <FilterOption>
-                        <input
-                          type="checkbox"
-                          id="over-20m"
-                          checked={selectedSalaryRanges.includes('over-20m')}
-                          onChange={() => toggleSalaryRange('over-20m')}
-                        />
-                        <span>{language === 'vi' ? 'Trên 10 triệu' : 'Over 10 million'}</span>
-                        <small>0</small>
-                      </FilterOption>
-                    </>
-                  ) : (
-                    <>
-                      <FilterOption>
-                        <input
-                          type="checkbox"
-                          id="26-30k"
-                          checked={selectedSalaryRanges.includes('26-30k')}
-                          onChange={() => toggleSalaryRange('26-30k')}
-                        />
-                        <span>{language === 'vi' ? '26.000 - 30.000 VNĐ/giờ' : '26k - 30k/hour'}</span>
-                        <small>35</small>
-                      </FilterOption>
-                      <FilterOption>
-                        <input
-                          type="checkbox"
-                          id="30-35k"
-                          checked={selectedSalaryRanges.includes('30-35k')}
-                          onChange={() => toggleSalaryRange('30-35k')}
-                        />
-                        <span>{language === 'vi' ? '30.000 - 35.000 VNĐ/giờ' : '30k - 35k/hour'}</span>
-                        <small>5</small>
-                      </FilterOption>
-                    </>
-                  )}
+                  <FilterOption>
+                    <input type="checkbox" id="under-25k"
+                      checked={selectedSalaryRanges.includes('under-25k')}
+                      onChange={() => toggleSalaryRange('under-25k')} />
+                    <span>{language === 'vi' ? 'Dưới 25.000đ/giờ' : 'Under 25k/hr'}</span>
+                    <small>{filterCounts.under25k}</small>
+                  </FilterOption>
+                  <FilterOption>
+                    <input type="checkbox" id="25k-30k"
+                      checked={selectedSalaryRanges.includes('25k-30k')}
+                      onChange={() => toggleSalaryRange('25k-30k')} />
+                    <span>25.000 – 30.000đ/giờ</span>
+                    <small>{filterCounts['25to30k']}</small>
+                  </FilterOption>
+                  <FilterOption>
+                    <input type="checkbox" id="30k-35k"
+                      checked={selectedSalaryRanges.includes('30k-35k')}
+                      onChange={() => toggleSalaryRange('30k-35k')} />
+                    <span>30.000 – 35.000đ/giờ</span>
+                    <small>{filterCounts['30to35k']}</small>
+                  </FilterOption>
+                  <FilterOption>
+                    <input type="checkbox" id="over-35k"
+                      checked={selectedSalaryRanges.includes('over-35k')}
+                      onChange={() => toggleSalaryRange('over-35k')} />
+                    <span>{language === 'vi' ? 'Trên 35.000đ/giờ' : 'Over 35k/hr'}</span>
+                    <small>{filterCounts.over35k}</small>
+                  </FilterOption>
                 </FilterOptions>
               )}
             </FilterSection>
