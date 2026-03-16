@@ -329,27 +329,27 @@ const StaffStatus = styled.div`
   border-radius: 8px;
   font-size: 12px;
   font-weight: 700;
-  background: ${props => 
-    props.$status === 'active' ? '#D1FAE5' : 
-    props.$status === 'completed' ? '#E0E7FF' : 
-    props.$status === 'pending' ? '#FEF9C3' :
-    props.$status === 'pending_confirmation' ? '#FEE2E2' :
-    props.$status === 'pending_change' ? '#FFEDD5' :
-    '#FEF3C7'};
-  color: ${props => 
-    props.$status === 'active' ? '#047857' : 
-    props.$status === 'completed' ? '#3730A3' : 
-    props.$status === 'pending' ? '#854D0E' :
-    props.$status === 'pending_confirmation' ? '#B91C1C' :
-    props.$status === 'pending_change' ? '#C2410C' :
-    '#92400E'};
-  border: 1px solid ${props => 
-    props.$status === 'active' ? '#10B981' : 
-    props.$status === 'completed' ? '#818CF8' : 
-    props.$status === 'pending' ? '#EAB308' :
-    props.$status === 'pending_confirmation' ? '#EF4444' :
-    props.$status === 'pending_change' ? '#F97316' :
-    '#F59E0B'};
+  background: ${props =>
+    props.$status === 'active' ? '#D1FAE5' :
+      props.$status === 'completed' ? '#E0E7FF' :
+        props.$status === 'pending' ? '#FEF9C3' :
+          props.$status === 'pending_confirmation' ? '#FEE2E2' :
+            props.$status === 'pending_change' ? '#FFEDD5' :
+              '#FEF3C7'};
+  color: ${props =>
+    props.$status === 'active' ? '#047857' :
+      props.$status === 'completed' ? '#3730A3' :
+        props.$status === 'pending' ? '#854D0E' :
+          props.$status === 'pending_confirmation' ? '#B91C1C' :
+            props.$status === 'pending_change' ? '#C2410C' :
+              '#92400E'};
+  border: 1px solid ${props =>
+    props.$status === 'active' ? '#10B981' :
+      props.$status === 'completed' ? '#818CF8' :
+        props.$status === 'pending' ? '#EAB308' :
+          props.$status === 'pending_confirmation' ? '#EF4444' :
+            props.$status === 'pending_change' ? '#F97316' :
+              '#F59E0B'};
 `;
 
 const StaffMeta = styled.div`
@@ -543,11 +543,11 @@ const StaffButton = styled(motion.button)`
   &:hover {
     transform: translateY(-1px);
     box-shadow: ${props => {
-      if (props.$variant === 'danger') return '0 4px 12px rgba(239, 68, 68, 0.3)';
-      if (props.$variant === 'warning') return '0 4px 12px rgba(245, 158, 11, 0.3)';
-      if (props.$variant === 'success') return '0 4px 12px rgba(16, 185, 129, 0.3)';
-      return '0 4px 12px rgba(30, 64, 175, 0.15)';
-    }};
+    if (props.$variant === 'danger') return '0 4px 12px rgba(239, 68, 68, 0.3)';
+    if (props.$variant === 'warning') return '0 4px 12px rgba(245, 158, 11, 0.3)';
+    if (props.$variant === 'success') return '0 4px 12px rgba(16, 185, 129, 0.3)';
+    return '0 4px 12px rgba(30, 64, 175, 0.15)';
+  }};
   }
 `;
 
@@ -741,10 +741,10 @@ const QuickJobPostButton = styled(motion.button)`
   &:hover {
     transform: translateY(-2px);
     box-shadow: ${props => {
-      if (props.$variant === 'primary') return '0 6px 16px rgba(245, 158, 11, 0.4)';
-      if (props.$variant === 'danger') return '0 6px 16px rgba(239, 68, 68, 0.4)';
-      return '0 6px 16px rgba(30, 64, 175, 0.2)';
-    }};
+    if (props.$variant === 'primary') return '0 6px 16px rgba(245, 158, 11, 0.4)';
+    if (props.$variant === 'danger') return '0 6px 16px rgba(239, 68, 68, 0.4)';
+    return '0 6px 16px rgba(30, 64, 175, 0.2)';
+  }};
   }
   
   &:active {
@@ -1176,8 +1176,8 @@ const WalletModalButton = styled(motion.button)`
   &:hover {
     transform: ${props => props.disabled ? 'none' : 'translateY(-2px)'};
     box-shadow: ${props => props.disabled ? 'none' : (props.$variant === 'primary'
-      ? '0 6px 20px rgba(30, 64, 175, 0.3)'
-      : '0 4px 12px rgba(0, 0, 0, 0.1)')};
+    ? '0 6px 20px rgba(30, 64, 175, 0.3)'
+    : '0 4px 12px rgba(0, 0, 0, 0.1)')};
   }
 
   svg {
@@ -2226,7 +2226,7 @@ const HRManagement = () => {
   const [activeSection, setActiveSection] = useState('posts'); // Default to 'posts' (Quản lý bài đăng)
   const [hrStaff, setHrStaff] = useState(() => getHRStaff(language).map(s => ({ ...s, rated: false, pendingRating: false })));
   const [selectedStaff, setSelectedStaff] = useState(null);
-  
+
   // Helper function to check if more than 1 hour has passed
   const hasPassedOneHourSinceConfirmed = (confirmedAt) => {
     if (!confirmedAt) return false;
@@ -2234,20 +2234,20 @@ const HRManagement = () => {
       const [datePart, timePart] = confirmedAt.split(' - ');
       const dateParts = datePart.split('/');
       let day, month, year;
-      
+
       if (language === 'vi') {
         [day, month, year] = dateParts;
       } else {
         [month, day, year] = dateParts;
       }
-      
+
       const [hours, minutes] = timePart.split(':');
       const confirmedTime = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes));
       const now = new Date();
       const oneHourInMs = 60 * 60 * 1000;
       const timeDifference = now - confirmedTime;
       const hasPassed = timeDifference > oneHourInMs;
-      
+
       console.log('⏰ Checking time:', {
         confirmedAt,
         confirmedTime: confirmedTime.toLocaleString(),
@@ -2255,7 +2255,7 @@ const HRManagement = () => {
         timeDifferenceInMinutes: Math.floor(timeDifference / 60000),
         hasPassed1Hour: hasPassed
       });
-      
+
       return hasPassed;
     } catch (e) {
       console.error('Error parsing time:', e);
@@ -2270,16 +2270,16 @@ const HRManagement = () => {
       const [startTime, endTime] = shift.split(' - ');
       const [startHour, startMin] = startTime.split(':').map(Number);
       const [endHour, endMin] = endTime.split(':').map(Number);
-      
+
       const now = new Date();
       const nowHour = now.getHours();
       const nowMin = now.getMinutes();
       const nowTimeInMin = nowHour * 60 + nowMin;
       const startTimeInMin = startHour * 60 + startMin;
       const endTimeInMin = endHour * 60 + endMin;
-      
+
       const isWorking = nowTimeInMin >= startTimeInMin && nowTimeInMin <= endTimeInMin;
-      
+
       console.log('🕐 Checking working status:', {
         shift,
         currentTime: `${nowHour}:${nowMin}`,
@@ -2288,7 +2288,7 @@ const HRManagement = () => {
         endTimeInMin,
         isWorking
       });
-      
+
       return isWorking;
     } catch (e) {
       console.error('Error checking working hours:', e);
@@ -2300,35 +2300,35 @@ const HRManagement = () => {
     // Open chat modal with applicationId
     handleOpenChat(staff.applicationId);
   };
-  
+
   // Load quick jobs from DynamoDB
   const [quickJobPosts, setQuickJobPosts] = useState([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
-  
+
   // Load applications from Quick Jobs
   const [realApplications, setRealApplications] = useState([]);
   const [loadingApplications, setLoadingApplications] = useState(false);
-  
+
   // Load jobs from DynamoDB on mount
   useEffect(() => {
     loadQuickJobsFromDynamoDB();
   }, []);
-  
+
   // Load applications when switching to HR section
   useEffect(() => {
     if (activeSection === 'hr' && quickJobPosts.length > 0) {
       loadApplicationsFromQuickJobs();
     }
   }, [activeSection, quickJobPosts]);
-  
+
   const loadQuickJobsFromDynamoDB = async () => {
     try {
       setLoadingJobs(true);
       console.log('📥 Loading quick jobs from DynamoDB...');
-      
+
       const jobs = await quickJobService.getMyQuickJobs();
       console.log('✅ Loaded jobs:', jobs);
-      
+
       // Format jobs for display
       const formattedJobs = jobs.map(job => ({
         id: job.id || job.idJob || job.jobID,
@@ -2378,7 +2378,7 @@ const HRManagement = () => {
         createdAt: job.createdAt,
         updatedAt: job.updatedAt
       }));
-      
+
       setQuickJobPosts(formattedJobs);
     } catch (error) {
       console.error('❌ Error loading quick jobs:', error);
@@ -2387,21 +2387,21 @@ const HRManagement = () => {
       setLoadingJobs(false);
     }
   };
-  
+
   const loadApplicationsFromQuickJobs = async () => {
     try {
       setLoadingApplications(true);
       console.log('📥 Loading applications from Quick Jobs...');
-      
+
       // applicationService is statically imported at the top of this file
-      
+
       // Load applications for each quick job
       const allApplications = [];
-      
+
       for (const job of quickJobPosts) {
         try {
           const jobApplications = await applicationService.getJobApplications(job.idJob);
-          
+
           // Add job info to each application
           const applicationsWithJobInfo = jobApplications.map(app => ({
             ...app,
@@ -2412,13 +2412,13 @@ const HRManagement = () => {
             jobWorkDate: job.deadline,
             jobType: 'quick'
           }));
-          
+
           allApplications.push(...applicationsWithJobInfo);
         } catch (error) {
           console.error(`Error loading applications for job ${job.idJob}:`, error);
         }
       }
-      
+
       console.log('✅ Loaded applications:', allApplications);
       setRealApplications(allApplications);
     } catch (error) {
@@ -2428,13 +2428,13 @@ const HRManagement = () => {
       setLoadingApplications(false);
     }
   };
-  
+
   // Create chat conversations from accepted staff (realApplications with status 'accepted')
   const chatConversations = useMemo(() => {
     if (!realApplications || !Array.isArray(realApplications)) {
       return [];
     }
-    
+
     return realApplications
       .filter(app => app.status === 'accepted')
       .map(app => ({
@@ -2448,7 +2448,7 @@ const HRManagement = () => {
         unread: 0
       }));
   }, [realApplications, language]);
-  
+
   const [activeChatId, setActiveChatId] = useState(null);
   const [currentMessages, setCurrentMessages] = useState([]);
   const [messageInput, setMessageInput] = useState('');
@@ -2492,32 +2492,32 @@ const HRManagement = () => {
         // Calculate totalPaid from jobSalary
         let totalPaid = 0;
         let hourlyRate = 0;
-        
+
         if (app.jobSalary) {
           // Parse salary: "224.400 VNĐ/8h" or "28.000 VNĐ/giờ"
           const salaryMatch = app.jobSalary.match(/([\d.]+)/);
           if (salaryMatch) {
             const salaryValue = parseInt(salaryMatch[1].replace(/\./g, ''));
-            
+
             if (app.jobSalary.includes('/giờ') || app.jobSalary.includes('/hour')) {
               // Hourly rate: calculate from shift hours
               hourlyRate = salaryValue;
-              
+
               // Parse shift hours: "09:00 - 17:00"
               if (app.jobShift && app.jobShift.includes('-')) {
                 const [startTime, endTime] = app.jobShift.split('-').map(t => t.trim());
                 const [startH, startM] = startTime.split(':').map(Number);
                 const [endH, endM] = endTime.split(':').map(Number);
-                
+
                 let hours = (endH + endM / 60) - (startH + startM / 60);
                 if (hours < 0) hours += 24; // overnight shift
-                
+
                 totalPaid = Math.round(hourlyRate * hours);
               }
             } else {
               // Total salary already calculated: "224.400 VNĐ/8h"
               totalPaid = salaryValue;
-              
+
               // Extract hourly rate if format includes hours
               const hoursMatch = app.jobSalary.match(/\/([\d.]+)h/);
               if (hoursMatch) {
@@ -2527,10 +2527,10 @@ const HRManagement = () => {
             }
           }
         }
-        
+
         // Use acceptedAt if available (when status is accepted), otherwise use appliedAt
         const timeToUse = app.acceptedAt || app.appliedAt;
-        
+
         // Format timestamp to readable format
         let formattedTime = timeToUse;
         if (timeToUse && !timeToUse.includes('/')) {
@@ -2542,20 +2542,20 @@ const HRManagement = () => {
             const year = date.getFullYear();
             const hours = date.getHours().toString().padStart(2, '0');
             const minutes = date.getMinutes().toString().padStart(2, '0');
-            
-            formattedTime = language === 'vi' 
+
+            formattedTime = language === 'vi'
               ? `${day}/${month}/${year} - ${hours}:${minutes}`
               : `${month}/${day}/${year} - ${hours}:${minutes}`;
           } catch (error) {
             console.error('Error formatting time:', error);
           }
         }
-        
+
         // Map status: pending -> pending_confirmation, accepted -> active or pending_change (if has changeRequest)
-        const mappedStatus = app.status === 'pending' 
-          ? 'pending_confirmation' 
+        const mappedStatus = app.status === 'pending'
+          ? 'pending_confirmation'
           : (app.changeRequest ? 'pending_change' : 'active');
-        
+
         return {
           id: app.applicationId,
           applicationId: app.applicationId,
@@ -2632,7 +2632,7 @@ const HRManagement = () => {
           const greetingMessage = {
             id: Date.now(),
             sender: 'me',
-            text: language === 'vi' 
+            text: language === 'vi'
               ? `Xin chào! ${companyName} đã duyệt CV ứng tuyển công việc tuyển gấp của bạn. Bạn có thể liên hệ với chúng tôi qua đây nhé! 😊`
               : `Hello! ${companyName} has approved your urgent job application. You can contact us here! 😊`,
             time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
@@ -2695,11 +2695,11 @@ const HRManagement = () => {
       console.error('❌ Staff or applicationId not found');
       return;
     }
-    
+
     try {
       // Update application status to 'accepted' via API
       await applicationService.updateApplicationStatus(staff.applicationId, 'accepted');
-      
+
       // Update confirmedAt to current time in realApplications
       const now = new Date();
       const day = now.getDate().toString().padStart(2, '0');
@@ -2707,18 +2707,18 @@ const HRManagement = () => {
       const year = now.getFullYear();
       const hours = now.getHours().toString().padStart(2, '0');
       const minutes = now.getMinutes().toString().padStart(2, '0');
-      
-      const newConfirmedAt = language === 'vi' 
+
+      const newConfirmedAt = language === 'vi'
         ? `${day}/${month}/${year} - ${hours}:${minutes}`
         : `${month}/${day}/${year} - ${hours}:${minutes}`;
-      
+
       // Update realApplications with new confirmedAt
-      setRealApplications(prev => prev.map(app => 
+      setRealApplications(prev => prev.map(app =>
         app.applicationId === staff.applicationId
           ? { ...app, status: 'accepted', acceptedAt: newConfirmedAt }
           : app
       ));
-      
+
       // Show success message
       console.log('✅ Application accepted successfully at:', newConfirmedAt);
     } catch (error) {
@@ -2742,17 +2742,17 @@ const HRManagement = () => {
 
   const handleRejectCV = async () => {
     if (!rejectStaff) return;
-    
+
     try {
       // Update application status to 'rejected' via API
       await applicationService.updateApplicationStatus(rejectStaff.applicationId, 'rejected');
-      
+
       // Reload applications from DynamoDB
       await loadApplicationsFromDynamoDB();
-      
+
       // Show success message
       console.log('✅ Application rejected successfully');
-      
+
       // Close modal
       setShowRejectModal(false);
       setRejectStaff(null);
@@ -2795,20 +2795,20 @@ const HRManagement = () => {
   // Confirm and delete job from DynamoDB
   const confirmDeleteJob = async () => {
     if (!deleteJobId) return;
-    
+
     setIsDeleting(true);
-    
+
     try {
       // Get the actual job ID for API (idJob or jobID)
       const job = quickJobPosts.find(j => j.id === deleteJobId);
       const apiJobId = job?.idJob || deleteJobId;
-      
+
       // Delete job from DynamoDB via API
       await quickJobService.deleteQuickJob(apiJobId);
-      
+
       // Reload jobs from DynamoDB
       await loadQuickJobsFromDynamoDB();
-      
+
       // Show success toast with correct message
       setSuccessToastMessage(language === 'vi' ? 'Đã xóa bài đăng thành công!' : 'Post deleted successfully!');
       setShowSuccessToast(true);
@@ -2819,7 +2819,7 @@ const HRManagement = () => {
       setShowErrorNotification(true);
       setTimeout(() => setShowErrorNotification(false), 3000);
     }
-    
+
     setIsDeleting(false);
     setDeleteJobId(null);
   };
@@ -2854,8 +2854,8 @@ const HRManagement = () => {
     // Validate hourly rate
     const hourlyRate = parseFloat(editJobData.hourlyRate);
     if (isNaN(hourlyRate) || hourlyRate < 31875) {
-      setErrorNotificationMessage(language === 'vi' 
-        ? 'Lương phải lớn hơn hoặc bằng 31.875 VNĐ/giờ' 
+      setErrorNotificationMessage(language === 'vi'
+        ? 'Lương phải lớn hơn hoặc bằng 31.875 VNĐ/giờ'
         : 'Hourly rate must be greater than or equal to 31,875 VND');
       setShowErrorNotification(true);
       return;
@@ -2865,8 +2865,8 @@ const HRManagement = () => {
     if (editJobData.workDate) {
       const today = new Date().toISOString().split('T')[0];
       if (editJobData.workDate < today) {
-        setErrorNotificationMessage(language === 'vi' 
-          ? 'Ngày làm việc không được ở trong quá khứ.' 
+        setErrorNotificationMessage(language === 'vi'
+          ? 'Ngày làm việc không được ở trong quá khứ.'
           : 'Work date cannot be in the past.');
         setShowErrorNotification(true);
         return;
@@ -2876,32 +2876,32 @@ const HRManagement = () => {
     try {
       // Clear any previous errors
       setShowErrorNotification(false);
-      
+
       // Calculate totalHours and totalSalary
       let totalHours = 0;
       let totalSalary = 0;
-      
+
       if (editJobData.startTime && editJobData.endTime) {
         const [startHour, startMin] = editJobData.startTime.split(':').map(Number);
         const [endHour, endMin] = editJobData.endTime.split(':').map(Number);
-        
+
         if (!isNaN(startHour) && !isNaN(startMin) && !isNaN(endHour) && !isNaN(endMin)) {
           let hoursWorked = (endHour + endMin / 60) - (startHour + startMin / 60);
-          
+
           // Handle overnight shifts
           if (hoursWorked < 0) {
             hoursWorked += 24;
           }
-          
+
           totalHours = hoursWorked;
           totalSalary = Math.round(hourlyRate * hoursWorked);
         }
       }
-      
+
       // Get the actual job ID for API (idJob or jobID)
       const job = quickJobPosts.find(j => j.id === editJobId);
       const apiJobId = job?.idJob || editJobId;
-      
+
       // Prepare update data with recalculated values
       const updateData = {
         ...editJobData,
@@ -2909,18 +2909,18 @@ const HRManagement = () => {
         totalHours: totalHours,
         totalSalary: totalSalary
       };
-      
+
       // Update job in DynamoDB via API
       await quickJobService.updateQuickJob(apiJobId, updateData);
-      
+
       // Reload jobs from DynamoDB
       await loadQuickJobsFromDynamoDB();
-      
+
       // Show success toast with correct message
       setSuccessToastMessage(language === 'vi' ? 'Đã cập nhật bài đăng!' : 'Post updated!');
       setShowSuccessToast(true);
       setTimeout(() => setShowSuccessToast(false), 3000);
-      
+
       setEditJobId(null);
       setEditJobData(null);
     } catch (error) {
@@ -2994,7 +2994,7 @@ const HRManagement = () => {
                 {language === 'vi' ? 'Tạo và quản lý các tin tuyển dụng' : 'Create and manage job postings'}
               </QuickJobDescription>
             </QuickJobCard>
-            
+
             <QuickJobCard
               $color="#1e40af"
               $active={activeSection === 'hr'}
@@ -3022,9 +3022,9 @@ const HRManagement = () => {
                   <UsersRound />
                   {language === 'vi' ? 'Quản lý nhân sự' : 'HR Management'}
                 </SectionTitle>
-                <p style={{ 
-                  fontSize: '13px', 
-                  color: '#64748B', 
+                <p style={{
+                  fontSize: '13px',
+                  color: '#64748B',
                   marginTop: '8px',
                   fontWeight: '500',
                   display: 'flex',
@@ -3047,8 +3047,8 @@ const HRManagement = () => {
                     <Zap style={{ width: '11px', height: '11px' }} />
                     REALTIME
                   </span>
-                  {language === 'vi' 
-                    ? 'Tự động ẩn sau khi hoàn thành' 
+                  {language === 'vi'
+                    ? 'Tự động ẩn sau khi hoàn thành'
                     : 'Real-time data'}
                 </p>
               </div>
@@ -3056,9 +3056,9 @@ const HRManagement = () => {
 
             <StaffTabBar>
               {[
-                { key: 'working',         label: language === 'vi' ? 'Đang làm'     : 'Working',              color: '#10B981', status: 'active' },
+                { key: 'working', label: language === 'vi' ? 'Đang làm' : 'Working', color: '#10B981', status: 'active' },
                 { key: 'pending_confirm', label: language === 'vi' ? 'Chờ xác nhận' : 'Pending Confirmation', color: '#EF4444', status: 'pending_confirmation' },
-                { key: 'pending_change',  label: language === 'vi' ? 'Chờ thay đổi' : 'Pending Changes',      color: '#F97316', status: 'pending_change' },
+                { key: 'pending_change', label: language === 'vi' ? 'Chờ thay đổi' : 'Pending Changes', color: '#F97316', status: 'pending_change' },
               ].map(tab => (
                 <StaffTabButton
                   key={tab.key}
@@ -3072,9 +3072,9 @@ const HRManagement = () => {
             </StaffTabBar>
 
             {allStaff.filter(staff => {
-              if (staffTabFilter === 'working')         return staff.status === 'active';
+              if (staffTabFilter === 'working') return staff.status === 'active';
               if (staffTabFilter === 'pending_confirm') return staff.status === 'pending_confirmation';
-              if (staffTabFilter === 'pending_change')  return staff.status === 'pending_change';
+              if (staffTabFilter === 'pending_change') return staff.status === 'pending_change';
               return false;
             }).length === 0 ? (
               <div style={{
@@ -3097,9 +3097,9 @@ const HRManagement = () => {
                 <AnimatePresence>
                   {allStaff
                     .filter(staff => {
-                      if (staffTabFilter === 'working')         return staff.status === 'active';
+                      if (staffTabFilter === 'working') return staff.status === 'active';
                       if (staffTabFilter === 'pending_confirm') return staff.status === 'pending_confirmation';
-                      if (staffTabFilter === 'pending_change')  return staff.status === 'pending_change';
+                      if (staffTabFilter === 'pending_change') return staff.status === 'pending_change';
                       return false;
                     })
                     .map((staff, index) => (
@@ -3133,22 +3133,22 @@ const HRManagement = () => {
                                   </StaffStatus>
                                 ) : (
                                   <StaffStatus $status={staff.status}>
-                                    {staff.status === 'active' 
+                                    {staff.status === 'active'
                                       ? (language === 'vi' ? 'Đang làm' : 'Active')
                                       : staff.status === 'completed'
-                                      ? (language === 'vi' ? 'Hoàn thành' : 'Completed')
-                                      : staff.status === 'pending_confirmation'
-                                      ? (language === 'vi' ? 'Chờ xác nhận' : 'Pending Confirm')
-                                      : staff.status === 'pending_change'
-                                      ? (language === 'vi' ? 'Chờ thay đổi' : 'Pending Change')
-                                      : (language === 'vi' ? 'Đang làm' : 'Active')}
+                                        ? (language === 'vi' ? 'Hoàn thành' : 'Completed')
+                                        : staff.status === 'pending_confirmation'
+                                          ? (language === 'vi' ? 'Chờ xác nhận' : 'Pending Confirm')
+                                          : staff.status === 'pending_change'
+                                            ? (language === 'vi' ? 'Chờ thay đổi' : 'Pending Change')
+                                            : (language === 'vi' ? 'Đang làm' : 'Active')}
                                   </StaffStatus>
                                 )
                               )
                             )}
                           </div>
                         </StaffHeader>
-                        
+
                         <StaffMeta>
                           <div className="meta-row">
                             <MapPin />{staff.location}
@@ -3205,7 +3205,7 @@ const HRManagement = () => {
                           >
                             <User />{language === 'vi' ? 'Xem hồ sơ' : 'View profile'}
                           </StaffButton> */}
-                          
+
                           {/* Only show chat and request change buttons when job is active */}
                           {staff.status === 'active' && (
                             <>
@@ -3236,7 +3236,7 @@ const HRManagement = () => {
                                   cursor: hasPassedOneHourSinceConfirmed(staff.confirmedAt) ? 'not-allowed' : 'pointer',
                                   pointerEvents: hasPassedOneHourSinceConfirmed(staff.confirmedAt) ? 'none' : 'auto'
                                 }}
-                                title={hasPassedOneHourSinceConfirmed(staff.confirmedAt) 
+                                title={hasPassedOneHourSinceConfirmed(staff.confirmedAt)
                                   ? (language === 'vi' ? 'Đã quá thời gian cho phép (1 giờ)' : 'Time limit exceeded (1 hour)')
                                   : ''}
                               >
@@ -3324,7 +3324,7 @@ const HRManagement = () => {
                           )}
                         </StaffActions>
                       </StaffCard>
-                  ))}
+                    ))}
                 </AnimatePresence>
               </StaffGrid>
             )}
@@ -3339,9 +3339,9 @@ const HRManagement = () => {
                   <FileText />
                   {language === 'vi' ? 'Quản lý bài đăng' : 'Post Management'}
                 </SectionTitle>
-                <p style={{ 
-                  fontSize: '13px', 
-                  color: '#64748B', 
+                <p style={{
+                  fontSize: '13px',
+                  color: '#64748B',
                   marginTop: '8px',
                   fontWeight: '500',
                   display: 'flex',
@@ -3364,8 +3364,8 @@ const HRManagement = () => {
                     <Zap style={{ width: '11px', height: '11px' }} />
                     REALTIME
                   </span>
-                  {language === 'vi' 
-                    ? 'Bài đăng tuyển gấp • Hiệu lực 7 ngày' 
+                  {language === 'vi'
+                    ? 'Bài đăng tuyển gấp • Hiệu lực 7 ngày'
                     : 'Shift posts • Valid for 7 days'}
                 </p>
               </div>
@@ -3389,8 +3389,8 @@ const HRManagement = () => {
                   {language === 'vi' ? 'Chưa có bài đăng nào' : 'No posts yet'}
                 </h3>
                 <p style={{ fontSize: '14px' }}>
-                  {language === 'vi' 
-                    ? 'Bắt đầu tuyển dụng bằng cách tạo bài đăng đầu tiên của bạn' 
+                  {language === 'vi'
+                    ? 'Bắt đầu tuyển dụng bằng cách tạo bài đăng đầu tiên của bạn'
                     : 'Start hiring by creating your first job post'}
                 </p>
               </div>
@@ -3447,7 +3447,7 @@ const HRManagement = () => {
                           </QuickJobPostMeta>
                         </div>
                       </QuickJobPostHeader>
-                      
+
                       <QuickJobPostStats>
                         <div className="stat">
                           <div className="stat-value">{post.applicants}</div>
@@ -3458,7 +3458,7 @@ const HRManagement = () => {
                           <div className="stat-label">{language === 'vi' ? 'Lượt xem' : 'Views'}</div>
                         </div>
                       </QuickJobPostStats>
-                      
+
                       <QuickJobPostActions>
                         <QuickJobPostButton
                           whileHover={{ scale: 1.02 }}
@@ -3638,14 +3638,14 @@ const HRManagement = () => {
                     : 'You need to connect your bank wallet before posting job listings. This ensures secure and transparent payment processing.'}
                 </WalletModalMessage>
                 <TermsCheckboxContainer>
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     id="terms-checkbox"
                     checked={agreedToTerms}
                     onChange={(e) => setAgreedToTerms(e.target.checked)}
                   />
                   <label htmlFor="terms-checkbox">
-                    {language === 'vi' 
+                    {language === 'vi'
                       ? <>Tôi đã đồng ý <a href="/OpPoReview/terms-urgent-jobs" style={{ fontWeight: 600, cursor: 'pointer' }} onClick={(e) => { e.preventDefault(); setShowWalletModal(false); navigate('/terms-urgent-jobs', { state: { returnToWallet: true } }); }}>điều khoản</a> sử dụng Job gấp này</>
                       : <>I agree to the <a href="/OpPoReview/terms-urgent-jobs" style={{ fontWeight: 600, cursor: 'pointer' }} onClick={(e) => { e.preventDefault(); setShowWalletModal(false); navigate('/terms-urgent-jobs', { state: { returnToWallet: true } }); }}>Terms of Service</a> for Urgent Jobs</>
                     }
@@ -3884,7 +3884,7 @@ const HRManagement = () => {
                       disabled={!changeRequestReason.trim() || !changeRequestType}
                       onClick={() => {
                         if (!changeRequestReason.trim() || !changeRequestType) return;
-                        
+
                         // Update staff status to pending_change in realApplications
                         // For now, just update the local hrStaff state (for accepted applications from DynamoDB)
                         const now = new Date();
@@ -3892,7 +3892,7 @@ const HRManagement = () => {
                         const dateStr = language === 'vi'
                           ? `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`
                           : `${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getDate().toString().padStart(2, '0')}/${now.getFullYear()}`;
-                        
+
                         // Map change type to label
                         const typeLabels = {
                           'poor_performance': language === 'vi' ? 'Làm việc không hiệu quả' : 'Poor Performance',
@@ -3900,24 +3900,24 @@ const HRManagement = () => {
                           'skill_mismatch': language === 'vi' ? 'Kỹ năng không đáp ứng' : 'Skill Mismatch',
                           'unreliable': language === 'vi' ? 'Không đáng tin cậy' : 'Unreliable'
                         };
-                        
+
                         // Update realApplications to add changeRequest
-                        setRealApplications(prev => prev.map(app => 
+                        setRealApplications(prev => prev.map(app =>
                           app.applicationId === changeRequestStaff.applicationId
                             ? {
-                                ...app,
-                                changeRequest: {
-                                  type: changeRequestType,
-                                  typeLabel: typeLabels[changeRequestType],
-                                  reason: changeRequestReason,
-                                  requestedAt: `${dateStr} - ${timeStr}`,
-                                  urgency: 'normal',
-                                  sentToAdmin: true
-                                }
+                              ...app,
+                              changeRequest: {
+                                type: changeRequestType,
+                                typeLabel: typeLabels[changeRequestType],
+                                reason: changeRequestReason,
+                                requestedAt: `${dateStr} - ${timeStr}`,
+                                urgency: 'normal',
+                                sentToAdmin: true
                               }
+                            }
                             : app
                         ));
-                        
+
                         setChangeRequestStaff(null);
                         setChangeRequestReason('');
                         setChangeRequestType('');
@@ -4008,7 +4008,7 @@ const HRManagement = () => {
             ];
             const renderStars = (catKey) => (
               <RateStarRow>
-                {[1,2,3,4,5].map(star => (
+                {[1, 2, 3, 4, 5].map(star => (
                   <RateStarButton
                     key={star}
                     type="button"
@@ -4395,11 +4395,11 @@ const HRManagement = () => {
                     {language === 'vi' ? 'Tuyển gấp' : 'Urgent'}
                   </div>
                 </div>
-                
+
                 {/* Meta Information Grid */}
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(2, 1fr)', 
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, 1fr)',
                   gap: '12px',
                   padding: '20px',
                   background: 'linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%)',
@@ -4407,13 +4407,13 @@ const HRManagement = () => {
                   border: '1px solid #E2E8F0'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#475569', fontSize: '14px' }}>
-                    <div style={{ 
-                      width: '36px', 
-                      height: '36px', 
-                      borderRadius: '10px', 
-                      background: '#EFF6FF', 
-                      display: 'flex', 
-                      alignItems: 'center', 
+                    <div style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '10px',
+                      background: '#EFF6FF',
+                      display: 'flex',
+                      alignItems: 'center',
                       justifyContent: 'center',
                       border: '1px solid #BFDBFE'
                     }}>
@@ -4426,15 +4426,15 @@ const HRManagement = () => {
                       <div style={{ fontWeight: '600', color: '#334155' }}>{selectedJobView.location}</div>
                     </div>
                   </div>
-                  
+
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#475569', fontSize: '14px' }}>
-                    <div style={{ 
-                      width: '36px', 
-                      height: '36px', 
-                      borderRadius: '10px', 
-                      background: '#F0FDF4', 
-                      display: 'flex', 
-                      alignItems: 'center', 
+                    <div style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '10px',
+                      background: '#F0FDF4',
+                      display: 'flex',
+                      alignItems: 'center',
                       justifyContent: 'center',
                       border: '1px solid #BBF7D0'
                     }}>
@@ -4447,16 +4447,16 @@ const HRManagement = () => {
                       <div style={{ fontWeight: '700', color: '#16A34A' }}>{selectedJobView.salary}</div>
                     </div>
                   </div>
-                  
+
                   {selectedJobView.shift && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#475569', fontSize: '14px' }}>
-                      <div style={{ 
-                        width: '36px', 
-                        height: '36px', 
-                        borderRadius: '10px', 
-                        background: '#FEF3C7', 
-                        display: 'flex', 
-                        alignItems: 'center', 
+                      <div style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '10px',
+                        background: '#FEF3C7',
+                        display: 'flex',
+                        alignItems: 'center',
                         justifyContent: 'center',
                         border: '1px solid #FDE047'
                       }}>
@@ -4470,15 +4470,15 @@ const HRManagement = () => {
                       </div>
                     </div>
                   )}
-                  
+
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#475569', fontSize: '14px' }}>
-                    <div style={{ 
-                      width: '36px', 
-                      height: '36px', 
-                      borderRadius: '10px', 
-                      background: '#FCE7F3', 
-                      display: 'flex', 
-                      alignItems: 'center', 
+                    <div style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '10px',
+                      background: '#FCE7F3',
+                      display: 'flex',
+                      alignItems: 'center',
                       justifyContent: 'center',
                       border: '1px solid #FBCFE8'
                     }}>
@@ -4491,16 +4491,16 @@ const HRManagement = () => {
                       <div style={{ fontWeight: '600', color: '#334155' }}>{selectedJobView.deadline}</div>
                     </div>
                   </div>
-                  
+
                   {selectedJobView.contactPhone && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#475569', fontSize: '14px', gridColumn: 'span 2' }}>
-                      <div style={{ 
-                        width: '36px', 
-                        height: '36px', 
-                        borderRadius: '10px', 
-                        background: '#E0E7FF', 
-                        display: 'flex', 
-                        alignItems: 'center', 
+                      <div style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '10px',
+                        background: '#E0E7FF',
+                        display: 'flex',
+                        alignItems: 'center',
                         justifyContent: 'center',
                         border: '1px solid #C7D2FE'
                       }}>
@@ -4516,7 +4516,7 @@ const HRManagement = () => {
                   )}
                 </div>
               </div>
-              
+
               {/* Description Section */}
               {selectedJobView.description && (
                 <div style={{
@@ -4525,10 +4525,10 @@ const HRManagement = () => {
                   borderRadius: '12px',
                   border: '1px solid #E2E8F0'
                 }}>
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '8px', 
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
                     marginBottom: '12px',
                     paddingBottom: '12px',
                     borderBottom: '2px solid #E2E8F0'
@@ -4538,10 +4538,10 @@ const HRManagement = () => {
                       {language === 'vi' ? 'Mô tả công việc' : 'Job Description'}
                     </h4>
                   </div>
-                  <p style={{ 
-                    fontSize: '14px', 
-                    lineHeight: '1.8', 
-                    color: '#475569', 
+                  <p style={{
+                    fontSize: '14px',
+                    lineHeight: '1.8',
+                    color: '#475569',
                     whiteSpace: 'pre-wrap',
                     margin: 0
                   }}>
@@ -4558,10 +4558,10 @@ const HRManagement = () => {
                   borderRadius: '12px',
                   border: '1px solid #E2E8F0'
                 }}>
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '8px', 
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
                     marginBottom: '12px',
                     paddingBottom: '12px',
                     borderBottom: '2px solid #E2E8F0'
@@ -4571,10 +4571,10 @@ const HRManagement = () => {
                       {language === 'vi' ? 'Yêu cầu công việc' : 'Job Requirements'}
                     </h4>
                   </div>
-                  <p style={{ 
-                    fontSize: '14px', 
-                    lineHeight: '1.8', 
-                    color: '#475569', 
+                  <p style={{
+                    fontSize: '14px',
+                    lineHeight: '1.8',
+                    color: '#475569',
                     whiteSpace: 'pre-wrap',
                     margin: 0
                   }}>
@@ -4584,20 +4584,20 @@ const HRManagement = () => {
               )}
 
               {/* Stats Section */}
-              <div style={{ 
-                display: 'grid', 
-                gridTemplateColumns: 'repeat(2, 1fr)', 
-                gap: '16px', 
-                padding: '24px', 
-                background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)', 
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '16px',
+                padding: '24px',
+                background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
                 borderRadius: '12px',
                 border: '2px solid #BFDBFE'
               }}>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '8px',
                     marginBottom: '8px'
                   }}>
@@ -4611,10 +4611,10 @@ const HRManagement = () => {
                   </div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '8px',
                     marginBottom: '8px'
                   }}>
@@ -4727,11 +4727,11 @@ const HRManagement = () => {
                         setShowErrorNotification(false);
                       }
                     }}
-                    style={{ 
-                      width: '100%', 
-                      padding: '12px 16px', 
-                      border: `2px solid ${editJobData.hourlyRate && parseFloat(editJobData.hourlyRate) < 31875 ? '#EF4444' : '#e2e8f0'}`, 
-                      borderRadius: '12px', 
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: `2px solid ${editJobData.hourlyRate && parseFloat(editJobData.hourlyRate) < 31875 ? '#EF4444' : '#e2e8f0'}`,
+                      borderRadius: '12px',
                       fontSize: '14px',
                       background: editJobData.hourlyRate && parseFloat(editJobData.hourlyRate) < 31875 ? '#FEE2E2' : 'white'
                     }}

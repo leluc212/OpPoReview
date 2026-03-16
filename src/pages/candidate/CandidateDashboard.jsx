@@ -1704,7 +1704,7 @@ const CandidateDashboard = () => {
                 <CurrentJobMeta>
                   <span><MapPin />{language === 'vi' ? 'Quận 8, TP.HCM' : 'District 8, HCMC'}</span>
                   <span><Clock />{language === 'vi' ? '06:00 - 14:00' : '06:00 am - 02:00 pm'}</span>
-                  <span><span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span> 224.400 VNĐ</span>
+                  <span><span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập trung bình:' : 'Income:'}</span> 224.400 VNĐ</span>
                   <span><Calendar />{language === 'vi' ? 'Từ 05/03/2026' : 'Since Mar 05, 2026'}</span>
                 </CurrentJobMeta>
               </CurrentJobInfo>
@@ -1765,7 +1765,7 @@ const CandidateDashboard = () => {
                         <span className="value">{language === 'vi' ? '06:00 - 14:00' : '06:00 am - 02:00 pm'}</span>
                       </JobDetailRow>
                       <JobDetailRow>
-                        <span style={{ fontWeight: '500', minWidth: '80px' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span>
+                        <span style={{ fontWeight: '500', minWidth: '80px' }}>{language === 'vi' ? 'Thu nhập trung bình:' : 'Income:'}</span>
                         <span className="value">224.400 VNĐ</span>
                       </JobDetailRow>
                       <JobDetailRow>
@@ -2059,7 +2059,7 @@ const CandidateDashboard = () => {
                           {translateLocation(job.location)}
                         </span>
                         <span>
-                          <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span>
+                          <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập trung bình:' : 'Income:'}</span>
                           {translateSalary(job.salary)}
                         </span>
                         <span>
