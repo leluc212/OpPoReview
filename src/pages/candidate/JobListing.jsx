@@ -893,33 +893,26 @@ const JobsGrid = styled.div`
   }
 `;
 
-const BoostBannerWrap = styled.div`
+const BoostBannerWrap = styled(motion.div)`
   position: relative;
-  margin-bottom: 20px;
-  border-radius: 16px;
+  margin-bottom: 24px;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
   cursor: pointer;
-  background: #f3f4f6;
+  height: 320px;
+  background: #1a1a1a;
 
   img {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: contain;
     display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    transition: opacity 0.5s ease-in-out, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    opacity: 0;
-    
-    &.active {
-      opacity: 1;
-      position: relative;
-    }
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  &:hover img.active {
-    transform: scale(1.01);
+  &:hover img {
+    transform: scale(1.02);
   }
 `;
 
@@ -3574,39 +3567,23 @@ const JobListing = () => {
               </ViewControls>
             </ContentHeader>
 
-            <BoostBannerWrap>
+            {/* Banner Carousel */}
+            <BoostBannerWrap
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.22 }}
+              whileHover={{ y: -2 }}
+            >
               <BoostTag>🔥Hot deal</BoostTag>
-              <div style={{ position: 'relative', width: '100%', lineHeight: 0 }}>
-                <AnimatePresence mode="sync">
-                  <motion.img 
-                    key={currentBannerIndex}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ 
-                      duration: 1.8,
-                      ease: 'easeInOut'
-                    }}
-                    src={banners[currentBannerIndex].src} 
-                    alt={banners[currentBannerIndex].alt}
-                    style={{ 
-                      width: '100%', 
-                      height: 'auto', 
-                      display: 'block',
-                      position: 'absolute',
-                      top: 0,
-                      left: 0
-                    }}
-                  />
-                </AnimatePresence>
-                {/* Placeholder để giữ chiều cao container */}
-                <img 
-                  src={banners[currentBannerIndex].src} 
-                  alt=""
-                  style={{ width: '100%', height: 'auto', display: 'block', visibility: 'hidden' }}
-                  aria-hidden="true"
-                />
-              </div>
+              <motion.img 
+                key={currentBannerIndex}
+                initial={{ opacity: 0.8, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6 }}
+                src={banners[currentBannerIndex].src} 
+                alt={banners[currentBannerIndex].alt}
+                style={{ width: '100%', height: 'auto', display: 'block' }}
+              />
               <BannerDots>
                 {banners.map((_, idx) => (
                   <BannerDot 
@@ -3619,7 +3596,7 @@ const JobListing = () => {
                   />
                 ))}
               </BannerDots>
-            </BoostBannerWrap >
+            </BoostBannerWrap>
 
   <JobsGrid>
     {filteredJobs.length > 0 ? (
