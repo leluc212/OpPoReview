@@ -4,13 +4,13 @@ import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import { Button, Input, TextArea, FormGroup, Label, DateInput } from '../../components/FormElements';
-import { 
-  CheckCircle, 
-  Circle, 
-  Upload, 
-  FileText, 
-  Building, 
-  User, 
+import {
+  CheckCircle,
+  Circle,
+  Upload,
+  FileText,
+  Building,
+  User,
   Phone,
   ArrowRight,
   ArrowLeft,
@@ -74,15 +74,15 @@ const Step = styled.div`
     height: 40px;
     border-radius: 50%;
     background: ${props => {
-      if (props.$completed) return props.theme.colors.success;
-      if (props.$active) return props.theme.colors.primary;
-      return props.theme.colors.bgLight;
-    }};
+    if (props.$completed) return props.theme.colors.success;
+    if (props.$active) return props.theme.colors.primary;
+    return props.theme.colors.bgLight;
+  }};
     border: 2px solid ${props => {
-      if (props.$completed) return props.theme.colors.success;
-      if (props.$active) return props.theme.colors.primary;
-      return props.theme.colors.border;
-    }};
+    if (props.$completed) return props.theme.colors.success;
+    if (props.$active) return props.theme.colors.primary;
+    return props.theme.colors.border;
+  }};
     display: flex;
     align-items: center;
     justify-content: center;
@@ -95,9 +95,9 @@ const Step = styled.div`
     font-size: 14px;
     font-weight: 600;
     color: ${props => {
-      if (props.$active) return props.theme.colors.text;
-      return props.theme.colors.textLight;
-    }};
+    if (props.$active) return props.theme.colors.text;
+    return props.theme.colors.textLight;
+  }};
     text-align: center;
   }
 `;
@@ -326,7 +326,7 @@ const CompanyVerification = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState([]);
   const [uploadSuccess, setUploadSuccess] = useState(null); // Track which file was uploaded
-  
+
   const [expiryDateError, setExpiryDateError] = useState(false);
 
   const [step1Data, setStep1Data] = useState({
@@ -336,7 +336,7 @@ const CompanyVerification = () => {
     expiryDate: '',
     issuingAuthority: ''
   });
-  
+
   const [step2Data, setStep2Data] = useState({
     companyName: '',
     companyNameEn: '',
@@ -347,7 +347,7 @@ const CompanyVerification = () => {
     website: '',
     description: ''
   });
-  
+
   const [step3Data, setStep3Data] = useState({
     representativeName: '',
     position: '',
@@ -356,7 +356,7 @@ const CompanyVerification = () => {
     idBackImage: null,
     authorizationLetter: null
   });
-  
+
   const [step4Data, setStep4Data] = useState({
     address: '',
     city: '',
@@ -429,7 +429,7 @@ const CompanyVerification = () => {
 
           // Convert to base64 with high compression
           const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-          
+
           // Check if compressed size is still too large
           const sizeInBytes = (compressedDataUrl.length * 3) / 4;
           if (sizeInBytes > 500 * 1024) { // 500KB limit after compression
@@ -450,20 +450,20 @@ const CompanyVerification = () => {
 
   const handleFileUpload = async (field, file, step) => {
     if (!file) return;
-    
+
     // Check file size before processing
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
-      alert(language === 'vi' 
+      alert(language === 'vi'
         ? 'File quá lớn! Vui lòng chọn file nhỏ hơn 5MB.'
         : 'File too large! Please select a file smaller than 5MB.');
       return;
     }
-    
+
     try {
       // Compress image before storing
       const compressedDataUrl = await compressImage(file);
-      
+
       // Check if localStorage has enough space
       const testKey = 'test_storage_' + Date.now();
       try {
@@ -474,7 +474,7 @@ const CompanyVerification = () => {
         console.warn('LocalStorage full, attempting to clear old data...');
         const oldVerification = localStorage.getItem('companyVerificationData');
         if (oldVerification) {
-          if (confirm(language === 'vi' 
+          if (confirm(language === 'vi'
             ? 'Bộ nhớ đầy. Xóa dữ liệu xác thực cũ để tiếp tục?'
             : 'Storage full. Clear old verification data to continue?')) {
             localStorage.removeItem('companyVerificationData');
@@ -486,7 +486,7 @@ const CompanyVerification = () => {
           throw storageError;
         }
       }
-      
+
       // Store both file name and compressed data
       const fileData = {
         name: file.name,
@@ -494,13 +494,13 @@ const CompanyVerification = () => {
         size: file.size,
         type: file.type
       };
-      
+
       if (step === 0) {
         setStep1Data(prev => ({ ...prev, [field]: fileData }));
       } else if (step === 2) {
         setStep3Data(prev => ({ ...prev, [field]: fileData }));
       }
-      
+
       // Show success message for this specific field
       setUploadSuccess(field);
       setTimeout(() => setUploadSuccess(null), 3000);
@@ -517,12 +517,12 @@ const CompanyVerification = () => {
     if (!validateStep(currentStep)) {
       return;
     }
-    
+
     // Mark current step as completed
     if (!completedSteps.includes(currentStep)) {
       setCompletedSteps([...completedSteps, currentStep]);
     }
-    
+
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -546,7 +546,7 @@ const CompanyVerification = () => {
         console.log('issueDate:', step1Data.issueDate);
         console.log('issuingAuthority:', step1Data.issuingAuthority);
         console.log('=========================');
-        
+
         const missingFields = [];
         if (!step1Data.businessLicense) {
           missingFields.push(language === 'vi' ? 'Giấy phép kinh doanh' : 'Business License');
@@ -560,12 +560,12 @@ const CompanyVerification = () => {
         if (!step1Data.issuingAuthority || String(step1Data.issuingAuthority).trim() === '') {
           missingFields.push(language === 'vi' ? 'Cơ quan cấp' : 'Issuing Authority');
         }
-        const parseDate = (s) => { if (!s) return null; const [d,m,y] = s.split('/'); return new Date(+y, +m-1, +d); };
+        const parseDate = (s) => { if (!s) return null; const [d, m, y] = s.split('/'); return new Date(+y, +m - 1, +d); };
         if (step1Data.expiryDate && step1Data.issueDate && parseDate(step1Data.expiryDate) <= parseDate(step1Data.issueDate)) {
           setExpiryDateError(true);
           return false;
         }
-        
+
         if (missingFields.length > 0) {
           console.log('Missing fields:', missingFields);
           alert((language === 'vi' ? 'Vui lòng điền đầy đủ các trường sau:\n' : 'Please fill in the following fields:\n') + missingFields.join(', '));
@@ -574,7 +574,7 @@ const CompanyVerification = () => {
         break;
       case 1:
         if (!step2Data.companyName || !step2Data.taxCode || !step2Data.industry) {
-          alert(language === 'vi' 
+          alert(language === 'vi'
             ? 'Vui lòng điền đầy đủ thông tin doanh nghiệp'
             : 'Please fill in all required company information');
           return false;
@@ -582,7 +582,7 @@ const CompanyVerification = () => {
         break;
       case 2:
         if (!step3Data.representativeName || !step3Data.idNumber || !step3Data.idFrontImage) {
-          alert(language === 'vi' 
+          alert(language === 'vi'
             ? 'Vui lòng điền đầy đủ thông tin người đại diện'
             : 'Please fill in all required representative information');
           return false;
@@ -590,7 +590,7 @@ const CompanyVerification = () => {
         break;
       case 3:
         if (!step4Data.address || !step4Data.phone || !step4Data.email) {
-          alert(language === 'vi' 
+          alert(language === 'vi'
             ? 'Vui lòng điền đầy đủ thông tin liên hệ'
             : 'Please fill in all required contact information');
           return false;
@@ -610,14 +610,14 @@ const CompanyVerification = () => {
       step4: step4Data,
       submittedAt: new Date().toISOString()
     };
-    
+
     console.log('Verification submitted:', verificationData);
-    
+
     try {
       // Save to localStorage (in production, send to API)
       localStorage.setItem('companyVerificationStatus', 'pending');
       localStorage.setItem('companyVerificationData', JSON.stringify(verificationData));
-      
+
       // Mark all steps as completed
       setCompletedSteps([0, 1, 2, 3]);
       setCurrentStep(4); // Show completion screen
@@ -653,7 +653,7 @@ const CompanyVerification = () => {
             </div>
             <h2>{language === 'vi' ? '🎉 Hoàn Tất Xác Thực!' : '🎉 Verification Complete!'}</h2>
             <p>
-              {language === 'vi' 
+              {language === 'vi'
                 ? 'Hồ sơ công ty của bạn đã được gửi thành công. Chúng tôi sẽ xem xét và phê duyệt trong vòng 24-48 giờ. Sau khi được phê duyệt, bạn có thể bắt đầu đăng tin tuyển dụng.'
                 : 'Your company profile has been submitted successfully. We will review and approve within 24-48 hours. Once approved, you can start posting job listings.'}
             </p>
@@ -671,7 +671,7 @@ const CompanyVerification = () => {
       <VerificationContainer>
         <Header>
           <h1>{language === 'vi' ? 'Xác Thực Hồ Sơ Công Ty' : 'Company Verification'}</h1>
-          <p>{language === 'vi' 
+          <p>{language === 'vi'
             ? 'Hoàn tất 4 bước để xác thực công ty và bắt đầu đăng tin tuyển dụng'
             : 'Complete 4 steps to verify your company and start posting jobs'}</p>
         </Header>
@@ -718,10 +718,10 @@ const CompanyVerification = () => {
                 <AlertCircle />
                 <div className="info-content">
                   <p><strong>{language === 'vi' ? 'Lưu ý:' : 'Note:'}</strong></p>
-                  <p>{language === 'vi' 
+                  <p>{language === 'vi'
                     ? '• Tải lên bản scan rõ nét của Giấy phép ĐKKD hoặc Giấy chứng nhận đăng ký doanh nghiệp'
                     : '• Upload a clear scan of your Business Registration Certificate'}</p>
-                  <p>{language === 'vi' 
+                  <p>{language === 'vi'
                     ? '• Định dạng: PDF, JPG, PNG (tối đa 5MB, khuyến nghị dưới 2MB)'
                     : '• Format: PDF, JPG, PNG (max 5MB, recommended under 2MB)'}</p>
                   <p>{language === 'vi'
@@ -732,7 +732,7 @@ const CompanyVerification = () => {
 
               <FormGroup>
                 <Label>{language === 'vi' ? 'Tải lên Giấy phép kinh doanh' : 'Upload Business License'} *</Label>
-                <FileUploadArea 
+                <FileUploadArea
                   $hasFile={!!step1Data.businessLicense}
                   onClick={() => document.getElementById('businessLicenseFile').click()}
                 >
@@ -936,7 +936,7 @@ const CompanyVerification = () => {
                   <TextArea
                     value={step2Data.description}
                     onChange={(e) => setStep2Data({ ...step2Data, description: e.target.value })}
-                    placeholder={language === 'vi' 
+                    placeholder={language === 'vi'
                       ? 'Mô tả ngắn gọn về công ty, lĩnh vực hoạt động, sản phẩm/dịch vụ chính...'
                       : 'Brief description about your company, business field, main products/services...'}
                     rows={5}
@@ -978,10 +978,10 @@ const CompanyVerification = () => {
                 <AlertCircle />
                 <div className="info-content">
                   <p><strong>{language === 'vi' ? 'Yêu cầu:' : 'Requirements:'}</strong></p>
-                  <p>{language === 'vi' 
+                  <p>{language === 'vi'
                     ? '• Người đại diện phải là Giám đốc hoặc được ủy quyền hợp pháp'
                     : '• Representative must be Director or legally authorized'}</p>
-                  <p>{language === 'vi' 
+                  <p>{language === 'vi'
                     ? '• Tải lên ảnh CMND/CCCD 2 mặt và giấy ủy quyền (nếu có)'
                     : '• Upload ID card (both sides) and authorization letter (if applicable)'}</p>
                 </div>
@@ -1024,7 +1024,7 @@ const CompanyVerification = () => {
 
               <FormGroup>
                 <Label>{language === 'vi' ? 'Ảnh CMND/CCCD mặt trước' : 'ID Card Front Image'} *</Label>
-                <FileUploadArea 
+                <FileUploadArea
                   $hasFile={!!step3Data.idFrontImage}
                   onClick={() => document.getElementById('idFrontImage').click()}
                 >
@@ -1060,7 +1060,7 @@ const CompanyVerification = () => {
 
               <FormGroup>
                 <Label>{language === 'vi' ? 'Ảnh CMND/CCCD mặt sau' : 'ID Card Back Image'} *</Label>
-                <FileUploadArea 
+                <FileUploadArea
                   $hasFile={!!step3Data.idBackImage}
                   onClick={() => document.getElementById('idBackImage').click()}
                 >
@@ -1096,7 +1096,7 @@ const CompanyVerification = () => {
 
               <FormGroup>
                 <Label>{language === 'vi' ? 'Giấy ủy quyền (nếu có)' : 'Authorization Letter (if any)'}</Label>
-                <FileUploadArea 
+                <FileUploadArea
                   $hasFile={!!step3Data.authorizationLetter}
                   onClick={() => document.getElementById('authorizationLetter').click()}
                 >
@@ -1164,7 +1164,7 @@ const CompanyVerification = () => {
                 <TextArea
                   value={step4Data.address}
                   onChange={(e) => setStep4Data({ ...step4Data, address: e.target.value })}
-                  placeholder={language === 'vi' 
+                  placeholder={language === 'vi'
                     ? '123 Đường ABC, Phường XYZ'
                     : '123 ABC Street, XYZ Ward'}
                   rows={3}

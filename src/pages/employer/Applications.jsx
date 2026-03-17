@@ -14,6 +14,20 @@ import jobPostService from '../../services/jobPostService';
 import applicationService from '../../services/applicationService';
 import CVPreviewModal from '../../components/CVPreviewModal';
 
+/**
+ * Format salary from DynamoDB — prevents double-appending VNĐ/h.
+ * - Already has currency unit (VNĐ / VND / đ) → return as-is
+ * - Raw number / numeric string → format as "X.XXX VNĐ/giờ"
+ */
+const formatSalaryFromDB = (raw, fallback = 'Thỏa thuận') => {
+  if (!raw && raw !== 0) return fallback;
+  const str = String(raw).trim();
+  if (str.includes('VNĐ') || str.includes('VND') || str.includes('đ')) return str;
+  const num = parseInt(str.replace(/\D/g, ''), 10);
+  if (isNaN(num) || num === 0) return fallback;
+  return `${num.toLocaleString('vi-VN')} VNĐ/giờ`;
+};
+
 // Mock job posts data
 const getJobPosts = (language) => [
   {
@@ -363,7 +377,7 @@ const JobPostCard = styled(motion.div)`
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  height: 100%;
   overflow: hidden;
   
   &:hover {
@@ -378,6 +392,7 @@ const JobPostHeader = styled.div`
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 16px;
+  flex: 1;
 `;
 
 const JobPostTitle = styled.h3`
@@ -2080,7 +2095,7 @@ const Applications = () => {
           idJob: job.idJob,
           title: job.title,
           location: job.location,
-          salary: job.salary ? `${job.salary.toLocaleString()} VNĐ/h` : (language === 'vi' ? 'Thỏa thuận' : 'Negotiable'),
+          salary: formatSalaryFromDB(job.salary, language === 'vi' ? 'Thỏa thuận' : 'Negotiable'),
           type: job.jobType === 'part-time' ? (language === 'vi' ? 'Bán thời gian' : 'Part-time') : (language === 'vi' ? 'Toàn thời gian' : 'Full-time'),
           shift: job.workHours,
           workDays: job.workDays,
@@ -2273,7 +2288,10 @@ const Applications = () => {
   // Auto-open profile modal if candidateId is passed via navigation state
   useEffect(() => {
     if (location.state?.candidateId) {
-      const candidate = applications.find(app => app.id === location.state.candidateId);
+      // Search in both mock and real applications
+      const allApps = [...applications, ...realApplications];
+      const candidate = allApps.find(app => app.id === location.state.candidateId);
+      
       if (candidate) {
         // First switch to applications tab
         setActiveSection('applications');
@@ -2285,9 +2303,25 @@ const Applications = () => {
 
         // Clear the state after opening to prevent re-opening on refresh
         navigate(location.pathname, { replace: true, state: {} });
+      } else {
+        // For notification fallback - if no specific candidate ID, just show applications tab
+        if (location.state?.fromNotifications) {
+          setActiveSection('applications');
+          navigate(location.pathname, { replace: true, state: {} });
+        }
+      }
+    } else if (location.state?.fromNotifications) {
+      // Just switch the tab if coming from notifications without specific candidate
+      setActiveSection('applications');
+      navigate(location.pathname, { replace: true, state: {} });
+    } else {
+      // By default it starts on posts, which might be what they wanted but let's handle if it comes from notification and we want applications to be default
+      if (location.state?.fromNotifications) {
+          setActiveSection('applications');
+          navigate(location.pathname, { replace: true, state: {} });
       }
     }
-  }, [location.state, applications, navigate, location.pathname]);
+  }, [location.state, applications, realApplications, navigate, location.pathname]);
 
   const filteredApplications = useMemo(() => {
     const applicationsToFilter = realApplications.length > 0 ? realApplications : applications;

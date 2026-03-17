@@ -1250,6 +1250,26 @@ const translateSalary = (salaryStr, language) => {
     .replace(/\/tiếng/g, '/hrs');
 };
 
+/**
+ * Format salary value from DynamoDB to display string.
+ * Handles both cases:
+ *   - Already formatted string: "28.000 VNĐ/giờ", "25000 VNĐ/h"  → return as-is
+ *   - Raw number/string:        25000, "25000"                       → "25.000 VNĐ/giờ"
+ * @param {string|number} raw - salary value from DB
+ * @param {string} fallback - fallback text if falsy
+ * @returns {string}
+ */
+const formatSalaryFromDB = (raw, fallback = 'Thỏa thuận') => {
+  if (!raw && raw !== 0) return fallback;
+  const str = String(raw).trim();
+  // Already has currency unit → use as-is
+  if (str.includes('VNĐ') || str.includes('VND') || str.includes('đ')) return str;
+  // Pure number → format
+  const num = parseInt(str.replace(/\D/g, ''), 10);
+  if (isNaN(num) || num === 0) return fallback;
+  return `${num.toLocaleString('vi-VN')} VNĐ/giờ`;
+};
+
 // Calculate per-shift salary for jobs with hourly rate
 const calculateShiftSalary = (job) => {
   // Only convert if salary is in VNĐ/giờ format
@@ -2468,7 +2488,7 @@ const JobListing = () => {
                 title: String(job.title || 'Untitled Job'),
                 company: String(job.employerName || job.employerEmail || 'Công ty'),
                 location: String(job.location || ''),
-                salary: job.salary ? `${parseInt(job.salary).toLocaleString()} VNĐ/h` : (language === 'vi' ? 'Thỏa thuận' : 'Negotiable'),
+                salary: formatSalaryFromDB(job.salary, language === 'vi' ? 'Thỏa thuận' : 'Negotiable'),
                 type: job.jobType === 'part-time' ? (language === 'vi' ? 'Bán thời gian' : 'Part-time') : (language === 'vi' ? 'Toàn thời gian' : 'Full-time'),
                 category: String(job.category || 'standard'), // Use category from DynamoDB
                 tags: job.tags ? String(job.tags).split(',').map(t => String(t).trim()).filter(t => t) : [],

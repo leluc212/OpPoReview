@@ -191,16 +191,31 @@ class OpenStreetMapService {
       const data = await response.json();
 
       if (data && data.length > 0) {
-        const suggestions = data.map(item => ({
-          description: item.display_name,
-          placeId: item.place_id,
-          lat: parseFloat(item.lat),
-          lng: parseFloat(item.lon),
-          type: item.type,
-          class: item.class,
-          importance: item.importance,
-          components: this.parseAddressComponents(item.address)
-        }));
+        const suggestions = data.map(item => {
+          let displayName = item.display_name;
+          // OpenStreetMap API Nominatim sometimes incorrectly groups all inner-city districts of HCM with Thu Duc City
+          if (
+            (displayName.includes('Quận 1,') || 
+             displayName.includes('Quận 3,') || 
+             displayName.includes('Quận 4,') || 
+             displayName.includes('Quận 5,') || 
+             displayName.includes('Quận 10,')) && 
+             displayName.includes('Thủ Đức')
+          ) {
+            displayName = displayName.replace(', Thành phố Thủ Đức', '');
+          }
+
+          return {
+            description: displayName,
+            placeId: item.place_id,
+            lat: parseFloat(item.lat),
+            lng: parseFloat(item.lon),
+            type: item.type,
+            class: item.class,
+            importance: item.importance,
+            components: this.parseAddressComponents(item.address)
+          };
+        });
 
         console.log('✅ OSM Places search successful:', suggestions.length, 'results');
         return suggestions;

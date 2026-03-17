@@ -623,6 +623,9 @@ const QuickJobPostCard = styled(motion.div)`
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   
   &:hover {
     border-color: #BFDBFE;
@@ -636,6 +639,7 @@ const QuickJobPostHeader = styled.div`
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 16px;
+  flex: 1;
 `;
 
 const QuickJobPostTitle = styled.h3`
@@ -2226,6 +2230,14 @@ const HRManagement = () => {
   const [activeSection, setActiveSection] = useState('posts'); // Default to 'posts' (Quản lý bài đăng)
   const [hrStaff, setHrStaff] = useState(() => getHRStaff(language).map(s => ({ ...s, rated: false, pendingRating: false })));
   const [selectedStaff, setSelectedStaff] = useState(null);
+
+  // Auto-switch to HR/applications tab when coming from notifications
+  useEffect(() => {
+    if (location.state?.fromNotifications) {
+      setActiveSection('hr');
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, navigate, location.pathname]);
 
   // Helper function to check if more than 1 hour has passed
   const hasPassedOneHourSinceConfirmed = (confirmedAt) => {

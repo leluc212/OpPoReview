@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
-import { 
-  Bell, 
-  BellOff, 
-  UserPlus, 
-  FileText, 
-  CheckCircle, 
-  AlertCircle, 
-  Clock, 
+import {
+  Bell,
+  BellOff,
+  UserPlus,
+  FileText,
+  CheckCircle,
+  AlertCircle,
+  Clock,
   Trash2,
   Eye,
-  Star
+  Star,
+  X
 } from 'lucide-react';
 
 const fadeIn = keyframes`
@@ -150,15 +152,15 @@ const ActionButton = styled(motion.button)`
   background: ${props => props.$variant === 'primary' ? '#1e40af' : '#ffffff'};
   color: ${props => props.$variant === 'primary' ? 'white' : '#1E293B'};
   border: 1.5px solid ${props => props.$variant === 'primary' ? 'transparent' : '#e2e8f0'};
-  box-shadow: ${props => props.$variant === 'primary' 
-    ? '0 4px 12px rgba(30, 64, 175, 0.25)' 
+  box-shadow: ${props => props.$variant === 'primary'
+    ? '0 4px 12px rgba(30, 64, 175, 0.25)'
     : '0 2px 8px rgba(0, 0, 0, 0.05)'};
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: ${props => props.$variant === 'primary' 
-      ? '0 6px 16px rgba(30, 64, 175, 0.35)' 
-      : '0 4px 12px rgba(0, 0, 0, 0.1)'};
+    box-shadow: ${props => props.$variant === 'primary'
+    ? '0 6px 16px rgba(30, 64, 175, 0.35)'
+    : '0 4px 12px rgba(0, 0, 0, 0.1)'};
   }
   
   svg {
@@ -194,14 +196,14 @@ const NotificationCard = styled(motion.div)`
     width: 4px;
     border-radius: 16px 0 0 16px;
     background: ${props => {
-      switch(props.$type) {
-        case 'application': return '#1e40af';
-        case 'interview': return '#10B981';
-        case 'system': return '#1e40af';
-        case 'rating': return '#F59E0B';
-        default: return '#64748B';
-      }
-    }};
+    switch (props.$type) {
+      case 'application': return '#1e40af';
+      case 'interview': return '#10B981';
+      case 'system': return '#1e40af';
+      case 'rating': return '#F59E0B';
+      default: return '#64748B';
+    }
+  }};
     opacity: ${props => props.$read ? '0.2' : '0.8'};
     transition: opacity 0.2s ease;
   }
@@ -222,7 +224,7 @@ const NotificationIcon = styled.div`
   min-width: 46px;
   border-radius: 14px;
   background: ${props => {
-    switch(props.$type) {
+    switch (props.$type) {
       case 'application': return '#EFF6FF';
       case 'interview': return '#ECFDF5';
       case 'system': return '#EFF6FF';
@@ -231,7 +233,7 @@ const NotificationIcon = styled.div`
     }
   }};
   border: 1.5px solid ${props => {
-    switch(props.$type) {
+    switch (props.$type) {
       case 'application': return '#BFDBFE';
       case 'interview': return '#A7F3D0';
       case 'system': return '#BFDBFE';
@@ -243,7 +245,7 @@ const NotificationIcon = styled.div`
   align-items: center;
   justify-content: center;
   color: ${props => {
-    switch(props.$type) {
+    switch (props.$type) {
       case 'application': return '#1e40af';
       case 'interview': return '#10B981';
       case 'system': return '#1e40af';
@@ -337,18 +339,18 @@ const IconButton = styled(motion.button)`
   
   &:hover {
     background: ${props => {
-      if (props.$variant === 'danger') return '#FEE2E2';
-      return '#E2E8F0';
-    }};
+    if (props.$variant === 'danger') return '#FEE2E2';
+    return '#E2E8F0';
+  }};
     color: ${props => {
-      if (props.$variant === 'danger') return '#DC2626';
-      return '#334155';
-    }};
+    if (props.$variant === 'danger') return '#DC2626';
+    return '#334155';
+  }};
     transform: translateY(-2px);
     box-shadow: 0 4px 12px ${props => {
-      if (props.$variant === 'danger') return 'rgba(239, 68, 68, 0.15)';
-      return 'rgba(0, 0, 0, 0.05)';
-    }};
+    if (props.$variant === 'danger') return 'rgba(239, 68, 68, 0.15)';
+    return 'rgba(0, 0, 0, 0.05)';
+  }};
   }
   
   svg {
@@ -395,12 +397,156 @@ const EmptyState = styled(motion.div)`
   }
 `;
 
+const ModalOverlay = styled(motion.div)`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+`;
+
+const ModalBox = styled(motion.div)`
+  background: #fff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 24px 60px rgba(30, 64, 175, 0.18);
+  overflow: hidden;
+`;
+
+const ModalHeader = styled.div`
+  padding: 24px 28px 20px;
+  border-bottom: 1.5px solid #f1f5f9;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  background: ${props => props.$isQuickJob ? 'linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)' : 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)'};
+`;
+
+const ModalIconWrap = styled.div`
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  border-radius: 14px;
+  background: ${props => props.$isQuickJob ? '#FDE68A' : '#BFDBFE'};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${props => props.$isQuickJob ? '#D97706' : '#1e40af'};
+  svg { width: 24px; height: 24px; }
+`;
+
+const ModalTitleGroup = styled.div`
+  flex: 1;
+  min-width: 0;
+  h2 {
+    font-size: 17px;
+    font-weight: 800;
+    color: #1E293B;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  p {
+    font-size: 13px;
+    color: #64748B;
+    font-weight: 500;
+  }
+`;
+
+const ModalCloseBtn = styled.button`
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.06);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748B;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  &:hover { background: rgba(0,0,0,0.12); color: #1E293B; }
+  svg { width: 18px; height: 18px; }
+`;
+
+const ModalBody = styled.div`
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+`;
+
+const ModalInfoRow = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1.5px solid #e2e8f0;
+
+  .icon-box {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 9px;
+    background: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1e40af;
+    svg { width: 16px; height: 16px; }
+  }
+
+  .info {
+    flex: 1;
+    min-width: 0;
+    .label { font-size: 11px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+    .value { font-size: 14.5px; font-weight: 700; color: #1E293B; }
+  }
+`;
+
+const ModalFooter = styled.div`
+  padding: 16px 28px 24px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+`;
+
+const ModalBtn = styled(motion.button)`
+  padding: 11px 22px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  transition: all 0.2s;
+  background: ${props => props.$primary ? '#1e40af' : '#f1f5f9'};
+  color: ${props => props.$primary ? '#fff' : '#475569'};
+  box-shadow: ${props => props.$primary ? '0 4px 14px rgba(30,64,175,0.25)' : 'none'};
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${props => props.$primary ? '0 8px 20px rgba(30,64,175,0.35)' : '0 4px 10px rgba(0,0,0,0.08)'};
+  }
+  svg { width: 16px; height: 16px; }
+`;
+
 const getNotifications = (language) => ([
   {
     id: 1,
     type: 'application',
-    title: language === 'vi' ? 'Ứng viên mới ứng tuyển' : 'New candidate application',
-    message: language === 'vi' ? 'Nguyễn Hùng Anh đã ứng tuyển' : 'Nguyen Van A has applied',
+    title: language === 'vi' ? 'Ứng viên mới ứng tuyển (Tuyển gấp)' : 'New applicant (Quick Job)',
+    message: language === 'vi' ? 'Nguyễn Hùng Anh đã ứng tuyển' : 'Nguyen Hung Anh has applied',
     jobTitle: language === 'vi' ? 'Nhân viên Bán Hàng' : 'Sales Staff',
     time: language === 'vi' ? '5 phút trước' : '5 minutes ago',
     read: false,
@@ -410,8 +556,8 @@ const getNotifications = (language) => ([
   {
     id: 2,
     type: 'application',
-    title: language === 'vi' ? 'Ứng viên mới ứng tuyển' : 'New candidate application',
-    message: language === 'vi' ? 'Trương Tú Phương đã ứng tuyển' : 'Tran Thi B has applied',
+    title: language === 'vi' ? 'Ứng viên mới ứng tuyển (Tuyển gấp)' : 'New applicant (Quick Job)',
+    message: language === 'vi' ? 'Trương Tú Phương đã ứng tuyển' : 'Truong Tu Phuong has applied',
     jobTitle: language === 'vi' ? 'Nhân viên Hành Chính' : 'Administrative Staff',
     time: language === 'vi' ? '15 phút trước' : '15 minutes ago',
     read: false,
@@ -421,13 +567,24 @@ const getNotifications = (language) => ([
   {
     id: 3,
     type: 'application',
-    title: language === 'vi' ? 'Nhận hồ sơ ứng tuyển' : 'Application received',
-    message: language === 'vi' ? 'Lê Văn Minh đã ứng tuyển' : 'Le Van Minh has applied',
+    title: language === 'vi' ? 'Ứng viên mới ứng tuyển (Tiêu chuẩn)' : 'New applicant (Standard Job)',
+    message: language === 'vi' ? 'Lê Văn Minh đã ứng tuyển vào vị trí tiêu chuẩn' : 'Le Van Minh has applied for a standard position',
     jobTitle: language === 'vi' ? 'Kỹ sư Phần mềm' : 'Software Engineer',
     time: language === 'vi' ? '1 giờ trước' : '1 hour ago',
     read: false,
-    isQuickJob: true,
-    icon: UserPlus
+    isQuickJob: false,
+    icon: FileText
+  },
+  {
+    id: 5,
+    type: 'application',
+    title: language === 'vi' ? 'Ứng viên mới ứng tuyển (Tiêu chuẩn)' : 'New applicant (Standard Job)',
+    message: language === 'vi' ? 'Phạm Thị Lan đã nộp hồ sơ ứng tuyển' : 'Pham Thi Lan submitted an application',
+    jobTitle: language === 'vi' ? 'Kế toán viên' : 'Accountant',
+    time: language === 'vi' ? '3 giờ trước' : '3 hours ago',
+    read: false,
+    isQuickJob: false,
+    icon: FileText
   },
   {
     id: 4,
@@ -443,8 +600,10 @@ const getNotifications = (language) => ([
 
 const EmployerNotifications = () => {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [notifications, setNotifications] = useState(() => getNotifications(language));
+  const [selectedNotification, setSelectedNotification] = useState(null);
 
   useEffect(() => {
     setNotifications(prev => {
@@ -464,17 +623,38 @@ const EmployerNotifications = () => {
   ];
 
   const filteredNotifications = notifications.filter(notification => {
-    // Show quick job notifications and system notifications (like package expiring)
-    if (!notification.isQuickJob && notification.type !== 'system') return false;
+    // Filter by active tab
     if (activeTab === 'all') return true;
     if (activeTab === 'unread') return !notification.read;
     return notification.type === activeTab;
   });
 
   const handleMarkAsRead = (id) => {
-    setNotifications(notifications.map(n => 
+    setNotifications(notifications.map(n =>
       n.id === id ? { ...n, read: true } : n
     ));
+  };
+
+  // Opens the detail modal (marks as read too)
+  const handleOpenDetail = (notification) => {
+    if (!notification.read) {
+      handleMarkAsRead(notification.id);
+    }
+    setSelectedNotification({ ...notification, read: true });
+  };
+
+  // Navigate to the correct page from inside the modal
+  const handleGoToApplications = (notification) => {
+    setSelectedNotification(null);
+    if (notification.type === 'application') {
+      if (notification.isQuickJob) {
+        navigate('/employer/quick-jobs', { state: { fromNotifications: true } });
+      } else {
+        navigate('/employer/standard-jobs', { state: { fromNotifications: true } });
+      }
+    } else {
+      navigate('/employer/dashboard');
+    }
   };
 
   const handleMarkAllAsRead = () => {
@@ -516,7 +696,7 @@ const EmployerNotifications = () => {
               </Tab>
             ))}
           </TabContainer>
-          
+
           <ActionButtons>
             {unreadCount > 0 && (
               <ActionButton
@@ -546,7 +726,7 @@ const EmployerNotifications = () => {
                 <NotificationIcon $type={notification.type}>
                   <notification.icon />
                 </NotificationIcon>
-                
+
                 <NotificationContent>
                   <NotificationTitle>{notification.title}</NotificationTitle>
                   <NotificationMessage>
@@ -560,21 +740,34 @@ const EmployerNotifications = () => {
                       <Clock />
                       {notification.time}
                     </div>
+                    {notification.type === 'application' && (
+                      <span style={{
+                        fontSize: '11px',
+                        fontWeight: '700',
+                        padding: '2px 8px',
+                        borderRadius: '10px',
+                        background: notification.isQuickJob ? '#FEF3C7' : '#EFF6FF',
+                        color: notification.isQuickJob ? '#D97706' : '#1e40af',
+                        border: `1px solid ${notification.isQuickJob ? '#FDE68A' : '#BFDBFE'}`
+                      }}>
+                        {notification.isQuickJob
+                          ? (language === 'vi' ? '⚡ Tuyển gấp' : '⚡ Quick Job')
+                          : (language === 'vi' ? '📋 Tiêu chuẩn' : '📋 Standard')}
+                      </span>
+                    )}
                     {!notification.read && <UnreadBadge>{language === 'vi' ? 'MỚI' : 'NEW'}</UnreadBadge>}
                   </NotificationMeta>
                 </NotificationContent>
-                
+
                 <NotificationActions>
-                  {!notification.read && (
-                    <IconButton
-                      onClick={() => handleMarkAsRead(notification.id)}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
-                      title={language === 'vi' ? 'Đánh dấu đã đọc' : 'Mark as read'}
-                    >
-                      <Eye />
-                    </IconButton>
-                  )}
+                  <IconButton
+                    onClick={() => handleOpenDetail(notification)}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    title={language === 'vi' ? 'Xem chi tiết' : 'View details'}
+                  >
+                    <Eye />
+                  </IconButton>
                   <IconButton
                     $variant="danger"
                     onClick={() => handleDelete(notification.id)}
@@ -600,6 +793,96 @@ const EmployerNotifications = () => {
           </EmptyState>
         )}
       </NotificationsContainer>
+
+      {/* Notification Detail Modal */}
+      {selectedNotification && (
+        <ModalOverlay
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setSelectedNotification(null)}
+        >
+          <ModalBox
+            initial={{ opacity: 0, scale: 0.92, y: 24 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.92, y: 24 }}
+            transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+            onClick={e => e.stopPropagation()}
+          >
+            <ModalHeader $isQuickJob={selectedNotification.isQuickJob}>
+              <ModalIconWrap $isQuickJob={selectedNotification.isQuickJob}>
+                <selectedNotification.icon />
+              </ModalIconWrap>
+              <ModalTitleGroup>
+                <h2>{selectedNotification.title}</h2>
+                <p>{selectedNotification.time}</p>
+              </ModalTitleGroup>
+              <ModalCloseBtn onClick={() => setSelectedNotification(null)}>
+                <X />
+              </ModalCloseBtn>
+            </ModalHeader>
+
+            <ModalBody>
+              <ModalInfoRow>
+                <div className="icon-box"><UserPlus /></div>
+                <div className="info">
+                  <div className="label">{language === 'vi' ? 'Nội dung' : 'Message'}</div>
+                  <div className="value">{selectedNotification.message}</div>
+                </div>
+              </ModalInfoRow>
+
+              {selectedNotification.jobTitle && (
+                <ModalInfoRow>
+                  <div className="icon-box"><FileText /></div>
+                  <div className="info">
+                    <div className="label">{language === 'vi' ? 'Vị trí tuyển dụng' : 'Job Position'}</div>
+                    <div className="value">{selectedNotification.jobTitle}</div>
+                  </div>
+                </ModalInfoRow>
+              )}
+
+              {selectedNotification.type === 'application' && (
+                <ModalInfoRow>
+                  <div className="icon-box">
+                    {selectedNotification.isQuickJob ? <Star /> : <CheckCircle />}
+                  </div>
+                  <div className="info">
+                    <div className="label">{language === 'vi' ? 'Loại công việc' : 'Job Type'}</div>
+                    <div className="value" style={{ color: selectedNotification.isQuickJob ? '#D97706' : '#1e40af' }}>
+                      {selectedNotification.isQuickJob
+                        ? (language === 'vi' ? '⚡ Tuyển gấp (Quick Job)' : '⚡ Quick Job')
+                        : (language === 'vi' ? '📋 Tiêu chuẩn (Standard Job)' : '📋 Standard Job')}
+                    </div>
+                  </div>
+                </ModalInfoRow>
+              )}
+            </ModalBody>
+
+            <ModalFooter>
+              <ModalBtn
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setSelectedNotification(null)}
+              >
+                {language === 'vi' ? 'Đóng' : 'Close'}
+              </ModalBtn>
+              {selectedNotification.type === 'application' && (
+                <ModalBtn
+                  $primary
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => handleGoToApplications(selectedNotification)}
+                >
+                  <Eye />
+                  {language === 'vi'
+                    ? (selectedNotification.isQuickJob ? 'Xem hồ sơ tuyển gấp' : 'Xem hồ sơ tiêu chuẩn')
+                    : (selectedNotification.isQuickJob ? 'View Quick Job Applications' : 'View Standard Applications')}
+                </ModalBtn>
+              )}
+            </ModalFooter>
+          </ModalBox>
+        </ModalOverlay>
+      )}
     </DashboardLayout>
   );
 };
