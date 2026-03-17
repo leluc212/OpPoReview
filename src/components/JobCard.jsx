@@ -351,7 +351,7 @@ const JobCard = ({ job, onClick, onSave, saved = false }) => {
           <span>{translateLocation(job.location, language)}</span>
         </DetailItem>
         <DetailItem whileHover={{ x: 4 }}>
-          <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span>
+          <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập trung bình:' : 'Income:'}</span>
           <span>{translateSalary(job.salary, language)}</span>
         </DetailItem>
         {job.shift && (

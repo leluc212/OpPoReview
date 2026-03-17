@@ -3006,16 +3006,16 @@ const JobListing = () => {
 
     const count = (fn) => base.filter(fn).length;
     return {
-      fulltime:  count(j => (j.type || '').toLowerCase().includes('full-time') || (j.type || '').toLowerCase().includes('toàn thời gian')),
-      parttime:  count(j => (j.type || '').toLowerCase().includes('part-time') || (j.type || '').toLowerCase().includes('bán thời gian')),
-      morning:   count(j => (j.type || '').toLowerCase().includes('sáng')),
+      fulltime: count(j => (j.type || '').toLowerCase().includes('full-time') || (j.type || '').toLowerCase().includes('toàn thời gian')),
+      parttime: count(j => (j.type || '').toLowerCase().includes('part-time') || (j.type || '').toLowerCase().includes('bán thời gian')),
+      morning: count(j => (j.type || '').toLowerCase().includes('sáng')),
       afternoon: count(j => (j.type || '').toLowerCase().includes('chiều')),
-      night:     count(j => (j.type || '').toLowerCase().includes('đêm')),
-      hourly:    count(j => (j.salary || '').toLowerCase().includes('giờ') || (j.salary || '').toLowerCase().includes('/h')),
-      under25k:  count(j => { const v = getSalaryValue(j.salary); return v > 0 && v < 25; }),
+      night: count(j => (j.type || '').toLowerCase().includes('đêm')),
+      hourly: count(j => (j.salary || '').toLowerCase().includes('giờ') || (j.salary || '').toLowerCase().includes('/h')),
+      under25k: count(j => { const v = getSalaryValue(j.salary); return v > 0 && v < 25; }),
       '25to30k': count(j => { const v = getSalaryValue(j.salary); return v >= 25 && v < 30; }),
       '30to35k': count(j => { const v = getSalaryValue(j.salary); return v >= 30 && v <= 35; }),
-      over35k:   count(j => getSalaryValue(j.salary) > 35),
+      over35k: count(j => getSalaryValue(j.salary) > 35),
     };
   }, [allJobs, jobCategory, searchKeyword, selectedLocation]);
 
@@ -3023,9 +3023,9 @@ const JobListing = () => {
     const value = getSalaryValue(salary);
     switch (range) {
       case 'under-25k': return value > 0 && value < 25;
-      case '25k-30k':   return value >= 25 && value < 30;
-      case '30k-35k':   return value >= 30 && value <= 35;
-      case 'over-35k':  return value > 35;
+      case '25k-30k': return value >= 25 && value < 30;
+      case '30k-35k': return value >= 30 && value <= 35;
+      case 'over-35k': return value > 35;
       default: return true;
     }
   };
@@ -3385,72 +3385,72 @@ const JobListing = () => {
             </FilterHeader>
 
             {jobCategory === 'standard' && (
-            <FilterSection>
-              <FilterTitle onClick={() => toggleFilter('jobType')} $expanded={expandedFilters.jobType}>
-                <h4>{language === 'vi' ? 'Loại hình công việc' : 'Job Type'}</h4>
-                <ChevronDown />
-              </FilterTitle>
-              {expandedFilters.jobType && (
-                <FilterOptions
-                  initial={{ height: 0 }}
-                  animate={{ height: 'auto' }}
-                  exit={{ height: 0 }}
-                >
-                  <FilterOption>
-                    <input type="checkbox" id="fulltime"
-                      checked={selectedJobTypes.includes('full-time')}
-                      onChange={() => toggleJobType('full-time')} />
-                    <span>{language === 'vi' ? 'Toàn thời gian' : 'Full-time'}</span>
-                    <small>{filterCounts.fulltime}</small>
-                  </FilterOption>
-                  <FilterOption>
-                    <input type="checkbox" id="parttime"
-                      checked={selectedJobTypes.includes('part-time')}
-                      onChange={() => toggleJobType('part-time')} />
-                    <span>{language === 'vi' ? 'Bán thời gian' : 'Part-time'}</span>
-                    <small>{filterCounts.parttime}</small>
-                  </FilterOption>
-                </FilterOptions>
-              )}
-            </FilterSection>
+              <FilterSection>
+                <FilterTitle onClick={() => toggleFilter('jobType')} $expanded={expandedFilters.jobType}>
+                  <h4>{language === 'vi' ? 'Loại hình công việc' : 'Job Type'}</h4>
+                  <ChevronDown />
+                </FilterTitle>
+                {expandedFilters.jobType && (
+                  <FilterOptions
+                    initial={{ height: 0 }}
+                    animate={{ height: 'auto' }}
+                    exit={{ height: 0 }}
+                  >
+                    <FilterOption>
+                      <input type="checkbox" id="fulltime"
+                        checked={selectedJobTypes.includes('full-time')}
+                        onChange={() => toggleJobType('full-time')} />
+                      <span>{language === 'vi' ? 'Toàn thời gian' : 'Full-time'}</span>
+                      <small>{filterCounts.fulltime}</small>
+                    </FilterOption>
+                    <FilterOption>
+                      <input type="checkbox" id="parttime"
+                        checked={selectedJobTypes.includes('part-time')}
+                        onChange={() => toggleJobType('part-time')} />
+                      <span>{language === 'vi' ? 'Bán thời gian' : 'Part-time'}</span>
+                      <small>{filterCounts.parttime}</small>
+                    </FilterOption>
+                  </FilterOptions>
+                )}
+              </FilterSection>
             )}
 
             {jobCategory === 'shift' && (
-            <FilterSection>
-              <FilterTitle onClick={() => toggleFilter('jobType')} $expanded={expandedFilters.jobType}>
-                <h4>{language === 'vi' ? 'Loại ca làm việc' : 'Shift Type'}</h4>
-                <ChevronDown />
-              </FilterTitle>
-              {expandedFilters.jobType && (
-                <FilterOptions
-                  initial={{ height: 0 }}
-                  animate={{ height: 'auto' }}
-                  exit={{ height: 0 }}
-                >
-                  <FilterOption>
-                    <input type="checkbox" id="morning"
-                      checked={selectedJobTypes.includes('sáng')}
-                      onChange={() => toggleJobType('sáng')} />
-                    <span>{language === 'vi' ? '6h - 14h' : '6AM - 2PM'}</span>
-                    <small>{filterCounts.morning}</small>
-                  </FilterOption>
-                  <FilterOption>
-                    <input type="checkbox" id="afternoon"
-                      checked={selectedJobTypes.includes('chiều')}
-                      onChange={() => toggleJobType('chiều')} />
-                    <span>{language === 'vi' ? '14h - 22h' : '2PM - 10PM'}</span>
-                    <small>{filterCounts.afternoon}</small>
-                  </FilterOption>
-                  <FilterOption>
-                    <input type="checkbox" id="night"
-                      checked={selectedJobTypes.includes('đêm')}
-                      onChange={() => toggleJobType('đêm')} />
-                    <span>{language === 'vi' ? '22h - 6h' : '10PM - 6AM'}</span>
-                    <small>{filterCounts.night}</small>
-                  </FilterOption>
-                </FilterOptions>
-              )}
-            </FilterSection>
+              <FilterSection>
+                <FilterTitle onClick={() => toggleFilter('jobType')} $expanded={expandedFilters.jobType}>
+                  <h4>{language === 'vi' ? 'Loại ca làm việc' : 'Shift Type'}</h4>
+                  <ChevronDown />
+                </FilterTitle>
+                {expandedFilters.jobType && (
+                  <FilterOptions
+                    initial={{ height: 0 }}
+                    animate={{ height: 'auto' }}
+                    exit={{ height: 0 }}
+                  >
+                    <FilterOption>
+                      <input type="checkbox" id="morning"
+                        checked={selectedJobTypes.includes('sáng')}
+                        onChange={() => toggleJobType('sáng')} />
+                      <span>{language === 'vi' ? '6h - 14h' : '6AM - 2PM'}</span>
+                      <small>{filterCounts.morning}</small>
+                    </FilterOption>
+                    <FilterOption>
+                      <input type="checkbox" id="afternoon"
+                        checked={selectedJobTypes.includes('chiều')}
+                        onChange={() => toggleJobType('chiều')} />
+                      <span>{language === 'vi' ? '14h - 22h' : '2PM - 10PM'}</span>
+                      <small>{filterCounts.afternoon}</small>
+                    </FilterOption>
+                    <FilterOption>
+                      <input type="checkbox" id="night"
+                        checked={selectedJobTypes.includes('đêm')}
+                        onChange={() => toggleJobType('đêm')} />
+                      <span>{language === 'vi' ? '22h - 6h' : '10PM - 6AM'}</span>
+                      <small>{filterCounts.night}</small>
+                    </FilterOption>
+                  </FilterOptions>
+                )}
+              </FilterSection>
             )}
 
             <FilterSection>
@@ -3549,19 +3549,19 @@ const JobListing = () => {
               whileHover={{ y: -2 }}
             >
               <BoostTag>🔥Hot deal</BoostTag>
-              <motion.img 
+              <motion.img
                 key={currentBannerIndex}
                 initial={{ opacity: 0.8, scale: 1.05 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6 }}
-                src={banners[currentBannerIndex].src} 
+                src={banners[currentBannerIndex].src}
                 alt={banners[currentBannerIndex].alt}
                 style={{ width: '100%', height: 'auto', display: 'block' }}
               />
               <BannerDots>
                 {banners.map((_, idx) => (
-                  <BannerDot 
-                    key={idx} 
+                  <BannerDot
+                    key={idx}
                     $active={currentBannerIndex === idx}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -3572,6 +3572,7 @@ const JobListing = () => {
               </BannerDots>
             </BoostBannerWrap>
 
+<<<<<<< HEAD
   <JobsGrid>
     {filteredJobs.length > 0 ? (
       filteredJobs.map((job, index) => (
@@ -3646,66 +3647,136 @@ const JobListing = () => {
       </div>
     )}
   </JobsGrid>
+=======
+            <JobsGrid>
+              {filteredJobs.length > 0 ? (
+                filteredJobs.map((job, index) => (
+                  <JobCardComponent
+                    key={job.id}
+                    job={job}
+                    saved={savedJobs.includes(job.id)}
+                    onSave={handleSaveJob}
+                    onClick={handleJobClick}
+                    onApply={handleApplyJob}
+                    delay={index * 0.05}
+                    showDistance={jobCategory === 'shift' && showNearbyJobs}
+                    language={language}
+                  />
+                ))
+              ) : (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '80px 20px',
+                  gridColumn: '1 / -1',
+                  color: '#6b7280'
+                }}>
+                  {showSavedJobsOnly ? (
+                    <>
+                      <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔖</div>
+                      <p style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
+                        {language === 'vi' ? 'Bạn chưa lưu công việc nào' : "You haven't saved any jobs yet"}
+                      </p>
+                      <p style={{ fontSize: '15px', color: '#6b7280' }}>
+                        {language === 'vi'
+                          ? 'Nhấn vào biểu tượng lưu ở tin tuyển dụng mà bạn quan tâm để thêm vào danh sách.'
+                          : 'Click the save icon on any job to add it here.'}
+                      </p>
+                    </>
+                  ) : jobCategory === 'shift' && !showNearbyJobs ? (
+                    <>
+                      <div style={{ fontSize: '48px', marginBottom: '16px' }}>📍</div>
+                      <p style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
+                        {language === 'vi' ? 'Bật vị trí để tìm việc gần bạn' : 'Enable location to find jobs near you'}
+                      </p>
+                      <p style={{ fontSize: '15px', color: '#6b7280', marginBottom: '20px' }}>
+                        {language === 'vi'
+                          ? 'Nhấn nút "Tìm việc gần tôi" ở phía trên để xem các công việc tuyển gấp trong bán kính 3km'
+                          : 'Click "Find Jobs Near Me" button above to see shift jobs within 3km radius'}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
+                      <p style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
+                        {language === 'vi' ? 'Không tìm thấy công việc phù hợp' : 'No matching jobs found'}
+                      </p>
+                      <p style={{ fontSize: '15px', color: '#6b7280' }}>
+                        {jobCategory === 'shift'
+                          ? (language === 'vi'
+                            ? 'Không có công việc tuyển gấp trong bán kính 3km. Thử mở rộng bán kính tìm kiếm.'
+                            : 'No shift jobs within 3km radius. Try expanding the search radius.')
+                          : (language === 'vi'
+                            ? 'Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn'
+                            : 'Try adjusting your filters or search keywords')
+                        }
+                      </p>
+                    </>
+                  )}
+                </div>
+              )}
+            </JobsGrid>
+>>>>>>> b5d53add6d64a708ffe13a357802fd7f0a1ef303
           </MainContent >
         </MainLayout >
       </Container >
 
-  {/* Confirmation Modal */ }
-  < Modal
-isOpen = { showConfirmModal }
-onClose = {() => setShowConfirmModal(false)}
-title = ""
-  >
-  <ConfirmationContent $isActive={isAvailable}>
-    <div className="icon-wrapper">
-      {isAvailable ? <XCircle /> : <CheckCircle />}
-    </div>
-    <h3>
-      {isAvailable
-        ? (language === 'vi' ? 'Tắt tìm việc?' : 'Pause Job Search?')
-        : (language === 'vi' ? 'Bật tìm việc?' : 'Activate Job Search?')}
-    </h3>
-    <p>
-      {isAvailable
-        ? (language === 'vi'
-          ? 'Hồ sơ của bạn sẽ bị ẩn với nhà tuyển dụng và bạn sẽ không nhận được thông báo về cơ hội việc làm.'
-          : 'Your profile will be hidden from employers and you will not receive job opportunity notifications.')
-        : (language === 'vi'
-          ? 'Hồ sơ của bạn sẽ hiển thị với nhà tuyển dụng và bạn sẽ nhận được thông báo về cơ hội việc làm phù hợp.'
-          : 'Your profile will be visible to employers and you will receive notifications about suitable job opportunities.')}
-    </p>
-    <div className="button-group">
-      <button className="cancel" onClick={() => setShowConfirmModal(false)}>
-        {language === 'vi' ? 'Hủy' : 'Cancel'}
-      </button>
-      <button className="confirm" onClick={confirmToggle}>
-        {isAvailable
-          ? (language === 'vi' ? 'Tắt ngay' : 'Pause Now')
-          : (language === 'vi' ? 'Bật ngay' : 'Activate Now')}
-      </button>
-    </div>
-  </ConfirmationContent>
+      {/* Confirmation Modal */}
+      < Modal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        title=""
+      >
+        <ConfirmationContent $isActive={isAvailable}>
+          <div className="icon-wrapper">
+            {isAvailable ? <XCircle /> : <CheckCircle />}
+          </div>
+          <h3>
+            {isAvailable
+              ? (language === 'vi' ? 'Tắt tìm việc?' : 'Pause Job Search?')
+              : (language === 'vi' ? 'Bật tìm việc?' : 'Activate Job Search?')}
+          </h3>
+          <p>
+            {isAvailable
+              ? (language === 'vi'
+                ? 'Hồ sơ của bạn sẽ bị ẩn với nhà tuyển dụng và bạn sẽ không nhận được thông báo về cơ hội việc làm.'
+                : 'Your profile will be hidden from employers and you will not receive job opportunity notifications.')
+              : (language === 'vi'
+                ? 'Hồ sơ của bạn sẽ hiển thị với nhà tuyển dụng và bạn sẽ nhận được thông báo về cơ hội việc làm phù hợp.'
+                : 'Your profile will be visible to employers and you will receive notifications about suitable job opportunities.')}
+          </p>
+          <div className="button-group">
+            <button className="cancel" onClick={() => setShowConfirmModal(false)}>
+              {language === 'vi' ? 'Hủy' : 'Cancel'}
+            </button>
+            <button className="confirm" onClick={confirmToggle}>
+              {isAvailable
+                ? (language === 'vi' ? 'Tắt ngay' : 'Pause Now')
+                : (language === 'vi' ? 'Bật ngay' : 'Activate Now')}
+            </button>
+          </div>
+        </ConfirmationContent>
       </Modal >
 
-  {/* Apply Confirmation Modal */ }
-  < Modal
-isOpen = {!!applyModal}
-onClose = {() => setApplyModal(null)}
-title = ""
-  >
-  { applyModal && (
-    <ApplyModalWrap onClick={e => e.stopPropagation()}>
-      <div className="apply-emoji">📋</div>
+      {/* Apply Confirmation Modal */}
+      < Modal
+        isOpen={!!applyModal}
+        onClose={() => setApplyModal(null)}
+        title=""
+      >
+        {applyModal && (
+          <ApplyModalWrap onClick={e => e.stopPropagation()}>
+            <div className="apply-emoji">📋</div>
 
-      <h3>{language === 'vi' ? 'Xác nhận ứng tuyển' : 'Confirm Application'}</h3>
+            <h3>{language === 'vi' ? 'Xác nhận ứng tuyển' : 'Confirm Application'}</h3>
 
-      <p className="apply-desc">
-        {language === 'vi'
-          ? <>Bạn muốn gửi CV ứng tuyển vào vị trí <strong>{translateJobTitle(applyModal.job.title, language)}</strong> tại <strong>{applyModal.job.company}</strong>?</>
-          : <>Send your CV for <strong>{translateJobTitle(applyModal.job.title, language)}</strong> at <strong>{applyModal.job.company}</strong>?</>
-        }
-      </p>
+            <p className="apply-desc">
+              {language === 'vi'
+                ? <>Bạn muốn gửi CV ứng tuyển vào vị trí <strong>{translateJobTitle(applyModal.job.title, language)}</strong> tại <strong>{applyModal.job.company}</strong>?</>
+                : <>Send your CV for <strong>{translateJobTitle(applyModal.job.title, language)}</strong> at <strong>{applyModal.job.company}</strong>?</>
+              }
+            </p>
 
+<<<<<<< HEAD
       <div className="apply-info-card">
         <div className="info-row">
           <span className="info-label">{language === 'vi' ? 'Vị trí' : 'Position'}:</span>
@@ -3766,55 +3837,118 @@ title = ""
           </span>
         </div>
       </div>
+=======
+            <div className="apply-info-card">
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Vị trí' : 'Position'}:</span>
+                <span className="info-value">{translateJobTitle(applyModal.job.title, language)}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Công ty' : 'Company'}:</span>
+                <span className="info-value">{applyModal.job.company}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Địa điểm' : 'Location'}:</span>
+                <span className="info-value">{translateLocation(applyModal.job.location, language)}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Mức lương' : 'Salary'}:</span>
+                <span className="info-value salary">{translateSalary(applyModal.job.category === 'shift' ? calculateShiftSalary(applyModal.job) : applyModal.job.salary, language)}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Loại hình' : 'Type'}:</span>
+                <span className="info-value">{translateJobType(applyModal.job.type, language)}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Ngày đăng' : 'Posted'}:</span>
+                <span className="info-value">
+                  {applyModal.job.postedDate
+                    ? formatPostedDate(applyModal.job.postedDate, language)
+                    : applyModal.job.postedAt
+                      ? translateTimePosted(applyModal.job.postedAt, language)
+                      : '-'
+                  }
+                </span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Ngày làm' : 'Work Date'}:</span>
+                <span className="info-value">
+                  {applyModal.job.workDate
+                    ? (() => {
+                      // Format workDate from YYYY-MM-DD to DD/MM/YYYY
+                      try {
+                        const [year, month, day] = applyModal.job.workDate.split('-');
+                        return `${day}/${month}/${year}`;
+                      } catch (e) {
+                        return applyModal.job.workDate;
+                      }
+                    })()
+                    : applyModal.job.workDays
+                      ? applyModal.job.workDays
+                      : applyModal.job.shiftDetails?.date
+                        ? applyModal.job.shiftDetails.date
+                        : (applyModal.job.urgent ? getUrgentJobWorkDate() : getStandardJobWorkDate())
+                  }
+                </span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Thời gian' : 'Time'}:</span>
+                <span className="info-value">
+                  {applyModal.job.workHours || applyModal.job.shiftDetails?.time || applyModal.job.type?.match(/\((.*?)\)/)?.[1] || '-'}
+                </span>
+              </div>
+            </div>
+>>>>>>> b5d53add6d64a708ffe13a357802fd7f0a1ef303
 
-      <div className="apply-buttons" style={{ display: 'flex', gap: '10px' }}>
-        <button className="btn-cancel" onClick={() => setApplyModal(null)}>
-          {language === 'vi' ? 'Hủy' : 'Cancel'}
-        </button>
-        <button
-          className="btn-info"
-          onClick={() => {
-            setJobDescriptionModal({ job: applyModal.job });
-          }}
-          style={{
-            flex: 1,
-            padding: '12px 20px',
-            background: '#f3f4f6',
-            color: '#374151',
-            border: 'none',
-            borderRadius: '12px',
-            fontSize: '15px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'all 0.2s'
-          }}
-          onMouseEnter={(e) => e.target.style.background = '#e5e7eb'}
-          onMouseLeave={(e) => e.target.style.background = '#f3f4f6'}
-        >
-          {language === 'vi' ? 'Xem mô tả' : 'View Description'}
-        </button>
-        <button className="btn-confirm" onClick={confirmApply}>
-          {language === 'vi' ? 'Gửi CV ngay' : 'Send CV'}
-        </button>
-      </div>
-    </ApplyModalWrap>
-  )}
+            <div className="apply-buttons" style={{ display: 'flex', gap: '10px' }}>
+              <button className="btn-cancel" onClick={() => setApplyModal(null)}>
+                {language === 'vi' ? 'Hủy' : 'Cancel'}
+              </button>
+              <button
+                className="btn-info"
+                onClick={() => {
+                  setJobDescriptionModal({ job: applyModal.job });
+                }}
+                style={{
+                  flex: 1,
+                  padding: '12px 20px',
+                  background: '#f3f4f6',
+                  color: '#374151',
+                  border: 'none',
+                  borderRadius: '12px',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.style.background = '#e5e7eb'}
+                onMouseLeave={(e) => e.target.style.background = '#f3f4f6'}
+              >
+                {language === 'vi' ? 'Xem mô tả' : 'View Description'}
+              </button>
+              <button className="btn-confirm" onClick={confirmApply}>
+                {language === 'vi' ? 'Gửi CV ngay' : 'Send CV'}
+              </button>
+            </div>
+          </ApplyModalWrap>
+        )}
       </Modal >
 
-  {/* Detail Modal */ }
-  < Modal
-isOpen = {!!detailModal}
-onClose = {() => setDetailModal(null)}
-title = ""
-  >
-  { detailModal && (
-    <ApplyModalWrap onClick={e => e.stopPropagation()}>
-      <div className="apply-emoji" style={{ fontSize: '40px' }}>💼</div>
-      <h3>{translateJobTitle(detailModal.job.title, language)}</h3>
-      <p className="apply-desc" style={{ marginBottom: '10px' }}>
-        <strong>{detailModal.job.company}</strong>
-      </p>
+      {/* Detail Modal */}
+      < Modal
+        isOpen={!!detailModal}
+        onClose={() => setDetailModal(null)}
+        title=""
+      >
+        {detailModal && (
+          <ApplyModalWrap onClick={e => e.stopPropagation()}>
+            <div className="apply-emoji" style={{ fontSize: '40px' }}>💼</div>
+            <h3>{translateJobTitle(detailModal.job.title, language)}</h3>
+            <p className="apply-desc" style={{ marginBottom: '10px' }}>
+              <strong>{detailModal.job.company}</strong>
+            </p>
 
+<<<<<<< HEAD
       <div className="apply-info-card" style={{ marginBottom: '15px' }}>
         <div className="info-row">
           <span className="info-label">{language === 'vi' ? 'Địa điểm' : 'Location'}:</span>
@@ -3845,280 +3979,309 @@ title = ""
           </span>
         </div>
       </div>
+=======
+            <div className="apply-info-card" style={{ marginBottom: '15px' }}>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Địa điểm' : 'Location'}:</span>
+                <span className="info-value">{detailModal.job.location}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Mức lương' : 'Salary'}:</span>
+                <span className="info-value salary">{translateSalary(detailModal.job.category === 'shift' ? calculateShiftSalary(detailModal.job) : detailModal.job.salary, language)}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Loại hình' : 'Type'}:</span>
+                <span className="info-value">{detailModal.job.type}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Ngày đăng' : 'Posted at'}:</span>
+                <span className="info-value">{detailModal.job.postedAt}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Ngày làm' : 'Date'}:</span>
+                <span className="info-value">
+                  {detailModal.job.shiftDetails?.date || (detailModal.job.urgent ? getUrgentJobWorkDate() : getStandardJobWorkDate())}
+                </span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">{language === 'vi' ? 'Thời gian' : 'Time'}:</span>
+                <span className="info-value">
+                  {detailModal.job.shiftDetails?.time || detailModal.job.type?.match(/\((.*?)\)/)?.[1] || '07:00 - 10:00'}
+                </span>
+              </div>
+            </div>
+>>>>>>> b5d53add6d64a708ffe13a357802fd7f0a1ef303
 
-      <div className="apply-buttons">
-        <button className="btn-cancel" onClick={() => setDetailModal(null)}>
-          {language === 'vi' ? 'Đóng' : 'Close'}
-        </button>
-        <button className="btn-confirm" onClick={() => {
-          setDetailModal(null);
-          setApplyModal({ job: detailModal.job });
-        }}>
-          {language === 'vi' ? 'Ứng tuyển ngay' : 'Apply Now'}
-        </button>
-      </div>
-    </ApplyModalWrap>
-  )}
+            <div className="apply-buttons">
+              <button className="btn-cancel" onClick={() => setDetailModal(null)}>
+                {language === 'vi' ? 'Đóng' : 'Close'}
+              </button>
+              <button className="btn-confirm" onClick={() => {
+                setDetailModal(null);
+                setApplyModal({ job: detailModal.job });
+              }}>
+                {language === 'vi' ? 'Ứng tuyển ngay' : 'Apply Now'}
+              </button>
+            </div>
+          </ApplyModalWrap>
+        )}
       </Modal >
 
-  {/* Job Description Modal */ }
-  < Modal
-isOpen = {!!jobDescriptionModal}
-onClose = {() => setJobDescriptionModal(null)}
-title = ""
-  >
-  { jobDescriptionModal && (
-    <ApplyModalWrap onClick={e => e.stopPropagation()}>
-      <div className="apply-emoji" style={{ fontSize: '40px' }}>📋</div>
-      <h3>{language === 'vi' ? 'Mô tả công việc' : 'Job Description'}</h3>
-      <p className="apply-desc" style={{ marginBottom: '10px' }}>
-        <strong>{translateJobTitle(jobDescriptionModal.job.title, language)}</strong> - {jobDescriptionModal.job.company}
-      </p>
+      {/* Job Description Modal */}
+      < Modal
+        isOpen={!!jobDescriptionModal}
+        onClose={() => setJobDescriptionModal(null)}
+        title=""
+      >
+        {jobDescriptionModal && (
+          <ApplyModalWrap onClick={e => e.stopPropagation()}>
+            <div className="apply-emoji" style={{ fontSize: '40px' }}>📋</div>
+            <h3>{language === 'vi' ? 'Mô tả công việc' : 'Job Description'}</h3>
+            <p className="apply-desc" style={{ marginBottom: '10px' }}>
+              <strong>{translateJobTitle(jobDescriptionModal.job.title, language)}</strong> - {jobDescriptionModal.job.company}
+            </p>
 
-      <div style={{ marginTop: '16px', padding: '24px', background: '#f3f4f6', borderRadius: '12px', border: '1px solid #e5e7eb', height: '300px', width: '100%', overflowY: 'auto' }}>
-        <div style={{ fontSize: '15px', color: '#1f2937', lineHeight: '1.7', whiteSpace: 'pre-line', textAlign: 'left', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
-          {/* Mô tả công việc */}
-          {jobDescriptionModal.job.description && (
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '10px', color: '#1e40af', letterSpacing: '0.5px' }}>
-                {language === 'vi' ? 'MÔ TẢ CÔNG VIỆC' : 'JOB DESCRIPTION'}
+            <div style={{ marginTop: '16px', padding: '24px', background: '#f3f4f6', borderRadius: '12px', border: '1px solid #e5e7eb', height: '300px', width: '100%', overflowY: 'auto' }}>
+              <div style={{ fontSize: '15px', color: '#1f2937', lineHeight: '1.7', whiteSpace: 'pre-line', textAlign: 'left', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
+                {/* Mô tả công việc */}
+                {jobDescriptionModal.job.description && (
+                  <div style={{ marginBottom: '20px' }}>
+                    <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '10px', color: '#1e40af', letterSpacing: '0.5px' }}>
+                      {language === 'vi' ? 'MÔ TẢ CÔNG VIỆC' : 'JOB DESCRIPTION'}
+                    </div>
+                    <div style={{ color: '#4b5563', lineHeight: '1.8' }}>{jobDescriptionModal.job.description}</div>
+                  </div>
+                )}
+
+                {/* Trách nhiệm */}
+                {jobDescriptionModal.job.responsibilities && (
+                  <div style={{ marginBottom: '20px' }}>
+                    <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '10px', color: '#1e40af', letterSpacing: '0.5px' }}>
+                      {language === 'vi' ? 'TRÁCH NHIỆM' : 'RESPONSIBILITIES'}
+                    </div>
+                    <div style={{ color: '#4b5563', lineHeight: '1.8' }}>{jobDescriptionModal.job.responsibilities}</div>
+                  </div>
+                )}
+
+                {/* Yêu cầu */}
+                {jobDescriptionModal.job.requirements && (
+                  <div style={{ marginBottom: '20px' }}>
+                    <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '10px', color: '#1e40af', letterSpacing: '0.5px' }}>
+                      {language === 'vi' ? 'YÊU CẦU' : 'REQUIREMENTS'}
+                    </div>
+                    <div style={{ color: '#4b5563', lineHeight: '1.8' }}>{jobDescriptionModal.job.requirements}</div>
+                  </div>
+                )}
+
+
+                {/* Fallback to generated description if no data */}
+                {!jobDescriptionModal.job.description && !jobDescriptionModal.job.responsibilities &&
+                  !jobDescriptionModal.job.requirements && !jobDescriptionModal.job.benefits && (
+                    <div>
+                      {/* MÔ TẢ header */}
+                      <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '10px', color: '#1e40af', letterSpacing: '0.5px' }}>
+                        {language === 'vi' ? 'MÔ TẢ' : 'DESCRIPTION'}
+                      </div>
+                      {(() => {
+                        const lines = generateJobDescription(jobDescriptionModal.job, language).split('\n');
+                        const benefitIdx = lines.findIndex(l => l.trim() === 'CHẾ ĐỘ PHÚC LỢI:' || l.trim() === 'BENEFITS:');
+                        const visibleLines = benefitIdx >= 0 ? lines.slice(0, benefitIdx) : lines;
+                        return visibleLines.map((line, index) => {
+                          const isHeading = line.trim() === 'YÊU CẦU:' || line.trim() === 'REQUIREMENTS:';
+                          if (isHeading) {
+                            return <div key={index} style={{ fontWeight: '700', fontSize: '16px', marginTop: index > 0 ? '16px' : '0', marginBottom: '8px', color: '#1e40af', letterSpacing: '0.5px' }}>{line}</div>;
+                          }
+                          return <div key={index}>{line}</div>;
+                        });
+                      })()}
+                    </div>
+                  )}
               </div>
-              <div style={{ color: '#4b5563', lineHeight: '1.8' }}>{jobDescriptionModal.job.description}</div>
             </div>
-          )}
 
-          {/* Trách nhiệm */}
-          {jobDescriptionModal.job.responsibilities && (
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '10px', color: '#1e40af', letterSpacing: '0.5px' }}>
-                {language === 'vi' ? 'TRÁCH NHIỆM' : 'RESPONSIBILITIES'}
-              </div>
-              <div style={{ color: '#4b5563', lineHeight: '1.8' }}>{jobDescriptionModal.job.responsibilities}</div>
+            <div className="apply-buttons" style={{ marginTop: '16px' }}>
+              <button className="btn-cancel" onClick={() => setJobDescriptionModal(null)} style={{ width: '100%' }}>
+                {language === 'vi' ? 'Đóng' : 'Close'}
+              </button>
             </div>
-          )}
-
-          {/* Yêu cầu */}
-          {jobDescriptionModal.job.requirements && (
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '10px', color: '#1e40af', letterSpacing: '0.5px' }}>
-                {language === 'vi' ? 'YÊU CẦU' : 'REQUIREMENTS'}
-              </div>
-              <div style={{ color: '#4b5563', lineHeight: '1.8' }}>{jobDescriptionModal.job.requirements}</div>
-            </div>
-          )}
-
-          {/* Quyền lợi */}
-          {jobDescriptionModal.job.benefits && (
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '10px', color: '#1e40af', letterSpacing: '0.5px' }}>
-                {language === 'vi' ? 'QUYỀN LỢI' : 'BENEFITS'}
-              </div>
-              <div style={{ color: '#4b5563', lineHeight: '1.8' }}>{jobDescriptionModal.job.benefits}</div>
-            </div>
-          )}
-
-          {/* Fallback to generated description if no data */}
-          {!jobDescriptionModal.job.description && !jobDescriptionModal.job.responsibilities &&
-            !jobDescriptionModal.job.requirements && !jobDescriptionModal.job.benefits && (
-              <div>
-                {generateJobDescription(jobDescriptionModal.job, language)
-                  .split('\n')
-                  .map((line, index) => {
-                    if (line.trim() === 'YÊU CẦU:' || line.trim() === 'CHẾ ĐỘ PHÚC LỢI:' ||
-                      line.trim() === 'REQUIREMENTS:' || line.trim() === 'BENEFITS:') {
-                      return <div key={index} style={{ fontWeight: 'bold', marginTop: index > 0 ? '12px' : '0' }}>{line}</div>;
-                    }
-                    return <div key={index}>{line}</div>;
-                  })
-                }
-              </div>
-            )}
-        </div>
-      </div>
-
-      <div className="apply-buttons" style={{ marginTop: '16px' }}>
-        <button className="btn-cancel" onClick={() => setJobDescriptionModal(null)} style={{ width: '100%' }}>
-          {language === 'vi' ? 'Đóng' : 'Close'}
-        </button>
-      </div>
-    </ApplyModalWrap>
-  )}
+          </ApplyModalWrap>
+        )}
       </Modal >
 
-  {/* Apply Success Toast */ }
-{
-  applySuccess && (
-    <div style={{
-      position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
-      background: '#10b981', color: 'white', padding: '14px 28px', borderRadius: '50px',
-      fontWeight: '600', fontSize: '15px', zIndex: 9999,
-      boxShadow: '0 8px 24px rgba(16,185,129,0.4)',
-      display: 'flex', alignItems: 'center', gap: '10px'
-    }}>
-      {language === 'vi' ? 'Gửi CV thành công! Nhà tuyển dụng sẽ liên hệ sớm.' : 'CV sent! The employer will contact you soon.'}
-    </div>
-  )
-}
-
-{/* CV Selection Modal */ }
-<Modal
-  isOpen={showCVSelectionModal}
-  onClose={() => setShowCVSelectionModal(false)}
-  title=""
->
-  <ApplyModalWrap onClick={e => e.stopPropagation()}>
-    <div className="apply-emoji">📄</div>
-    <h3>{language === 'vi' ? 'Chọn CV để gửi' : 'Select CV to Send'}</h3>
-    <p className="apply-desc">
-      {language === 'vi'
-        ? 'Chọn 1 trong các CV của bạn để gửi cho nhà tuyển dụng'
-        : 'Select one of your CVs to send to the employer'
+      {/* Apply Success Toast */}
+      {
+        applySuccess && (
+          <div style={{
+            position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
+            background: '#10b981', color: 'white', padding: '14px 28px', borderRadius: '50px',
+            fontWeight: '600', fontSize: '15px', zIndex: 9999,
+            boxShadow: '0 8px 24px rgba(16,185,129,0.4)',
+            display: 'flex', alignItems: 'center', gap: '10px'
+          }}>
+            {language === 'vi' ? 'Gửi CV thành công! Nhà tuyển dụng sẽ liên hệ sớm.' : 'CV sent! The employer will contact you soon.'}
+          </div>
+        )
       }
-    </p>
 
-    <CVSelectionSection>
-      {candidateCVList.length > 0 ? (
-        candidateCVList.map(cv => (
-          <CVOption
-            key={cv.id}
-            $selected={selectedCV === cv.id}
-            onClick={() => setSelectedCV(cv.id)}
+      {/* CV Selection Modal */}
+      <Modal
+        isOpen={showCVSelectionModal}
+        onClose={() => setShowCVSelectionModal(false)}
+        title=""
+      >
+        <ApplyModalWrap onClick={e => e.stopPropagation()}>
+          <div className="apply-emoji">📄</div>
+          <h3>{language === 'vi' ? 'Chọn CV để gửi' : 'Select CV to Send'}</h3>
+          <p className="apply-desc">
+            {language === 'vi'
+              ? 'Chọn 1 trong các CV của bạn để gửi cho nhà tuyển dụng'
+              : 'Select one of your CVs to send to the employer'
+            }
+          </p>
+
+          <CVSelectionSection>
+            {candidateCVList.length > 0 ? (
+              candidateCVList.map(cv => (
+                <CVOption
+                  key={cv.id}
+                  $selected={selectedCV === cv.id}
+                  onClick={() => setSelectedCV(cv.id)}
+                >
+                  <CVRadio $selected={selectedCV === cv.id} />
+                  <CVOptionInfo>
+                    <CVOptionName>📄 {cv.cvFileName}</CVOptionName>
+                    <CVOptionDate>
+                      {language === 'vi' ? 'Tải lên: ' : 'Uploaded: '}
+                      {new Date(cv.cvUploadDate).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US')}
+                    </CVOptionDate>
+                  </CVOptionInfo>
+                </CVOption>
+              ))
+            ) : (
+              <NoCVMessage>
+                ⚠️ {language === 'vi'
+                  ? <>Bạn chưa có CV nào. <a href="/candidate/profile">Tải lên CV</a> để ứng tuyển.</>
+                  : <>You don't have any CV. <a href="/candidate/profile">Upload CV</a> to apply.</>
+                }
+              </NoCVMessage>
+            )}
+          </CVSelectionSection>
+
+          <div className="apply-buttons">
+            <button
+              className="btn-cancel"
+              onClick={() => setShowCVSelectionModal(false)}
+            >
+              {language === 'vi' ? 'Hủy' : 'Cancel'}
+            </button>
+            <button
+              className="btn-confirm"
+              onClick={submitApplicationWithCV}
+              disabled={!selectedCV || isSubmitting}
+              style={{
+                opacity: !selectedCV || isSubmitting ? 0.5 : 1,
+                cursor: !selectedCV || isSubmitting ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {isSubmitting
+                ? (language === 'vi' ? 'Đang gửi...' : 'Sending...')
+                : (language === 'vi' ? 'Gửi CV ngay' : 'Send CV Now')
+              }
+            </button>
+          </div>
+        </ApplyModalWrap>
+      </Modal>
+
+      {/* Error Modal */}
+      {
+        errorModal.show && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.6)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 10000,
+              backdropFilter: 'blur(4px)'
+            }}
+            onClick={() => {
+              setErrorModal({ show: false, message: '' });
+              setApplyModal(null); // Close apply modal when clicking backdrop
+            }}
           >
-            <CVRadio $selected={selectedCV === cv.id} />
-            <CVOptionInfo>
-              <CVOptionName>📄 {cv.cvFileName}</CVOptionName>
-              <CVOptionDate>
-                {language === 'vi' ? 'Tải lên: ' : 'Uploaded: '}
-                {new Date(cv.cvUploadDate).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US')}
-              </CVOptionDate>
-            </CVOptionInfo>
-          </CVOption>
-        ))
-      ) : (
-        <NoCVMessage>
-          ⚠️ {language === 'vi'
-            ? <>Bạn chưa có CV nào. <a href="/candidate/profile">Tải lên CV</a> để ứng tuyển.</>
-            : <>You don't have any CV. <a href="/candidate/profile">Upload CV</a> to apply.</>
-          }
-        </NoCVMessage>
-      )}
-    </CVSelectionSection>
-
-    <div className="apply-buttons">
-      <button
-        className="btn-cancel"
-        onClick={() => setShowCVSelectionModal(false)}
-      >
-        {language === 'vi' ? 'Hủy' : 'Cancel'}
-      </button>
-      <button
-        className="btn-confirm"
-        onClick={submitApplicationWithCV}
-        disabled={!selectedCV || isSubmitting}
-        style={{
-          opacity: !selectedCV || isSubmitting ? 0.5 : 1,
-          cursor: !selectedCV || isSubmitting ? 'not-allowed' : 'pointer'
-        }}
-      >
-        {isSubmitting
-          ? (language === 'vi' ? 'Đang gửi...' : 'Sending...')
-          : (language === 'vi' ? 'Gửi CV ngay' : 'Send CV Now')
-        }
-      </button>
-    </div>
-  </ApplyModalWrap>
-</Modal>
-
-{/* Error Modal */ }
-{
-  errorModal.show && (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0, 0, 0, 0.6)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 10000,
-        backdropFilter: 'blur(4px)'
-      }}
-      onClick={() => {
-        setErrorModal({ show: false, message: '' });
-        setApplyModal(null); // Close apply modal when clicking backdrop
-      }}
-    >
-      <div
-        style={{
-          background: 'white',
-          borderRadius: '20px',
-          padding: '40px',
-          maxWidth: '480px',
-          width: '90%',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
-          textAlign: 'center',
-          animation: 'slideIn 0.3s ease-out'
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div style={{
-          width: '80px',
-          height: '80px',
-          background: 'linear-gradient(135deg, #fef3c7 0%, #fbbf24 100%)',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          margin: '0 auto 24px',
-          fontSize: '40px'
-        }}>
-          ⚠️
-        </div>
-        <h3 style={{
-          fontSize: '22px',
-          fontWeight: '700',
-          color: '#1f2937',
-          marginBottom: '16px',
-          lineHeight: '1.4'
-        }}>
-          {errorModal.message}
-        </h3>
-        <button
-          onClick={() => {
-            setErrorModal({ show: false, message: '' });
-            setApplyModal(null); // Close apply modal when clicking button
-          }}
-          style={{
-            marginTop: '24px',
-            padding: '14px 40px',
-            background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '12px',
-            fontSize: '16px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
-            transition: 'all 0.2s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.transform = 'translateY(-2px)';
-            e.target.style.boxShadow = '0 6px 16px rgba(59, 130, 246, 0.4)';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.transform = 'translateY(0)';
-            e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
-          }}
-        >
-          Đã hiểu
-        </button>
-      </div>
-    </div>
-  )
-}
+            <div
+              style={{
+                background: 'white',
+                borderRadius: '20px',
+                padding: '40px',
+                maxWidth: '480px',
+                width: '90%',
+                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+                textAlign: 'center',
+                animation: 'slideIn 0.3s ease-out'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{
+                width: '80px',
+                height: '80px',
+                background: 'linear-gradient(135deg, #fef3c7 0%, #fbbf24 100%)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 24px',
+                fontSize: '40px'
+              }}>
+                ⚠️
+              </div>
+              <h3 style={{
+                fontSize: '22px',
+                fontWeight: '700',
+                color: '#1f2937',
+                marginBottom: '16px',
+                lineHeight: '1.4'
+              }}>
+                {errorModal.message}
+              </h3>
+              <button
+                onClick={() => {
+                  setErrorModal({ show: false, message: '' });
+                  setApplyModal(null); // Close apply modal when clicking button
+                }}
+                style={{
+                  marginTop: '24px',
+                  padding: '14px 40px',
+                  background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '12px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 6px 16px rgba(59, 130, 246, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
+                }}
+              >
+                Đã hiểu
+              </button>
+            </div>
+          </div>
+        )
+      }
 
     </DashboardLayout >
   );
@@ -4214,7 +4377,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, onApply, delay = 0, sho
         </JobTags>
 
         <JobSalary>
-          <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span>
+          <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập trung bình:' : 'Income:'}</span>
           <span>{translateSalary(job.category === 'shift' ? calculateShiftSalary(job) : job.salary, language)}</span>
         </JobSalary>
       </JobCardBody>
@@ -4239,14 +4402,16 @@ const JobCardComponent = ({ job, saved, onSave, onClick, onApply, delay = 0, sho
             <ArrowUpRight />
           </ActionButton>
 
-          <SaveButton
-            $saved={saved}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={(e) => onSave(job.id, e)}
-          >
-            <Bookmark />
-          </SaveButton>
+          {job.category !== 'shift' && (
+            <SaveButton
+              $saved={saved}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={(e) => onSave(job.id, e)}
+            >
+              <Bookmark />
+            </SaveButton>
+          )}
         </JobActions>
       </JobCardFooter>
     </JobCardWrapper>

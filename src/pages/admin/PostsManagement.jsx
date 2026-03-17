@@ -1316,7 +1316,7 @@ const PostsManagement = () => {
                     <p>{selectedJob.location}</p>
                   </InfoItem>
                   <InfoItem>
-                    <label>{language === 'vi' ? 'Mức lương' : 'Salary'}</label>
+                    <label>{language === 'vi' ? 'Mức lương trung bình' : 'Salary'}</label>
                     <p style={{ fontSize: '15px', fontWeight: '600' }}>
                       {selectedJob.salary || (language === 'vi' ? '25.000 VND/giờ' : '25,000 VND/hour')}
                     </p>
