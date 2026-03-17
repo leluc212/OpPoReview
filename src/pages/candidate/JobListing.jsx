@@ -2681,11 +2681,11 @@ const JobListing = () => {
 
   // Handle search from Navbar or LandingPage
   useEffect(() => {
-    if (location.state?.searchKeyword) {
-      setSearchKeyword(location.state.searchKeyword);
-    }
-    if (location.state?.searchLocation) {
-      setSelectedLocation(location.state.searchLocation);
+    if (location.state?.searchKeyword !== undefined || location.state?.searchLocation !== undefined) {
+      if (location.state?.searchKeyword) setSearchKeyword(location.state.searchKeyword);
+      if (location.state?.searchLocation) setSelectedLocation(location.state.searchLocation);
+      // Clear state so re-visiting doesn't re-apply old search
+      window.history.replaceState({}, document.title);
     }
   }, [location.state]);
 
@@ -3587,6 +3587,13 @@ const JobListing = () => {
           language={language}
         />
       ))
+    ) : isLoadingDynamoJobs ? (
+      <div style={{ textAlign: 'center', padding: '80px 20px', gridColumn: '1 / -1', color: '#6b7280' }}>
+        <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
+        <p style={{ fontSize: '18px', fontWeight: '600', color: '#374151' }}>
+          {language === 'vi' ? 'Đang tải công việc...' : 'Loading jobs...'}
+        </p>
+      </div>
     ) : (
       <div style={{
         textAlign: 'center',
@@ -3713,7 +3720,7 @@ title = ""
           <span className="info-value">{translateLocation(applyModal.job.location, language)}</span>
         </div>
         <div className="info-row">
-          <span className="info-label">{language === 'vi' ? 'Mức lương' : 'Salary'}:</span>
+          <span className="info-label">{language === 'vi' ? 'Mức lương trung bình' : 'Average Salary'}:</span>
           <span className="info-value salary">{translateSalary(applyModal.job.category === 'shift' ? calculateShiftSalary(applyModal.job) : applyModal.job.salary, language)}</span>
         </div>
         <div className="info-row">
@@ -3814,7 +3821,7 @@ title = ""
           <span className="info-value">{detailModal.job.location}</span>
         </div>
         <div className="info-row">
-          <span className="info-label">{language === 'vi' ? 'Mức lương' : 'Salary'}:</span>
+          <span className="info-label">{language === 'vi' ? 'Mức lương trung bình' : 'Average Salary'}:</span>
           <span className="info-value salary">{translateSalary(detailModal.job.category === 'shift' ? calculateShiftSalary(detailModal.job) : detailModal.job.salary, language)}</span>
         </div>
         <div className="info-row">
