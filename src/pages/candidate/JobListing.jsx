@@ -3572,82 +3572,6 @@ const JobListing = () => {
               </BannerDots>
             </BoostBannerWrap>
 
-<<<<<<< HEAD
-  <JobsGrid>
-    {filteredJobs.length > 0 ? (
-      filteredJobs.map((job, index) => (
-        <JobCardComponent
-          key={job.id}
-          job={job}
-          saved={savedJobs.includes(job.id)}
-          onSave={handleSaveJob}
-          onClick={handleJobClick}
-          onApply={handleApplyJob}
-          delay={index * 0.05}
-          showDistance={jobCategory === 'shift' && showNearbyJobs}
-          language={language}
-        />
-      ))
-    ) : isLoadingDynamoJobs ? (
-      <div style={{ textAlign: 'center', padding: '80px 20px', gridColumn: '1 / -1', color: '#6b7280' }}>
-        <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
-        <p style={{ fontSize: '18px', fontWeight: '600', color: '#374151' }}>
-          {language === 'vi' ? 'Đang tải công việc...' : 'Loading jobs...'}
-        </p>
-      </div>
-    ) : (
-      <div style={{
-        textAlign: 'center',
-        padding: '80px 20px',
-        gridColumn: '1 / -1',
-        color: '#6b7280'
-      }}>
-        {showSavedJobsOnly ? (
-          <>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔖</div>
-            <p style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
-              {language === 'vi' ? 'Bạn chưa lưu công việc nào' : "You haven't saved any jobs yet"}
-            </p>
-            <p style={{ fontSize: '15px', color: '#6b7280' }}>
-              {language === 'vi'
-                ? 'Nhấn vào biểu tượng lưu ở tin tuyển dụng mà bạn quan tâm để thêm vào danh sách.'
-                : 'Click the save icon on any job to add it here.'}
-            </p>
-          </>
-        ) : jobCategory === 'shift' && !showNearbyJobs ? (
-          <>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📍</div>
-            <p style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
-              {language === 'vi' ? 'Bật vị trí để tìm việc gần bạn' : 'Enable location to find jobs near you'}
-            </p>
-            <p style={{ fontSize: '15px', color: '#6b7280', marginBottom: '20px' }}>
-              {language === 'vi'
-                ? 'Nhấn nút "Tìm việc gần tôi" ở phía trên để xem các công việc tuyển gấp trong bán kính 3km'
-                : 'Click "Find Jobs Near Me" button above to see shift jobs within 3km radius'}
-            </p>
-          </>
-        ) : (
-          <>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
-            <p style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
-              {language === 'vi' ? 'Không tìm thấy công việc phù hợp' : 'No matching jobs found'}
-            </p>
-            <p style={{ fontSize: '15px', color: '#6b7280' }}>
-              {jobCategory === 'shift'
-                ? (language === 'vi'
-                  ? 'Không có công việc tuyển gấp trong bán kính 3km. Thử mở rộng bán kính tìm kiếm.'
-                  : 'No shift jobs within 3km radius. Try expanding the search radius.')
-                : (language === 'vi'
-                  ? 'Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn'
-                  : 'Try adjusting your filters or search keywords')
-              }
-            </p>
-          </>
-        )}
-      </div>
-    )}
-  </JobsGrid>
-=======
             <JobsGrid>
               {filteredJobs.length > 0 ? (
                 filteredJobs.map((job, index) => (
@@ -3663,6 +3587,13 @@ const JobListing = () => {
                     language={language}
                   />
                 ))
+              ) : isLoadingDynamoJobs ? (
+                <div style={{ textAlign: 'center', padding: '80px 20px', gridColumn: '1 / -1', color: '#6b7280' }}>
+                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
+                  <p style={{ fontSize: '18px', fontWeight: '600', color: '#374151' }}>
+                    {language === 'vi' ? 'Đang tải công việc...' : 'Loading jobs...'}
+                  </p>
+                </div>
               ) : (
                 <div style={{
                   textAlign: 'center',
@@ -3715,7 +3646,6 @@ const JobListing = () => {
                 </div>
               )}
             </JobsGrid>
->>>>>>> b5d53add6d64a708ffe13a357802fd7f0a1ef303
           </MainContent >
         </MainLayout >
       </Container >
@@ -3776,68 +3706,6 @@ const JobListing = () => {
               }
             </p>
 
-<<<<<<< HEAD
-      <div className="apply-info-card">
-        <div className="info-row">
-          <span className="info-label">{language === 'vi' ? 'Vị trí' : 'Position'}:</span>
-          <span className="info-value">{translateJobTitle(applyModal.job.title, language)}</span>
-        </div>
-        <div className="info-row">
-          <span className="info-label">{language === 'vi' ? 'Công ty' : 'Company'}:</span>
-          <span className="info-value">{applyModal.job.company}</span>
-        </div>
-        <div className="info-row">
-          <span className="info-label">{language === 'vi' ? 'Địa điểm' : 'Location'}:</span>
-          <span className="info-value">{translateLocation(applyModal.job.location, language)}</span>
-        </div>
-        <div className="info-row">
-          <span className="info-label">{language === 'vi' ? 'Mức lương trung bình' : 'Average Salary'}:</span>
-          <span className="info-value salary">{translateSalary(applyModal.job.category === 'shift' ? calculateShiftSalary(applyModal.job) : applyModal.job.salary, language)}</span>
-        </div>
-        <div className="info-row">
-          <span className="info-label">{language === 'vi' ? 'Loại hình' : 'Type'}:</span>
-          <span className="info-value">{translateJobType(applyModal.job.type, language)}</span>
-        </div>
-        <div className="info-row">
-          <span className="info-label">{language === 'vi' ? 'Ngày đăng' : 'Posted'}:</span>
-          <span className="info-value">
-            {applyModal.job.postedDate
-              ? formatPostedDate(applyModal.job.postedDate, language)
-              : applyModal.job.postedAt
-                ? translateTimePosted(applyModal.job.postedAt, language)
-                : '-'
-            }
-          </span>
-        </div>
-        <div className="info-row">
-          <span className="info-label">{language === 'vi' ? 'Ngày làm' : 'Work Date'}:</span>
-          <span className="info-value">
-            {applyModal.job.workDate
-              ? (() => {
-                // Format workDate from YYYY-MM-DD to DD/MM/YYYY
-                try {
-                  const [year, month, day] = applyModal.job.workDate.split('-');
-                  return `${day}/${month}/${year}`;
-                } catch (e) {
-                  return applyModal.job.workDate;
-                }
-              })()
-              : applyModal.job.workDays
-                ? applyModal.job.workDays
-                : applyModal.job.shiftDetails?.date
-                  ? applyModal.job.shiftDetails.date
-                  : (applyModal.job.urgent ? getUrgentJobWorkDate() : getStandardJobWorkDate())
-            }
-          </span>
-        </div>
-        <div className="info-row">
-          <span className="info-label">{language === 'vi' ? 'Thời gian' : 'Time'}:</span>
-          <span className="info-value">
-            {applyModal.job.workHours || applyModal.job.shiftDetails?.time || applyModal.job.type?.match(/\((.*?)\)/)?.[1] || '-'}
-          </span>
-        </div>
-      </div>
-=======
             <div className="apply-info-card">
               <div className="info-row">
                 <span className="info-label">{language === 'vi' ? 'Vị trí' : 'Position'}:</span>
@@ -3852,7 +3720,7 @@ const JobListing = () => {
                 <span className="info-value">{translateLocation(applyModal.job.location, language)}</span>
               </div>
               <div className="info-row">
-                <span className="info-label">{language === 'vi' ? 'Mức lương' : 'Salary'}:</span>
+                <span className="info-label">{language === 'vi' ? 'Mức lương trung bình' : 'Average Salary'}:</span>
                 <span className="info-value salary">{translateSalary(applyModal.job.category === 'shift' ? calculateShiftSalary(applyModal.job) : applyModal.job.salary, language)}</span>
               </div>
               <div className="info-row">
@@ -3898,7 +3766,6 @@ const JobListing = () => {
                 </span>
               </div>
             </div>
->>>>>>> b5d53add6d64a708ffe13a357802fd7f0a1ef303
 
             <div className="apply-buttons" style={{ display: 'flex', gap: '10px' }}>
               <button className="btn-cancel" onClick={() => setApplyModal(null)}>
@@ -3948,45 +3815,13 @@ const JobListing = () => {
               <strong>{detailModal.job.company}</strong>
             </p>
 
-<<<<<<< HEAD
-      <div className="apply-info-card" style={{ marginBottom: '15px' }}>
-        <div className="info-row">
-          <span className="info-label">{language === 'vi' ? 'Địa điểm' : 'Location'}:</span>
-          <span className="info-value">{detailModal.job.location}</span>
-        </div>
-        <div className="info-row">
-          <span className="info-label">{language === 'vi' ? 'Mức lương trung bình' : 'Average Salary'}:</span>
-          <span className="info-value salary">{translateSalary(detailModal.job.category === 'shift' ? calculateShiftSalary(detailModal.job) : detailModal.job.salary, language)}</span>
-        </div>
-        <div className="info-row">
-          <span className="info-label">{language === 'vi' ? 'Loại hình' : 'Type'}:</span>
-          <span className="info-value">{detailModal.job.type}</span>
-        </div>
-        <div className="info-row">
-          <span className="info-label">{language === 'vi' ? 'Ngày đăng' : 'Posted at'}:</span>
-          <span className="info-value">{detailModal.job.postedAt}</span>
-        </div>
-        <div className="info-row">
-          <span className="info-label">{language === 'vi' ? 'Ngày làm' : 'Date'}:</span>
-          <span className="info-value">
-            {detailModal.job.shiftDetails?.date || (detailModal.job.urgent ? getUrgentJobWorkDate() : getStandardJobWorkDate())}
-          </span>
-        </div>
-        <div className="info-row">
-          <span className="info-label">{language === 'vi' ? 'Thời gian' : 'Time'}:</span>
-          <span className="info-value">
-            {detailModal.job.shiftDetails?.time || detailModal.job.type?.match(/\((.*?)\)/)?.[1] || '07:00 - 10:00'}
-          </span>
-        </div>
-      </div>
-=======
             <div className="apply-info-card" style={{ marginBottom: '15px' }}>
               <div className="info-row">
                 <span className="info-label">{language === 'vi' ? 'Địa điểm' : 'Location'}:</span>
                 <span className="info-value">{detailModal.job.location}</span>
               </div>
               <div className="info-row">
-                <span className="info-label">{language === 'vi' ? 'Mức lương' : 'Salary'}:</span>
+                <span className="info-label">{language === 'vi' ? 'Mức lương trung bình' : 'Average Salary'}:</span>
                 <span className="info-value salary">{translateSalary(detailModal.job.category === 'shift' ? calculateShiftSalary(detailModal.job) : detailModal.job.salary, language)}</span>
               </div>
               <div className="info-row">
@@ -4010,7 +3845,6 @@ const JobListing = () => {
                 </span>
               </div>
             </div>
->>>>>>> b5d53add6d64a708ffe13a357802fd7f0a1ef303
 
             <div className="apply-buttons">
               <button className="btn-cancel" onClick={() => setDetailModal(null)}>
