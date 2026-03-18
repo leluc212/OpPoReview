@@ -398,7 +398,7 @@ const SavedJobs = () => {
                   </JobTags>
                   
                   <JobSalary>
-                    <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span>
+                    <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập trung bình:' : 'Income:'}</span>
                     <span>{job.salary}</span>
                   </JobSalary>
                 </JobCardBody>

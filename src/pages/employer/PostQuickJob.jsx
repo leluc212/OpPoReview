@@ -514,8 +514,22 @@ const PostQuickJob = () => {
     e.preventDefault();
     
     // Validation
-    if (!formData.title || !formData.location || !formData.hourlyRate) {
+    if (!formData.title || !formData.location || !formData.hourlyRate || !formData.workDate) {
       setModalType('error');
+      setShowModal(true);
+      return;
+    }
+
+    // Validate work date is not in the past
+    const today = new Date().toISOString().split('T')[0];
+    if (formData.workDate < today) {
+      setModalType('error');
+      setPaymentInfo({
+        error: true,
+        message: language === 'vi' 
+          ? 'Ngày làm việc không được ở trong quá khứ.'
+          : 'Work date cannot be in the past.'
+      });
       setShowModal(true);
       return;
     }

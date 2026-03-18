@@ -6,13 +6,27 @@ import DashboardLayout from '../../components/DashboardLayout';
 import StatusBadge from '../../components/StatusBadge';
 import TableFilter from '../../components/TableFilter';
 import Modal from '../../components/Modal';
-import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText, Clock, Users, Newspaper, Edit, Trash2, TrendingUp, Plus, X, XCircle, Wallet, AlertCircle, Save, Download, MessageSquare } from 'lucide-react';
+import { Eye, CheckCircle, Star, Mail, Phone, MapPin, Calendar, Award, Briefcase, FileText, Clock, Users, Newspaper, Edit, Trash2, TrendingUp, Plus, X, XCircle, Wallet, Banknote, AlertCircle, Save, Download, MessageSquare, Search } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { initializeMultipleSampleCVs } from '../../utils/sampleCVGenerator';
 import jobPostService from '../../services/jobPostService';
 import applicationService from '../../services/applicationService';
 import CVPreviewModal from '../../components/CVPreviewModal';
+
+/**
+ * Format salary from DynamoDB — prevents double-appending VNĐ/h.
+ * - Already has currency unit (VNĐ / VND / đ) → return as-is
+ * - Raw number / numeric string → format as "X.XXX VNĐ/giờ"
+ */
+const formatSalaryFromDB = (raw, fallback = 'Thỏa thuận') => {
+  if (!raw && raw !== 0) return fallback;
+  const str = String(raw).trim();
+  if (str.includes('VNĐ') || str.includes('VND') || str.includes('đ')) return str;
+  const num = parseInt(str.replace(/\D/g, ''), 10);
+  if (isNaN(num) || num === 0) return fallback;
+  return `${num.toLocaleString('vi-VN')} VNĐ/giờ`;
+};
 
 // Mock job posts data
 const getJobPosts = (language) => [
@@ -29,7 +43,7 @@ const getJobPosts = (language) => [
     status: 'active',
     postedDate: language === 'vi' ? '5 ngày trước' : '5 days ago',
     deadline: language === 'vi' ? '15 ngày nữa' : '15 days left',
-    description: language === 'vi' 
+    description: language === 'vi'
       ? 'Chúng tôi đang tìm kiếm một Cửa hàng trưởng có kinh nghiệm để quản lý và điều hành cửa hàng. Bạn sẽ chịu trách nhiệm về doanh thu, quản lý nhân sự, đào tạo và phát triển đội ngũ, đồng thời đảm bảo chất lượng dịch vụ khách hàng.\n\nYêu cầu:\n• Kinh nghiệm tối thiểu 3 năm trong vị trí quản lý cửa hàng F&B\n• Kỹ năng lãnh đạo và quản lý đội ngũ xuất sắc\n• Khả năng phân tích số liệu doanh thu và lập kế hoạch kinh doanh\n• Kỹ năng giao tiếp và giải quyết vấn đề tốt\n• Ưu tiên ứng viên có kinh nghiệm trong chuỗi cà phê\n\nQuyền lợi:\n• Lương cơ bản: 15.000.000 VNĐ/tháng + thưởng KPI\n• Bảo hiểm xã hội đầy đủ\n• Thưởng theo doanh thu cửa hàng\n• Cơ hội thăng tiến rõ ràng'
       : 'We are looking for an experienced Store Manager to manage and operate the store. You will be responsible for revenue, staff management, training and development, while ensuring customer service quality.\n\nRequirements:\n• Minimum 3 years experience in F&B store management\n• Excellent leadership and team management skills\n• Ability to analyze revenue data and business planning\n• Good communication and problem-solving skills\n• Priority for candidates with coffee chain experience\n\nBenefits:\n• Base salary: $600/month + KPI bonus\n• Full social insurance\n• Bonus based on store revenue\n• Clear promotion opportunities'
   },
@@ -175,11 +189,9 @@ const getInitialApplications = (language) => [
 ];
 
 const FILTER_OPTIONS = (language) => ([
-  { value: 'pending', label: language === 'vi' ? 'Chờ duyệt' : 'Pending' },
-  { value: 'approved', label: language === 'vi' ? 'Chấp nhận' : 'Approved' },
-  { value: 'rejected', label: language === 'vi' ? 'Từ chối' : 'Rejected' },
-  { value: 'completed', label: language === 'vi' ? 'Hoàn thành' : 'Completed' },
-  { value: 'marked', label: language === 'vi' ? 'Đã đánh dấu' : 'Marked' },
+  { value: 'today', label: language === 'vi' ? 'Hôm nay' : 'Today' },
+  { value: 'week', label: language === 'vi' ? 'Tuần này' : 'This week' },
+  { value: 'month', label: language === 'vi' ? 'Tháng này' : 'This month' },
 ]);
 
 const ApplicationsContainer = styled(motion.div)`
@@ -346,7 +358,7 @@ const EmptyState = styled(motion.div)`
 // --- Job Posts Styles ---
 const JobPostsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
   gap: 20px;
   align-items: stretch;
   
@@ -357,22 +369,21 @@ const JobPostsGrid = styled.div`
 
 const JobPostCard = styled(motion.div)`
   background: #ffffff;
-  border: 2px solid #E2E8F0;
-  border-left: 4px solid ${props => props.$status === 'active' ? '#10B981' : '#94A3B8'};
-  border-radius: 12px;
-  padding: 20px 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1.5px solid #E8EFFF;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.06);
   transition: all 0.3s ease;
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  height: 100%;
+  overflow: hidden;
   
   &:hover {
     border-color: #BFDBFE;
-    border-left-color: ${props => props.$status === 'active' ? '#10B981' : '#94A3B8'};
-    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.15);
-    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.13);
+    transform: translateY(-4px);
   }
 `;
 
@@ -381,65 +392,66 @@ const JobPostHeader = styled.div`
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 16px;
+  flex: 1;
 `;
 
 const JobPostTitle = styled.h3`
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: ${props => props.theme.colors.text};
-  margin-bottom: 8px;
+  margin-bottom: 0;
+  line-height: 1.3;
 `;
 
 const JobPostMeta = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 12px;
   
   .meta-item {
     display: flex;
     align-items: center;
-    gap: 4px;
-    font-size: 11.5px;
+    gap: 8px;
+    font-size: 14px;
     color: ${props => props.theme.colors.textLight};
-    white-space: nowrap;
-    overflow: hidden;
+    font-weight: 500;
     
     svg {
-      width: 13px;
-      height: 13px;
+      width: 16px;
+      height: 16px;
+      color: #1e40af;
       flex-shrink: 0;
-    }
-    
-    /* Allow text to truncate if too long */
-    span {
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
   }
 `;
 
 const JobPostStats = styled.div`
   display: flex;
-  gap: 20px;
-  padding: 16px 0;
+  gap: 24px;
+  padding: 20px;
   border-top: 1px solid #E8EFFF;
   border-bottom: 1px solid #E8EFFF;
-  margin-bottom: 16px;
+  margin-bottom: 4px;
+  background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+  border-radius: 12px;
   
   .stat {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
+    align-items: center;
+    flex: 1;
     
     .stat-value {
-      font-size: 20px;
+      font-size: 28px;
       font-weight: 800;
-      color: ${props => props.theme.colors.text};
+      color: #1e40af;
+      line-height: 1;
     }
     
     .stat-label {
-      font-size: 12px;
+      font-size: 13px;
       color: ${props => props.theme.colors.textLight};
       font-weight: 600;
     }
@@ -454,20 +466,22 @@ const JobPostActions = styled.div`
 
 const JobPostButton = styled(motion.button)`
   flex: 1;
-  padding: 10px 16px;
-  border-radius: 10px;
-  font-size: 13px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 14px;
   font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   transition: all 0.2s ease;
+  cursor: pointer;
+  white-space: nowrap;
   
   background: ${props => {
-    if (props.$variant === 'primary') return '#1e40af';
-    if (props.$variant === 'danger') return '#EF4444';
-    return '#EFF6FF';
+    if (props.$variant === 'primary') return 'linear-gradient(135deg, #1e40af 0%, #2563eb 100%)';
+    if (props.$variant === 'danger') return 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)';
+    return 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)';
   }};
   
   color: ${props => props.$variant === 'primary' || props.$variant === 'danger' ? 'white' : '#1e40af'};
@@ -485,10 +499,14 @@ const JobPostButton = styled(motion.button)`
   &:hover {
     transform: translateY(-2px);
     box-shadow: ${props => {
-      if (props.$variant === 'primary') return '0 4px 12px rgba(30, 64, 175, 0.3)';
-      if (props.$variant === 'danger') return '0 4px 12px rgba(239, 68, 68, 0.3)';
-      return '0 4px 12px rgba(30, 64, 175, 0.15)';
-    }};
+    if (props.$variant === 'primary') return '0 6px 16px rgba(30, 64, 175, 0.4)';
+    if (props.$variant === 'danger') return '0 6px 16px rgba(239, 68, 68, 0.4)';
+    return '0 6px 16px rgba(30, 64, 175, 0.2)';
+  }};
+  }
+  
+  &:active {
+    transform: translateY(0);
   }
 `;
 
@@ -518,18 +536,15 @@ const JobTypeBadge = styled.div`
 // --- Section Header for Posts ---
 const PostsSectionHeader = styled.div`
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
-  padding: 16px 20px;
-  background: #ffffff;
-  border-radius: 12px;
-  border: 1.5px solid #E8EFFF;
-  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.06);
+  padding: 16px 0;
+  border-bottom: 2px solid #E8EFFF;
 `;
 
 const PostsSectionTitle = styled.h2`
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: ${props => props.theme.colors.text};
   display: flex;
@@ -604,11 +619,11 @@ const AppCard = styled(motion.div)`
     width: 4px;
     border-radius: 16px 0 0 16px;
     background: ${props => {
-      if (props.$status === 'approved') return '#10B981';
-      if (props.$status === 'rejected') return '#EF4444';
-      if (props.$status === 'completed') return '#1e40af';
-      return '#F59E0B';
-    }};
+    if (props.$status === 'approved') return '#10B981';
+    if (props.$status === 'rejected') return '#EF4444';
+    if (props.$status === 'completed') return '#1e40af';
+    return '#F59E0B';
+  }};
     opacity: 0.5;
     transition: opacity 0.3s ease;
   }
@@ -1352,23 +1367,23 @@ const FeedbackButton = styled(motion.button)`
 
   background: ${props =>
     props.$variant === 'approve' ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' :
-    props.$variant === 'reject' ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)' :
-    'linear-gradient(135deg, #1e40af 0%, #2563eb 100%)'
+      props.$variant === 'reject' ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)' :
+        'linear-gradient(135deg, #1e40af 0%, #2563eb 100%)'
   };
   color: white;
   box-shadow: ${props =>
     props.$variant === 'approve' ? '0 3px 10px rgba(16, 185, 129, 0.25)' :
-    props.$variant === 'reject' ? '0 3px 10px rgba(239, 68, 68, 0.25)' :
-    '0 3px 10px rgba(30, 64, 175, 0.25)'
+      props.$variant === 'reject' ? '0 3px 10px rgba(239, 68, 68, 0.25)' :
+        '0 3px 10px rgba(30, 64, 175, 0.25)'
   };
 
   &:hover {
     transform: translateY(-1px);
     box-shadow: ${props =>
-      props.$variant === 'approve' ? '0 4px 14px rgba(16, 185, 129, 0.35)' :
+    props.$variant === 'approve' ? '0 4px 14px rgba(16, 185, 129, 0.35)' :
       props.$variant === 'reject' ? '0 4px 14px rgba(239, 68, 68, 0.35)' :
-      '0 4px 14px rgba(30, 64, 175, 0.35)'
-    };
+        '0 4px 14px rgba(30, 64, 175, 0.35)'
+  };
   }
 
   svg {
@@ -1459,7 +1474,7 @@ const StarRating = ({ rating }) => (
 const ProfileDetailModal = React.memo(({ candidate, onClose }) => {
   const { language } = useLanguage();
   const [showCVPreview, setShowCVPreview] = useState(false);
-  
+
   const initials = candidate.candidate
     .split(' ')
     .map(n => n[0])
@@ -1680,7 +1695,7 @@ const ProfileDetailModal = React.memo(({ candidate, onClose }) => {
                     </CVDownloadButton>
                   </div>
                 </CVCard>
-                
+
                 {showCVPreview && (
                   <CVPreviewModal
                     cvUrl={candidate.cvUrl}
@@ -1873,8 +1888,8 @@ const WalletModalButton = styled(motion.button)`
   &:hover {
     transform: translateY(-2px);
     box-shadow: ${props => props.$variant === 'primary'
-      ? '0 6px 20px rgba(30, 64, 175, 0.3)'
-      : '0 4px 12px rgba(0, 0, 0, 0.1)'};
+    ? '0 6px 20px rgba(30, 64, 175, 0.3)'
+    : '0 4px 12px rgba(0, 0, 0, 0.1)'};
   }
 
   svg {
@@ -2037,6 +2052,8 @@ const Applications = () => {
   const [activeSection, setActiveSection] = useState('posts');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilters, setStatusFilters] = useState([]);
+  const [timeFilter, setTimeFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [applications, setApplications] = useState(() => getInitialApplications(language));
   const [realApplications, setRealApplications] = useState([]); // Real applications from DynamoDB
@@ -2053,6 +2070,8 @@ const Applications = () => {
   const [editJobData, setEditJobData] = useState(null);
   const [showCVModal, setShowCVModal] = useState(false);
   const [selectedCV, setSelectedCV] = useState(null);
+  const [postTimeFilter, setPostTimeFilter] = useState('all'); // 'all' | 'today' | 'week' | 'month'
+  const [postSearchTerm, setPostSearchTerm] = useState('');
 
   // Mock wallet connection status - in real app, get from user context or API
   const [isWalletConnected] = useState(() => {
@@ -2065,18 +2084,18 @@ const Applications = () => {
       try {
         setIsLoadingJobs(true);
         console.log('📥 Loading job posts from DynamoDB...');
-        
+
         // Get only employer's own jobs
         let jobs = await jobPostService.getMyJobPosts();
         console.log('✅ Loaded jobs:', jobs);
-        
+
         // Transform DynamoDB data to match UI format
         const transformedJobs = jobs.map(job => ({
           id: job.idJob,
           idJob: job.idJob,
           title: job.title,
           location: job.location,
-          salary: job.salary ? `${job.salary.toLocaleString()} VNĐ/h` : (language === 'vi' ? 'Thỏa thuận' : 'Negotiable'),
+          salary: formatSalaryFromDB(job.salary, language === 'vi' ? 'Thỏa thuận' : 'Negotiable'),
           type: job.jobType === 'part-time' ? (language === 'vi' ? 'Bán thời gian' : 'Part-time') : (language === 'vi' ? 'Toàn thời gian' : 'Full-time'),
           shift: job.workHours,
           workDays: job.workDays,
@@ -2084,6 +2103,7 @@ const Applications = () => {
           views: job.views || 0,
           status: job.status,
           postedDate: formatDate(job.createdAt, language),
+          _createdAt: job.createdAt,
           deadline: calculateDeadline(job.workDays, language),
           description: job.description,
           responsibilities: job.responsibilities,
@@ -2091,7 +2111,7 @@ const Applications = () => {
           benefits: job.benefits,
           tags: job.tags
         }));
-        
+
         console.log('📦 Transformed jobs:', transformedJobs);
         setJobPosts(transformedJobs);
       } catch (error) {
@@ -2101,7 +2121,7 @@ const Applications = () => {
         setIsLoadingJobs(false);
       }
     };
-    
+
     loadJobPosts();
   }, [language]);
 
@@ -2111,7 +2131,7 @@ const Applications = () => {
     const now = new Date();
     const diffTime = Math.abs(now - date);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 0) return lang === 'vi' ? 'Hôm nay' : 'Today';
     if (diffDays === 1) return lang === 'vi' ? 'Hôm qua' : 'Yesterday';
     if (diffDays < 7) return lang === 'vi' ? `${diffDays} ngày trước` : `${diffDays} days ago`;
@@ -2121,14 +2141,14 @@ const Applications = () => {
     }
     return date.toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'en-US');
   };
-  
+
   // Helper function to calculate deadline
   const calculateDeadline = (workDays, lang) => {
     const workDate = new Date(workDays);
     const now = new Date();
     const diffTime = workDate - now;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays < 0) return lang === 'vi' ? 'Đã hết hạn' : 'Expired';
     if (diffDays === 0) return lang === 'vi' ? 'Hôm nay' : 'Today';
     if (diffDays === 1) return lang === 'vi' ? 'Ngày mai' : 'Tomorrow';
@@ -2143,14 +2163,14 @@ const Applications = () => {
   useEffect(() => {
     const loadApplications = async () => {
       if (activeSection !== 'applications') return;
-      
+
       try {
         setIsLoadingApplications(true);
         console.log('📥 Loading applications from DynamoDB...');
-        
+
         // Get all applications for all employer's jobs
         const allApplications = [];
-        
+
         for (const job of jobPosts) {
           try {
             const jobApplications = await applicationService.getJobApplications(job.idJob);
@@ -2159,9 +2179,9 @@ const Applications = () => {
             console.error(`Error loading applications for job ${job.idJob}:`, error);
           }
         }
-        
+
         console.log('✅ Loaded applications:', allApplications);
-        
+
         // Transform to UI format
         const transformedApplications = allApplications.map(app => ({
           id: app.applicationId,
@@ -2185,7 +2205,7 @@ const Applications = () => {
           reviews: [],
           marked: false
         }));
-        
+
         setRealApplications(transformedApplications);
         console.log('✅ Transformed applications:', transformedApplications);
       } catch (error) {
@@ -2195,7 +2215,7 @@ const Applications = () => {
         setIsLoadingApplications(false);
       }
     };
-    
+
     if (jobPosts.length > 0) {
       loadApplications();
     }
@@ -2204,7 +2224,7 @@ const Applications = () => {
   // Comprehensive screenshot prevention
   useEffect(() => {
     let blurTimeout;
-    
+
     const handleBlur = () => {
       const container = document.querySelector('[data-secure]');
       if (container) container.classList.add('blurred');
@@ -2223,17 +2243,17 @@ const Applications = () => {
     };
 
     const handleKeyDown = (e) => {
-      const shouldBlock = 
+      const shouldBlock =
         e.key === 'PrintScreen' ||
         (e.ctrlKey && e.shiftKey && (e.key === 'S' || e.key === 's')) ||
         (e.metaKey && e.shiftKey && e.key === 's') ||
         (e.metaKey && e.shiftKey && (e.key === '4' || e.key === '5'));
-      
+
       if (shouldBlock) {
         e.preventDefault();
         handleBlur();
-        alert(language === 'vi' 
-          ? '🚫 Chụp màn hình bị vô hiệu hóa vì lý do bảo mật!' 
+        alert(language === 'vi'
+          ? '🚫 Chụp màn hình bị vô hiệu hóa vì lý do bảo mật!'
           : '🚫 Screenshots are disabled for security reasons!');
         setTimeout(handleFocus, 2000);
       }
@@ -2268,46 +2288,80 @@ const Applications = () => {
   // Auto-open profile modal if candidateId is passed via navigation state
   useEffect(() => {
     if (location.state?.candidateId) {
-      const candidate = applications.find(app => app.id === location.state.candidateId);
+      // Search in both mock and real applications
+      const allApps = [...applications, ...realApplications];
+      const candidate = allApps.find(app => app.id === location.state.candidateId);
+      
       if (candidate) {
         // First switch to applications tab
         setActiveSection('applications');
-        
+
         // Then open modal after a brief delay for smooth transition
         setTimeout(() => {
           setSelectedCandidate(candidate);
         }, 300);
-        
+
         // Clear the state after opening to prevent re-opening on refresh
         navigate(location.pathname, { replace: true, state: {} });
+      } else {
+        // For notification fallback - if no specific candidate ID, just show applications tab
+        if (location.state?.fromNotifications) {
+          setActiveSection('applications');
+          navigate(location.pathname, { replace: true, state: {} });
+        }
+      }
+    } else if (location.state?.fromNotifications) {
+      // Just switch the tab if coming from notifications without specific candidate
+      setActiveSection('applications');
+      navigate(location.pathname, { replace: true, state: {} });
+    } else {
+      // By default it starts on posts, which might be what they wanted but let's handle if it comes from notification and we want applications to be default
+      if (location.state?.fromNotifications) {
+          setActiveSection('applications');
+          navigate(location.pathname, { replace: true, state: {} });
       }
     }
-  }, [location.state, applications, navigate, location.pathname]);
+  }, [location.state, applications, realApplications, navigate, location.pathname]);
 
   const filteredApplications = useMemo(() => {
-    // Use real applications if available, otherwise use mock data
     const applicationsToFilter = realApplications.length > 0 ? realApplications : applications;
-    
+
+    const toHours = (applied = '') => {
+      const s = applied.toLowerCase();
+      if (s.includes('phút') || s.includes('minute')) { const m = s.match(/(\d+)/); return m ? parseInt(m[1]) / 60 : 0; }
+      if (s.includes('giờ') || s.includes('hour')) { const m = s.match(/(\d+)/); return m ? parseInt(m[1]) : 0; }
+      if (s.includes('ngày') || s.includes('day')) { const m = s.match(/(\d+)/); return m ? parseInt(m[1]) * 24 : 24; }
+      if (s.includes('tuần') || s.includes('week')) { const m = s.match(/(\d+)/); return m ? parseInt(m[1]) * 24 * 7 : 24 * 7; }
+      if (s.includes('tháng') || s.includes('month')) { const m = s.match(/(\d+)/); return m ? parseInt(m[1]) * 24 * 30 : 24 * 30; }
+      return 0;
+    };
+
     return applicationsToFilter.filter(app => {
+      // Search: tên ứng viên hoặc vị trí
       const matchesSearch = !searchTerm ||
         app.candidate.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.job.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesStatus = statusFilters.length === 0 ||
-        statusFilters.includes(app.status) ||
-        (statusFilters.includes('marked') && app.marked);
+      // Time filter (single select)
+      const hours = toHours(app.applied || app.appliedAt);
+      const matchesTime =
+        timeFilter === 'all' ? true :
+          timeFilter === 'today' ? hours < 24 :
+            timeFilter === 'week' ? hours < 24 * 7 :
+              timeFilter === 'month' ? hours < 24 * 30 : true;
 
-      return matchesSearch && matchesStatus;
+      // Status filter (single select)
+      const matchesStatus =
+        statusFilter === 'all' ? true :
+          statusFilter === 'pending' ? app.status === 'pending' :
+            statusFilter === 'approved' ? app.status === 'approved' :
+              statusFilter === 'rejected' ? app.status === 'rejected' : true;
+
+      return matchesSearch && matchesTime && matchesStatus;
     });
-  }, [applications, realApplications, searchTerm, statusFilters]);
+  }, [applications, realApplications, searchTerm, timeFilter, statusFilter]);
 
-  const handleFilterToggle = useCallback((filterValue) => {
-    setStatusFilters(prev =>
-      prev.includes(filterValue)
-        ? prev.filter(f => f !== filterValue)
-        : [...prev, filterValue]
-    );
-  }, []);
+  const handleFilterToggle = useCallback(() => { }, []);
 
   const handleCompleteJob = useCallback((id) => {
     setApplications(prev => prev.map(app =>
@@ -2351,27 +2405,27 @@ const Applications = () => {
   // Confirm and delete job post
   const confirmDeleteJob = async () => {
     if (!deleteJobId) return;
-    
+
     setIsDeleting(true);
-    
+
     try {
       // Find the job to get its idJob
       const job = jobPosts.find(j => j.id === deleteJobId);
       const jobId = job?.idJob || job?.id;
-      
+
       console.log('🗑️ Deleting job:', jobId);
-      
+
       // Delete from DynamoDB
       await jobPostService.deleteJobPost(jobId);
-      
+
       // Remove job from state
       setJobPosts(prev => prev.filter(job => job.id !== deleteJobId));
-      
+
       // Show success toast
       setSuccessMessage(language === 'vi' ? 'Đã xóa bài đăng thành công!' : 'Post deleted successfully!');
       setShowSuccessToast(true);
       setTimeout(() => setShowSuccessToast(false), 3000);
-      
+
       console.log('✅ Job deleted successfully');
     } catch (error) {
       console.error('❌ Error deleting job:', error);
@@ -2391,6 +2445,40 @@ const Applications = () => {
 
   // Get job title for delete confirmation
   const jobToDelete = deleteJobId ? jobPosts.find(job => job.id === deleteJobId) : null;
+
+  // Filter job posts by time and search
+  const filteredJobPosts = useMemo(() => {
+    const now = new Date();
+
+    // Parse postedDate → Date object (handles both ISO timestamp and relative string)
+    const toDate = (post) => {
+      // Real data: has _createdAt ISO string
+      if (post._createdAt) return new Date(post._createdAt);
+      // Mock data: relative string like "5 ngày trước", "2 days ago"
+      const s = (post.postedDate || '').toLowerCase();
+      const m = s.match(/(\d+)/);
+      const n = m ? parseInt(m[1]) : 1;
+      if (s.includes('phút') || s.includes('minute')) return new Date(now - n * 60 * 1000);
+      if (s.includes('giờ') || s.includes('hour')) return new Date(now - n * 3600 * 1000);
+      if (s.includes('ngày') || s.includes('day')) return new Date(now - n * 86400 * 1000);
+      if (s.includes('tuần') || s.includes('week')) return new Date(now - n * 7 * 86400 * 1000);
+      if (s.includes('tháng') || s.includes('month')) return new Date(now - n * 30 * 86400 * 1000);
+      return new Date(0);
+    };
+
+    return jobPosts.filter(post => {
+      if (postSearchTerm) {
+        const term = postSearchTerm.toLowerCase();
+        if (!post.title?.toLowerCase().includes(term) && !post.location?.toLowerCase().includes(term)) return false;
+      }
+      if (postTimeFilter === 'all') return true;
+      const diffDays = (now - toDate(post)) / (1000 * 60 * 60 * 24);
+      if (postTimeFilter === 'today') return diffDays < 1;
+      if (postTimeFilter === 'week') return diffDays < 7;
+      if (postTimeFilter === 'month') return diffDays < 30;
+      return true;
+    });
+  }, [jobPosts, postTimeFilter, postSearchTerm]);
 
   // View job details
   const handleViewJob = (jobId) => {
@@ -2434,14 +2522,14 @@ const Applications = () => {
         <StandardJobsSection>
           <StandardJobsGrid>
             <StandardJobCard
-              $color="#1e40af"
+              $color="#10B981"
               $active={activeSection === 'posts'}
               onClick={() => setActiveSection('posts')}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
             >
-              <StandardJobIcon $color="#1e40af">
-                <Newspaper />
+              <StandardJobIcon $color="#10B981">
+                <FileText />
               </StandardJobIcon>
               <StandardJobLabel>{language === 'vi' ? 'Quản lý bài đăng' : 'Post Management'}</StandardJobLabel>
               <StandardJobDescription>
@@ -2450,13 +2538,13 @@ const Applications = () => {
             </StandardJobCard>
 
             <StandardJobCard
-              $color="#10B981"
+              $color="#1e40af"
               $active={activeSection === 'applications'}
               onClick={() => setActiveSection('applications')}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
             >
-              <StandardJobIcon $color="#10B981">
+              <StandardJobIcon $color="#1e40af">
                 <Users />
               </StandardJobIcon>
               <StandardJobLabel>{language === 'vi' ? 'Hồ sơ ứng tuyển' : 'Applications'}</StandardJobLabel>
@@ -2484,123 +2572,200 @@ const Applications = () => {
                 {language === 'vi' ? 'Đăng bài mới' : 'Post New Job'}
               </CreatePostButton>
             </PostsSectionHeader>
-        
-        {isLoadingJobs ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
-            <div style={{ fontSize: '14px' }}>{language === 'vi' ? 'Đang tải...' : 'Loading...'}</div>
-          </div>
-        ) : jobPosts.length === 0 ? (
-          <EmptyState
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <div className="icon">📋</div>
-            <h3>{language === 'vi' ? 'Chưa có bài đăng nào' : 'No job posts yet'}</h3>
-            <p>{language === 'vi' ? 'Bấm "Đăng bài mới" để tạo bài đăng tuyển dụng đầu tiên' : 'Click "Post New Job" to create your first job posting'}</p>
-          </EmptyState>
-        ) : (
-          <JobPostsGrid>
-            <AnimatePresence>
-              {jobPosts.map((post, index) => (
-              <JobPostCard
-                key={post.id}
-                $status={post.status}
+
+            {/* Filter bar for job posts */}
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+              <input
+                type="text"
+                placeholder={language === 'vi' ? 'Tìm theo tên việc, địa điểm...' : 'Search by title, location...'}
+                value={postSearchTerm}
+                onChange={e => setPostSearchTerm(e.target.value)}
+                style={{
+                  flex: 1, minWidth: '180px', padding: '8px 14px', borderRadius: '8px',
+                  border: '1.5px solid #e2e8f0', fontSize: '14px', outline: 'none',
+                  background: '#f8fafc', color: '#1e293b'
+                }}
+              />
+              {['all', 'today', 'week', 'month'].map(f => (
+                <button
+                  key={f}
+                  onClick={() => setPostTimeFilter(f)}
+                  style={{
+                    padding: '7px 14px', borderRadius: '8px', fontSize: '13px', fontWeight: '600',
+                    border: '1.5px solid',
+                    borderColor: postTimeFilter === f ? '#1e40af' : '#e2e8f0',
+                    background: postTimeFilter === f ? '#1e40af' : '#f8fafc',
+                    color: postTimeFilter === f ? '#fff' : '#64748b',
+                    cursor: 'pointer', transition: 'all 0.15s'
+                  }}
+                >
+                  {f === 'all' ? (language === 'vi' ? 'Tất cả' : 'All')
+                    : f === 'today' ? (language === 'vi' ? 'Hôm nay' : 'Today')
+                      : f === 'week' ? (language === 'vi' ? 'Tuần này' : 'This week')
+                        : (language === 'vi' ? 'Tháng này' : 'This month')}
+                </button>
+              ))}
+            </div>
+
+            {isLoadingJobs ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+                <div style={{ fontSize: '14px' }}>{language === 'vi' ? 'Đang tải...' : 'Loading...'}</div>
+              </div>
+            ) : jobPosts.length === 0 ? (
+              <EmptyState
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
               >
-                <JobPostHeader>
-                  <div>
-                    <JobPostTitle>{post.title}</JobPostTitle>
-                    <JobPostMeta>
-                      <div className="meta-item">
-                        <MapPin /><span>{post.location}</span>
-                      </div>
-                      <div className="meta-item">
-                        <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span> <span>{post.salary}</span>
-                      </div>
-                      {post.shift && (
-                        <div className="meta-item">
-                          <Clock /><span>{post.shift}</span>
+                <div className="icon">📋</div>
+                <h3>{language === 'vi' ? 'Chưa có bài đăng nào' : 'No job posts yet'}</h3>
+                <p>{language === 'vi' ? 'Bấm "Đăng bài mới" để tạo bài đăng tuyển dụng đầu tiên' : 'Click "Post New Job" to create your first job posting'}</p>
+              </EmptyState>
+            ) : filteredJobPosts.length === 0 ? (
+              <EmptyState
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <div className="icon">🔍</div>
+                <h3>{language === 'vi' ? 'Không tìm thấy bài đăng phù hợp' : 'No matching posts found'}</h3>
+                <p>{language === 'vi' ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm' : 'Try changing the filter or search term'}</p>
+              </EmptyState>
+            ) : (
+              <JobPostsGrid>
+                <AnimatePresence>
+                  {filteredJobPosts.map((post, index) => (
+                    <JobPostCard
+                      key={post.id}
+                      $status={post.status}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <JobPostHeader>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                            <JobPostTitle style={{ margin: 0, flex: 1 }}>{post.title}</JobPostTitle>
+                            <JobStatusBadge $status={post.status}>
+                              {post.status === 'active'
+                                ? (language === 'vi' ? 'Đang tuyển' : 'Active')
+                                : (language === 'vi' ? 'Đã đóng' : 'Closed')}
+                            </JobStatusBadge>
+                          </div>
+                          <JobPostMeta>
+                            <div className="meta-item">
+                              <MapPin />{post.location}
+                            </div>
+                            <div className="meta-item">
+                              <Wallet size={15} style={{ strokeWidth: 1.5 }} />{post.salary}
+                            </div>
+                            {post.shift && (
+                              <div className="meta-item">
+                                <Clock />{post.shift}
+                              </div>
+                            )}
+                            {post.workDays && (
+                              <div className="meta-item">
+                                <Calendar />{language === 'vi' ? 'Ngày làm: ' : 'Work date: '}{post.workDays}
+                              </div>
+                            )}
+                          </JobPostMeta>
+                          <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                            <JobTypeBadge $partTime={post.type === 'Bán thời gian' || post.type === 'Part-time'}>
+                              {(post.type === 'Bán thời gian' || post.type === 'Part-time') ? 'Part-time' : 'Full-time'}
+                            </JobTypeBadge>
+                            {post.postedDate && (
+                              <span style={{
+                                display: 'flex', alignItems: 'center', gap: '5px',
+                                fontSize: '12px', fontWeight: '600', color: '#1e40af',
+                                background: '#EFF6FF', border: '1.5px solid #BFDBFE',
+                                borderRadius: '20px', padding: '4px 10px'
+                              }}>
+                                <Clock size={12} />
+                                {language === 'vi' ? 'Đăng ' : 'Posted '}{post.postedDate}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      )}
-                      {post.workDays && (
-                        <div className="meta-item">
-                          <Calendar /><span>{language === 'vi' ? 'Ngày làm: ' : 'Work date: '}{post.workDays}</span>
+                      </JobPostHeader>
+
+                      <JobPostStats>
+                        <div className="stat">
+                          <div className="stat-value">{post.applicants}</div>
+                          <div className="stat-label">{language === 'vi' ? 'Ứng viên' : 'Applicants'}</div>
                         </div>
-                      )}
-                    </JobPostMeta>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-                    <JobStatusBadge $status={post.status}>
-                      {post.status === 'active' 
-                        ? (language === 'vi' ? 'Đang tuyển' : 'Active') 
-                        : (language === 'vi' ? 'Đã đóng' : 'Closed')}
-                    </JobStatusBadge>
-                    <JobTypeBadge $partTime={post.type === 'Bán thời gian' || post.type === 'Part-time'}>
-                      {(post.type === 'Bán thời gian' || post.type === 'Part-time') ? 'Part-time' : 'Full-time'}
-                    </JobTypeBadge>
-                  </div>
-                </JobPostHeader>
-                
-                <JobPostStats>
-                  <div className="stat">
-                    <div className="stat-value">{post.applicants}</div>
-                    <div className="stat-label">{language === 'vi' ? 'Ứng viên' : 'Applicants'}</div>
-                  </div>
-                  <div className="stat">
-                    <div className="stat-value">{post.views}</div>
-                    <div className="stat-label">{language === 'vi' ? 'Lượt xem' : 'Views'}</div>
-                  </div>
-                  <div className="stat" style={{ marginLeft: 'auto' }}>
-                    <div className="stat-label">{language === 'vi' ? 'Đăng' : 'Posted'}</div>
-                    <div className="stat-label" style={{ color: '#1e40af', fontWeight: 700 }}>{post.postedDate}</div>
-                  </div>
-                </JobPostStats>
-                
-                <JobPostActions>
-                  <JobPostButton
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => handleViewJob(post.id)}
-                  >
-                    <Eye />{language === 'vi' ? 'Xem' : 'View'}
-                  </JobPostButton>
-                  <JobPostButton
-                    $variant="primary"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => handleEditJob(post.id)}
-                  >
-                    <Edit />{language === 'vi' ? 'Sửa' : 'Edit'}
-                  </JobPostButton>
-                  <JobPostButton
-                    $variant="danger"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => handleDeleteJob(post.id)}
-                  >
-                    <Trash2 />
-                  </JobPostButton>
-                </JobPostActions>
-              </JobPostCard>
-            ))}
-          </AnimatePresence>
-        </JobPostsGrid>
-        )}
+                        <div className="stat">
+                          <div className="stat-value">{post.views}</div>
+                          <div className="stat-label">{language === 'vi' ? 'Lượt xem' : 'Views'}</div>
+                        </div>
+                      </JobPostStats>
+
+                      <JobPostActions>
+                        <JobPostButton
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => handleViewJob(post.id)}
+                        >
+                          <Eye />{language === 'vi' ? 'Xem mô tả' : 'View'}
+                        </JobPostButton>
+                        <JobPostButton
+                          $variant="primary"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => handleEditJob(post.id)}
+                        >
+                          <Edit />{language === 'vi' ? 'Sửa' : 'Edit'}
+                        </JobPostButton>
+                        <JobPostButton
+                          $variant="danger"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => handleDeleteJob(post.id)}
+                        >
+                          <Trash2 />
+                        </JobPostButton>
+                      </JobPostActions>
+                    </JobPostCard>
+                  ))}
+                </AnimatePresence>
+              </JobPostsGrid>
+            )}
           </>
         )}
 
         {activeSection === 'applications' && (
           <>
-            <TableFilter
-              searchValue={searchTerm}
-              onSearchChange={setSearchTerm}
-              filterOptions={FILTER_OPTIONS(language)}
-              activeFilters={statusFilters}
-              onFilterToggle={handleFilterToggle}
-              searchPlaceholder={language === 'vi' ? 'Tìm kiếm theo ứng viên hoặc vị trí...' : 'Search by candidate or position...'}
-            />
+            {/* Filter bar */}
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+              <input
+                type="text"
+                placeholder={language === 'vi' ? 'Tìm ứng viên, vị trí...' : 'Search candidate, position...'}
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                style={{
+                  flex: 1, minWidth: '180px', padding: '8px 14px', borderRadius: '8px',
+                  border: '1.5px solid #e2e8f0', fontSize: '14px', outline: 'none',
+                  background: '#f8fafc', color: '#1e293b'
+                }}
+              />
+              {['all', 'today', 'week', 'month'].map(f => (
+                <button
+                  key={f}
+                  onClick={() => setTimeFilter(f)}
+                  style={{
+                    padding: '7px 14px', borderRadius: '8px', fontSize: '13px', fontWeight: '600',
+                    border: '1.5px solid',
+                    borderColor: timeFilter === f ? '#1e40af' : '#e2e8f0',
+                    background: timeFilter === f ? '#1e40af' : '#f8fafc',
+                    color: timeFilter === f ? '#fff' : '#64748b',
+                    cursor: 'pointer', transition: 'all 0.15s'
+                  }}
+                >
+                  {f === 'all' ? (language === 'vi' ? 'Tất cả' : 'All')
+                    : f === 'today' ? (language === 'vi' ? 'Hôm nay' : 'Today')
+                      : f === 'week' ? (language === 'vi' ? 'Tuần này' : 'This week')
+                        : (language === 'vi' ? 'Tháng này' : 'This month')}
+                </button>
+              ))}
+            </div>
 
             {isLoadingApplications ? (
               <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
@@ -2750,7 +2915,7 @@ const Applications = () => {
                   <span>{selectedJobView.location}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
-                  <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span>
+                  <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập trung bình:' : 'Income:'}</span>
                   <span>{selectedJobView.salary}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
@@ -2881,7 +3046,7 @@ const Applications = () => {
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
-                  {language === 'vi' ? 'Mức lương' : 'Salary'}
+                  {language === 'vi' ? 'Mức lương trung bình' : 'Salary'}
                 </label>
                 <input
                   type="text"
@@ -2926,12 +3091,12 @@ const Applications = () => {
                 value={editJobData.description || ''}
                 onChange={(e) => setEditJobData({ ...editJobData, description: e.target.value })}
                 placeholder={language === 'vi' ? 'Nhập mô tả công việc chi tiết, yêu cầu và quyền lợi...' : 'Enter detailed job description, requirements and benefits...'}
-                style={{ 
-                  width: '100%', 
+                style={{
+                  width: '100%',
                   minHeight: '200px',
-                  padding: '12px 16px', 
-                  border: '2px solid #e2e8f0', 
-                  borderRadius: '12px', 
+                  padding: '12px 16px',
+                  border: '2px solid #e2e8f0',
+                  borderRadius: '12px',
                   fontSize: '14px',
                   fontFamily: 'inherit',
                   lineHeight: '1.6',

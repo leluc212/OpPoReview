@@ -365,7 +365,7 @@ export const translations = {
       entry: 'Mới Vào Nghề',
       mid: 'Trung Cấp',
       senior: 'Cao Cấp',
-      salary: 'Mức Lương',
+      salary: 'Mức lương trung bình',
       apply: 'Ứng Tuyển',
       save: 'Lưu',
       saved: 'Đã Lưu',

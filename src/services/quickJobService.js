@@ -2,6 +2,7 @@
 // Table: PostQuickJob
 
 import { fetchAuthSession } from 'aws-amplify/auth';
+import employerProfileService from './employerProfileService';
 
 // API base URL - update this after deploying Lambda
 const API_BASE_URL = 'https://6zw89pkuxb.execute-api.ap-southeast-1.amazonaws.com';
@@ -89,8 +90,7 @@ const getCompanyInfo = async () => {
     
     // Try to fetch from employer profile API
     try {
-      const employerProfileService = await import('./employerProfileService.js');
-      const profile = await employerProfileService.default.getMyProfile();
+      const profile = await employerProfileService.getMyProfile();
       if (profile && (profile.companyName || profile.businessName)) {
         const companyName = profile.companyName || profile.businessName;
         console.log('✅ Company name from API:', companyName);
