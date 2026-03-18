@@ -2462,12 +2462,20 @@ const JobListing = () => {
           .filter(job => job.status !== 'deleted') // Filter out deleted jobs
           .map(job => {
             try {
+              // Use coordinates from job if available, otherwise use default HCM location
+              const lat = job.latitude || job.lat || 10.7769;
+              const lng = job.longitude || job.lng || 106.7009;
+              
+              console.log(`📍 DynamoDB Job: ${job.title} at ${job.location} - Coords: ${lat}, ${lng}`);
+              
               return {
                 id: `dynamo-${job.idJob}`,
                 idJob: job.idJob,
                 title: String(job.title || 'Untitled Job'),
                 company: String(job.employerName || job.employerEmail || 'Công ty'),
                 location: String(job.location || ''),
+                lat: lat, // Add coordinates for location-based filtering
+                lng: lng,
                 salary: job.salary ? `${parseInt(job.salary).toLocaleString()} VNĐ/h` : (language === 'vi' ? 'Thỏa thuận' : 'Negotiable'),
                 type: job.jobType === 'part-time' ? (language === 'vi' ? 'Bán thời gian' : 'Part-time') : (language === 'vi' ? 'Toàn thời gian' : 'Full-time'),
                 category: String(job.category || 'standard'), // Use category from DynamoDB
@@ -2534,12 +2542,20 @@ const JobListing = () => {
                   ? 'Full-time'
                   : job.jobType || 'Part-time';
 
+              // Use coordinates from job if available, otherwise use default HCM location
+              const lat = job.latitude || job.lat || 10.7769;
+              const lng = job.longitude || job.lng || 106.7009;
+              
+              console.log(`📍 Quick Job: ${job.title} at ${job.location} - Coords: ${lat}, ${lng}`);
+
               return {
                 id: `quick-${jobId}`,
                 idJob: jobId,
                 title: String(job.title || 'Untitled Job'),
                 company: String(job.companyName || 'Công ty'),
                 location: String(job.location || ''),
+                lat: lat, // Add coordinates for location-based filtering
+                lng: lng,
                 salary: candidateIncome > 0
                   ? `${candidateIncome.toLocaleString()} VNĐ/${totalHours}h`
                   : `${Math.round(hourlyRate * 0.85).toLocaleString()} VNĐ/giờ`,
@@ -2601,7 +2617,7 @@ const JobListing = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [showNearbyJobs, setShowNearbyJobs] = useState(false);
-  const [nearbyRadius, setNearbyRadius] = useState(3); // km
+  const [nearbyRadius, setNearbyRadius] = useState(3); // km - radius to find jobs near candidate
   const [showSavedJobsOnly, setShowSavedJobsOnly] = useState(false);
 
   // Job search status states
@@ -3008,14 +3024,25 @@ const JobListing = () => {
   const nearbyJobs = useMemo(() => {
     if (!userLocation) return [];
 
-    return allJobs
+    const jobsWithCoords = allJobs
       .filter(job => job.category === jobCategory)
+      .filter(job => job.lat && job.lng); // Only include jobs with coordinates
+    
+    console.log(`📍 Jobs with coordinates in ${jobCategory}:`, jobsWithCoords.length);
+    console.log(`📍 User location:`, userLocation);
+    console.log(`📍 Nearby radius: ${nearbyRadius}km`);
+    
+    const nearby = jobsWithCoords
       .map(job => ({
         ...job,
         distance: calculateDistance(userLocation.lat, userLocation.lng, job.lat, job.lng)
       }))
       .filter(job => job.distance <= nearbyRadius)
       .sort((a, b) => a.distance - b.distance);
+    
+    console.log(`📍 Found ${nearby.length} jobs within ${nearbyRadius}km`);
+    
+    return nearby;
   }, [userLocation, jobCategory, nearbyRadius, allJobs]);
 
   // Advanced filtering with useMemo for performance

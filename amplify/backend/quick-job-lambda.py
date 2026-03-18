@@ -147,6 +147,15 @@ def create_quick_job(body_str, user_id, headers):
         # Use employerId from body if user_id is anonymous
         employer_id = body.get('employerId', user_id)
         
+        # Convert latitude and longitude to Decimal if they exist
+        latitude = body.get('latitude')
+        longitude = body.get('longitude')
+        
+        if latitude is not None:
+            latitude = Decimal(str(latitude))
+        if longitude is not None:
+            longitude = Decimal(str(longitude))
+        
         # Create item
         item = {
             'jobID': body['idJob'],  # Note: table uses jobID, but API uses idJob
@@ -155,6 +164,8 @@ def create_quick_job(body_str, user_id, headers):
             'companyName': body.get('companyName', ''),  # Company name for display
             'title': body['title'],
             'location': body['location'],
+            'latitude': latitude,  # GPS latitude for location-based search (Decimal)
+            'longitude': longitude,  # GPS longitude for location-based search (Decimal)
             'jobType': body.get('jobType', 'part-time'),  # Job type: part-time or full-time
             'hourlyRate': body['hourlyRate'],
             'startTime': body['startTime'],
@@ -352,20 +363,26 @@ def update_quick_job(body_str, job_id, user_id, headers):
         expr_names = {}
         
         # Add fields to update
-        updatable_fields = ['title', 'location', 'jobType', 'hourlyRate', 'startTime', 'endTime',
+        updatable_fields = ['title', 'location', 'latitude', 'longitude', 'jobType', 'hourlyRate', 'startTime', 'endTime',
                            'totalHours', 'totalSalary', 'description', 'requirements', 'status', 'workDate']
         
         reserved_keywords = ['location', 'status']
         
         for field in updatable_fields:
             if field in body:
+                value = body[field]
+                
+                # Convert latitude and longitude to Decimal
+                if field in ['latitude', 'longitude'] and value is not None:
+                    value = Decimal(str(value))
+                
                 if field in reserved_keywords:
                     update_expr += f", #{field} = :{field}"
                     expr_names[f'#{field}'] = field
-                    expr_values[f':{field}'] = body[field]
+                    expr_values[f':{field}'] = value
                 else:
                     update_expr += f", {field} = :{field}"
-                    expr_values[f':{field}'] = body[field]
+                    expr_values[f':{field}'] = value
         
         # Update item
         update_params = {
