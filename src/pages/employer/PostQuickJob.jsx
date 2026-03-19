@@ -632,14 +632,14 @@ const PostQuickJob = () => {
       const jobData = {
         title: formData.title,
         location: formData.location,
-        latitude: formData.latitude ? parseFloat(formData.latitude) : null,
-        longitude: formData.longitude ? parseFloat(formData.longitude) : null,
+        latitude: formData.latitude ? Math.round(parseFloat(formData.latitude) * 1000000) / 1000000 : null,
+        longitude: formData.longitude ? Math.round(parseFloat(formData.longitude) * 1000000) / 1000000 : null,
         jobType: formData.jobType || 'part-time',
-        hourlyRate: rate,
+        hourlyRate: Math.round(rate), // Ensure integer
         startTime: formData.startTime,
         endTime: formData.endTime,
-        totalHours: calculation.hours,
-        totalSalary: totalFee,
+        totalHours: Math.round(calculation.hours * 10) / 10, // Round to 1 decimal place
+        totalSalary: Math.round(totalFee), // Ensure integer
         description: formData.description || '',
         requirements: formData.requirements || '',
         contactPhone: formData.contactPhone || '',

@@ -203,14 +203,14 @@ class QuickJobService {
         companyName: companyName,
         title: jobData.title,
         location: jobData.location,
-        latitude: jobData.latitude || null,
-        longitude: jobData.longitude || null,
+        latitude: jobData.latitude ? Math.round(jobData.latitude * 1000000) / 1000000 : null, // Round to 6 decimal places
+        longitude: jobData.longitude ? Math.round(jobData.longitude * 1000000) / 1000000 : null, // Round to 6 decimal places
         jobType: jobData.jobType || 'part-time',
-        hourlyRate: jobData.hourlyRate,
+        hourlyRate: Math.round(jobData.hourlyRate || 0), // Convert to integer
         startTime: jobData.startTime,
         endTime: jobData.endTime,
-        totalHours: jobData.totalHours || 0,
-        totalSalary: jobData.totalSalary || 0,
+        totalHours: Math.round((jobData.totalHours || 0) * 10) / 10, // Round to 1 decimal place
+        totalSalary: Math.round(jobData.totalSalary || 0), // Convert to integer
         description: jobData.description || '',
         requirements: jobData.requirements || '',
         status: jobData.status || 'pending',

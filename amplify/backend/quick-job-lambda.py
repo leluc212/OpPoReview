@@ -156,6 +156,18 @@ def create_quick_job(body_str, user_id, headers):
         if longitude is not None:
             longitude = Decimal(str(longitude))
         
+        # Convert numeric fields to Decimal to avoid Float type errors
+        hourly_rate = body.get('hourlyRate', 0)
+        total_hours = body.get('totalHours', 0)
+        total_salary = body.get('totalSalary', 0)
+        
+        if hourly_rate is not None:
+            hourly_rate = Decimal(str(hourly_rate))
+        if total_hours is not None:
+            total_hours = Decimal(str(total_hours))
+        if total_salary is not None:
+            total_salary = Decimal(str(total_salary))
+        
         # Create item
         item = {
             'jobID': body['idJob'],  # Note: table uses jobID, but API uses idJob
@@ -167,11 +179,11 @@ def create_quick_job(body_str, user_id, headers):
             'latitude': latitude,  # GPS latitude for location-based search (Decimal)
             'longitude': longitude,  # GPS longitude for location-based search (Decimal)
             'jobType': body.get('jobType', 'part-time'),  # Job type: part-time or full-time
-            'hourlyRate': body['hourlyRate'],
+            'hourlyRate': hourly_rate,
             'startTime': body['startTime'],
             'endTime': body['endTime'],
-            'totalHours': body.get('totalHours', 0),
-            'totalSalary': body.get('totalSalary', 0),
+            'totalHours': total_hours,
+            'totalSalary': total_salary,
             'description': body['description'],
             'requirements': body.get('requirements', ''),  # Job requirements
             'status': body.get('status', 'pending'),
