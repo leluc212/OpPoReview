@@ -2540,20 +2540,20 @@ const CompanyBannerContent = styled.div`
 
 const CompanyBannerTitle = styled(motion.h2)`
   text-align: center;
-  font-size: 70px;
-  font-weight: 800;
+  font-size: 62px;
+  font-weight: 900;
   color: ${props => props.$isDark ? '#f1f5f9' : '#0c4a6e'};
-  margin-bottom: 60px;
-  line-height: 1.3;
-  letter-spacing: -1px;
+  margin-bottom: 52px;
+  line-height: 1.2;
+  letter-spacing: -1.5px;
   transition: color 0.4s ease;
-  text-shadow: ${props => props.$isDark ? '0 2px 8px rgba(0, 0, 0, 0.3)' : '0 2px 8px rgba(12, 74, 110, 0.1)'};
-  padding: 0 80px;
+  padding: 0 120px;
   
   @media (max-width: 768px) {
-    font-size: 38px;
-    margin-bottom: 40px;
-    padding: 0 20px;
+    font-size: 34px;
+    margin-bottom: 32px;
+    padding: 0 24px;
+    letter-spacing: -0.5px;
   }
 `;
 
@@ -3744,7 +3744,13 @@ const LandingPage = () => {
               viewport={{ once: false, amount: 0.5 }}
               transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
             >
-              Nhiều nhà tuyển dụng đang tìm "đồng đội"<br />giỏi – là bạn đó!
+              Những ứng viên mà nhà tuyển dụng<br />đang tìm kiếm –{' '}
+              <span style={{
+                background: 'linear-gradient(90deg, #0284c7, #1d4ed8)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}>có thể chính là bạn.</span>
             </CompanyBannerTitle>
 
             <LogoCarouselWrapper $isDark={isDarkMode}>
