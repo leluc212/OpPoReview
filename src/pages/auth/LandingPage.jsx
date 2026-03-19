@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { motion, useInView } from 'framer-motion';
 import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package, Heart, UserPlus, Shield, MessageCircle, Headphones, Moon, Sun, Clock, Mail, Send, Award, Zap, Target, Calendar, Download } from 'lucide-react';
 import { Button } from '../../components/FormElements';
@@ -2563,11 +2563,17 @@ const LogoCarouselWrapper = styled.div`
   width: 100%;
 `;
 
-const LogoCarousel = styled(motion.div)`
+const logoScroll = keyframes`
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+`;
+
+const LogoCarousel = styled.div`
   display: flex;
   gap: 60px;
   align-items: center;
-  width: fit-content;
+  width: max-content;
+  animation: ${logoScroll} 30s linear infinite;
 `;
 
 const BannerCompanyLogo = styled.div`
@@ -3742,20 +3748,8 @@ const LandingPage = () => {
             </CompanyBannerTitle>
 
             <LogoCarouselWrapper $isDark={isDarkMode}>
-              <LogoCarousel
-                animate={{
-                  x: [0, -1800],
-                }}
-                transition={{
-                  x: {
-                    repeat: Infinity,
-                    repeatType: "loop",
-                    duration: 30,
-                    ease: "linear",
-                  },
-                }}
-              >
-                {[...companyLogos, ...companyLogos, ...companyLogos].map((company, index) => (
+              <LogoCarousel>
+                {[...companyLogos, ...companyLogos].map((company, index) => (
                   <BannerCompanyLogo $isDark={isDarkMode} key={`${company.name}-${index}`}>
                     <img
                       src={company.logo}
