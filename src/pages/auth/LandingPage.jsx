@@ -2578,8 +2578,8 @@ const LogoCarousel = styled.div`
 
 const BannerCompanyLogo = styled.div`
   background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)'};
-  padding: 24px 40px;
-  border-radius: 16px;
+  padding: 28px 52px;
+  border-radius: 20px;
   box-shadow: ${props => props.$isDark
     ? '0 6px 20px rgba(0, 0, 0, 0.3)'
     : '0 6px 20px rgba(14, 165, 233, 0.15)'};
@@ -2589,8 +2589,8 @@ const BannerCompanyLogo = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 220px;
-  height: 100px;
+  min-width: 280px;
+  height: 130px;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(10px);
   
@@ -2605,8 +2605,8 @@ const BannerCompanyLogo = styled.div`
   }
   
   img {
-    max-width: 180px;
-    max-height: 70px;
+    max-width: 220px;
+    max-height: 90px;
     object-fit: contain;
     filter: ${props => props.$isDark ? 'brightness(1.1)' : 'brightness(1)'};
     transition: filter 0.3s ease;
