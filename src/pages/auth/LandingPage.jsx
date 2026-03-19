@@ -2489,7 +2489,7 @@ const CompanyBannerSection = styled(motion.section)`
   background: ${props => props.$isDark
     ? '#1e293b'
     : '#E0F2FE'};
-  padding: 60px 80px;
+  padding: 60px 0;
   position: relative;
   overflow: hidden;
   height: 100vh;
@@ -2501,19 +2501,19 @@ const CompanyBannerSection = styled(motion.section)`
   transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   
   @media (max-width: 1024px) {
-    padding: 50px 40px;
+    padding: 50px 0;
     height: auto;
     min-height: 80vh;
   }
   
   @media (max-width: 768px) {
-    padding: 40px 20px;
+    padding: 40px 0;
     height: auto;
     min-height: 60vh;
   }
   
   @media (max-width: 480px) {
-    padding: 30px 16px;
+    padding: 30px 0;
     min-height: 50vh;
   }
   
@@ -2533,8 +2533,7 @@ const CompanyBannerSection = styled(motion.section)`
 `;
 
 const CompanyBannerContent = styled.div`
-  max-width: 1440px;
-  margin: 0 auto;
+  width: 100%;
   position: relative;
   z-index: 1;
 `;
@@ -2549,10 +2548,12 @@ const CompanyBannerTitle = styled(motion.h2)`
   letter-spacing: -1px;
   transition: color 0.4s ease;
   text-shadow: ${props => props.$isDark ? '0 2px 8px rgba(0, 0, 0, 0.3)' : '0 2px 8px rgba(12, 74, 110, 0.1)'};
+  padding: 0 80px;
   
   @media (max-width: 768px) {
     font-size: 38px;
     margin-bottom: 40px;
+    padding: 0 20px;
   }
 `;
 
@@ -2560,32 +2561,6 @@ const LogoCarouselWrapper = styled.div`
   position: relative;
   overflow: hidden;
   width: 100%;
-  
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 100px;
-    z-index: 2;
-    pointer-events: none;
-    transition: background 0.4s ease;
-  }
-  
-  &::before {
-    left: 0;
-    background: ${props => props.$isDark
-    ? 'linear-gradient(to right, rgba(30, 41, 59, 1), rgba(30, 41, 59, 0))'
-    : 'linear-gradient(to right, rgba(224, 242, 254, 1), rgba(224, 242, 254, 0))'};
-  }
-  
-  &::after {
-    right: 0;
-    background: ${props => props.$isDark
-    ? 'linear-gradient(to left, rgba(30, 41, 59, 1), rgba(30, 41, 59, 0))'
-    : 'linear-gradient(to left, rgba(224, 242, 254, 1), rgba(224, 242, 254, 0))'};
-  }
 `;
 
 const LogoCarousel = styled(motion.div)`
