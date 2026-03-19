@@ -3102,12 +3102,13 @@ const JobListing = () => {
     } else {
       // For shift jobs
       if (jobCategory === 'shift') {
-        if (showNearbyJobs) {
+        // IMPORTANT: Only show shift jobs when work status is ON and location is enabled
+        if (isAvailable && showNearbyJobs) {
           // Location enabled: only show jobs within radius (strict ≤3km)
           return nearbyJobs;
         }
-        // Location not enabled: show all shift jobs for browsing
-        result = result.filter(job => job.category === 'shift');
+        // If work status is OFF or location not enabled: hide all shift jobs
+        return [];
       } else {
         result = result.filter(job => job.category === jobCategory);
       }
@@ -3193,6 +3194,14 @@ const JobListing = () => {
     quickFilter, savedJobs, sortBy, userLocation, showNearbyJobs, nearbyJobs, allJobs, showSavedJobsOnly]);
 
   const categoryJobs = allJobs.filter(job => job.category === jobCategory);
+
+  // Calculate visible shift jobs count (only when work status + location are enabled)
+  const visibleShiftJobsCount = useMemo(() => {
+    if (isAvailable && showNearbyJobs) {
+      return nearbyJobs.length;
+    }
+    return 0;
+  }, [isAvailable, showNearbyJobs, nearbyJobs]);
 
   return (
     <DashboardLayout role="candidate" key={language}>
@@ -3393,7 +3402,7 @@ const JobListing = () => {
             <Zap />
             {language === 'vi' ? 'Công việc Tuyển gấp' : 'Shift Jobs - Hiring Now'}
             <span style={{ marginLeft: 'auto', fontSize: '14px', opacity: 0.9 }}>
-              ({allJobs.filter(j => j.category === 'shift').length})
+              ({visibleShiftJobsCount})
             </span>
           </CategoryTab>
 
@@ -3660,16 +3669,32 @@ const JobListing = () => {
                           : 'Click the save icon on any job to add it here.'}
                       </p>
                     </>
-                  ) : jobCategory === 'shift' && !showNearbyJobs ? (
+                  ) : jobCategory === 'shift' && (!isAvailable || !showNearbyJobs) ? (
                     <>
-                      <div style={{ fontSize: '48px', marginBottom: '16px' }}>📍</div>
+                      <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔒</div>
                       <p style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
-                        {language === 'vi' ? 'Bật vị trí để tìm việc gần bạn' : 'Enable location to find jobs near you'}
+                        {language === 'vi' ? 'Bật trạng thái làm việc và vị trí để tìm công việc' : 'Enable work status and location to see jobs'}
                       </p>
                       <p style={{ fontSize: '15px', color: '#6b7280', marginBottom: '20px' }}>
                         {language === 'vi'
-                          ? 'Nhấn nút "Tìm việc gần tôi" ở phía trên để xem các công việc tuyển gấp trong bán kính 3km'
-                          : 'Click "Find Jobs Near Me" button above to see shift jobs within 3km radius'}
+                          ? !isAvailable 
+                            ? 'Vui lòng bật trạng thái làm việc ở phía trên, sau đó nhấn "Tìm việc gần tôi" để tìm các công việc tuyển gấp trong bán kính 3km'
+                            : 'Vui lòng nhấn nút "Tìm việc gần tôi" ở phía trên để tìm các công việc tuyển gấp trong bán kính 3km'
+                          : !isAvailable
+                            ? 'Please enable work status above, then click "Find Jobs Near Me" to see shift jobs within 3km radius'
+                            : 'Click "Find Jobs Near Me" button above to see shift jobs within 3km radius'}
+                      </p>
+                    </>
+                  ) : jobCategory === 'shift' && showNearbyJobs ? (
+                    <>
+                      <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
+                      <p style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
+                        {language === 'vi' ? 'Không tìm thấy công việc gần bạn' : 'No jobs found near you'}
+                      </p>
+                      <p style={{ fontSize: '15px', color: '#6b7280' }}>
+                        {language === 'vi'
+                          ? 'Không có công việc tuyển gấp trong bán kính 3km. Thử lại sau hoặc di chuyển đến khu vực khác.'
+                          : 'No shift jobs within 3km radius. Try again later or move to another area.'}
                       </p>
                     </>
                   ) : (
@@ -3679,14 +3704,9 @@ const JobListing = () => {
                         {language === 'vi' ? 'Không tìm thấy công việc phù hợp' : 'No matching jobs found'}
                       </p>
                       <p style={{ fontSize: '15px', color: '#6b7280' }}>
-                        {jobCategory === 'shift'
-                          ? (language === 'vi'
-                            ? 'Không có công việc tuyển gấp trong bán kính 3km. Thử mở rộng bán kính tìm kiếm.'
-                            : 'No shift jobs within 3km radius. Try expanding the search radius.')
-                          : (language === 'vi'
-                            ? 'Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn'
-                            : 'Try adjusting your filters or search keywords')
-                        }
+                        {language === 'vi'
+                          ? 'Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn'
+                          : 'Try adjusting your filters or search keywords'}
                       </p>
                     </>
                   )}
