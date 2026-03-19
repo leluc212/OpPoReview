@@ -37,7 +37,7 @@ const Modal = styled(motion.div)`
   border-radius: 28px;
   padding: 0;
   width: 100%;
-  max-width: 480px;
+  max-width: 900px;
   position: relative;
   overflow: hidden;
   box-shadow:
@@ -86,7 +86,7 @@ const EmojiCircle = styled.div`
 `;
 
 const BannerTitle = styled.h2`
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 900;
   color: #fff;
   text-align: center;
@@ -97,7 +97,7 @@ const BannerTitle = styled.h2`
 `;
 
 const BannerSub = styled.p`
-  font-size: 13.5px;
+  font-size: 16px;
   color: rgba(255,255,255,0.72);
   text-align: center;
   line-height: 1.6;
@@ -129,13 +129,13 @@ const BenefitItem = styled.div`
 const BenefitText = styled.div`
   flex: 1;
   .title {
-    font-size: 13.5px;
+    font-size: 16px;
     font-weight: 700;
     color: #0f172a;
     margin-bottom: 2px;
   }
   .desc {
-    font-size: 12px;
+    font-size: 14px;
     color: #94a3b8;
     line-height: 1.5;
   }
@@ -181,7 +181,7 @@ const BtnSkip = styled.button`
   border-radius: 12px;
   background: transparent;
   color: #94a3b8;
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;

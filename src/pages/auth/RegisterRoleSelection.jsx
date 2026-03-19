@@ -42,7 +42,9 @@ const cardGlow = keyframes`
    PAGE ROOT
 ═══════════════════════════════════════════════ */
 const Page = styled.div`
-  min-height: 100vh;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
   background: linear-gradient(145deg, #060f3e 0%, #0d2778 30%, #0E3995 60%, #1648c8 100%);
   background-size: 220% 220%;
   animation: ${gradShift} 12s ease infinite;
@@ -50,11 +52,15 @@ const Page = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 24px 24px;
-  position: relative;
-  overflow: hidden;
-  font-family: 'Inter', sans-serif !important;
+  padding: 8px 16px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif !important;
   color-scheme: light;
+
+  @media (max-width: 720px) {
+    padding: 16px 16px;
+    justify-content: flex-start;
+    padding-top: 24px;
+  }
 
   * {
     font-family: inherit !important;
@@ -114,8 +120,8 @@ const Star = styled.div`
    CONTENT
 ═══════════════════════════════════════════════ */
 const Wrap = styled(motion.div)`
-  width: 100%;
-  max-width: 1060px;
+  width: min(100%, 1280px);
+  max-width: unset;
   position: relative;
   z-index: 10;
   display: flex;
@@ -134,7 +140,6 @@ const BrandLink = styled(Link)`
   text-decoration: none;
   margin-bottom: 4px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-  transition: transform 0.25s, box-shadow 0.25s;
 
   &:hover {
     transform: translateY(-3px);
@@ -142,7 +147,7 @@ const BrandLink = styled(Link)`
   }
 `;
 const BrandImg = styled.img`
-  height: 50px;
+  height: 44px;
   object-fit: contain;
 `;
 
@@ -165,15 +170,15 @@ const Eyebrow = styled.div`
 
 /* headline */
 const H1 = styled.h1`
-  font-size: clamp(18px, 5vw, 52px);
+  font-size: clamp(22px, 5vw, 52px);
   font-weight: 1000;
   letter-spacing: -2px;
   line-height: 1;
-  padding: 6px 0;
+  padding: 4px 0;
   color: #fff;
   text-align: center;
   margin-top: 0;
-  margin-bottom: 10px;
+  margin-bottom: 4px;
 
   .shine {
     background: linear-gradient(90deg, #93c5fd, #c4b5fd, #fbcfe8, #93c5fd);
@@ -189,12 +194,12 @@ const H1 = styled.h1`
 `;
 
 const Sub = styled.p`
-  font-size: 14px;
+  font-size: 15px;
   color: rgba(255,255,255,0.65);
   text-align: center;
   line-height: 1.6;
   max-width: 520px;
-  margin-bottom: 20px;
+  margin-bottom: 6px;
 `;
 
 /* ═══════════════════════════════════════════════
@@ -203,21 +208,22 @@ const Sub = styled.p`
 const CardGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  gap: 20px;
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   align-items: stretch;
 
   @media (max-width: 720px) {
     grid-template-columns: 1fr;
     max-width: 500px;
+    gap: 14px;
   }
 `;
 
 const RoleCard = styled(motion.div)`
   background: #fff;
-  border-radius: 24px;
-  padding: 28px 32px 26px;
+  border-radius: 20px;
+  padding: 36px 40px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -227,6 +233,10 @@ const RoleCard = styled(motion.div)`
   border: 2px solid transparent;
   transition: border-color 0.3s, box-shadow 0.3s;
   height: 100%;
+
+  @media (max-width: 720px) {
+    padding: 24px 22px;
+  }
 
   /* top accent */
   &::before {
@@ -294,18 +304,26 @@ const CardBadge = styled.div`
 `;
 
 const CardIconBox = styled.div`
-  width: 68px;
-  height: 68px;
-  border-radius: 18px;
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
   background: ${p => p.$bg};
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
+  font-size: 30px;
   margin-bottom: 18px;
-  box-shadow: 0 6px 20px ${p => p.$shadow};
+  box-shadow: 0 4px 12px ${p => p.$shadow};
   position: relative;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  @media (max-width: 720px) {
+    width: 56px;
+    height: 56px;
+    font-size: 28px;
+    margin-bottom: 12px;
+    border-radius: 14px;
+  }
   
   &::before {
     content: '';
@@ -329,45 +347,45 @@ const CardIconBox = styled.div`
 `;
 
 const CardTitle = styled.h2`
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 800;
   color: #0f172a;
-  letter-spacing: -0.6px;
+  letter-spacing: -0.4px;
   line-height: 1.2;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 `;
 
 const CardDesc = styled.p`
-  font-size: 13.5px;
+  font-size: 15px;
   color: #64748b;
   line-height: 1.6;
   font-weight: 400;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 `;
 
 const FeatureList = styled.ul`
   list-style: none;
-  margin: 0 0 20px;
+  margin: 0 0 22px;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   flex: 1;
 `;
 
 const FeatureItem = styled.li`
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 13.5px;
-  color: #475569;
+  gap: 9px;
+  font-size: 15px;
+  color: #334155;
   font-weight: 500;
-  line-height: 1.6;
+  line-height: 1.5;
 
   &::before {
     content: '✓';
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     border-radius: 6px;
     background: ${p => p.$bg};
     color: ${p => p.$c};
@@ -382,7 +400,7 @@ const FeatureItem = styled.li`
 
 const SelectBtn = styled(motion.button)`
   width: 100%;
-  height: 46px;
+  height: 52px;
   border: none;
   border-radius: 12px;
   background: ${p => p.$grad};
@@ -425,27 +443,27 @@ const SelectBtn = styled(motion.button)`
    TICKER
 ═══════════════════════════════════════════════ */
 const TickerOuter = styled.div`
-  width: 100%;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  margin-left: -50vw;
   overflow: hidden;
   margin-bottom: 20px;
-  position: relative;
-
-  &::before, &::after {
-    content: '';
-    position: absolute;
-    top: 0; bottom: 0;
-    width: 60px;
-    z-index: 2;
-  }
-  &::before { left: 0; background: linear-gradient(90deg, rgba(10,30,100,0.9), transparent); }
-  &::after  { right: 0; background: linear-gradient(-90deg, rgba(10,30,100,0.9), transparent); }
 `;
 
 const TickerTrack = styled.div`
   display: flex;
-  gap: 32px;
+  gap: 0;
   white-space: nowrap;
-  animation: ${ticker} 28s linear infinite;
+  width: max-content;
+  animation: ${ticker} 60s linear infinite;
+`;
+
+const TickerSet = styled.div`
+  display: flex;
+  gap: 32px;
+  flex-shrink: 0;
+  padding-right: 32px;
 `;
 
 const TickerChip = styled.span`
@@ -557,8 +575,6 @@ const RegisterRoleSelection = () => {
 
   const chips = [
     '☕ Nhân viên Barista', '🍳 Nhân viên Phụ bếp', '🍽️ Nhân viên Phục vụ', '🧁 Nhân viên Làm bánh', '🥤 Nhân viên Pha chế', '🛎️ Nhân viên Thu ngân', '🍜 Nhân viên Bếp', '🧹 Nhân viên Dọn dẹp', '📦 Nhân viên Soạn hàng', '🏪 Nhân viên Cửa hàng F&B',
-    '☕ Nhân viên Barista', '🍳 Nhân viên Phụ bếp', '🍽️ Nhân viên Phục vụ', '🧁 Nhân viên Làm bánh', '🥤 Nhân viên Pha chế', '🛎️ Nhân viên Thu ngân', '🍜 Nhân viên Bếp', '🧹 Nhân viên Dọn dẹp', '📦 Nhân viên Soạn hàng', '🏪 Nhân viên Cửa hàng F&B',
-    '☕ Nhân viên Barista', '🍳 Nhân viên Phụ bếp', '🍽️ Nhân viên Phục vụ', '🧁 Nhân viên Làm bánh', '🥤 Nhân viên Pha chế', '🛎️ Nhân viên Thu ngân', '🍜 Nhân viên Bếp', '🧹 Nhân viên Dọn dẹp', '📦 Nhân viên Soạn hàng', '🏪 Nhân viên Cửa hàng F&B',
   ];
 
   /* stagger */
@@ -615,7 +631,12 @@ const RegisterRoleSelection = () => {
         <motion.div variants={item} style={{ width: '100%' }}>
           <TickerOuter>
             <TickerTrack>
-              {chips.map((c, i) => <TickerChip key={i}>{c}</TickerChip>)}
+              <TickerSet>
+                {chips.map((c, i) => <TickerChip key={`a-${i}`}>{c}</TickerChip>)}
+              </TickerSet>
+              <TickerSet>
+                {chips.map((c, i) => <TickerChip key={`b-${i}`}>{c}</TickerChip>)}
+              </TickerSet>
             </TickerTrack>
           </TickerOuter>
         </motion.div>
@@ -634,15 +655,10 @@ const RegisterRoleSelection = () => {
                 whileHover={{ y: -8, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } }}
                 whileTap={{ scale: 0.985 }}
               >
-                <CardBadge>
-                  <img src="/OpPoReview/images/logo.png" alt="OpPo" onError={e => { e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"%3E%3Ctext y="20" font-size="20"%3E⭐%3C/text%3E%3C/svg%3E'; }} />
-                  OpPo
-                </CardBadge>
-                
                 <CardIconBox $bg={r.iconBg} $grad={r.grad} $shadow={r.iconShadow}>
                   {r.icon}
                 </CardIconBox>
-                
+
                 <CardTitle>{r.title}</CardTitle>
                 <CardDesc>{r.desc}</CardDesc>
 

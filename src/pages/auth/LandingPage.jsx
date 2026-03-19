@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { motion, useInView } from 'framer-motion';
 import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sparkles, Globe, ChevronDown, Bookmark, FileText, ThumbsUp, Star, Upload, BookOpen, Edit3, Folder, Package, Heart, UserPlus, Shield, MessageCircle, Headphones, Moon, Sun, Clock, Mail, Send, Award, Zap, Target, Calendar, Download } from 'lucide-react';
 import { Button } from '../../components/FormElements';
@@ -2489,7 +2489,7 @@ const CompanyBannerSection = styled(motion.section)`
   background: ${props => props.$isDark
     ? '#1e293b'
     : '#E0F2FE'};
-  padding: 60px 80px;
+  padding: 60px 0;
   position: relative;
   overflow: hidden;
   height: 100vh;
@@ -2501,19 +2501,19 @@ const CompanyBannerSection = styled(motion.section)`
   transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   
   @media (max-width: 1024px) {
-    padding: 50px 40px;
+    padding: 50px 0;
     height: auto;
     min-height: 80vh;
   }
   
   @media (max-width: 768px) {
-    padding: 40px 20px;
+    padding: 40px 0;
     height: auto;
     min-height: 60vh;
   }
   
   @media (max-width: 480px) {
-    padding: 30px 16px;
+    padding: 30px 0;
     min-height: 50vh;
   }
   
@@ -2533,26 +2533,27 @@ const CompanyBannerSection = styled(motion.section)`
 `;
 
 const CompanyBannerContent = styled.div`
-  max-width: 1440px;
-  margin: 0 auto;
+  width: 100%;
   position: relative;
   z-index: 1;
 `;
 
 const CompanyBannerTitle = styled(motion.h2)`
   text-align: center;
-  font-size: 70px;
-  font-weight: 800;
+  font-size: 62px;
+  font-weight: 900;
   color: ${props => props.$isDark ? '#f1f5f9' : '#0c4a6e'};
-  margin-bottom: 60px;
-  line-height: 1.3;
-  letter-spacing: -1px;
+  margin-bottom: 52px;
+  line-height: 1.2;
+  letter-spacing: -1.5px;
   transition: color 0.4s ease;
-  text-shadow: ${props => props.$isDark ? '0 2px 8px rgba(0, 0, 0, 0.3)' : '0 2px 8px rgba(12, 74, 110, 0.1)'};
+  padding: 0 120px;
   
   @media (max-width: 768px) {
-    font-size: 38px;
-    margin-bottom: 40px;
+    font-size: 34px;
+    margin-bottom: 32px;
+    padding: 0 24px;
+    letter-spacing: -0.5px;
   }
 `;
 
@@ -2560,45 +2561,25 @@ const LogoCarouselWrapper = styled.div`
   position: relative;
   overflow: hidden;
   width: 100%;
-  
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 100px;
-    z-index: 2;
-    pointer-events: none;
-    transition: background 0.4s ease;
-  }
-  
-  &::before {
-    left: 0;
-    background: ${props => props.$isDark
-    ? 'linear-gradient(to right, rgba(30, 41, 59, 1), rgba(30, 41, 59, 0))'
-    : 'linear-gradient(to right, rgba(224, 242, 254, 1), rgba(224, 242, 254, 0))'};
-  }
-  
-  &::after {
-    right: 0;
-    background: ${props => props.$isDark
-    ? 'linear-gradient(to left, rgba(30, 41, 59, 1), rgba(30, 41, 59, 0))'
-    : 'linear-gradient(to left, rgba(224, 242, 254, 1), rgba(224, 242, 254, 0))'};
-  }
 `;
 
-const LogoCarousel = styled(motion.div)`
+const logoScroll = keyframes`
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+`;
+
+const LogoCarousel = styled.div`
   display: flex;
   gap: 60px;
   align-items: center;
-  width: fit-content;
+  width: max-content;
+  animation: ${logoScroll} 30s linear infinite;
 `;
 
 const BannerCompanyLogo = styled.div`
   background: ${props => props.$isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)'};
-  padding: 24px 40px;
-  border-radius: 16px;
+  padding: 28px 52px;
+  border-radius: 20px;
   box-shadow: ${props => props.$isDark
     ? '0 6px 20px rgba(0, 0, 0, 0.3)'
     : '0 6px 20px rgba(14, 165, 233, 0.15)'};
@@ -2608,8 +2589,8 @@ const BannerCompanyLogo = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 220px;
-  height: 100px;
+  min-width: 280px;
+  height: 130px;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(10px);
   
@@ -2624,8 +2605,8 @@ const BannerCompanyLogo = styled.div`
   }
   
   img {
-    max-width: 180px;
-    max-height: 70px;
+    max-width: 220px;
+    max-height: 90px;
     object-fit: contain;
     filter: ${props => props.$isDark ? 'brightness(1.1)' : 'brightness(1)'};
     transition: filter 0.3s ease;
@@ -3763,24 +3744,18 @@ const LandingPage = () => {
               viewport={{ once: false, amount: 0.5 }}
               transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
             >
-              Nhiều nhà tuyển dụng đang tìm "đồng đội"<br />giỏi – là bạn đó!
+              Những ứng viên mà nhà tuyển dụng<br />đang tìm kiếm –{' '}
+              <span style={{
+                background: 'linear-gradient(90deg, #0284c7, #1d4ed8)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}>có thể chính là bạn.</span>
             </CompanyBannerTitle>
 
             <LogoCarouselWrapper $isDark={isDarkMode}>
-              <LogoCarousel
-                animate={{
-                  x: [0, -1800],
-                }}
-                transition={{
-                  x: {
-                    repeat: Infinity,
-                    repeatType: "loop",
-                    duration: 30,
-                    ease: "linear",
-                  },
-                }}
-              >
-                {[...companyLogos, ...companyLogos, ...companyLogos].map((company, index) => (
+              <LogoCarousel>
+                {[...companyLogos, ...companyLogos].map((company, index) => (
                   <BannerCompanyLogo $isDark={isDarkMode} key={`${company.name}-${index}`}>
                     <img
                       src={company.logo}
