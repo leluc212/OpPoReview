@@ -1,20 +1,20 @@
 ﻿{
-    "Version":  "2012-10-17",
-    "Statement":  [
-                      {
-                          "Effect":  "Allow",
-                          "Resource":  [
-                                           "arn:aws:dynamodb:ap-southeast-1:*:table/EmployerProfiles",
-                                           "arn:aws:dynamodb:ap-southeast-1:*:table/EmployerProfiles/index/*"
-                                       ],
-                          "Action":  [
-                                         "dynamodb:GetItem",
-                                         "dynamodb:PutItem",
-                                         "dynamodb:UpdateItem",
-                                         "dynamodb:DeleteItem",
-                                         "dynamodb:Query",
-                                         "dynamodb:Scan"
-                                     ]
-                      }
-                  ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:PutItem",
+        "dynamodb:GetItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:Query",
+        "dynamodb:Scan"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:ap-southeast-1:*:table/Notifications",
+        "arn:aws:dynamodb:ap-southeast-1:*:table/Notifications/index/*"
+      ]
+    }
+  ]
 }

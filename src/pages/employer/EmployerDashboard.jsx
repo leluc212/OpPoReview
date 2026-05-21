@@ -7,6 +7,7 @@ import StatsCard from '../../components/StatsCard';
 import StatusBadge from '../../components/StatusBadge';
 import CompanyProfileSetupModal from '../../components/CompanyProfileSetupModal';
 import ProfileSetupPrompt from '../../components/ProfileSetupPrompt';
+
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { useCompanyProfileCompletion } from '../../hooks/useCompanyProfileCompletion';

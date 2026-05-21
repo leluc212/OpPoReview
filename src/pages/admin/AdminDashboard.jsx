@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
+
 import { useLanguage } from '../../context/LanguageContext';
 import { jobPosts } from '../../data/jobPosts';
 import { Users, Briefcase, Building2, DollarSign, CheckSquare, XSquare, Shield, Calendar, ArrowRight, Zap, TrendingUp, Star, Sparkles, Eye, Rocket, FileText, ChevronDown } from 'lucide-react';
@@ -2148,9 +2149,6 @@ const AdminDashboard = () => {
             </RevenueStatsGrid>
           </RevenueChartCard>
         </RevenueSection>
-
-
-
 
       </DashboardContainer>
     </DashboardLayout>

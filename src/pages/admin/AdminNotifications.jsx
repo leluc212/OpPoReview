@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import { 
@@ -14,10 +14,14 @@ import {
   Search,
   Trash2,
   Eye,
-  Send
+  Send,
+  Package
 } from 'lucide-react';
 import { Button } from '../../components/FormElements';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
+import { getNotifications, markAsRead, markAllAsRead } from '../../services/notificationService';
+import { useNavigate } from 'react-router-dom';
 
 const PageContainer = styled.div`
   padding: 2rem;
@@ -352,8 +356,13 @@ const ToggleSwitch = styled.label`
 
 const AdminNotifications = () => {
   const { language } = useLanguage();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [filterType, setFilterType] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [notificationSettings, setNotificationSettings] = useState({
     posts: true,
     payments: true,
@@ -361,118 +370,95 @@ const AdminNotifications = () => {
     employers: true
   });
 
-  const notifications = [
-    {
-      id: 1,
-      type: 'employers',
-      icon: Users,
-      color: '#8b5cf6',
-      title: language === 'vi' ? 'Người dùng mới đăng ký' : 'New user registrations',
-      message: language === 'vi' ? '15 ứng viên và 3 nhà tuyển dụng mới đã đăng ký trong 24h qua. Vui lòng kiểm tra và xác minh thông tin.' : '15 candidates and 3 employers registered in the last 24h. Please review and verify information.',
-      time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
-      unread: true,
-      actionRequired: true
-    },
-    {
-      id: 2,
-      type: 'employers',
-      icon: Briefcase,
-      color: '#f59e0b',
-      title: language === 'vi' ? 'Yêu cầu phê duyệt nhà tuyển dụng' : 'Employer approval request',
-      message: language === 'vi' ? 'Katinat chi nhánh quận 8 đang chờ phê duyệt. Đã hoàn tất xác thực eKYC và chấp nhận điều khoản.' : 'Katinat District 8 branch is pending approval. Completed eKYC verification and accepted terms.',
-      time: language === 'vi' ? '3 giờ trước' : '3 hours ago',
-      unread: true,
-      actionRequired: true
-    },
-    {
-      id: 3,
-      type: 'posts',
-      icon: AlertCircle,
-      color: '#ef4444',
-      title: language === 'vi' ? 'Bài đăng bị cảnh báo' : 'Flagged job posts',
-      message: language === 'vi' ? '5 bài đăng tuyển nhân viên phục vụ bị cảnh báo do vi phạm chính sách về mức lương. Cần xem xét và xử lý.' : '5 server job posts flagged for violating salary policy. Requires review and action.',
-      time: language === 'vi' ? '5 giờ trước' : '5 hours ago',
-      unread: true,
-      actionRequired: true
-    },
-    {
-      id: 4,
-      type: 'payments',
-      icon: DollarSign,
-      color: '#10b981',
-      title: language === 'vi' ? 'Thanh toán mới' : 'New payment',
-      message: language === 'vi' ? 'The Coffee House đã thanh toán gói Banner nổi bật 2 trị giá 745.000 VND. Giao dịch thành công.' : 'The Coffee House paid for Spotlight Banner 2 package worth 745,000 VND. Transaction successful.',
-      time: language === 'vi' ? '1 ngày trước' : '1 day ago',
-      unread: false,
-      actionRequired: false
-    },
-    {
-      id: 5,
-      type: 'posts',
-      icon: AlertCircle,
-      color: '#f59e0b',
-      title: language === 'vi' ? 'Tin tuyển dụng chờ phê duyệt' : 'Job posts pending approval',
-      message: language === 'vi' ? '12 tin tuyển dụng mới từ 8 nhà tuyển dụng khác nhau đang chờ phê duyệt. Vui lòng kiểm tra và xác nhận.' : '12 new job posts from 8 different employers are pending approval. Please review and confirm.',
-      time: language === 'vi' ? '30 phút trước' : '30 minutes ago',
-      unread: true,
-      actionRequired: true
-    },
-    {
-      id: 6,
-      type: 'payments',
-      icon: DollarSign,
-      color: '#10b981',
-      title: language === 'vi' ? 'Thanh toán mới' : 'New payment',
-      message: language === 'vi' ? 'Highlands Coffee đã mua gói Quick Boost trị giá 245.000 VND cho 3 tin tuyển dụng. Giao dịch đã được xác nhận.' : 'Highlands Coffee purchased Quick Boost package worth 245,000 VND for 3 job posts. Transaction confirmed.',
-      time: language === 'vi' ? '1 giờ trước' : '1 hour ago',
-      unread: true,
-      actionRequired: false
-    },
-    {
-      id: 7,
-      type: 'urgent',
-      icon: AlertCircle,
-      color: '#ef4444',
-      title: language === 'vi' ? 'Yêu cầu duyệt Công việc Tuyển gấp' : 'Urgent job approval request',
-      message: language === 'vi' ? 'Phúc Long Coffee & Tea yêu cầu duyệt gấp 3 tin tuyển nhân viên pha chế ca sáng. Cần xử lý trong 2 giờ.' : 'Phuc Long Coffee & Tea requests urgent approval for 3 morning shift barista positions. Requires processing within 2 hours.',
-      time: language === 'vi' ? '45 phút trước' : '45 minutes ago',
-      unread: true,
-      actionRequired: true
-    },
-    {
-      id: 8,
-      type: 'employers',
-      icon: Briefcase,
-      color: '#8b5cf6',
-      title: language === 'vi' ? 'Yêu cầu phê duyệt nhà tuyển dụng' : 'Employer approval request',
-      message: language === 'vi' ? 'Trung Nguyên Legend Café và 2 nhà tuyển dụng khác đang chờ phê duyệt tài khoản. Vui lòng xác minh thông tin và điều khoản.' : 'Trung Nguyen Legend Cafe and 2 other employers are pending account approval. Please verify information and terms.',
-      time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
-      unread: true,
-      actionRequired: true
-    },
-    {
-      id: 9,
-      type: 'payments',
-      icon: DollarSign,
-      color: '#10b981',
-      title: language === 'vi' ? 'Thanh toán mới' : 'New payment',
-      message: language === 'vi' ? 'Gong Cha đã mua gói Hot Search trị giá 395.000 VND để tăng độ hiển thị cho 5 tin tuyển dụng.' : 'Gong Cha purchased Hot Search package worth 395,000 VND to increase visibility for 5 job posts.',
-      time: language === 'vi' ? '3 giờ trước' : '3 hours ago',
-      unread: false,
-      actionRequired: false
-    },
-    {
-      id: 10,
-      type: 'posts',
-      icon: CheckCircle,
-      color: '#10b981',
-      title: language === 'vi' ? 'Tin tuyển dụng chờ phê duyệt' : 'Job posts pending approval',
-      message: language === 'vi' ? '6 tin tuyển dụng từ Starbucks Coffee đang chờ phê duyệt. Đã kiểm tra sơ bộ, không có vấn đề.' : '6 job posts from Starbucks Coffee are pending approval. Preliminary check shows no issues.',
-      time: language === 'vi' ? '4 giờ trước' : '4 hours ago',
-      unread: false,
-      actionRequired: true
+  // Load notifications from API
+  useEffect(() => {
+    loadNotifications();
+    
+    // Poll every 10 seconds
+    const interval = setInterval(loadNotifications, 10000);
+    
+    return () => clearInterval(interval);
+  }, [user]);
+
+  const loadNotifications = async () => {
+    if (!user) return;
+    
+    try {
+      const userId = 'admin';
+      const role = 'admin';
+      const notifs = await getNotifications(userId, role);
+      
+      console.log('📥 Loaded notifications:', notifs);
+      setNotifications(notifs);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error loading notifications:', error);
+      setLoading(false);
     }
-  ];
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllAsRead('admin', 'admin');
+      await loadNotifications();
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+    }
+  };
+
+  const handleNotificationClick = async (notification) => {
+    try {
+      // Mark as read
+      if (!notification.read) {
+        await markAsRead(notification.notificationId);
+        await loadNotifications();
+      }
+      
+      // Navigate to action URL
+      if (notification.actionUrl) {
+        navigate(notification.actionUrl);
+      }
+    } catch (error) {
+      console.error('Error handling notification click:', error);
+    }
+  };
+
+  // Map notification type to icon
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'package_purchase_request':
+        return Package;
+      case 'package_approved':
+        return CheckCircle;
+      case 'employers':
+        return Briefcase;
+      case 'posts':
+        return AlertCircle;
+      case 'payments':
+        return DollarSign;
+      case 'urgent':
+        return AlertCircle;
+      default:
+        return Bell;
+    }
+  };
+
+  // Format time from ISO string
+  const formatTime = (isoString) => {
+    const date = new Date(isoString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return language === 'vi' ? 'Vừa xong' : 'Just now';
+    if (diffMins < 60) return language === 'vi' ? `${diffMins} phút trước` : `${diffMins} min ago`;
+    if (diffHours < 24) return language === 'vi' ? `${diffHours} giờ trước` : `${diffHours} hours ago`;
+    if (diffDays < 7) return language === 'vi' ? `${diffDays} ngày trước` : `${diffDays} days ago`;
+    
+    return date.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US');
+  };
 
   const handleToggle = (setting) => {
     setNotificationSettings(prev => ({
@@ -481,42 +467,44 @@ const AdminNotifications = () => {
     }));
   };
 
-  const unreadCount = notifications.filter(n => n.unread).length;
-  const actionRequiredCount = notifications.filter(n => n.actionRequired).length;
+  const unreadCount = notifications.filter(n => !n.read).length;
+  const actionRequiredCount = notifications.filter(n => n.type === 'package_purchase_request').length;
 
-  // Helper function to parse time string to hours
-  const parseTimeToHours = (timeStr) => {
-    const match = timeStr.match(/(\d+)/);
-    if (!match) return 999999;
-    
-    const num = parseInt(match[1]);
-    
-    if (timeStr.includes('giờ') || timeStr.includes('hour')) {
-      return num;
-    } else if (timeStr.includes('ngày') || timeStr.includes('day')) {
-      return num * 24;
-    } else if (timeStr.includes('tuần') || timeStr.includes('week')) {
-      return num * 24 * 7;
-    }
-    
-    return 999999;
+  // Helper function to parse time string to milliseconds for sorting
+  const parseTimeToMs = (isoString) => {
+    return new Date(isoString).getTime();
   };
 
   // Filter and sort notifications
   const displayNotifications = notifications
-    .filter(notification => filterType === 'all' || notification.type === filterType)
+    .filter(notification => {
+      // Filter by search term
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        const title = language === 'vi' ? notification.title : notification.titleEn;
+        const message = language === 'vi' ? notification.message : notification.messageEn;
+        if (!title?.toLowerCase().includes(searchLower) && !message?.toLowerCase().includes(searchLower)) {
+          return false;
+        }
+      }
+      
+      // Filter by type
+      if (filterType === 'all') return true;
+      if (filterType === 'payments') return notification.type === 'package_purchase_request' || notification.type === 'package_approved';
+      return notification.type === filterType;
+    })
     .sort((a, b) => {
       switch(sortBy) {
         case 'newest':
-          return parseTimeToHours(a.time) - parseTimeToHours(b.time);
+          return parseTimeToMs(b.createdAt) - parseTimeToMs(a.createdAt);
         case 'oldest':
-          return parseTimeToHours(b.time) - parseTimeToHours(a.time);
+          return parseTimeToMs(a.createdAt) - parseTimeToMs(b.createdAt);
         case 'unread':
           // Unread first, then by newest
-          if (a.unread === b.unread) {
-            return parseTimeToHours(a.time) - parseTimeToHours(b.time);
+          if (a.read === b.read) {
+            return parseTimeToMs(b.createdAt) - parseTimeToMs(a.createdAt);
           }
-          return a.unread ? -1 : 1;
+          return a.read ? 1 : -1;
         default:
           return 0;
       }
@@ -531,13 +519,9 @@ const AdminNotifications = () => {
             <Subtitle>{language === 'vi' ? 'Theo dõi và quản lý tất cả thông báo' : 'Track and manage all notifications'}</Subtitle>
           </HeaderLeft>
           <HeaderActions>
-            <Button $variant="outline">
+            <Button $variant="outline" onClick={handleMarkAllAsRead}>
               <Eye size={18} />
               {language === 'vi' ? 'Đánh dấu đã đọc tất cả' : 'Mark all as read'}
-            </Button>
-            <Button $variant="primary">
-              <Send size={18} />
-              {language === 'vi' ? 'Gửi thông báo mới' : 'Send new notification'}
             </Button>
           </HeaderActions>
         </PageHeader>
@@ -566,12 +550,18 @@ const AdminNotifications = () => {
             <FilterBar>
               <SearchBox>
                 <SearchIcon size={18} />
-                <SearchInput placeholder={language === 'vi' ? 'Tìm kiếm thông báo...' : 'Search notifications...'} />
+                <SearchInput 
+                  placeholder={language === 'vi' ? 'Tìm kiếm thông báo...' : 'Search notifications...'} 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </SearchBox>
               <Select value={filterType} onChange={(e) => setFilterType(e.target.value)}>
                 <option value="all">{language === 'vi' ? 'Tất cả' : 'All'}</option>
+                <option value="package_purchase_request">{language === 'vi' ? 'Yêu cầu mua gói' : 'Purchase requests'}</option>
+                <option value="package_approved">{language === 'vi' ? 'Gói đã duyệt' : 'Approved packages'}</option>
                 <option value="posts">{language === 'vi' ? 'Tin chưa duyệt' : 'Pending posts'}</option>
-                <option value="payments">{language === 'vi' ? 'Mua bài' : 'Purchases'}</option>
+                <option value="payments">{language === 'vi' ? 'Thanh toán' : 'Payments'}</option>
                 <option value="urgent">{language === 'vi' ? 'Công việc Tuyển gấp' : 'Urgent jobs'}</option>
                 <option value="employers">{language === 'vi' ? 'Duyệt NTD' : 'Employer approval'}</option>
               </Select>
@@ -582,44 +572,73 @@ const AdminNotifications = () => {
               </Select>
             </FilterBar>
 
-            <NotificationList>
-              {displayNotifications.map(notification => (
-                <NotificationItem key={notification.id} $unread={notification.unread}>
-                  <NotificationHeader>
-                    <NotificationIcon $color={notification.color}>
-                      <notification.icon size={24} />
-                    </NotificationIcon>
-                    <NotificationContent>
-                      <NotificationTitle>
-                        {notification.unread && <UnreadBadge />}
-                        {notification.title}
-                      </NotificationTitle>
-                      <NotificationMessage>{notification.message}</NotificationMessage>
-                      <NotificationMeta>
-                        <span>{notification.time}</span>
-                        {notification.actionRequired && (
-                          <span style={{ color: '#f59e0b', fontWeight: 500 }}>
-                            • {language === 'vi' ? 'Cần xử lý' : 'Action required'}
-                          </span>
-                        )}
-                      </NotificationMeta>
-                    </NotificationContent>
-                  </NotificationHeader>
-                  {notification.actionRequired && (
-                    <NotificationActions>
-                      <ActionButton $variant="primary">
-                        <CheckCircle size={16} />
-                        {language === 'vi' ? 'Xử lý ngay' : 'Handle now'}
-                      </ActionButton>
-                      <ActionButton>
-                        <Eye size={16} />
-                        {language === 'vi' ? 'Xem chi tiết' : 'View details'}
-                      </ActionButton>
-                    </NotificationActions>
-                  )}
-                </NotificationItem>
-              ))}
-            </NotificationList>
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '3rem', color: '#64748B' }}>
+                <div style={{ fontSize: '16px', fontWeight: '600' }}>
+                  {language === 'vi' ? 'Đang tải thông báo...' : 'Loading notifications...'}
+                </div>
+              </div>
+            ) : displayNotifications.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '3rem', color: '#64748B' }}>
+                <Bell size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
+                <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '0.5rem' }}>
+                  {language === 'vi' ? 'Không có thông báo' : 'No notifications'}
+                </div>
+                <div style={{ fontSize: '14px' }}>
+                  {language === 'vi' ? 'Bạn sẽ nhận được thông báo khi có hoạt động mới' : 'You will receive notifications when there are new activities'}
+                </div>
+              </div>
+            ) : (
+              <NotificationList>
+                {displayNotifications.map(notification => {
+                  const NotifIcon = getNotificationIcon(notification.type);
+                  const title = language === 'vi' ? notification.title : notification.titleEn;
+                  const message = language === 'vi' ? notification.message : notification.messageEn;
+                  const actionText = language === 'vi' ? notification.actionText : notification.actionTextEn;
+                  const isActionRequired = notification.type === 'package_purchase_request';
+                  
+                  return (
+                    <NotificationItem 
+                      key={notification.notificationId} 
+                      $unread={!notification.read}
+                      onClick={() => handleNotificationClick(notification)}
+                    >
+                      <NotificationHeader>
+                        <NotificationIcon $color={notification.color}>
+                          <NotifIcon size={24} />
+                        </NotificationIcon>
+                        <NotificationContent>
+                          <NotificationTitle>
+                            {!notification.read && <UnreadBadge />}
+                            {title}
+                          </NotificationTitle>
+                          <NotificationMessage>{message}</NotificationMessage>
+                          <NotificationMeta>
+                            <span>{formatTime(notification.createdAt)}</span>
+                            {isActionRequired && (
+                              <span style={{ color: '#f59e0b', fontWeight: 500 }}>
+                                • {language === 'vi' ? 'Cần xử lý' : 'Action required'}
+                              </span>
+                            )}
+                          </NotificationMeta>
+                        </NotificationContent>
+                      </NotificationHeader>
+                      {isActionRequired && (
+                        <NotificationActions>
+                          <ActionButton $variant="primary" onClick={(e) => {
+                            e.stopPropagation();
+                            handleNotificationClick(notification);
+                          }}>
+                            <CheckCircle size={16} />
+                            {actionText || (language === 'vi' ? 'Xử lý ngay' : 'Handle now')}
+                          </ActionButton>
+                        </NotificationActions>
+                      )}
+                    </NotificationItem>
+                  );
+                })}
+              </NotificationList>
+            )}
           </MainContent>
 
           <Sidebar>

@@ -6,6 +6,7 @@ import StatsCard from '../../components/StatsCard';
 import JobCard from '../../components/JobCard';
 import StatusBadge from '../../components/StatusBadge';
 import ProfileSetupPrompt from '../../components/ProfileSetupPrompt';
+
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import candidateProfileService from '../../services/candidateProfileService';
