@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
+import RelativeTime from '../../components/RelativeTime';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { getNotifications, markAsRead, markAllAsRead, deleteNotification } from '../../services/notificationService';
@@ -401,6 +402,31 @@ const EmptyState = styled(motion.div)`
   }
 `;
 
+const LoadingState = styled(motion.div)`
+  text-align: center;
+  padding: 80px 20px;
+  
+  .spinner {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 20px;
+    border: 4px solid #E5E7EB;
+    border-top-color: #1e40af;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  p {
+    font-size: 15px;
+    color: ${props => props.theme.colors.textLight};
+    font-weight: 500;
+  }
+`;
+
 const ModalOverlay = styled(motion.div)`
   position: fixed;
   inset: 0;
@@ -554,21 +580,49 @@ const EmployerNotifications = () => {
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Load notifications from API
-  useEffect(() => {
-    loadNotifications();
-    
-    // Poll every 10 seconds
-    const interval = setInterval(loadNotifications, 10000);
-    
-    return () => clearInterval(interval);
-  }, [user]);
+  // Helper function to get icon for notification type
+  const getIconForType = (type) => {
+    switch (type) {
+      case 'application': return UserPlus;
+      case 'package_approved': return CheckCircle;
+      case 'package_purchase_request': return Package;
+      case 'system': return AlertCircle;
+      case 'rating': return Star;
+      default: return Bell;
+    }
+  };
 
-  const loadNotifications = async () => {
-    if (!user) return;
+  const loadNotifications = useCallback(async () => {
+    if (!user) {
+      console.log('⚠️ [EmployerNotifications] No user, skipping notification load');
+      setLoading(false);
+      return;
+    }
     
     try {
-      const userId = user.userId || user.id || user.email;
+      // CRITICAL FIX: Ensure we use UUID from Cognito, not email
+      let userId = user.userId || user.id;
+      
+      // If userId looks like an email, fetch the real UUID from Cognito
+      if (userId && userId.includes('@')) {
+        console.warn('⚠️ [EmployerNotifications] userId is email, fetching UUID from Cognito...');
+        try {
+          const { fetchAuthSession } = await import('aws-amplify/auth');
+          const session = await fetchAuthSession();
+          if (session && session.tokens) {
+            const uuidFromToken = session.tokens.idToken.payload.sub;
+            console.log('✅ [EmployerNotifications] Got UUID from Cognito:', uuidFromToken);
+            userId = uuidFromToken;
+            
+            // Update user object in AuthContext and localStorage
+            const updatedUser = { ...user, userId: uuidFromToken };
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+          }
+        } catch (cognitoError) {
+          console.error('❌ [EmployerNotifications] Failed to get UUID from Cognito:', cognitoError);
+        }
+      }
+      
       const role = user.role;
       console.log('🔔 [EmployerNotifications] Loading notifications for:', { userId, role });
       
@@ -582,7 +636,7 @@ const EmployerNotifications = () => {
         title: language === 'vi' ? notif.title : (notif.titleEn || notif.title),
         message: language === 'vi' ? notif.message : (notif.messageEn || notif.message),
         jobTitle: notif.data?.jobTitle || notif.data?.packageName,
-        time: formatTime(notif.createdAt),
+        createdAt: notif.createdAt, // Keep original timestamp for RelativeTime component
         read: notif.read,
         isQuickJob: notif.data?.isQuickJob || false,
         icon: getIconForType(notif.type),
@@ -597,38 +651,50 @@ const EmployerNotifications = () => {
       console.error('❌ [EmployerNotifications] Error loading notifications:', error);
       setLoading(false);
     }
-  };
+  }, [user, language]); // Dependencies: user and language
 
-  // Helper function to format time
-  const formatTime = (createdAt) => {
-    if (!createdAt) return '';
+  // Load notifications from API
+  useEffect(() => {
+    console.log('🔄 [EmployerNotifications] useEffect triggered, user:', user?.email || 'no user');
     
-    const now = new Date();
-    const created = new Date(createdAt);
-    const diffMs = now - created;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
+    // Load immediately when component mounts or user changes
+    loadNotifications();
     
-    if (diffMins < 1) return language === 'vi' ? 'Vừa xong' : 'Just now';
-    if (diffMins < 60) return language === 'vi' ? `${diffMins} phút trước` : `${diffMins} minutes ago`;
-    if (diffHours < 24) return language === 'vi' ? `${diffHours} giờ trước` : `${diffHours} hours ago`;
-    if (diffDays < 7) return language === 'vi' ? `${diffDays} ngày trước` : `${diffDays} days ago`;
+    // Poll every 5 seconds for updates (balanced between responsiveness and server load)
+    const interval = setInterval(loadNotifications, 5000);
     
-    return created.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US');
-  };
-
-  // Helper function to get icon for notification type
-  const getIconForType = (type) => {
-    switch (type) {
-      case 'application': return UserPlus;
-      case 'package_approved': return CheckCircle;
-      case 'package_purchase_request': return Package;
-      case 'system': return AlertCircle;
-      case 'rating': return Star;
-      default: return Bell;
-    }
-  };
+    // Listen for storage events (triggered when new notification is created)
+    const handleStorageChange = () => {
+      console.log('🔄 Storage event detected - reloading notifications...');
+      loadNotifications();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Listen for focus events (reload when user returns to tab)
+    const handleFocus = () => {
+      console.log('👁️ Tab focused - reloading notifications...');
+      loadNotifications();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    
+    // Listen for user login events
+    const handleUserLogin = () => {
+      console.log('🔐 User logged in - reloading notifications...');
+      // Wait a bit for user state to be fully updated
+      setTimeout(loadNotifications, 500);
+    };
+    
+    window.addEventListener('userLoggedIn', handleUserLogin);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('userLoggedIn', handleUserLogin);
+    };
+  }, [loadNotifications]); // Dependency: loadNotifications (which depends on user and language)
 
   const tabs = [
     { id: 'all', label: language === 'vi' ? 'Tất cả' : 'All', count: notifications.length },
@@ -727,7 +793,16 @@ const EmployerNotifications = () => {
           </ActionButtons>
         </HeaderActions>
 
-        {filteredNotifications.length > 0 ? (
+        {loading ? (
+          <LoadingState
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="spinner"></div>
+            <p>{language === 'vi' ? 'Đang tải thông báo...' : 'Loading notifications...'}</p>
+          </LoadingState>
+        ) : filteredNotifications.length > 0 ? (
           <NotificationsGrid>
             {filteredNotifications.map((notification, index) => (
               <NotificationCard
@@ -753,7 +828,7 @@ const EmployerNotifications = () => {
                   <NotificationMeta>
                     <div className="meta-item">
                       <Clock />
-                      {notification.time}
+                      <RelativeTime timestamp={notification.createdAt} language={language} />
                     </div>
                     {notification.type === 'application' && (
                       <span style={{
@@ -830,7 +905,7 @@ const EmployerNotifications = () => {
               </ModalIconWrap>
               <ModalTitleGroup>
                 <h2>{selectedNotification.title}</h2>
-                <p>{selectedNotification.time}</p>
+                <p><RelativeTime timestamp={selectedNotification.createdAt} language={language} /></p>
               </ModalTitleGroup>
               <ModalCloseBtn onClick={() => setSelectedNotification(null)}>
                 <X />

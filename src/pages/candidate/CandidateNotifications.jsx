@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
+import RelativeTime from '../../components/RelativeTime';
 import { useLanguage } from '../../context/LanguageContext';
 import {
   Bell,
@@ -401,86 +402,90 @@ function CandidateNotifications() {
   const { language } = useLanguage();
   const [filter, setFilter] = useState('all');
 
-  const getNotificationsData = () => [
-    {
-      id: 1,
-      type: 'application',
-      icon: Eye,
-      color: '#1e40af',
-      // Quick job (system-internal) notification — do not show "Quick Job" label or mention interviews
-      isQuickJob: true,
-      title: language === 'vi' ? 'Nhà tuyển dụng đã xem hồ sơ' : 'Employer viewed your application',
-      message: language === 'vi'
-        ? 'Highlands Coffee đã xem hồ sơ ứng tuyển của bạn.'
-        : 'Highlands Coffee viewed your application.',
-      time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
-      unread: true
-    },
-    {
-      id: 2,
-      type: 'success',
-      icon: CheckCircle,
-      color: '#10B981',
-      // Quick job (system-internal) notification (accepted)
-      isQuickJob: true,
-      title: language === 'vi' ? 'Hồ sơ được chấp nhận' : 'Application accepted',
-      message: language === 'vi'
-        ? 'Hồ sơ của bạn tại Katinat Q8 đã được chấp nhận. Nhà tuyển dụng sẽ liên hệ.'
-        : 'Your application at Katinat Q8 has been accepted. Employer will contact you.',
-      time: language === 'vi' ? '1 ngày trước' : '1 day ago',
-      unread: false
-    },
-    {
-      id: 3,
-      type: 'application',
-      icon: Briefcase,
-      color: '#1e40af',
-      isQuickJob: false,
-      title: language === 'vi' ? 'Công việc phù hợp với bạn' : 'Jobs matching your profile',
-      message: language === 'vi'
-        ? 'Có 5 công việc phù hợp với kỹ năng của bạn tại Quận 1 và Quận 3.'
-        : '5 new jobs match your skills in District 1 and District 3.',
-      time: language === 'vi' ? '3 giờ trước' : '3 hours ago',
-      unread: true
-    },
-    {
-      id: 4,
-      type: 'success',
-      icon: CheckCircle,
-      color: '#10B981',
-      isQuickJob: false,
-      title: language === 'vi' ? 'Hồ sơ ứng tuyển được duyệt' : 'Application approved',
-      message: language === 'vi'
-        ? 'The Coffee House đã duyệt hồ sơ ứng tuyển ca tối của bạn. Liên hệ nhà tuyển dụng để xác nhận.'
-        : 'The Coffee House approved your application. Contact the employer to confirm.',
-      time: language === 'vi' ? '3 ngày trước' : '3 days ago',
-      unread: false
-    },
-    {
-      id: 5,
-      type: 'success',
-      icon: Award,
-      color: '#10B981',
-      title: language === 'vi' ? 'Chúc mừng! Hồ sơ hoàn thiện 100%' : 'Congratulations! Profile 100% complete',
-      message: language === 'vi'
-        ? 'Bạn đã hoàn thiện hồ sơ với đầy đủ thông tin, kỹ năng và kinh nghiệm. Cơ hội được tuyển dụng tăng 70%!'
-        : 'You completed your profile with full information, skills and experience. Your hiring chances increased by 70%!',
-      time: language === 'vi' ? '3 ngày trước' : '3 days ago',
-      unread: false
-    },
-    {
-      id: 6,
-      type: 'application',
-      icon: TrendingUp,
-      color: '#F59E0B',
-      title: language === 'vi' ? 'Hồ sơ của bạn đang được quan tâm!' : 'Your profile is getting attention!',
-      message: language === 'vi'
-        ? 'Có 8 nhà tuyển dụng đã xem hồ sơ của bạn trong tuần này. Hãy cập nhật thêm kỹ năng và kinh nghiệm để tăng cơ hội được tuyển!'
-        : '8 employers viewed your profile this week. Update your skills and experience to increase your hiring chances!',
-      time: language === 'vi' ? '5 giờ trước' : '5 hours ago',
-      unread: true
-    }
-  ];
+  // Generate realistic timestamps for demo data
+  const getNotificationsData = () => {
+    const now = Date.now();
+    return [
+      {
+        id: 1,
+        type: 'application',
+        icon: Eye,
+        color: '#1e40af',
+        // Quick job (system-internal) notification — do not show "Quick Job" label or mention interviews
+        isQuickJob: true,
+        title: language === 'vi' ? 'Nhà tuyển dụng đã xem hồ sơ' : 'Employer viewed your application',
+        message: language === 'vi'
+          ? 'Highlands Coffee đã xem hồ sơ ứng tuyển của bạn.'
+          : 'Highlands Coffee viewed your application.',
+        createdAt: new Date(now - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+        unread: true
+      },
+      {
+        id: 2,
+        type: 'success',
+        icon: CheckCircle,
+        color: '#10B981',
+        // Quick job (system-internal) notification (accepted)
+        isQuickJob: true,
+        title: language === 'vi' ? 'Hồ sơ được chấp nhận' : 'Application accepted',
+        message: language === 'vi'
+          ? 'Hồ sơ của bạn tại Katinat Q8 đã được chấp nhận. Nhà tuyển dụng sẽ liên hệ.'
+          : 'Your application at Katinat Q8 has been accepted. Employer will contact you.',
+        createdAt: new Date(now - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+        unread: false
+      },
+      {
+        id: 3,
+        type: 'application',
+        icon: Briefcase,
+        color: '#1e40af',
+        isQuickJob: false,
+        title: language === 'vi' ? 'Công việc phù hợp với bạn' : 'Jobs matching your profile',
+        message: language === 'vi'
+          ? 'Có 5 công việc phù hợp với kỹ năng của bạn tại Quận 1 và Quận 3.'
+          : '5 new jobs match your skills in District 1 and District 3.',
+        createdAt: new Date(now - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago
+        unread: true
+      },
+      {
+        id: 4,
+        type: 'success',
+        icon: CheckCircle,
+        color: '#10B981',
+        isQuickJob: false,
+        title: language === 'vi' ? 'Hồ sơ ứng tuyển được duyệt' : 'Application approved',
+        message: language === 'vi'
+          ? 'The Coffee House đã duyệt hồ sơ ứng tuyển ca tối của bạn. Liên hệ nhà tuyển dụng để xác nhận.'
+          : 'The Coffee House approved your application. Contact the employer to confirm.',
+        createdAt: new Date(now - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+        unread: false
+      },
+      {
+        id: 5,
+        type: 'success',
+        icon: Award,
+        color: '#10B981',
+        title: language === 'vi' ? 'Chúc mừng! Hồ sơ hoàn thiện 100%' : 'Congratulations! Profile 100% complete',
+        message: language === 'vi'
+          ? 'Bạn đã hoàn thiện hồ sơ với đầy đủ thông tin, kỹ năng và kinh nghiệm. Cơ hội được tuyển dụng tăng 70%!'
+          : 'You completed your profile with full information, skills and experience. Your hiring chances increased by 70%!',
+        createdAt: new Date(now - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+        unread: false
+      },
+      {
+        id: 6,
+        type: 'application',
+        icon: TrendingUp,
+        color: '#F59E0B',
+        title: language === 'vi' ? 'Hồ sơ của bạn đang được quan tâm!' : 'Your profile is getting attention!',
+        message: language === 'vi'
+          ? 'Có 8 nhà tuyển dụng đã xem hồ sơ của bạn trong tuần này. Hãy cập nhật thêm kỹ năng và kinh nghiệm để tăng cơ hội được tuyển!'
+          : '8 employers viewed your profile this week. Update your skills and experience to increase your hiring chances!',
+        createdAt: new Date(now - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
+        unread: true
+      }
+    ];
+  };
 
   const [notifications, setNotifications] = useState(getNotificationsData());
 
@@ -588,7 +593,7 @@ function CandidateNotifications() {
                   <div className="notification-footer">
                     <time>
                       <Clock />
-                      {notif.time}
+                      <RelativeTime timestamp={notif.createdAt} language={language} />
                     </time>
                   </div>
                 </NotificationContent>
@@ -640,7 +645,11 @@ function CandidateNotifications() {
                     <span className="stat-label">{language === 'vi' ? 'Thông báo hôm nay' : 'Today\'s notifications'}</span>
                     <Bell />
                   </div>
-                  <div className="stat-value">{quickJobNotifications.filter(n => n.time.includes(language === 'vi' ? 'giờ trước' : 'hours ago')).length}</div>
+                  <div className="stat-value">{quickJobNotifications.filter(n => {
+                    const notifTime = new Date(n.createdAt).getTime();
+                    const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+                    return notifTime > dayAgo;
+                  }).length}</div>
                 </StatItem>
 
                 <StatItem $color="#10B981">
@@ -670,10 +679,10 @@ function CandidateNotifications() {
                 <h2><Clock />{language === 'vi' ? 'Hoạt động gần đây' : 'Recent Activity'}</h2>
               </div>
 
-              {notifications.slice(0, 4).map((notif, index) => (
+              {notifications.slice(0, 4).map((notif) => (
                 <ActivityItem key={notif.id}>
                   <h4>{notif.title}</h4>
-                  <p>{notif.time}</p>
+                  <p><RelativeTime timestamp={notif.createdAt} language={language} /></p>
                 </ActivityItem>
               ))}
             </Card>

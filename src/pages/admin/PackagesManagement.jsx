@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
+import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import TableFilter from '../../components/TableFilter';
 import { useLanguage } from '../../context/LanguageContext';
@@ -18,7 +19,9 @@ import {
   BarChart3,
   PieChart as PieChartIcon,
   Users,
-  Activity
+  Activity,
+  X,
+  Send
 } from 'lucide-react';
 
 const PageContainer = styled.div``;
@@ -450,12 +453,189 @@ const ApproveButton = styled.button`
   }
 `;
 
+// Success Modal Styles
+const ModalOverlay = styled(motion.div)`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+`;
+
+const ModalBox = styled(motion.div)`
+  background: #fff;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 24px 60px rgba(16, 185, 129, 0.25);
+  overflow: hidden;
+`;
+
+const ModalHeader = styled.div`
+  padding: 32px 32px 24px;
+  background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+  text-align: center;
+  position: relative;
+`;
+
+const ModalCloseBtn = styled.button`
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.06);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748B;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.12);
+    color: #1E293B;
+  }
+  
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+`;
+
+const SuccessIconWrapper = styled(motion.div)`
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+  
+  svg {
+    width: 44px;
+    height: 44px;
+    color: white;
+  }
+`;
+
+const ModalTitle = styled.h2`
+  font-size: 24px;
+  font-weight: 800;
+  color: #1E293B;
+  margin-bottom: 8px;
+  line-height: 1.3;
+`;
+
+const ModalSubtitle = styled.p`
+  font-size: 15px;
+  color: #64748B;
+  font-weight: 500;
+`;
+
+const ModalBody = styled.div`
+  padding: 28px 32px;
+`;
+
+const InfoRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: #F8FAFC;
+  border-radius: 14px;
+  border: 1.5px solid #E2E8F0;
+  margin-bottom: 12px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+const InfoIcon = styled.div`
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 10px;
+  background: #ECFDF5;
+  border: 1.5px solid #A7F3D0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #10b981;
+  
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+`;
+
+const InfoContent = styled.div`
+  flex: 1;
+  min-width: 0;
+  
+  .label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  
+  .value {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1E293B;
+  }
+`;
+
+const ModalFooter = styled.div`
+  padding: 20px 32px 32px;
+  display: flex;
+  justify-content: center;
+`;
+
+const ModalButton = styled(motion.button)`
+  padding: 14px 32px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+  
+  &:hover {
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+  }
+  
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+`;
+
 const PackagesManagement = () => {
   const { language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState('pending'); // 'pending' or 'approved'
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [approvedPackageInfo, setApprovedPackageInfo] = useState(null);
   const itemsPerPage = 20;
 
   // Dữ liệu gói dịch vụ đã mua - Load từ API
@@ -659,7 +839,15 @@ const PackagesManagement = () => {
       await createPackageApprovedNotification(notificationData, employerId);
       
       console.log('✅ Notification sent to employer successfully!');
-      alert('✅ Đã duyệt gói và gửi thông báo cho Employer thành công!');
+      
+      // Show success modal instead of alert
+      setApprovedPackageInfo({
+        employer: purchase.employer,
+        package: purchase.package,
+        duration: purchase.duration,
+        expiryDate: updatedSubscription.expiryDate || updatedSubscription.data?.expiryDate
+      });
+      setShowSuccessModal(true);
       
       // Step 4: Update local state
       setPurchases(prev => prev.map(p => 
@@ -1016,6 +1204,108 @@ const PackagesManagement = () => {
         </>
         )}
       </PageContainer>
+
+      {/* Success Modal */}
+      <AnimatePresence>
+        {showSuccessModal && approvedPackageInfo && (
+          <ModalOverlay
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowSuccessModal(false)}
+          >
+            <ModalBox
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ModalHeader>
+                <ModalCloseBtn onClick={() => setShowSuccessModal(false)}>
+                  <X />
+                </ModalCloseBtn>
+                <SuccessIconWrapper
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                >
+                  <CheckCircle />
+                </SuccessIconWrapper>
+                <ModalTitle>
+                  {language === 'vi' ? 'Duyệt Gói Thành Công!' : 'Package Approved Successfully!'}
+                </ModalTitle>
+                <ModalSubtitle>
+                  {language === 'vi' 
+                    ? 'Đã gửi thông báo cho nhà tuyển dụng' 
+                    : 'Notification sent to employer'}
+                </ModalSubtitle>
+              </ModalHeader>
+
+              <ModalBody>
+                <InfoRow>
+                  <InfoIcon>
+                    <Users />
+                  </InfoIcon>
+                  <InfoContent>
+                    <div className="label">
+                      {language === 'vi' ? 'Nhà tuyển dụng' : 'Employer'}
+                    </div>
+                    <div className="value">{approvedPackageInfo.employer}</div>
+                  </InfoContent>
+                </InfoRow>
+
+                <InfoRow>
+                  <InfoIcon>
+                    <Package />
+                  </InfoIcon>
+                  <InfoContent>
+                    <div className="label">
+                      {language === 'vi' ? 'Gói dịch vụ' : 'Package'}
+                    </div>
+                    <div className="value">{approvedPackageInfo.package}</div>
+                  </InfoContent>
+                </InfoRow>
+
+                <InfoRow>
+                  <InfoIcon>
+                    <Clock />
+                  </InfoIcon>
+                  <InfoContent>
+                    <div className="label">
+                      {language === 'vi' ? 'Thời hạn' : 'Duration'}
+                    </div>
+                    <div className="value">{approvedPackageInfo.duration}</div>
+                  </InfoContent>
+                </InfoRow>
+
+                <InfoRow>
+                  <InfoIcon>
+                    <Calendar />
+                  </InfoIcon>
+                  <InfoContent>
+                    <div className="label">
+                      {language === 'vi' ? 'Hết hạn' : 'Expiry Date'}
+                    </div>
+                    <div className="value">{approvedPackageInfo.expiryDate}</div>
+                  </InfoContent>
+                </InfoRow>
+              </ModalBody>
+
+              <ModalFooter>
+                <ModalButton
+                  onClick={() => setShowSuccessModal(false)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Send />
+                  {language === 'vi' ? 'Hoàn tất' : 'Done'}
+                </ModalButton>
+              </ModalFooter>
+            </ModalBox>
+          </ModalOverlay>
+        )}
+      </AnimatePresence>
     </DashboardLayout>
   );
 };

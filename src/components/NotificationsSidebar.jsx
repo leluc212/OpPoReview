@@ -5,6 +5,7 @@ import { Bell, Package, CheckCircle, AlertCircle, DollarSign, Users, Briefcase }
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { getNotifications, markAsRead } from '../services/notificationService';
+import RelativeTime from './RelativeTime';
 
 const SidebarContainer = styled.div`
   background: ${props => props.theme.colors.bgLight};
@@ -222,10 +223,21 @@ const NotificationsSidebar = () => {
   useEffect(() => {
     loadNotifications();
     
-    // Poll every 10 seconds
-    const interval = setInterval(loadNotifications, 10000);
+    // Poll every 3 seconds for faster updates
+    const interval = setInterval(loadNotifications, 3000);
     
-    return () => clearInterval(interval);
+    // Listen for storage events (triggered when new notification is created)
+    const handleStorageChange = () => {
+      console.log('🔄 [NotificationsSidebar] Storage event detected - reloading...');
+      loadNotifications();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, [user]);
 
   const loadNotifications = async () => {
@@ -283,22 +295,6 @@ const NotificationsSidebar = () => {
       default:
         return Bell;
     }
-  };
-
-  const formatTime = (isoString) => {
-    const date = new Date(isoString);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return language === 'vi' ? 'Vừa xong' : 'Just now';
-    if (diffMins < 60) return language === 'vi' ? `${diffMins} phút trước` : `${diffMins} min ago`;
-    if (diffHours < 24) return language === 'vi' ? `${diffHours} giờ trước` : `${diffHours} hours ago`;
-    if (diffDays < 7) return language === 'vi' ? `${diffDays} ngày trước` : `${diffDays} days ago`;
-    
-    return date.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US');
   };
 
   const filteredNotifications = activeTab === 'all' 
@@ -374,7 +370,9 @@ const NotificationsSidebar = () => {
                       {title}
                     </NotificationTitle>
                     <NotificationMessage>{message}</NotificationMessage>
-                    <NotificationTime>{formatTime(notification.createdAt)}</NotificationTime>
+                    <NotificationTime>
+                      <RelativeTime timestamp={notification.createdAt} language={language} />
+                    </NotificationTime>
                   </NotificationContent>
                 </NotificationHeader>
               </NotificationItem>

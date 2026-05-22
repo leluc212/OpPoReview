@@ -1,9 +1,12 @@
 import json
 import boto3
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 import uuid
+
+# Force UTC timezone
+os.environ['TZ'] = 'UTC'
 
 dynamodb = boto3.resource('dynamodb')
 table_name = os.environ.get('TABLE_NAME', 'Notifications')
@@ -179,7 +182,16 @@ def lambda_handler(event, context):
                         }, ensure_ascii=False)
                     }
                 
-                notification_id = f"NOTIF-{datetime.now().strftime('%Y%m%d')}-{str(uuid.uuid4())[:8]}"
+                notification_id = f"NOTIF-{datetime.now(timezone.utc).strftime('%Y%m%d')}-{str(uuid.uuid4())[:8]}"
+                
+                # Get current time in UTC with explicit timezone
+                current_time_utc = datetime.now(timezone.utc)
+                current_time_iso = current_time_utc.isoformat()
+                
+                print(f"⏰ TIMESTAMP DEBUG:")
+                print(f"   Server time (UTC): {current_time_utc}")
+                print(f"   Server time (ISO): {current_time_iso}")
+                print(f"   Timezone: {current_time_utc.tzinfo}")
                 
                 notification = {
                     'notificationId': notification_id,
@@ -195,8 +207,8 @@ def lambda_handler(event, context):
                     'data': body.get('data', {}),
                     'read': False,
                     'deleted': False,
-                    'createdAt': datetime.now().isoformat(),
-                    'updatedAt': datetime.now().isoformat(),
+                    'createdAt': current_time_iso,
+                    'updatedAt': current_time_iso,
                     'icon': body.get('icon', 'bell'),
                     'color': body.get('color', '#3b82f6'),
                     'actionUrl': body.get('actionUrl', ''),

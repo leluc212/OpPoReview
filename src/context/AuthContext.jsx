@@ -21,6 +21,9 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
     setIsAuthenticated(true);
     localStorage.setItem('user', JSON.stringify(userData));
+    
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: userData }));
   };
 
   const logout = () => {
@@ -133,9 +136,20 @@ export const AuthProvider = ({ children }) => {
 
     checkAuth();
     
+    // Listen for storage events (when user data is updated in another tab or by login)
+    const handleStorageChange = (e) => {
+      if (e.key === 'user' && e.newValue) {
+        console.log('🔄 [AuthContext] User data changed in storage, re-checking auth...');
+        checkAuth();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
     // Cleanup function
     return () => {
       isMounted = false;
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
 
