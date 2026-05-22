@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import TableFilter from '../../components/TableFilter';
 import { useLanguage } from '../../context/LanguageContext';
+import { createPackageApprovedNotification } from '../../services/notificationService';
 import { 
   Package, 
   Zap, 
@@ -585,9 +586,40 @@ const PackagesManagement = () => {
 
   const handleApprove = async (purchaseId) => {
     try {
-      console.log('Approving purchase:', purchaseId);
+      console.log('🔄 Approving purchase:', purchaseId);
       
       const API_ENDPOINT = import.meta.env.VITE_PACKAGE_SUBSCRIPTIONS_API;
+      
+      // Step 1: Get full subscription details FIRST to extract employerId
+      console.log('📥 Fetching subscription details...');
+      const subscriptionResponse = await fetch(`${API_ENDPOINT}/subscriptions/${purchaseId}`);
+      
+      if (!subscriptionResponse.ok) {
+        throw new Error('Failed to fetch subscription details');
+      }
+      
+      const subscriptionData = await subscriptionResponse.json();
+      console.log('📦 Full subscription data:', JSON.stringify(subscriptionData, null, 2));
+      
+      // Extract employerId from response (handle both direct and nested data)
+      let employerId = subscriptionData.employerId 
+        || subscriptionData.data?.employerId
+        || subscriptionData.userId
+        || subscriptionData.data?.userId;
+      
+      console.log('📧 Extracted employerId:', employerId);
+      
+      if (!employerId) {
+        console.error('❌ No employerId found in subscription data');
+        console.error('Available keys:', Object.keys(subscriptionData));
+        if (subscriptionData.data) {
+          console.error('Available data keys:', Object.keys(subscriptionData.data));
+        }
+        throw new Error('Cannot find employerId in subscription data. Please check API response structure.');
+      }
+      
+      // Step 2: Approve the subscription
+      console.log('✅ Approving subscription...');
       const response = await fetch(`${API_ENDPOINT}/subscriptions/${purchaseId}`, {
         method: 'PUT',
         headers: {
@@ -604,24 +636,49 @@ const PackagesManagement = () => {
       }
       
       const updatedSubscription = await response.json();
-      console.log('Subscription approved:', updatedSubscription);
+      console.log('✅ Subscription approved:', updatedSubscription);
       
-      // Update local state
-      setPurchases(prev => prev.map(purchase => 
-        purchase.id === purchaseId 
+      // Step 3: Create notification for employer
+      console.log('🔔 Creating notification for employer...');
+      const purchase = purchases.find(p => p.id === purchaseId);
+      
+      if (!purchase) {
+        throw new Error('Purchase not found in local state');
+      }
+      
+      const notificationData = {
+        subscriptionId: purchaseId,
+        packageName: purchase.package,
+        duration: purchase.duration,
+        expiryDate: updatedSubscription.expiryDate || updatedSubscription.data?.expiryDate
+      };
+      
+      console.log('📤 Sending notification with data:', notificationData);
+      console.log('📤 To employerId:', employerId);
+      
+      await createPackageApprovedNotification(notificationData, employerId);
+      
+      console.log('✅ Notification sent to employer successfully!');
+      alert('✅ Đã duyệt gói và gửi thông báo cho Employer thành công!');
+      
+      // Step 4: Update local state
+      setPurchases(prev => prev.map(p => 
+        p.id === purchaseId 
           ? {
-              ...purchase,
-              status: updatedSubscription.status,
-              approvalStatus: updatedSubscription.approvalStatus,
-              purchaseDate: updatedSubscription.purchaseDate,
-              expiryDate: updatedSubscription.expiryDate
+              ...p,
+              status: updatedSubscription.status || updatedSubscription.data?.status || 'active',
+              approvalStatus: updatedSubscription.approvalStatus || updatedSubscription.data?.approvalStatus || 'approved',
+              purchaseDate: updatedSubscription.purchaseDate || updatedSubscription.data?.purchaseDate || p.purchaseDate,
+              expiryDate: updatedSubscription.expiryDate || updatedSubscription.data?.expiryDate || p.expiryDate
             }
-          : purchase
+          : p
       ));
       
     } catch (error) {
-      console.error('Error approving subscription:', error);
-      alert('Có lỗi xảy ra khi duyệt gói. Vui lòng thử lại.');
+      console.error('❌ Error approving subscription:', error);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      alert('Có lỗi xảy ra: ' + error.message);
     }
   };
 

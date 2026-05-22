@@ -7,6 +7,7 @@ import { useLanguage } from '../context/LanguageContext';
 import candidateProfileService from '../services/candidateProfileService';
 import employerProfileService from '../services/employerProfileService';
 import jobPostService from '../services/jobPostService';
+import { getNotifications, getUnreadCount, markAsRead } from '../services/notificationService';
 
 const NavbarContainer = styled.nav`
   height: 80px;
@@ -486,111 +487,50 @@ const Navbar = ({ showSearch = true }) => {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Get notifications based on user role
-  const getNotifications = () => {
-    if (user?.role === 'admin') {
-      return [
-        {
-          id: 1,
-          icon: Users,
-          color: '#8b5cf6',
-          title: language === 'vi' ? 'Người dùng mới đăng ký' : 'New User Registrations',
-          message: language === 'vi' ? '15 ứng viên và 3 nhà tuyển dụng mới đã đăng ký trong 24h qua' : '15 candidates and 3 employers registered in the last 24h',
-          time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
-          unread: true
-        },
-        {
-          id: 2,
-          icon: Briefcase,
-          color: '#f59e0b',
-          title: language === 'vi' ? 'Yêu cầu phê duyệt nhà tuyển dụng' : 'Employer Approval Request',
-          message: language === 'vi' ? 'Katinat chi nhánh quận 8 đang chờ phê duyệt' : 'Katinat District 8 branch is pending approval',
-          time: language === 'vi' ? '3 giờ trước' : '3 hours ago',
-          unread: true
-        },
-        {
-          id: 3,
-          icon: AlertCircle,
-          color: '#ef4444',
-          title: language === 'vi' ? 'Bài đăng bị cảnh báo' : 'Posts Flagged',
-          message: language === 'vi' ? '5 bài đăng tuyển nhân viên phục vụ bị cảnh báo' : '5 server job posts have been flagged',
-          time: language === 'vi' ? '5 giờ trước' : '5 hours ago',
-          unread: true
-        },
-        {
-          id: 4,
-          icon: DollarSign,
-          color: '#10b981',
-          title: language === 'vi' ? 'Thanh toán mới' : 'New Payment',
-          message: language === 'vi' ? 'The Coffee House đã thanh toán gói Banner nổi bật 2' : 'The Coffee House paid for Featured Banner 2 package',
-          time: language === 'vi' ? '1 ngày trước' : '1 day ago',
-          unread: false
-        },
-      ];
-    } else if (user?.role === 'employer') {
-      return [
-        {
-          id: 1,
-          icon: User,
-          color: '#1e40af',
-          title: language === 'vi' ? 'Ứng viên mới ứng tuyển' : 'New Applicant',
-          message: language === 'vi' ? 'Nguyễn Hùng Anh đã ứng tuyển' : 'Nguyen Hung Anh has applied',
-          jobTitle: language === 'vi' ? 'Nhân viên Bán Hàng' : 'Sales Staff',
-          time: language === 'vi' ? '5 phút trước' : '5 minutes ago',
-          unread: true
-        },
-        {
-          id: 2,
-          icon: User,
-          color: '#1e40af',
-          title: language === 'vi' ? 'Ứng viên mới ứng tuyển' : 'New Applicant',
-          message: language === 'vi' ? 'Trương Tú Phương đã ứng tuyển' : 'Truong Tu Phuong has applied',
-          jobTitle: language === 'vi' ? 'Nhân viên Hành Chính' : 'Administrative Staff',
-          time: language === 'vi' ? '15 phút trước' : '15 minutes ago',
-          unread: true
-        },
-        {
-          id: 3,
-          icon: AlertCircle,
-          color: '#f59e0b',
-          title: language === 'vi' ? 'Gói sắp hết hạn' : 'Package Expiring Soon',
-          message: language === 'vi' ? 'Gói Banner Nổi Bật của bạn sẽ hết hạn vào 20/03/2026' : 'Your Featured Banner package will expire on 03/20/2026',
-          time: language === 'vi' ? '1 ngày trước' : '1 day ago',
-          unread: true
-        },
-        // Rating notification removed from navbar
-      ];
-    } else if (user?.role === 'candidate') {
-      // Only show quick-job related application/receive notifications
-      return [
-        {
-          id: 1,
-          icon: Briefcase,
-          color: '#1e40af',
-          title: language === 'vi' ? 'Nhà tuyển dụng đã xem hồ sơ' : 'Employer Viewed Your Profile',
-          message: language === 'vi' ? 'Highlands Coffee đã xem hồ sơ ứng tuyển của bạn' : 'Highlands Coffee viewed your application profile',
-          time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
-          unread: true,
-          isQuickJob: true,
-          type: 'application'
-        },
-        {
-          id: 2,
-          icon: AlertCircle,
-          color: '#10B981',
-          title: language === 'vi' ? 'Hồ sơ được chấp nhận' : 'Application Accepted',
-          message: language === 'vi' ? 'Hồ sơ ứng tuyển tại Katinat Quận 8 đã được chấp nhận' : 'Your application at Katinat District 8 has been accepted',
-          time: language === 'vi' ? '1 ngày trước' : '1 day ago',
-          unread: true,
-          isQuickJob: true,
-          type: 'success'
-        }
-      ];
-    }
-    return [];
-  };
+  // Get notifications from service
+  const [realNotifications, setRealNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  const notifications = getNotifications();
+  useEffect(() => {
+    const loadNotifications = async () => {
+      if (!user) {
+        console.log('⚠️ No user, skipping notification load');
+        return;
+      }
+      
+      try {
+        // For employer/candidate, use userId (Cognito sub) which matches employerId in notifications
+        // For admin, use 'admin' as recipientId
+        const userId = user.role === 'admin' ? 'admin' : (user.userId || user.id || user.email);
+        console.log('🔔 Loading notifications for:', { userId, role: user.role, userObject: user });
+        
+        const notifs = await getNotifications(userId, user.role);
+        console.log('📥 Received notifications:', notifs);
+        console.log('📊 Notifications count:', notifs?.length || 0);
+        
+        const count = await getUnreadCount(userId, user.role);
+        console.log('📬 Unread count:', count);
+        
+        setRealNotifications(notifs || []);
+        setUnreadCount(count || 0);
+      } catch (error) {
+        console.error('❌ Error loading notifications:', error);
+        console.error('Error details:', error.message, error.stack);
+      }
+    };
+
+    loadNotifications();
+    
+    // Poll every 10 seconds
+    const interval = setInterval(loadNotifications, 10000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [user]);
+
+  // Use only real notifications from API
+  const notifications = realNotifications;
   const filteredNotifications = notifications;
 
   useEffect(() => {
@@ -718,6 +658,22 @@ const Navbar = ({ showSearch = true }) => {
     }
   };
 
+  const formatNotificationTime = (isoString) => {
+    const date = new Date(isoString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return language === 'vi' ? 'Vừa xong' : 'Just now';
+    if (diffMins < 60) return language === 'vi' ? `${diffMins} phút trước` : `${diffMins} min ago`;
+    if (diffHours < 24) return language === 'vi' ? `${diffHours} giờ trước` : `${diffHours} hours ago`;
+    if (diffDays < 7) return language === 'vi' ? `${diffDays} ngày trước` : `${diffDays} days ago`;
+    
+    return date.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US');
+  };
+
   return (
     <NavbarContainer>
       <NavLeft>
@@ -767,7 +723,7 @@ const Navbar = ({ showSearch = true }) => {
         <div style={{ position: 'relative' }} ref={notificationRef}>
           <IconButton onClick={toggleNotifications}>
             <Bell />
-            <Badge>{filteredNotifications.filter(n => n.unread).length}</Badge>
+            {unreadCount > 0 && <Badge>{unreadCount > 99 ? '99+' : unreadCount}</Badge>}
           </IconButton>
 
           {showNotifications && (
@@ -794,29 +750,88 @@ const Navbar = ({ showSearch = true }) => {
 
               <NotificationList>
                 {filteredNotifications
-                  .filter(n => notificationTab === 'all' || n.unread)
-                  .map((notification) => (
-                    <NotificationItem
-                      key={notification.id}
-                      $unread={notification.unread}
-                      onClick={handleNotificationItemClick}
-                    >
-                      <NotificationIcon $color={notification.color}>
-                        <notification.icon />
-                      </NotificationIcon>
-                      <NotificationContent>
-                        <div className="title">{notification.title}</div>
-                        <div className="message">
-                          {notification.message}
-                          {notification.jobTitle && (
-                            <span> — {notification.jobTitle}</span>
-                          )}
-                        </div>
-                        <div className="time">{notification.time}</div>
-                      </NotificationContent>
-                      {notification.unread && <NotificationDot />}
-                    </NotificationItem>
-                  ))}
+                  .filter(n => notificationTab === 'all' || !n.read)
+                  .map((notification) => {
+                    // Check if this is a real notification from service or static one
+                    const isRealNotification = notification.notificationId && notification.recipientId;
+                    
+                    // Get icon based on notification type
+                    let Icon = Bell;
+                    if (isRealNotification) {
+                      switch (notification.type) {
+                        case 'package_purchase_request':
+                          Icon = Briefcase;
+                          break;
+                        case 'package_approved':
+                          Icon = CheckCircle;
+                          break;
+                        case 'employers':
+                          Icon = Building2;
+                          break;
+                        case 'posts':
+                          Icon = AlertCircle;
+                          break;
+                        case 'payments':
+                          Icon = DollarSign;
+                          break;
+                        case 'urgent':
+                          Icon = AlertCircle;
+                          break;
+                        default:
+                          Icon = Bell;
+                      }
+                    } else {
+                      Icon = notification.icon;
+                    }
+                    
+                    return (
+                      <NotificationItem
+                        key={isRealNotification ? notification.notificationId : notification.id}
+                        $unread={isRealNotification ? !notification.read : notification.unread}
+                        onClick={async () => {
+                          if (isRealNotification) {
+                            try {
+                              await markAsRead(notification.notificationId);
+                              setRealNotifications(prev => prev.map(n => 
+                                n.notificationId === notification.notificationId ? { ...n, read: true } : n
+                              ));
+                              if (notification.actionUrl) {
+                                navigate(notification.actionUrl);
+                              }
+                            } catch (error) {
+                              console.error('Error marking notification as read:', error);
+                            }
+                          }
+                          handleNotificationItemClick();
+                        }}
+                      >
+                        <NotificationIcon $color={notification.color}>
+                          <Icon />
+                        </NotificationIcon>
+                        <NotificationContent>
+                          <div className="title">
+                            {isRealNotification 
+                              ? (language === 'vi' ? notification.title : notification.titleEn)
+                              : notification.title}
+                          </div>
+                          <div className="message">
+                            {isRealNotification
+                              ? (language === 'vi' ? notification.message : notification.messageEn)
+                              : notification.message}
+                            {notification.jobTitle && (
+                              <span> — {notification.jobTitle}</span>
+                            )}
+                          </div>
+                          <div className="time">
+                            {isRealNotification 
+                              ? formatNotificationTime(notification.createdAt)
+                              : notification.time}
+                          </div>
+                        </NotificationContent>
+                        {(isRealNotification ? !notification.read : notification.unread) && <NotificationDot />}
+                      </NotificationItem>
+                    );
+                  })}
               </NotificationList>
             </NotificationDropdown>
           )}

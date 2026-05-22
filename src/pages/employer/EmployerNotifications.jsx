@@ -4,6 +4,8 @@ import styled, { keyframes } from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
+import { getNotifications, markAsRead, markAllAsRead, deleteNotification } from '../../services/notificationService';
 import {
   Bell,
   BellOff,
@@ -15,7 +17,9 @@ import {
   Trash2,
   Eye,
   Star,
-  X
+  X,
+  Package,
+  Briefcase
 } from 'lucide-react';
 
 const fadeIn = keyframes`
@@ -541,79 +545,90 @@ const ModalBtn = styled(motion.button)`
   svg { width: 16px; height: 16px; }
 `;
 
-const getNotifications = (language) => ([
-  {
-    id: 1,
-    type: 'application',
-    title: language === 'vi' ? 'Ứng viên mới ứng tuyển (Tuyển gấp)' : 'New applicant (Quick Job)',
-    message: language === 'vi' ? 'Nguyễn Hùng Anh đã ứng tuyển' : 'Nguyen Hung Anh has applied',
-    jobTitle: language === 'vi' ? 'Nhân viên Bán Hàng' : 'Sales Staff',
-    time: language === 'vi' ? '5 phút trước' : '5 minutes ago',
-    read: false,
-    isQuickJob: true,
-    icon: UserPlus
-  },
-  {
-    id: 2,
-    type: 'application',
-    title: language === 'vi' ? 'Ứng viên mới ứng tuyển (Tuyển gấp)' : 'New applicant (Quick Job)',
-    message: language === 'vi' ? 'Trương Tú Phương đã ứng tuyển' : 'Truong Tu Phuong has applied',
-    jobTitle: language === 'vi' ? 'Nhân viên Hành Chính' : 'Administrative Staff',
-    time: language === 'vi' ? '15 phút trước' : '15 minutes ago',
-    read: false,
-    isQuickJob: true,
-    icon: UserPlus
-  },
-  {
-    id: 3,
-    type: 'application',
-    title: language === 'vi' ? 'Ứng viên mới ứng tuyển (Tiêu chuẩn)' : 'New applicant (Standard Job)',
-    message: language === 'vi' ? 'Lê Văn Minh đã ứng tuyển vào vị trí tiêu chuẩn' : 'Le Van Minh has applied for a standard position',
-    jobTitle: language === 'vi' ? 'Kỹ sư Phần mềm' : 'Software Engineer',
-    time: language === 'vi' ? '1 giờ trước' : '1 hour ago',
-    read: false,
-    isQuickJob: false,
-    icon: FileText
-  },
-  {
-    id: 5,
-    type: 'application',
-    title: language === 'vi' ? 'Ứng viên mới ứng tuyển (Tiêu chuẩn)' : 'New applicant (Standard Job)',
-    message: language === 'vi' ? 'Phạm Thị Lan đã nộp hồ sơ ứng tuyển' : 'Pham Thi Lan submitted an application',
-    jobTitle: language === 'vi' ? 'Kế toán viên' : 'Accountant',
-    time: language === 'vi' ? '3 giờ trước' : '3 hours ago',
-    read: false,
-    isQuickJob: false,
-    icon: FileText
-  },
-  {
-    id: 4,
-    type: 'system',
-    title: language === 'vi' ? 'Gói sắp hết hạn' : 'Package expiring soon',
-    message: language === 'vi' ? 'Gói Banner Nổi Bật của bạn sẽ hết hạn vào 20/03/2026' : 'Your Featured Banner package will expire on 20/03/2026',
-    time: language === 'vi' ? '1 ngày trước' : '1 day ago',
-    read: false,
-    isQuickJob: false,
-    icon: AlertCircle
-  }
-]);
-
 const EmployerNotifications = () => {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
-  const [notifications, setNotifications] = useState(() => getNotifications(language));
+  const [notifications, setNotifications] = useState([]);
   const [selectedNotification, setSelectedNotification] = useState(null);
+  const [loading, setLoading] = useState(true);
 
+  // Load notifications from API
   useEffect(() => {
-    setNotifications(prev => {
-      const next = getNotifications(language);
-      return next.map(item => {
-        const previousItem = prev.find(p => p.id === item.id);
-        return previousItem ? { ...item, read: previousItem.read } : item;
-      });
-    });
-  }, [language]);
+    loadNotifications();
+    
+    // Poll every 10 seconds
+    const interval = setInterval(loadNotifications, 10000);
+    
+    return () => clearInterval(interval);
+  }, [user]);
+
+  const loadNotifications = async () => {
+    if (!user) return;
+    
+    try {
+      const userId = user.userId || user.id || user.email;
+      const role = user.role;
+      console.log('🔔 [EmployerNotifications] Loading notifications for:', { userId, role });
+      
+      const notifs = await getNotifications(userId, role);
+      console.log('📥 [EmployerNotifications] Received notifications:', notifs?.length || 0);
+      
+      // Transform API notifications to match component format
+      const transformedNotifs = notifs.map(notif => ({
+        id: notif.notificationId,
+        type: notif.type,
+        title: language === 'vi' ? notif.title : (notif.titleEn || notif.title),
+        message: language === 'vi' ? notif.message : (notif.messageEn || notif.message),
+        jobTitle: notif.data?.jobTitle || notif.data?.packageName,
+        time: formatTime(notif.createdAt),
+        read: notif.read,
+        isQuickJob: notif.data?.isQuickJob || false,
+        icon: getIconForType(notif.type),
+        actionUrl: notif.actionUrl,
+        actionText: language === 'vi' ? notif.actionText : (notif.actionTextEn || notif.actionText),
+        data: notif.data
+      }));
+      
+      setNotifications(transformedNotifs);
+      setLoading(false);
+    } catch (error) {
+      console.error('❌ [EmployerNotifications] Error loading notifications:', error);
+      setLoading(false);
+    }
+  };
+
+  // Helper function to format time
+  const formatTime = (createdAt) => {
+    if (!createdAt) return '';
+    
+    const now = new Date();
+    const created = new Date(createdAt);
+    const diffMs = now - created;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) return language === 'vi' ? 'Vừa xong' : 'Just now';
+    if (diffMins < 60) return language === 'vi' ? `${diffMins} phút trước` : `${diffMins} minutes ago`;
+    if (diffHours < 24) return language === 'vi' ? `${diffHours} giờ trước` : `${diffHours} hours ago`;
+    if (diffDays < 7) return language === 'vi' ? `${diffDays} ngày trước` : `${diffDays} days ago`;
+    
+    return created.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US');
+  };
+
+  // Helper function to get icon for notification type
+  const getIconForType = (type) => {
+    switch (type) {
+      case 'application': return UserPlus;
+      case 'package_approved': return CheckCircle;
+      case 'package_purchase_request': return Package;
+      case 'system': return AlertCircle;
+      case 'rating': return Star;
+      default: return Bell;
+    }
+  };
 
   const tabs = [
     { id: 'all', label: language === 'vi' ? 'Tất cả' : 'All', count: notifications.length },

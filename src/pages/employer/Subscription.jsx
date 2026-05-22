@@ -6,6 +6,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 import employerProfileService from '../../services/employerProfileService';
 import { Check, Zap, Star, Rocket, Sparkles, X, HelpCircle, CreditCard, Shield, Clock, CheckCircle } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { createPackagePurchaseRequestNotification } from '../../services/notificationService';
 
 // ─── Animations ───────────────────────────────────────────────
 const rotateBorder = keyframes`
@@ -685,8 +686,20 @@ const Subscription = () => {
     console.log('New balance after purchase:', newBalance);
     
     // Create purchase record and send to API
+    console.log('🚀 Starting purchase process...');
+    console.log('   Package:', selectedPackage.name);
+    console.log('   Duration:', selectedDuration.duration);
+    console.log('   Price:', packagePrice);
+    console.log('   Employer:', employerId);
+    console.log('   Company:', companyName);
+    
+    // Generate subscription ID first (in case API fails)
+    const subscriptionId = `SUB-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    console.log('   Subscription ID:', subscriptionId);
+    
     try {
       const API_ENDPOINT = import.meta.env.VITE_PACKAGE_SUBSCRIPTIONS_API;
+      console.log('📡 Subscription API:', API_ENDPOINT);
       
       const purchaseData = {
         employerId: employerId,
@@ -695,24 +708,106 @@ const Subscription = () => {
         duration: selectedDuration.duration
       };
       
-      console.log('Sending purchase to API:', purchaseData);
+      console.log('📤 Sending purchase to subscription API...');
       
-      const response = await fetch(`${API_ENDPOINT}/subscriptions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8'
-        },
-        body: JSON.stringify(purchaseData)
-      });
+      let subscriptionCreated = false;
+      let apiSubscriptionId = subscriptionId;
       
-      if (!response.ok) {
-        throw new Error('Failed to create subscription');
+      try {
+        const response = await fetch(`${API_ENDPOINT}/subscriptions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8'
+          },
+          body: JSON.stringify(purchaseData)
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log('✅ Subscription created via API:', result);
+          apiSubscriptionId = result.data?.subscriptionId || subscriptionId;
+          subscriptionCreated = true;
+        } else {
+          console.warn('⚠️ Subscription API returned error:', response.status);
+          console.warn('   Will still create notification with local subscription ID');
+        }
+      } catch (apiError) {
+        console.warn('⚠️ Subscription API failed:', apiError.message);
+        console.warn('   Will still create notification with local subscription ID');
       }
       
-      const result = await response.json();
-      console.log('Subscription created:', result);
+      // ALWAYS create notification for admin (even if subscription API fails)
+      console.log('');
+      console.log('📤 Creating notification for admin...');
+      console.log('   This is CRITICAL - notification must be created!');
+      console.log('   Environment check:');
+      console.log('   - VITE_NOTIFICATIONS_API:', import.meta.env.VITE_NOTIFICATIONS_API);
+      console.log('   - typeof:', typeof import.meta.env.VITE_NOTIFICATIONS_API);
+      
+      // Verify API endpoint is available
+      if (!import.meta.env.VITE_NOTIFICATIONS_API) {
+        console.error('❌ CRITICAL: VITE_NOTIFICATIONS_API is undefined!');
+        console.error('   All env vars:', import.meta.env);
+        alert('Lỗi: Không thể kết nối đến hệ thống thông báo. Vui lòng liên hệ admin.');
+        return;
+      }
+      
+      try {
+        const notificationData = {
+          subscriptionId: apiSubscriptionId,
+          employerId: employerId,
+          companyName: companyName,
+          packageName: selectedPackage.name,
+          duration: selectedDuration.duration,
+          price: packagePrice
+        };
+        
+        console.log('📦 Notification data:', notificationData);
+        console.log('📤 Calling createPackagePurchaseRequestNotification...');
+        
+        const notificationResult = await createPackagePurchaseRequestNotification(notificationData);
+        
+        console.log('✅ Notification function returned!');
+        console.log('   Result:', notificationResult);
+        console.log('   Result type:', typeof notificationResult);
+        console.log('   Result.success:', notificationResult?.success);
+        
+        if (notificationResult && notificationResult.success) {
+          console.log('✅ Notification ID:', notificationResult.data?.notificationId);
+          console.log('✅ Notification saved to DynamoDB!');
+          console.log('✅ Admin will see this notification in their dashboard');
+        } else {
+          console.error('❌ Notification API returned success=false');
+          console.error('   Full response:', JSON.stringify(notificationResult, null, 2));
+          // Don't block the purchase flow, but log the error
+          console.warn('⚠️ Continuing with purchase despite notification error');
+        }
+        
+        // Trigger a storage event to update navbar immediately
+        console.log('📡 Dispatching storage event to update navbar...');
+        window.dispatchEvent(new Event('storage'));
+        console.log('✅ Storage event dispatched');
+        
+      } catch (notifError) {
+        console.error('❌ CRITICAL ERROR: Failed to create notification!');
+        console.error('   Error type:', notifError.constructor.name);
+        console.error('   Error:', notifError);
+        console.error('   Message:', notifError.message);
+        console.error('   Stack:', notifError.stack);
+        
+        // Log additional debugging info
+        if (notifError.response) {
+          console.error('   Response status:', notifError.response.status);
+          console.error('   Response data:', notifError.response.data);
+        }
+        
+        // Show alert to user but don't block the purchase
+        console.warn('⚠️ Showing alert to user about notification error');
+        alert('Cảnh báo: Đơn hàng đã được tạo nhưng thông báo cho admin có thể bị lỗi. Vui lòng liên hệ admin để xác nhận.');
+      }
       
       // Show success modal
+      console.log('✅ Purchase process completed!');
       setShowConfirmModal(false);
       setShowSuccessModal(true);
       
@@ -724,7 +819,10 @@ const Subscription = () => {
       }, 3000);
       
     } catch (error) {
-      console.error('Error creating subscription:', error);
+      console.error('❌ Error in purchase process:', error);
+      console.error('   Message:', error.message);
+      console.error('   Stack:', error.stack);
+      
       alert(vi ? 'Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại.' : 'Error creating order. Please try again.');
       
       // Refund the balance

@@ -1,0 +1,8 @@
+{
+  "httpMethod": "GET",
+  "path": "/notifications",
+  "queryStringParameters": null,
+  "headers": {
+    "Content-Type": "application/json"
+  }
+}
