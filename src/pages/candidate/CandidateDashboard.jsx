@@ -1398,7 +1398,16 @@ const CandidateDashboard = () => {
     const titleMap = {
       'Nhân viên Pha Chế': 'Barista',
       'Nhân viên Phục Vụ': 'Service Staff',
-      'Đầu Bếp Phụ': 'Assistant Chef'
+      'Đầu Bếp Phụ': 'Assistant Chef',
+      'Nhân viên Pha chế - Part-time': 'Barista - Part-time',
+      'Nhân viên Phục vụ - Part-time': 'Service Staff - Part-time',
+      'Nhân viên Phụ bếp - Part-time': 'Kitchen Assistant - Part-time',
+      'Nhân viên Pha chế - Full-time': 'Barista - Full-time',
+      'Nhân viên Bưng bê - Part-time': 'Food Runner - Part-time',
+      'Nhân viên Phục vụ': 'Service Staff',
+      'Nhân viên Pha chế': 'Barista',
+      'Nhân viên Phụ bếp': 'Kitchen Assistant',
+      'Nhân viên Bưng bê': 'Food Runner',
     };
     return titleMap[titleVi] || titleVi;
   };
@@ -1427,7 +1436,15 @@ const CandidateDashboard = () => {
       'Hành chính': 'Admin',
       'Phục vụ': 'Service',
       'F&B': 'F&B',
-      'Ca làm linh động': 'Flexible Shifts'
+      'Ca làm linh động': 'Flexible Shifts',
+      'Pha chế': 'Barista',
+      'Phụ bếp': 'Kitchen Asst.',
+      'Nhà hàng': 'Restaurant',
+      'Lẩu': 'Hot Pot',
+      'Part-time': 'Part-time',
+      'Full-time': 'Full-time',
+      'Coffee': 'Coffee',
+      'Pizza': 'Pizza',
     };
     return tagMap[tagVi] || tagVi;
   };
@@ -1531,10 +1548,10 @@ const CandidateDashboard = () => {
 
   const sendChatMessage = () => {
     if (!chatInput.trim()) return;
-    setChatMessages(prev => [...prev, { id: Date.now(), mine: true, text: chatInput.trim(), time: 'Vừa xong' }]);
+    setChatMessages(prev => [...prev, { id: Date.now(), mine: true, text: chatInput.trim(), time: language === 'vi' ? 'Vừa xong' : 'Just now' }]);
     setChatInput('');
     setTimeout(() => {
-      setChatMessages(prev => [...prev, { id: Date.now() + 1, mine: false, text: 'Cảm ơn bạn đã phản hồi! Chúng tôi sẽ liên hệ lại sớm nhất có thể.', time: 'Vừa xong' }]);
+      setChatMessages(prev => [...prev, { id: Date.now() + 1, mine: false, text: language === 'vi' ? 'Cảm ơn bạn đã phản hồi! Chúng tôi sẽ liên hệ lại sớm nhất có thể.' : 'Thank you for your message! We will get back to you as soon as possible.', time: language === 'vi' ? 'Vừa xong' : 'Just now' }]);
     }, 1200);
   };
 
@@ -1928,7 +1945,7 @@ const CandidateDashboard = () => {
                 transition={{ duration: 0.5, delay: 0.22 }}
                 whileHover={{ y: -2 }}
               >
-                <BoostTag>🔥Đề xuất</BoostTag>
+                <BoostTag>{language === 'vi' ? '🔥Đề xuất' : '🔥Featured'}</BoostTag>
                 <div style={{ position: 'relative', width: '100%', lineHeight: 0 }}>
                   <AnimatePresence mode="sync">
                     <motion.img
@@ -1997,7 +2014,7 @@ const CandidateDashboard = () => {
                   >
                     <ApplicationHeader>
                       <ApplicationInfo>
-                        <h4>{app.title} {app.urgent && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', background: '#FEE2E2', color: '#EF4444', borderRadius: '20px', fontSize: '10px', fontWeight: 700, marginLeft: '6px', border: '1px solid #FECACA' }}>● {language === 'vi' ? 'Tuyển Gấp' : 'Urgent'}</span>}</h4>
+                        <h4>{translateJobTitle(app.title)} {app.urgent && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', background: '#FEE2E2', color: '#EF4444', borderRadius: '20px', fontSize: '10px', fontWeight: 700, marginLeft: '6px', border: '1px solid #FECACA' }}>● {language === 'vi' ? 'Tuyển Gấp' : 'Urgent'}</span>}</h4>
                         <p>{app.company}</p>
                       </ApplicationInfo>
                       <StatusBadge status={app.status} />
@@ -2005,7 +2022,7 @@ const CandidateDashboard = () => {
                     <ApplicationMeta>
                       <span>
                         <Clock />
-                        {app.appliedDate}
+                        {translatePostedAt(app.appliedDate)}
                       </span>
                       <span>
                         <Eye />
@@ -2112,7 +2129,7 @@ const CandidateDashboard = () => {
             <img src="/OpPoReview/images/katinatlogo.jpg" alt="Katinat" />
             <div className="info">
               <h4>Katinat Quận Cam</h4>
-              <p><span className="dot" /> Đang hoạt động</p>
+              <p><span className="dot" /> {language === 'vi' ? 'Đang hoạt động' : 'Active'}</p>
             </div>
             <div className="actions">
               <button onClick={() => setChatOpen(false)}><ChevronDown /></button>
@@ -2130,7 +2147,7 @@ const CandidateDashboard = () => {
           <ChatInputRow>
             <input
               type="text"
-              placeholder="Nhắn tin cho Katinat Quận Cam..."
+              placeholder={language === 'vi' ? 'Nhắn tin cho Katinat Quận Cam...' : 'Message Katinat Quan Cam...'}
               value={chatInput}
               onChange={e => setChatInput(e.target.value)}
               onKeyPress={e => e.key === 'Enter' && sendChatMessage()}

@@ -5,6 +5,7 @@ import { uploadCV, getCVInfo, deleteCV } from '../services/cvUploadService';
 import { useAuth } from '../context/AuthContext';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import DeleteConfirmModal from './DeleteConfirmModal';
+import { useLanguage } from '../context/LanguageContext';
 
 const CVUploadContainer = styled.div`
   background: white;
@@ -180,6 +181,7 @@ const SuccessMessage = styled.div`
 
 const CVUpload = () => {
   const { user, isLoading } = useAuth();
+  const { language } = useLanguage();
   const [userId, setUserId] = useState(null);
   const [cvList, setCvList] = useState([]); // Thay đổi từ cvInfo sang cvList (array)
   const [isDragging, setIsDragging] = useState(false);
@@ -282,7 +284,9 @@ const CVUpload = () => {
     
     // Kiểm tra giới hạn số lượng CV
     if (cvList.length >= MAX_CV_COUNT) {
-      setError(`Bạn chỉ có thể tải lên tối đa ${MAX_CV_COUNT} CV. Vui lòng xóa CV cũ trước khi tải lên CV mới.`);
+      setError(language === 'vi'
+        ? `Bạn chỉ có thể tải lên tối đa ${MAX_CV_COUNT} CV. Vui lòng xóa CV cũ trước khi tải lên CV mới.`
+        : `You can only upload a maximum of ${MAX_CV_COUNT} CVs. Please delete an old CV before uploading a new one.`);
       return;
     }
     
@@ -313,11 +317,11 @@ const CVUpload = () => {
       // Reload CV list to get updated data
       await loadCVInfo();
       
-      setSuccess('Upload CV thành công!');
+      setSuccess(language === 'vi' ? 'Upload CV thành công!' : 'CV uploaded successfully!');
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
       console.error('❌ [CVUpload] Upload error:', error);
-      setError(error.message || 'Upload thất bại. Vui lòng thử lại.');
+      setError(error.message || (language === 'vi' ? 'Upload thất bại. Vui lòng thử lại.' : 'Upload failed. Please try again.'));
     } finally {
       setUploading(false);
       setProgress(0);
@@ -337,10 +341,10 @@ const CVUpload = () => {
       await loadCVInfo();
       setCvToDelete(null);
       
-      setSuccess('Đã xóa CV thành công!');
+      setSuccess(language === 'vi' ? 'Đã xóa CV thành công!' : 'CV deleted successfully!');
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
-      setError(error.message || 'Xóa CV thất bại. Vui lòng thử lại.');
+      setError(error.message || (language === 'vi' ? 'Xóa CV thất bại. Vui lòng thử lại.' : 'Failed to delete CV. Please try again.'));
     }
   };
 
@@ -353,19 +357,21 @@ const CVUpload = () => {
       console.log('CV URL:', cv.cvUrl);
       
       if (!cv.cvUrl) {
-        throw new Error('Không tìm thấy URL của CV.');
+        throw new Error(language === 'vi' ? 'Không tìm thấy URL của CV.' : 'CV URL not found.');
       }
       
       const newWindow = window.open(cv.cvUrl, '_blank');
       
       // Fallback nếu popup bị block
       if (!newWindow) {
-        setError('Popup bị chặn. Vui lòng cho phép popup hoặc thử lại.');
+        setError(language === 'vi'
+          ? 'Popup bị chặn. Vui lòng cho phép popup hoặc thử lại.'
+          : 'Popup blocked. Please allow popups or try again.');
       }
       
     } catch (error) {
       console.error('❌ [CVUpload] Error viewing CV:', error);
-      setError(error.message || 'Không thể mở CV. Vui lòng thử lại.');
+      setError(error.message || (language === 'vi' ? 'Không thể mở CV. Vui lòng thử lại.' : 'Cannot open CV. Please try again.'));
     }
   };
   
@@ -388,19 +394,21 @@ const CVUpload = () => {
     <>
       <CVUploadContainer>
         <Title>
-          📄 CV / Hồ Sơ ({cvList.length}/{MAX_CV_COUNT})
+          📄 {language === 'vi' ? 'CV / Hồ Sơ' : 'CV / Resume'} ({cvList.length}/{MAX_CV_COUNT})
         </Title>
 
         {loadingUserId ? (
           <UploadArea>
             <UploadIcon>⏳</UploadIcon>
-            <UploadText>Đang tải thông tin người dùng...</UploadText>
+            <UploadText>{language === 'vi' ? 'Đang tải thông tin người dùng...' : 'Loading user information...'}</UploadText>
           </UploadArea>
         ) : !userId ? (
           <UploadArea>
             <UploadIcon>⚠️</UploadIcon>
             <UploadText style={{ color: '#dc2626' }}>
-              Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.
+              {language === 'vi'
+                ? 'Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.'
+                : 'You are not logged in. Please log in to continue.'}
             </UploadText>
           </UploadArea>
         ) : (
@@ -413,16 +421,16 @@ const CVUpload = () => {
                     <FileIcon>📄</FileIcon>
                     <FileInfo>
                       <FileName>{cv.cvFileName}</FileName>
-                      <FileDate>Tải lên: {formatDate(cv.cvUploadDate)}</FileDate>
+                      <FileDate>{language === 'vi' ? 'Tải lên:' : 'Uploaded:'} {formatDate(cv.cvUploadDate)}</FileDate>
                     </FileInfo>
                     <ButtonGroup>
-                      <IconButton onClick={() => handleView(cv)} title="Xem CV">
+                      <IconButton onClick={() => handleView(cv)} title={language === 'vi' ? 'Xem CV' : 'View CV'}>
                         <Eye size={18} />
                       </IconButton>
                       <IconButton 
                         $variant="danger" 
                         onClick={() => openDeleteModal(cv)}
-                        title="Xóa CV"
+                        title={language === 'vi' ? 'Xóa CV' : 'Delete CV'}
                       >
                         <Trash2 size={18} />
                       </IconButton>
@@ -444,10 +452,14 @@ const CVUpload = () => {
                 >
                   <UploadIcon>📁</UploadIcon>
                   <UploadText>
-                    {uploading ? 'Đang tải lên...' : 'Kéo thả file CV vào đây hoặc click để chọn'}
+                    {uploading
+                      ? (language === 'vi' ? 'Đang tải lên...' : 'Uploading...')
+                      : (language === 'vi' ? 'Kéo thả file CV vào đây hoặc click để chọn' : 'Drag and drop your CV here or click to select')}
                   </UploadText>
                   <UploadHint>
-                    Hỗ trợ: PDF, DOC, DOCX (Tối đa 5MB) • Còn lại: {MAX_CV_COUNT - cvList.length} CV
+                    {language === 'vi'
+                      ? `Hỗ trợ: PDF, DOC, DOCX (Tối đa 5MB) • Còn lại: ${MAX_CV_COUNT - cvList.length} CV`
+                      : `Supported: PDF, DOC, DOCX (Max 5MB) • Remaining: ${MAX_CV_COUNT - cvList.length} CV`}
                   </UploadHint>
                 </UploadArea>
                 
@@ -472,7 +484,9 @@ const CVUpload = () => {
               <UploadArea style={{ background: '#fef3c7', borderColor: '#fbbf24' }}>
                 <UploadIcon>⚠️</UploadIcon>
                 <UploadText style={{ color: '#92400e' }}>
-                  Bạn đã tải lên tối đa {MAX_CV_COUNT} CV. Vui lòng xóa CV cũ để tải lên CV mới.
+                  {language === 'vi'
+                    ? `Bạn đã tải lên tối đa ${MAX_CV_COUNT} CV. Vui lòng xóa CV cũ để tải lên CV mới.`
+                    : `You have uploaded the maximum of ${MAX_CV_COUNT} CVs. Please delete an old CV to upload a new one.`}
                 </UploadText>
               </UploadArea>
             )}
@@ -485,8 +499,10 @@ const CVUpload = () => {
 
       {showDeleteModal && cvToDelete && (
         <DeleteConfirmModal
-          title="Xóa CV?"
-          message={`Bạn có chắc muốn xóa "${cvToDelete.cvFileName}"? Hành động này không thể hoàn tác.`}
+          title={language === 'vi' ? 'Xóa CV?' : 'Delete CV?'}
+          message={language === 'vi'
+            ? `Bạn có chắc muốn xóa "${cvToDelete.cvFileName}"? Hành động này không thể hoàn tác.`
+            : `Are you sure you want to delete "${cvToDelete.cvFileName}"? This action cannot be undone.`}
           onConfirm={handleDelete}
           onCancel={() => {
             setShowDeleteModal(false);

@@ -494,36 +494,36 @@ const Navbar = ({ showSearch = true }) => {
           id: 1,
           icon: Users,
           color: '#8b5cf6',
-          title: 'Người dùng mới đăng ký',
-          message: '15 ứng viên và 3 nhà tuyển dụng mới đã đăng ký trong 24h qua',
-          time: '2 giờ trước',
+          title: language === 'vi' ? 'Người dùng mới đăng ký' : 'New User Registrations',
+          message: language === 'vi' ? '15 ứng viên và 3 nhà tuyển dụng mới đã đăng ký trong 24h qua' : '15 candidates and 3 employers registered in the last 24h',
+          time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
           unread: true
         },
         {
           id: 2,
           icon: Briefcase,
           color: '#f59e0b',
-          title: 'Yêu cầu phê duyệt nhà tuyển dụng',
-          message: 'Katinat chi nhánh quận 8 đang chờ phê duyệt',
-          time: '3 giờ trước',
+          title: language === 'vi' ? 'Yêu cầu phê duyệt nhà tuyển dụng' : 'Employer Approval Request',
+          message: language === 'vi' ? 'Katinat chi nhánh quận 8 đang chờ phê duyệt' : 'Katinat District 8 branch is pending approval',
+          time: language === 'vi' ? '3 giờ trước' : '3 hours ago',
           unread: true
         },
         {
           id: 3,
           icon: AlertCircle,
           color: '#ef4444',
-          title: 'Bài đăng bị cảnh báo',
-          message: '5 bài đăng tuyển nhân viên phục vụ bị cảnh báo',
-          time: '5 giờ trước',
+          title: language === 'vi' ? 'Bài đăng bị cảnh báo' : 'Posts Flagged',
+          message: language === 'vi' ? '5 bài đăng tuyển nhân viên phục vụ bị cảnh báo' : '5 server job posts have been flagged',
+          time: language === 'vi' ? '5 giờ trước' : '5 hours ago',
           unread: true
         },
         {
           id: 4,
           icon: DollarSign,
           color: '#10b981',
-          title: 'Thanh toán mới',
-          message: 'The Coffee House đã thanh toán gói Banner nổi bật 2',
-          time: '1 ngày trước',
+          title: language === 'vi' ? 'Thanh toán mới' : 'New Payment',
+          message: language === 'vi' ? 'The Coffee House đã thanh toán gói Banner nổi bật 2' : 'The Coffee House paid for Featured Banner 2 package',
+          time: language === 'vi' ? '1 ngày trước' : '1 day ago',
           unread: false
         },
       ];
@@ -533,29 +533,29 @@ const Navbar = ({ showSearch = true }) => {
           id: 1,
           icon: User,
           color: '#1e40af',
-          title: 'Ứng viên mới ứng tuyển',
-          message: 'Nguyễn Hùng Anh đã ứng tuyển',
-          jobTitle: 'Nhân viên Bán Hàng',
-          time: '5 phút trước',
+          title: language === 'vi' ? 'Ứng viên mới ứng tuyển' : 'New Applicant',
+          message: language === 'vi' ? 'Nguyễn Hùng Anh đã ứng tuyển' : 'Nguyen Hung Anh has applied',
+          jobTitle: language === 'vi' ? 'Nhân viên Bán Hàng' : 'Sales Staff',
+          time: language === 'vi' ? '5 phút trước' : '5 minutes ago',
           unread: true
         },
         {
           id: 2,
           icon: User,
           color: '#1e40af',
-          title: 'Ứng viên mới ứng tuyển',
-          message: 'Trương Tú Phương đã ứng tuyển',
-          jobTitle: 'Nhân viên Hành Chính',
-          time: '15 phút trước',
+          title: language === 'vi' ? 'Ứng viên mới ứng tuyển' : 'New Applicant',
+          message: language === 'vi' ? 'Trương Tú Phương đã ứng tuyển' : 'Truong Tu Phuong has applied',
+          jobTitle: language === 'vi' ? 'Nhân viên Hành Chính' : 'Administrative Staff',
+          time: language === 'vi' ? '15 phút trước' : '15 minutes ago',
           unread: true
         },
         {
           id: 3,
           icon: AlertCircle,
           color: '#f59e0b',
-          title: 'Gói sắp hết hạn',
-          message: 'Gói Banner Nổi Bật của bạn sẽ hết hạn vào 20/03/2026',
-          time: '1 ngày trước',
+          title: language === 'vi' ? 'Gói sắp hết hạn' : 'Package Expiring Soon',
+          message: language === 'vi' ? 'Gói Banner Nổi Bật của bạn sẽ hết hạn vào 20/03/2026' : 'Your Featured Banner package will expire on 03/20/2026',
+          time: language === 'vi' ? '1 ngày trước' : '1 day ago',
           unread: true
         },
         // Rating notification removed from navbar
@@ -567,9 +567,9 @@ const Navbar = ({ showSearch = true }) => {
           id: 1,
           icon: Briefcase,
           color: '#1e40af',
-          title: 'Nhà tuyển dụng đã xem hồ sơ',
-          message: 'Highlands Coffee đã xem hồ sơ ứng tuyển của bạn',
-          time: '2 giờ trước',
+          title: language === 'vi' ? 'Nhà tuyển dụng đã xem hồ sơ' : 'Employer Viewed Your Profile',
+          message: language === 'vi' ? 'Highlands Coffee đã xem hồ sơ ứng tuyển của bạn' : 'Highlands Coffee viewed your application profile',
+          time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
           unread: true,
           isQuickJob: true,
           type: 'application'
@@ -578,9 +578,9 @@ const Navbar = ({ showSearch = true }) => {
           id: 2,
           icon: AlertCircle,
           color: '#10B981',
-          title: 'Hồ sơ được chấp nhận',
-          message: 'Hồ sơ ứng tuyển tại Katinat Quận 8 đã được chấp nhận',
-          time: '1 ngày trước',
+          title: language === 'vi' ? 'Hồ sơ được chấp nhận' : 'Application Accepted',
+          message: language === 'vi' ? 'Hồ sơ ứng tuyển tại Katinat Quận 8 đã được chấp nhận' : 'Your application at Katinat District 8 has been accepted',
+          time: language === 'vi' ? '1 ngày trước' : '1 day ago',
           unread: true,
           isQuickJob: true,
           type: 'success'
@@ -773,8 +773,8 @@ const Navbar = ({ showSearch = true }) => {
           {showNotifications && (
             <NotificationDropdown>
               <NotificationHeader>
-                <h3>Thông báo</h3>
-                <button onClick={handleNotificationItemClick}>Xem tất cả</button>
+                <h3>{language === 'vi' ? 'Thông báo' : 'Notifications'}</h3>
+                <button onClick={handleNotificationItemClick}>{language === 'vi' ? 'Xem tất cả' : 'View all'}</button>
               </NotificationHeader>
 
               <NotificationTabs>
@@ -782,13 +782,13 @@ const Navbar = ({ showSearch = true }) => {
                   $active={notificationTab === 'all'}
                   onClick={() => setNotificationTab('all')}
                 >
-                  Tất cả
+                  {language === 'vi' ? 'Tất cả' : 'All'}
                 </NotificationTab>
                 <NotificationTab
                   $active={notificationTab === 'unread'}
                   onClick={() => setNotificationTab('unread')}
                 >
-                  Chưa đọc
+                  {language === 'vi' ? 'Chưa đọc' : 'Unread'}
                 </NotificationTab>
               </NotificationTabs>
 
@@ -822,7 +822,7 @@ const Navbar = ({ showSearch = true }) => {
           )}
         </div>
 
-        <IconButton onClick={handleSettingsClick} title="Cài đặt">
+        <IconButton onClick={handleSettingsClick} title={language === 'vi' ? 'Cài đặt' : 'Settings'}>
           <Settings />
         </IconButton>
 
@@ -841,7 +841,7 @@ const Navbar = ({ showSearch = true }) => {
             )}
           </Avatar>
           <UserInfo>
-            <span>{user?.role === 'employer' ? (employerProfile?.companyName || 'Chưa cập nhật tên công ty') : (candidateProfile?.fullName || user?.name || 'User')}</span>
+            <span>{user?.role === 'employer' ? (employerProfile?.companyName || (language === 'vi' ? 'Chưa cập nhật tên công ty' : 'Company name not updated')) : (candidateProfile?.fullName || user?.name || 'User')}</span>
             <span>{getRoleTranslation(user?.role) || 'Role'}</span>
           </UserInfo>
         </UserMenu>
