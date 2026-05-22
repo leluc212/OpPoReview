@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
+import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
+import RelativeTime from '../../components/RelativeTime';
 import { 
   Bell, 
+  BellOff,
   Settings,
   CheckCircle,
   AlertCircle,
@@ -15,51 +18,106 @@ import {
   Trash2,
   Eye,
   Send,
-  Package
+  Package,
+  Clock,
+  X
 } from 'lucide-react';
-import { Button } from '../../components/FormElements';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { getNotifications, markAsRead, markAllAsRead } from '../../services/notificationService';
 import { useNavigate } from 'react-router-dom';
 
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
 const PageContainer = styled.div`
-  padding: 2rem;
+  animation: ${fadeIn} 0.5s ease-in;
 `;
 
 const PageHeader = styled.div`
+  margin-bottom: 28px;
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 2rem;
+  justify-content: space-between;
+  gap: 20px;
   flex-wrap: wrap;
-  gap: 1rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 `;
 
-const HeaderLeft = styled.div``;
-
-const Title = styled.h1`
-  font-size: 2rem;
-  font-weight: 700;
-  color: ${props => props.theme.colors.text};
-  margin-bottom: 0.5rem;
+const PageTitleGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
 `;
 
-const Subtitle = styled.p`
-  color: ${props => props.theme.colors.textSecondary};
-  font-size: 0.95rem;
+const PageIconBox = styled.div`
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border: 1.5px solid #BFDBFE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+
+  svg {
+    width: 24px;
+    height: 24px;
+    color: #1e40af;
+  }
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.15);
+  }
+`;
+
+const PageTitleText = styled.div`
+  h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: ${props => props.theme.colors.text};
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
+  p {
+    color: ${props => props.theme.colors.textLight};
+    font-size: 13.5px;
+    font-weight: 500;
+  }
 `;
 
 const HeaderActions = styled.div`
   display: flex;
-  gap: 0.75rem;
+  gap: 12px;
   flex-wrap: wrap;
+  align-items: center;
 `;
 
 const Grid = styled.div`
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 2rem;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: 1fr 320px;
+  }
 
   @media (max-width: 968px) {
     grid-template-columns: 1fr;
@@ -68,125 +126,226 @@ const Grid = styled.div`
 
 const MainContent = styled.div``;
 
-const Sidebar = styled.div``;
+const Sidebar = styled.div`
+  @media (max-width: 968px) {
+    order: -1;
+  }
+`;
+
+const LoadingContainer = styled.div`
+  text-align: center;
+  padding: 60px 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1.5px solid #F1F5F9;
+  
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #F1F5F9;
+    border-top-color: #1e40af;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 20px;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  .text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #64748B;
+  }
+`;
 
 const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
 `;
 
 const StatCard = styled.div`
-  background: ${props => props.theme.colors.bgLight};
-  padding: 1.25rem;
-  border-radius: ${props => props.theme.borderRadius.lg};
-  box-shadow: ${props => props.theme.shadows.sm};
+  background: #ffffff;
+  padding: 20px 24px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.04);
+  border: 1.5px solid #F1F5F9;
   border-left: 4px solid ${props => props.$color};
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.12);
+    border-color: #BFDBFE;
+  }
 `;
 
 const StatLabel = styled.div`
-  font-size: 0.85rem;
-  color: ${props => props.theme.colors.textSecondary};
-  margin-bottom: 0.5rem;
+  font-size: 13px;
+  color: #64748B;
+  margin-bottom: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 `;
 
 const StatValue = styled.div`
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: ${props => props.theme.colors.text};
+  font-size: 32px;
+  font-weight: 800;
+  color: #1E293B;
+  line-height: 1;
 `;
 
 const FilterBar = styled.div`
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: 12px;
+  margin-bottom: 24px;
   flex-wrap: wrap;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 `;
 
 const SearchBox = styled.div`
   position: relative;
   flex: 1;
-  min-width: 250px;
+  min-width: 280px;
+
+  @media (max-width: 768px) {
+    min-width: 100%;
+  }
 `;
 
 const SearchInput = styled.input`
   width: 100%;
-  padding: 0.75rem 1rem 0.75rem 2.5rem;
-  border: 1px solid ${props => props.theme.colors.border};
-  border-radius: ${props => props.theme.borderRadius.md};
-  font-size: 0.9rem;
-  background: ${props => props.theme.colors.bgLight};
-  color: #F1F5F9;
+  padding: 12px 16px 12px 44px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 14px;
+  background: #ffffff;
+  color: #1E293B;
+  transition: all 0.2s ease;
+  font-weight: 500;
+
+  &::placeholder {
+    color: #94A3B8;
+  }
 
   &:focus {
     outline: none;
-    border-color: ${props => props.theme.colors.primary};
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
   }
 `;
 
 const SearchIcon = styled(Search)`
   position: absolute;
-  left: 0.75rem;
+  left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: ${props => props.theme.colors.textSecondary};
+  color: #64748B;
+  width: 18px;
+  height: 18px;
 `;
 
 const Select = styled.select`
-  padding: 0.75rem 1rem;
-  border: 1px solid ${props => props.theme.colors.border};
-  border-radius: ${props => props.theme.borderRadius.md};
-  background: ${props => props.theme.colors.bgLight};
-  color: ${props => props.theme.colors.text};
-  font-size: 0.9rem;
+  padding: 12px 16px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #1E293B;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 160px;
 
   &:focus {
     outline: none;
-    border-color: ${props => props.theme.colors.primary};
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+  }
+
+  &:hover {
+    border-color: #93C5FD;
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    min-width: 100%;
   }
 `;
 
 const NotificationList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  display: grid;
+  gap: 16px;
 `;
 
-const NotificationItem = styled.div`
-  background: ${props => props.$unread ? props.theme.colors.bgDark : props.theme.colors.bgLight};
-  border: 2px solid ${props => props.$unread ? props.theme.colors.primary : props.theme.colors.border};
-  border-radius: ${props => props.theme.borderRadius.lg};
-  padding: 1.25rem;
-  box-shadow: ${props => props.theme.shadows.sm};
-  transition: all 0.2s;
+const NotificationItem = styled(motion.div)`
+  background: #ffffff;
+  border: 1.5px solid ${props => props.$unread ? '#BFDBFE' : '#F1F5F9'};
+  border-radius: 16px;
+  padding: 20px 24px;
+  transition: all 0.22s ease;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.04);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  gap: 16px;
+  align-items: start;
   cursor: pointer;
-
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    border-radius: 16px 0 0 16px;
+    background: ${props => props.$color || '#1e40af'};
+    opacity: ${props => props.$unread ? '0.8' : '0.2'};
+    transition: opacity 0.2s ease;
+  }
+  
   &:hover {
-    box-shadow: ${props => props.theme.shadows.md};
     transform: translateY(-2px);
-    border-color: ${props => props.theme.colors.primary};
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.12);
+    border-color: #93C5FD;
+    &::before {
+      opacity: 1;
+    }
   }
 `;
 
-const NotificationHeader = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-`;
-
 const NotificationIcon = styled.div`
-  width: 48px;
-  height: 48px;
-  border-radius: ${props => props.theme.borderRadius.md};
-  background: ${props => props.$color ? `${props.$color}15` : `${props.theme.colors.primary}15`};
-  color: ${props => props.$color || props.theme.colors.primary};
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  border-radius: 14px;
+  background: ${props => props.$color ? `${props.$color}15` : '#EFF6FF'};
+  color: ${props => props.$color || '#1e40af'};
+  border: 1.5px solid ${props => props.$color ? `${props.$color}40` : '#BFDBFE'};
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: all 0.2s ease;
+  
+  ${NotificationItem}:hover & {
+    transform: scale(1.05);
+  }
+  
+  svg {
+    width: 20px;
+    height: 20px;
+  }
 `;
 
 const NotificationContent = styled.div`
@@ -194,81 +353,17 @@ const NotificationContent = styled.div`
 `;
 
 const NotificationTitle = styled.div`
+  font-size: 16px;
   font-weight: 700;
-  color: ${props => props.theme.colors.text};
-  margin-bottom: 0.5rem;
-  font-size: 0.95rem;
-`;
-
-const NotificationMessage = styled.div`
-  color: ${props => props.theme.colors.text};
-  font-size: 0.9rem;
-  line-height: 1.6;
-  margin-bottom: 0.5rem;
-  opacity: 0.85;
-`;
-
-const NotificationMeta = styled.div`
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  font-size: 0.85rem;
-  color: ${props => props.theme.colors.text};
-  opacity: 0.7;
-  font-weight: 500;
-`;
-
-const NotificationActions = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid ${props => props.theme.colors.border};
-`;
-
-const ActionButton = styled.button`
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: ${props => props.theme.borderRadius.md};
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
+  color: #1E293B;
+  margin-bottom: 6px;
+  line-height: 1.4;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-
-  ${props => {
-    switch(props.$variant) {
-      case 'primary':
-        return `
-          background: ${props.theme.colors.primary};
-          color: white;
-          &:hover {
-            opacity: 0.9;
-          }
-        `;
-      case 'danger':
-        return `
-          background: #fee2e2;
-          color: #dc2626;
-          &:hover {
-            background: #fecaca;
-          }
-        `;
-      default:
-        return `
-          background: ${props.theme.colors.background};
-          color: ${props.theme.colors.text};
-          &:hover {
-            background: ${props.theme.colors.border};
-          }
-        `;
-    }
-  }}
+  gap: 8px;
 `;
 
-const UnreadBadge = styled.span`
+const UnreadDot = styled.div`
   width: 8px;
   height: 8px;
   background: #1e40af;
@@ -276,36 +371,148 @@ const UnreadBadge = styled.span`
   flex-shrink: 0;
 `;
 
+const NotificationMessage = styled.div`
+  font-size: 14.5px;
+  color: #475569;
+  line-height: 1.6;
+  margin-bottom: 8px;
+  font-weight: 500;
+`;
+
+const NotificationMeta = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #64748B;
+    font-weight: 500;
+    
+    svg {
+      width: 14px;
+      height: 14px;
+      opacity: 0.8;
+    }
+  }
+`;
+
+const NotificationActions = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1.5px solid #F1F5F9;
+`;
+
+const ActionButton = styled.button`
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  ${props => {
+    switch(props.$variant) {
+      case 'primary':
+        return `
+          background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+          color: white;
+          box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25);
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(30, 64, 175, 0.35);
+          }
+        `;
+      case 'danger':
+        return `
+          background: #FEF2F2;
+          color: #EF4444;
+          border: 1.5px solid #FECACA;
+          &:hover {
+            background: #FEE2E2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+          }
+        `;
+      default:
+        return `
+          background: #F1F5F9;
+          color: #475569;
+          border: 1.5px solid #E2E8F0;
+          &:hover {
+            background: #E2E8F0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+          }
+        `;
+    }
+  }}
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
 const SettingsCard = styled.div`
-  background: ${props => props.theme.colors.bgLight};
-  border-radius: ${props => props.theme.borderRadius.lg};
-  box-shadow: ${props => props.theme.shadows.sm};
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.04);
+  border: 1.5px solid #F1F5F9;
+  padding: 24px;
+  margin-bottom: 20px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.08);
+    border-color: #BFDBFE;
+  }
 `;
 
 const SettingsTitle = styled.h3`
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: ${props => props.theme.colors.text};
-  margin-bottom: 1.25rem;
+  font-size: 17px;
+  font-weight: 800;
+  color: #1E293B;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  
+  svg {
+    color: #1e40af;
+  }
 `;
 
 const SettingItem = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid ${props => props.theme.colors.border};
+  padding: 14px 0;
+  border-bottom: 1.5px solid #F1F5F9;
 
   &:last-child {
     border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  &:first-child {
+    padding-top: 0;
   }
 `;
 
 const SettingLabel = styled.div`
-  font-size: 0.9rem;
-  color: ${props => props.theme.colors.text};
+  font-size: 14px;
+  color: #475569;
+  font-weight: 600;
 `;
 
 const ToggleSwitch = styled.label`
@@ -328,7 +535,7 @@ const ToggleSwitch = styled.label`
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
+    background-color: #cbd5e1;
     transition: 0.3s;
     border-radius: 24px;
 
@@ -342,15 +549,60 @@ const ToggleSwitch = styled.label`
       background-color: white;
       transition: 0.3s;
       border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
   }
 
   input:checked + span {
-    background-color: ${props => props.theme.colors.primary};
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
   }
 
   input:checked + span:before {
     transform: translateX(24px);
+  }
+
+  &:hover span {
+    opacity: 0.9;
+  }
+`;
+
+const StyledButton = styled(motion.button)`
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  background: #ffffff;
+  color: #1E293B;
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #93C5FD;
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    &:hover {
+      transform: none;
+    }
   }
 `;
 
@@ -374,10 +626,21 @@ const AdminNotifications = () => {
   useEffect(() => {
     loadNotifications();
     
-    // Poll every 10 seconds
-    const interval = setInterval(loadNotifications, 10000);
+    // Poll every 3 seconds for faster updates
+    const interval = setInterval(loadNotifications, 3000);
     
-    return () => clearInterval(interval);
+    // Listen for storage events (triggered when new notification is created)
+    const handleStorageChange = () => {
+      console.log('🔄 Storage event detected - reloading notifications...');
+      loadNotifications();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, [user]);
 
   const loadNotifications = async () => {
@@ -443,23 +706,6 @@ const AdminNotifications = () => {
     }
   };
 
-  // Format time from ISO string
-  const formatTime = (isoString) => {
-    const date = new Date(isoString);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return language === 'vi' ? 'Vừa xong' : 'Just now';
-    if (diffMins < 60) return language === 'vi' ? `${diffMins} phút trước` : `${diffMins} min ago`;
-    if (diffHours < 24) return language === 'vi' ? `${diffHours} giờ trước` : `${diffHours} hours ago`;
-    if (diffDays < 7) return language === 'vi' ? `${diffDays} ngày trước` : `${diffDays} days ago`;
-    
-    return date.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US');
-  };
-
   const handleToggle = (setting) => {
     setNotificationSettings(prev => ({
       ...prev,
@@ -514,15 +760,25 @@ const AdminNotifications = () => {
     <DashboardLayout role="admin" key={language}>
       <PageContainer>
         <PageHeader>
-          <HeaderLeft>
-            <Title>{language === 'vi' ? 'Thông Báo Hệ Thống' : 'System Notifications'}</Title>
-            <Subtitle>{language === 'vi' ? 'Theo dõi và quản lý tất cả thông báo' : 'Track and manage all notifications'}</Subtitle>
-          </HeaderLeft>
+          <PageTitleGroup>
+            <PageIconBox>
+              <Bell />
+            </PageIconBox>
+            <PageTitleText>
+              <h1>{language === 'vi' ? 'Thông Báo Hệ Thống' : 'System Notifications'}</h1>
+              <p>{language === 'vi' ? 'Theo dõi và quản lý tất cả thông báo' : 'Track and manage all notifications'}</p>
+            </PageTitleText>
+          </PageTitleGroup>
           <HeaderActions>
-            <Button $variant="outline" onClick={handleMarkAllAsRead}>
+            <StyledButton 
+              onClick={handleMarkAllAsRead}
+              disabled={unreadCount === 0}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+            >
               <Eye size={18} />
               {language === 'vi' ? 'Đánh dấu đã đọc tất cả' : 'Mark all as read'}
-            </Button>
+            </StyledButton>
           </HeaderActions>
         </PageHeader>
 
@@ -573,67 +829,95 @@ const AdminNotifications = () => {
             </FilterBar>
 
             {loading ? (
-              <div style={{ textAlign: 'center', padding: '3rem', color: '#64748B' }}>
-                <div style={{ fontSize: '16px', fontWeight: '600' }}>
+              <LoadingContainer>
+                <div className="spinner"></div>
+                <div className="text">
                   {language === 'vi' ? 'Đang tải thông báo...' : 'Loading notifications...'}
                 </div>
-              </div>
+              </LoadingContainer>
             ) : displayNotifications.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '3rem', color: '#64748B' }}>
-                <Bell size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
-                <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '0.5rem' }}>
+              <div style={{ textAlign: 'center', padding: '80px 20px', background: '#f8fafc', borderRadius: '20px', border: '2px dashed #e2e8f0' }}>
+                <BellOff size={80} style={{ opacity: 0.4, marginBottom: '20px', color: '#1e40af' }} />
+                <div style={{ fontSize: '22px', fontWeight: '700', marginBottom: '10px', color: '#1E293B' }}>
                   {language === 'vi' ? 'Không có thông báo' : 'No notifications'}
                 </div>
-                <div style={{ fontSize: '14px' }}>
+                <div style={{ fontSize: '15px', color: '#64748B' }}>
                   {language === 'vi' ? 'Bạn sẽ nhận được thông báo khi có hoạt động mới' : 'You will receive notifications when there are new activities'}
                 </div>
               </div>
             ) : (
               <NotificationList>
-                {displayNotifications.map(notification => {
+                {displayNotifications.map((notification, index) => {
                   const NotifIcon = getNotificationIcon(notification.type);
                   const title = language === 'vi' ? notification.title : notification.titleEn;
                   const message = language === 'vi' ? notification.message : notification.messageEn;
                   const actionText = language === 'vi' ? notification.actionText : notification.actionTextEn;
                   const isActionRequired = notification.type === 'package_purchase_request';
                   
+                  // Determine color based on notification type
+                  const getNotificationColor = (type) => {
+                    switch (type) {
+                      case 'package_purchase_request':
+                        return '#f59e0b';
+                      case 'package_approved':
+                        return '#10b981';
+                      case 'employers':
+                        return '#1e40af';
+                      case 'posts':
+                        return '#ef4444';
+                      case 'payments':
+                        return '#8b5cf6';
+                      case 'urgent':
+                        return '#f59e0b';
+                      default:
+                        return '#1e40af';
+                    }
+                  };
+                  
                   return (
                     <NotificationItem 
                       key={notification.notificationId} 
                       $unread={!notification.read}
+                      $color={getNotificationColor(notification.type)}
                       onClick={() => handleNotificationClick(notification)}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.4, delay: index * 0.05 }}
                     >
-                      <NotificationHeader>
-                        <NotificationIcon $color={notification.color}>
-                          <NotifIcon size={24} />
-                        </NotificationIcon>
-                        <NotificationContent>
-                          <NotificationTitle>
-                            {!notification.read && <UnreadBadge />}
-                            {title}
-                          </NotificationTitle>
-                          <NotificationMessage>{message}</NotificationMessage>
-                          <NotificationMeta>
-                            <span>{formatTime(notification.createdAt)}</span>
-                            {isActionRequired && (
-                              <span style={{ color: '#f59e0b', fontWeight: 500 }}>
-                                • {language === 'vi' ? 'Cần xử lý' : 'Action required'}
-                              </span>
-                            )}
-                          </NotificationMeta>
-                        </NotificationContent>
-                      </NotificationHeader>
-                      {isActionRequired && (
-                        <NotificationActions>
-                          <ActionButton $variant="primary" onClick={(e) => {
-                            e.stopPropagation();
-                            handleNotificationClick(notification);
-                          }}>
-                            <CheckCircle size={16} />
-                            {actionText || (language === 'vi' ? 'Xử lý ngay' : 'Handle now')}
-                          </ActionButton>
-                        </NotificationActions>
-                      )}
+                      <NotificationIcon $color={getNotificationColor(notification.type)}>
+                        <NotifIcon />
+                      </NotificationIcon>
+                      
+                      <NotificationContent>
+                        <NotificationTitle>
+                          {!notification.read && <UnreadDot />}
+                          {title}
+                        </NotificationTitle>
+                        <NotificationMessage>{message}</NotificationMessage>
+                        <NotificationMeta>
+                          <div className="meta-item">
+                            <Clock />
+                            <RelativeTime timestamp={notification.createdAt} language={language} />
+                          </div>
+                          {isActionRequired && (
+                            <div className="meta-item" style={{ color: '#f59e0b', fontWeight: 700 }}>
+                              • {language === 'vi' ? 'Cần xử lý' : 'Action required'}
+                            </div>
+                          )}
+                        </NotificationMeta>
+                        
+                        {isActionRequired && (
+                          <NotificationActions>
+                            <ActionButton $variant="primary" onClick={(e) => {
+                              e.stopPropagation();
+                              handleNotificationClick(notification);
+                            }}>
+                              <CheckCircle size={16} />
+                              {actionText || (language === 'vi' ? 'Xử lý ngay' : 'Handle now')}
+                            </ActionButton>
+                          </NotificationActions>
+                        )}
+                      </NotificationContent>
                     </NotificationItem>
                   );
                 })}
@@ -644,7 +928,7 @@ const AdminNotifications = () => {
           <Sidebar>
             <SettingsCard>
               <SettingsTitle>
-                <Settings size={20} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
+                <Settings size={20} />
                 {language === 'vi' ? 'Cài Đặt Thông Báo' : 'Notification Settings'}
               </SettingsTitle>
               

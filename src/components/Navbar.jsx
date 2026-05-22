@@ -8,6 +8,7 @@ import candidateProfileService from '../services/candidateProfileService';
 import employerProfileService from '../services/employerProfileService';
 import jobPostService from '../services/jobPostService';
 import { getNotifications, getUnreadCount, markAsRead } from '../services/notificationService';
+import RelativeTime from './RelativeTime';
 
 const NavbarContainer = styled.nav`
   height: 80px;
@@ -499,9 +500,35 @@ const Navbar = ({ showSearch = true }) => {
       }
       
       try {
-        // For employer/candidate, use userId (Cognito sub) which matches employerId in notifications
-        // For admin, use 'admin' as recipientId
-        const userId = user.role === 'admin' ? 'admin' : (user.userId || user.id || user.email);
+        // CRITICAL FIX: Ensure we use UUID from Cognito, not email
+        let userId;
+        
+        if (user.role === 'admin') {
+          userId = 'admin';
+        } else {
+          userId = user.userId || user.id;
+          
+          // If userId looks like an email, fetch the real UUID from Cognito
+          if (userId && userId.includes('@')) {
+            console.warn('⚠️ [Navbar] userId is email, fetching UUID from Cognito...');
+            try {
+              const { fetchAuthSession } = await import('aws-amplify/auth');
+              const session = await fetchAuthSession();
+              if (session && session.tokens) {
+                const uuidFromToken = session.tokens.idToken.payload.sub;
+                console.log('✅ [Navbar] Got UUID from Cognito:', uuidFromToken);
+                userId = uuidFromToken;
+                
+                // Update user object in localStorage
+                const updatedUser = { ...user, userId: uuidFromToken };
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+              }
+            } catch (cognitoError) {
+              console.error('❌ [Navbar] Failed to get UUID from Cognito:', cognitoError);
+            }
+          }
+        }
+        
         console.log('🔔 Loading notifications for:', { userId, role: user.role, userObject: user });
         
         const notifs = await getNotifications(userId, user.role);
@@ -523,9 +550,19 @@ const Navbar = ({ showSearch = true }) => {
     
     // Poll every 10 seconds
     const interval = setInterval(loadNotifications, 10000);
+    
+    // Listen for user login events
+    const handleUserLogin = () => {
+      console.log('🔐 [Navbar] User logged in - reloading notifications...');
+      // Wait a bit for user state to be fully updated
+      setTimeout(loadNotifications, 500);
+    };
+    
+    window.addEventListener('userLoggedIn', handleUserLogin);
 
     return () => {
       clearInterval(interval);
+      window.removeEventListener('userLoggedIn', handleUserLogin);
     };
   }, [user]);
 
@@ -656,22 +693,6 @@ const Navbar = ({ showSearch = true }) => {
     } else if (user?.role === 'admin') {
       navigate('/admin/profile');
     }
-  };
-
-  const formatNotificationTime = (isoString) => {
-    const date = new Date(isoString);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return language === 'vi' ? 'Vừa xong' : 'Just now';
-    if (diffMins < 60) return language === 'vi' ? `${diffMins} phút trước` : `${diffMins} min ago`;
-    if (diffHours < 24) return language === 'vi' ? `${diffHours} giờ trước` : `${diffHours} hours ago`;
-    if (diffDays < 7) return language === 'vi' ? `${diffDays} ngày trước` : `${diffDays} days ago`;
-    
-    return date.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US');
   };
 
   return (
@@ -824,7 +845,7 @@ const Navbar = ({ showSearch = true }) => {
                           </div>
                           <div className="time">
                             {isRealNotification 
-                              ? formatNotificationTime(notification.createdAt)
+                              ? <RelativeTime timestamp={notification.createdAt} language={language} />
                               : notification.time}
                           </div>
                         </NotificationContent>
