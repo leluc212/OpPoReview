@@ -10,11 +10,8 @@ import Modal from '../../components/Modal';
 import CVPreviewModal from '../../components/CVPreviewModal';
 import quickJobService from '../../services/quickJobService';
 import applicationService from '../../services/applicationService';
-<<<<<<< HEAD
 import { createCandidateCvAcceptedNotification, createCandidateCvRejectedNotification } from '../../services/notificationService';
-=======
 import DynamicTranslate from '../../components/DynamicTranslate';
->>>>>>> f2576f34ca4b83112bc0970b97ceae158c018977
 
 // Helper: tính số giờ từ chuỗi shift "HH:MM - HH:MM"
 const calcShiftHours = (shift) => {

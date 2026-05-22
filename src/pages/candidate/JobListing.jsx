@@ -3025,10 +3025,6 @@ const JobListing = () => {
       }
 
       // Submit application
-<<<<<<< HEAD
-      const applicationService = (await import('../../services/applicationService')).default;
-      const jobId = jobData.idJob || jobData.id;
-=======
       const applicationService = await import('../../services/applicationService');
       console.log('🔍 [Debug] Application Modal Job:', applyModal.job);
       console.log('🔍 [Debug] Candidate CV List:', candidateCVList);
@@ -3037,7 +3033,6 @@ const JobListing = () => {
 
       const jobId = applyModal.job.idJob || applyModal.job.id;
       console.log('🔍 [Debug] Calculated Job ID:', jobId);
->>>>>>> f2576f34ca4b83112bc0970b97ceae158c018977
 
       if (!jobId) {
         setIsSubmitting(false);
