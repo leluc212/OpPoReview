@@ -9,6 +9,7 @@ import { Button } from '../../components/FormElements';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import DynamicTranslate from '../../components/DynamicTranslate';
+import jobPostService from '../../services/jobPostService';
 
 const fadeIn = keyframes`
   from {
@@ -418,58 +419,56 @@ const JobManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilters, setStatusFilters] = useState([]);
 
-  const getDefaultJobs = () => [
-    { 
-      id: 1, 
-      title: language === 'vi' ? 'Cửa hàng trưởng' : 'Store Manager', 
-      applicants: 45, 
-      status: 'recruiting', 
-      posted: language === 'vi' ? '2 ngày trước' : '2 days ago',
-      views: 234,
-      responseRate: 85,
-      location: language === 'vi' ? 'Quận 1, TP.HCM' : 'District 1, HCMC',
-      jobType: 'full-time',
-      department: language === 'vi' ? 'Kỹ thuật' : 'Engineering'
-    },
-    { 
-      id: 2, 
-      title: language === 'vi' ? 'Nhân viên Thu Ngân' : 'Cashier', 
-      applicants: 32, 
-      status: 'displayed', 
-      posted: language === 'vi' ? '1 tuần trước' : '1 week ago',
-      views: 156,
-      responseRate: 72,
-      location: language === 'vi' ? 'Quận 3, TP.HCM' : 'District 3, HCMC',
-      jobType: 'full-time',
-      department: language === 'vi' ? 'Bán hàng' : 'Sales'
-    },
-    { 
-      id: 3, 
-      title: language === 'vi' ? 'Nhân viên Pha Chế' : 'Barista', 
-      applicants: 28, 
-      status: 'expired', 
-      posted: language === 'vi' ? '2 tuần trước' : '2 weeks ago',
-      views: 98,
-      responseRate: 65,
-      location: language === 'vi' ? 'Quận 7, TP.HCM' : 'District 7, HCMC',
-      jobType: 'part-time',
-      department: language === 'vi' ? 'Dịch vụ' : 'Service'
-    },
-  ];
+  const [jobs, setJobs] = useState([]);
+  const [isLoadingJobs, setIsLoadingJobs] = useState(true);
 
-  const getJobs = () => {
-    // Get jobs from localStorage
-    const savedJobs = JSON.parse(localStorage.getItem('employerJobs') || '[]');
-    
-    // Merge with default jobs
-    return [...savedJobs, ...getDefaultJobs()];
-  };
-
-  const [jobs, setJobs] = useState(getJobs());
-  
   // Refresh jobs when component mounts
   useEffect(() => {
-    setJobs(getJobs());
+    const fetchJobs = async () => {
+      setIsLoadingJobs(true);
+      try {
+        const data = await jobPostService.getMyJobPosts();
+        
+        // Transform job fields to match what UI expects
+        const formattedJobs = data.map(job => {
+          let jobLocation = job.location;
+          try {
+            if (typeof jobLocation === 'string' && jobLocation.includes('{')) {
+              const locObj = JSON.parse(jobLocation);
+              jobLocation = locObj.address || locObj.city || jobLocation;
+            }
+          } catch(e) {}
+
+          let timePosted = new Date(job.createdAt || Date.now());
+          
+          return {
+            id: job.idJob || job.id,
+            title: job.title || 'Vị trí công việc',
+            applicants: job.applicants || 0,
+            status: job.status === 'active' ? 'recruiting' : (job.status || 'recruiting'),
+            posted: timePosted.toLocaleDateString(),
+            views: job.views || 0,
+            responseRate: job.responseRate || 0,
+            location: jobLocation,
+            jobType: job.jobType || 'full-time',
+            department: job.jobType === 'part-time' ? 'Bán thời gian' : 'Toàn thời gian'
+          };
+        });
+
+        // Ensure new jobs created via app appear first
+        const sortedJobs = formattedJobs.sort((a,b) => {
+          return new Date(b.posted) - new Date(a.posted);
+        });
+
+        setJobs(sortedJobs);
+      } catch (error) {
+        console.error("Failed to load jobs", error);
+        setJobs([]);
+      } finally {
+        setIsLoadingJobs(false);
+      }
+    };
+    fetchJobs();
   }, [language]);
 
   const filterOptions = [
@@ -554,7 +553,11 @@ const JobManagement = () => {
           searchPlaceholder={language === 'vi' ? 'Tìm kiếm việc làm...' : 'Search jobs...'}
         />
 
-        {filteredJobs.length === 0 ? (
+        {isLoadingJobs ? (
+          <EmptyState>
+             <p>{language === 'vi' ? 'Đang tải dữ liệu...' : 'Loading jobs...'}</p>
+          </EmptyState>
+        ) : filteredJobs.length === 0 ? (
           <EmptyState
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}

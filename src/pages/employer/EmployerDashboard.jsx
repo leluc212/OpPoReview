@@ -12,6 +12,9 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { useCompanyProfileCompletion } from '../../hooks/useCompanyProfileCompletion';
 import employerProfileService from '../../services/employerProfileService';
+import jobPostService from '../../services/jobPostService';
+import quickJobService from '../../services/quickJobService';
+import { getJobApplications } from '../../services/applicationService';
 import DynamicTranslate from '../../components/DynamicTranslate';
 import {
   Briefcase,
@@ -486,39 +489,83 @@ const EmployerDashboard = () => {
     }
   }, [user, isLoadingProfileCompletion, isProfileComplete]);
 
-  const getRecentApplications = () => [
-    {
-      id: 1,
-      candidate: language === 'vi' ? 'Đỗ Hoàng Hiếu' : 'Hieu Do Hoang',
-      job: language === 'vi' ? 'Nhân viên phụ bếp' : 'Kitchen Assistant',
-      applied: language === 'vi' ? '2 giờ trước' : '2 hours ago',
-      status: 'pending',
-      avatar: 'H'
-    },
-    {
-      id: 2,
-      candidate: language === 'vi' ? 'Phạm Lê Duy' : 'Duy Pham Le',
-      job: language === 'vi' ? 'Nhân viên Thu ngân' : 'Cashier',
-      applied: language === 'vi' ? '5 giờ trước' : '5 hours ago',
-      status: 'pending',
-      avatar: 'D'
-    },
-    {
-      id: 3,
-      candidate: 'Trần Phương Tuấn',
-      job: language === 'vi' ? 'Nhân viên Pha chế' : 'Barista',
-      applied: language === 'vi' ? '1 ngày trước' : '1 day ago',
-      status: 'approved',
-      avatar: 'N'
-    },
-  ];
-
-  const [recentApplications, setRecentApplications] = useState(getRecentApplications());
+  const [dashboardStats, setDashboardStats] = useState({
+    totalJobs: 0,
+    totalApplications: 0,
+    totalViews: 0,
+    quickJobs: 0,
+    applicationsList: []
+  });
+  const [recentApplications, setRecentApplications] = useState([]);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
 
   useEffect(() => {
-    setRecentApplications(getRecentApplications());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [language]);
+    const fetchStats = async () => {
+      if (!user) return;
+      setIsLoadingStats(true);
+      try {
+        const [standardJobs, quickJobs] = await Promise.all([
+          jobPostService.getMyJobPosts().catch(() => []),
+          quickJobService.getMyQuickJobs().catch(() => [])
+        ]);
+
+        const allStandard = standardJobs || [];
+        const allQuick = quickJobs || [];
+        const allJobs = [...allStandard, ...allQuick];
+
+        let totalViewsCount = 0;
+        allJobs.forEach(job => {
+          totalViewsCount += (job.views || 0);
+        });
+
+        // Fetch applications for standard jobs
+        const appsPromises = allStandard.map(job => 
+          getJobApplications(job.idJob || job.id).catch(() => [])
+        );
+        const appsResults = await Promise.all(appsPromises);
+        let allApplications = appsResults.flat().filter(app => {
+          // Consider it valid if it has a name OR an email that isn't 'Unknown'
+          const hasIdentify = app.fullName?.trim() || app.candidateName?.trim() || (app.candidateEmail && app.candidateEmail !== 'Unknown');
+          // Only show actionable applications
+          const isActive = !['accepted', 'rejected', 'completed'].includes(app.status);
+          return hasIdentify && isActive;
+        });
+        
+        setDashboardStats({
+          totalJobs: allJobs.length,
+          totalApplications: allApplications.length,
+          totalViews: totalViewsCount,
+          quickJobs: allQuick.length,
+          applicationsList: allApplications
+        });
+
+        const sortedApps = [...allApplications].sort((a, b) => new Date(b.createdAt || Date.now()) - new Date(a.createdAt || Date.now()));
+        const recentAppsList = sortedApps.slice(0, 3).map(app => {
+          const jobMatch = allStandard.find(j => (j.idJob || j.id) === app.jobId);
+          return {
+            id: app.applicationId || app.idApp || app.id || Math.random().toString(),
+            candidate: app.fullName || app.candidateName || app.candidateEmail || 'Ứng viên',
+            job: jobMatch?.title || 'Công việc',
+
+
+            applied: new Date(app.createdAt || Date.now()).toLocaleDateString(),
+            status: app.status || 'pending',
+            avatar: (app.fullName || app.candidateName || app.candidateEmail || 'U')[0],
+            jobId: app.jobId
+          };
+        });
+        
+        setRecentApplications(recentAppsList);
+
+
+      } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+      } finally {
+        setIsLoadingStats(false);
+      }
+    };
+    fetchStats();
+  }, [user]);
 
   const activities = [
     {
@@ -577,7 +624,7 @@ const EmployerDashboard = () => {
         >
           <WelcomeContent>
             <h1>{getGreeting()}, {getCompanyName()}! 👋</h1>
-            <p>{language === 'vi' ? 'Hôm nay bạn có 3 ứng viên mới' : 'You have 3 new candidates today'}</p>
+            <p>{language === 'vi' ? `Hôm nay bạn có ${dashboardStats.applicationsList ? dashboardStats.applicationsList.filter(app => new Date(app.createdAt || Date.now()).toDateString() === new Date().toDateString()).length : 0} ứng viên mới` : `You have ${dashboardStats.applicationsList ? dashboardStats.applicationsList.filter(app => new Date(app.createdAt || Date.now()).toDateString() === new Date().toDateString()).length : 0} new candidates today`}</p>
             <QuickActions>
               <ActionButton
                 $variant="primary"
@@ -607,8 +654,8 @@ const EmployerDashboard = () => {
         <StatsGrid>
           <StatsCard
             title={language === 'vi' ? 'Tổng các tin tuyển dụng' : 'Total Job Posts'}
-            value="12"
-            change="+3"
+            value={isLoadingStats ? "..." : dashboardStats.totalJobs.toString()}
+            change=""
             changeText={language === 'vi' ? 'so với tháng trước' : 'vs last month'}
             icon={Briefcase}
             color="#1e40af"
@@ -616,8 +663,8 @@ const EmployerDashboard = () => {
           />
           <StatsCard
             title={language === 'vi' ? 'Tổng hồ sơ ứng tuyển' : 'Total Applications'}
-            value="248"
-            change="+45%"
+            value={isLoadingStats ? "..." : dashboardStats.totalApplications.toString()}
+            change=""
             changeText={language === 'vi' ? 'so với tháng trước' : 'vs last month'}
             icon={Users}
             color="#F59E0B"
@@ -625,8 +672,8 @@ const EmployerDashboard = () => {
           />
           <StatsCard
             title={language === 'vi' ? 'Tổng lượt tiếp cận' : 'Total Views'}
-            value="1,234"
-            change="+12%"
+            value={isLoadingStats ? "..." : dashboardStats.totalViews.toString()}
+            change=""
             changeText={language === 'vi' ? 'so với tuần trước' : 'vs last week'}
             icon={Eye}
             color="#10B981"
@@ -634,8 +681,8 @@ const EmployerDashboard = () => {
           />
           <StatsCard
             title={language === 'vi' ? 'Tổng tin tuyển dụng gấp' : 'Quick Job Posts'}
-            value="8"
-            change="+2"
+            value={isLoadingStats ? "..." : dashboardStats.quickJobs.toString()}
+            change=""
             changeText={language === 'vi' ? 'tháng này' : 'this month'}
             icon={TrendingUp}
             color="#1e40af"
@@ -662,36 +709,74 @@ const EmployerDashboard = () => {
               </a>
             </SectionHeader>
 
-            {recentApplications.map((app, index) => (
-              <ApplicationCard
-                key={app.id}
-                initial={{ opacity: 0, y: 20 }}
+            {recentApplications.length > 0 ? (
+              recentApplications.map((app, index) => (
+                <ApplicationCard
+                  key={app.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + index * 0.1 }}
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <ApplicationHeader>
+                    <CandidateInfo>
+                      <h4>{app.candidate}</h4>
+                      <p><DynamicTranslate text={app.job} showIndicator={false} /></p>
+                    </CandidateInfo>
+                    <ViewProfileButton onClick={() => navigate('/employer/standard-jobs', { state: { candidateId: app.id } })}>
+                      <Eye />
+                      {language === 'vi' ? 'Xem hồ sơ' : 'View Profile'}
+                    </ViewProfileButton>
+                  </ApplicationHeader>
+                  <ApplicationMeta>
+                    <span>
+                      <Clock />
+                      {app.applied}
+                    </span>
+                    <span>
+                      <Download />
+                      {language === 'vi' ? 'Tải CV' : 'Download CV'}
+                    </span>
+                  </ApplicationMeta>
+                </ApplicationCard>
+              ))
+            ) : (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + index * 0.1 }}
-                whileHover={{ scale: 1.02 }}
+                style={{ 
+                  textAlign: 'center', 
+                  padding: '48px 20px', 
+                  background: 'rgba(248, 250, 252, 0.5)', 
+                  borderRadius: '20px', 
+                  border: '2px dashed #e2e8f0',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '12px'
+                }}
               >
-                <ApplicationHeader>
-                  <CandidateInfo>
-                    <h4>{app.candidate}</h4>
-                    <p><DynamicTranslate text={app.job} showIndicator={false} /></p>
-                  </CandidateInfo>
-                  <ViewProfileButton onClick={() => navigate('/employer/standard-jobs', { state: { candidateId: app.id } })}>
-                    <Eye />
-                    {language === 'vi' ? 'Xem hồ sơ' : 'View Profile'}
-                  </ViewProfileButton>
-                </ApplicationHeader>
-                <ApplicationMeta>
-                  <span>
-                    <Clock />
-                    {app.applied}
-                  </span>
-                  <span>
-                    <Download />
-                    {language === 'vi' ? 'Tải CV' : 'Download CV'}
-                  </span>
-                </ApplicationMeta>
-              </ApplicationCard>
-            ))}
+                <div style={{ 
+                  width: '64px', 
+                  height: '64px', 
+                  background: '#f1f5f9', 
+                  borderRadius: '50%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  fontSize: '28px'
+                }}>📋</div>
+                <div>
+                  <h4 style={{ fontSize: '17px', fontWeight: 700, color: '#1e293b', marginBottom: '6px' }}>
+                    {language === 'vi' ? 'Chưa có ứng tuyển mới' : 'No new applications'}
+                  </h4>
+                  <p style={{ fontSize: '14px', color: '#64748b', maxWidth: '300px', margin: '0 auto', lineHeight: 1.5 }}>
+                    {language === 'vi' ? 'Hệ thống tự động lọc bỏ hồ sơ không hợp lệ. Các ứng tuyển mới sẽ xuất hiện tại đây.' : 'Invalid applications are automatically filtered. New applications will appear here.'}
+                  </p>
+                </div>
+              </motion.div>
+            )}
+
           </Section>
 
           {/* Activity Feed */}

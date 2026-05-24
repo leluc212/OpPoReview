@@ -30,164 +30,10 @@ const formatSalaryFromDB = (raw, fallback = 'Thỏa thuận') => {
 };
 
 // Mock job posts data
-const getJobPosts = (language) => [
-  {
-    id: 1,
-    title: language === 'vi' ? 'Cửa hàng trưởng' : 'Store Manager',
-    location: language === 'vi' ? 'Quận 8, TP.HCM' : 'District 8, HCMC',
-    salary: language === 'vi' ? '405.000 VNĐ' : '$27/day',
-    type: language === 'vi' ? 'Bán thời gian' : 'Part-time',
-    shift: '08:00 - 17:00',
-    workDays: language === 'vi' ? '20/03/2026' : '03/20/2026',
-    applicants: 12,
-    views: 156,
-    status: 'active',
-    postedDate: language === 'vi' ? '5 ngày trước' : '5 days ago',
-    deadline: language === 'vi' ? '15 ngày nữa' : '15 days left',
-    description: language === 'vi'
-      ? 'Chúng tôi đang tìm kiếm một Cửa hàng trưởng có kinh nghiệm để quản lý và điều hành cửa hàng. Bạn sẽ chịu trách nhiệm về doanh thu, quản lý nhân sự, đào tạo và phát triển đội ngũ, đồng thời đảm bảo chất lượng dịch vụ khách hàng.\n\nYêu cầu:\n• Kinh nghiệm tối thiểu 3 năm trong vị trí quản lý cửa hàng F&B\n• Kỹ năng lãnh đạo và quản lý đội ngũ xuất sắc\n• Khả năng phân tích số liệu doanh thu và lập kế hoạch kinh doanh\n• Kỹ năng giao tiếp và giải quyết vấn đề tốt\n• Ưu tiên ứng viên có kinh nghiệm trong chuỗi cà phê\n\nQuyền lợi:\n• Lương cơ bản: 15.000.000 VNĐ/tháng + thưởng KPI\n• Bảo hiểm xã hội đầy đủ\n• Thưởng theo doanh thu cửa hàng\n• Cơ hội thăng tiến rõ ràng'
-      : 'We are looking for an experienced Store Manager to manage and operate the store. You will be responsible for revenue, staff management, training and development, while ensuring customer service quality.\n\nRequirements:\n• Minimum 3 years experience in F&B store management\n• Excellent leadership and team management skills\n• Ability to analyze revenue data and business planning\n• Good communication and problem-solving skills\n• Priority for candidates with coffee chain experience\n\nBenefits:\n• Base salary: $600/month + KPI bonus\n• Full social insurance\n• Bonus based on store revenue\n• Clear promotion opportunities'
-  },
-  {
-    id: 2,
-    title: language === 'vi' ? 'Nhân viên Pha Chế' : 'Barista',
-    location: language === 'vi' ? 'Quận 1, TP.HCM' : 'District 1, HCMC',
-    salary: language === 'vi' ? '280.000 VNĐ' : '$16/day',
-    type: language === 'vi' ? 'Bán thời gian' : 'Part-time',
-    shift: '07:00 - 15:00',
-    workDays: language === 'vi' ? '18/03/2026' : '03/18/2026',
-    applicants: 28,
-    views: 342,
-    status: 'active',
-    postedDate: language === 'vi' ? '2 ngày trước' : '2 days ago',
-    deadline: language === 'vi' ? '25 ngày nữa' : '25 days left',
-    description: language === 'vi'
-      ? 'Tìm kiếm nhân viên pha chế nhiệt tình, yêu thích cà phê để gia nhập đội ngũ. Công việc bao gồm pha chế các loại đồ uống, phục vụ khách hàng và duy trì vệ sinh khu vực làm việc.\n\nYêu cầu:\n• Ưu tiên có kinh nghiệm pha chế từ 1 năm trở lên\n• Chấp nhận fresher có đam mê\n• Nhiệt tình, thân thiện, chăm chỉ\n• Có thể làm việc theo ca\n\nQuyền lợi:\n• Lương: 8.000.000 VNĐ/tháng\n• Tips từ khách hàng\n• Được đào tạo kỹ năng pha chế chuyên nghiệp\n• Môi trường làm việc trẻ trung, năng động'
-      : 'Looking for enthusiastic baristas who love coffee to join our team. Work includes preparing beverages, serving customers and maintaining workspace cleanliness.\n\nRequirements:\n• Priority for 1+ years barista experience\n• Accept passionate freshers\n• Enthusiastic, friendly, hardworking\n• Can work in shifts\n\nBenefits:\n• Salary: $320/month\n• Customer tips\n• Professional barista training\n• Young, dynamic work environment'
-  },
-  {
-    id: 3,
-    title: language === 'vi' ? 'Nhân viên Thu Ngân' : 'Cashier',
-    location: language === 'vi' ? 'Quận 7, TP.HCM' : 'District 7, HCMC',
-    salary: language === 'vi' ? '250.000 VNĐ' : '$10/day',
-    type: language === 'vi' ? 'Bán thời gian' : 'Part-time',
-    shift: '13:00 - 18:00',
-    workDays: language === 'vi' ? '15/03/2026' : '03/15/2026',
-    applicants: 15,
-    views: 203,
-    status: 'active',
-    postedDate: language === 'vi' ? '1 tuần trước' : '1 week ago',
-    deadline: language === 'vi' ? '20 ngày nữa' : '20 days left',
-    description: language === 'vi'
-      ? 'Tuyển thu ngân bán thời gian làm việc tại cửa hàng cà phê. Công việc chính là thu tiền, đối soát cuối ca và hỗ trợ các công việc khác khi cần.\n\nYêu cầu:\n• Trung thực, cẩn thận trong công việc\n• Có kỹ năng giao tiếp cơ bản\n• Có thể làm việc 4-6 giờ/ngày\n• Ưu tiên sinh viên, học sinh\n\nQuyền lợi:\n• Lương: 160.000 VNĐ\n• Linh hoạt thời gian làm việc\n• Môi trường thân thiện\n• Được hưởng đồ uống miễn phí trong ca'
-      : 'Hiring part-time cashier to work at coffee shop. Main tasks include cash handling, end-of-shift reconciliation and other support when needed.\n\nRequirements:\n• Honest, careful in work\n• Basic communication skills\n• Can work 4-6 hours/day\n• Priority for students\n\nBenefits:\n• Salary: $2/hour\n• Flexible working hours\n• Friendly environment\n• Free drinks during shift'
-  }
-];
+
 
 // Mock data generator (language-aware)
-const getInitialApplications = (language) => [
-  {
-    id: 1,
-    candidate: language === 'vi' ? 'Đỗ Hoàng Hiếu' : 'Do Hoang Hieu',
-    job: language === 'vi' ? 'Cửa hàng trưởng' : 'Store Manager',
-    applied: language === 'vi' ? '2 giờ trước' : '2 hours ago',
-    status: 'pending',
-    completed: false,
-    marked: false,
-    messagesDeleted: false,
-    email: 'hieuseu@example.com',
-    phone: '0123 456 789',
-    location: language === 'vi' ? 'Quận 1, TP.HCM' : 'District 1, HCMC',
-    experience: language === 'vi' ? '5 năm' : '5 years',
-    education: language === 'vi' ? 'Đại học Kinh Tế' : 'University of Economics',
-    skills: language === 'vi' ? ['Quản lý vận hành', 'Đào tạo nhân sự', 'Quản lý tồn kho', 'Pha chế', 'Chăm sóc khách hàng'] : ['Operations management', 'Staff training', 'Inventory management', 'Barista', 'Customer service'],
-    bio: language === 'vi' ? 'Tôi có 5 năm kinh nghiệm quản lý các chuỗi F&B lớn. Làm việc với niềm đam mê và luôn muốn xây dựng văn hóa làm việc tích cực cho cửa hàng.' : 'I have 5 years of experience managing large F&B chains. Working with passion to build a positive store culture.',
-    reviews: [
-      { id: 1, employer: language === 'vi' ? 'Phúc Long Coffee & Tea' : 'Phuc Long Coffee & Tea', position: language === 'vi' ? 'Cửa hàng trưởng' : 'Store Manager', rating: 5, date: language === 'vi' ? 'Tháng 11/2024' : 'Nov 2024', comment: language === 'vi' ? 'Quản lý xuất sắc, luôn hoàn thành và vượt chỉ tiêu doanh thu. Thái độ làm việc rất chuyên nghiệp.' : 'Excellent manager, always exceeding revenue targets. Very professional attitude.' },
-      { id: 2, employer: language === 'vi' ? 'The Coffee House' : 'The Coffee House', position: language === 'vi' ? 'Giám sát cửa hàng' : 'Store Supervisor', rating: 4, date: language === 'vi' ? 'Tháng 5/2023' : 'May 2023', comment: language === 'vi' ? 'Kỹ năng giải quyết tình huống tốt, training nhân viên hiệu quả. Cần hỗ trợ thêm về làm báo cáo.' : 'Good problem-solving skills, effective staff training. Needs some support with reporting.' },
-    ]
-  },
-  {
-    id: 2,
-    candidate: language === 'vi' ? 'Phạm Lê Duy' : 'Duy san',
-    job: language === 'vi' ? 'Nhân viên Thu Ngân' : 'Cashier',
-    applied: language === 'vi' ? '5 giờ trước' : '5 hours ago',
-    status: 'pending',
-    completed: false,
-    marked: false,
-    messagesDeleted: false,
-    email: 'duuyseu@example.com',
-    phone: '0987 654 321',
-    location: language === 'vi' ? 'Quận Bình Thạnh, TP.HCM' : 'Binh Thanh Dist., HCMC',
-    experience: language === 'vi' ? '2 năm' : '2 years',
-    education: language === 'vi' ? 'Cao đẳng Kinh tế' : 'College of Economics',
-    skills: language === 'vi' ? ['Kế toán', 'Excel', 'Giao tiếp', 'Quản lý tiền mặt'] : ['Accounting', 'Excel', 'Communication', 'Cash handling'],
-    bio: language === 'vi' ? 'Có kinh nghiệm làm việc tại các cửa hàng bán lẻ và nhà hàng. Cẩn thận, chính xác và trung thực.' : 'Experienced in retail and restaurant roles. Detail-oriented, accurate and honest.',
-    reviews: [
-      { id: 1, employer: language === 'vi' ? 'Siêu thị CoopMart' : 'CoopMart Supermarket', position: language === 'vi' ? 'Nhân viên Thu Ngân' : 'Cashier', rating: 4, date: language === 'vi' ? 'Tháng 8/2024' : 'Aug 2024', comment: language === 'vi' ? 'Cẩn thận, ít sai sót trong việc xử lý tiền mặt. Thái độ phục vụ tốt.' : 'Careful with cash handling, few errors. Good customer service attitude.' },
-      { id: 2, employer: language === 'vi' ? 'Nhà hàng Hương Việt' : 'Huong Viet Restaurant', position: language === 'vi' ? 'Nhân viên Thu Ngân kiêm Lễ Tân' : 'Cashier & Receptionist', rating: 3, date: language === 'vi' ? 'Tháng 1/2023' : 'Jan 2023', comment: language === 'vi' ? 'Làm việc ổn định nhưng đôi khi cần nhắc nhở. Cần cải thiện tốc độ xử lý.' : 'Stable work but sometimes needs reminders. Speed of processing needs improvement.' },
-    ]
-  },
-  {
-    id: 3,
-    candidate: 'Trần Phương Tuấn',
-    job: language === 'vi' ? 'Nhân viên Pha Chế' : 'Barista',
-    applied: language === 'vi' ? '1 ngày trước' : '1 day ago',
-    status: 'approved',
-    completed: false,
-    marked: false,
-    messagesDeleted: false,
-    email: 'Trần Phương Tuấn@example.com',
-    phone: '0909 123 456',
-    location: language === 'vi' ? 'Quận 7, TP.HCM' : 'District 7, HCMC',
-    experience: language === 'vi' ? '3 năm' : '3 years',
-    education: language === 'vi' ? 'Trung cấp Ẩm thực' : 'Vocational Culinary School',
-    skills: language === 'vi' ? ['Pha chế cà phê', 'Trà sữa', 'Cocktail', 'Latte Art', 'Phục vụ khách hàng'] : ['Coffee brewing', 'Bubble tea', 'Cocktail', 'Latte Art', 'Customer service'],
-    bio: language === 'vi' ? 'Đam mê nghệ thuật pha chế và tạo ra những ly đồ uống hoàn hảo. Có chứng chỉ Barista quốc tế.' : 'Passionate about beverage crafting and creating perfect drinks. Holds an international Barista certificate.',
-    reviews: [
-      { id: 1, employer: language === 'vi' ? 'The Coffee House' : 'The Coffee House', position: language === 'vi' ? 'Barista chính' : 'Head Barista', rating: 5, date: language === 'vi' ? 'Tháng 9/2024' : 'Sep 2024', comment: language === 'vi' ? 'Tuyệt vời! Kỹ năng pha chế cực kỳ chuyên nghiệp, khách hàng rất hài lòng.' : 'Excellent! Extremely professional barista skills, customers loved the drinks.' },
-      { id: 2, employer: language === 'vi' ? 'Highlands Coffee' : 'Highlands Coffee', position: 'Barista', rating: 5, date: language === 'vi' ? 'Tháng 3/2022' : 'Mar 2022', comment: language === 'vi' ? 'Nhân viên tốt bụng, nhanh nhẹn và luôn giữ vệ sinh khu vực làm việc sạch sẽ.' : 'Kind, agile and always kept the workspace clean.' },
-    ]
-  },
-  {
-    id: 4,
-    candidate: 'Lê Tấn Lực',
-    job: language === 'vi' ? 'Giám sát ca' : 'Shift Supervisor',
-    applied: language === 'vi' ? '2 ngày trước' : '2 days ago',
-    status: 'rejected',
-    completed: false,
-    marked: false,
-    messagesDeleted: false,
-    email: 'Lê Tấn Lựcseu@example.com',
-    phone: '0901 234 567',
-    location: language === 'vi' ? 'Quận Tân Bình, TP.HCM' : 'Tan Binh Dist., HCMC',
-    experience: language === 'vi' ? '4 năm' : '4 years',
-    education: language === 'vi' ? 'Cao đẳng Du lịch' : 'Tourism College',
-    skills: language === 'vi' ? ['Quản lý ca', 'Giải quyết sự cố', 'Pha chế cà phê', 'Làm việc nhóm', 'Giao tiếp'] : ['Shift management', 'Problem solving', 'Coffee brewing', 'Teamwork', 'Communication'],
-    bio: language === 'vi' ? 'Có kinh nghiệm giám sát ca tại nhiều cửa hàng cà phê lớn. Khả năng bao quát công việc, làm việc nhóm tốt và luôn đặt trải nghiệm khách hàng lên hàng đầu.' : 'Experienced in shift supervision at large coffee shops. Good teamwork and customer-first mindset.',
-    reviews: [
-      { id: 1, employer: language === 'vi' ? 'Highlands Coffee' : 'Highlands Coffee', position: language === 'vi' ? 'Trưởng ca' : 'Shift Leader', rating: 4, date: language === 'vi' ? 'Tháng 6/2024' : 'Jun 2024', comment: language === 'vi' ? 'Tác phong nhanh nhẹn, luôn hỗ trợ đồng nghiệp. Đôi khi hơi cứng nhắc trong giao tiếp với khách hàng.' : 'Agile and supportive of colleagues. Sometimes a bit rigid when communicating with customers.' },
-    ]
-  },
-  {
-    id: 5,
-    candidate: 'Lê Minh Khang',
-    job: language === 'vi' ? 'Nhân viên Phục Vụ' : 'Waiter/Server',
-    applied: language === 'vi' ? '1 tuần trước' : '1 week ago',
-    status: 'pending',
-    completed: false,
-    marked: false,
-    messagesDeleted: false,
-    email: 'Lê Minh Khangseu@example.com',
-    phone: '0912 345 678',
-    location: language === 'vi' ? 'Quận Gò Vấp, TP.HCM' : 'Go Vap Dist., HCMC',
-    experience: language === 'vi' ? '1 năm' : '1 year',
-    education: language === 'vi' ? 'Trung học phổ thông' : 'High School',
-    skills: language === 'vi' ? ['Phục vụ bàn', 'Giao tiếp', 'Nhanh nhẹn', 'Làm việc nhóm'] : ['Table service', 'Communication', 'Fast-paced', 'Teamwork'],
-    bio: language === 'vi' ? 'Nhiệt tình, vui vẻ và luôn sẵn sàng học hỏi. Có kinh nghiệm làm việc tại các nhà hàng buffet.' : 'Enthusiastic, friendly and eager to learn. Experienced in buffet restaurant service.',
-    reviews: []
-  },
-];
+
 
 const FILTER_OPTIONS = (language) => ([
   { value: 'today', label: language === 'vi' ? 'Hôm nay' : 'Today' },
@@ -2056,7 +1902,7 @@ const Applications = () => {
   const [timeFilter, setTimeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedCandidate, setSelectedCandidate] = useState(null);
-  const [applications, setApplications] = useState(() => getInitialApplications(language));
+  const [applications, setApplications] = useState([]);
   const [realApplications, setRealApplications] = useState([]); // Real applications from DynamoDB
   const [isLoadingApplications, setIsLoadingApplications] = useState(false);
   const [jobPosts, setJobPosts] = useState([]);
@@ -2157,7 +2003,7 @@ const Applications = () => {
   };
 
   useEffect(() => {
-    setApplications(getInitialApplications(language));
+    setApplications([]);
   }, [language]);
 
   // Load real applications from DynamoDB when switching to applications tab
@@ -2184,30 +2030,37 @@ const Applications = () => {
         console.log('✅ Loaded applications:', allApplications);
 
         // Transform to UI format
-        const transformedApplications = allApplications.map(app => ({
-          id: app.applicationId,
-          applicationId: app.applicationId,
-          candidate: app.candidateEmail || 'Unknown',
-          candidateId: app.candidateId,
-          candidateEmail: app.candidateEmail,
-          job: app.jobTitle || 'Unknown Position',
-          jobId: app.jobId,
-          applied: new Date(app.appliedAt).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US'),
-          status: app.status || 'pending',
-          cvUrl: app.cvUrl,
-          cvFileName: app.cvFilename || 'CV.pdf',
-          email: app.candidateEmail,
-          phone: '-',
-          location: '-',
-          education: '-',
-          experience: '-',
-          skills: [],
-          bio: '-',
-          reviews: [],
-          marked: false
-        }));
+        const transformedApplications = allApplications
+          .filter(app => {
+            // Filter out test records without identification (Name or Email)
+            return app.fullName?.trim() || app.candidateName?.trim() || (app.candidateEmail && app.candidateEmail !== 'Unknown');
+          })
+
+          .map(app => ({
+            id: app.applicationId,
+            applicationId: app.applicationId,
+            candidate: app.fullName || app.candidateName || app.candidateEmail || 'Unknown',
+            candidateId: app.candidateId,
+            candidateEmail: app.candidateEmail,
+            job: app.jobTitle || 'Unknown Position',
+            jobId: app.jobId,
+            applied: new Date(app.appliedAt).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US'),
+            status: app.status || 'pending',
+            cvUrl: app.cvUrl,
+            cvFileName: app.cvFilename || 'CV.pdf',
+            email: app.candidateEmail,
+            phone: '-',
+            location: '-',
+            education: '-',
+            experience: '-',
+            skills: [],
+            bio: '-',
+            reviews: [],
+            marked: false
+          }));
 
         setRealApplications(transformedApplications);
+
         console.log('✅ Transformed applications:', transformedApplications);
       } catch (error) {
         console.error('❌ Error loading applications:', error);
@@ -2325,7 +2178,7 @@ const Applications = () => {
   }, [location.state, applications, realApplications, navigate, location.pathname]);
 
   const filteredApplications = useMemo(() => {
-    const applicationsToFilter = realApplications.length > 0 ? realApplications : applications;
+    const applicationsToFilter = realApplications;
 
     const toHours = (applied = '') => {
       const s = applied.toLowerCase();
@@ -2365,7 +2218,7 @@ const Applications = () => {
   const handleFilterToggle = useCallback(() => { }, []);
 
   const handleCompleteJob = useCallback((id) => {
-    setApplications(prev => prev.map(app =>
+    setRealApplications(prev => prev.map(app =>
       app.id === id
         ? { ...app, completed: true, status: 'completed', messagesDeleted: true }
         : app
@@ -2373,19 +2226,19 @@ const Applications = () => {
   }, []);
 
   const handleMarkCandidate = useCallback((id) => {
-    setApplications(prev => prev.map(app =>
+    setRealApplications(prev => prev.map(app =>
       app.id === id ? { ...app, marked: !app.marked } : app
     ));
   }, []);
 
   const handleApproveApplication = useCallback((id) => {
-    setApplications(prev => prev.map(app =>
+    setRealApplications(prev => prev.map(app =>
       app.id === id ? { ...app, status: 'approved' } : app
     ));
   }, []);
 
   const handleRejectApplication = useCallback((id) => {
-    setApplications(prev => prev.map(app =>
+    setRealApplications(prev => prev.map(app =>
       app.id === id ? { ...app, status: 'rejected' } : app
     ));
   }, []);
