@@ -1636,11 +1636,14 @@ const translateJobType = (typeStr, language) => {
   return typeStr;
 };
 
+<<<<<<< HEAD
 // Jobs data - moved outside component to avoid re-creation on each render
 // Jobs data - transitions to dynamic API sources
 
 
 
+=======
+>>>>>>> d4f1ac3603c2dbecb8d2a90c8ad563ade591092f
 const JobListing = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
@@ -1807,7 +1810,11 @@ const JobListing = () => {
   // Merge DynamoDB jobs AND quick jobs
   const allJobs = useMemo(() => {
     return [...dynamoDBJobs, ...quickJobs];
+<<<<<<< HEAD
   }, [dynamoDBJobs, quickJobs]);
+=======
+  }, [dynamoDBJobs, quickJobs, language]);
+>>>>>>> d4f1ac3603c2dbecb8d2a90c8ad563ade591092f
 
   const [quickFilter, setQuickFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
