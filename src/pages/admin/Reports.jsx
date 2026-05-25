@@ -673,37 +673,37 @@ const Reports = () => {
   // Process data for statistics
   const statsSummary = useMemo(() => adminReportService.calculateStats(reportData), [reportData]);
 
-  // Stats display configuration
+  // Stats display configuration with dynamic trends
   const stats = [
     { 
       label: language === 'vi' ? 'Tổng Ứng Viên' : 'Total Candidates',
       value: statsSummary.totalCandidates.toString(),
-      change: '+100%', 
-      positive: true,
+      change: statsSummary.trends.candidates, 
+      positive: !statsSummary.trends.candidates.includes('-'),
       icon: Users,
       color: '#3b82f6'
     },
     { 
       label: language === 'vi' ? 'Tổng Nhà Tuyển Dụng' : 'Total Employers',
       value: statsSummary.totalEmployers.toString(),
-      change: '+100%',
-      positive: true,
+      change: statsSummary.trends.employers,
+      positive: !statsSummary.trends.employers.includes('-'),
       icon: Building2,
       color: '#8b5cf6'
     },
     { 
       label: language === 'vi' ? 'Tin tiêu chuẩn' : 'Standard Jobs',
       value: statsSummary.totalStandardJobs.toString(),
-      change: '+100%',
-      positive: true,
+      change: statsSummary.trends.standardJobs,
+      positive: !statsSummary.trends.standardJobs.includes('-'),
       icon: Briefcase,
       color: '#10b981'
     },
     { 
       label: language === 'vi' ? 'Tin tuyển gấp' : 'Urgent Jobs',
       value: statsSummary.totalQuickJobs.toString(),
-      change: '+100%',
-      positive: true,
+      change: statsSummary.trends.quickJobs,
+      positive: !statsSummary.trends.quickJobs.includes('-'),
       icon: Zap,
       color: '#f59e0b'
     },
@@ -749,7 +749,7 @@ const Reports = () => {
       .slice(0, 5);
   }, [reportData.standardJobs, reportData.quickJobs, reportData.employers]);
 
-  const districts = ['Tất cả quận', 'Quận 1', 'Quận 2', 'Quận 3', 'Quận 4', 'Quận 5', 'Quận Thủ Đức', 'Quận Bình Thạnh'];
+  const districts = useMemo(() => adminReportService.getDynamicDistricts(reportData), [reportData]);
 
   // Data for tables - DYNAMIC FROM SUBSCRIPTIONS
   const packageStats = useMemo(() => 
@@ -1158,7 +1158,7 @@ const Reports = () => {
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
                 <span style={{ color: '#64748b' }}>{language === 'vi' ? 'Tỉ lệ tăng trưởng' : 'Growth Rate'}</span>
-                <span style={{ fontWeight: 700, color: '#3b82f6' }}>+100%</span>
+                <span style={{ fontWeight: 700, color: '#3b82f6' }}>{statsSummary.trends.revenue}</span>
               </div>
             </div>
           </TableCard>

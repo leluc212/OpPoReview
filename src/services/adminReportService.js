@@ -62,10 +62,58 @@ class AdminReportService {
   }
 
   /**
-   * Process and calculate statistics from raw data
+   * Process and calculate statistics from raw data with trends
    */
   calculateStats(data) {
     const { candidates, employers, standardJobs, quickJobs, subscriptions } = data;
+
+    // Time periods for trends (Current vs Previous Month)
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const prevMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+
+    const isCurrentPeriod = (dateStr) => {
+      if (!dateStr) return false;
+      const d = new Date(dateStr);
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    };
+
+    const isPreviousPeriod = (dateStr) => {
+      if (!dateStr) return false;
+      const d = new Date(dateStr);
+      return d.getMonth() === prevMonth && d.getFullYear() === prevMonthYear;
+    };
+
+    const calculateGrowth = (current, previous) => {
+      if (previous === 0) return current > 0 ? '+100%' : '0%';
+      const growth = ((current - previous) / previous) * 100;
+      return (growth >= 0 ? '+' : '') + growth.toFixed(1) + '%';
+    };
+
+    // Calculate counts for trend comparison
+    const currCandidates = candidates.filter(c => isCurrentPeriod(c.createdAt)).length;
+    const prevCandidates = candidates.filter(c => isPreviousPeriod(c.createdAt)).length;
+    
+    const currEmployers = employers.filter(e => isCurrentPeriod(e.createdAt)).length;
+    const prevEmployers = employers.filter(e => isPreviousPeriod(e.createdAt)).length;
+    
+    const currStandardJobs = standardJobs.filter(j => isCurrentPeriod(j.createdAt)).length;
+    const prevStandardJobs = standardJobs.filter(j => isPreviousPeriod(j.createdAt)).length;
+    
+    const currQuickJobs = quickJobs.filter(j => isCurrentPeriod(j.createdAt)).length;
+    const prevQuickJobs = quickJobs.filter(j => isPreviousPeriod(j.createdAt)).length;
+
+    // Revenue calculation with trend
+    const getRevenueForPeriod = (list, filterFn) => {
+      return list
+        .filter(s => (s.status === 'active' || s.status === 'expired' || s.status === 'expiring') && filterFn(s.purchaseDateTime || s.createdAt))
+        .reduce((sum, s) => sum + (parseFloat(s.price) || 0), 0);
+    };
+
+    const currRevenue = getRevenueForPeriod(subscriptions, isCurrentPeriod);
+    const prevRevenue = getRevenueForPeriod(subscriptions, isPreviousPeriod);
 
     // Basic counts
     const totalCandidates = candidates.length;
@@ -73,15 +121,10 @@ class AdminReportService {
     const totalStandardJobs = standardJobs.length;
     const totalQuickJobs = quickJobs.length;
 
-    // Job categories
-    const activeStandardJobs = standardJobs.filter(j => j.status === 'active').length;
-    const activeQuickJobs = quickJobs.filter(j => j.status === 'active' || j.status === 'pending').length;
-
     // Subscription stats
     const activeSubscriptions = subscriptions.filter(s => s.status === 'active').length;
     const pendingSubscriptions = subscriptions.filter(s => s.status === 'pending' || s.approvalStatus === 'pending').length;
     
-    // Revenue calculation
     const totalRevenue = subscriptions
       .filter(s => s.status === 'active' || s.status === 'expired' || s.status === 'expiring')
       .reduce((sum, s) => sum + (parseFloat(s.price) || 0), 0);
@@ -91,12 +134,43 @@ class AdminReportService {
       totalEmployers,
       totalStandardJobs,
       totalQuickJobs,
-      activeStandardJobs,
-      activeQuickJobs,
       activeSubscriptions,
       pendingSubscriptions,
-      totalRevenue
+      totalRevenue,
+      trends: {
+        candidates: calculateGrowth(currCandidates, prevCandidates),
+        employers: calculateGrowth(currEmployers, prevEmployers),
+        standardJobs: calculateGrowth(currStandardJobs, prevStandardJobs),
+        quickJobs: calculateGrowth(currQuickJobs, prevQuickJobs),
+        revenue: calculateGrowth(currRevenue, prevRevenue)
+      }
     };
+  }
+
+  /**
+   * Extract unique districts from available data
+   */
+  getDynamicDistricts(data) {
+    const { candidates, standardJobs, quickJobs } = data;
+    const locations = new Set();
+    
+    const extract = (list, field) => {
+      if (!Array.isArray(list)) return;
+      list.forEach(item => {
+        if (item[field] && typeof item[field] === 'string') {
+          // Normalize: "Quận 1, TP.HCM" -> "Quận 1"
+          const district = item[field].split(',')[0].trim();
+          if (district && district.length < 30) locations.add(district);
+        }
+      });
+    };
+
+    extract(candidates, 'location');
+    extract(standardJobs, 'location');
+    extract(quickJobs, 'location');
+
+    const result = Array.from(locations).sort();
+    return result.length > 0 ? ['Tất cả quận', ...result] : ['Tất cả quận', 'Quận 1', 'Quận 2', 'Quận 3', 'Quận 4', 'Quận 5', 'Quận Thủ Đức', 'Quận Bình Thạnh'];
   }
 
   /**
