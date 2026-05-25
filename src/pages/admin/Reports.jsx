@@ -1,8 +1,10 @@
-import { useState } from 'react';
+// @ts-nocheck
+import { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
-import { jobPosts } from '../../data/jobPosts';
+import adminReportService from '../../services/adminReportService';
+import { motion } from 'framer-motion';
 import { 
   BarChart3,
   TrendingUp,
@@ -627,161 +629,179 @@ const Reports = () => {
   const [activeTab, setActiveTab] = useState('statistics');
   const [dateFilter, setDateFilter] = useState('month');
   const [locationFilter, setLocationFilter] = useState('all');
+  
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [reportData, setReportData] = useState({
+    candidates: [],
+    employers: [],
+    standardJobs: [],
+    quickJobs: [],
+    subscriptions: []
+  });
+
+  // Load report data from consolidated service
+  useEffect(() => {
+    const fetchAllData = async () => {
+      try {
+        setLoading(true);
+        const data = await adminReportService.getReportsData();
+        setReportData(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching report data:', err);
+        setError(language === 'vi' 
+          ? 'Không thể tải đầy đủ dữ liệu báo cáo. Có thể do lỗi kết nối hoặc CORS với AWS.' 
+          : 'Could not load complete report data. This may be due to connection or CORS issues with AWS.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllData();
+  }, [language]);
 
   // Handler xuất Excel (chưa implement thư viện)
   const handleExportExcel = () => {
     alert(
       language === 'vi' 
         ? '🚧 Chức năng xuất Excel đang được phát triển\n\n📊 Dữ liệu sẽ được xuất:\n- Thống kê dịch vụ\n- Lịch sử mua gói\n- Trạng thái các gói\n- Báo cáo doanh thu'
-        : '🚧 Excel export feature is under development\n\n📊 Data to be exported:\n- Service statistics\n- Purchase history\n- Package status\n- Revenue reports'
+        : '🚧 Excel export feature is under development\n\n📊 Dữ liệu sẽ được xuất:\n- Thống kê dịch vụ\n- Lịch sử mua gói\n- Trạng thái các gói\n- Báo cáo doanh thu'
     );
   };
 
-  // Calculate real statistics
-  const totalCandidates = 100;
-  const totalEmployers = 30;
-  const totalPosts = jobPosts.length;
-  const urgentPosts = jobPosts.filter(post => post.category === 'urgent').length;
-  const standardPosts = jobPosts.filter(post => post.category === 'standard').length;
+  // Process data for statistics
+  const statsSummary = useMemo(() => adminReportService.calculateStats(reportData), [reportData]);
 
-  // Stats data
+  // Stats display configuration
   const stats = [
     { 
       label: language === 'vi' ? 'Tổng Ứng Viên' : 'Total Candidates',
-      value: totalCandidates.toString(),
-      change: '+12%',
+      value: statsSummary.totalCandidates.toString(),
+      change: '+100%', 
       positive: true,
       icon: Users,
       color: '#3b82f6'
     },
     { 
       label: language === 'vi' ? 'Tổng Nhà Tuyển Dụng' : 'Total Employers',
-      value: totalEmployers.toString(),
-      change: '+8%',
+      value: statsSummary.totalEmployers.toString(),
+      change: '+100%',
       positive: true,
       icon: Building2,
       color: '#8b5cf6'
     },
     { 
-      label: language === 'vi' ? 'Công việc Tiêu chuẩn' : 'Standard Jobs',
-      value: standardPosts.toString(),
-      change: '+15%',
+      label: language === 'vi' ? 'Tin tiêu chuẩn' : 'Standard Jobs',
+      value: statsSummary.totalStandardJobs.toString(),
+      change: '+100%',
       positive: true,
       icon: Briefcase,
       color: '#10b981'
     },
     { 
-      label: language === 'vi' ? 'Công việc Tuyển gấp' : 'Urgent Jobs',
-      value: urgentPosts.toString(),
-      change: '+23%',
+      label: language === 'vi' ? 'Tin tuyển gấp' : 'Urgent Jobs',
+      value: statsSummary.totalQuickJobs.toString(),
+      change: '+100%',
       positive: true,
       icon: Zap,
       color: '#f59e0b'
     },
   ];
 
-  // Revenue data for Công việc Tiêu chuẩn (Standard Jobs)
-  const standardRevenueData = [
-    { month: 'T1', revenue: 85 },
-    { month: 'T2', revenue: 92 },
-    { month: 'T3', revenue: 98 },
-    { month: 'T4', revenue: 105 },
-    { month: 'T5', revenue: 112 },
-    { month: 'T6', revenue: 90 },
-  ];
-
-  // Revenue data for Công việc Tuyển gấp (Urgent Jobs)
-  const urgentRevenueData = [
-    { month: 'T1', revenue: 95 },
-    { month: 'T2', revenue: 103 },
-    { month: 'T3', revenue: 112 },
-    { month: 'T4', revenue: 120 },
-    { month: 'T5', revenue: 123 },
-    { month: 'T6', revenue: 127 },
-  ];
-
-  const maxStandardRevenue = Math.max(...standardRevenueData.map(d => d.revenue));
-  const maxUrgentRevenue = Math.max(...urgentRevenueData.map(d => d.revenue));
-
-  // Top employers by posts count (Đăng nhiều tin nhất)
-  const employerPostCounts = {};
-  jobPosts.forEach(post => {
-    employerPostCounts[post.company] = (employerPostCounts[post.company] || 0) + 1;
-  });
+  // Revenue charts data
+  const revenueData = useMemo(() => adminReportService.getRevenueByMonth(reportData.subscriptions), [reportData.subscriptions]);
+  const maxRevenue = useMemo(() => Math.max(...revenueData.map(d => d.revenue), 10), [revenueData]);
   
-  const topEmployersByPosts = Object.entries(employerPostCounts)
-    .map(([name, count]) => ({ name, posts: count }))
-    .sort((a, b) => b.posts - a.posts)
-    .slice(0, 5);
+  // Top employers processing - REVENUE BASED
+  const topEmployersByRevenue = useMemo(() => 
+    adminReportService.getTopEmployersByRevenue(reportData.subscriptions), 
+  [reportData.subscriptions]);
 
-  // Top employers by package purchases (Mua nhiều gói nhất) - simulated data
-  const topEmployersByPackages = [
-    { name: 'Chill Out Beer Club', packages: 12, revenue: '18.5M' },
-    { name: 'Bia Sệt 123', packages: 10, revenue: '15.2M' },
-    { name: 'Beer Garden Phố', packages: 9, revenue: '14.8M' },
-    { name: 'Nướng Ngói Gia Bảo', packages: 8, revenue: '12.3M' },
-    { name: 'Lẩu Bò Sài Gòn Vi Vu', packages: 7, revenue: '10.9M' },
-  ];
+  const topEmployersByPosts = useMemo(() => {
+    const counts = {};
+    const formattedStandard = Array.isArray(reportData.standardJobs) ? reportData.standardJobs : [];
+    const formattedQuick = Array.isArray(reportData.quickJobs) ? reportData.quickJobs : [];
+    const employersList = Array.isArray(reportData.employers) ? reportData.employers : [];
 
-  // Districts in Ho Chi Minh City
-  const districts = [
-    'Tất cả quận',
-    'Quận 1', 'Quận 2', 'Quận 3', 'Quận 4', 'Quận 5',
-    'Quận 6', 'Quận 7', 'Quận 8', 'Quận 9', 'Quận 10',
-    'Quận 11', 'Quận 12', 'Quận Bình Thạnh', 'Quận Tân Bình',
-    'Quận Tân Phú', 'Quận Phú Nhuận', 'Quận Gò Vấp',
-    'Quận Bình Tân', 'Quận Thủ Đức'
-  ];
+    [...formattedStandard, ...formattedQuick].forEach(job => {
+      let company = job.companyName || job.company;
+      
+      // If company name is missing, try to find it from the employer profile list
+      if (!company || company === 'Unknown Company') {
+        const profile = employersList.find(e => 
+          (job.employerId && e.userId === job.employerId) || 
+          (job.employerEmail && e.email === job.employerEmail)
+        );
+        if (profile) {
+          company = profile.companyName || profile.businessName;
+        }
+      }
+      
+      const finalName = company || 'Unknown Company';
+      counts[finalName] = (counts[finalName] || 0) + 1;
+    });
 
-  // Service packages data for Công việc Tiêu chuẩn
-  const standardJobServices = [
-    { id: 1, name: 'Quick Boost', price: '145.000 VND', duration: '7 ngày', status: 'active' },
-    { id: 2, name: 'Hot Search', price: '245.000 VND', duration: '7 ngày', status: 'active' },
-    { id: 3, name: 'Spotlight Banner', price: '495.000 VND', duration: '7 ngày', status: 'active' },
-    { id: 4, name: 'Top Spotlight', price: '745.000 VND', duration: '7 ngày', status: 'active' },
-  ];
+    return Object.entries(counts)
+      .map(([name, posts]) => ({ name, posts }))
+      .sort((a, b) => b.posts - a.posts)
+      .filter(item => item.name !== 'Unknown Company') // Optional: Filter out if still unknown
+      .slice(0, 5);
+  }, [reportData.standardJobs, reportData.quickJobs, reportData.employers]);
 
-  // Service packages data for Công việc Tuyển gấp
-  const urgentJobServices = [
-    { id: 1, name: 'Quick Boost Gấp', price: '245.000 VND', duration: '7 ngày', status: 'active' },
-    { id: 2, name: 'Hot Search Gấp', price: '395.000 VND', duration: '7 ngày', status: 'active' },
-    { id: 3, name: 'Spotlight Banner Gấp', price: '745.000 VND', duration: '7 ngày', status: 'active' },
-    { id: 4, name: 'Top Spotlight Gấp', price: '1.095.000 VND', duration: '7 ngày', status: 'active' },
-  ];
+  const districts = ['Tất cả quận', 'Quận 1', 'Quận 2', 'Quận 3', 'Quận 4', 'Quận 5', 'Quận Thủ Đức', 'Quận Bình Thạnh'];
 
-  // Purchase history for Công việc Tiêu chuẩn
-  const standardPurchaseHistory = [
-    { id: 1, employer: 'Lẩu Bò Sài Gòn Vi Vu', package: 'Hot Search', price: '245.000 VND', date: '08/03/2026', status: 'active' },
-    { id: 2, employer: 'Phở Gia Truyền 1954', package: 'Spotlight Banner', price: '495.000 VND', date: '07/03/2026', status: 'active' },
-    { id: 3, employer: 'Urban Coffee', package: 'Quick Boost', price: '145.000 VND', date: '06/03/2026', status: 'expired' },
-    { id: 4, employer: 'Dimsum House', package: 'Top Spotlight', price: '745.000 VND', date: '05/03/2026', status: 'active' },
-    { id: 5, employer: 'Bánh Mì PewPew', package: 'Hot Search', price: '245.000 VND', date: '04/03/2026', status: 'active' },
-  ];
+  // Data for tables - DYNAMIC FROM SUBSCRIPTIONS
+  const packageStats = useMemo(() => 
+    adminReportService.calculatePackageStats(reportData.subscriptions), 
+  [reportData.subscriptions]);
 
-  // Purchase history for Công việc Tuyển gấp
-  const urgentPurchaseHistory = [
-    { id: 1, employer: 'Chill Out Beer Club', package: 'Quick Boost Gấp', price: '245.000 VND', date: '08/03/2026', status: 'active' },
-    { id: 2, employer: 'Bia Sệt 123', package: 'Hot Search Gấp', price: '395.000 VND', date: '08/03/2026', status: 'active' },
-    { id: 3, employer: 'Beer Garden Phố', package: 'Spotlight Banner Gấp', price: '745.000 VND', date: '07/03/2026', status: 'active' },
-    { id: 4, employer: 'Nướng Ngói Gia Bảo', package: 'Top Spotlight Gấp', price: '1.095.000 VND', date: '07/03/2026', status: 'active' },
-    { id: 5, employer: 'Lẩu Phan', package: 'Quick Boost Gấp', price: '245.000 VND', date: '06/03/2026', status: 'expired' },
-  ];
+  const standardServices = useMemo(() => 
+    packageStats.filter(p => p.type === 'standard'), 
+  [packageStats]);
 
-  // Package status for Công việc Tiêu chuẩn
-  const standardPackageStatus = [
-    { id: 1, employer: 'Lẩu Bò Sài Gòn Vi Vu', package: 'Hot Search', startDate: '08/03/2026', endDate: '10/03/2026', status: 'active' },
-    { id: 2, employer: 'Phở Gia Truyền 1954', package: 'Spotlight Banner', startDate: '07/03/2026', endDate: '14/03/2026', status: 'active' },
-    { id: 3, employer: 'Urban Coffee', package: 'Quick Boost', startDate: '06/03/2026', endDate: '07/03/2026', status: 'expired' },
-    { id: 4, employer: 'Dimsum House', package: 'Top Spotlight', startDate: '05/03/2026', endDate: '19/03/2026', status: 'active' },
-  ];
+  const urgentServices = useMemo(() => 
+    packageStats.filter(p => p.type === 'urgent'), 
+  [packageStats]);
 
-  // Package status for Công việc Tuyển gấp
-  const urgentPackageStatus = [
-    { id: 1, employer: 'Chill Out Beer Club', package: 'Quick Boost Gấp', startDate: '08/03/2026', endDate: '08/03/2026', status: 'active' },
-    { id: 2, employer: 'Bia Sệt 123', package: 'Hot Search Gấp', startDate: '08/03/2026', endDate: '09/03/2026', status: 'active' },
-    { id: 3, employer: 'Beer Garden Phố', package: 'Spotlight Banner Gấp', startDate: '07/03/2026', endDate: '10/03/2026', status: 'active' },
-    { id: 4, employer: 'Nướng Ngói Gia Bảo', package: 'Top Spotlight Gấp', startDate: '07/03/2026', endDate: '14/03/2026', status: 'active' },
-  ];
+  if (loading) {
+    return (
+      <DashboardLayout role="admin">
+        <PageContainer style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <div style={{ textAlign: 'center' }}>
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+              style={{ width: '40px', height: '40px', border: '4px solid #f3f3f3', borderTop: '4px solid #3b82f6', borderRadius: '50%', margin: '0 auto 16px' }}
+            />
+            <p>{language === 'vi' ? 'Đang tải dữ liệu báo cáo...' : 'Loading report data...'}</p>
+          </div>
+        </PageContainer>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout role="admin">
+        <PageContainer style={{ textAlign: 'center', padding: '40px' }}>
+          <div style={{ color: '#ef4444', marginBottom: '16px' }}>{error}</div>
+          <button onClick={() => window.location.reload()} style={{ padding: '8px 16px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
+            {language === 'vi' ? 'Thử lại' : 'Retry'}
+          </button>
+        </PageContainer>
+      </DashboardLayout>
+    );
+  }
+
+  // Filter subscriptions for history and status tabs
+  const standardSubscriptions = reportData.subscriptions.filter(s => 
+    !s.packageName?.includes('Gấp') && !s.packageName?.includes('Urgent')
+  );
+  
+  const urgentSubscriptions = reportData.subscriptions.filter(s => 
+    s.packageName?.includes('Gấp') || s.packageName?.includes('Urgent')
+  );
 
   return (
     <DashboardLayout role="admin" key={language}>
@@ -853,12 +873,14 @@ const Reports = () => {
                       <TableHeaderCell>{language === 'vi' ? 'Tên gói' : 'Package Name'}</TableHeaderCell>
                       <TableHeaderCell $align="center">{language === 'vi' ? 'Giá' : 'Price'}</TableHeaderCell>
                       <TableHeaderCell $align="center">{language === 'vi' ? 'Thời hạn' : 'Duration'}</TableHeaderCell>
-                      <TableHeaderCell $align="center">{language === 'vi' ? 'Trạng thái' : 'Status'}</TableHeaderCell>
+                      <TableHeaderCell $align="center">{language === 'vi' ? 'Đang dùng' : 'Active'}</TableHeaderCell>
+                      <TableHeaderCell $align="center">{language === 'vi' ? 'Tổng mua' : 'Total Sales'}</TableHeaderCell>
+                      <TableHeaderCell $align="center">{language === 'vi' ? 'Doanh thu' : 'Revenue'}</TableHeaderCell>
                     </TableHeaderRow>
                   </thead>
                   <tbody>
-                    {standardJobServices.map((service, index) => (
-                      <TableRow key={service.id}>
+                    {standardServices.length > 0 ? standardServices.map((service, index) => (
+                      <TableRow key={service.name}>
                         <TableCell $align="center" style={{ fontWeight: 600, color: '#6b7280' }}>
                           {index + 1}
                         </TableCell>
@@ -867,13 +889,19 @@ const Reports = () => {
                           {service.price}
                         </TableCell>
                         <TableCell $align="center">{service.duration}</TableCell>
-                        <TableCell $align="center">
-                          <StatusBadge $status={service.status}>
-                            {language === 'vi' ? 'Hoạt động' : 'Active'}
-                          </StatusBadge>
+                        <TableCell $align="center" style={{ fontWeight: 700 }}>{service.activeCount}</TableCell>
+                        <TableCell $align="center">{service.totalCount}</TableCell>
+                        <TableCell $align="center" style={{ fontWeight: 700, color: '#3b82f6' }}>
+                          {service.revenue}
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )) : (
+                      <tr>
+                        <td colSpan="7" style={{ textAlign: 'center', padding: '24px', color: '#64748b', fontSize: '15px' }}>
+                          {language === 'vi' ? 'chưa có' : 'no data'}
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </ServiceTableGrid>
               </ServiceTableContent>
@@ -892,12 +920,14 @@ const Reports = () => {
                       <TableHeaderCell>{language === 'vi' ? 'Tên gói' : 'Package Name'}</TableHeaderCell>
                       <TableHeaderCell $align="center">{language === 'vi' ? 'Giá' : 'Price'}</TableHeaderCell>
                       <TableHeaderCell $align="center">{language === 'vi' ? 'Thời hạn' : 'Duration'}</TableHeaderCell>
-                      <TableHeaderCell $align="center">{language === 'vi' ? 'Trạng thái' : 'Status'}</TableHeaderCell>
+                      <TableHeaderCell $align="center">{language === 'vi' ? 'Đang dùng' : 'Active'}</TableHeaderCell>
+                      <TableHeaderCell $align="center">{language === 'vi' ? 'Tổng mua' : 'Total Sales'}</TableHeaderCell>
+                      <TableHeaderCell $align="center">{language === 'vi' ? 'Doanh thu' : 'Revenue'}</TableHeaderCell>
                     </TableHeaderRow>
                   </thead>
                   <tbody>
-                    {urgentJobServices.map((service, index) => (
-                      <TableRow key={service.id}>
+                    {urgentServices.length > 0 ? urgentServices.map((service, index) => (
+                      <TableRow key={service.name}>
                         <TableCell $align="center" style={{ fontWeight: 600, color: '#6b7280' }}>
                           {index + 1}
                         </TableCell>
@@ -906,13 +936,19 @@ const Reports = () => {
                           {service.price}
                         </TableCell>
                         <TableCell $align="center">{service.duration}</TableCell>
-                        <TableCell $align="center">
-                          <StatusBadge $status={service.status}>
-                            {language === 'vi' ? 'Hoạt động' : 'Active'}
-                          </StatusBadge>
+                        <TableCell $align="center" style={{ fontWeight: 700 }}>{service.activeCount}</TableCell>
+                        <TableCell $align="center">{service.totalCount}</TableCell>
+                        <TableCell $align="center" style={{ fontWeight: 700, color: '#3b82f6' }}>
+                          {service.revenue}
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )) : (
+                      <tr>
+                        <td colSpan="7" style={{ textAlign: 'center', padding: '24px', color: '#64748b', fontSize: '15px' }}>
+                          {language === 'vi' ? 'chưa có' : 'no data'}
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </ServiceTableGrid>
               </ServiceTableContent>
@@ -943,10 +979,12 @@ const Reports = () => {
           <ChartCard>
             <ChartHeader>
               <h3>
-                <Briefcase />
-                {language === 'vi' ? 'Doanh Thu Công việc Tiêu chuẩn' : 'Standard Jobs Revenue'}
+                <BarChart3 />
+                {language === 'vi' ? 'Tổng Doanh Thu Hàng Tháng' : 'Total Monthly Revenue'}
               </h3>
-              <RevenueTotal>{language === 'vi' ? '90.000.000 VNĐ' : '90.000.000 VNĐ'}</RevenueTotal>
+              <RevenueTotal>
+                {(statsSummary.totalRevenue / 1000000).toFixed(1)}M VND
+              </RevenueTotal>
             </ChartHeader>
             <ChartContainer>
               <ChartSVG viewBox="0 0 700 300">
@@ -962,39 +1000,41 @@ const Reports = () => {
                   />
                 ))}
                 
-                {standardRevenueData.map((d, i) => {
-                  const barHeight = (d.revenue / maxStandardRevenue) * 180;
+                {revenueData.map((d, i) => {
+                  const barHeight = (d.revenue / maxRevenue) * 180;
                   return (
                     <g key={i}>
                       <defs>
-                        <linearGradient id={`standardGrad${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                          <stop offset="0%" stopColor="#10b981" stopOpacity="0.8" />
-                          <stop offset="100%" stopColor="#10b981" stopOpacity="0.4" />
+                        <linearGradient id={`revGrad${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.8" />
+                          <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.4" />
                         </linearGradient>
                       </defs>
                       <rect
-                        x={80 + i * 100}
+                        x={65 + i * 52}
                         y={250 - barHeight}
-                        width="60"
+                        width="30"
                         height={barHeight}
-                        fill={`url(#standardGrad${i})`}
-                        rx="6"
+                        fill={`url(#revGrad${i})`}
+                        rx="4"
                       />
+                      {d.revenue > 0 && (
+                        <text
+                          x={80 + i * 52}
+                          y={240 - barHeight}
+                          textAnchor="middle"
+                          fontSize="10"
+                          fill="#3b82f6"
+                          fontWeight="700"
+                        >
+                          {d.revenue.toFixed(1)}
+                        </text>
+                      )}
                       <text
-                        x={110 + i * 100}
-                        y={240 - barHeight}
-                        textAnchor="middle"
-                        fontSize="12"
-                        fill="#10b981"
-                        fontWeight="700"
-                      >
-                        {d.revenue}M
-                      </text>
-                      <text
-                        x={110 + i * 100}
+                        x={80 + i * 52}
                         y="275"
                         textAnchor="middle"
-                        fontSize="13"
+                        fontSize="11"
                         fill="#6b7280"
                         fontWeight="600"
                       >
@@ -1007,72 +1047,50 @@ const Reports = () => {
             </ChartContainer>
           </ChartCard>
 
-          <ChartCard>
+          <TableCard>
             <ChartHeader>
               <h3>
-                <Zap />
-                {language === 'vi' ? 'Doanh Thu Công việc Tuyển gấp' : 'Urgent Jobs Revenue'}
+                <Package />
+                {language === 'vi' ? 'Mua Nhiều Gói Nhất' : 'Most Packages Purchased'}
               </h3>
-              <RevenueTotal>{language === 'vi' ? '127 triệu VNĐ' : '127M VND'}</RevenueTotal>
             </ChartHeader>
-            <ChartContainer>
-              <ChartSVG viewBox="0 0 700 300">
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <line
-                    key={i}
-                    x1="50"
-                    y1={50 + i * 50}
-                    x2="650"
-                    y2={50 + i * 50}
-                    stroke="#f0f0f0"
-                    strokeWidth="1"
-                  />
-                ))}
-                
-                {urgentRevenueData.map((d, i) => {
-                  const barHeight = (d.revenue / maxUrgentRevenue) * 180;
-                  return (
-                    <g key={i}>
-                      <defs>
-                        <linearGradient id={`urgentGrad${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                          <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.8" />
-                          <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.4" />
-                        </linearGradient>
-                      </defs>
-                      <rect
-                        x={80 + i * 100}
-                        y={250 - barHeight}
-                        width="60"
-                        height={barHeight}
-                        fill={`url(#urgentGrad${i})`}
-                        rx="6"
-                      />
-                      <text
-                        x={110 + i * 100}
-                        y={240 - barHeight}
-                        textAnchor="middle"
-                        fontSize="12"
-                        fill="#f59e0b"
-                        fontWeight="700"
-                      >
-                        {d.revenue}M
-                      </text>
-                      <text
-                        x={110 + i * 100}
-                        y="275"
-                        textAnchor="middle"
-                        fontSize="13"
-                        fill="#6b7280"
-                        fontWeight="600"
-                      >
-                        {d.month}
-                      </text>
-                    </g>
-                  );
-                })}
-              </ChartSVG>
-            </ChartContainer>
-          </ChartCard>
+            <TableWrapper>
+              <Table>
+                <thead>
+                  <tr>
+                    <th style={{ width: '60px', textAlign: 'center' }}>{language === 'vi' ? 'Top' : 'Rank'}</th>
+                    <th>{language === 'vi' ? 'Nhà Tuyển Dụng' : 'Employer'}</th>
+                    <th style={{ textAlign: 'center' }}>{language === 'vi' ? 'Số Gói' : 'Packages'}</th>
+                    <th style={{ textAlign: 'right' }}>{language === 'vi' ? 'Doanh Thu' : 'Revenue'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topEmployersByRevenue.length > 0 ? topEmployersByRevenue.map((employer, index) => (
+                    <tr key={index}>
+                      <td style={{ textAlign: 'center' }}>
+                        <RankBadge $rank={index + 1}>
+                          {index + 1}
+                        </RankBadge>
+                      </td>
+                      <td style={{ fontWeight: 600 }}>{employer.name}</td>
+                      <td style={{ textAlign: 'center', fontWeight: 700, color: '#8b5cf6', fontSize: '16px' }}>
+                        {employer.packages}
+                      </td>
+                      <td style={{ textAlign: 'right', fontWeight: 700, color: '#10b981' }}>
+                        {employer.revenue}
+                      </td>
+                    </tr>
+                  )) : (
+                    <tr>
+                      <td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>
+                        {language === 'vi' ? 'Chưa có dữ liệu giao dịch' : 'No transaction data available'}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+            </TableWrapper>
+          </TableCard>
         </ChartsGrid>
 
         <SectionTitle>
@@ -1098,7 +1116,7 @@ const Reports = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {topEmployersByPosts.map((employer, index) => (
+                  {topEmployersByPosts.length > 0 ? topEmployersByPosts.map((employer, index) => (
                     <tr key={index}>
                       <td style={{ textAlign: 'center' }}>
                         <RankBadge $rank={index + 1}>
@@ -1110,7 +1128,13 @@ const Reports = () => {
                         {employer.posts}
                       </td>
                     </tr>
-                  ))}
+                  )) : (
+                    <tr>
+                      <td colSpan="3" style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>
+                        {language === 'vi' ? 'Chưa có dữ liệu đăng tin' : 'No job post data available'}
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </Table>
             </TableWrapper>
@@ -1119,40 +1143,24 @@ const Reports = () => {
           <TableCard>
             <ChartHeader>
               <h3>
-                <Package />
-                {language === 'vi' ? 'Mua Nhiều Gói Nhất' : 'Most Packages Purchased'}
+                <Users />
+                {language === 'vi' ? 'Thống Kê Tổng Quan' : 'Overview Statistics'}
               </h3>
             </ChartHeader>
-            <TableWrapper>
-              <Table>
-                <thead>
-                  <tr>
-                    <th style={{ width: '60px', textAlign: 'center' }}>{language === 'vi' ? 'Top' : 'Rank'}</th>
-                    <th>{language === 'vi' ? 'Nhà Tuyển Dụng' : 'Employer'}</th>
-                    <th style={{ textAlign: 'center' }}>{language === 'vi' ? 'Số Gói' : 'Packages'}</th>
-                    <th style={{ textAlign: 'right' }}>{language === 'vi' ? 'Doanh Thu' : 'Revenue'}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {topEmployersByPackages.map((employer, index) => (
-                    <tr key={index}>
-                      <td style={{ textAlign: 'center' }}>
-                        <RankBadge $rank={index + 1}>
-                          {index + 1}
-                        </RankBadge>
-                      </td>
-                      <td style={{ fontWeight: 600 }}>{employer.name}</td>
-                      <td style={{ textAlign: 'center', fontWeight: 700, color: '#8b5cf6', fontSize: '16px' }}>
-                        {employer.packages}
-                      </td>
-                      <td style={{ textAlign: 'right', fontWeight: 700, color: '#10b981' }}>
-                        {employer.revenue}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </TableWrapper>
+            <div style={{ padding: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <span style={{ color: '#64748b' }}>{language === 'vi' ? 'Gói đang hoạt động' : 'Active Packages'}</span>
+                <span style={{ fontWeight: 700, color: '#10b981' }}>{statsSummary.activeSubscriptions}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <span style={{ color: '#64748b' }}>{language === 'vi' ? 'Yêu cầu chờ duyệt' : 'Pending Requests'}</span>
+                <span style={{ fontWeight: 700, color: '#f59e0b' }}>{statsSummary.pendingSubscriptions}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <span style={{ color: '#64748b' }}>{language === 'vi' ? 'Tỉ lệ tăng trưởng' : 'Growth Rate'}</span>
+                <span style={{ fontWeight: 700, color: '#3b82f6' }}>+100%</span>
+              </div>
+            </div>
           </TableCard>
         </ChartsGrid>
           </>
@@ -1178,27 +1186,34 @@ const Reports = () => {
                     </TableHeaderRow>
                   </thead>
                   <tbody>
-                    {standardPurchaseHistory.map((purchase, index) => (
-                      <TableRow key={purchase.id}>
+                    {standardSubscriptions.length > 0 ? standardSubscriptions.map((purchase, index) => (
+                      <TableRow key={purchase.subscriptionId || index}>
                         <TableCell $align="center" style={{ fontWeight: 600, color: '#6b7280' }}>
                           {index + 1}
                         </TableCell>
-                        <TableCell style={{ fontWeight: 600 }}>{purchase.employer}</TableCell>
-                        <TableCell>{purchase.package}</TableCell>
+                        <TableCell style={{ fontWeight: 600 }}>{purchase.companyName || purchase.employer || 'Unknown'}</TableCell>
+                        <TableCell>{purchase.packageName}</TableCell>
                         <TableCell $align="center" style={{ fontWeight: 700, color: '#10b981' }}>
-                          {purchase.price}
+                          {(parseFloat(purchase.price) || 0).toLocaleString()} VND
                         </TableCell>
-                        <TableCell $align="center">{purchase.date}</TableCell>
+                        <TableCell $align="center">
+                          {purchase.purchaseDate || (purchase.purchaseDateTime ? new Date(purchase.purchaseDateTime).toLocaleDateString('vi-VN') : (purchase.createdAt ? new Date(purchase.createdAt).toLocaleDateString('vi-VN') : 'N/A'))}
+                        </TableCell>
                         <TableCell $align="center">
                           <StatusBadge $status={purchase.status}>
                             {purchase.status === 'active' 
                               ? (language === 'vi' ? 'Hoạt động' : 'Active')
-                              : (language === 'vi' ? 'Hết hạn' : 'Expired')
+                              : purchase.status === 'pending'
+                                ? (language === 'vi' ? 'Chờ duyệt' : 'Pending')
+                                : (language === 'vi' ? 'Hết hạn' : 'Expired')
                             }
                           </StatusBadge>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )) : (
+                      <tr><td colSpan="6" style={{ textAlign: 'center', padding: '24px', color: '#64748b', fontSize: '15px' }}>{language === 'vi' ? 'chưa có' : 'no data available'}</td></tr>
+
+                    )}
                   </tbody>
                 </ServiceTableGrid>
               </ServiceTableContent>
@@ -1222,27 +1237,34 @@ const Reports = () => {
                     </TableHeaderRow>
                   </thead>
                   <tbody>
-                    {urgentPurchaseHistory.map((purchase, index) => (
-                      <TableRow key={purchase.id}>
+                    {urgentSubscriptions.length > 0 ? urgentSubscriptions.map((purchase, index) => (
+                      <TableRow key={purchase.subscriptionId || index}>
                         <TableCell $align="center" style={{ fontWeight: 600, color: '#6b7280' }}>
                           {index + 1}
                         </TableCell>
-                        <TableCell style={{ fontWeight: 600 }}>{purchase.employer}</TableCell>
-                        <TableCell>{purchase.package}</TableCell>
+                        <TableCell style={{ fontWeight: 600 }}>{purchase.companyName || purchase.employer || 'Unknown'}</TableCell>
+                        <TableCell>{purchase.packageName}</TableCell>
                         <TableCell $align="center" style={{ fontWeight: 700, color: '#f59e0b' }}>
-                          {purchase.price}
+                          {(parseFloat(purchase.price) || 0).toLocaleString()} VND
                         </TableCell>
-                        <TableCell $align="center">{purchase.date}</TableCell>
+                        <TableCell $align="center">
+                          {purchase.purchaseDate || (purchase.purchaseDateTime ? new Date(purchase.purchaseDateTime).toLocaleDateString('vi-VN') : (purchase.createdAt ? new Date(purchase.createdAt).toLocaleDateString('vi-VN') : 'N/A'))}
+                        </TableCell>
                         <TableCell $align="center">
                           <StatusBadge $status={purchase.status}>
                             {purchase.status === 'active' 
                               ? (language === 'vi' ? 'Hoạt động' : 'Active')
-                              : (language === 'vi' ? 'Hết hạn' : 'Expired')
+                              : purchase.status === 'pending'
+                                ? (language === 'vi' ? 'Chờ duyệt' : 'Pending')
+                                : (language === 'vi' ? 'Hết hạn' : 'Expired')
                             }
                           </StatusBadge>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )) : (
+                      <tr><td colSpan="6" style={{ textAlign: 'center', padding: '24px', color: '#64748b', fontSize: '15px' }}>{language === 'vi' ? 'chưa có' : 'no data available'}</td></tr>
+
+                    )}
                   </tbody>
                 </ServiceTableGrid>
               </ServiceTableContent>
@@ -1270,25 +1292,30 @@ const Reports = () => {
                     </TableHeaderRow>
                   </thead>
                   <tbody>
-                    {standardPackageStatus.map((pkg, index) => (
-                      <TableRow key={pkg.id}>
+                    {standardSubscriptions.length > 0 ? standardSubscriptions.map((pkg, index) => (
+                      <TableRow key={pkg.subscriptionId || index}>
                         <TableCell $align="center" style={{ fontWeight: 600, color: '#6b7280' }}>
                           {index + 1}
                         </TableCell>
-                        <TableCell style={{ fontWeight: 600 }}>{pkg.employer}</TableCell>
-                        <TableCell>{pkg.package}</TableCell>
-                        <TableCell $align="center">{pkg.startDate}</TableCell>
-                        <TableCell $align="center">{pkg.endDate}</TableCell>
+                        <TableCell style={{ fontWeight: 600 }}>{pkg.companyName || pkg.employer || 'Unknown'}</TableCell>
+                        <TableCell>{pkg.packageName}</TableCell>
+                        <TableCell $align="center">{pkg.purchaseDate || (pkg.purchaseDateTime ? new Date(pkg.purchaseDateTime).toLocaleDateString('vi-VN') : (pkg.createdAt ? new Date(pkg.createdAt).toLocaleDateString('vi-VN') : 'N/A'))}</TableCell>
+                        <TableCell $align="center">{pkg.expiryDate || (pkg.expiryDateTime ? new Date(pkg.expiryDateTime).toLocaleDateString('vi-VN') : (pkg.updatedAt ? new Date(new Date(pkg.updatedAt).getTime() + (7 * 24 * 60 * 60 * 1000)).toLocaleDateString('vi-VN') : 'N/A'))}</TableCell>
                         <TableCell $align="center">
                           <StatusBadge $status={pkg.status}>
                             {pkg.status === 'active' 
                               ? (language === 'vi' ? 'Hoạt động' : 'Active')
-                              : (language === 'vi' ? 'Hết hạn' : 'Expired')
+                              : pkg.status === 'pending'
+                                ? (language === 'vi' ? 'Chờ duyệt' : 'Pending')
+                                : (language === 'vi' ? 'Hết hạn' : 'Expired')
                             }
                           </StatusBadge>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )) : (
+                      <tr><td colSpan="6" style={{ textAlign: 'center', padding: '24px', color: '#64748b', fontSize: '15px' }}>{language === 'vi' ? 'chưa có' : 'no data available'}</td></tr>
+
+                    )}
                   </tbody>
                 </ServiceTableGrid>
               </ServiceTableContent>
@@ -1312,25 +1339,30 @@ const Reports = () => {
                     </TableHeaderRow>
                   </thead>
                   <tbody>
-                    {urgentPackageStatus.map((pkg, index) => (
-                      <TableRow key={pkg.id}>
+                    {urgentSubscriptions.length > 0 ? urgentSubscriptions.map((pkg, index) => (
+                      <TableRow key={pkg.subscriptionId || index}>
                         <TableCell $align="center" style={{ fontWeight: 600, color: '#6b7280' }}>
                           {index + 1}
                         </TableCell>
-                        <TableCell style={{ fontWeight: 600 }}>{pkg.employer}</TableCell>
-                        <TableCell>{pkg.package}</TableCell>
-                        <TableCell $align="center">{pkg.startDate}</TableCell>
-                        <TableCell $align="center">{pkg.endDate}</TableCell>
+                        <TableCell style={{ fontWeight: 600 }}>{pkg.companyName || pkg.employer || 'Unknown'}</TableCell>
+                        <TableCell>{pkg.packageName}</TableCell>
+                        <TableCell $align="center">{pkg.purchaseDate || (pkg.purchaseDateTime ? new Date(pkg.purchaseDateTime).toLocaleDateString('vi-VN') : 'N/A')}</TableCell>
+                        <TableCell $align="center">{pkg.expiryDate || (pkg.expiryDateTime ? new Date(pkg.expiryDateTime).toLocaleDateString('vi-VN') : 'N/A')}</TableCell>
                         <TableCell $align="center">
                           <StatusBadge $status={pkg.status}>
                             {pkg.status === 'active' 
                               ? (language === 'vi' ? 'Hoạt động' : 'Active')
-                              : (language === 'vi' ? 'Hết hạn' : 'Expired')
+                              : pkg.status === 'pending'
+                                ? (language === 'vi' ? 'Chờ duyệt' : 'Pending')
+                                : (language === 'vi' ? 'Hết hạn' : 'Expired')
                             }
                           </StatusBadge>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )) : (
+                      <tr><td colSpan="6" style={{ textAlign: 'center', padding: '24px', color: '#64748b', fontSize: '15px' }}>{language === 'vi' ? 'chưa có' : 'no data available'}</td></tr>
+
+                    )}
                   </tbody>
                 </ServiceTableGrid>
               </ServiceTableContent>

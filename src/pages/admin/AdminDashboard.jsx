@@ -1322,7 +1322,7 @@ const AdminDashboard = () => {
   // Top Candidates - Ứng viên mới (Từ database)
   const topCandidates = candidates.slice(0, 4).map(can => ({
     id: can.userId,
-    name: can.fullName || 'New Candidate',
+    name: can.fullName || (can.email ? can.email.split('@')[0] : (can.userId ? `ID: ${can.userId.substring(0, 8)}` : (language === 'vi' ? 'Ứng viên mới' : 'New Candidate'))),
     status: 'verified',
     joinedTime: can.createdAt ? new Date(can.createdAt).toLocaleDateString() : 'Recently',
     ekycStatus: language === 'vi' ? 'Đã Duyệt Xác Thực' : 'Verified'
@@ -1358,7 +1358,7 @@ const AdminDashboard = () => {
     })),
     ...candidates.slice(0, 2).map(can => ({
       id: `can-${can.userId || can.id}`,
-      name: can.fullName || 'New Candidate',
+      name: can.fullName || (can.email ? can.email.split('@')[0] : (can.userId ? `ID: ${can.userId.substring(0, 8)}` : (language === 'vi' ? 'Ứng viên mới' : 'New Candidate'))),
       joinDate: can.createdAt ? new Date(can.createdAt).toLocaleDateString() : 'Recently',
       verified: 'DA_DUYET',
       verifiedColor: { bg: '#D1FAE5', color: '#059669' },
