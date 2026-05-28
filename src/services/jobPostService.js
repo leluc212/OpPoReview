@@ -74,27 +74,33 @@ class JobPostService {
       
       console.log('🔑 Token check:', token ? 'Token exists' : 'No token');
       
-      // Don't require token - Lambda will handle anonymous requests
+      // Don't require token for public GET requests to avoid CORS preflight issues
       const headers = {
         'Content-Type': 'application/json',
         ...options.headers
       };
       
-      if (token) {
+      const isPublicGet = options.method === 'GET' || !options.method;
+      
+      if (token && !isPublicGet) {
         const cleanToken = token.trim().replace(/[\r\n\t]/g, '');
         headers['Authorization'] = `Bearer ${cleanToken}`;
         console.log('🔑 Authorization header added');
+      } else if (token && isPublicGet) {
+        console.log('ℹ️ Public GET request - skipping Authorization header to avoid CORS issues');
       } else {
         console.log('⚠️ No authorization header - proceeding without auth');
       }
 
       console.log(`📤 Making ${options.method || 'GET'} request to ${API_BASE_URL}${endpoint}`);
       
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const requestOptions = {
         ...options,
         headers,
         mode: 'cors'
-      });
+      };
+
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, requestOptions);
 
       console.log(`📥 Response status: ${response.status}`);
 
@@ -461,21 +467,28 @@ class JobPostService {
   /**
    * Get all job posts (admin view)
    */
-  async getAllJobPosts() {
-    console.log('🚀 getAllJobPosts() called');
-    try {
-      const result = await this.makeRequest('/jobs');
+   async getAllJobPosts() {
+     console.log('🚀 getAllJobPosts() called');
+     try {
+       // Thử /jobs trước
+       let result;
+       try {
+         result = await this.makeRequest('/jobs');
+       } catch (e) {
+         console.warn('⚠️ Request to /jobs failed, trying fallback /jobs/');
+         result = await this.makeRequest('/jobs/');
+       }
 
-      if (result.success && result.data) {
-        console.log('✅ All job posts loaded from DynamoDB:', result.data.length, 'jobs');
-        return result.data;
-      }
+       if (result && result.success && result.data) {
+         console.log('✅ All job posts loaded from DynamoDB:', result.data.length, 'jobs');
+         return result.data;
+       }
 
-      return [];
-    } catch (error) {
-      console.error('❌ Error fetching all job posts:', error);
-      return this.getAllActiveJobs();
-    }
+       return [];
+     } catch (error) {
+       console.error('❌ Error fetching all job posts:', error);
+       return this.getAllActiveJobs();
+     }
   }
 }
 

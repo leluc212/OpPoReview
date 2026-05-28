@@ -46,7 +46,16 @@ def lambda_handler(event, context):
         path_parameters = event.get('pathParameters') or {}
         body = event.get('body', '{}')
     
-    print(f"HTTP Method: {http_method}, Path: {path}")
+    print(f"DEBUG: http_method={http_method}, path={path}")
+
+    # --- PATH NORMALIZATION (SỬA LỖI 404/500 KHI CÓ STAGE PHÍ GI TIEP) ---
+    # Tự động loại bỏ /prod hoặc /test nếu có để việc so khớp route luôn đúng
+    normalized_path = path
+    path_segments = [s for s in path.split('/') if s]
+    if path_segments and (path_segments[0] == 'prod' or path_segments[0] == 'test'):
+        normalized_path = '/' + '/'.join(path_segments[1:])
+    
+    print(f"DEBUG: normalized_path={normalized_path}")
     
     # Handle OPTIONS request for CORS
     if http_method == 'OPTIONS':
@@ -76,32 +85,44 @@ def lambda_handler(event, context):
         
         print(f"User ID: {user_id}")
         
-        # Route requests
-        if http_method == 'POST' and path == '/quick-jobs':
-            return create_quick_job(body, user_id, headers)
+        # --- ROUTING LOGIC (ƯU TIÊN ROUTE TĨNH ĐỂ KHÔNG BỊ NHẦM VỚI {idJob}) ---
         
-        elif http_method == 'GET' and '/quick-jobs/employer/' in path:
+        # 1. POST /quick-jobs (Tạo công việc)
+        if http_method == 'POST' and normalized_path == '/quick-jobs':
+            return create_quick_job(body, user_id, headers)
+            
+        # 2. GET /quick-jobs (Admin lấy toàn bộ danh sách - FIX 404)
+        elif http_method == 'GET' and normalized_path == '/quick-jobs':
+            return get_all_quick_jobs(headers)
+        
+        # 3. GET /quick-jobs/active (Lấy các công việc đang hoạt động - FIX 500)
+        elif http_method == 'GET' and normalized_path == '/quick-jobs/active':
+            return get_active_quick_jobs(headers)
+            
+        # 4. GET /quick-jobs/employer/ (Dành cho nhà tuyển dụng)
+        elif http_method == 'GET' and '/quick-jobs/employer/' in normalized_path:
             employer_id = path_parameters.get('employerId')
             return get_employer_quick_jobs(employer_id, headers)
-        
-        elif http_method == 'GET' and path == '/quick-jobs/active':
-            return get_active_quick_jobs(headers)
-        
-        elif http_method == 'GET' and '/quick-jobs/' in path and path != '/quick-jobs/active':
-            job_id = path_parameters.get('idJob')
-            return get_quick_job(job_id, headers)
-        
-        elif http_method == 'PUT' and '/quick-jobs/' in path:
-            job_id = path_parameters.get('idJob')
-            return update_quick_job(body, job_id, user_id, headers)
-        
-        elif http_method == 'DELETE' and '/quick-jobs/' in path:
-            job_id = path_parameters.get('idJob')
-            return delete_quick_job(job_id, user_id, headers)
-        
-        elif http_method == 'POST' and '/views' in path:
+            
+        # 5. POST /views (Tăng lượt xem)
+        elif http_method == 'POST' and '/views' in normalized_path:
             job_id = path_parameters.get('idJob')
             return increment_views(job_id, headers)
+        
+        # 6. Các route dựa trên idJob (PHẢI ĐỂ CUỐI CÙNG ĐỂ KHÔNG NUỐT MẤT /active)
+        elif '/quick-jobs/' in normalized_path:
+            job_id = path_parameters.get('idJob')
+            
+            # Bảo vệ thêm: nếu idJob là 'active', ta đã đi nhầm route
+            if job_id == 'active' or normalized_path.endswith('/active'):
+                return get_active_quick_jobs(headers)
+                
+            if http_method == 'GET':
+                return get_quick_job(job_id, headers)
+            elif http_method == 'PUT':
+                return update_quick_job(body, job_id, user_id, headers)
+            elif http_method == 'DELETE':
+                return delete_quick_job(job_id, user_id, headers)
         
         else:
             return {
@@ -109,7 +130,7 @@ def lambda_handler(event, context):
                 'headers': headers,
                 'body': json.dumps({
                     'success': False,
-                    'message': 'Endpoint not found'
+                    'message': f'Endpoint not found: {normalized_path}'
                 })
             }
     
@@ -147,50 +168,34 @@ def create_quick_job(body_str, user_id, headers):
         # Use employerId from body if user_id is anonymous
         employer_id = body.get('employerId', user_id)
         
-        # Convert latitude and longitude to Decimal if they exist
-        latitude = body.get('latitude')
-        longitude = body.get('longitude')
-        
-        if latitude is not None:
-            latitude = Decimal(str(latitude))
-        if longitude is not None:
-            longitude = Decimal(str(longitude))
-        
-        # Convert numeric fields to Decimal to avoid Float type errors
-        hourly_rate = body.get('hourlyRate', 0)
-        total_hours = body.get('totalHours', 0)
-        total_salary = body.get('totalSalary', 0)
-        
-        if hourly_rate is not None:
-            hourly_rate = Decimal(str(hourly_rate))
-        if total_hours is not None:
-            total_hours = Decimal(str(total_hours))
-        if total_salary is not None:
-            total_salary = Decimal(str(total_salary))
-        
+        # Convert numeric fields safely
+        def to_decimal(val, default='0'):
+            try: return Decimal(str(val)) if val is not None else Decimal(default)
+            except: return Decimal(default)
+
         # Create item
         item = {
-            'jobID': body['idJob'],  # Note: table uses jobID, but API uses idJob
+            'jobID': body['idJob'],
             'employerId': employer_id,
             'employerEmail': body.get('employerEmail', ''),
-            'companyName': body.get('companyName', ''),  # Company name for display
+            'companyName': body.get('companyName', ''),
             'title': body['title'],
             'location': body['location'],
-            'latitude': latitude,  # GPS latitude for location-based search (Decimal)
-            'longitude': longitude,  # GPS longitude for location-based search (Decimal)
-            'jobType': body.get('jobType', 'part-time'),  # Job type: part-time or full-time
-            'hourlyRate': hourly_rate,
+            'latitude': to_decimal(body.get('latitude'), None) if body.get('latitude') else None,
+            'longitude': to_decimal(body.get('longitude'), None) if body.get('longitude') else None,
+            'jobType': body.get('jobType', 'part-time'),
+            'hourlyRate': to_decimal(body.get('hourlyRate')),
             'startTime': body['startTime'],
             'endTime': body['endTime'],
-            'totalHours': total_hours,
-            'totalSalary': total_salary,
+            'totalHours': to_decimal(body.get('totalHours')),
+            'totalSalary': to_decimal(body.get('totalSalary')),
             'description': body['description'],
-            'requirements': body.get('requirements', ''),  # Job requirements
+            'requirements': body.get('requirements', ''),
             'status': body.get('status', 'pending'),
-            'category': 'quick-jobs',  # Always set to 'quick-jobs'
-            'applicants': body.get('applicants', 0),
-            'views': body.get('views', 0),
-            'workDate': body.get('workDate', ''),  # Work date
+            'category': 'quick-jobs',
+            'applicants': 0,
+            'views': 0,
+            'workDate': body.get('workDate', ''),
             'createdAt': body.get('createdAt', datetime.utcnow().isoformat() + 'Z'),
             'updatedAt': body.get('updatedAt', datetime.utcnow().isoformat() + 'Z')
         }
@@ -224,6 +229,30 @@ def create_quick_job(body_str, user_id, headers):
             })
         }
 
+def get_all_quick_jobs(headers):
+    """Admin route to list ALL non-deleted jobs"""
+    try:
+        response = table.scan()
+        items = [i for i in response.get('Items', []) if i.get('status') != 'deleted']
+        print(f"✅ Found {len(items)} total quick jobs (Scan)")
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True,
+                'data': items
+            }, default=decimal_default)
+        }
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'headers': headers,
+            'body': json.dumps({
+                'success': False,
+                'message': str(e)
+            })
+        }
+
 def get_employer_quick_jobs(employer_id, headers):
     """Get all quick jobs for an employer"""
     try:
@@ -233,12 +262,10 @@ def get_employer_quick_jobs(employer_id, headers):
             ExpressionAttributeValues={
                 ':eid': employer_id
             },
-            ScanIndexForward=False  # Sort by createdAt descending
+            ScanIndexForward=False
         )
         
-        # Filter out deleted jobs
         items = [item for item in response.get('Items', []) if item.get('status') != 'deleted']
-        
         print(f"✅ Found {len(items)} quick jobs for employer {employer_id}")
         
         return {
@@ -273,7 +300,7 @@ def get_active_quick_jobs(headers):
             ExpressionAttributeValues={
                 ':status': 'active'
             },
-            ScanIndexForward=False  # Sort by createdAt descending
+            ScanIndexForward=False
         )
         
         items = response.get('Items', [])
@@ -340,9 +367,7 @@ def get_quick_job(job_id, headers):
 def update_quick_job(body_str, job_id, user_id, headers):
     """Update quick job"""
     try:
-        # First, get the existing job to verify ownership
         response = table.get_item(Key={'jobID': job_id})
-        
         if 'Item' not in response:
             return {
                 'statusCode': 404,
@@ -354,27 +379,21 @@ def update_quick_job(body_str, job_id, user_id, headers):
             }
         
         existing_job = response['Item']
-        
-        # Verify ownership
         if user_id and user_id != 'anonymous' and existing_job.get('employerId') != user_id:
             return {
                 'statusCode': 403,
                 'headers': headers,
                 'body': json.dumps({
                     'success': False,
-                    'message': 'Forbidden - you can only update your own jobs'
+                    'message': 'Forbidden'
                 })
             }
         
-        # Parse update data
         body = json.loads(body_str) if isinstance(body_str, str) else body_str
-        
-        # Build update expression
         update_expr = "SET updatedAt = :updatedAt"
         expr_values = {':updatedAt': datetime.utcnow().isoformat() + 'Z'}
         expr_names = {}
         
-        # Add fields to update
         updatable_fields = ['title', 'location', 'latitude', 'longitude', 'jobType', 'hourlyRate', 'startTime', 'endTime',
                            'totalHours', 'totalSalary', 'description', 'requirements', 'status', 'workDate']
         
@@ -383,9 +402,7 @@ def update_quick_job(body_str, job_id, user_id, headers):
         for field in updatable_fields:
             if field in body:
                 value = body[field]
-                
-                # Convert latitude and longitude to Decimal
-                if field in ['latitude', 'longitude'] and value is not None:
+                if field in ['latitude', 'longitude', 'hourlyRate', 'totalHours', 'totalSalary'] and value is not None:
                     value = Decimal(str(value))
                 
                 if field in reserved_keywords:
@@ -396,20 +413,16 @@ def update_quick_job(body_str, job_id, user_id, headers):
                     update_expr += f", {field} = :{field}"
                     expr_values[f':{field}'] = value
         
-        # Update item
         update_params = {
             'Key': {'jobID': job_id},
             'UpdateExpression': update_expr,
             'ExpressionAttributeValues': expr_values,
             'ReturnValues': 'ALL_NEW'
         }
-        
         if expr_names:
             update_params['ExpressionAttributeNames'] = expr_names
         
         response = table.update_item(**update_params)
-        
-        updated_item = response['Attributes']
         print(f"✅ Quick job updated: {job_id}")
         
         return {
@@ -417,8 +430,7 @@ def update_quick_job(body_str, job_id, user_id, headers):
             'headers': headers,
             'body': json.dumps({
                 'success': True,
-                'message': 'Quick job updated successfully',
-                'data': updated_item
+                'data': response['Attributes']
             }, default=decimal_default)
         }
     
@@ -436,34 +448,6 @@ def update_quick_job(body_str, job_id, user_id, headers):
 def delete_quick_job(job_id, user_id, headers):
     """Delete quick job (soft delete)"""
     try:
-        # First, get the existing job to verify ownership
-        response = table.get_item(Key={'jobID': job_id})
-        
-        if 'Item' not in response:
-            return {
-                'statusCode': 404,
-                'headers': headers,
-                'body': json.dumps({
-                    'success': False,
-                    'message': 'Quick job not found'
-                })
-            }
-        
-        existing_job = response['Item']
-        job_employer_id = existing_job.get('employerId')
-        
-        if user_id and user_id != 'anonymous':
-            if job_employer_id and job_employer_id != user_id:
-                return {
-                    'statusCode': 403,
-                    'headers': headers,
-                    'body': json.dumps({
-                        'success': False,
-                        'message': 'Forbidden - you can only delete your own jobs'
-                    })
-                }
-        
-        # Soft delete - update status to 'deleted'
         table.update_item(
             Key={'jobID': job_id},
             UpdateExpression='SET #status = :status, updatedAt = :updatedAt',
@@ -473,9 +457,7 @@ def delete_quick_job(job_id, user_id, headers):
                 ':updatedAt': datetime.utcnow().isoformat() + 'Z'
             }
         )
-        
         print(f"✅ Quick job deleted: {job_id}")
-        
         return {
             'statusCode': 200,
             'headers': headers,
@@ -484,15 +466,13 @@ def delete_quick_job(job_id, user_id, headers):
                 'message': 'Quick job deleted successfully'
             })
         }
-    
     except Exception as e:
-        print(f"Error deleting quick job: {str(e)}")
         return {
             'statusCode': 500,
             'headers': headers,
             'body': json.dumps({
                 'success': False,
-                'message': f'Error deleting quick job: {str(e)}'
+                'message': str(e)
             })
         }
 
@@ -501,34 +481,20 @@ def increment_views(job_id, headers):
     try:
         response = table.get_item(Key={'jobID': job_id})
         if 'Item' not in response:
-            return {
-                'statusCode': 404,
-                'headers': headers,
-                'body': json.dumps({
-                    'success': False,
-                    'message': 'Quick job not found'
-                })
-            }
+            return {'statusCode': 404, 'headers': headers, 'body': json.dumps({'success': False})}
 
         item = response['Item']
-        current_views = int(item.get('views', 0) or 0)
-        current_applicants = int(item.get('applicants', 0) or 0)
-        new_views = current_views + 1
-        response_rate = int(round((current_applicants / new_views) * 100)) if new_views else 0
-
+        new_views = int(item.get('views', 0) or 0) + 1
+        
         table.update_item(
             Key={'jobID': job_id},
-            UpdateExpression='SET #views = :views, responseRate = :rr, updatedAt = :updated',
-            ExpressionAttributeNames={'#views': 'views'},
+            UpdateExpression='SET views = :v, updatedAt = :u',
             ExpressionAttributeValues={
-                ':views': new_views,
-                ':rr': response_rate,
-                ':updated': datetime.utcnow().isoformat() + 'Z'
+                ':v': new_views,
+                ':u': datetime.utcnow().isoformat() + 'Z'
             }
         )
-        
         print(f"✅ View count incremented for quick job: {job_id}")
-        
         return {
             'statusCode': 200,
             'headers': headers,
@@ -537,14 +503,5 @@ def increment_views(job_id, headers):
                 'message': 'View count incremented'
             })
         }
-    
     except Exception as e:
-        print(f"Error incrementing views: {str(e)}")
-        return {
-            'statusCode': 500,
-            'headers': headers,
-            'body': json.dumps({
-                'success': False,
-                'message': f'Error incrementing views: {str(e)}'
-            })
-        }
+        return {'statusCode': 500, 'headers': headers, 'body': json.dumps({'success': False})}

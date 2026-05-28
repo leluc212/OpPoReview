@@ -34,78 +34,10 @@ const getHRStaff = (language) => {
 };
 
 // Mock Quick Job Posts Data
-const getQuickJobPosts = (language) => [
-  {
-    id: 1,
-    title: language === 'vi' ? 'Nhân viên Pha Chế - GẤP' : 'Barista - URGENT',
-    location: language === 'vi' ? 'Quận 1, TP.HCM' : 'District 1, HCMC',
-    salary: language === 'vi' ? '10-15 triệu' : '$400-600',
-    type: language === 'vi' ? 'Tuyển gấp' : 'Urgent',
-    applicants: 15,
-    views: 89,
-    status: 'active',
-    deadline: language === 'vi' ? '3 ngày nữa' : '3 days left'
-  },
-  {
-    id: 2,
-    title: language === 'vi' ? 'Nhân viên Thu Ngân ' : 'Cashier - Immediate',
-    location: language === 'vi' ? 'Quận 7, TP.HCM' : 'District 7, HCMC',
-    salary: language === 'vi' ? '8-12 triệu' : '$320-480',
-    type: language === 'vi' ? 'Tuyển gấp' : 'Urgent',
-    applicants: 23,
-    views: 134,
-    status: 'active',
-    deadline: language === 'vi' ? '5 ngày nữa' : '5 days left'
-  },
-  {
-    id: 3,
-    title: language === 'vi' ? 'Nhân viên Phục Vụ - Khẩn cấp' : 'Server - Critical',
-    location: language === 'vi' ? 'Quận 3, TP.HCM' : 'District 3, HCMC',
-    salary: language === 'vi' ? '7-10 triệu' : '$280-400',
-    type: language === 'vi' ? 'Tuyển gấp' : 'Urgent',
-    applicants: 18,
-    views: 102,
-    status: 'active',
-    deadline: language === 'vi' ? '2 ngày nữa' : '2 days left'
-  }
-];
+
 
 // Mock Chat Conversations Data
-const getChatConversations = (language) => [
-  {
-    id: 1,
-    name: language === 'vi' ? 'Nguyễn Minh Tuấn' : 'Nguyen Minh Tuan',
-    role: language === 'vi' ? 'Nhân viên' : 'Employee',
-    lastMessage: language === 'vi' ? 'Chưa có tin nhắn' : 'No messages yet',
-    time: language === 'vi' ? '10 phút trước' : '10 min ago',
-    unread: 0,
-    status: 'online',
-    position: language === 'vi' ? 'Nhân viên pha chế' : 'Barista',
-    messages: []
-  },
-  {
-    id: 3,
-    name: language === 'vi' ? 'Trần Quốc Bảo' : 'Tran Quoc Bao',
-    role: language === 'vi' ? 'Nhân viên' : 'Employee',
-    lastMessage: language === 'vi' ? 'Chưa có tin nhắn' : 'No messages yet',
-    time: language === 'vi' ? '2 giờ trước' : '2 hours ago',
-    unread: 0,
-    status: 'offline',
-    position: language === 'vi' ? 'Nhân viên phục vụ' : 'Server',
-    messages: []
-  },
-  {
-    id: 4,
-    name: language === 'vi' ? 'Lê Thị Mai' : 'Le Thi Mai',
-    role: language === 'vi' ? 'Nhân viên' : 'Employee',
-    lastMessage: language === 'vi' ? 'Chưa có tin nhắn' : 'No messages yet',
-    time: language === 'vi' ? '15 phút trước' : '15 min ago',
-    unread: 0,
-    status: 'online',
-    position: language === 'vi' ? 'Nhân viên bán hàng' : 'Sales Staff',
-    messages: []
-  }
-];
+
 
 // ─── Animations ────────────────────────────────────────────
 const pulseAnimation = `

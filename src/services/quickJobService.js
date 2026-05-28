@@ -4,8 +4,8 @@
 import { fetchAuthSession } from 'aws-amplify/auth';
 import employerProfileService from './employerProfileService';
 
-// API base URL - update this after deploying Lambda
-const API_BASE_URL = 'https://6zw89pkuxb.execute-api.ap-southeast-1.amazonaws.com';
+// API base URL - stage prefix MUST be /prod as verified from other services
+const API_BASE_URL = 'https://6zw89pkuxb.execute-api.ap-southeast-1.amazonaws.com/prod';
 
 /**
  * Generate random quick job ID
@@ -123,48 +123,47 @@ class QuickJobService {
     console.log('🔗 API URL:', API_BASE_URL);
   }
 
-  /**
-   * Make authenticated API request
-   */
   async makeRequest(endpoint, options = {}) {
+    const fullUrl = `${API_BASE_URL}${endpoint}`;
     try {
-      // Temporarily disable auth for testing
-      // const { token } = await getAuthInfo();
+      const { token } = await getAuthInfo();
       
       const headers = {
         'Content-Type': 'application/json',
         ...options.headers
       };
       
-      // Temporarily commented out for CORS testing
-      // if (token) {
-      //   headers['Authorization'] = `Bearer ${token}`;
-      //   console.log('🔑 Authorization header added');
-      // } else {
-      //   console.log('⚠️ No authorization header - proceeding without auth');
-      // }
-
-      console.log(`📤 Making ${options.method || 'GET'} request to ${API_BASE_URL}${endpoint}`);
+      const isPublicGet = options.method === 'GET' || !options.method;
       
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      if (token && !isPublicGet) {
+        headers['Authorization'] = `Bearer ${token}`;
+        console.log('🔑 Authorization header added');
+      } else if (token && isPublicGet) {
+        console.log('ℹ️ Public GET request - skipping Authorization header to avoid CORS issues');
+      }
+      // No need for "No token" warning if it's public
+
+      console.log(`📤 QuickJobService: Requesting ${options.method || 'GET'} ${fullUrl}`);
+      
+      const response = await fetch(fullUrl, {
         ...options,
         headers,
         mode: 'cors'
       });
 
-      console.log(`📥 Response status: ${response.status}`);
+      console.log(`📥 QuickJobService: Response status: ${response.status} from ${fullUrl}`);
 
       if (!response.ok) {
         const errorBody = await response.json().catch(() => ({ message: 'Request failed' }));
-        console.error(`❌ API Error ${response.status}:`, errorBody);
-        throw new Error(errorBody.message || `HTTP ${response.status}`);
+        console.error(`❌ QuickJobService API Error ${response.status}:`, errorBody);
+        throw new Error(errorBody.message || `HTTP ${response.status} from ${fullUrl}`);
       }
 
       const data = await response.json();
-      console.log('✅ API request successful');
+      console.log('✅ QuickJobService API request successful');
       return data;
     } catch (error) {
-      console.error('❌ Request error:', error);
+      console.error(`❌ QuickJobService Request error for ${fullUrl}:`, error);
       if (error.message.includes('Failed to fetch') || 
           error.message.includes('CORS') ||
           error.message.includes('NetworkError') ||
@@ -378,8 +377,7 @@ class QuickJobService {
   async getAllActiveQuickJobs() {
     console.log('🚀 getAllActiveQuickJobs() called');
     try {
-      console.log('🔍 Getting all active quick jobs');
-
+      // Use /quick-jobs/active which is supported by Lambda
       const result = await this.makeRequest('/quick-jobs/active');
       
       if (result.success && result.data) {
@@ -400,6 +398,7 @@ class QuickJobService {
   async getAllQuickJobs() {
     console.log('🚀 getAllQuickJobs() called');
     try {
+      // Use the base /quick-jobs endpoint which we just enabled in Lambda
       const result = await this.makeRequest('/quick-jobs');
 
       if (result.success && result.data) {
@@ -408,10 +407,11 @@ class QuickJobService {
       }
 
       return [];
-    } catch (error) {
-      console.error('❌ Error fetching all quick jobs:', error);
-      throw error;
-    }
+        } catch (error) {
+      console.error('❌ Error fetching all quick jobs from /quick-jobs:', error);
+      // Fallback to active jobs if base endpoint fails
+      return this.getAllActiveQuickJobs();
+        }
   }
 }
 
