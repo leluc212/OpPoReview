@@ -1,0 +1,128 @@
+import json
+import boto3
+from decimal import Decimal
+from datetime import datetime
+
+dynamodb = boto3.resource('dynamodb', region_name='ap-southeast-1')
+table = dynamodb.Table('CandidateProfiles')
+
+
+def get_cors_headers():
+    return {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token',
+        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+        'Content-Type': 'application/json'
+    }
+
+
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        return super().default(obj)
+
+
+def response(status_code, body):
+    return {
+        'statusCode': status_code,
+        'headers': get_cors_headers(),
+        'body': json.dumps(body, cls=DecimalEncoder)
+    }
+
+
+def lambda_handler(event, context):
+    print('Event:', json.dumps(event))
+
+    # Handle CORS preflight
+    http_method = event.get('httpMethod') or event.get('requestContext', {}).get('http', {}).get('method', 'GET')
+    if http_method == 'OPTIONS':
+        return response(200, {})
+
+    # Get path
+    path = event.get('path') or event.get('rawPath', '')
+    path_params = event.get('pathParameters') or {}
+    user_id = path_params.get('userId') or path_params.get('proxy', '').split('/')[-1]
+
+    # Get userId from path manually if not in pathParameters
+    if not user_id and '/profile/' in path:
+        user_id = path.split('/profile/')[-1].strip('/')
+
+    try:
+        if http_method == 'GET' and user_id:
+            # GET /profile/{userId}
+            result = table.get_item(Key={'userId': user_id})
+            item = result.get('Item')
+            if not item:
+                return response(404, {'success': False, 'message': 'Profile not found'})
+            return response(200, {'success': True, 'data': item})
+
+        elif http_method == 'POST':
+            # POST /profile - Create profile
+            body = json.loads(event.get('body') or '{}')
+            if not user_id:
+                # Get userId from body or token
+                user_id = body.get('userId')
+            if not user_id:
+                return response(400, {'success': False, 'message': 'userId is required'})
+
+            timestamp = datetime.utcnow().isoformat()
+            item = {
+                'userId': user_id,
+                'fullName': body.get('fullName', ''),
+                'email': body.get('email', ''),
+                'phone': body.get('phone', ''),
+                'location': body.get('location', ''),
+                'title': body.get('title', ''),
+                'bio': body.get('bio', ''),
+                'skills': body.get('skills', []),
+                'profileImage': body.get('profileImage'),
+                'socialLinks': body.get('socialLinks', {}),
+                'createdAt': timestamp,
+                'updatedAt': timestamp,
+                'isActive': True,
+                'profileCompletion': 0
+            }
+            table.put_item(Item=item)
+            return response(200, {'success': True, 'data': item})
+
+        elif http_method == 'PUT' and user_id:
+            # PUT /profile/{userId} - Update profile
+            body = json.loads(event.get('body') or '{}')
+            body.pop('userId', None)
+            body.pop('createdAt', None)
+            body['updatedAt'] = datetime.utcnow().isoformat()
+
+            update_expr = 'SET ' + ', '.join(f'#k{i} = :v{i}' for i, k in enumerate(body))
+            attr_names = {f'#k{i}': k for i, k in enumerate(body)}
+            attr_values = {f':v{i}': v for i, (k, v) in enumerate(body.items())}
+
+            result = table.update_item(
+                Key={'userId': user_id},
+                UpdateExpression=update_expr,
+                ExpressionAttributeNames=attr_names,
+                ExpressionAttributeValues=attr_values,
+                ReturnValues='ALL_NEW'
+            )
+            return response(200, {'success': True, 'data': result.get('Attributes', {})})
+
+        elif http_method == 'DELETE' and user_id:
+            # DELETE /profile/{userId} - Soft delete
+            table.update_item(
+                Key={'userId': user_id},
+                UpdateExpression='SET isActive = :false, updatedAt = :ts',
+                ExpressionAttributeValues={
+                    ':false': False,
+                    ':ts': datetime.utcnow().isoformat()
+                }
+            )
+            return response(200, {'success': True, 'message': 'Profile deactivated'})
+
+        else:
+            return response(400, {'success': False, 'message': 'Invalid request'})
+
+    except Exception as e:
+        print(f'Error: {str(e)}')
+        return response(500, {'success': False, 'message': str(e)})

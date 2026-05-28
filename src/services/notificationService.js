@@ -1,36 +1,11 @@
 // Notification Service for Package Subscriptions
 
 const API_ENDPOINT = import.meta.env.VITE_NOTIFICATIONS_API;
-const USE_API = true; // API is now working!
-const NOTIFICATIONS_KEY = 'app_notifications';
 
 // Debug: Log API endpoint on module load
 console.log('🔧 notificationService.js loaded');
 console.log('🔧 API_ENDPOINT:', API_ENDPOINT);
 console.log('🔧 import.meta.env:', import.meta.env);
-
-// ===== LocalStorage Functions (Fallback) =====
-
-const getFromLocalStorage = () => {
-  try {
-    const data = localStorage.getItem(NOTIFICATIONS_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch (error) {
-    console.error('Error getting from localStorage:', error);
-    return [];
-  }
-};
-
-const saveToLocalStorage = (notifications) => {
-  try {
-    localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(notifications));
-    window.dispatchEvent(new Event('storage'));
-    return true;
-  } catch (error) {
-    console.error('Error saving to localStorage:', error);
-    return false;
-  }
-};
 
 // ===== API Functions =====
 
@@ -38,10 +13,10 @@ const saveToLocalStorage = (notifications) => {
  * Get all notifications from API
  */
 export const getAllNotifications = async () => {
-  if (!USE_API) {
-    return getFromLocalStorage();
+  if (!API_ENDPOINT) {
+    throw new Error('Notifications API endpoint is not configured');
   }
-  
+
   try {
     const response = await fetch(`${API_ENDPOINT}/notifications`);
     if (!response.ok) {
@@ -50,8 +25,8 @@ export const getAllNotifications = async () => {
     const data = await response.json();
     return data || [];
   } catch (error) {
-    console.error('Error getting notifications from API, using localStorage:', error);
-    return getFromLocalStorage();
+    console.error('Error getting notifications from API:', error);
+    throw error;
   }
 };
 
@@ -61,16 +36,10 @@ export const getAllNotifications = async () => {
  * @param {string} role - 'admin' or 'employer'
  */
 export const getNotifications = async (userId, role) => {
-  if (!USE_API) {
-    const allNotifications = getFromLocalStorage();
-    return allNotifications.filter(n => {
-      if (role === 'admin') {
-        return (n.recipientId === 'admin' || n.recipientId === userId) && n.recipientRole === 'admin' && !n.deleted;
-      }
-      return n.recipientId === userId && n.recipientRole === role && !n.deleted;
-    });
+  if (!API_ENDPOINT) {
+    throw new Error('Notifications API endpoint is not configured');
   }
-  
+
   try {
     const response = await fetch(`${API_ENDPOINT}/notifications?recipientId=${userId}&recipientRole=${role}`);
     if (!response.ok) {
@@ -79,14 +48,8 @@ export const getNotifications = async (userId, role) => {
     const data = await response.json();
     return data || [];
   } catch (error) {
-    console.error('Error getting notifications from API, using localStorage:', error);
-    const allNotifications = getFromLocalStorage();
-    return allNotifications.filter(n => {
-      if (role === 'admin') {
-        return (n.recipientId === 'admin' || n.recipientId === userId) && n.recipientRole === 'admin' && !n.deleted;
-      }
-      return n.recipientId === userId && n.recipientRole === role && !n.deleted;
-    });
+    console.error('Error getting notifications from API:', error);
+    throw error;
   }
 };
 

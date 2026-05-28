@@ -599,7 +599,15 @@ const Navbar = ({ showSearch = true }) => {
       if (user?.role === 'candidate') {
         try {
           const profile = await candidateProfileService.getMyProfile();
-          setCandidateProfile(profile);
+          if (!profile) {
+            const created = await candidateProfileService.createProfile({
+              fullName: user?.name || '',
+              email: user?.email || '',
+            }).catch(() => null);
+            setCandidateProfile(created);
+          } else {
+            setCandidateProfile(profile);
+          }
         } catch (error) {
           console.error('Error fetching candidate profile:', error);
         }

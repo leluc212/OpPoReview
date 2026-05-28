@@ -119,7 +119,13 @@ def lambda_handler(event, context):
             
         # 4. GET /quick-jobs/employer/ (Dành cho nhà tuyển dụng)
         elif http_method == 'GET' and '/quick-jobs/employer/' in normalized_path:
-            employer_id = path_parameters.get('employerId')
+            employer_id = path_parameters.get('employerId') or path_parameters.get('employerid')
+            if not employer_id:
+                # Lấy từ path trực tiếp: /quick-jobs/employer/{id}
+                parts = [s for s in normalized_path.split('/') if s]
+                emp_idx = next((i for i, s in enumerate(parts) if s == 'employer'), None)
+                if emp_idx is not None and emp_idx + 1 < len(parts):
+                    employer_id = parts[emp_idx + 1]
             return get_employer_quick_jobs(employer_id, headers)
             
         # 5. POST /views (Tăng lượt xem)
@@ -374,6 +380,12 @@ def get_all_quick_jobs(headers):
 
 def get_employer_quick_jobs(employer_id, headers):
     """Get all quick jobs for an employer"""
+    if not employer_id:
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'message': 'employerId is required'})
+        }
     try:
         response = table.query(
             IndexName='EmployerIndex',

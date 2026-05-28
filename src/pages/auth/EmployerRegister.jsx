@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 // load aws-amplify dynamically where needed to handle ESM/CJS export differences
 import { Link, useNavigate } from 'react-router-dom';
 import styled, { keyframes, css } from 'styled-components';
@@ -839,6 +839,15 @@ const EmployerRegister = () => {
     companyName: '', phone: '',
   });
   const [errors, setErrors] = useState({});
+  const [googleError, setGoogleError] = useState(null);
+
+  useEffect(() => {
+    const err = localStorage.getItem('googleLoginError');
+    if (err) {
+      try { setGoogleError(JSON.parse(err)); } catch (_) {}
+      localStorage.removeItem('googleLoginError');
+    }
+  }, []);
 
   const pw = pwStrength(form.password);
 
@@ -1004,7 +1013,18 @@ const EmployerRegister = () => {
     }
   };
 
-  const handleSocial = p => alert(`Đăng ký bằng ${p} (đang phát triển)`);
+  const handleSocial = async (p) => {
+    if (p === 'Google') {
+      try {
+        const { Auth } = await import('../../utils/amplifyClient');
+        localStorage.setItem('pendingGoogleRole', 'employer');
+        try { await Auth.signOut(); } catch (_) {}
+        await Auth.signInWithRedirect({ provider: 'Google' });
+      } catch (err) {
+        console.error('Google login failed:', err);
+      }
+    }
+  };
 
   /* slide variants */
   const slide = {
@@ -1015,6 +1035,28 @@ const EmployerRegister = () => {
 
   return (
     <Root>
+      {/* Google error modal */}
+      {googleError && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          background: 'rgba(0,0,0,0.4)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <div style={{
+            background: '#fff', borderRadius: 16, padding: '28px 32px',
+            maxWidth: 440, width: '90%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)'
+          }}>
+            <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+              <span style={{ background: '#ef4444', color: '#fff', borderRadius: '50%', width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, flexShrink: 0 }}>!</span>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: '#dc2626', marginBottom: 6 }}>{googleError.title}</div>
+                <div style={{ color: '#6b1a1a', fontSize: 14 }}>{googleError.message}</div>
+              </div>
+            </div>
+            <button onClick={() => setGoogleError(null)} style={{ background: 'transparent', border: 'none', fontWeight: 700, color: '#0E3995', cursor: 'pointer', float: 'right' }}>Đóng</button>
+          </div>
+        </div>
+      )}
       {/* ══════════════════ LEFT PANEL ══════════════════ */}
       <Left>
         <GridLines />

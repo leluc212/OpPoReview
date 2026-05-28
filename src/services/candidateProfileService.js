@@ -3,8 +3,9 @@
 
 import { fetchAuthSession } from 'aws-amplify/auth';
 
-// API base URL - using direct URLs for public access
-const API_BASE_URL = import.meta.env.DEV ? '/api-report' : (import.meta.env.VITE_CANDIDATE_API_URL || 'https://sd7ds72m8g.execute-api.ap-southeast-1.amazonaws.com/prod');
+// Prefer the direct API Gateway URL to avoid Vite proxy auth/header quirks.
+// This HTTP API does not use the /prod stage prefix for profile routes.
+const API_BASE_URL = import.meta.env.VITE_CANDIDATE_API_URL || 'https://sd7ds72m8g.execute-api.ap-southeast-1.amazonaws.com/prod';
 // Switch to xyp4wkszi7 for listing as well, as sd7ds72m8g is IAM-locked and xyp4wkszi7's Lambda returns the full list
 const CANDIDATE_LIST_API_URL = import.meta.env.DEV ? '/api' : 'https://xyp4wkszi7.execute-api.ap-southeast-1.amazonaws.com/prod';
 
@@ -80,11 +81,9 @@ class CandidateProfileService {
         ...options.headers
       };
 
-      // If token exists, add it to Authorization header.
-      // Avoid attaching the header when calling the local Vite proxy (paths like '/api-...')
-      // because forwarding Cognito JWT in the `Authorization` header can cause API Gateway
-      // (IAM) to attempt SigV4 parsing and return "Invalid key=value pair" 403s.
-      if (token) {
+      // Attach Authorization only for direct AWS calls.
+      const shouldAttachAuth = !baseUrl.startsWith('/');
+      if (token && shouldAttachAuth) {
         headers['Authorization'] = `Bearer ${token}`;
 
         // Decode token to get userId for logging
@@ -156,22 +155,6 @@ class CandidateProfileService {
         }
         return null;
       } catch (firstError) {
-        // If 403 (IAM blocks Bearer token), retry without Authorization header
-        if (firstError.message.includes('Invalid key=value pair') || firstError.message.includes('403')) {
-          console.warn('🔄 IAM detected, retrying profile fetch without auth header...');
-          const baseUrl = API_BASE_URL;
-          const response = await fetch(`${baseUrl}/profile/${userId}`, {
-            method: 'GET',
-            mode: 'cors'
-          });
-          if (response.ok) {
-            const result = await response.json();
-            if (result.success && result.data) {
-              console.log('✅ Profile loaded (public fallback):', result.data);
-              return result.data;
-            }
-          }
-        }
         throw firstError;
       }
     } catch (error) {
@@ -180,9 +163,8 @@ class CandidateProfileService {
       // Return null if profile doesn't exist yet (404 or "not found" message)
       if (error.message.includes('not found') || 
           error.message.includes('404') ||
-          error.message.includes('No profile exists') ||
-          error.message.includes('Invalid key=value pair')) {
-        console.log('ℹ️ No profile found or API blocked - this is normal for new Google users');
+          error.message.includes('No profile exists')) {
+        console.log('ℹ️ No profile found in DynamoDB');
         return null;
       }
       

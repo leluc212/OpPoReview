@@ -77,17 +77,6 @@ const getCompanyInfo = async () => {
       }
     }
     
-    // Try to get from localStorage (cached profile)
-    const cachedProfile = localStorage.getItem('employerProfile');
-    if (cachedProfile) {
-      const profile = JSON.parse(cachedProfile);
-      const companyName = profile.companyName || profile.businessName;
-      if (companyName) {
-        console.log('✅ Company name from cached profile:', companyName);
-        return { companyName };
-      }
-    }
-    
     // Try to fetch from employer profile API
     try {
       const profile = await employerProfileService.getMyProfile();
@@ -168,7 +157,7 @@ class QuickJobService {
           error.message.includes('CORS') ||
           error.message.includes('NetworkError') ||
           error.name === 'TypeError') {
-        throw new Error('Cannot connect to API. Using offline mode.');
+        throw new Error('Cannot connect to API.');
       }
       throw error;
     }

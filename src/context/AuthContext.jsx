@@ -99,19 +99,13 @@ export const AuthProvider = ({ children }) => {
                 title: 'Tài khoản Google đã được đăng ký',
                 message: `Email ${emailFromToken} đã đăng ký với vai trò ${lockedRole}. Vui lòng dùng tài khoản Google khác để đăng nhập với vai trò ${attemptedRole}.`
               }));
-              // Redirect to login so the LoginPage can show the error immediately
-              try { window.location.replace(`${BASE}login`); } catch (e) { /* ignore */ }
-              // Sign out
+              // Giữ isLoading = true để không render dashboard, redirect ngay
+              localStorage.removeItem('user');
               try {
                 const { signOut } = await import('aws-amplify/auth');
                 await signOut();
               } catch (e) { /* ignore */ }
-              if (isMounted) {
-                setUser(null);
-                setIsAuthenticated(false);
-                setIsLoading(false);
-              }
-              localStorage.removeItem('user');
+              window.location.replace(`${BASE}login`);
               return;
             } else if (googleRoleMap[emailFromToken]) {
               // Email này đã đăng ký với vai trò cố định
@@ -167,17 +161,12 @@ export const AuthProvider = ({ children }) => {
                   message: `Email ${emailForMapping} đã đăng ký với vai trò ${lockedRole}. Vui lòng dùng tài khoản Google khác để đăng nhập với vai trò ${attemptedRole}.`
                 }));
                 // Redirect to login so the LoginPage can show the error immediately
-                try { window.location.replace(`${BASE}login`); } catch (e) { /* ignore */ }
+                localStorage.removeItem('user');
                 try {
                   const { signOut } = await import('aws-amplify/auth');
                   await signOut();
                 } catch (e) { /* ignore */ }
-                if (isMounted) {
-                  setUser(null);
-                  setIsAuthenticated(false);
-                  setIsLoading(false);
-                }
-                localStorage.removeItem('user');
+                window.location.replace(`${BASE}login`);
                 return;
               } else if (googleRoleMap[emailForMapping]) {
                 userRole = googleRoleMap[emailForMapping];
@@ -209,6 +198,21 @@ export const AuthProvider = ({ children }) => {
               approved: true
             };
             console.log('✅ [AuthContext] Created user from Cognito:', userData.email, 'Role:', userData.role, 'UserId:', userData.userId);
+
+            // Auto-create profile if candidate and no profile exists
+            if (userRole === 'candidate' && userData.userId) {
+              try {
+                const { default: candidateProfileService } = await import('../services/candidateProfileService');
+                const existing = await candidateProfileService.getMyProfile().catch(() => null);
+                if (!existing) {
+                  await candidateProfileService.createProfile({
+                    userId: userData.userId,
+                    fullName: session.tokens.idToken.payload.name || '',
+                    email: userData.email,
+                  }).catch(() => null);
+                }
+              } catch (_) {}
+            }
             
             if (isMounted) {
               setUser(userData);

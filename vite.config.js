@@ -53,17 +53,30 @@ export default defineConfig({
         }
       },
       '/api-applications': {
-        target: 'https://l1636ie205.execute-api.ap-southeast-1.amazonaws.com/prod',
+        target: 'https://l1636ie205.execute-api.ap-southeast-1.amazonaws.com',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api-applications/, '/applications'),
-        secure: false
+        secure: false,
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
+            if (req.headers.authorization) {
+              proxyReq.setHeader('Authorization', req.headers.authorization);
+            }
+          });
+        }
       },
       '/api-report': {
         target: 'https://sd7ds72m8g.execute-api.ap-southeast-1.amazonaws.com/prod',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api-report/, ''),
         secure: false,
-        
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
+            if (req.headers.authorization) {
+              proxyReq.setHeader('Authorization', req.headers.authorization);
+            }
+          });
+        }
       }
     }
   },

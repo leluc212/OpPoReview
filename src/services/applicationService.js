@@ -1,6 +1,7 @@
 import { fetchAuthSession } from 'aws-amplify/auth';
 
-const API_BASE_URL = 'https://l1636ie205.execute-api.ap-southeast-1.amazonaws.com/prod';
+// HTTP API uses the $default stage, so the invoke URL must NOT include /prod.
+const API_BASE_URL = 'https://l1636ie205.execute-api.ap-southeast-1.amazonaws.com';
 
 /**
  * Get authenticated headers with JWT token
@@ -22,14 +23,6 @@ async function getAuthHeaders() {
     };
   } catch (error) {
     console.error('Error getting auth headers:', error);
-    // Fallback: use PKCE-token stored by AuthContext (OPPO_ID_TOKEN)
-    try {
-      const fallback = localStorage.getItem('OPPO_ID_TOKEN');
-      if (fallback) {
-        const tokenString = fallback.trim();
-        return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenString}` };
-      }
-    } catch (e) { /* ignore */ }
     throw error;
   }
 }
@@ -107,12 +100,7 @@ export async function getMyCandidateApplications() {
       const session = await fetchAuthSession();
       userId = session.tokens?.idToken?.payload?.sub;
     } catch (e) {
-      // try fallback from OPPO_ID_TOKEN
-      const fallback = localStorage.getItem('OPPO_ID_TOKEN');
-      if (fallback) {
-        const payload = decodeJwtPayload(fallback);
-        userId = payload?.sub || null;
-      }
+      userId = null;
     }
 
     if (!userId) {
@@ -122,23 +110,21 @@ export async function getMyCandidateApplications() {
     // Try Vite proxy first in dev mode to avoid CORS
     const urls = import.meta.env.DEV
       ? [
-          `/api-applications/candidate/${userId}`,
-          `${API_BASE_URL}/applications/candidate/${userId}`
+          `${API_BASE_URL}/applications/candidate/${userId}`,
+          `/api-applications/candidate/${userId}`
         ]
       : [`${API_BASE_URL}/applications/candidate/${userId}`];
     
     for (const url of urls) {
       try {
-        // In dev mode, when using the Vite proxy (local paths like '/api-applications/...'),
-        // avoid attaching the Cognito `Authorization` header so the proxy doesn't forward
-        // it to API Gateway (which may interpret it as SigV4 and return 403).
-        let response;
-        if (import.meta.env.DEV && url.startsWith('/')) {
-          response = await fetch(url, { method: 'GET' });
-        } else {
-          const headers = await getAuthHeaders();
-          response = await fetch(url, { method: 'GET', headers });
-        }
+        // ✅ FIX: Always send Bearer token, even via Vite proxy
+        // Cognito authorizer needs the token to extract claims (user ID)
+        const headers = await getAuthHeaders();
+        const response = await fetch(url, { 
+          method: 'GET', 
+          headers,
+          mode: 'cors'  // ✅ Enable CORS mode
+        });
         
         if (response.ok) {
           const data = await response.json();
@@ -146,18 +132,6 @@ export async function getMyCandidateApplications() {
           return data.applications || [];
         }
         
-        // If 403 with IAM error, try without auth
-        if (response.status === 403) {
-          const errorText = await response.text();
-          if (errorText.includes('Invalid key=value pair')) {
-            console.warn('🔄 IAM detected on applications API, retrying without auth...');
-            const pubResponse = await fetch(url, { method: 'GET', mode: 'cors' });
-            if (pubResponse.ok) {
-              const data = await pubResponse.json();
-              return data.applications || [];
-            }
-          }
-        }
       } catch (fetchErr) {
         console.warn(`⚠️ Failed to fetch applications from ${url}:`, fetchErr.message);
         continue; // Try next URL

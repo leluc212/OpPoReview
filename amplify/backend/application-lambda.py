@@ -28,7 +28,7 @@ def lambda_handler(event, context):
     def create_response(status_code, body):
         return {
             'statusCode': status_code,
-            'headers': response_headers,
+            'headers': response_headers,  # ✅ ALWAYS include CORS headers
             'body': json.dumps(body, default=str)
         }
 
@@ -58,29 +58,36 @@ def lambda_handler(event, context):
             candidate_id = 'anonymous'
             candidate_email = 'anonymous@example.com'
         
+        # ✅ Return 401 with CORS headers (not just reject at authorizer level)
         if not candidate_id and http_method != 'OPTIONS':
-            return create_response(401, {'error': 'Unauthorized - No user ID'})
+            return create_response(401, {'error': 'Unauthorized - No user ID. Missing or invalid Cognito token.'})
         
         # POST /applications - Submit application
         if http_method == 'POST' and normalized_path == '/applications':
+            print(f"✅ Matched submit application route: {normalized_path}")
             return submit_application(event, candidate_id, candidate_email, create_response)
         
         # GET /applications - Get all applications (Admin)
         elif http_method == 'GET' and (normalized_path == '/applications' or normalized_path == '/applications/'):
+            print(f"✅ Matched get all applications route: {normalized_path}")
             return get_all_applications(create_response)
         
         # GET /applications/candidate/{candidateId} - Get candidate's applications
-        elif http_method == 'GET' and '/applications/candidate/' in normalized_path:
-            return get_candidate_applications(candidate_id, create_response)
+        elif http_method == 'GET' and normalized_path.startswith('/applications/candidate/'):
+            requested_candidate_id = normalized_path.split('/')[-1]
+            print(f"✅ Matched candidate applications route: requested_candidate_id={requested_candidate_id}, auth_candidate_id={candidate_id}")
+            return get_candidate_applications(requested_candidate_id or candidate_id, create_response)
         
         # GET /applications/job/{jobId} - Get applications for a job (employer only)
-        elif http_method == 'GET' and '/applications/job/' in path:
+        elif http_method == 'GET' and normalized_path.startswith('/applications/job/'):
             job_id = path.split('/')[-1]
+            print(f"✅ Matched job applications route: job_id={job_id}")
             return get_job_applications(job_id, candidate_id, create_response)
         
         # PUT /applications/{applicationId}/status - Update application status (employer only)
-        elif http_method == 'PUT' and '/status' in path:
+        elif http_method == 'PUT' and normalized_path.endswith('/status'):
             application_id = path.split('/')[-2]
+            print(f"✅ Matched update application status route: application_id={application_id}")
             return update_application_status(event, application_id, candidate_id, create_response)
         
         else:

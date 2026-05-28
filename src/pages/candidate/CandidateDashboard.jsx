@@ -1359,7 +1359,16 @@ const CandidateDashboard = () => {
       try {
         setIsLoadingProfile(true);
         const profile = await candidateProfileService.getMyProfile();
-        setCandidateProfile(profile);
+        if (!profile) {
+          // Auto-create empty profile for new users
+          const created = await candidateProfileService.createProfile({
+            fullName: user?.name || '',
+            email: user?.email || '',
+          }).catch(() => null);
+          setCandidateProfile(created);
+        } else {
+          setCandidateProfile(profile);
+        }
       } catch (error) {
         console.error('Error fetching profile:', error);
       } finally {

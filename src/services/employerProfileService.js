@@ -111,7 +111,7 @@ class EmployerProfileService {
           error.message.includes('NetworkError') ||
           error.name === 'TypeError') {
         console.error('❌ API request failed - network/CORS issue:', error);
-        throw new Error('Cannot connect to API. Using offline mode.');
+        throw new Error('Cannot connect to API.');
       }
       throw error;
     }
@@ -164,23 +164,6 @@ class EmployerProfileService {
         throw new Error('Authentication required. Please log in again.');
       }
       
-      // If API is not available, try localStorage as fallback
-      if (error.message.includes('Cannot connect to API') || 
-          error.message.includes('offline mode')) {
-        console.log('🔄 API unavailable, using localStorage fallback');
-        const savedData = localStorage.getItem('employerProfile');
-        if (savedData) {
-          try {
-            const profile = JSON.parse(savedData);
-            console.log('✅ Employer profile loaded from localStorage (fallback)');
-            return profile;
-          } catch (e) {
-            console.error('Error parsing localStorage data:', e);
-          }
-        }
-        return null;
-      }
-      
       throw error;
     }
   }
@@ -231,22 +214,6 @@ class EmployerProfileService {
       throw new Error('Failed to create profile');
     } catch (error) {
       console.error('❌ Error creating employer profile:', error);
-      
-      // If API is not available, save to localStorage as fallback
-      if (error.message.includes('Cannot connect to API') || 
-          error.message.includes('offline mode')) {
-        console.log('🔄 API unavailable, saving to localStorage fallback');
-        const fallbackData = {
-          ...profileData,
-          profileCompletion: this.calculateCompletion(profileData),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-        localStorage.setItem('employerProfile', JSON.stringify(fallbackData));
-        console.log('✅ Employer profile saved to localStorage (fallback)');
-        return fallbackData;
-      }
-      
       throw error;
     }
   }
@@ -295,21 +262,6 @@ class EmployerProfileService {
       throw new Error('Failed to update profile');
     } catch (error) {
       console.error('❌ Error updating employer profile:', error);
-      
-      // If API is not available, save to localStorage as fallback
-      if (error.message.includes('Cannot connect to API') || 
-          error.message.includes('offline mode')) {
-        console.log('🔄 API unavailable, saving to localStorage fallback');
-        const fallbackData = {
-          ...updates,
-          profileCompletion: this.calculateCompletion(updates),
-          updatedAt: new Date().toISOString()
-        };
-        localStorage.setItem('employerProfile', JSON.stringify(fallbackData));
-        console.log('✅ Employer profile saved to localStorage (fallback)');
-        return fallbackData;
-      }
-      
       throw error;
     }
   }
@@ -385,16 +337,6 @@ class EmployerProfileService {
       throw new Error('Failed to submit verification');
     } catch (error) {
       console.error('❌ Error submitting verification:', error);
-      
-      // Fallback to localStorage
-      if (error.message.includes('Cannot connect to API') || 
-          error.message.includes('offline mode')) {
-        localStorage.setItem('companyVerificationStatus', 'pending');
-        localStorage.setItem('companyVerificationData', JSON.stringify(verificationData));
-        console.log('✅ Verification saved to localStorage (fallback)');
-        return { status: 'pending', submittedAt: new Date().toISOString() };
-      }
-      
       throw error;
     }
   }
@@ -471,21 +413,8 @@ class EmployerProfileService {
       return null;
     } catch (error) {
       console.error('❌ Error getting verification status:', error);
-      
-      // Fallback to localStorage
-      if (error.message.includes('Cannot connect to API') || 
-          error.message.includes('offline mode') ||
-          error.message.includes('not found')) {
-        const status = localStorage.getItem('companyVerificationStatus');
-        const data = localStorage.getItem('companyVerificationData');
-        
-        if (status && data) {
-          return {
-            status,
-            data: JSON.parse(data),
-            submittedAt: new Date().toISOString()
-          };
-        }
+      if (error.message.includes('not found') || error.message.includes('404')) {
+        return null;
       }
       
       return null;

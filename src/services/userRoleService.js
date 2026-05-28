@@ -14,15 +14,8 @@ export async function updateMyRole(role) {
     throw new Error('Invalid role value');
   }
 
-  // Always update local cache first for immediate UX.
-  const current = JSON.parse(localStorage.getItem('user') || '{}');
-  const updatedUser = { ...current, role };
-  localStorage.setItem('user', JSON.stringify(updatedUser));
-  localStorage.removeItem('needsGoogleRoleSetup');
-
-  // If backend endpoint is not configured yet, keep local result and exit.
   if (!API_BASE_URL) {
-    return { success: true, localOnly: true, user: updatedUser };
+    throw new Error('User role API is not configured');
   }
 
   const token = await getAuthToken();
@@ -41,5 +34,5 @@ export async function updateMyRole(role) {
     throw new Error(data.message || data.error || `Role update failed: HTTP ${response.status}`);
   }
 
-  return { success: true, localOnly: false, data };
+  return { success: true, data };
 }

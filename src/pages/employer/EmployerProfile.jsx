@@ -779,7 +779,7 @@ const EmployerProfile = () => {
         
         let profile = null;
         
-        // Try to load from API first
+        // Load from API only - no localStorage fallback
         try {
           profile = await employerProfileService.getMyProfile();
           if (profile) {
@@ -787,24 +787,8 @@ const EmployerProfile = () => {
             setIsOfflineMode(false);
           }
         } catch (apiError) {
-          console.log('❌ API failed, trying localStorage fallback:', apiError.message);
+          console.error('❌ API failed:', apiError.message);
           setIsOfflineMode(true);
-          
-          // Fallback to localStorage
-          const savedData = localStorage.getItem('employerProfile');
-          const savedLogo = localStorage.getItem('companyLogo');
-          
-          if (savedData) {
-            try {
-              profile = JSON.parse(savedData);
-              if (savedLogo) {
-                profile.companyLogo = savedLogo;
-              }
-              console.log('✅ Employer profile loaded from localStorage (fallback)');
-            } catch (parseError) {
-              console.error('Error parsing localStorage data:', parseError);
-            }
-          }
         }
         
         if (profile) {
@@ -1023,43 +1007,8 @@ const EmployerProfile = () => {
         toast.success(language === 'vi' ? 'Đã cập nhật hồ sơ công ty thành công!' : 'Company profile updated successfully!');
         
       } catch (apiError) {
-        console.error('❌ API Error, using localStorage fallback:', apiError);
-        setIsOfflineMode(true);
-        
-        // Fallback to localStorage
-        try {
-          const fallbackData = {
-            ...profileData,
-            updatedAt: new Date().toISOString(),
-            profileCompletion: calculateProfileCompletion(profileData)
-          };
-          
-          localStorage.setItem('employerProfile', JSON.stringify(fallbackData));
-          localStorage.setItem('companyLogo', companyLogo || '');
-          
-          setOriginalFormData({
-            companyName: fallbackData.companyName || '',
-            email: fallbackData.email || '',
-            phone: fallbackData.phone || '',
-            address: fallbackData.address || '',
-            latitude: fallbackData.latitude || '',
-            longitude: fallbackData.longitude || '',
-            website: fallbackData.website || '',
-            industry: fallbackData.industry || '',
-            companySize: fallbackData.companySize || '',
-            foundedYear: fallbackData.foundedYear || '',
-            description: fallbackData.description || '',
-            taxCode: fallbackData.taxCode || '',
-            businessLicense: fallbackData.businessLicense || ''
-          });
-          
-          setIsEditing(false);
-          toast.success(language === 'vi' ? 'Đã lưu hồ sơ công ty (chế độ offline)!' : 'Company profile saved (offline mode)!');
-          
-        } catch (localError) {
-          console.error('❌ localStorage fallback failed:', localError);
-          toast.error(language === 'vi' ? 'Không thể lưu hồ sơ công ty' : 'Failed to save company profile');
-        }
+        console.error('❌ API Error saving profile:', apiError);
+        toast.error(language === 'vi' ? 'Lỗi khi lưu hồ sơ. Vui lòng thử lại.' : 'Error saving profile. Please try again.');
       }
       
     } catch (error) {

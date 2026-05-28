@@ -120,7 +120,7 @@ class JobPostService {
           error.message.includes('NetworkError') ||
           error.name === 'TypeError') {
         console.error('❌ API request failed - network/CORS issue:', error);
-        throw new Error('Cannot connect to API. Using offline mode.');
+        throw new Error('Cannot connect to API.');
       }
       throw error;
     }
@@ -196,34 +196,6 @@ class JobPostService {
     } catch (error) {
       console.error('❌ Error creating job post:', error);
       console.error('❌ Error details:', error.message);
-      
-      // Fallback to localStorage
-      if (error.message.includes('Cannot connect to API') || 
-          error.message.includes('offline mode')) {
-        console.log('🔄 API unavailable, saving to localStorage fallback');
-        
-        const jobId = generateJobId();
-        const fallbackData = {
-          id: Date.now(),
-          idJob: jobId,
-          ...jobData,
-          applicants: 0,
-          // fallback offline mode should also mark as pending for manual moderation
-          status: 'pending',
-          views: 0,
-          responseRate: 0,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-        
-        const existingJobs = JSON.parse(localStorage.getItem('employerJobs') || '[]');
-        const updatedJobs = [fallbackData, ...existingJobs];
-        localStorage.setItem('employerJobs', JSON.stringify(updatedJobs));
-        
-        console.log('✅ Job post saved to localStorage (fallback)');
-        return fallbackData;
-      }
-      
       throw error;
     }
   }
@@ -253,24 +225,6 @@ class JobPostService {
       throw new Error('Failed to update job post');
     } catch (error) {
       console.error('❌ Error updating job post:', error);
-      
-      // Fallback to localStorage
-      if (error.message.includes('Cannot connect to API') || 
-          error.message.includes('offline mode')) {
-        console.log('🔄 API unavailable, updating localStorage fallback');
-        
-        const existingJobs = JSON.parse(localStorage.getItem('employerJobs') || '[]');
-        const updatedJobs = existingJobs.map(job => 
-          job.idJob === jobId || job.id === jobId
-            ? { ...job, ...updates, updatedAt: new Date().toISOString() }
-            : job
-        );
-        localStorage.setItem('employerJobs', JSON.stringify(updatedJobs));
-        
-        console.log('✅ Job post updated in localStorage (fallback)');
-        return { ...updates, updatedAt: new Date().toISOString() };
-      }
-      
       throw error;
     }
   }
@@ -339,20 +293,6 @@ class JobPostService {
       return null;
     } catch (error) {
       console.error('❌ Error fetching job post:', error);
-      
-      // Fallback to localStorage
-      if (error.message.includes('Cannot connect to API') || 
-          error.message.includes('offline mode') ||
-          error.message.includes('not found')) {
-        console.log('🔄 API unavailable, using localStorage fallback');
-        const jobs = JSON.parse(localStorage.getItem('employerJobs') || '[]');
-        const job = jobs.find(j => j.idJob === jobId || j.id === jobId);
-        if (job) {
-          console.log('✅ Job post loaded from localStorage (fallback)');
-        }
-        return job || null;
-      }
-      
       throw error;
     }
   }
@@ -376,22 +316,6 @@ class JobPostService {
       throw new Error('Failed to delete job post');
     } catch (error) {
       console.error('❌ Error deleting job post:', error);
-      
-      // Fallback to localStorage
-      if (error.message.includes('Cannot connect to API') || 
-          error.message.includes('offline mode')) {
-        console.log('🔄 API unavailable, deleting from localStorage fallback');
-        
-        const existingJobs = JSON.parse(localStorage.getItem('employerJobs') || '[]');
-        const updatedJobs = existingJobs.filter(job => 
-          job.idJob !== jobId && job.id !== jobId
-        );
-        localStorage.setItem('employerJobs', JSON.stringify(updatedJobs));
-        
-        console.log('✅ Job post deleted from localStorage (fallback)');
-        return true;
-      }
-      
       throw error;
     }
   }
@@ -448,18 +372,6 @@ class JobPostService {
     } catch (error) {
       console.error('❌ Error fetching active jobs:', error);
       console.error('❌ Error details:', error.message, error.stack);
-      
-      // Fallback to localStorage
-      if (error.message.includes('Cannot connect to API') || 
-          error.message.includes('offline mode') ||
-          error.message.includes('not found')) {
-        console.log('🔄 API unavailable, using localStorage fallback');
-        const jobs = JSON.parse(localStorage.getItem('employerJobs') || '[]');
-        const activeJobs = jobs.filter(job => job.status === 'active');
-        console.log('✅ Active jobs loaded from localStorage (fallback):', activeJobs.length, 'jobs');
-        return activeJobs;
-      }
-      
       throw error;
     }
   }
