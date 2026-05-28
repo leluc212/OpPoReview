@@ -564,7 +564,7 @@ const GoogleSVG = () => (
 const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, isAuthenticated, user, isLoading } = useAuth();
   const { t, language } = useLanguage();
   const [role, setRole] = useState('candidate');
   const [showPw, setShowPw] = useState(false);
@@ -572,6 +572,7 @@ const LoginPage = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [googleErrorModal, setGoogleErrorModal] = useState(null);
 
   /* Sync i18n labels */
   ROLES.candidate.label = t.login.roleCandidate;
@@ -582,6 +583,25 @@ const LoginPage = () => {
     const p = new URLSearchParams(location.search).get('role');
     if (p && ROLES[p]) setRole(p);
   }, [location.search]);
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated && !user?.role) {
+      navigate('/auth/google-role-setup', { replace: true });
+    }
+  }, [isLoading, isAuthenticated, user, navigate]);
+
+  // Hiển thị lỗi nếu Google account bị khóa ở role khác
+  useEffect(() => {
+    const errorStr = localStorage.getItem('googleLoginError');
+    if (errorStr) {
+      try {
+        const errorData = JSON.parse(errorStr);
+        // Show as modal instead of banner
+        setGoogleErrorModal(errorData);
+      } catch (e) { /* ignore */ }
+      localStorage.removeItem('googleLoginError');
+    }
+  }, []);
 
   const rc = ROLES[role];
 
@@ -706,15 +726,14 @@ const LoginPage = () => {
         
         const sp = new URLSearchParams(location.search);
         const rd = sp.get('redirect');
+        const BASE = import.meta.env.BASE_URL || '/';
         if (rd) {
-          if ((roleToUse === 'candidate' && rd.startsWith('/candidate/')) ||
-            (roleToUse === 'employer' && rd.startsWith('/employer/')) ||
-            (roleToUse === 'admin' && rd.startsWith('/admin/'))) {
-            navigate(rd); 
-            return;
-          }
+          const target = rd.replace(/^\/+/, '');
+          window.location.replace(`${BASE}${target}`);
+          return;
         }
-        navigate(roleToUse === 'admin' ? '/admin/dashboard' : roleToUse === 'employer' ? '/employer/dashboard' : '/candidate/dashboard');
+        const dashboardPath = roleToUse === 'admin' ? 'admin/dashboard' : roleToUse === 'employer' ? 'employer/dashboard' : 'candidate/dashboard';
+        window.location.replace(`${BASE}${dashboardPath}`);
       } else if (result.nextStep) {
         // Additional steps required (OTP, MFA, new password, etc.)
         console.log('Additional step required:', result.nextStep.signInStep);
@@ -762,7 +781,68 @@ const LoginPage = () => {
     }
   };
 
-  const handleSocial = p => setShowModal(true);
+  const handleSocial = async (provider) => {
+    if (provider === 'Google') {
+      try {
+        setLoading(true);
+        const { Auth } = await import('../../utils/amplifyClient');
+        
+        // Đảm bảo đăng xuất session cũ nếu có trước khi chuyển hướng Google
+        try {
+          await Auth.signOut();
+          console.log('Signed out existing session before Google redirect');
+        } catch (signOutErr) {
+          console.log('No active session to sign out before Google redirect');
+        }
+        
+        // Lưu vai trò đang chọn trước khi redirect sang Google
+        localStorage.setItem('pendingGoogleRole', role);
+        console.log('📝 Saved pending Google role:', role);
+        // Generate PKCE verifier & challenge, store verifier in sessionStorage, then redirect to Hosted UI with prompt=select_account
+        try {
+          const { generateCodeVerifier, generateCodeChallenge } = await import('../../utils/pkce');
+          const verifier = generateCodeVerifier();
+          const challenge = await generateCodeChallenge(verifier);
+          sessionStorage.setItem('pkce_code_verifier', verifier);
+
+          // use values exported from amplifyClient
+          const { OAUTH_DOMAIN: domain, OAUTH_CLIENT_ID: clientId, OAUTH_REDIRECT_URI: redirectUri } = await import('../../utils/amplifyClient');
+          const scope = encodeURIComponent('openid email profile');
+          const responseType = 'code';
+          const providerParam = 'Google';
+          const prompt = 'select_account';
+
+          const hostedUrl = `https://${domain}/oauth2/authorize?response_type=${responseType}&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}&identity_provider=${providerParam}&prompt=${prompt}&code_challenge=${challenge}&code_challenge_method=S256`;
+          console.log('Redirecting to Hosted UI (PKCE + select_account):', hostedUrl);
+          try {
+            if (window.top && window.top !== window) {
+              window.top.location.href = hostedUrl;
+            } else {
+              window.location.href = hostedUrl;
+            }
+          } catch (navError) {
+            const popup = window.open(hostedUrl, '_blank', 'noopener,noreferrer');
+            if (!popup) {
+              window.location.href = hostedUrl;
+            }
+          }
+          return;
+        } catch (errRedirect) {
+          console.error('PKCE Hosted UI redirect failed:', errRedirect);
+          try { await Auth.signInWithRedirect({ provider: 'Google' }); return; } catch(e){ /* fallthrough */ }
+          setErrors({ submit: 'Không thể chuyển hướng đến Google login. Vui lòng thử lại.', submitTitle: 'Lỗi đăng nhập Google' });
+          setLoading(false);
+          return;
+        }
+      } catch (err) {
+        console.error('❌ Google redirect login failed:', err);
+        setErrors({ submit: err.message, submitTitle: 'Lỗi đăng nhập Google' });
+        setLoading(false);
+      }
+    } else {
+      setShowModal(true);
+    }
+  };
 
   const panelVariants = {
     initial: { opacity: 0, x: -40 },
@@ -825,6 +905,40 @@ const LoginPage = () => {
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
           $grad={rc.grad}
         >
+          {/* Google role mismatch modal */}
+          <AnimatePresence>
+            {googleErrorModal && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)' }} />
+                <motion.div
+                  initial={{ scale: 0.98, y: 8 }}
+                  animate={{ scale: 1, y: 0 }}
+                  exit={{ scale: 0.98, y: 8 }}
+                  transition={{ duration: 0.2 }}
+                  style={{ background: '#fff', borderRadius: 12, padding: 20, width: 'min(720px,90%)', zIndex: 2001 }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: 12 }}>
+                    <div style={{ display: 'flex', gap: 12 }}>
+                      <ErrorIcon style={{ background: '#ef4444' }}>!</ErrorIcon>
+                      <div>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: '#dc2626', marginBottom: 6 }}>{googleErrorModal.title}</div>
+                        <div style={{ color: '#6b1a1a' }}>{googleErrorModal.message}</div>
+                      </div>
+                    </div>
+                    <div>
+                      <button onClick={() => setGoogleErrorModal(null)} style={{ background: 'transparent', border: 'none', fontWeight: 700, color: '#0E3995', cursor: 'pointer' }}>Đóng</button>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
           {/* Header */}
           <CardLogoRow>
             <CLogoImg src="/OpPoReview/images/logo.png" alt="Ốp Pờ" onError={e=>{e.target.style.display='none';}} />

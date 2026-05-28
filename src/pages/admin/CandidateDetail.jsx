@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
+import candidateProfileService from '../../services/candidateProfileService';
 import { 
   ArrowLeft,
   Phone,
@@ -15,7 +16,8 @@ import {
   Unlock,
   CheckCircle,
   XCircle,
-  Edit
+  Edit,
+  Loader2
 } from 'lucide-react';
 
 const PageContainer = styled.div`
@@ -263,51 +265,6 @@ const SectionTitle = styled.h3`
   }
 `;
 
-const ActionButtonsRow = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-top: 24px;
-  
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const ActionButton = styled.button`
-  padding: 14px 20px;
-  border: none;
-  border-radius: ${props => props.theme.borderRadius.md};
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  
-  background: ${props => {
-    if (props.$variant === 'success') return '#10b981';
-    if (props.$variant === 'danger') return '#ef4444';
-    if (props.$variant === 'warning') return '#f59e0b';
-    return props.theme.colors.primary;
-  }};
-  
-  color: white;
-  
-  &:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-  
-  svg {
-    width: 18px;
-    height: 18px;
-  }
-`;
-
 const WorkAreaTags = styled.div`
   display: flex;
   gap: 8px;
@@ -384,109 +341,91 @@ const ViolationCard = styled.div`
   }
 `;
 
+const LoadingContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  gap: 16px;
+  color: ${props => props.theme.colors.primary};
+`;
+
 const CandidateDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState('info');
+  const [candidate, setCandidate] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Sample data - trong thực tế sẽ fetch từ API dựa trên id
-  const candidatesData = {
-    1: {
-      id: 1,
-      name: 'Mai Thanh Tuấn',
-      email: 'Tuanmaytinh@gmail.com',
-      phone: '0938 678 209',
-      dob: '12/05/2001',
-      gender: 'Nam',
-      address: 'Quận 1 - TP.HCM',
-      ekycVerified: true,
-      approvalStatus: 'approved',
-      joined: '10/01/2026',
-      jobsCompleted: 32,
-      rating: 4.6,
-      totalEarned: '1,250,000',
-      violations: [],
-      workAreas: ['Quận 1', 'Quận 3', 'Bình Thạnh']
-    },
-    2: {
-      id: 2,
-      name: 'Trần Thị Thu Chi',
-      email: 'thuchi12795@gmail.com',
-      phone: '0912 345 678',
-      dob: '15/08/1999',
-      gender: 'Nữ',
-      address: 'Quận 3 - TP.HCM',
-      ekycVerified: true,
-      approvalStatus: 'pending',
-      joined: '15/01/2026',
-      jobsCompleted: 28,
-      rating: 4.8,
-      totalEarned: '980,000',
-      violations: [],
-      workAreas: ['Quận 3', 'Quận 10']
-    },
-    3: {
-      id: 3,
-      name: 'Ngô Thanh Sơn',
-      email: 'Alibaba05623@gmail.com',
-      phone: '0909 876 543',
-      dob: '20/03/2000',
-      gender: 'Nam',
-      address: 'Quận 8 - TP.HCM',
-      ekycVerified: false,
-      approvalStatus: 'pending',
-      joined: '20/01/2026',
-      jobsCompleted: 15,
-      rating: 4.2,
-      totalEarned: '520,000',
-      violations: [
-        { date: '10/3', content: 'Job cafe ABC - Đến muộn 15 phút' },
-        { date: '16/3', content: 'Job Coffee House - Không hoàn thành công việc' }
-      ],
-      workAreas: ['Quận 8']
-    },
-    4: {
-      id: 4,
-      name: 'Phạm Thị Thu Thao',
-      email: 'thuthao123@gmail.com',
-      phone: '0987 654 321',
-      dob: '05/11/1998',
-      gender: 'Nữ',
-      address: 'Quận 7 - TP.HCM',
-      ekycVerified: true,
-      approvalStatus: 'approved',
-      joined: '25/01/2026',
-      jobsCompleted: 45,
-      rating: 4.9,
-      totalEarned: '1,850,000',
-      violations: [],
-      workAreas: ['Quận 7', 'Quận 4', 'Bình Thạnh']
-    },
-    5: {
-      id: 5,
-      name: 'Hoàng Yến Vy',
-      email: 'dori.hyv@gmail.com',
-      phone: '0901 234 567',
-      dob: '18/07/2002',
-      gender: 'Nữ',
-      address: 'Thủ Đức - TP.HCM',
-      ekycVerified: false,
-      approvalStatus: 'rejected',
-      joined: '30/01/2026',
-      jobsCompleted: 5,
-      rating: 3.2,
-      totalEarned: '180,000',
-      violations: [
-        { date: '5/3', content: 'Job Starbucks - Vi phạm quy định trang phục' },
-        { date: '7/3', content: 'Job Highlands - Thái độ không tốt với khách hàng' },
-        { date: '8/3', content: 'Job Phúc Long - Không đến làm việc' }
-      ],
-      workAreas: ['Thủ Đức']
-    }
-  };
+  useEffect(() => {
+    const fetchCandidate = async () => {
+      setLoading(true);
+      try {
+        console.log('📡 Fetching profile for ID:', id);
+        const allCandidates = await candidateProfileService.getAllCandidates();
+        const found = allCandidates.find(c => (c.userId || c.id) === id);
+        
+        if (found) {
+          setCandidate({
+            id: found.userId || found.id,
+            name: found.fullName || (found.email ? found.email.split('@')[0] : 'Unknown Candidate'),
+            email: found.email || 'No email provided',
+            phone: found.phone || 'No phone',
+            dob: found.dateOfBirth || (language === 'vi' ? 'Chưa cập nhật' : 'Not updated'),
+            gender: found.gender || (language === 'vi' ? 'Chưa xác định' : 'Unknown'),
+            address: found.location || (language === 'vi' ? 'Chưa cập nhật' : 'Not updated'),
+            ekycVerified: found.kycCompleted || found.ekycStatus === 'verified' || false,
+            approvalStatus: (found.kycCompleted || found.ekycStatus === 'verified') ? 'approved' : 'pending',
+            joined: found.createdAt ? new Date(found.createdAt).toLocaleDateString('vi-VN') : 'N/A',
+            jobsCompleted: found.jobsCompleted || 0,
+            rating: found.rating || 5.0,
+            totalEarned: found.totalEarned || '0',
+            violations: found.violations || [],
+            workAreas: found.workAreas || []
+          });
+        }
+      } catch (error) {
+        console.error('❌ Error fetching candidate details:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const candidate = candidatesData[id] || candidatesData[1];
+    fetchCandidate();
+  }, [id, language]);
+
+  if (loading) {
+    return (
+      <DashboardLayout role="admin">
+        <LoadingContainer>
+          <Loader2 className="animate-spin" size={48} />
+          <p>{language === 'vi' ? 'Đang tải dữ liệu ứng viên...' : 'Loading candidate data...'}</p>
+        </LoadingContainer>
+      </DashboardLayout>
+    );
+  }
+
+  if (!candidate) {
+    return (
+      <DashboardLayout role="admin">
+        <PageContainer>
+          <BackButton onClick={() => navigate('/admin/candidates')}>
+            <ArrowLeft />
+            {language === 'vi' ? 'Quay lại danh sách' : 'Back to list'}
+          </BackButton>
+          <VerificationCard $verified={false}>
+            <AlertTriangle />
+            <div className="content">
+              <div className="title">{language === 'vi' ? 'Không tìm thấy ứng viên' : 'Candidate not found'}</div>
+              <div className="desc">{language === 'vi' ? 'ID ứng viên không hợp lệ hoặc đã bị xóa.' : 'Invalid candidate ID or record deleted.'}</div>
+            </div>
+          </VerificationCard>
+        </PageContainer>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout role="admin" key={language}>
@@ -506,7 +445,7 @@ const CandidateDetail = () => {
             </CandidateAvatar>
             <CandidateInfo>
               <h1>{candidate.name}</h1>
-              <div className="id">ID: UV{candidate.id.toString().padStart(4, '0')}</div>
+              <div className="id">ID: {candidate.id}</div>
               <div className="contact">
                 <div className="item">
                   <Mail />
@@ -535,7 +474,7 @@ const CandidateDetail = () => {
             </StatCard>
             <StatCard>
               <div className="label">{language === 'vi' ? 'Trust score' : 'Trust Score'}</div>
-              <div className="value">4.6 / 5</div>
+              <div className="value">{candidate.rating} / 5</div>
             </StatCard>
           </StatsRow>
         </HeaderSection>
@@ -605,12 +544,18 @@ const CandidateDetail = () => {
                 {language === 'vi' ? 'Khu vực có thể làm việc:' : 'Work Areas:'}
               </SectionTitle>
               <WorkAreaTags>
-                {candidate.workAreas.map((area, index) => (
-                  <Tag key={index}>
-                    <MapPin size={14} />
-                    {area}
-                  </Tag>
-                ))}
+                {candidate.workAreas.length > 0 ? (
+                  candidate.workAreas.map((area, index) => (
+                    <Tag key={index}>
+                      <MapPin size={14} />
+                      {area}
+                    </Tag>
+                  ))
+                ) : (
+                  <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                    {language === 'vi' ? 'Chưa cập nhật' : 'Not updated'}
+                  </div>
+                )}
               </WorkAreaTags>
 
               <SectionTitle style={{ marginTop: '32px' }}>
@@ -631,7 +576,6 @@ const CandidateDetail = () => {
                 </div>
                 {candidate.ekycVerified ? <CheckCircle size={20} /> : <XCircle size={20} />}
               </VerificationCard>
-
             </>
           )}
 
@@ -639,16 +583,12 @@ const CandidateDetail = () => {
             <>
               <SectionTitle>{language === 'vi' ? 'Ví ứng viên' : 'Candidate Wallet'}</SectionTitle>
               <div style={{ fontSize: '32px', fontWeight: '700', color: '#10b981', marginBottom: '24px' }}>
-                {candidate.totalEarned} VND
+                {new Intl.NumberFormat('vi-VN').format(candidate.totalEarned)} VND
               </div>
               <InfoGrid>
                 <InfoItem>
                   <div className="label">{language === 'vi' ? 'Số dư hiện tại:' : 'Current Balance:'}</div>
-                  <div className="value">{candidate.totalEarned} VND</div>
-                </InfoItem>
-                <InfoItem>
-                  <div className="label">{language === 'vi' ? 'Tổng tiền đã nhận:' : 'Total Earned:'}</div>
-                  <div className="value">8,500,000 VND</div>
+                  <div className="value">{new Intl.NumberFormat('vi-VN').format(candidate.totalEarned)} VND</div>
                 </InfoItem>
               </InfoGrid>
             </>

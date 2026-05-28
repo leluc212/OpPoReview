@@ -15,6 +15,17 @@ def decimal_default(obj):
         return int(obj) if obj % 1 == 0 else float(obj)
     raise TypeError
 
+
+def get_cors_headers():
+    return {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent',
+        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+        'Access-Control-Max-Age': '3600',
+        'Access-Control-Allow-Credentials': 'true',
+        'Content-Type': 'application/json'
+    }
+
 def lambda_handler(event, context):
     """
     Main Lambda handler for PostQuickJob API
@@ -22,13 +33,7 @@ def lambda_handler(event, context):
     print(f"Event: {json.dumps(event)}")
     
     # CORS headers
-    headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token',
-        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-        'Access-Control-Max-Age': '3600',
-        'Content-Type': 'application/json'
-    }
+    headers = get_cors_headers()
     
     # Check if this is API Gateway v2 format (HTTP API)
     is_v2 = 'requestContext' in event and 'http' in event.get('requestContext', {})
@@ -57,6 +62,19 @@ def lambda_handler(event, context):
     
     print(f"DEBUG: normalized_path={normalized_path}")
     
+    # --- ROBUST ID EXTRACTION (SỬA LỖI pathParameters BỊ TRỐNG) ---
+    def get_id_from_path(p, param_name='idJob'):
+        # Thử lấy từ pathParameters trước
+        val = path_parameters.get(param_name)
+        if val: return val
+        
+        # Nếu trống, thử parse thủ công từ path (ví dụ: /quick-jobs/QJOB-123)
+        segments = [s for s in p.split('/') if s]
+        if len(segments) >= 2 and segments[0] == 'quick-jobs':
+            if segments[1] not in ['active', 'employer', 'cleanup', 'cleanup-bulk']:
+                return segments[1]
+        return None
+
     # Handle OPTIONS request for CORS
     if http_method == 'OPTIONS':
         return {
@@ -109,20 +127,31 @@ def lambda_handler(event, context):
             job_id = path_parameters.get('idJob')
             return increment_views(job_id, headers)
         
-        # 6. Các route dựa trên idJob (PHẢI ĐỂ CUỐI CÙNG ĐỂ KHÔNG NUỐT MẤT /active)
+        # 6. BULK CLEANUP (BY SPECIFIC IDs) - Ưu tiên trên các route idJob
+        elif http_method == 'POST' and normalized_path == '/quick-jobs/cleanup-bulk':
+            return cleanup_bulk(body, headers)
+
+        # 7. DELETE ALL TEST/DUPLICATE JOBS (AUTO-DETECT)
+        elif http_method == 'POST' and normalized_path == '/quick-jobs/cleanup':
+            return cleanup_ghost_jobs(headers)
+
+        # 8. Các route dựa trên idJob (Ví dụ: /quick-jobs/QJOB-123)
         elif '/quick-jobs/' in normalized_path:
-            job_id = path_parameters.get('idJob')
+            job_id = get_id_from_path(normalized_path)
             
-            # Bảo vệ thêm: nếu idJob là 'active', ta đã đi nhầm route
-            if job_id == 'active' or normalized_path.endswith('/active'):
-                return get_active_quick_jobs(headers)
-                
             if http_method == 'GET':
                 return get_quick_job(job_id, headers)
             elif http_method == 'PUT':
                 return update_quick_job(body, job_id, user_id, headers)
             elif http_method == 'DELETE':
                 return delete_quick_job(job_id, user_id, headers)
+            else:
+                # Trả về 405 nếu method không được hỗ trợ cho idJob
+                return {
+                    'statusCode': 405,
+                    'headers': headers,
+                    'body': json.dumps({'message': f'Method {http_method} not allowed for job ID'})
+                }
         
         else:
             return {
@@ -143,6 +172,96 @@ def lambda_handler(event, context):
                 'success': False,
                 'message': f'Internal server error: {str(e)}'
             })
+        }
+
+def cleanup_bulk(body_str, headers):
+    """Bulk cleanup of specific job IDs"""
+    try:
+        body = json.loads(body_str) if isinstance(body_str, str) else body_str
+        job_ids = body.get('jobIds', [])
+        
+        if not job_ids:
+            return {'statusCode': 400, 'headers': headers, 'body': json.dumps({'message': 'Missing jobIds'})}
+            
+        deleted_count = 0
+        for jid in job_ids:
+            table.update_item(
+                Key={'jobID': jid},
+                UpdateExpression='SET #status = :status, updatedAt = :updatedAt',
+                ExpressionAttributeNames={'#status': 'status'},
+                ExpressionAttributeValues={
+                    ':status': 'deleted',
+                    ':updatedAt': datetime.utcnow().isoformat() + 'Z'
+                }
+            )
+            deleted_count += 1
+            
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True,
+                'message': f'Deleted {deleted_count} jobs',
+                'deleted_count': deleted_count
+            })
+        }
+    except Exception as e:
+        return {'statusCode': 500, 'headers': headers, 'body': json.dumps({'success': False, 'message': str(e)})}
+
+def cleanup_ghost_jobs(headers):
+    """Internal cleanup of test and duplicate jobs"""
+    try:
+        response = table.scan()
+        jobs = response.get('Items', [])
+        
+        # Sort by createdAt descending to keep newest
+        jobs.sort(key=lambda x: x.get('createdAt', ''), reverse=True)
+        
+        to_delete = []
+        seen = set()
+        
+        for job in jobs:
+            title = (job.get('title') or '').lower().strip()
+            company = (job.get('companyName') or 'Unknown Company').lower().strip()
+            key = f"{title}|{company}"
+            job_id = job.get('jobID')
+            
+            if not job_id: continue
+            
+            is_test = any(t in title for t in ['mệt mỏi', 'lười biếng', 'abcd']) or 'unknown company' in company
+            
+            if is_test or key in seen:
+                to_delete.append(job_id)
+            else:
+                seen.add(key)
+        
+        deleted_count = 0
+        for jid in to_delete:
+            table.update_item(
+                Key={'jobID': jid},
+                UpdateExpression='SET #status = :status, updatedAt = :updatedAt',
+                ExpressionAttributeNames={'#status': 'status'},
+                ExpressionAttributeValues={
+                    ':status': 'deleted',
+                    ':updatedAt': datetime.utcnow().isoformat() + 'Z'
+                }
+            )
+            deleted_count += 1
+            
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True,
+                'message': f'Cleaned up {deleted_count} jobs',
+                'deleted_count': deleted_count
+            })
+        }
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'headers': headers,
+            'body': json.dumps({'success': False, 'message': str(e)})
         }
 
 def create_quick_job(body_str, user_id, headers):

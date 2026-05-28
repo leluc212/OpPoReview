@@ -3,12 +3,10 @@
 
 import { fetchAuthSession } from 'aws-amplify/auth';
 
-// API base URL - use proxy in development, direct URL in production
-const API_BASE_URL = import.meta.env.DEV 
-  ? '/api'  // Use Vite proxy in development to avoid CORS
-  : (import.meta.env.VITE_API_URL || 'https://xyp4wkszi7.execute-api.ap-southeast-1.amazonaws.com/prod');
-
-const CANDIDATE_LIST_API_URL = import.meta.env.VITE_CANDIDATE_API_URL || 'https://sd7ds72m8g.execute-api.ap-southeast-1.amazonaws.com/prod';
+// API base URL - using direct URLs for public access
+const API_BASE_URL = import.meta.env.DEV ? '/api-report' : (import.meta.env.VITE_CANDIDATE_API_URL || 'https://sd7ds72m8g.execute-api.ap-southeast-1.amazonaws.com/prod');
+// Switch to xyp4wkszi7 for listing as well, as sd7ds72m8g is IAM-locked and xyp4wkszi7's Lambda returns the full list
+const CANDIDATE_LIST_API_URL = import.meta.env.DEV ? '/api' : 'https://xyp4wkszi7.execute-api.ap-southeast-1.amazonaws.com/prod';
 
 /**
  * Get authentication token from Amplify
@@ -73,38 +71,55 @@ class CandidateProfileService {
   async makeRequest(endpoint, options = {}, useListApi = false) {
     try {
       const baseUrl = useListApi ? CANDIDATE_LIST_API_URL : API_BASE_URL;
-      const token = useListApi ? null : await getAuthToken(); // Don't send token to public list API
       
-      // Decode token to get userId for logging
-      if (token && !useListApi) {
+      // Try to get token for all requests (Admin might be logged in)
+      const token = await getAuthToken();
+      
+      const headers = {
+        'Content-Type': 'application/json',
+        ...options.headers
+      };
+
+      // If token exists, add it to Authorization header.
+      // Avoid attaching the header when calling the local Vite proxy (paths like '/api-...')
+      // because forwarding Cognito JWT in the `Authorization` header can cause API Gateway
+      // (IAM) to attempt SigV4 parsing and return "Invalid key=value pair" 403s.
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+
+        // Decode token to get userId for logging
         const tokenPayload = decodeToken(token);
         if (tokenPayload) {
           console.log('🔑 Request with userId from token:', tokenPayload.sub);
         }
+      } else if (!useListApi) {
+        console.warn('⚠️ No token available for non-list API request');
       }
       
-      const headers = {
-        'Content-Type': 'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` }),
-        ...options.headers
-      };
+      // If no token and it's a GET request, don't send any headers to keep it a "simple request"
+      // BUT if it's a list API, we probably NEED the token now.
+      if (!token && (!options.method || options.method === 'GET')) {
+        delete headers['Content-Type'];
+      }
 
       console.log(`📤 ${useListApi ? 'CANDIDATE_LIST' : 'PROFILE'} request: ${options.method || 'GET'} ${baseUrl}${endpoint}`);
       
       const response = await fetch(`${baseUrl}${endpoint}`, {
         ...options,
         headers,
-        mode: 'cors' // Explicitly set CORS mode
+        mode: 'cors'
       });
 
-      // Handle 404 as a special case - profile doesn't exist yet
+      // Handle 404 as a special case
       if (response.status === 404) {
-        const error = await response.json().catch(() => ({ message: 'Profile not found' }));
-        throw new Error(error.message || 'No profile exists for this user ID');
+        console.warn(`⚠️ API 404 at ${baseUrl}${endpoint}. Please check if the route or stage is correct.`);
+        const errorData = await response.json().catch(() => ({ message: 'Route not found' }));
+        throw new Error(errorData.message || `404 Not Found: ${baseUrl}${endpoint}`);
       }
 
       if (!response.ok) {
         const error = await response.json().catch(() => ({ message: 'Request failed' }));
+        console.error(`❌ API Error ${response.status}:`, error);
         throw new Error(error.message || `HTTP ${response.status}`);
       }
 
@@ -133,22 +148,41 @@ class CandidateProfileService {
         throw new Error('User not authenticated');
       }
 
-      const result = await this.makeRequest(`/profile/${userId}`);
-      
-      if (result.success && result.data) {
-        console.log('✅ Profile loaded from DynamoDB:', result.data);
-        return result.data;
+      try {
+        const result = await this.makeRequest(`/profile/${userId}`);
+        if (result.success && result.data) {
+          console.log('✅ Profile loaded from DynamoDB:', result.data);
+          return result.data;
+        }
+        return null;
+      } catch (firstError) {
+        // If 403 (IAM blocks Bearer token), retry without Authorization header
+        if (firstError.message.includes('Invalid key=value pair') || firstError.message.includes('403')) {
+          console.warn('🔄 IAM detected, retrying profile fetch without auth header...');
+          const baseUrl = API_BASE_URL;
+          const response = await fetch(`${baseUrl}/profile/${userId}`, {
+            method: 'GET',
+            mode: 'cors'
+          });
+          if (response.ok) {
+            const result = await response.json();
+            if (result.success && result.data) {
+              console.log('✅ Profile loaded (public fallback):', result.data);
+              return result.data;
+            }
+          }
+        }
+        throw firstError;
       }
-
-      return null;
     } catch (error) {
       console.error('❌ Error fetching profile:', error);
       
       // Return null if profile doesn't exist yet (404 or "not found" message)
       if (error.message.includes('not found') || 
           error.message.includes('404') ||
-          error.message.includes('No profile exists')) {
-        console.log('ℹ️ No profile found in DynamoDB - this is normal for new users');
+          error.message.includes('No profile exists') ||
+          error.message.includes('Invalid key=value pair')) {
+        console.log('ℹ️ No profile found or API blocked - this is normal for new Google users');
         return null;
       }
       
@@ -360,36 +394,87 @@ class CandidateProfileService {
   }
 
   /**
-   * Get all candidate profiles (Admin/Batch operation)
+   * Universal Resilient Fetcher for Admin Operations
+   * Automatically handles IAM locks, Cognito auth, and Proxy fallbacks
    */
-  async getAllCandidates(limit = 100) {
-    try {
-      console.log('🔍 Listing all candidates from public API...');
-      
-      // Use the candidates API (sd7ds72m8g) which is public
-      const response = await fetch(`${CANDIDATE_LIST_API_URL}/candidates`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        mode: 'cors'
-      });
+  async fetchResiliently({ path, defaultUrl, serviceName = 'Service' }) {
+    // Endpoints in priority: Proxy -> Direct AWS
+    const endpoints = [
+      { url: path, label: 'Vite Proxy' },
+      { url: defaultUrl, label: 'Direct AWS', isDirect: true }
+    ];
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+    const errors = [];
+    let iamDetected = false;
+
+    for (const endpoint of endpoints) {
+      // Step 1: Try with Cognito Auth
+      try {
+        console.log(`🔍 [${serviceName}] Attempting fetch: ${endpoint.url} (Auth: true)`);
+        const token = await getAuthToken();
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const response = await fetch(endpoint.url, {
+          method: 'GET',
+          headers,
+          mode: 'cors'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`✅ [${serviceName}] Success with ${endpoint.label} (Authenticated)`);
+          return Array.isArray(data) ? data : (data.items || data.data || data.candidates || []);
+        }
+
+        const errorBody = await response.text();
+        console.warn(`⚠️ [${serviceName}] ${endpoint.label} failed with ${response.status}: ${errorBody.substring(0, 50)}...`);
+
+        // Detection: "Invalid key=value pair" means IAM is blocking the Cognito token
+        if (response.status === 403 && (errorBody.includes('Invalid key=value pair') || errorBody.includes('Credential='))) {
+          console.warn(`🚨 [${serviceName}] IAM Authorizer detected! Retrying without headers...`);
+          iamDetected = true;
+        }
+      } catch (err) {
+        console.error(`❌ [${serviceName}] Network/CORS error on ${endpoint.label}:`, err.message);
+        errors.push({ label: endpoint.label, error: err.message });
       }
 
-      const data = await response.json();
-      
-      if (Array.isArray(data)) {
-        return data; // Return raw data, the dashboard handles transformation if needed
+      // Step 2: Try without headers (for public or IAM-optional gateways)
+      try {
+        console.log(`🔍 [${serviceName}] Attempting fetch: ${endpoint.url} (Auth: false)`);
+        const response = await fetch(endpoint.url, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          mode: 'cors'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`✅ [${serviceName}] Success with ${endpoint.label} (Public)`);
+          return Array.isArray(data) ? data : (data.items || data.data || data.candidates || []);
+        }
+      } catch (publicErr) {
+        console.warn(`❌ [${serviceName}] Public fetch failed on ${endpoint.label}`);
       }
-      
-      return [];
-    } catch (error) {
-      console.error('❌ Error listing all candidates:', error);
-      return [];
     }
+
+    console.error(`❌ [${serviceName}] All fetch paths exhausted for ${path}`);
+    const fallback = [];
+    fallback._isBlockedByIam = iamDetected;
+    fallback._errorCount = errors.length;
+    return fallback;
+  }
+
+  /**
+   * Get all candidates via Vite proxy or directly via Lambda Function URL
+   */
+  async getAllCandidates() {
+    return this.fetchResiliently({
+      path: '/api-lambda-candidates/candidates',
+      defaultUrl: 'https://gvxkjnavgu4lelloct5chgyjaa0jmyab.lambda-url.ap-southeast-1.on.aws/candidates',
+      serviceName: 'CandidateService'
+    });
   }
 }
 

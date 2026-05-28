@@ -4,8 +4,8 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
 import { useLanguage } from '../../context/LanguageContext';
-import { 
-  Users, 
+import {
+  Users,
   Search,
   CheckSquare,
   XSquare,
@@ -15,6 +15,9 @@ import {
   Zap,
   RefreshCw
 } from 'lucide-react';
+import jobPostService from '../../services/jobPostService';
+import quickJobService from '../../services/quickJobService';
+import candidateProfileService from '../../services/candidateProfileService';
 
 const API_URL = import.meta.env.VITE_CANDIDATE_API_URL;
 
@@ -487,56 +490,65 @@ const CandidatesManagement = () => {
   const [timeFilter, setTimeFilter] = useState('month'); // month, quarter, year
   const itemsPerPage = 20;
 
-  // Load real data from DynamoDB
+  // State management for data
   const [candidates, setCandidates] = useState([]);
+  const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
-  
-  const loadCandidates = async () => {
+  const [apiStats, setApiStats] = useState({
+    total: 0,
+    thisMonth: 0,
+    verified: 0,
+    responseRate: 0,
+    trend: '0%'
+  });
+  const [apiChartData, setApiChartData] = useState([]);
+  const [apiJobChartData, setApiJobChartData] = useState([]);
+
+  const loadData = async () => {
     setLoading(true);
     try {
-      // Fetch from API
-      const response = await fetch(`${API_URL}/candidates`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      console.log('📡 Fetching raw data from DynamoDB for local processing...');
+
+      const [candidateData, standardJobs, quickJobs] = await Promise.all([
+        candidateProfileService.getAllCandidates(),
+        jobPostService.getAllJobPosts().catch(() => []),
+        quickJobService.getAllQuickJobs().catch(() => [])
+      ]);
+
+      // Transform and filter candidates for the table
+      if (Array.isArray(candidateData)) {
+        const transformedData = candidateData
+          .filter(item =>
+            (item.email && item.email.includes('@')) ||
+            (item.fullName && item.fullName.trim() !== '' && item.fullName !== 'Unknown User')
+          ) // Filter out junk
+          .map((item, index) => ({
+            id: item.userId || item.id || `candidate-${index}`,
+            name: item.fullName || (item.email ? item.email.split('@')[0] : 'Unknown User'),
+            email: item.email || 'No email provided',
+            phone: item.phone || 'No phone',
+            ekycVerified: item.kycCompleted || item.ekycStatus === 'verified' || false,
+            approvalStatus: (item.kycCompleted || item.ekycStatus === 'verified') ? 'approved' : 'pending',
+            joined: item.createdAt ? new Date(item.createdAt).toISOString().split('T')[0] : 'Incomplete setup',
+            location: item.location || 'Unknown',
+            title: item.title || 'Candidate',
+            createdAt: item.createdAt // Keep raw for processing
+          }));
+        setCandidates(transformedData);
       }
-      
-      const data = await response.json();
-      
-      // Check if data is valid array
-      if (!Array.isArray(data)) {
-        console.error('Data is not an array:', data);
-        setCandidates([]);
-        return;
-      }
-      
-      // Transform API data
-      const transformedData = data.map((item, index) => ({
-        id: item.userId || `candidate-${index}`,
-        name: item.fullName || 'N/A',
-        email: item.email || 'N/A',
-        phone: item.phone || 'N/A',
-        ekycVerified: item.kycCompleted || false,
-        approvalStatus: item.kycCompleted ? 'approved' : 'pending',
-        joined: item.createdAt ? new Date(item.createdAt).toISOString().split('T')[0] : '2026-03-01',
-        reviewDate: item.updatedAt ? new Date(item.updatedAt).toISOString().split('T')[0] : null,
-        location: item.location || 'N/A',
-        title: item.title || 'N/A'
-      }));
-      
-      setCandidates(transformedData);
+
+      setJobs([...standardJobs, ...quickJobs]);
       setLastUpdated(new Date());
     } catch (error) {
-      console.error('Error loading candidates:', error);
-      setCandidates([]);
+      console.error('❌ Error loading data:', error);
     } finally {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
-    loadCandidates();
+    loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -558,7 +570,7 @@ const CandidatesManagement = () => {
 
   const filteredCandidates = candidates.filter(candidate => {
     const matchesSearch = candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         candidate.email.toLowerCase().includes(searchTerm.toLowerCase());
+      candidate.email.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
@@ -574,26 +586,28 @@ const CandidatesManagement = () => {
     setCurrentPage(1);
   };
 
-  // Calculate real data from candidates
+  // Calculate real data from candidates for charts
   const getChartData = () => {
     const now = new Date();
     let data = [];
-    
+
     if (timeFilter === 'month') {
       // Last 6 months
       for (let i = 5; i >= 0; i--) {
         const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const monthStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
         const monthLabel = `T${date.getMonth() + 1}`;
-        
-        const candidatesCount = candidates.filter(c => c.joined.startsWith(monthStr)).length;
-        // Simulate job data based on candidates (regular jobs ~2x candidates, urgent ~0.3x)
-        const regularJobs = Math.floor(candidatesCount * 2.2 + Math.random() * 10);
-        const urgentJobs = Math.floor(candidatesCount * 0.3 + Math.random() * 5);
-        
+
+        // Ensure we only count records that explicitly have a createdAt and match the month
+        const candidatesCount = candidates.filter(c => c.createdAt && c.createdAt.startsWith(monthStr)).length;
+
+        const monthJobs = jobs.filter(j => j.createdAt && j.createdAt.startsWith(monthStr));
+        const regularJobs = monthJobs.filter(j => j.category !== 'urgent' && j.jobType !== 'urgent').length;
+        const urgentJobs = monthJobs.length - regularJobs;
+
         data.push({
           label: monthLabel,
-          candidates: candidatesCount,
+          count: candidatesCount,
           regularJobs,
           urgentJobs
         });
@@ -604,18 +618,22 @@ const CandidatesManagement = () => {
         const quarterStart = new Date(now.getFullYear(), now.getMonth() - (i * 3), 1);
         const quarterEnd = new Date(now.getFullYear(), now.getMonth() - (i * 3) + 3, 0);
         const quarterLabel = `Q${Math.floor(quarterStart.getMonth() / 3) + 1}`;
-        
+
         const candidatesCount = candidates.filter(c => {
-          const joinDate = new Date(c.joined);
+          const joinDate = new Date(c.createdAt || '');
           return joinDate >= quarterStart && joinDate <= quarterEnd;
         }).length;
-        
-        const regularJobs = Math.floor(candidatesCount * 2.5 + Math.random() * 20);
-        const urgentJobs = Math.floor(candidatesCount * 0.4 + Math.random() * 10);
-        
+
+        const monthJobs = jobs.filter(j => {
+          const jobDate = new Date(j.createdAt || '');
+          return jobDate >= quarterStart && jobDate <= quarterEnd;
+        });
+        const regularJobs = monthJobs.filter(j => j.category !== 'urgent' && j.jobType !== 'urgent').length;
+        const urgentJobs = monthJobs.length - regularJobs;
+
         data.push({
           label: quarterLabel,
-          candidates: candidatesCount,
+          count: candidatesCount,
           regularJobs,
           urgentJobs
         });
@@ -624,42 +642,38 @@ const CandidatesManagement = () => {
       // Last 3 years
       for (let i = 2; i >= 0; i--) {
         const year = now.getFullYear() - i;
-        const yearLabel = year.toString();
-        
-        const candidatesCount = candidates.filter(c => c.joined.startsWith(year.toString())).length;
-        const regularJobs = Math.floor(candidatesCount * 3 + Math.random() * 50);
-        const urgentJobs = Math.floor(candidatesCount * 0.5 + Math.random() * 20);
-        
+        const yearStr = year.toString();
+
+        const candidatesCount = candidates.filter(c => (c.createdAt || '').startsWith(yearStr)).length;
+
+        const yearJobs = jobs.filter(j => (j.createdAt || '').startsWith(yearStr));
+        const regularJobs = yearJobs.filter(j => j.category !== 'urgent' && j.jobType !== 'urgent').length;
+        const urgentJobs = yearJobs.length - regularJobs;
+
         data.push({
-          label: yearLabel,
-          candidates: candidatesCount,
+          label: yearStr,
+          count: candidatesCount,
           regularJobs,
           urgentJobs
         });
       }
     }
-    
+
     return data;
   };
 
-  const chartData = getChartData();
+  const currentChartData = getChartData();
 
-  const stats = {
-    total: filteredCandidates.length
-  };
-
-  // Helper function to generate additional stats - easily expandable
+  // Helper function to generate additional stats - from real data
   const getAdditionalStats = () => {
-    // Calculate additional metrics from real data
-    const activeThisMonth = candidates.filter(c => {
-      const joinDate = new Date(c.joined);
-      const thisMonth = new Date();
-      return joinDate.getMonth() === thisMonth.getMonth() && 
-             joinDate.getFullYear() === thisMonth.getFullYear();
-    }).length;
+    // Current month stats
+    const now = new Date();
+    const thisMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const activeThisMonth = candidates.filter(c => (c.createdAt || '').startsWith(thisMonthStr)).length;
 
+    // Previous month for trend (if needed, but for now let's keep it simple)
     const verifiedCandidates = candidates.filter(c => c.ekycVerified).length;
-    const responseRate = Math.round((verifiedCandidates / candidates.length) * 100);
+    const responseRate = candidates.length > 0 ? Math.round((verifiedCandidates / candidates.length) * 100) : 0;
 
     return [
       {
@@ -715,11 +729,11 @@ const CandidatesManagement = () => {
           {/* Main total stats - always shown */}
           <StatsCard
             title={language === 'vi' ? 'Tổng Ứng Viên' : 'Total Candidates'}
-            value={stats.total.toString()}
+            value={candidates.length.toString()}
             icon={Users}
             color="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
           />
-          
+
           {/* Additional stats - controlled by enabledStats array */}
           {additionalStats
             .filter(stat => enabledStats.includes(stat.id))
@@ -743,20 +757,20 @@ const CandidatesManagement = () => {
                 {language === 'vi' ? 'Tăng Trưởng Ứng Viên' : 'Candidate Growth'}
               </h3>
               <TimeFilterTabs>
-                <TimeTab 
-                  $active={timeFilter === 'month'} 
+                <TimeTab
+                  $active={timeFilter === 'month'}
                   onClick={() => setTimeFilter('month')}
                 >
                   {language === 'vi' ? 'Tháng' : 'Month'}
                 </TimeTab>
-                <TimeTab 
-                  $active={timeFilter === 'quarter'} 
+                <TimeTab
+                  $active={timeFilter === 'quarter'}
                   onClick={() => setTimeFilter('quarter')}
                 >
                   {language === 'vi' ? 'Quý' : 'Quarter'}
                 </TimeTab>
-                <TimeTab 
-                  $active={timeFilter === 'year'} 
+                <TimeTab
+                  $active={timeFilter === 'year'}
                   onClick={() => setTimeFilter('year')}
                 >
                   {language === 'vi' ? 'Năm' : 'Year'}
@@ -776,26 +790,26 @@ const CandidatesManagement = () => {
                     strokeWidth="1"
                   />
                 ))}
-                
+
                 {/* Dynamic polyline based on real data */}
                 <polyline
-                  points={chartData.map((item, i) => {
-                    const x = 100 + (i * (500 / Math.max(chartData.length - 1, 1)));
-                    const maxCandidates = Math.max(...chartData.map(d => d.candidates));
-                    const y = 280 - (item.candidates / Math.max(maxCandidates, 1)) * 200;
+                  points={currentChartData.map((item, i) => {
+                    const x = 100 + (i * (500 / Math.max(currentChartData.length - 1, 1)));
+                    const maxCandidates = Math.max(...currentChartData.map(d => d.count), 1);
+                    const y = 280 - (item.count / maxCandidates) * 200;
                     return `${x},${y}`;
                   }).join(' ')}
                   fill="none"
                   stroke="#667eea"
                   strokeWidth="4"
                 />
-                
+
                 {/* Dynamic points based on real data */}
-                {chartData.map((item, i) => {
-                  const x = 100 + (i * (500 / Math.max(chartData.length - 1, 1)));
-                  const maxCandidates = Math.max(...chartData.map(d => d.candidates));
-                  const y = 280 - (item.candidates / Math.max(maxCandidates, 1)) * 200;
-                  
+                {currentChartData.map((item, i) => {
+                  const x = 100 + (i * (500 / Math.max(currentChartData.length - 1, 1)));
+                  const maxCandidates = Math.max(...currentChartData.map(d => d.count), 1);
+                  const y = 280 - (item.count / maxCandidates) * 200;
+
                   return (
                     <g key={i}>
                       <circle cx={x} cy={y} r="6" fill="#667eea" stroke="white" strokeWidth="2" />
@@ -817,7 +831,7 @@ const CandidatesManagement = () => {
                         fill="#667eea"
                         fontWeight="700"
                       >
-                        {item.candidates}
+                        {item.count}
                       </text>
                     </g>
                   );
@@ -839,20 +853,20 @@ const CandidatesManagement = () => {
                 {language === 'vi' ? 'Tăng Trưởng Công Việc' : 'Job Growth'}
               </h3>
               <TimeFilterTabs>
-                <TimeTab 
-                  $active={timeFilter === 'month'} 
+                <TimeTab
+                  $active={timeFilter === 'month'}
                   onClick={() => setTimeFilter('month')}
                 >
                   {language === 'vi' ? 'Tháng' : 'Month'}
                 </TimeTab>
-                <TimeTab 
-                  $active={timeFilter === 'quarter'} 
+                <TimeTab
+                  $active={timeFilter === 'quarter'}
                   onClick={() => setTimeFilter('quarter')}
                 >
                   {language === 'vi' ? 'Quý' : 'Quarter'}
                 </TimeTab>
-                <TimeTab 
-                  $active={timeFilter === 'year'} 
+                <TimeTab
+                  $active={timeFilter === 'year'}
                   onClick={() => setTimeFilter('year')}
                 >
                   {language === 'vi' ? 'Năm' : 'Year'}
@@ -872,39 +886,39 @@ const CandidatesManagement = () => {
                     strokeWidth="1"
                   />
                 ))}
-                
+
                 {/* Job thường - Dynamic polyline */}
                 <polyline
-                  points={chartData.map((item, i) => {
-                    const x = 100 + (i * (500 / Math.max(chartData.length - 1, 1)));
-                    const maxJobs = Math.max(...chartData.map(d => Math.max(d.regularJobs, d.urgentJobs)));
-                    const y = 280 - (item.regularJobs / Math.max(maxJobs, 1)) * 200;
+                  points={currentChartData.map((item, i) => {
+                    const x = 100 + (i * (500 / Math.max(currentChartData.length - 1, 1)));
+                    const maxJobs = Math.max(...currentChartData.map(d => Math.max(d.regularJobs, d.urgentJobs)), 1);
+                    const y = 280 - (item.regularJobs / maxJobs) * 200;
                     return `${x},${y}`;
                   }).join(' ')}
                   fill="none"
                   stroke="#10b981"
                   strokeWidth="3"
                 />
-                
+
                 {/* Công việc Tuyển gấp - Dynamic polyline */}
                 <polyline
-                  points={chartData.map((item, i) => {
-                    const x = 100 + (i * (500 / Math.max(chartData.length - 1, 1)));
-                    const maxJobs = Math.max(...chartData.map(d => Math.max(d.regularJobs, d.urgentJobs)));
-                    const y = 280 - (item.urgentJobs / Math.max(maxJobs, 1)) * 200;
+                  points={currentChartData.map((item, i) => {
+                    const x = 100 + (i * (500 / Math.max(currentChartData.length - 1, 1)));
+                    const maxJobs = Math.max(...currentChartData.map(d => Math.max(d.regularJobs, d.urgentJobs)), 1);
+                    const y = 280 - (item.urgentJobs / maxJobs) * 200;
                     return `${x},${y}`;
                   }).join(' ')}
                   fill="none"
                   stroke="#f59e0b"
                   strokeWidth="3"
                 />
-                
+
                 {/* Dynamic points for regular jobs */}
-                {chartData.map((item, i) => {
-                  const x = 100 + (i * (500 / Math.max(chartData.length - 1, 1)));
-                  const maxJobs = Math.max(...chartData.map(d => Math.max(d.regularJobs, d.urgentJobs)));
-                  const y = 280 - (item.regularJobs / Math.max(maxJobs, 1)) * 200;
-                  
+                {currentChartData.map((item, i) => {
+                  const x = 100 + (i * (500 / Math.max(currentChartData.length - 1, 1)));
+                  const maxJobs = Math.max(...currentChartData.map(d => Math.max(d.regularJobs, d.urgentJobs)), 1);
+                  const y = 280 - (item.regularJobs / maxJobs) * 200;
+
                   return (
                     <g key={`regular-${i}`}>
                       <circle cx={x} cy={y} r="5" fill="#10b981" stroke="white" strokeWidth="2" />
@@ -931,13 +945,13 @@ const CandidatesManagement = () => {
                     </g>
                   );
                 })}
-                
+
                 {/* Dynamic points for urgent jobs */}
-                {chartData.map((item, i) => {
-                  const x = 100 + (i * (500 / Math.max(chartData.length - 1, 1)));
-                  const maxJobs = Math.max(...chartData.map(d => Math.max(d.regularJobs, d.urgentJobs)));
-                  const y = 280 - (item.urgentJobs / Math.max(maxJobs, 1)) * 200;
-                  
+                {currentChartData.map((item, i) => {
+                  const x = 100 + (i * (500 / Math.max(currentChartData.length - 1, 1)));
+                  const maxJobs = Math.max(...currentChartData.map(d => Math.max(d.regularJobs, d.urgentJobs)), 1);
+                  const y = 280 - (item.urgentJobs / maxJobs) * 200;
+
                   return (
                     <g key={`urgent-${i}`}>
                       <circle cx={x} cy={y} r="5" fill="#f59e0b" stroke="white" strokeWidth="2" />
@@ -979,10 +993,10 @@ const CandidatesManagement = () => {
               onChange={handleSearchChange}
             />
           </SearchBox>
-          <ReloadButton onClick={loadCandidates} disabled={loading}>
+          <ReloadButton onClick={loadData} disabled={loading}>
             <RefreshCw size={18} className={loading ? 'spinning' : ''} />
-            {loading 
-              ? (language === 'vi' ? 'Đang tải...' : 'Loading...') 
+            {loading
+              ? (language === 'vi' ? 'Đang tải...' : 'Loading...')
               : (language === 'vi' ? 'Làm mới' : 'Refresh')
             }
           </ReloadButton>
@@ -1002,8 +1016,8 @@ const CandidatesManagement = () => {
             </thead>
             <tbody>
               {currentCandidates.map((candidate, index) => (
-                <tr 
-                  key={candidate.id} 
+                <tr
+                  key={candidate.id}
                   onClick={() => navigate(`/admin/candidates/${candidate.id}`)}
                   style={{ cursor: 'pointer' }}
                 >
@@ -1018,7 +1032,7 @@ const CandidatesManagement = () => {
                   <td>
                     <VerificationBadge $verified={candidate.ekycVerified}>
                       {candidate.ekycVerified ? <CheckSquare /> : <XSquare />}
-                      {candidate.ekycVerified 
+                      {candidate.ekycVerified
                         ? (language === 'vi' ? 'Đã xác thực' : 'Verified')
                         : (language === 'vi' ? 'Chưa xác thực' : 'Not Verified')
                       }
@@ -1038,20 +1052,20 @@ const CandidatesManagement = () => {
 
         <PaginationContainer>
           <PaginationInfo>
-            {language === 'vi' 
+            {language === 'vi'
               ? `Đang xem ${startIndex + 1}-${Math.min(endIndex, filteredCandidates.length)} trên ${filteredCandidates.length} kết quả`
               : `Showing ${startIndex + 1}-${Math.min(endIndex, filteredCandidates.length)} of ${filteredCandidates.length} results`
             }
           </PaginationInfo>
-          
+
           <PaginationButtons>
-            <PageButton 
+            <PageButton
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
             >
               {language === 'vi' ? '← Trước' : '← Previous'}
             </PageButton>
-            
+
             {/* First page */}
             {currentPage > 3 && (
               <>
@@ -1059,15 +1073,15 @@ const CandidatesManagement = () => {
                 <PageEllipsis>...</PageEllipsis>
               </>
             )}
-            
+
             {/* Page numbers around current page */}
             {Array.from({ length: totalPages }, (_, i) => i + 1)
               .filter(page => {
-                return page === currentPage || 
-                       page === currentPage - 1 || 
-                       page === currentPage + 1 ||
-                       (page === 1 && currentPage <= 2) ||
-                       (page === totalPages && currentPage >= totalPages - 1);
+                return page === currentPage ||
+                  page === currentPage - 1 ||
+                  page === currentPage + 1 ||
+                  (page === 1 && currentPage <= 2) ||
+                  (page === totalPages && currentPage >= totalPages - 1);
               })
               .map(page => (
                 <PageButton
@@ -1079,7 +1093,7 @@ const CandidatesManagement = () => {
                 </PageButton>
               ))
             }
-            
+
             {/* Last page */}
             {currentPage < totalPages - 2 && (
               <>
@@ -1087,8 +1101,8 @@ const CandidatesManagement = () => {
                 <PageButton onClick={() => setCurrentPage(totalPages)}>{totalPages}</PageButton>
               </>
             )}
-            
-            <PageButton 
+
+            <PageButton
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}
             >

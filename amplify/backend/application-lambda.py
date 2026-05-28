@@ -4,6 +4,16 @@ import uuid
 from datetime import datetime
 from decimal import Decimal
 
+
+def get_cors_headers():
+    return {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent',
+        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+        'Access-Control-Allow-Credentials': 'true',
+        'Content-Type': 'application/json'
+    }
+
 dynamodb = boto3.resource('dynamodb')
 applications_table = dynamodb.Table('StandardApplications')
 jobs_table = dynamodb.Table('PostStandardJob')
@@ -13,12 +23,7 @@ def lambda_handler(event, context):
     print(f"📥 Received event: {json.dumps(event)}")
     
     # Common headers for all responses including CORS
-    response_headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token',
-        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-        'Access-Control-Allow-Credentials': 'true'
-    }
+    response_headers = get_cors_headers()
 
     def create_response(status_code, body):
         return {
@@ -30,8 +35,13 @@ def lambda_handler(event, context):
     try:
         http_method = event.get('httpMethod') or event.get('requestContext', {}).get('http', {}).get('method', '')
         path = event.get('path', '') or event.get('rawPath', '')
+        # --- PATH NORMALIZATION (SỬA LỖI 404 KHI CÓ STAGE PHÍA TRƯỚC) ---
+        normalized_path = path
+        path_segments = [s for s in path.split('/') if s]
+        if path_segments and (path_segments[0] == 'prod' or path_segments[0] == 'test'):
+            normalized_path = '/' + '/'.join(path_segments[1:])
         
-        print(f"Executing method: {http_method}, Path: {path}")
+        print(f"DEBUG: normalized_path={normalized_path}")
 
         # Handle OPTIONS request FIRST
         if http_method == 'OPTIONS':
@@ -43,19 +53,24 @@ def lambda_handler(event, context):
         candidate_id = claims.get('sub')
         candidate_email = claims.get('email')
         
-        if not candidate_id:
+        # If no authorizer, allow GET for admin/public access
+        if not candidate_id and http_method == 'GET':
+            candidate_id = 'anonymous'
+            candidate_email = 'anonymous@example.com'
+        
+        if not candidate_id and http_method != 'OPTIONS':
             return create_response(401, {'error': 'Unauthorized - No user ID'})
         
         # POST /applications - Submit application
-        if http_method == 'POST' and path == '/applications':
+        if http_method == 'POST' and normalized_path == '/applications':
             return submit_application(event, candidate_id, candidate_email, create_response)
         
         # GET /applications - Get all applications (Admin)
-        elif http_method == 'GET' and (path == '/applications' or path == '/applications/'):
+        elif http_method == 'GET' and (normalized_path == '/applications' or normalized_path == '/applications/'):
             return get_all_applications(create_response)
         
         # GET /applications/candidate/{candidateId} - Get candidate's applications
-        elif http_method == 'GET' and '/applications/candidate/' in path:
+        elif http_method == 'GET' and '/applications/candidate/' in normalized_path:
             return get_candidate_applications(candidate_id, create_response)
         
         # GET /applications/job/{jobId} - Get applications for a job (employer only)

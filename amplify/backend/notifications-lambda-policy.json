@@ -25,5 +25,15 @@
       ],
       "Resource": "arn:aws:logs:*:*:*"
     }
+    ,
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ses:SendEmail",
+        "ses:SendRawEmail",
+        "ses:SendTemplatedEmail"
+      ],
+      "Resource": "*"
+    }
   ]
 }

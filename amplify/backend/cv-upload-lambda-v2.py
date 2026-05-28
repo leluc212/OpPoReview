@@ -9,6 +9,16 @@ s3_client = boto3.client('s3')
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('CandidateProfiles')
 
+
+def get_cors_headers():
+    return {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent',
+        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+        'Access-Control-Allow-Credentials': 'true',
+        'Content-Type': 'application/json'
+    }
+
 BUCKET_NAME = 'opporeview-cv-storage'
 ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx']
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
@@ -18,12 +28,7 @@ def lambda_handler(event, context):
     print(f"Event: {json.dumps(event)}")
     
     # Common headers for all responses including CORS
-    response_headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token',
-        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-        'Access-Control-Allow-Credentials': 'true'
-    }
+    response_headers = get_cors_headers()
 
     def create_response(status_code, body):
         return {

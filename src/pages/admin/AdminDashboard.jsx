@@ -5,7 +5,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 import StatsCard from '../../components/StatsCard';
 
 import { useLanguage } from '../../context/LanguageContext';
-import { jobPosts as mockJobPosts } from '../../data/jobPosts';
+
 import { Users, Briefcase, Building2, DollarSign, CheckSquare, XSquare, Shield, Calendar, ArrowRight, Zap, TrendingUp, Star, Sparkles, Eye, Rocket, FileText, ChevronDown } from 'lucide-react';
 
 // Import Services
@@ -14,6 +14,7 @@ import candidateProfileService from '../../services/candidateProfileService';
 import jobPostService from '../../services/jobPostService';
 import quickJobService from '../../services/quickJobService';
 import applicationService from '../../services/applicationService';
+import adminReportService from '../../services/adminReportService';
 
 const DashboardContainer = styled.div`
   animation: fadeIn 0.5s ease-in;
@@ -1085,12 +1086,20 @@ const AdminDashboard = () => {
     totalJobPosts: 0,
     totalApplications: 0,
     urgentJobs: 0,
-    standardJobs: 0
+    standardJobs: 0,
+    totalRevenue: 0,
+    trends: {}
   });
   const [employers, setEmployers] = useState([]);
   const [candidates, setCandidates] = useState([]);
   const [allJobPosts, setAllJobPosts] = useState([]);
   const [applications, setApplications] = useState([]);
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [chartData, setChartData] = useState({
+    activityData: [],
+    quarterlyData: [],
+    revenueTrend: []
+  });
 
   useEffect(() => {
     fetchDashboardData();
@@ -1099,50 +1108,37 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      console.log('📊 Fetching Admin Dashboard data from database...');
+      console.log('📊 Fetching Admin Dashboard data from database via AdminReportService...');
       
-      // Fetch data in parallel
-      const [
-        employerData, 
-        candidateData, 
-        standardJobs, 
-        quickJobs,
-        applicationData
-      ] = await Promise.all([
-        adminEmployerService.getAllEmployers().catch(e => { console.error(e); return []; }),
-        candidateProfileService.getAllCandidates().catch(e => { console.error(e); return []; }),
-        jobPostService.getAllActiveJobs().catch(e => { console.error(e); return []; }),
-        quickJobService.getAllActiveQuickJobs().catch(e => { console.error(e); return []; }),
-        applicationService.getAllApplications().catch(e => { console.error(e); return []; })
-      ]);
-
-      const combinedJobsRaw = [...standardJobs, ...quickJobs];
+      const data = await adminReportService.getReportsData();
       
-      // Deduplicate jobs by ID to prevent React key warnings
-      const seenJobIds = new Set();
-      const combinedJobs = combinedJobsRaw.filter(job => {
-        const id = job.idJob || job.id;
-        if (seenJobIds.has(id)) return false;
-        seenJobIds.add(id);
-        return true;
-      });
+      const calculatedStats = adminReportService.calculateStats(data);
+      const activity = adminReportService.getActivityData(data);
+      const quarterly = adminReportService.getQuarterlyData(data);
+      const revenueTrend = adminReportService.getRevenueByMonth(data.subscriptions);
       
-      setEmployers(employerData);
-      setCandidates(candidateData);
-      setAllJobPosts(combinedJobs);
-      setApplications(applicationData);
+      setEmployers(data.employers);
+      setCandidates(data.candidates);
+      setAllJobPosts([...data.standardJobs, ...data.quickJobs]);
+      setApplications(data.applications);
+      setSubscriptions(data.subscriptions);
 
       setStats({
-        totalCandidates: candidateData.length,
-        totalEmployers: employerData.length,
-        totalJobPosts: combinedJobs.length,
-        totalApplications: applicationData.length || Math.round(combinedJobs.length * 0.7),
-        urgentJobs: combinedJobs.filter(j => j.category === 'urgent' || j.category === 'quick-jobs' || j.jobType === 'urgent').length,
-        standardJobs: standardJobs.length
+        ...calculatedStats,
+        totalJobPosts: calculatedStats.totalStandardJobs + calculatedStats.totalQuickJobs,
+        urgentJobs: calculatedStats.totalQuickJobs,
+        standardJobs: calculatedStats.totalStandardJobs,
+        totalApplications: data.applications.length
+      });
+
+      setChartData({
+        activityData: activity,
+        quarterlyData: quarterly,
+        revenueTrend: revenueTrend
       });
 
       console.log('✅ Dashboard data synchronized with database');
-      console.log(`💰 Commission (15%) calculated from ${combinedJobs.filter(j => j.category === 'urgent' || j.category === 'quick-jobs' || j.jobType === 'urgent').length} urgent jobs`);
+      console.log(`💰 Commission (15%) calculated from ${calculatedStats.totalQuickJobs} urgent jobs`);
     } catch (error) {
       console.error('❌ Error fetching dashboard data:', error);
     } finally {
@@ -1194,13 +1190,13 @@ const AdminDashboard = () => {
   const totalJobPostsValue = stats.totalJobPosts;
   const totalApplicationsValue = stats.totalApplications;
 
-  // Calculate revenue from services (based on real package data)
-  // ESTIMATED RATES: Quick Boost: 100k, Hot Search: 200k, Banner: 500k, Top Spotlight: 800k
-  const revenueFromBoost = allJobPosts.filter(j => j.category === 'urgent').length * 100000; 
-  const revenueFromHotSearch = allJobPosts.filter(j => j.views > 200).length * 200000; 
+  const totalRevenue = stats.totalRevenue || 0;
+  
+  // Calculate specific revenue segments for footer display
+  const revenueFromBoost = allJobPosts.filter(j => j.category === 'urgent' || j.jobType === 'urgent').length * 100000;
+  const revenueFromHotSearch = allJobPosts.filter(j => j.views > 200).length * 200000;
   const revenueFromBanner = allJobPosts.filter(j => j.featured).length * 500000;
   const revenueFromTopSpotlight = allJobPosts.filter(j => j.jobType === 'hot').length * 800000;
-  const totalRevenue = revenueFromBoost + revenueFromHotSearch + revenueFromBanner + revenueFromTopSpotlight;
 
   // Real data for charts - calculated from actual job posts
   const urgentJobs = allJobPosts.filter(post => post.category === 'urgent' || post.category === 'quick-jobs' || post.jobType === 'urgent').length;
@@ -1217,36 +1213,20 @@ const AdminDashboard = () => {
   const totalPosts = allJobPosts.length; // From database
   const conversionRate = 0.65; // 65% of posts get applications (realistic for part-time jobs)
 
-  const activityData = [
-    { date: '02/3', posts: Math.round(totalPosts * 0.56), applications: Math.round(totalPosts * 0.56 * conversionRate) },
-    { date: '03/3', posts: Math.round(totalPosts * 0.68), applications: Math.round(totalPosts * 0.68 * conversionRate) },
-    { date: '04/3', posts: Math.round(totalPosts * 0.77), applications: Math.round(totalPosts * 0.77 * conversionRate) },
-    { date: '05/3', posts: Math.round(totalPosts * 0.85), applications: Math.round(totalPosts * 0.85 * conversionRate) },
-    { date: '06/3', posts: Math.round(totalPosts * 0.92), applications: Math.round(totalPosts * 0.92 * conversionRate) },
-    { date: '07/3', posts: Math.round(totalPosts * 0.97), applications: Math.round(totalPosts * 0.97 * conversionRate) },
-    { date: '08/3', posts: totalPosts, applications: Math.round(totalPosts * conversionRate) }
-  ];
+  const activityData = chartData.activityData;
+  const quarterlyJobData = chartData.quarterlyData.map(q => ({
+    label: q.name,
+    standard: Math.round(q.jobs * 0.7 * 10), // simulated application multiplier for visual
+    standardPosts: Math.round(q.jobs * 0.7),
+    quick: Math.round(q.jobs * 0.3 * 10),
+    quickPosts: Math.round(q.jobs * 0.3)
+  }));
 
-  // Quarterly Job application data - Derived from current stats
-  const quarterlyJobData = [
-    { label: language === 'vi' ? 'Quý 1' : 'Q1', standard: Math.round(totalPosts * 6.5), standardPosts: Math.round(totalPosts * 1.5), quick: Math.round(totalPosts * 8.2), quickPosts: Math.round(totalPosts * 1.8) },
-    { label: language === 'vi' ? 'Quý 2' : 'Q2', standard: Math.round(totalPosts * 7.2), standardPosts: Math.round(totalPosts * 1.6), quick: Math.round(totalPosts * 9.0), quickPosts: Math.round(totalPosts * 2.1) },
-    { label: language === 'vi' ? 'Quý 3' : 'Q3', standard: Math.round(totalPosts * 6.8), standardPosts: Math.round(totalPosts * 1.4), quick: Math.round(totalPosts * 9.5), quickPosts: Math.round(totalPosts * 2.3) },
-    { label: language === 'vi' ? 'Quý 4' : 'Q4', standard: Math.round(totalApplicationsValue * 0.4), standardPosts: Math.round(standardJobsValue), quick: Math.round(totalApplicationsValue * 0.6), quickPosts: Math.round(urgentJobs) }
-  ];
-
-  // Revenue trend data - derived from totalRevenue
-  const currentMonthRevenue = (totalRevenue / 1000000) || 1.0; 
-  const revenueTrendData = [
-    { month: language === 'vi' ? 'T1' : 'Jan', actual: currentMonthRevenue * 0.65, target: currentMonthRevenue * 0.7 },
-    { month: language === 'vi' ? 'T2' : 'Feb', actual: currentMonthRevenue * 0.72, target: currentMonthRevenue * 0.75 },
-    { month: language === 'vi' ? 'T3' : 'Mar', actual: currentMonthRevenue * 0.81, target: currentMonthRevenue * 0.8 },
-    { month: language === 'vi' ? 'T4' : 'Apr', actual: currentMonthRevenue * 0.85, target: currentMonthRevenue * 0.88 },
-    { month: language === 'vi' ? 'T5' : 'May', actual: currentMonthRevenue * 0.88, target: currentMonthRevenue * 0.92 },
-    { month: language === 'vi' ? 'T6' : 'Jun', actual: currentMonthRevenue * 0.91, target: currentMonthRevenue * 0.95 },
-    { month: language === 'vi' ? 'T7' : 'Jul', actual: currentMonthRevenue * 0.96, target: currentMonthRevenue * 0.98 },
-    { month: language === 'vi' ? 'T8' : 'Aug', actual: currentMonthRevenue, target: currentMonthRevenue * 1.05 },
-  ];
+  const revenueTrendData = chartData.revenueTrend.map(d => ({
+    month: d.month,
+    actual: d.revenue,
+    target: d.target
+  }));
 
   const getApprovalStatusText = (status) => {
     if (status === 'approved') return language === 'vi' ? 'Đã duyệt' : 'Approved';
@@ -1397,8 +1377,8 @@ const AdminDashboard = () => {
                 <StatTitle>{language === 'vi' ? 'Tổng ứng viên' : 'Total Candidates'}</StatTitle>
                 <StatValue>
                   {totalCandidatesValue.toLocaleString()}
-                  <StatChange $positive={true}>
-                    ↗ +12%
+                  <StatChange $positive={!stats.trends.candidates?.startsWith('-')}>
+                    ↗ {stats.trends.candidates || '0%'}
                   </StatChange>
                 </StatValue>
               </StatContent>
@@ -1417,8 +1397,8 @@ const AdminDashboard = () => {
                 <StatTitle>{language === 'vi' ? 'Tổng nhà tuyển dụng' : 'Total Employers'}</StatTitle>
                 <StatValue>
                   {totalEmployersValue.toLocaleString()}
-                  <StatChange $positive={true}>
-                    ↗ +8%
+                  <StatChange $positive={!stats.trends.employers?.startsWith('-')}>
+                    ↗ {stats.trends.employers || '0%'}
                   </StatChange>
                 </StatValue>
               </StatContent>
@@ -1437,8 +1417,8 @@ const AdminDashboard = () => {
                 <StatTitle>{language === 'vi' ? 'Bài đăng tuyển dụng' : 'Job Posts'}</StatTitle>
                 <StatValue>
                   {totalJobPostsValue.toLocaleString()}
-                  <StatChange $positive={true}>
-                    ↗ +15%
+                  <StatChange $positive={!stats.trends.standardJobs?.startsWith('-')}>
+                    ↗ {stats.trends.standardJobs || '0%'}
                   </StatChange>
                 </StatValue>
               </StatContent>
@@ -1457,8 +1437,8 @@ const AdminDashboard = () => {
                 <StatTitle>{language === 'vi' ? 'Tổng doanh thu' : 'Total Revenue'}</StatTitle>
                 <StatValue>
                   {(totalRevenue / 1000000).toFixed(1)}M
-                  <StatChange $positive={true}>
-                    ↗ +23%
+                  <StatChange $positive={!stats.trends.revenue?.startsWith('-')}>
+                    ↗ {stats.trends.revenue || '0%'}
                   </StatChange>
                 </StatValue>
               </StatContent>
@@ -1734,10 +1714,10 @@ const AdminDashboard = () => {
                 const bgColor = colors[index % colors.length];
 
                 const logoMap = {
-                  'Cơm tấm Phúc Lộc Thọ': '/images/logoplt.png',
-                  'Katinat': '/images/katinatlogo.jpg',
-                  'The Coffee House': '/images/coffeehouse.jpg',
-                  'Highlands Coffee': '/images/highlands.jpg',
+                  'Cơm tấm Phúc Lộc Thọ': '/OpPoReview/images/logoplt.png',
+                  'Katinat': '/OpPoReview/images/katinatlogo.jpg',
+                  'The Coffee House': '/OpPoReview/images/coffeehouse.jpg',
+                  'Highlands Coffee': '/OpPoReview/images/highlands.jpg',
                 };
                 const logo = logoMap[post.employer] || null;
 
@@ -2071,7 +2051,7 @@ const AdminDashboard = () => {
                 ))}
 
                 {/* Decorative Artistic Bars (4 columns per month) */}
-                {revenueTrendData.map((d, i) => {
+                {revenueTrendData.length > 0 && revenueTrendData.map((d, i) => {
                   const x = 120 + i * 140; 
                   return (
                     <g key={`bars-${i}`}>
@@ -2084,39 +2064,43 @@ const AdminDashboard = () => {
                 })}
 
                 {/* Smooth Orange Curve (Target) */}
-                <path
-                  d={`M 120 ${300 - revenueTrendData[0].target * 45} 
-                     ${revenueTrendData.map((d, i) => {
-                    if (i === 0) return '';
-                    const prev = revenueTrendData[i - 1];
-                    const cp1x = (120 + (i - 1) * 140) + 70;
-                    const cp2x = (120 + i * 140) - 70;
-                    return `C ${cp1x} ${300 - prev.target * 45}, ${cp2x} ${300 - d.target * 45}, ${120 + i * 140} ${300 - d.target * 45}`;
-                  }).join(' ')}`}
-                  fill="none"
-                  stroke="#F97316"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                />
+                {revenueTrendData.length > 0 && (
+                  <path
+                    d={`M 120 ${300 - revenueTrendData[0].target * 45} 
+                       ${revenueTrendData.map((d, i) => {
+                      if (i === 0) return '';
+                      const prev = revenueTrendData[i - 1];
+                      const cp1x = (120 + (i - 1) * 140) + 70;
+                      const cp2x = (120 + i * 140) - 70;
+                      return `C ${cp1x} ${300 - prev.target * 45}, ${cp2x} ${300 - d.target * 45}, ${120 + i * 140} ${300 - d.target * 45}`;
+                    }).join(' ')}`}
+                    fill="none"
+                    stroke="#F97316"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                  />
+                )}
 
                 {/* Smooth Blue Curve (Actual) */}
-                <path
-                  d={`M 120 ${300 - revenueTrendData[0].actual * 50} 
-                     ${revenueTrendData.map((d, i) => {
-                    if (i === 0) return '';
-                    const prev = revenueTrendData[i - 1];
-                    const cp1x = (120 + (i - 1) * 140) + 70;
-                    const cp2x = (120 + i * 140) - 70;
-                    return `C ${cp1x} ${300 - prev.actual * 50}, ${cp2x} ${300 - d.actual * 50}, ${120 + i * 140} ${300 - d.actual * 50}`;
-                  }).join(' ')}`}
-                  fill="none"
-                  stroke="#3B82F6"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                />
+                {revenueTrendData.length > 0 && (
+                  <path
+                    d={`M 120 ${300 - revenueTrendData[0].actual * 50} 
+                       ${revenueTrendData.map((d, i) => {
+                      if (i === 0) return '';
+                      const prev = revenueTrendData[i - 1];
+                      const cp1x = (120 + (i - 1) * 140) + 70;
+                      const cp2x = (120 + i * 140) - 70;
+                      return `C ${cp1x} ${300 - prev.actual * 50}, ${cp2x} ${300 - d.actual * 50}, ${120 + i * 140} ${300 - d.actual * 50}`;
+                    }).join(' ')}`}
+                    fill="none"
+                    stroke="#3B82F6"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                  />
+                )}
 
                 {/* Data points */}
-                {revenueTrendData.map((d, i) => {
+                {revenueTrendData.length > 0 && revenueTrendData.map((d, i) => {
                   const x = 120 + i * 140;
                   const yBlue = 300 - d.actual * 50;
                   const yOrange = 300 - d.target * 45;

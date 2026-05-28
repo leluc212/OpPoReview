@@ -66,12 +66,18 @@ class EmployerProfileService {
       
       // CRITICAL: Ensure token is clean before adding to header
       const cleanToken = token.trim().replace(/[\r\n\t]/g, '');
-      
+
       const headers = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${cleanToken}`,
         ...options.headers
       };
+
+      // Avoid forwarding Authorization when using a local proxy path
+      if (!API_BASE_URL.startsWith('/')) {
+        headers['Authorization'] = `Bearer ${cleanToken}`;
+      } else {
+        console.log('ℹ️ Skipping Authorization header for local proxy request (employer)');
+      }
 
       console.log(`📤 Making ${options.method || 'GET'} request to ${API_BASE_URL}${endpoint}`);
       console.log('🔑 Authorization header length:', headers.Authorization.length);

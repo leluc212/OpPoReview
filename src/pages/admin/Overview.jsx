@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
@@ -10,7 +10,7 @@ import {
   Users,
   Calendar
 } from 'lucide-react';
-import { jobPosts } from '../../data/jobPosts';
+import adminReportService from '../../services/adminReportService';
 
 const PageContainer = styled.div`
   background: #0a0a0a;
@@ -259,31 +259,56 @@ const TotalAmount = styled.div`
 
 const Overview = () => {
   const { language } = useLanguage();
-  const [timeRange] = useState('Last 30 days');
+  const [timeRange] = useState(language === 'vi' ? '30 ngày qua' : 'Last 30 days');
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalCandidates: 0,
+    totalEmployers: 0,
+    totalStandardJobs: 0,
+    totalQuickJobs: 0,
+    totalRevenue: 0,
+    trends: {}
+  });
+  const [revenueData, setRevenueData] = useState([]);
+  const [pipelineData, setPipelineData] = useState([]);
 
-  // Revenue trend data
-  const revenueData = [
-    { month: 'Jan', revenue: 150, target: 120 },
-    { month: 'Feb', revenue: 180, target: 140 },
-    { month: 'Mar', revenue: 160, target: 150 },
-    { month: 'Apr', revenue: 190, target: 160 },
-    { month: 'May', revenue: 220, target: 180 },
-    { month: 'Jun', revenue: 240, target: 190 },
-    { month: 'Jul', revenue: 260, target: 200 },
-    { month: 'Aug', revenue: 280, target: 210 },
-    { month: 'Sep', revenue: 300, target: 220 },
-    { month: 'Oct', revenue: 320, target: 230 },
-    { month: 'Nov', revenue: 350, target: 240 },
-    { month: 'Dec', revenue: 380, target: 250 },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const data = await adminReportService.getReportsData();
+        
+        const calculatedStats = adminReportService.calculateStats(data);
+        setStats(calculatedStats);
+        
+        const monthlyRevenue = adminReportService.getRevenueByMonth(data.subscriptions);
+        setRevenueData(monthlyRevenue);
+        
+        const pipeline = adminReportService.calculatePipelineStats(data.applications);
+        setPipelineData(pipeline);
+      } catch (error) {
+        console.error('Error fetching overview data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
 
-  const maxValue = 400;
+  // Calculate dynamic max value for chart
+  const revenueValues = revenueData.map(d => d.revenue);
+  const targetValues = revenueData.map(d => d.target);
+  const maxRevenueValue = Math.max(...revenueValues, ...targetValues, 10);
+  const chartHeightScale = 180 / maxRevenueValue;
 
   // Generate smooth curve path
   const generatePath = (data, key) => {
+    if (!data || data.length === 0) return '';
+    
     const points = data.map((d, i) => ({
       x: 60 + (i * 60),
-      y: 240 - (d[key] / maxValue) * 180
+      y: 240 - (d[key] * chartHeightScale)
     }));
 
     let path = `M ${points[0].x} ${points[0].y}`;
@@ -301,6 +326,12 @@ const Overview = () => {
   const revenuePath = generatePath(revenueData, 'revenue');
   const targetPath = generatePath(revenueData, 'target');
 
+  const formatLargeNumber = (num) => {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num.toString();
+  };
+
   return (
     <DashboardLayout role="admin">
       <PageContainer>
@@ -315,57 +346,57 @@ const Overview = () => {
         <StatsGrid>
           <StatCard>
             <StatHeader>
-              <StatLabel>{language === 'vi' ? 'T\u1ED5ng \u1EE9ng vi\u00EAn' : 'Total Candidates'}</StatLabel>
+              <StatLabel>{language === 'vi' ? 'Tổng ứng viên' : 'Total Candidates'}</StatLabel>
               <StatIcon $bg="#1e3a8a" $color="#667eea">
                 <Users />
               </StatIcon>
             </StatHeader>
-            <StatValue>100</StatValue>
-            <StatChange $positive={true}>
+            <StatValue>{loading ? '...' : stats.totalCandidates}</StatValue>
+            <StatChange $positive={!stats.trends.candidates?.startsWith('-')}>
               <TrendingUp />
-              +12%
+              {stats.trends.candidates || '0%'}
             </StatChange>
           </StatCard>
 
           <StatCard>
             <StatHeader>
-              <StatLabel>{language === 'vi' ? 'T\u1ED5ng nh\u00E0 tuy\u1EC3n d\u1EE5ng' : 'Total Employers'}</StatLabel>
+              <StatLabel>{language === 'vi' ? 'Tổng nhà tuyển dụng' : 'Total Employers'}</StatLabel>
               <StatIcon $bg="#064e3b" $color="#10b981">
                 <Building2 />
               </StatIcon>
             </StatHeader>
-            <StatValue>30</StatValue>
-            <StatChange $positive={true}>
+            <StatValue>{loading ? '...' : stats.totalEmployers}</StatValue>
+            <StatChange $positive={!stats.trends.employers?.startsWith('-')}>
               <TrendingUp />
-              +8%
+              {stats.trends.employers || '0%'}
             </StatChange>
           </StatCard>
 
           <StatCard>
             <StatHeader>
-              <StatLabel>{language === 'vi' ? 'B\u00E0i \u0111\u0103ng tuy\u1EC3n d\u1EE5ng' : 'Job Posts'}</StatLabel>
+              <StatLabel>{language === 'vi' ? 'Tổng bài đăng' : 'Job Posts'}</StatLabel>
               <StatIcon $bg="#1e1e3a" $color="#3b82f6">
                 <Briefcase />
               </StatIcon>
             </StatHeader>
-            <StatValue>{jobPosts.length}</StatValue>
-            <StatChange $positive={true}>
+            <StatValue>{loading ? '...' : (stats.totalStandardJobs + stats.totalQuickJobs)}</StatValue>
+            <StatChange $positive={!stats.trends.standardJobs?.startsWith('-')}>
               <TrendingUp />
-              +15%
+              {stats.trends.standardJobs || '0%'}
             </StatChange>
           </StatCard>
 
           <StatCard>
             <StatHeader>
-              <StatLabel>{language === 'vi' ? 'T\u1ED5ng doanh thu' : 'Total Revenue'}</StatLabel>
+              <StatLabel>{language === 'vi' ? 'Tổng doanh thu' : 'Total Revenue'}</StatLabel>
               <StatIcon $bg="#422006" $color="#f59e0b">
                 <DollarSign />
               </StatIcon>
             </StatHeader>
-            <StatValue>14.8M</StatValue>
-            <StatChange $positive={true}>
+            <StatValue>{loading ? '...' : formatLargeNumber(stats.totalRevenue)}</StatValue>
+            <StatChange $positive={!stats.trends.revenue?.startsWith('-')}>
               <TrendingUp />
-              +23%
+              {stats.trends.revenue || '0%'}
             </StatChange>
           </StatCard>
         </StatsGrid>
@@ -374,12 +405,12 @@ const Overview = () => {
           <ChartCard>
             <ChartHeader>
               <ChartTitle>{language === 'vi' ? 'Xu Hướng Doanh Thu' : 'Revenue Trend'}</ChartTitle>
-              <ChartSubtitle>{language === 'vi' ? 'Hiệu suất hàng tháng so với mục tiêu' : 'Monthly performance vs target'}</ChartSubtitle>
+              <ChartSubtitle>{language === 'vi' ? 'Hiệu suất hàng tháng so với mục tiêu ($)' : 'Monthly performance vs target ($)'}</ChartSubtitle>
             </ChartHeader>
 
             <ChartLegend>
-              <LegendItem $color="#06b6d4">{language === 'vi' ? 'Doanh thu' : 'Revenue'}</LegendItem>
-              <LegendItem $color="#10b981">{language === 'vi' ? 'Mục tiêu' : 'Target'}</LegendItem>
+              <LegendItem $color="#06b6d4">{language === 'vi' ? 'Doanh thu (triệu)' : 'Revenue (millions)'}</LegendItem>
+              <LegendItem $color="#10b981">{language === 'vi' ? 'Mục tiêu (triệu)' : 'Target (millions)'}</LegendItem>
             </ChartLegend>
 
             <ChartSvg viewBox="0 0 780 280">
@@ -408,7 +439,7 @@ const Overview = () => {
               ))}
 
               {/* Y-axis labels */}
-              {['$600k', '$450k', '$300k', '$150k', '$0k'].map((label, i) => (
+              {[1, 0.75, 0.5, 0.25, 0].map((factor, i) => (
                 <text
                   key={i}
                   x="30"
@@ -417,39 +448,43 @@ const Overview = () => {
                   fontSize="11"
                   fill="#6b7280"
                 >
-                  {label}
+                  {`$${(maxRevenueValue * factor).toFixed(1)}M`}
                 </text>
               ))}
 
-              {/* Revenue area */}
-              <path
-                d={`${revenuePath} L 720 240 L 60 240 Z`}
-                fill="url(#revenueGradient)"
-              />
+              {!loading && revenuePath && (
+                <>
+                  {/* Revenue area */}
+                  <path
+                    d={`${revenuePath} L ${60 + (revenueData.length - 1) * 60} 240 L 60 240 Z`}
+                    fill="url(#revenueGradient)"
+                  />
 
-              {/* Target area */}
-              <path
-                d={`${targetPath} L 720 240 L 60 240 Z`}
-                fill="url(#targetGradient)"
-              />
+                  {/* Target area */}
+                  <path
+                    d={`${targetPath} L ${60 + (revenueData.length - 1) * 60} 240 L 60 240 Z`}
+                    fill="url(#targetGradient)"
+                  />
 
-              {/* Revenue line */}
-              <path
-                d={revenuePath}
-                fill="none"
-                stroke="#06b6d4"
-                strokeWidth="3"
-                strokeLinecap="round"
-              />
+                  {/* Revenue line */}
+                  <path
+                    d={revenuePath}
+                    fill="none"
+                    stroke="#06b6d4"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                  />
 
-              {/* Target line */}
-              <path
-                d={targetPath}
-                fill="none"
-                stroke="#10b981"
-                strokeWidth="3"
-                strokeLinecap="round"
-              />
+                  {/* Target line */}
+                  <path
+                    d={targetPath}
+                    fill="none"
+                    stroke="#10b981"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                  />
+                </>
+              )}
 
               {/* X-axis labels */}
               {revenueData.map((d, i) => (
@@ -469,54 +504,30 @@ const Overview = () => {
 
           <ChartCard>
             <ChartHeader>
-              <ChartTitle>{language === 'vi' ? 'Giai Đoạn Pipeline' : 'Pipeline Stages'}</ChartTitle>
-              <ChartSubtitle>{language === 'vi' ? 'Phân bổ theo giai đoạn' : 'Distribution by stage'}</ChartSubtitle>
+              <ChartTitle>{language === 'vi' ? 'Tiến độ hồ sơ (Pipeline)' : 'Pipeline Stages'}</ChartTitle>
+              <ChartSubtitle>{language === 'vi' ? 'Phân bổ theo trạng thái ứng tuyển' : 'Distribution by application status'}</ChartSubtitle>
             </ChartHeader>
 
             <div style={{ marginTop: '32px' }}>
-              <PipelineStage>
-                <StageHeader>
-                  <StageName>Lead</StageName>
-                  <StageValue>892 <span>45%</span></StageValue>
-                </StageHeader>
-                <ProgressBar>
-                  <ProgressFill $width={45} $color="#3b82f6" />
-                </ProgressBar>
-              </PipelineStage>
-
-              <PipelineStage>
-                <StageHeader>
-                  <StageName>Qualified</StageName>
-                  <StageValue>556 <span>28%</span></StageValue>
-                </StageHeader>
-                <ProgressBar>
-                  <ProgressFill $width={28} $color="#10b981" />
-                </ProgressBar>
-              </PipelineStage>
-
-              <PipelineStage>
-                <StageHeader>
-                  <StageName>Proposal</StageName>
-                  <StageValue>357 <span>18%</span></StageValue>
-                </StageHeader>
-                <ProgressBar>
-                  <ProgressFill $width={18} $color="#f59e0b" />
-                </ProgressBar>
-              </PipelineStage>
-
-              <PipelineStage>
-                <StageHeader>
-                  <StageName>Negotiation</StageName>
-                  <StageValue>179 <span>9%</span></StageValue>
-                </StageHeader>
-                <ProgressBar>
-                  <ProgressFill $width={9} $color="#8b5cf6" />
-                </ProgressBar>
-              </PipelineStage>
+              {pipelineData.length > 0 ? pipelineData.map((stage, idx) => (
+                <PipelineStage key={idx}>
+                  <StageHeader>
+                    <StageName>{stage.name}</StageName>
+                    <StageValue>{stage.count} <span>{stage.percentage}%</span></StageValue>
+                  </StageHeader>
+                  <ProgressBar>
+                    <ProgressFill $width={stage.percentage} $color={stage.color} />
+                  </ProgressBar>
+                </PipelineStage>
+              )) : (
+                <div style={{ color: '#6b7280', fontSize: '14px', textAlign: 'center', marginTop: '40px' }}>
+                  {language === 'vi' ? 'Chưa có dữ liệu hồ sơ' : 'No application data available'}
+                </div>
+              )}
 
               <TotalValue>
-                <TotalLabel>{language === 'vi' ? 'Tổng Giá Trị Pipeline' : 'Total Pipeline Value'}</TotalLabel>
-                <TotalAmount>$4.8M</TotalAmount>
+                <TotalLabel>{language === 'vi' ? 'Tổng số hồ sơ trong hệ thống' : 'Total applications in system'}</TotalLabel>
+                <TotalAmount>{loading ? '...' : (pipelineData.reduce((sum, s) => sum + s.count, 0))}</TotalAmount>
               </TotalValue>
             </div>
           </ChartCard>

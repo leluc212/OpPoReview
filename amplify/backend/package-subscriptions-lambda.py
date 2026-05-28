@@ -22,6 +22,17 @@ def decimal_default(obj):
         return int(obj) if obj % 1 == 0 else float(obj)
     raise TypeError
 
+
+def get_cors_headers():
+    return {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent',
+        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+        'Access-Control-Max-Age': '3600',
+        'Access-Control-Allow-Credentials': 'true',
+        'Content-Type': 'application/json; charset=utf-8'
+    }
+
 def lambda_handler(event, context):
     """
     Main Lambda handler for PackageSubscriptions API
@@ -29,13 +40,7 @@ def lambda_handler(event, context):
     print(f"Event: {json.dumps(event)}")
     
     # CORS headers
-    headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token',
-        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-        'Access-Control-Max-Age': '3600',
-        'Content-Type': 'application/json; charset=utf-8'
-    }
+    headers = get_cors_headers()
 
     # Scheduled EventBridge trigger
     if event.get('source') == 'aws.events' or event.get('detail-type') == 'Scheduled Event':

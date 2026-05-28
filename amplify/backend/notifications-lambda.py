@@ -12,6 +12,16 @@ dynamodb = boto3.resource('dynamodb')
 table_name = os.environ.get('TABLE_NAME', 'Notifications')
 table = dynamodb.Table(table_name)
 
+
+def get_cors_headers():
+    return {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent',
+        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+        'Access-Control-Allow-Credentials': 'true',
+        'Content-Type': 'application/json; charset=utf-8'
+    }
+
 def decimal_default(obj):
     if isinstance(obj, Decimal):
         return float(obj)
@@ -24,12 +34,7 @@ def lambda_handler(event, context):
     path = event.get('path', event.get('rawPath', ''))
     
     # CORS headers
-    headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-        'Content-Type': 'application/json; charset=utf-8'
-    }
+    headers = get_cors_headers()
     
     try:
         # Handle OPTIONS for CORS

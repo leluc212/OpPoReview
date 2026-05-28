@@ -9,6 +9,16 @@ dynamodb = boto3.resource('dynamodb')
 table_name = os.environ.get('TABLE_NAME', 'PostStandardJob')
 table = dynamodb.Table(table_name)
 
+
+def get_cors_headers():
+    return {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent',
+        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+        'Access-Control-Allow-Credentials': 'true',
+        'Content-Type': 'application/json'
+    }
+
 # Helper function to convert Decimal to int/float for JSON serialization
 def decimal_default(obj):
     if isinstance(obj, Decimal):
@@ -23,12 +33,7 @@ def lambda_handler(event, context):
     print(f"Event Trace: {json.dumps(event)}")
     
     # --- 1. CORE CORS HEADERS (Must be first) ---
-    headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token',
-        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-        'Content-Type': 'application/json'
-    }
+    headers = get_cors_headers()
     
     http_method = event.get('httpMethod')
     path = event.get('path', '')

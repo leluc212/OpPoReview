@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Briefcase, MapPin, Clock, Bookmark } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import { getCompanyLogo, getCompanyInitial } from '../data/companyLogos';
+
 
 // Translate salary string based on language
 const translateSalary = (salaryStr, language) => {
@@ -337,15 +337,11 @@ const JobCard = ({ job, onClick, onSave, saved = false }) => {
       <CardHeader>
         <div style={{ display: 'flex', flex: 1 }}>
           <CompanyLogo
-            $hasImage={!!getCompanyLogo(job.company)}
+            $hasImage={false}
             whileHover={{ rotate: -10, scale: 1.1 }}
             transition={{ duration: 0.3 }}
           >
-            {getCompanyLogo(job.company) ? (
-              <img src={getCompanyLogo(job.company)} alt={job.company} />
-            ) : (
-              getCompanyInitial(job.company)
-            )}
+            {job.company ? job.company.charAt(0).toUpperCase() : '?'}
           </CompanyLogo>
           <CardContent>
             <JobTitle>{translateJobTitle(job.title, language)}</JobTitle>

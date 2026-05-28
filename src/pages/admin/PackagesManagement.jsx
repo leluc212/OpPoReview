@@ -718,15 +718,43 @@ const PackagesManagement = () => {
     loadSubscriptions();
   }, []);
 
-  // Dữ liệu theo tháng cho biểu đồ (6 tháng gần nhất)
-  const monthlyData = [
-    { month: 'T9/25', quickBoost: 8, hotSearch: 5, spotlight: 3, topSpotlight: 2 },
-    { month: 'T10/25', quickBoost: 12, hotSearch: 7, spotlight: 4, topSpotlight: 3 },
-    { month: 'T11/25', quickBoost: 15, hotSearch: 9, spotlight: 6, topSpotlight: 4 },
-    { month: 'T12/25', quickBoost: 18, hotSearch: 11, spotlight: 7, topSpotlight: 5 },
-    { month: 'T1/26', quickBoost: 22, hotSearch: 14, spotlight: 9, topSpotlight: 6 },
-    { month: 'T2/26', quickBoost: 25, hotSearch: 16, spotlight: 11, topSpotlight: 8 },
-  ];
+  // Dữ liệu theo tháng cho biểu đồ (6 tháng gần nhất) - Tính toán động từ purchases
+  const monthlyData = useMemo(() => {
+    const months = [];
+    const now = new Date();
+    
+    // Tạo 6 tháng gần nhất
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthLabel = `T${d.getMonth() + 1}/${d.getFullYear().toString().slice(-2)}`;
+      months.push({ 
+        month: monthLabel, 
+        quickBoost: 0, 
+        hotSearch: 0, 
+        spotlight: 0, 
+        topSpotlight: 0,
+        monthIndex: d.getMonth(),
+        year: d.getFullYear()
+      });
+    }
+
+    purchases.forEach(p => {
+      if (p.status === 'pending' || p.approvalStatus === 'rejected') return;
+      
+      const pDate = new Date(p.purchaseDateTime || p.createdAt);
+      const mIdx = months.findIndex(m => m.monthIndex === pDate.getMonth() && m.year === pDate.getFullYear());
+      
+      if (mIdx !== -1) {
+        const pkg = p.package.toLowerCase();
+        if (pkg.includes('quick')) months[mIdx].quickBoost++;
+        else if (pkg.includes('hot')) months[mIdx].hotSearch++;
+        else if (pkg.includes('banner') || pkg.includes('spotlight')) months[mIdx].spotlight++;
+        else if (pkg.includes('top')) months[mIdx].topSpotlight++;
+      }
+    });
+
+    return months;
+  }, [purchases]);
 
   const packageColors = {
     'Quick Boost': '#3b82f6',

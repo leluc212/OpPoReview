@@ -8,35 +8,62 @@ export default defineConfig({
     port: 3000,
     open: true,
     proxy: {
+      // Lambda Function URL proxies (bypasses browser CORS)
+      '/api-lambda-candidates': {
+        target: 'https://gvxkjnavgu4lelloct5chgyjaa0jmyab.lambda-url.ap-southeast-1.on.aws',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-lambda-candidates/, ''),
+        secure: true,
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq) => {
+            proxyReq.removeHeader('authorization');
+            proxyReq.removeHeader('Authorization');
+          });
+        }
+      },
+      '/api-lambda-applications': {
+        target: 'https://65fnfwjx5m7iq5ilmoj5ea7nwq0cespm.lambda-url.ap-southeast-1.on.aws',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-lambda-applications/, ''),
+        secure: true,
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq) => {
+            proxyReq.removeHeader('authorization');
+            proxyReq.removeHeader('Authorization');
+          });
+        }
+      },
       '/api': {
         target: 'https://xyp4wkszi7.execute-api.ap-southeast-1.amazonaws.com/prod',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-        secure: true
-      },
-      '/api-employer': {
-        target: 'https://dlidp35x33.execute-api.ap-southeast-1.amazonaws.com/prod',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api-employer/, ''),
-        secure: true
-      },
-      '/api-jobs': {
-        target: 'https://dlidp35x33.execute-api.ap-southeast-1.amazonaws.com/prod',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api-jobs/, ''),
-        secure: true
+        rewrite: (path) => path.replace(/^\/api/, '/candidates'),
+        secure: true,
+        
       },
       '/api-cv': {
         target: 'https://v56v542h8f.execute-api.ap-southeast-1.amazonaws.com/prod',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api-cv/, ''),
-        secure: true
+        secure: true,
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq) => {
+            proxyReq.removeHeader('authorization');
+            proxyReq.removeHeader('Authorization');
+          });
+        }
       },
       '/api-applications': {
         target: 'https://l1636ie205.execute-api.ap-southeast-1.amazonaws.com/prod',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api-applications/, ''),
-        secure: true
+        rewrite: (path) => path.replace(/^\/api-applications/, '/applications'),
+        secure: false
+      },
+      '/api-report': {
+        target: 'https://sd7ds72m8g.execute-api.ap-southeast-1.amazonaws.com/prod',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-report/, ''),
+        secure: false,
+        
       }
     }
   },
@@ -59,7 +86,7 @@ export default defineConfig({
         }
       }
     },
-    chunkSizeWarningLimit: 2000 // raise limit to reduce noisy warnings (KB)
+    chunkSizeWarningLimit: 2000
   },
   optimizeDeps: {
     include: ['@popperjs/core']

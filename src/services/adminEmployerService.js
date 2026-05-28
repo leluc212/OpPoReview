@@ -55,12 +55,20 @@ class AdminEmployerService {
       }
       
       const cleanToken = token.trim().replace(/[\r\n\t]/g, '');
-      
+
       const headers = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${cleanToken}`,
         ...options.headers
       };
+
+      // Only attach Authorization when communicating with a direct API endpoint
+      // (not when API_BASE_URL is a local proxy path like '/api-...'). Forwarding
+      // Cognito tokens to API Gateway via the proxy can cause SigV4 parsing errors.
+      if (!API_BASE_URL.startsWith('/')) {
+        headers['Authorization'] = `Bearer ${cleanToken}`;
+      } else {
+        console.log('ℹ️ Skipping Authorization header for local proxy request (admin)');
+      }
 
       console.log(`📤 Admin request: ${options.method || 'GET'} ${API_BASE_URL}${endpoint}`);
       

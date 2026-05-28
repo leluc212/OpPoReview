@@ -17,6 +17,7 @@ import OTPVerification from './pages/auth/OTPVerification';
 import PendingApproval from './pages/auth/PendingApproval';
 import DownloadApp from './pages/auth/DownloadApp';
 import ForgotPassword from './pages/auth/ForgotPassword';
+import GoogleRoleSetupPage from './pages/auth/GoogleRoleSetupPage';
 
 // Other Pages
 import TermsUrgentJobs from './pages/TermsUrgentJobs';
@@ -72,16 +73,57 @@ import AdminManagement from './pages/admin/AdminManagement';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
   const location = useLocation();
+  const BASE = import.meta.env.BASE_URL || '/';
   
   if (!isAuthenticated) {
     const redirect = location.pathname + location.search;
-    return <Navigate to={`/login?redirect=${encodeURIComponent(redirect)}`} replace />;
+    return <Navigate to={`${BASE}login?redirect=${encodeURIComponent(redirect)}`} replace />;
+  }
+
+  if (allowedRoles && !allowedRoles.includes(user?.role)) {
+    const dashboardPath = `/${user?.role === 'admin' ? 'admin' : user?.role === 'employer' ? 'employer' : 'candidate'}/dashboard`;
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '60vh',
+        textAlign: 'center',
+        padding: '24px'
+      }}>
+        <h2>Tài khoản đã đăng nhập ở vai trò khác</h2>
+        <p>Tài khoản này hiện đang ở vai trò "{user?.role || 'chưa xác định'}" và không thể truy cập trang này.</p>
+        <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+          <button onClick={() => window.location.replace(`${BASE}${dashboardPath.replace(/^\//,'')}`)}>Đi tới bảng điều khiển</button>
+          <button onClick={async () => { await logout(); window.location.replace(`${BASE}login`); }}>Đăng xuất</button>
+        </div>
+      </div>
+    );
   }
   
-  if (allowedRoles && !allowedRoles.includes(user?.role)) {
-    return <Navigate to="/" replace />;
+  return children;
+};
+
+// Guest Route Component (redirects logged-in users away from public pages)
+const GuestRoute = ({ children }) => {
+  const { isAuthenticated, user, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return null; // Let AppRoutes handle global loading state
+  }
+  
+  // If there is a pending Google login error, keep user on login page so modal can show
+  try {
+    const googleErr = localStorage.getItem('googleLoginError');
+    if (googleErr) return children;
+  } catch (e) { /* ignore */ }
+
+  if (isAuthenticated && user?.role) {
+    const dashboardPath = `/${user.role === 'admin' ? 'admin' : user.role === 'employer' ? 'employer' : 'candidate'}/dashboard`;
+    return <Navigate to={dashboardPath} replace />;
   }
   
   return children;
@@ -109,14 +151,19 @@ function AppRoutes() {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path="/" element={<LandingPage />} />
+      <Route path="/" element={<GuestRoute><LandingPage /></GuestRoute>} />
       <Route path="/download" element={<DownloadApp />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/register" element={<RegisterRoleSelection />} />
-      <Route path="/register/candidate" element={<CandidateRegister />} />
-      <Route path="/register/employer" element={<EmployerRegister />} />
+      <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
+      <Route path="/forgot-password" element={<GuestRoute><ForgotPassword /></GuestRoute>} />
+      <Route path="/register" element={<GuestRoute><RegisterRoleSelection /></GuestRoute>} />
+      <Route path="/register/candidate" element={<GuestRoute><CandidateRegister /></GuestRoute>} />
+      <Route path="/register/employer" element={<GuestRoute><EmployerRegister /></GuestRoute>} />
       <Route path="/verify-otp" element={<OTPVerification />} />
+      <Route path="/auth/google-role-setup" element={
+        <ProtectedRoute>
+          <GoogleRoleSetupPage />
+        </ProtectedRoute>
+      } />
       <Route path="/pending-approval" element={<PendingApproval />} />
       <Route path="/terms-urgent-jobs" element={<TermsUrgentJobs />} />
       
