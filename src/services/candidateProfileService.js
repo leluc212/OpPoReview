@@ -449,7 +449,7 @@ class CandidateProfileService {
   }
 
   /**
-   * Get all candidates via Vite proxy or directly via Lambda Function URL
+   * Get all candidates via Vite proxy (Lambda Function URL)
    */
   async getAllCandidates() {
     return this.fetchResiliently({

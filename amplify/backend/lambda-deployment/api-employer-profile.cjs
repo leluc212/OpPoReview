@@ -77,6 +77,61 @@ exports.handler = async (event) => {
       };
     }
 
+    // GET /admin/employers - List all employers (Admin only)
+    if (httpMethod === 'GET' && (event.path === '/admin/employers' || event.path?.endsWith('/admin/employers'))) {
+      const result = await employerProfileService.listAllProfiles();
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({ success: true, data: result.profiles })
+      };
+    }
+
+    // GET /profile/{userId}/verification - Get verification data
+    if (httpMethod === 'GET' && pathUserId && event.path?.endsWith('/verification')) {
+      try {
+        const profile = await employerProfileService.getProfile(pathUserId);
+        const verificationData = profile.verificationData || null;
+        const submittedAt = profile.verificationSubmittedAt || null;
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify({
+            success: true,
+            data: verificationData ? { verificationData, submittedAt, status: profile.verificationStatus || 'pending' } : null
+          })
+        };
+      } catch (error) {
+        if (error.message.includes('No profile exists')) {
+          return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ success: false, data: null }) };
+        }
+        throw error;
+      }
+    }
+
+    // POST /profile/{userId}/verification - Submit verification
+    if (httpMethod === 'POST' && pathUserId && event.path?.endsWith('/verification')) {
+      if (userId !== pathUserId) {
+        return { statusCode: 403, headers: corsHeaders, body: JSON.stringify({ success: false, message: 'Access denied' }) };
+      }
+      const body = JSON.parse(event.body || '{}');
+      const { DynamoDB } = require('@aws-sdk/client-dynamodb');
+      const { DynamoDBDocument } = require('@aws-sdk/lib-dynamodb');
+      const ddb = DynamoDBDocument.from(new DynamoDB({ region: 'ap-southeast-1' }));
+      await ddb.update({
+        TableName: 'EmployerProfiles',
+        Key: { userId: pathUserId },
+        UpdateExpression: 'SET verificationData = :vd, verificationStatus = :vs, verificationSubmittedAt = :sa, updatedAt = :ua',
+        ExpressionAttributeValues: {
+          ':vd': body.verificationData,
+          ':vs': 'pending',
+          ':sa': body.submittedAt || new Date().toISOString(),
+          ':ua': new Date().toISOString()
+        }
+      });
+      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true, data: { status: 'pending' } }) };
+    }
+
     // GET /profile/{userId} - Get profile
     if (httpMethod === 'GET' && pathUserId) {
       try {

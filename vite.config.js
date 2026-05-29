@@ -9,6 +9,19 @@ export default defineConfig({
     open: true,
     proxy: {
       // Lambda Function URL proxies (bypasses browser CORS)
+      '/api-employer': {
+        target: 'https://dlidp35x33.execute-api.ap-southeast-1.amazonaws.com/prod',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-employer/, ''),
+        secure: true,
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
+            if (req.headers.authorization) {
+              proxyReq.setHeader('Authorization', req.headers.authorization);
+            }
+          });
+        }
+      },
       '/api-lambda-candidates': {
         target: 'https://gvxkjnavgu4lelloct5chgyjaa0jmyab.lambda-url.ap-southeast-1.on.aws',
         changeOrigin: true,

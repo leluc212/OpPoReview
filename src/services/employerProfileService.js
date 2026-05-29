@@ -3,8 +3,10 @@
 
 import { fetchAuthSession } from 'aws-amplify/auth';
 
-// API base URL - TEMPORARILY use direct URL to bypass proxy issues
-const API_BASE_URL = 'https://dlidp35x33.execute-api.ap-southeast-1.amazonaws.com/prod';
+// API base URL - use Vite proxy in dev to avoid CORS, direct URL in production
+const API_BASE_URL = import.meta.env.DEV
+  ? '/api-employer'
+  : (import.meta.env.VITE_EMPLOYER_API_URL || 'https://dlidp35x33.execute-api.ap-southeast-1.amazonaws.com/prod');
 
 /**
  * Get authentication token from Amplify Cognito
@@ -72,12 +74,8 @@ class EmployerProfileService {
         ...options.headers
       };
 
-      // Avoid forwarding Authorization when using a local proxy path
-      if (!API_BASE_URL.startsWith('/')) {
-        headers['Authorization'] = `Bearer ${cleanToken}`;
-      } else {
-        console.log('ℹ️ Skipping Authorization header for local proxy request (employer)');
-      }
+      // Always include Authorization header - proxy will forward it, direct URL needs it
+      headers['Authorization'] = `Bearer ${cleanToken}`;
 
       console.log(`📤 Making ${options.method || 'GET'} request to ${API_BASE_URL}${endpoint}`);
       console.log('🔑 Authorization header length:', headers.Authorization.length);

@@ -30,7 +30,11 @@ def get_cors_headers():
 def lambda_handler(event, context):
     try:
         http_method = event.get('httpMethod') or event.get('requestContext', {}).get('http', {}).get('method', '')
-        path = event.get('path') or event.get('rawPath', '')
+        # Lambda Function URL (payload v2.0) uses rawPath; API Gateway uses path
+        path = event.get('rawPath') or event.get('path') or '/'
+        # Normalize: treat root and empty as /candidates
+        if not path or path == '/':
+            path = '/candidates'
         
         headers = get_cors_headers()
 

@@ -345,6 +345,7 @@ const CompanyVerification = () => {
     industry: '',
     companySize: '',
     website: '',
+    fanpage: '',
     description: ''
   });
 
@@ -363,7 +364,7 @@ const CompanyVerification = () => {
     district: '',
     ward: '',
     phone: '',
-    email: '',
+    emails: [''],
     emergencyContact: '',
     emergencyPhone: ''
   });
@@ -551,20 +552,6 @@ const CompanyVerification = () => {
         if (!step1Data.businessLicense) {
           missingFields.push(language === 'vi' ? 'Giấy phép kinh doanh' : 'Business License');
         }
-        if (!step1Data.licenseNumber || String(step1Data.licenseNumber).trim() === '') {
-          missingFields.push(language === 'vi' ? 'Số giấy phép' : 'License Number');
-        }
-        if (!step1Data.issueDate || String(step1Data.issueDate).trim() === '') {
-          missingFields.push(language === 'vi' ? 'Ngày cấp' : 'Issue Date');
-        }
-        if (!step1Data.issuingAuthority || String(step1Data.issuingAuthority).trim() === '') {
-          missingFields.push(language === 'vi' ? 'Cơ quan cấp' : 'Issuing Authority');
-        }
-        const parseDate = (s) => { if (!s) return null; const [d, m, y] = s.split('/'); return new Date(+y, +m - 1, +d); };
-        if (step1Data.expiryDate && step1Data.issueDate && parseDate(step1Data.expiryDate) <= parseDate(step1Data.issueDate)) {
-          setExpiryDateError(true);
-          return false;
-        }
 
         if (missingFields.length > 0) {
           console.log('Missing fields:', missingFields);
@@ -581,7 +568,7 @@ const CompanyVerification = () => {
         }
         break;
       case 2:
-        if (!step3Data.representativeName || !step3Data.idNumber || !step3Data.idFrontImage) {
+        if (!step3Data.representativeName) {
           alert(language === 'vi'
             ? 'Vui lòng điền đầy đủ thông tin người đại diện'
             : 'Please fill in all required representative information');
@@ -589,7 +576,7 @@ const CompanyVerification = () => {
         }
         break;
       case 3:
-        if (!step4Data.address || !step4Data.phone || !step4Data.email) {
+        if (!step4Data.address || !step4Data.phone || !step4Data.emails[0]) {
           alert(language === 'vi'
             ? 'Vui lòng điền đầy đủ thông tin liên hệ'
             : 'Please fill in all required contact information');
@@ -722,11 +709,8 @@ const CompanyVerification = () => {
                     ? '• Tải lên bản scan rõ nét của Giấy phép ĐKKD hoặc Giấy chứng nhận đăng ký doanh nghiệp'
                     : '• Upload a clear scan of your Business Registration Certificate'}</p>
                   <p>{language === 'vi'
-                    ? '• Định dạng: PDF, JPG, PNG (tối đa 5MB, khuyến nghị dưới 2MB)'
-                    : '• Format: PDF, JPG, PNG (max 5MB, recommended under 2MB)'}</p>
-                  <p>{language === 'vi'
-                    ? '• Ảnh sẽ được tự động nén để tiết kiệm dung lượng'
-                    : '• Images will be automatically compressed to save space'}</p>
+                    ? '• Định dạng: PDF (tối đa 5MB)'
+                    : '• Format: PDF (max 5MB)'}</p>
                 </div>
               </InfoBox>
 
@@ -743,12 +727,12 @@ const CompanyVerification = () => {
                       : (language === 'vi' ? 'Nhấn để chọn file' : 'Click to select file')}
                   </div>
                   <div className="upload-hint">
-                    {language === 'vi' ? 'PDF, JPG, PNG (tối đa 5MB, khuyến nghị < 2MB)' : 'PDF, JPG, PNG (max 5MB, recommended < 2MB)'}
+                    {language === 'vi' ? 'PDF (tối đa 5MB)' : 'PDF (max 5MB)'}
                   </div>
                   <input
                     id="businessLicenseFile"
                     type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
+                    accept=".pdf"
                     onChange={(e) => handleFileUpload('businessLicense', e.target.files[0], 0)}
                   />
                 </FileUploadArea>
@@ -764,64 +748,6 @@ const CompanyVerification = () => {
                     </SuccessMessage>
                   )}
                 </AnimatePresence>
-              </FormGroup>
-
-              <FormGroup>
-                <Label>{language === 'vi' ? 'Số giấy phép' : 'License Number'} *</Label>
-                <Input
-                  type="text"
-                  value={step1Data.licenseNumber}
-                  onChange={(e) => setStep1Data(prev => ({ ...prev, licenseNumber: e.target.value }))}
-                  placeholder={language === 'vi' ? 'Nhập số giấy phép' : 'Enter license number'}
-                  required
-                />
-              </FormGroup>
-
-              <FormGrid>
-                <FormGroup>
-                  <Label>{language === 'vi' ? 'Ngày cấp' : 'Issue Date'} *</Label>
-                  <DateInput
-                    value={step1Data.issueDate}
-                    onChange={(val) => setStep1Data(prev => ({ ...prev, issueDate: val }))}
-                    required
-                  />
-                </FormGroup>
-
-                <FormGroup>
-                  <Label>{language === 'vi' ? 'Ngày hết hạn (nếu có)' : 'Expiry Date (if any)'}</Label>
-                  <DateInput
-                    value={step1Data.expiryDate}
-                    onChange={(val) => {
-                      setExpiryDateError(false);
-                      setStep1Data(prev => ({ ...prev, expiryDate: val }));
-                    }}
-                    $error={expiryDateError}
-                  />
-                  <AnimatePresence>
-                    {expiryDateError && (
-                      <ErrorMessage
-                        initial={{ opacity: 0, y: -6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -6 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <AlertCircle size={15} />
-                        {language === 'vi' ? 'Ngày hết hạn không hợp lệ' : 'Invalid expiry date'}
-                      </ErrorMessage>
-                    )}
-                  </AnimatePresence>
-                </FormGroup>
-              </FormGrid>
-
-              <FormGroup>
-                <Label>{language === 'vi' ? 'Cơ quan cấp' : 'Issuing Authority'} *</Label>
-                <Input
-                  type="text"
-                  value={step1Data.issuingAuthority}
-                  onChange={(e) => setStep1Data(prev => ({ ...prev, issuingAuthority: e.target.value }))}
-                  placeholder={language === 'vi' ? 'VD: Sở KH&ĐT TP.HCM' : 'E.g.: Department of Planning and Investment'}
-                  required
-                />
               </FormGroup>
 
               <ButtonGroup>
@@ -932,6 +858,16 @@ const CompanyVerification = () => {
                 </FormGroup>
 
                 <FormGroup style={{ gridColumn: '1 / -1' }}>
+                  <Label>{language === 'vi' ? 'Fanpage (Nếu có)' : 'Fanpage (Optional)'}</Label>
+                  <Input
+                    type="url"
+                    value={step2Data.fanpage}
+                    onChange={(e) => setStep2Data({ ...step2Data, fanpage: e.target.value })}
+                    placeholder="https://facebook.com/yourpage"
+                  />
+                </FormGroup>
+
+                <FormGroup style={{ gridColumn: '1 / -1' }}>
                   <Label>{language === 'vi' ? 'Mô tả công ty' : 'Company Description'} *</Label>
                   <TextArea
                     value={step2Data.description}
@@ -974,19 +910,6 @@ const CompanyVerification = () => {
                 <h2>{language === 'vi' ? 'Thông Tin Người Đại Diện' : 'Representative Information'}</h2>
               </FormTitle>
 
-              <InfoBox>
-                <AlertCircle />
-                <div className="info-content">
-                  <p><strong>{language === 'vi' ? 'Yêu cầu:' : 'Requirements:'}</strong></p>
-                  <p>{language === 'vi'
-                    ? '• Người đại diện phải là Giám đốc hoặc được ủy quyền hợp pháp'
-                    : '• Representative must be Director or legally authorized'}</p>
-                  <p>{language === 'vi'
-                    ? '• Tải lên ảnh CMND/CCCD 2 mặt và giấy ủy quyền (nếu có)'
-                    : '• Upload ID card (both sides) and authorization letter (if applicable)'}</p>
-                </div>
-              </InfoBox>
-
               <FormGrid>
                 <FormGroup>
                   <Label>{language === 'vi' ? 'Họ và tên' : 'Full Name'} *</Label>
@@ -1010,125 +933,7 @@ const CompanyVerification = () => {
                   />
                 </FormGroup>
 
-                <FormGroup style={{ gridColumn: '1 / -1' }}>
-                  <Label>{language === 'vi' ? 'Số CMND/CCCD' : 'ID Number'} *</Label>
-                  <Input
-                    type="text"
-                    value={step3Data.idNumber}
-                    onChange={(e) => setStep3Data({ ...step3Data, idNumber: e.target.value })}
-                    placeholder="012345678901"
-                    required
-                  />
-                </FormGroup>
               </FormGrid>
-
-              <FormGroup>
-                <Label>{language === 'vi' ? 'Ảnh CMND/CCCD mặt trước' : 'ID Card Front Image'} *</Label>
-                <FileUploadArea
-                  $hasFile={!!step3Data.idFrontImage}
-                  onClick={() => document.getElementById('idFrontImage').click()}
-                >
-                  <Upload className="upload-icon" />
-                  <div className="upload-text">
-                    {step3Data.idFrontImage?.name
-                      ? `✓ ${step3Data.idFrontImage.name}`
-                      : (language === 'vi' ? 'Tải lên mặt trước CMND/CCCD' : 'Upload ID card front')}
-                  </div>
-                  <div className="upload-hint">
-                    {language === 'vi' ? 'JPG, PNG (tối đa 5MB, khuyến nghị < 2MB)' : 'JPG, PNG (max 5MB, recommended < 2MB)'}
-                  </div>
-                  <input
-                    id="idFrontImage"
-                    type="file"
-                    accept=".jpg,.jpeg,.png"
-                    onChange={(e) => handleFileUpload('idFrontImage', e.target.files[0], 2)}
-                  />
-                </FileUploadArea>
-                <AnimatePresence>
-                  {uploadSuccess === 'idFrontImage' && (
-                    <SuccessMessage
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                    >
-                      <CheckCircle />
-                      {language === 'vi' ? 'Tải ảnh thành công!' : 'Image uploaded successfully!'}
-                    </SuccessMessage>
-                  )}
-                </AnimatePresence>
-              </FormGroup>
-
-              <FormGroup>
-                <Label>{language === 'vi' ? 'Ảnh CMND/CCCD mặt sau' : 'ID Card Back Image'} *</Label>
-                <FileUploadArea
-                  $hasFile={!!step3Data.idBackImage}
-                  onClick={() => document.getElementById('idBackImage').click()}
-                >
-                  <Upload className="upload-icon" />
-                  <div className="upload-text">
-                    {step3Data.idBackImage?.name
-                      ? `✓ ${step3Data.idBackImage.name}`
-                      : (language === 'vi' ? 'Tải lên mặt sau CMND/CCCD' : 'Upload ID card back')}
-                  </div>
-                  <div className="upload-hint">
-                    {language === 'vi' ? 'JPG, PNG (tối đa 5MB, khuyến nghị < 2MB)' : 'JPG, PNG (max 5MB, recommended < 2MB)'}
-                  </div>
-                  <input
-                    id="idBackImage"
-                    type="file"
-                    accept=".jpg,.jpeg,.png"
-                    onChange={(e) => handleFileUpload('idBackImage', e.target.files[0], 2)}
-                  />
-                </FileUploadArea>
-                <AnimatePresence>
-                  {uploadSuccess === 'idBackImage' && (
-                    <SuccessMessage
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                    >
-                      <CheckCircle />
-                      {language === 'vi' ? 'Tải ảnh thành công!' : 'Image uploaded successfully!'}
-                    </SuccessMessage>
-                  )}
-                </AnimatePresence>
-              </FormGroup>
-
-              <FormGroup>
-                <Label>{language === 'vi' ? 'Giấy ủy quyền (nếu có)' : 'Authorization Letter (if any)'}</Label>
-                <FileUploadArea
-                  $hasFile={!!step3Data.authorizationLetter}
-                  onClick={() => document.getElementById('authorizationLetter').click()}
-                >
-                  <Upload className="upload-icon" />
-                  <div className="upload-text">
-                    {step3Data.authorizationLetter?.name
-                      ? `✓ ${step3Data.authorizationLetter.name}`
-                      : (language === 'vi' ? 'Tải lên giấy ủy quyền' : 'Upload authorization letter')}
-                  </div>
-                  <div className="upload-hint">
-                    {language === 'vi' ? 'PDF, JPG, PNG (tối đa 5MB, khuyến nghị < 2MB)' : 'PDF, JPG, PNG (max 5MB, recommended < 2MB)'}
-                  </div>
-                  <input
-                    id="authorizationLetter"
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => handleFileUpload('authorizationLetter', e.target.files[0], 2)}
-                  />
-                </FileUploadArea>
-                <AnimatePresence>
-                  {uploadSuccess === 'authorizationLetter' && (
-                    <SuccessMessage
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                    >
-                      <CheckCircle />
-                      {language === 'vi' ? 'Tải file thành công!' : 'File uploaded successfully!'}
-                    </SuccessMessage>
-                  )}
-                </AnimatePresence>
-              </FormGroup>
 
               <ButtonGroup>
                 <Button $variant="secondary" onClick={handleBack}>
@@ -1218,14 +1023,63 @@ const CompanyVerification = () => {
                 </FormGroup>
 
                 <FormGroup>
-                  <Label>{language === 'vi' ? 'Email liên hệ' : 'Contact Email'} *</Label>
-                  <Input
-                    type="email"
-                    value={step4Data.email}
-                    onChange={(e) => setStep4Data({ ...step4Data, email: e.target.value })}
-                    placeholder="hr@company.com"
-                    required
-                  />
+                  <Label>{language === 'vi' ? 'Email liên hệ' : 'Contact Email'} * <span style={{ fontWeight: 400, color: 'var(--color-text-light, #888)', fontSize: '0.85em' }}>({language === 'vi' ? 'tối đa 3 email' : 'max 3 emails'})</span></Label>
+                  {step4Data.emails.map((email, index) => (
+                    <div key={index} style={{ display: 'flex', gap: '8px', marginBottom: index < step4Data.emails.length - 1 ? '8px' : 0 }}>
+                      <Input
+                        type="email"
+                        value={email}
+                        onChange={(e) => {
+                          const updated = [...step4Data.emails];
+                          updated[index] = e.target.value;
+                          setStep4Data({ ...step4Data, emails: updated });
+                        }}
+                        placeholder={index === 0 ? 'hr@company.com' : `email${index + 1}@company.com`}
+                        required={index === 0}
+                        style={{ flex: 1 }}
+                      />
+                      {index > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updated = step4Data.emails.filter((_, i) => i !== index);
+                            setStep4Data({ ...step4Data, emails: updated });
+                          }}
+                          style={{
+                            padding: '0 12px',
+                            border: '1px solid #fca5a5',
+                            borderRadius: '8px',
+                            background: '#fff',
+                            color: '#dc2626',
+                            cursor: 'pointer',
+                            fontSize: '18px',
+                            lineHeight: 1,
+                            flexShrink: 0
+                          }}
+                          title={language === 'vi' ? 'Xóa email' : 'Remove email'}
+                        >×</button>
+                      )}
+                    </div>
+                  ))}
+                  {step4Data.emails.length < 3 && (
+                    <button
+                      type="button"
+                      onClick={() => setStep4Data({ ...step4Data, emails: [...step4Data.emails, ''] })}
+                      style={{
+                        marginTop: '8px',
+                        padding: '6px 14px',
+                        border: '1px dashed #6366f1',
+                        borderRadius: '8px',
+                        background: '#f5f3ff',
+                        color: '#6366f1',
+                        cursor: 'pointer',
+                        fontSize: '0.875rem',
+                        fontWeight: 500
+                      }}
+                    >
+                      + {language === 'vi' ? 'Thêm email' : 'Add email'}
+                    </button>
+                  )}
                 </FormGroup>
 
                 <FormGroup>

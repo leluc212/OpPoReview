@@ -252,13 +252,19 @@ class AdminReportService {
           totalCount: 0,
           revenue: 0,
           price: s.price || 0,
-          duration: s.duration || '7 ngày'
+          duration: s.duration || '7 ngày',
+          pendingCount: 0,
+          expiredCount: 0
         };
       }
 
       statsMap[pkgName].totalCount += 1;
       if (s.status === 'active') {
         statsMap[pkgName].activeCount += 1;
+      } else if (s.status === 'expired' || s.status === 'expiring') {
+        statsMap[pkgName].expiredCount += 1;
+      } else if (s.status === 'pending') {
+        statsMap[pkgName].pendingCount += 1;
       }
 
       // Revenue from successful, expired or pending subscriptions (all except rejected)
@@ -271,7 +277,7 @@ class AdminReportService {
       ...pkg,
       revenue: new Intl.NumberFormat('vi-VN').format(pkg.revenue) + ' VND',
       rawRevenue: pkg.revenue,
-      price: pkg.price ? `${new Intl.NumberFormat('vi-VN').format(pkg.price)} VND` : 'Sắp có'
+      price: pkg.price ? `${new Intl.NumberFormat('vi-VN').format(pkg.price)}` : 'Sắp có'
     })).sort((a, b) => b.rawRevenue - a.rawRevenue);
   }
 

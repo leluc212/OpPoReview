@@ -203,6 +203,14 @@ class EmployerProfileService {
   }
 
   /**
+   * List ALL employer profiles (Admin only - no filters)
+   */
+  async listAllProfiles() {
+    const result = await dynamoDb.scan({ TableName: tableName });
+    return { profiles: result.Items || [] };
+  }
+
+  /**
    * List all active employer profiles
    */
   async listProfiles(limit = 50, lastEvaluatedKey = null) {

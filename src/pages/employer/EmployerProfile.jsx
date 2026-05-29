@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import styled, { keyframes } from 'styled-components';
+import styled, { keyframes, createGlobalStyle } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -41,6 +41,18 @@ const fadeIn = keyframes`
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+`;
+
+const spin = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+`;
+
+const GlobalSpinStyle = createGlobalStyle`
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
   }
 `;
 
@@ -872,75 +884,80 @@ const EmployerProfile = () => {
       loadProfile();
     }
     
-    // Load verification documents only once
-    const verificationData = localStorage.getItem('companyVerificationData');
-    if (verificationData && verificationDocuments.length === 0) {
+    // Load verification documents from DB
+    const loadVerificationDocs = async () => {
+      if (verificationDocuments.length > 0) return;
       try {
-        const parsed = JSON.parse(verificationData);
+        const verif = await employerProfileService.getVerificationStatus(user.username);
+        if (!verif) return;
+
+        const parsed = verif.verificationData || verif;
+        const submittedAt = verif.submittedAt || parsed.submittedAt;
+        const uploadDate = submittedAt
+          ? new Date(submittedAt).toLocaleDateString('vi-VN')
+          : 'N/A';
+
         const docs = [];
-        
-        // Step 1: Business License
+
         if (parsed.step1?.businessLicense) {
           docs.push({
             id: 'business-license',
             name: language === 'vi' ? 'Giấy phép kinh doanh' : 'Business License',
             type: 'verification',
-            uploadDate: parsed.submittedAt ? new Date(parsed.submittedAt).toLocaleDateString('vi-VN') : 'N/A',
+            uploadDate,
             fileData: parsed.step1.businessLicense,
             metadata: {
-              licenseNumber: parsed.step1.licenseNumber,
-              issueDate: parsed.step1.issueDate,
-              expiryDate: parsed.step1.expiryDate
+              [language === 'vi' ? 'Số GP' : 'License No']: parsed.step1.licenseNumber,
+              [language === 'vi' ? 'Ngày cấp' : 'Issue Date']: parsed.step1.issueDate,
+              [language === 'vi' ? 'Hết hạn' : 'Expiry']: parsed.step1.expiryDate
             }
           });
         }
-        
-        // Step 3: ID Front
+
         if (parsed.step3?.idFrontImage) {
           docs.push({
             id: 'id-front',
             name: language === 'vi' ? 'CCCD/CMND mặt trước' : 'ID Card (Front)',
             type: 'verification',
-            uploadDate: parsed.submittedAt ? new Date(parsed.submittedAt).toLocaleDateString('vi-VN') : 'N/A',
+            uploadDate,
             fileData: parsed.step3.idFrontImage,
             metadata: {
-              representativeName: parsed.step3.representativeName,
-              idNumber: parsed.step3.idNumber
+              [language === 'vi' ? 'Họ tên' : 'Name']: parsed.step3.representativeName,
+              [language === 'vi' ? 'Số CCCD' : 'ID No']: parsed.step3.idNumber
             }
           });
         }
-        
-        // Step 3: ID Back
+
         if (parsed.step3?.idBackImage) {
           docs.push({
             id: 'id-back',
             name: language === 'vi' ? 'CCCD/CMND mặt sau' : 'ID Card (Back)',
             type: 'verification',
-            uploadDate: parsed.submittedAt ? new Date(parsed.submittedAt).toLocaleDateString('vi-VN') : 'N/A',
+            uploadDate,
             fileData: parsed.step3.idBackImage,
             metadata: {
-              representativeName: parsed.step3.representativeName,
-              idNumber: parsed.step3.idNumber
+              [language === 'vi' ? 'Họ tên' : 'Name']: parsed.step3.representativeName,
+              [language === 'vi' ? 'Số CCCD' : 'ID No']: parsed.step3.idNumber
             }
           });
         }
-        
-        // Step 3: Authorization Letter
+
         if (parsed.step3?.authorizationLetter) {
           docs.push({
             id: 'authorization-letter',
             name: language === 'vi' ? 'Giấy ủy quyền' : 'Authorization Letter',
             type: 'verification',
-            uploadDate: parsed.submittedAt ? new Date(parsed.submittedAt).toLocaleDateString('vi-VN') : 'N/A',
+            uploadDate,
             fileData: parsed.step3.authorizationLetter
           });
         }
-        
-        setVerificationDocuments(docs);
+
+        if (docs.length > 0) setVerificationDocuments(docs);
       } catch (e) {
-        console.error('Error parsing verification data:', e);
+        console.error('Error loading verification documents from DB:', e);
       }
-    }
+    };
+    loadVerificationDocs();
   }, [user?.username]); // Only depend on user.username to prevent infinite loops
   
   // Handle save profile
@@ -1875,12 +1892,7 @@ const EmployerProfile = () => {
         </>
         )}
       </ProfileContainer>
-      <style jsx>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
+      <GlobalSpinStyle />
     </DashboardLayout>
   );
 };

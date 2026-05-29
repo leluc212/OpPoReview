@@ -153,28 +153,50 @@ export async function getMyCandidateApplications() {
  * @returns {Promise<Array>} List of applications
  */
 export async function getJobApplications(jobId) {
-  try {
-    console.log('📥 Loading applications for job:', jobId);
-    
-    const headers = await getAuthHeaders();
-    
-    const response = await fetch(`${API_BASE_URL}/applications/job/${jobId}`, {
-      method: 'GET',
-      headers
-    });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to get job applications');
+  const maxRetries = 2;
+  let lastError;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      if (attempt > 0) {
+        // Exponential backoff: 500ms, 1000ms
+        await new Promise(r => setTimeout(r, 500 * attempt));
+        console.log(`🔄 Retry ${attempt}/${maxRetries} for job:`, jobId);
+      } else {
+        console.log('📥 Loading applications for job:', jobId);
+      }
+
+      const headers = await getAuthHeaders();
+      const response = await fetch(`${API_BASE_URL}/applications/job/${jobId}`, {
+        method: 'GET',
+        headers
+      });
+
+      if (response.status === 503 || response.status === 502) {
+        // Service unavailable - retry
+        lastError = new Error(`Service unavailable (${response.status})`);
+        continue;
+      }
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || `Failed to get job applications (${response.status})`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Loaded job applications:', data);
+      return data.applications || [];
+    } catch (error) {
+      lastError = error;
+      // Don't retry on non-transient errors
+      if (!error.message.includes('503') && !error.message.includes('502') && !error.message.includes('unavailable')) {
+        throw error;
+      }
     }
-    
-    const data = await response.json();
-    console.log('✅ Loaded job applications:', data);
-    return data.applications || [];
-  } catch (error) {
-    console.error('❌ Error getting job applications:', error);
-    throw error;
   }
+
+  console.error('❌ Error getting job applications after retries:', lastError);
+  return []; // Return empty instead of throwing to not break dashboard
 }
 
 /**

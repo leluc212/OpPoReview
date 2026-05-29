@@ -2,7 +2,6 @@ const AWS = require('aws-sdk');
 
 const cognito = new AWS.CognitoIdentityServiceProvider({ apiVersion: '2016-04-18' });
 const docClient = new AWS.DynamoDB.DocumentClient();
-const ses = new AWS.SES({ apiVersion: '2010-12-01', region: process.env.AWS_REGION || 'ap-southeast-1' });
 
 function parseIdentityProvider(attrs) {
   // Social users often include `identities` claim; fallback to Cognito local.
@@ -106,38 +105,6 @@ exports.handler = async (event) => {
     // Do not block sign-in flow if DB upsert fails.
     console.error('Failed upserting user profile', err);
   }
-
-  // Send a welcome email using SES (best-effort; do not block user creation)
-  (async function trySendWelcome() {
-    const email = attrs.email || '';
-    if (!email) return;
-
-    const fromAddress = process.env.FROM_EMAIL || process.env.SES_FROM_EMAIL || `no-reply@${process.env.DOMAIN || 'example.com'}`;
-    const displayName = attrs.name || attrs.given_name || '';
-    const subject = 'Welcome to OpPoReview';
-    const htmlBody = `<p>Hi ${displayName || ''},</p><p>Welcome to OpPoReview — glad to have you on board.</p><p>Regards,<br/>OpPoReview Team</p>`;
-    const textBody = `Hi ${displayName || ''},\n\nWelcome to OpPoReview — glad to have you on board.\n\nRegards,\nOpPoReview Team`;
-
-    const params = {
-      Source: fromAddress,
-      Destination: { ToAddresses: [email] },
-      Message: {
-        Subject: { Data: subject },
-        Body: {
-          Html: { Data: htmlBody },
-          Text: { Data: textBody }
-        }
-      }
-    };
-
-    try {
-      console.log('Attempting to send welcome email to', email, 'from', fromAddress);
-      const resp = await ses.sendEmail(params).promise();
-      console.log('SES sendEmail response:', resp);
-    } catch (sendErr) {
-      console.error('Failed sending welcome email via SES:', sendErr && sendErr.message ? sendErr.message : sendErr);
-    }
-  })();
 
   return event;
 };

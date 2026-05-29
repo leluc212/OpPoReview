@@ -531,11 +531,16 @@ const EmployerDashboard = () => {
           totalViewsCount += (job.views || 0);
         });
 
-        // Fetch applications for ALL standard jobs
-        const appsPromises = allStandard.map(job => 
-          getJobApplications(job.idJob || job.id).catch(() => [])
-        );
-        const appsResults = await Promise.all(appsPromises);
+        // Fetch applications for ALL standard jobs - batched to avoid Lambda throttling
+        const batchSize = 5;
+        const appsResults = [];
+        for (let i = 0; i < allStandard.length; i += batchSize) {
+          const batch = allStandard.slice(i, i + batchSize);
+          const batchResults = await Promise.all(
+            batch.map(job => getJobApplications(job.idJob || job.id).catch(() => []))
+          );
+          appsResults.push(...batchResults);
+        }
         const rawAllApplications = appsResults.flat();
         
         let allApplications = rawAllApplications.filter(app => {
@@ -559,8 +564,8 @@ const EmployerDashboard = () => {
           const jobMatch = allStandard.find(j => (j.idJob || j.id) === app.jobId);
           return {
             id: app.applicationId || app.idApp || app.id || Math.random().toString(),
-            candidate: app.fullName || app.candidateName || app.candidateEmail || 'Ứng viên',
-            job: jobMatch?.title || 'Công việc',
+            candidate: app.fullName || app.candidateName || app.candidateEmail || (language === 'vi' ? 'Ứng viên' : 'Candidate'),
+            job: jobMatch?.title || (language === 'vi' ? 'Công việc' : 'Job'),
 
 
             applied: new Date(app.createdAt || Date.now()).toLocaleDateString(),
@@ -807,7 +812,7 @@ const EmployerDashboard = () => {
                 >
                   <ApplicationHeader>
                     <CandidateInfo>
-                      <h4>{app.candidate}</h4>
+                      <h4>{app.candidate === 'Ứng viên' ? (language === 'vi' ? 'Ứng viên' : 'Candidate') : app.candidate}</h4>
                       <p><DynamicTranslate text={app.job} showIndicator={false} /></p>
                     </CandidateInfo>
                     <ViewProfileButton onClick={() => navigate('/employer/standard-jobs', { state: { candidateId: app.id, section: 'applications' } })}>

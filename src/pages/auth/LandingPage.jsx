@@ -2836,14 +2836,6 @@ const LandingPage = () => {
                         <Bookmark />
                         {language === 'vi' ? 'Việc làm đã lưu' : 'Saved Jobs'}
                       </CVTemplateItem>
-                      <CVTemplateItem to="/candidate/applications" $isDark={isDarkMode}>
-                        <FileText />
-                        {language === 'vi' ? 'Việc làm đã ứng tuyển' : 'Applied Jobs'}
-                      </CVTemplateItem>
-                      <CVTemplateItem to="/candidate/jobs?recommended=true" $isDark={isDarkMode}>
-                        <ThumbsUp />
-                        {language === 'vi' ? 'Việc làm phù hợp' : 'Recommended Jobs'}
-                      </CVTemplateItem>
                     </DropdownSection>
 
                     <DropdownSection>
@@ -2861,21 +2853,6 @@ const LandingPage = () => {
                       </CVTemplateItem>
                     </DropdownSection>
                   </DropdownLeftColumn>
-
-                  <DropdownRightColumn>
-                    <GreenSectionTitle>
-                      {language === 'vi' ? 'Việc làm theo vị trí' : 'Jobs by Position'}
-                      <ArrowRight />
-                    </GreenSectionTitle>
-                    <JobCategoriesGrid>
-                      <JobCategoryItem to="/candidate/jobs?category=sales" $isDark={isDarkMode}>{language === 'vi' ? 'Nhân viên pha chế' : 'Barista'}</JobCategoryItem>
-                      <JobCategoryItem to="/candidate/jobs?category=labor" $isDark={isDarkMode}>{language === 'vi' ? 'Nhân viên thu ngân' : 'Cashier'}</JobCategoryItem>
-                      <JobCategoryItem to="/candidate/jobs?category=accountant" $isDark={isDarkMode}>{language === 'vi' ? 'Nhân viên phụ bếp' : 'Kitchen Assistant'}</JobCategoryItem>
-                      <JobCategoryItem to="/candidate/jobs?type=senior" $isDark={isDarkMode}>{language === 'vi' ? 'Nhân viên phục vụ' : 'Service Staff'}</JobCategoryItem>
-                      <JobCategoryItem to="/candidate/jobs?category=marketing" $isDark={isDarkMode}>{language === 'vi' ? 'Nhân viên kho' : 'Warehouse Staff'}</JobCategoryItem>
-                      <JobCategoryItem to="/candidate/jobs?category=engineer" $isDark={isDarkMode}>{language === 'vi' ? 'Nhân viên kỹ thuật' : 'Technical Staff'}</JobCategoryItem>
-                    </JobCategoriesGrid>
-                  </DropdownRightColumn>
                 </LargeDropdownMenu>
               )}
             </DropdownContainer>
