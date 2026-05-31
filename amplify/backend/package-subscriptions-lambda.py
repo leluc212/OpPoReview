@@ -4,6 +4,7 @@ import os
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 import uuid
+import re
 from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
 
@@ -15,6 +16,8 @@ catalog_table_name = os.environ.get('PACKAGE_CATALOG_TABLE', 'PackageCatalog')
 catalog_table = dynamodb.Table(catalog_table_name)
 notifications_table_name = os.environ.get('NOTIFICATIONS_TABLE', 'Notifications')
 notifications_table = dynamodb.Table(notifications_table_name)
+employer_profile_table_name = os.environ.get('EMPLOYER_PROFILE_TABLE', 'EmployerProfiles')
+employer_profile_table = dynamodb.Table(employer_profile_table_name)
 
 VN_TZ = timezone(timedelta(hours=7))
 
@@ -102,7 +105,7 @@ def lambda_handler(event, context):
             package_id = path_parameters.get('packageId')
             return update_package(package_id, body, headers)
 
-        if http_method == 'POST' and path == '/subscriptions':
+        elif http_method == 'POST' and path == '/subscriptions':
             return create_subscription(body, headers)
         
         elif http_method == 'GET' and path == '/subscriptions':
@@ -123,6 +126,18 @@ def lambda_handler(event, context):
         elif http_method == 'DELETE' and '/subscriptions/' in path:
             subscription_id = path_parameters.get('subscriptionId')
             return delete_subscription(subscription_id, headers)
+
+        elif http_method == 'GET' and '/wallet/' in path:
+            employer_id = path_parameters.get('employerId')
+            return get_employer_wallet(employer_id, headers)
+        
+        elif http_method == 'POST' and path == '/wallet/withdraw':
+            return withdraw_wallet(body, headers)
+            
+        elif http_method == 'POST' and path == '/wallet/sepay-webhook':
+            query_params = event.get('queryStringParameters') or {}
+            token = query_params.get('token')
+            return handle_sepay_webhook(body, token, headers)
         
         else:
             return {
@@ -345,14 +360,25 @@ def get_package_definition(package_name):
             return item
     return None
 
+def normalize_duration_str(d):
+    if not d:
+        return ""
+    d_clean = d.lower()
+    d_clean = re.sub(r'[^0-9a-z]', '', d_clean)
+    if 'ng' in d_clean:
+        d_clean = re.sub(r'ng.*', 'ng', d_clean)
+    return d_clean
+
 def get_package_price(package_name, duration):
     """Get package price based on name and duration"""
     package = get_package_definition(package_name)
     if not package:
         return 0
 
+    norm_target = normalize_duration_str(duration)
     for price_option in package.get('prices', []):
-        if price_option.get('duration') == duration:
+        opt_duration = price_option.get('duration')
+        if opt_duration == duration or normalize_duration_str(opt_duration) == norm_target:
             return price_option.get('amount', 0)
 
     return 0
@@ -619,7 +645,7 @@ def process_expired_subscriptions():
     return expired_count
 
 def create_subscription(body_str, headers):
-    """Create new subscription request"""
+    """Create new subscription request and process payment via wallet"""
     try:
         body = json.loads(body_str) if isinstance(body_str, str) else body_str
         
@@ -643,25 +669,73 @@ def create_subscription(body_str, headers):
         
         # Calculate price
         price = get_package_price(body['packageName'], body['duration'])
+        price_decimal = Decimal(str(price))
+        
+        # Check and deduct employer wallet balance in database
+        employer_id = body['employerId']
+        wallet_info = get_or_create_wallet(employer_id)
+        balance = wallet_info.get('walletBalance', Decimal('0'))
+        
+        if balance < price_decimal:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({
+                    'success': False,
+                    'message': 'Số dư tài khoản không đủ để thanh toán gói dịch vụ này. Vui lòng nạp thêm tiền.'
+                })
+            }
+            
+        new_balance = balance - price_decimal
         
         now_dt = get_vn_now()
+        txn_id = f"TXN-BUY-{now_dt.strftime('%Y%m%d')}-{str(uuid.uuid4())[:6].upper()}"
+        
+        transaction = {
+            'transactionId': txn_id,
+            'type': 'debit',
+            'amount': price_decimal,
+            'description': f"Thanh toán gói dịch vụ {body['packageName']} ({body['duration']})",
+            'timestamp': now_dt.isoformat(),
+            'status': 'completed',
+            'paymentDetails': {
+                'subscriptionId': subscription_id,
+                'packageName': body['packageName'],
+                'duration': body['duration']
+            }
+        }
+        
+        transactions = wallet_info.get('walletTransactions', [])
+        transactions.insert(0, transaction)
+        
+        # Deduct wallet balance and add transaction history record
+        employer_profile_table.update_item(
+            Key={'userId': employer_id},
+            UpdateExpression="SET walletBalance = :bal, walletTransactions = :txs, updatedAt = :updatedAt",
+            ExpressionAttributeValues={
+                ':bal': new_balance,
+                ':txs': transactions,
+                ':updatedAt': now_dt.isoformat()
+            }
+        )
+        
         expiry_dt = calculate_expiry_datetime(body['duration'], now_dt)
         expiry_date = format_vn_date(expiry_dt)
         
-        # Create item
+        # Create item as active & approved directly since it is paid via wallet
         item = {
             'subscriptionId': subscription_id,
             'employerId': body['employerId'],
             'companyName': body['companyName'],
             'packageName': body['packageName'],
             'duration': body['duration'],
-            'price': Decimal(str(price)),
+            'price': price_decimal,
             'purchaseDate': format_vn_date(now_dt),
             'purchaseDateTime': now_dt.isoformat(),
             'expiryDate': expiry_date,
             'expiryDateTime': expiry_dt.isoformat(),
-            'status': 'pending',  # pending, active, expired
-            'approvalStatus': 'pending',  # pending, approved, rejected
+            'status': 'active',  # active immediately
+            'approvalStatus': 'approved',  # approved immediately
             'createdAt': now_dt.isoformat(),
             'updatedAt': now_dt.isoformat()
         }
@@ -669,14 +743,14 @@ def create_subscription(body_str, headers):
         # Put item in DynamoDB
         table.put_item(Item=item)
         
-        print(f"✅ Subscription created: {subscription_id}")
+        print(f"✅ Subscription created and paid: {subscription_id}")
         
         return {
             'statusCode': 201,
             'headers': headers,
             'body': json.dumps({
                 'success': True,
-                'message': 'Subscription request created successfully',
+                'message': 'Đăng ký gói dịch vụ thành công.',
                 'data': item
             }, default=decimal_default)
         }
@@ -689,6 +763,364 @@ def create_subscription(body_str, headers):
             'body': json.dumps({
                 'success': False,
                 'message': f'Error creating subscription: {str(e)}'
+            })
+        }
+
+def generate_unique_wallet_code():
+    import random
+    import string
+    
+    attempts = 0
+    while attempts < 10:
+        code = 'OP' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
+        try:
+            response = employer_profile_table.scan(
+                FilterExpression=Attr('walletCode').eq(code),
+                ProjectionExpression='userId'
+            )
+            if not response.get('Items'):
+                return code
+        except Exception as e:
+            print(f"Error scanning for unique walletCode: {str(e)}")
+            return code
+        attempts += 1
+        
+    return 'OP' + str(uuid.uuid4().hex[:4]).upper()
+
+def get_or_create_wallet(employer_id):
+    try:
+        response = employer_profile_table.get_item(Key={'userId': employer_id})
+    except Exception as e:
+        print(f"Error getting employer profile: {str(e)}")
+        raise e
+
+    if 'Item' not in response:
+        now_str = get_vn_now().isoformat()
+        wallet_code = generate_unique_wallet_code()
+        new_profile = {
+            'userId': employer_id,
+            'companyName': '',
+            'email': f"employer_{employer_id}@placeholder.com",
+            'walletBalance': Decimal('0'),
+            'walletCode': wallet_code,
+            'walletTransactions': [],
+            'createdAt': now_str,
+            'updatedAt': now_str,
+            'isActive': True,
+            'isVerified': False
+        }
+        try:
+            employer_profile_table.put_item(Item=new_profile)
+            return new_profile
+        except Exception as e:
+            print(f"Error creating default profile/wallet: {str(e)}")
+            raise e
+    
+    profile = response['Item']
+    needs_update = False
+    
+    if 'walletBalance' not in profile:
+        profile['walletBalance'] = Decimal('0')
+        needs_update = True
+        
+    if 'walletTransactions' not in profile:
+        profile['walletTransactions'] = []
+        needs_update = True
+        
+    if 'walletCode' not in profile:
+        profile['walletCode'] = generate_unique_wallet_code()
+        needs_update = True
+        
+    if needs_update:
+        try:
+            employer_profile_table.update_item(
+                Key={'userId': employer_id},
+                UpdateExpression="SET walletBalance = :bal, walletTransactions = :txs, walletCode = :code, updatedAt = :updatedAt",
+                ExpressionAttributeValues={
+                    ':bal': profile['walletBalance'],
+                    ':txs': profile['walletTransactions'],
+                    ':code': profile['walletCode'],
+                    ':updatedAt': get_vn_now().isoformat()
+                }
+            )
+        except Exception as e:
+            print(f"Error updating profile with wallet fields: {str(e)}")
+    
+    return profile
+
+def get_employer_wallet(employer_id, headers):
+    try:
+        if not employer_id:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({
+                    'success': False,
+                    'message': 'employerId is required'
+                })
+            }
+            
+        wallet_info = get_or_create_wallet(employer_id)
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True,
+                'data': {
+                    'walletBalance': wallet_info.get('walletBalance', Decimal('0')),
+                    'walletCode': wallet_info.get('walletCode', ''),
+                    'walletTransactions': wallet_info.get('walletTransactions', [])
+                }
+            }, default=decimal_default)
+        }
+    except Exception as e:
+        print(f"Error in get_employer_wallet: {str(e)}")
+        return {
+            'statusCode': 500,
+            'headers': headers,
+            'body': json.dumps({
+                'success': False,
+                'message': f'Error getting wallet: {str(e)}'
+            })
+        }
+
+def withdraw_wallet(body_str, headers):
+    try:
+        body = json.loads(body_str) if isinstance(body_str, str) else body_str
+        
+        employer_id = body.get('employerId')
+        amount = Decimal(str(body.get('amount', 0)))
+        bank_name = body.get('bankName')
+        account_number = body.get('accountNumber')
+        account_name = body.get('accountName')
+        
+        if not employer_id or amount <= 0 or not bank_name or not account_number or not account_name:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({
+                    'success': False,
+                    'message': 'Missing required withdrawal fields or invalid amount'
+                })
+            }
+            
+        wallet_info = get_or_create_wallet(employer_id)
+        balance = wallet_info.get('walletBalance', Decimal('0'))
+        
+        if balance < amount:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({
+                    'success': False,
+                    'message': 'Số dư tài khoản không đủ để thực hiện giao dịch này.'
+                })
+            }
+            
+        new_balance = balance - amount
+        
+        now_dt = get_vn_now()
+        txn_id = f"TXN-WITHDRAW-{now_dt.strftime('%Y%m%d')}-{str(uuid.uuid4())[:6].upper()}"
+        
+        transaction = {
+            'transactionId': txn_id,
+            'type': 'debit',
+            'amount': amount,
+            'description': f"Rút tiền về tài khoản {bank_name} - {account_number}",
+            'timestamp': now_dt.isoformat(),
+            'status': 'completed',
+            'paymentDetails': {
+                'bankName': bank_name,
+                'accountNumber': account_number,
+                'accountName': account_name
+            }
+        }
+        
+        transactions = wallet_info.get('walletTransactions', [])
+        transactions.insert(0, transaction)
+        
+        employer_profile_table.update_item(
+            Key={'userId': employer_id},
+            UpdateExpression="SET walletBalance = :bal, walletTransactions = :txs, updatedAt = :updatedAt",
+            ExpressionAttributeValues={
+                ':bal': new_balance,
+                ':txs': transactions,
+                ':updatedAt': now_dt.isoformat()
+            }
+        )
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True,
+                'message': 'Rút tiền thành công',
+                'data': {
+                    'walletBalance': new_balance,
+                    'walletTransactions': transactions
+                }
+            }, default=decimal_default)
+        }
+        
+    except Exception as e:
+        print(f"Error in withdraw_wallet: {str(e)}")
+        return {
+            'statusCode': 500,
+            'headers': headers,
+            'body': json.dumps({
+                'success': False,
+                'message': f'Error processing withdrawal: {str(e)}'
+            })
+        }
+
+def extract_wallet_code(content):
+    if not content:
+        return None
+    match = re.search(r'OPPOWALLET\s+(OP[A-Z0-9]{4})', content, re.IGNORECASE)
+    if match:
+        return match.group(1).upper()
+    match2 = re.search(r'\b(OP[A-Z0-9]{4})\b', content, re.IGNORECASE)
+    if match2:
+        return match2.group(1).upper()
+    return None
+
+def handle_sepay_webhook(body_str, token, headers):
+    try:
+        # Check token
+        expected_token = 'oppo_secure_sepay_token_2026'
+        if token != expected_token:
+            print(f"Unauthorized Webhook Access: Invalid token received: {token}")
+            return {
+                'statusCode': 401,
+                'headers': headers,
+                'body': json.dumps({
+                    'success': False,
+                    'message': 'Unauthorized: Invalid token'
+                })
+            }
+            
+        body = json.loads(body_str) if isinstance(body_str, str) else body_str
+        print(f"SePay Webhook received payload: {json.dumps(body)}")
+        
+        transfer_type = body.get('transferType', 'in')
+        if transfer_type != 'in':
+            print(f"Ignoring non-credit transaction type: {transfer_type}")
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({'success': True, 'message': 'Ignored transferType out'})
+            }
+            
+        content = body.get('content', '')
+        wallet_code = extract_wallet_code(content)
+        
+        if not wallet_code:
+            print(f"Could not extract wallet code from content: {content}")
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({
+                    'success': False,
+                    'message': f'Could not extract wallet code from transaction content: {content}'
+                })
+            }
+            
+        # Find employer profile by wallet_code
+        try:
+            response = employer_profile_table.scan(
+                FilterExpression=Attr('walletCode').eq(wallet_code)
+            )
+            items = response.get('Items', [])
+        except Exception as e:
+            print(f"Error scanning for walletCode: {str(e)}")
+            return {
+                'statusCode': 500,
+                'headers': headers,
+                'body': json.dumps({'success': False, 'message': 'Database error looking up wallet code'})
+            }
+            
+        if not items:
+            print(f"No employer profile found for walletCode: {wallet_code}")
+            return {
+                'statusCode': 404,
+                'headers': headers,
+                'body': json.dumps({'success': False, 'message': f'Wallet code {wallet_code} not found'})
+            }
+            
+        profile = items[0]
+        employer_id = profile['userId']
+        transactions = profile.get('walletTransactions', [])
+        sepay_id = str(body.get('id', ''))
+        
+        # Deduplicate
+        for txn in transactions:
+            if txn.get('paymentDetails', {}).get('sepayId') == sepay_id:
+                print(f"Transaction with SePay ID {sepay_id} already processed.")
+                return {
+                    'statusCode': 200,
+                    'headers': headers,
+                    'body': json.dumps({'success': True, 'message': 'Already processed'})
+                }
+                
+        transfer_amount = Decimal(str(body.get('transferAmount', 0)))
+        if transfer_amount <= 0:
+            print(f"Invalid transfer amount: {transfer_amount}")
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'success': False, 'message': 'Invalid transfer amount'})
+            }
+            
+        current_balance = profile.get('walletBalance', Decimal('0'))
+        new_balance = current_balance + transfer_amount
+        
+        now_dt = get_vn_now()
+        txn_id = f"TXN-DEPOSIT-{now_dt.strftime('%Y%m%d')}-{str(uuid.uuid4())[:6].upper()}"
+        
+        new_txn = {
+            'transactionId': txn_id,
+            'type': 'credit',
+            'amount': transfer_amount,
+            'description': f"Nạp tiền tự động qua SePay (GD: {sepay_id})",
+            'timestamp': now_dt.isoformat(),
+            'status': 'completed',
+            'paymentDetails': {
+                'sepayId': sepay_id,
+                'gateway': body.get('gateway', ''),
+                'transactionDate': body.get('transactionDate', ''),
+                'referenceCode': body.get('referenceCode', ''),
+                'content': content
+            }
+        }
+        
+        transactions.insert(0, new_txn)
+        
+        employer_profile_table.update_item(
+            Key={'userId': employer_id},
+            UpdateExpression="SET walletBalance = :bal, walletTransactions = :txs, updatedAt = :updatedAt",
+            ExpressionAttributeValues={
+                ':bal': new_balance,
+                ':txs': transactions,
+                ':updatedAt': now_dt.isoformat()
+            }
+        )
+        
+        print(f"Successfully credited {transfer_amount} to employer {employer_id}")
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({'success': True})
+        }
+        
+    except Exception as e:
+        print(f"Error in handle_sepay_webhook: {str(e)}")
+        return {
+            'statusCode': 500,
+            'headers': headers,
+            'body': json.dumps({
+                'success': False,
+                'message': f'Internal server error: {str(e)}'
             })
         }
 

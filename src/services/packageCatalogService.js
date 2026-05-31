@@ -136,3 +136,50 @@ export const updatePackageCatalogItem = async (packageItem) => {
 };
 
 export const normalizePackageCatalogItem = (item) => normalizePackageItem(item);
+
+export const getWallet = async (employerId) => {
+  const base = API_ENDPOINT || (import.meta.env.DEV ? DEV_PROXY_BASE : null);
+  if (!base) {
+    throw new Error('API endpoint is not configured');
+  }
+
+  const url = `${base.replace(/\/$/, '')}/wallet/${encodeURIComponent(employerId)}`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    throw new Error(errorBody.message || 'Failed to fetch wallet info');
+  }
+
+  const payload = await response.json();
+  return payload?.data || payload;
+};
+
+export const withdrawWallet = async (employerId, amount, bankName, accountNumber, accountName) => {
+  const base = API_ENDPOINT || (import.meta.env.DEV ? DEV_PROXY_BASE : null);
+  if (!base) {
+    throw new Error('API endpoint is not configured');
+  }
+
+  const url = `${base.replace(/\/$/, '')}/wallet/withdraw`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      employerId,
+      amount,
+      bankName,
+      accountNumber,
+      accountName
+    })
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    throw new Error(errorBody.message || 'Failed to process withdrawal');
+  }
+
+  const payload = await response.json();
+  return payload?.data || payload;
+};

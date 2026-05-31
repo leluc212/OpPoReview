@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
 import { Button, Input } from '../../components/FormElements';
+import { useAuth } from '../../context/AuthContext';
+import { getWallet, withdrawWallet } from '../../services/packageCatalogService';
 import {
   Wallet as WalletIcon,
   TrendingUp,
@@ -27,7 +29,9 @@ import {
   AlertCircle,
   Clock,
   BarChart3,
-  FileText
+  FileText,
+  Copy,
+  Check
 } from 'lucide-react';
 
 const WalletContainer = styled.div`
@@ -944,33 +948,114 @@ const WithdrawSuccessState = styled(SuccessState)`
   .amount-text { color: #b45309; }
 `;
 
+const QRContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+`;
+
+const QRCodeImage = styled.img`
+  width: 220px;
+  height: 220px;
+  border-radius: 16px;
+  border: 4px solid #f1f5f9;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+`;
+
+const PaymentDetailsTable = styled.div`
+  width: 100%;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const DetailRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13.5px;
+  
+  .label {
+    color: #64748b;
+    font-weight: 500;
+  }
+  
+  .value {
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+`;
+
+const CopyButton = styled.button`
+  background: #EFF6FF;
+  border: none;
+  color: #1e40af;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: #BFDBFE;
+  }
+`;
+
+const PollingStatus = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #1e40af;
+  font-weight: 600;
+  background: #EFF6FF;
+  padding: 10px 16px;
+  border-radius: 20px;
+  margin-top: 8px;
+  animation: pulseStatus 2.2s infinite ease-in-out;
+  
+  @keyframes pulseStatus {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(0.98); }
+  }
+`;
+
 const EmployerWallet = () => {
   const { language } = useLanguage();
+  const { user } = useAuth();
+  const employerId = user?.userId;
 
-  // Initialize wallet if not exists
-  const initializeWallet = () => {
-    const walletData = localStorage.getItem('employer_wallet');
-    if (!walletData) {
-      const initialWallet = {
-        balance: 500000, // 500,000 VNĐ số dư ban đầu
-        createdAt: new Date().toISOString()
-      };
-      localStorage.setItem('employer_wallet', JSON.stringify(initialWallet));
-      return initialWallet.balance;
-    }
-    return JSON.parse(walletData).balance;
-  };
-
-  const [balance, setBalance] = useState(() => initializeWallet());
+  const [balance, setBalance] = useState(0);
+  const [walletCode, setWalletCode] = useState('');
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showBalance, setShowBalance] = useState(false);
   const [filterType, setFilterType] = useState('all');
 
   // Deposit modal state
   const [showDepositModal, setShowDepositModal] = useState(false);
+  const [depositStep, setDepositStep] = useState(1); // 1: Select amount, 2: Show VietQR and polling
   const [depositRawAmount, setDepositRawAmount] = useState('');
   const [depositLoading, setDepositLoading] = useState(false);
   const [depositSuccess, setDepositSuccess] = useState(false);
   const depositInputRef = useRef(null);
+  
+  // Copy to clipboard state
+  const [copiedText, setCopiedText] = useState('');
 
   // Withdraw modal state
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
@@ -998,66 +1083,77 @@ const EmployerWallet = () => {
   const withdrawExceedsBalance = parsedWithdrawAmount > balance;
   const withdrawFormValid =
     parsedWithdrawAmount > 0 &&
-    !withdrawExceedsBalance;
+    !withdrawExceedsBalance &&
+    withdrawBankName &&
+    withdrawAccountNumber &&
+    withdrawAccountName;
 
-  // Load transactions from localStorage
-  const [transactions, setTransactions] = useState(() => {
-    const saved = localStorage.getItem('employer_transactions');
-    if (saved) {
-      return JSON.parse(saved);
-    }
-    // Mock data fallback
-    return [
-      {
-        id: 1,
-        type: 'income',
-        description: language === 'vi' ? 'Nạp tiền ban đầu' : 'Initial deposit',
-        amount: 500000,
-        date: new Date().toISOString(),
-        balanceAfter: 500000
-      }
-    ];
-  });
-
-  // Reload balance from localStorage
-  const reloadBalance = () => {
-    const walletData = localStorage.getItem('employer_wallet');
-    if (walletData) {
-      const balance = JSON.parse(walletData).balance;
-      setBalance(balance);
-    }
-  };
-
-  // Reload transactions from localStorage
-  const reloadTransactions = () => {
-    const saved = localStorage.getItem('employer_transactions');
-    if (saved) {
-      setTransactions(JSON.parse(saved));
+  const fetchWalletData = async (showLoadingSpinner = true) => {
+    if (!employerId) return;
+    try {
+      if (showLoadingSpinner) setLoading(true);
+      const wallet = await getWallet(employerId);
+      setBalance(wallet.walletBalance || 0);
+      setWalletCode(wallet.walletCode || '');
+      // Format transactions to have required attributes
+      const txs = (wallet.walletTransactions || []).map((t, idx) => ({
+        id: t.transactionId || idx,
+        type: t.type,
+        amount: Number(t.amount || 0),
+        description: t.description || '',
+        date: t.timestamp || '',
+        paymentDetails: t.paymentDetails || {}
+      }));
+      setTransactions(txs);
+    } catch (err) {
+      console.error('Error fetching wallet data:', err);
+    } finally {
+      if (showLoadingSpinner) setLoading(false);
     }
   };
 
-  // Auto-reload when page becomes visible
+  // Load wallet on mount
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        reloadBalance();
-        reloadTransactions();
-      }
-    };
+    fetchWalletData();
+  }, [employerId]);
 
-    const handleFocus = () => {
-      reloadBalance();
-      reloadTransactions();
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
-
+  // Polling for deposits while deposit modal is open in step 2
+  useEffect(() => {
+    let intervalId;
+    if (showDepositModal && depositStep === 2 && employerId) {
+      intervalId = setInterval(async () => {
+        try {
+          const wallet = await getWallet(employerId);
+          const newBal = wallet.walletBalance || 0;
+          if (newBal > balance) {
+            setBalance(newBal);
+            const txs = (wallet.walletTransactions || []).map((t, idx) => ({
+              id: t.transactionId || idx,
+              type: t.type,
+              amount: Number(t.amount || 0),
+              description: t.description || '',
+              date: t.timestamp || '',
+              paymentDetails: t.paymentDetails || {}
+            }));
+            setTransactions(txs);
+            setDepositSuccess(true);
+            setDepositRawAmount('');
+            clearInterval(intervalId);
+            
+            setTimeout(() => {
+              setShowDepositModal(false);
+              setDepositSuccess(false);
+            }, 2200);
+          }
+        } catch (err) {
+          console.error('Error polling wallet balance:', err);
+        }
+      }, 5000);
+    }
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleFocus);
+      if (intervalId) clearInterval(intervalId);
     };
-  }, []);
+  }, [showDepositModal, depositStep, employerId, balance]);
 
   const receipts = [
     { id: 1, title: language === 'vi' ? 'Hóa đơn #2026021401' : 'Invoice #2026021401', date: '14/02/2026', amount: '2,500,000 VND' },
@@ -1066,7 +1162,6 @@ const EmployerWallet = () => {
   ];
 
   const formatCurrency = (amount) => {
-    // Always use vi-VN locale for VND currency with VND text instead of symbol
     const formatted = new Intl.NumberFormat('vi-VN').format(amount);
     return formatted + ' VND';
   };
@@ -1086,32 +1181,29 @@ const EmployerWallet = () => {
     setTimeout(() => withdrawInputRef.current?.focus(), 120);
   };
 
-  const handleConfirmWithdraw = () => {
-    if (!withdrawFormValid) return;
+  const handleConfirmWithdraw = async () => {
+    if (!withdrawFormValid || !employerId) return;
     setWithdrawLoading(true);
-    setTimeout(() => {
-      const walletData = JSON.parse(localStorage.getItem('employer_wallet') || '{"balance": 0}');
-      const newBalance = (walletData.balance || 0) - parsedWithdrawAmount;
-      walletData.balance = newBalance;
-      localStorage.setItem('employer_wallet', JSON.stringify(walletData));
-
-      const transaction = {
-        id: Date.now(),
-        type: 'debit',
-        amount: parsedWithdrawAmount,
-        description: language === 'vi'
-          ? `Rút tiền → ${withdrawBankName} (${withdrawAccountNumber})`
-          : `Withdraw → ${withdrawBankName} (${withdrawAccountNumber})`,
-        date: new Date().toISOString(),
-        balanceAfter: newBalance
-      };
-
-      const savedTxs = JSON.parse(localStorage.getItem('employer_transactions') || '[]');
-      savedTxs.unshift(transaction);
-      localStorage.setItem('employer_transactions', JSON.stringify(savedTxs));
-
-      setBalance(newBalance);
-      reloadTransactions();
+    try {
+      const result = await withdrawWallet(
+        employerId,
+        parsedWithdrawAmount,
+        withdrawBankName,
+        withdrawAccountNumber,
+        withdrawAccountName
+      );
+      
+      setBalance(result.walletBalance || 0);
+      const txs = (result.walletTransactions || []).map((t, idx) => ({
+        id: t.transactionId || idx,
+        type: t.type,
+        amount: Number(t.amount || 0),
+        description: t.description || '',
+        date: t.timestamp || '',
+        paymentDetails: t.paymentDetails || {}
+      }));
+      setTransactions(txs);
+      
       setWithdrawLoading(false);
       setWithdrawSuccess(true);
 
@@ -1119,7 +1211,11 @@ const EmployerWallet = () => {
         setShowWithdrawModal(false);
         setWithdrawSuccess(false);
       }, 2400);
-    }, 900);
+    } catch (error) {
+      console.error('Error processing withdrawal:', error);
+      alert(error.message || 'Rút tiền thất bại. Vui lòng thử lại sau.');
+      setWithdrawLoading(false);
+    }
   };
 
   const handleWithdrawAmountInput = (e) => {
@@ -1131,50 +1227,25 @@ const EmployerWallet = () => {
     setDepositRawAmount('');
     setDepositSuccess(false);
     setDepositLoading(false);
+    setDepositStep(1);
     setShowDepositModal(true);
     setTimeout(() => depositInputRef.current?.focus(), 120);
   };
 
   const handleConfirmDeposit = () => {
-    const amount = parseInt(depositRawAmount.replace(/\D/g, '') || '0');
-    if (!amount || amount <= 0) return;
-
-    setDepositLoading(true);
-
-    setTimeout(() => {
-      const walletData = JSON.parse(localStorage.getItem('employer_wallet') || '{"balance": 0}');
-      const newBalance = (walletData.balance || 0) + amount;
-      walletData.balance = newBalance;
-      localStorage.setItem('employer_wallet', JSON.stringify(walletData));
-
-      const transaction = {
-        id: Date.now(),
-        type: 'credit',
-        amount: amount,
-        description: language === 'vi' ? 'Nạp tiền vào ví' : 'Wallet deposit',
-        date: new Date().toISOString(),
-        balanceAfter: newBalance
-      };
-
-      const savedTxs = JSON.parse(localStorage.getItem('employer_transactions') || '[]');
-      savedTxs.unshift(transaction);
-      localStorage.setItem('employer_transactions', JSON.stringify(savedTxs));
-
-      setBalance(newBalance);
-      reloadTransactions();
-      setDepositLoading(false);
-      setDepositSuccess(true);
-
-      setTimeout(() => {
-        setShowDepositModal(false);
-        setDepositSuccess(false);
-      }, 2200);
-    }, 900);
+    if (parsedDepositAmount <= 0) return;
+    setDepositStep(2);
   };
 
   const handleDepositAmountInput = (e) => {
     const raw = e.target.value.replace(/\D/g, '');
     setDepositRawAmount(raw);
+  };
+
+  const handleCopyText = (text, label) => {
+    navigator.clipboard.writeText(text);
+    setCopiedText(label);
+    setTimeout(() => setCopiedText(''), 2000);
   };
 
 
@@ -1563,6 +1634,39 @@ const EmployerWallet = () => {
                       )}
                     </BalanceHint>
 
+                    <SectionLabel>{language === 'vi' ? 'Ngân hàng thụ hưởng' : 'Recipient Bank'}</SectionLabel>
+                    <AmountInputWrapper>
+                      <WithdrawInput
+                        type="text"
+                        placeholder={language === 'vi' ? "Ví dụ: Vietcombank, MBBank..." : "e.g. Vietcombank, MBBank..."}
+                        value={withdrawBankName}
+                        onChange={(e) => setWithdrawBankName(e.target.value)}
+                        style={{ marginBottom: '12px' }}
+                      />
+                    </AmountInputWrapper>
+
+                    <SectionLabel>{language === 'vi' ? 'Số tài khoản' : 'Account Number'}</SectionLabel>
+                    <AmountInputWrapper>
+                      <WithdrawInput
+                        type="text"
+                        placeholder={language === 'vi' ? "Nhập số tài khoản" : "Enter account number"}
+                        value={withdrawAccountNumber}
+                        onChange={(e) => setWithdrawAccountNumber(e.target.value)}
+                        style={{ marginBottom: '12px' }}
+                      />
+                    </AmountInputWrapper>
+
+                    <SectionLabel>{language === 'vi' ? 'Tên chủ tài khoản' : 'Account Holder'}</SectionLabel>
+                    <AmountInputWrapper>
+                      <WithdrawInput
+                        type="text"
+                        placeholder={language === 'vi' ? "NHAP TEN KHONG DAU" : "ENTER NAME IN ALL CAPS"}
+                        value={withdrawAccountName}
+                        onChange={(e) => setWithdrawAccountName(e.target.value.toUpperCase())}
+                        style={{ marginBottom: '12px' }}
+                      />
+                    </AmountInputWrapper>
+
                   </ModalBody>
 
                   <ModalFooter>
@@ -1646,61 +1750,125 @@ const EmployerWallet = () => {
 
                   {/* Body */}
                   <ModalBody>
-                    <SectionLabel>{language === 'vi' ? 'Chọn nhanh' : 'Quick select'}</SectionLabel>
-                    <QuickAmountsGrid>
-                      {QUICK_AMOUNTS.map(amt => (
-                        <QuickAmountBtn
-                          key={amt}
-                          $selected={parseInt(depositRawAmount.replace(/\D/g, '') || '0') === amt}
-                          onClick={() => setDepositRawAmount(String(amt))}
-                        >
-                          {formatQuickAmount(amt)}
-                        </QuickAmountBtn>
-                      ))}
-                    </QuickAmountsGrid>
+                    {depositStep === 1 ? (
+                      <>
+                        <SectionLabel>{language === 'vi' ? 'Chọn nhanh' : 'Quick select'}</SectionLabel>
+                        <QuickAmountsGrid>
+                          {QUICK_AMOUNTS.map(amt => (
+                            <QuickAmountBtn
+                              key={amt}
+                              $selected={parseInt(depositRawAmount.replace(/\D/g, '') || '0') === amt}
+                              onClick={() => setDepositRawAmount(String(amt))}
+                            >
+                              {formatQuickAmount(amt)}
+                            </QuickAmountBtn>
+                          ))}
+                        </QuickAmountsGrid>
 
-                    <SectionLabel>{language === 'vi' ? 'Nhập số tiền' : 'Enter amount'}</SectionLabel>
-                    <AmountInputWrapper>
-                      <DepositInput
-                        ref={depositInputRef}
-                        type="text"
-                        inputMode="numeric"
-                        placeholder={language === 'vi' ? '0' : '0'}
-                        value={depositRawAmount ? parseInt(depositRawAmount).toLocaleString('vi-VN') : ''}
-                        onChange={handleDepositAmountInput}
-                        $invalid={depositRawAmount !== '' && parsedDepositAmount <= 0}
-                      />
-                      <CurrencyLabel>VND</CurrencyLabel>
-                    </AmountInputWrapper>
-                    <AmountPreview>
-                      {formattedDepositPreview
-                        ? `≈ ${formattedDepositPreview}`
-                        : (language === 'vi' ? 'Tối thiểu 1.000 VND' : 'Minimum 1,000 VND')}
-                    </AmountPreview>
+                        <SectionLabel>{language === 'vi' ? 'Nhập số tiền' : 'Enter amount'}</SectionLabel>
+                        <AmountInputWrapper>
+                          <DepositInput
+                            ref={depositInputRef}
+                            type="text"
+                            inputMode="numeric"
+                            placeholder={language === 'vi' ? '0' : '0'}
+                            value={depositRawAmount ? parseInt(depositRawAmount).toLocaleString('vi-VN') : ''}
+                            onChange={handleDepositAmountInput}
+                            $invalid={depositRawAmount !== '' && parsedDepositAmount <= 0}
+                          />
+                          <CurrencyLabel>VND</CurrencyLabel>
+                        </AmountInputWrapper>
+                        <AmountPreview>
+                          {formattedDepositPreview
+                            ? `≈ ${formattedDepositPreview}`
+                            : (language === 'vi' ? 'Tối thiểu 1.000 VND' : 'Minimum 1,000 VND')}
+                        </AmountPreview>
+                      </>
+                    ) : (
+                      <QRContainer>
+                        <QRCodeImage
+                          src={`https://img.vietqr.io/image/MB-0563518922-compact.png?amount=${parsedDepositAmount}&addInfo=OPPOWALLET%20${walletCode}&accountName=OPPO%20HIRING%20PLATFORM`}
+                          alt="VietQR Transfer Code"
+                        />
+                        <PollingStatus>
+                          <Clock size={16} />
+                          {language === 'vi' ? 'Đang chờ giao dịch chuyển khoản...' : 'Waiting for transfer transaction...'}
+                        </PollingStatus>
+                        <PaymentDetailsTable>
+                          <DetailRow>
+                            <span className="label">{language === 'vi' ? 'Ngân hàng' : 'Bank'}</span>
+                            <span className="value">MBBank</span>
+                          </DetailRow>
+                          <DetailRow>
+                            <span className="label">{language === 'vi' ? 'Số tài khoản' : 'Account No.'}</span>
+                            <span className="value">
+                              0563518922
+                              <CopyButton onClick={() => handleCopyText('0563518922', 'account')}>
+                                {copiedText === 'account' ? <><Check size={11} /> {language === 'vi' ? 'Đã chép' : 'Copied'}</> : <><Copy size={11} /> {language === 'vi' ? 'Sao chép' : 'Copy'}</>}
+                              </CopyButton>
+                            </span>
+                          </DetailRow>
+                          <DetailRow>
+                            <span className="label">{language === 'vi' ? 'Tên thụ hưởng' : 'Account Name'}</span>
+                            <span className="value">OPPO HIRING PLATFORM</span>
+                          </DetailRow>
+                          <DetailRow>
+                            <span className="label">{language === 'vi' ? 'Số tiền' : 'Amount'}</span>
+                            <span className="value" style={{ color: '#10b981', fontSize: '15px' }}>{formatCurrency(parsedDepositAmount)}</span>
+                          </DetailRow>
+                          <DetailRow>
+                            <span className="label">{language === 'vi' ? 'Nội dung chuyển' : 'Content'}</span>
+                            <span className="value" style={{ color: '#1e40af' }}>
+                              {`OPPOWALLET ${walletCode}`}
+                              <CopyButton onClick={() => handleCopyText(`OPPOWALLET ${walletCode}`, 'content')}>
+                                {copiedText === 'content' ? <><Check size={11} /> {language === 'vi' ? 'Đã chép' : 'Copied'}</> : <><Copy size={11} /> {language === 'vi' ? 'Sao chép' : 'Copy'}</>}
+                              </CopyButton>
+                            </span>
+                          </DetailRow>
+                        </PaymentDetailsTable>
+                      </QRContainer>
+                    )}
                   </ModalBody>
 
                   {/* Footer */}
                   <ModalFooter>
-                    <CancelBtn onClick={() => !depositLoading && setShowDepositModal(false)}>
-                      {language === 'vi' ? 'Huỷ' : 'Cancel'}
-                    </CancelBtn>
-                    <ConfirmBtn
-                      onClick={handleConfirmDeposit}
-                      disabled={depositLoading || parsedDepositAmount <= 0}
-                      whileTap={{ scale: 0.97 }}
-                    >
-                      {depositLoading ? (
-                        <LoadingSpinner
-                          animate={{ rotate: 360 }}
-                          transition={{ repeat: Infinity, duration: 0.75, ease: 'linear' }}
-                        />
-                      ) : (
-                        <>
-                          <Zap />
-                          {language === 'vi' ? 'Xác nhận nạp tiền' : 'Confirm Deposit'}
-                        </>
-                      )}
-                    </ConfirmBtn>
+                    {depositStep === 1 ? (
+                      <>
+                        <CancelBtn onClick={() => !depositLoading && setShowDepositModal(false)}>
+                          {language === 'vi' ? 'Huỷ' : 'Cancel'}
+                        </CancelBtn>
+                        <ConfirmBtn
+                          onClick={handleConfirmDeposit}
+                          disabled={depositLoading || parsedDepositAmount <= 0}
+                          whileTap={{ scale: 0.97 }}
+                        >
+                          {depositLoading ? (
+                            <LoadingSpinner
+                              animate={{ rotate: 360 }}
+                              transition={{ repeat: Infinity, duration: 0.75, ease: 'linear' }}
+                            />
+                          ) : (
+                            <>
+                              <Zap />
+                              {language === 'vi' ? 'Tạo mã QR' : 'Generate QR'}
+                            </>
+                          )}
+                        </ConfirmBtn>
+                      </>
+                    ) : (
+                      <>
+                        <CancelBtn onClick={() => setDepositStep(1)} style={{ flex: 1 }}>
+                          {language === 'vi' ? 'Quay lại' : 'Back'}
+                        </CancelBtn>
+                        <ConfirmBtn
+                          onClick={() => setShowDepositModal(false)}
+                          style={{ flex: 1, background: '#64748b', boxShadow: 'none' }}
+                          whileTap={{ scale: 0.97 }}
+                        >
+                          {language === 'vi' ? 'Đóng' : 'Close'}
+                        </ConfirmBtn>
+                      </>
+                    )}
                   </ModalFooter>
                 </>
               )}

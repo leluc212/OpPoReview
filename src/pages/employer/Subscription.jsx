@@ -7,7 +7,7 @@ import employerProfileService from '../../services/employerProfileService';
 import { Check, Zap, Star, Rocket, Sparkles, X, HelpCircle, CreditCard, Shield, Clock, CheckCircle, Mail, Phone } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { createPackagePurchaseRequestNotification } from '../../services/notificationService';
-import { getDefaultPackageCatalog, getPackageCatalog } from '../../services/packageCatalogService';
+import { getDefaultPackageCatalog, getPackageCatalog, getWallet } from '../../services/packageCatalogService';
 
 // ─── Animations ───────────────────────────────────────────────
 const rotateBorder = keyframes`
@@ -694,10 +694,6 @@ const Subscription = () => {
     const priceString = selectedDuration.amount.replace(/[^0-9]/g, '');
     const packagePrice = parseInt(priceString);
 
-    // Get wallet balance
-    const walletData = JSON.parse(localStorage.getItem('employer_wallet') || '{"balance": 0}');
-    const currentBalance = walletData.balance || 0;
-
     // Get employerId from Cognito session
     let employerId = 'unknown';
     try {
@@ -709,6 +705,17 @@ const Subscription = () => {
       }
     } catch (error) {
       console.error('Error getting Cognito session:', error);
+    }
+
+    // Get wallet balance from database
+    let currentBalance = 0;
+    try {
+      const wallet = await getWallet(employerId);
+      currentBalance = wallet.walletBalance || 0;
+    } catch (error) {
+      console.error('Error getting wallet balance from database:', error);
+      alert(vi ? 'Không thể tải thông tin ví từ máy chủ. Vui lòng thử lại.' : 'Failed to fetch wallet information from server. Please try again.');
+      return;
     }
 
     // Get companyName from DynamoDB
@@ -738,12 +745,7 @@ const Subscription = () => {
       return;
     }
 
-    // Deduct from wallet
-    const newBalance = currentBalance - packagePrice;
-    walletData.balance = newBalance;
-    localStorage.setItem('employer_wallet', JSON.stringify(walletData));
-
-    console.log('New balance after purchase:', newBalance);
+    console.log('New balance after purchase:', currentBalance - packagePrice);
 
     // Create purchase record and send to API
     console.log('🚀 Starting purchase process...');
@@ -788,12 +790,15 @@ const Subscription = () => {
           apiSubscriptionId = result.data?.subscriptionId || subscriptionId;
           subscriptionCreated = true;
         } else {
+          const errorMsg = await response.json().catch(() => ({}));
           console.warn('⚠️ Subscription API returned error:', response.status);
-          console.warn('   Will still create notification with local subscription ID');
+          alert(errorMsg.message || 'Thanh toán gói thất bại. Vui lòng kiểm tra lại số dư ví.');
+          return;
         }
       } catch (apiError) {
-        console.warn('⚠️ Subscription API failed:', apiError.message);
-        console.warn('   Will still create notification with local subscription ID');
+        console.error('⚠️ Subscription API failed:', apiError.message);
+        alert(vi ? 'Kết nối đến hệ thống thanh toán bị lỗi. Vui lòng thử lại.' : 'Connection to payment system failed. Please try again.');
+        return;
       }
 
       // ALWAYS create notification for admin (even if subscription API fails)
@@ -884,10 +889,6 @@ const Subscription = () => {
       console.error('   Stack:', error.stack);
 
       alert(vi ? 'Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại.' : 'Error creating order. Please try again.');
-
-      // Refund the balance
-      walletData.balance = currentBalance;
-      localStorage.setItem('employer_wallet', JSON.stringify(walletData));
     }
   };
 
