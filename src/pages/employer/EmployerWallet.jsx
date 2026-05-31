@@ -4,11 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
 import { Button, Input } from '../../components/FormElements';
-import { 
-  Wallet as WalletIcon, 
-  TrendingUp, 
+import {
+  Wallet as WalletIcon,
+  TrendingUp,
   TrendingDown,
-  Download, 
+  Download,
   CreditCard,
   ArrowUpRight,
   ArrowDownLeft,
@@ -16,7 +16,6 @@ import {
   DollarSign,
   Calendar,
   Plus,
-  Building2,
   Users,
   Eye,
   EyeOff,
@@ -241,14 +240,14 @@ const StatCard = styled(motion.div)`
   
   &:hover {
     border-color: ${props => {
-      const colorMap = {
-        'success': props.theme.colors.success,
-        'error': props.theme.colors.error,
-        'warning': props.theme.colors.warning,
-        'primary': props.theme.colors.primary
-      };
-      return colorMap[props.$color] || props.theme.colors.primary;
-    }};
+    const colorMap = {
+      'success': props.theme.colors.success,
+      'error': props.theme.colors.error,
+      'warning': props.theme.colors.warning,
+      'primary': props.theme.colors.primary
+    };
+    return colorMap[props.$color] || props.theme.colors.primary;
+  }};
     transform: translateX(4px);
     box-shadow: ${props => props.theme.shadows.md};
   }
@@ -264,14 +263,14 @@ const StatCard = styled(motion.div)`
       height: 48px;
       border-radius: ${props => props.theme.borderRadius.lg};
       background: ${props => {
-        const colorMap = {
-          'success': props.theme.colors.successBg,
-          'error': props.theme.colors.errorBg,
-          'warning': props.theme.colors.warningBg,
-          'primary': props.theme.colors.primary + '15'
-        };
-        return colorMap[props.$color] || props.theme.colors.primary + '15';
-      }};
+    const colorMap = {
+      'success': props.theme.colors.successBg,
+      'error': props.theme.colors.errorBg,
+      'warning': props.theme.colors.warningBg,
+      'primary': props.theme.colors.primary + '15'
+    };
+    return colorMap[props.$color] || props.theme.colors.primary + '15';
+  }};
       display: flex;
       align-items: center;
       justify-content: center;
@@ -281,14 +280,14 @@ const StatCard = styled(motion.div)`
         width: 24px;
         height: 24px;
         color: ${props => {
-          const colorMap = {
-            'success': props.theme.colors.success,
-            'error': props.theme.colors.error,
-            'warning': props.theme.colors.warning,
-            'primary': props.theme.colors.primary
-          };
-          return colorMap[props.$color] || props.theme.colors.primary;
-        }};
+    const colorMap = {
+      'success': props.theme.colors.success,
+      'error': props.theme.colors.error,
+      'warning': props.theme.colors.warning,
+      'primary': props.theme.colors.primary
+    };
+    return colorMap[props.$color] || props.theme.colors.primary;
+  }};
       }
     }
     
@@ -947,7 +946,7 @@ const WithdrawSuccessState = styled(SuccessState)`
 
 const EmployerWallet = () => {
   const { language } = useLanguage();
-  
+
   // Initialize wallet if not exists
   const initializeWallet = () => {
     const walletData = localStorage.getItem('employer_wallet');
@@ -1178,27 +1177,27 @@ const EmployerWallet = () => {
     setDepositRawAmount(raw);
   };
 
-  const handleLinkBank = () => {
-    alert(language === 'vi' ? 'Liên kết ngân hàng' : 'Link bank account');
-  };
+
+
+
 
   // Calculate stats
   const totalIncome = transactions
     .filter(t => t.type === 'income' || t.type === 'credit')
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-    
+
   const totalExpense = transactions
     .filter(t => t.type === 'expense' || t.type === 'debit')
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
   // Filter transactions based on filter type
-  const filteredTransactions = filterType === 'all' 
-    ? transactions 
+  const filteredTransactions = filterType === 'all'
+    ? transactions
     : transactions.filter(t => {
-        if (filterType === 'income') return t.type === 'income' || t.type === 'credit';
-        if (filterType === 'expense') return t.type === 'expense' || t.type === 'debit';
-        return true;
-      });
+      if (filterType === 'income') return t.type === 'income' || t.type === 'credit';
+      if (filterType === 'expense') return t.type === 'expense' || t.type === 'debit';
+      return true;
+    });
 
   return (
     <DashboardLayout role="employer" key={language}>
@@ -1222,7 +1221,7 @@ const EmployerWallet = () => {
                 <div className="amount">
                   {showBalance ? formatCurrency(balance) : '••••••••'}
                 </div>
-                <button 
+                <button
                   className="toggle-balance"
                   onClick={() => setShowBalance(!showBalance)}
                 >
@@ -1237,7 +1236,7 @@ const EmployerWallet = () => {
             <WalletIcon className="wallet-icon" />
           </div>
           <div className="balance-actions">
-            <ActionButton 
+            <ActionButton
               onClick={handleDeposit}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
@@ -1245,7 +1244,7 @@ const EmployerWallet = () => {
               <Plus size={18} />
               {language === 'vi' ? 'Nạp Tiền' : 'Deposit'}
             </ActionButton>
-            <ActionButton 
+            <ActionButton
               onClick={handleWithdraw}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
@@ -1253,19 +1252,12 @@ const EmployerWallet = () => {
               <ArrowUpRight size={18} />
               {language === 'vi' ? 'Rút Tiền' : 'Withdraw'}
             </ActionButton>
-            <ActionButton 
-              onClick={handleLinkBank}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Building2 size={18} />
-              {language === 'vi' ? 'Liên Kết Ngân Hàng' : 'Link Bank'}
-            </ActionButton>
+
           </div>
         </BalanceCard>
 
         <StatsGrid>
-          <StatCard 
+          <StatCard
             $color="success"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1282,8 +1274,8 @@ const EmployerWallet = () => {
               </div>
             </div>
           </StatCard>
-          
-          <StatCard 
+
+          <StatCard
             $color="error"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1300,8 +1292,8 @@ const EmployerWallet = () => {
               </div>
             </div>
           </StatCard>
-          
-          <StatCard 
+
+          <StatCard
             $color="primary"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1318,8 +1310,8 @@ const EmployerWallet = () => {
               </div>
             </div>
           </StatCard>
-          
-          <StatCard 
+
+          <StatCard
             $color="warning"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1351,8 +1343,8 @@ const EmployerWallet = () => {
                   {language === 'vi' ? 'Lịch Sử Giao Dịch' : 'Transaction History'}
                 </h2>
                 <div className="header-action">
-                  <Button 
-                    $variant="secondary" 
+                  <Button
+                    $variant="secondary"
                     $size="small"
                   >
                     <Download style={{ width: '16px', height: '16px' }} />
@@ -1360,10 +1352,10 @@ const EmployerWallet = () => {
                   </Button>
                 </div>
               </div>
-              
+
               <FilterBar>
                 <div className="filter-group">
-                  <FilterButton 
+                  <FilterButton
                     $active={filterType === 'all'}
                     onClick={() => setFilterType('all')}
                     whileHover={{ scale: 1.05 }}
@@ -1371,7 +1363,7 @@ const EmployerWallet = () => {
                   >
                     {language === 'vi' ? 'Tất Cả' : 'All'}
                   </FilterButton>
-                  <FilterButton 
+                  <FilterButton
                     $active={filterType === 'income'}
                     onClick={() => setFilterType('income')}
                     whileHover={{ scale: 1.05 }}
@@ -1379,7 +1371,7 @@ const EmployerWallet = () => {
                   >
                     {language === 'vi' ? 'Nạp tiền' : 'Deposits'}
                   </FilterButton>
-                  <FilterButton 
+                  <FilterButton
                     $active={filterType === 'expense'}
                     onClick={() => setFilterType('expense')}
                     whileHover={{ scale: 1.05 }}
@@ -1388,16 +1380,16 @@ const EmployerWallet = () => {
                     {language === 'vi' ? 'Rút tiền' : 'Withdrawals'}
                   </FilterButton>
                 </div>
-                <Input 
-                  type="date" 
-                  style={{ width: 'auto', padding: '10px 16px' }} 
+                <Input
+                  type="date"
+                  style={{ width: 'auto', padding: '10px 16px' }}
                 />
               </FilterBar>
-              
+
               <TransactionList>
                 {filteredTransactions.map((transaction, index) => (
-                  <TransactionItem 
-                    key={transaction.id} 
+                  <TransactionItem
+                    key={transaction.id}
                     $type={transaction.type === 'debit' ? 'expense' : (transaction.type === 'credit' ? 'income' : transaction.type)}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -1423,7 +1415,7 @@ const EmployerWallet = () => {
                       </div>
                       <div className="date">
                         <Calendar />
-                        {transaction.date 
+                        {transaction.date
                           ? new Date(transaction.date).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US')
                           : ''}
                       </div>
@@ -1446,9 +1438,9 @@ const EmployerWallet = () => {
                   {language === 'vi' ? 'Hóa Đơn Điện Tử' : 'Electronic Invoices'}
                 </h2>
               </div>
-              
+
               {receipts.map((receipt, index) => (
-                <ReceiptCard 
+                <ReceiptCard
                   key={receipt.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -1460,8 +1452,8 @@ const EmployerWallet = () => {
                       <FileText />
                       {receipt.title}
                     </h4>
-                    <Download 
-                      className="download-btn" 
+                    <Download
+                      className="download-btn"
                       style={{ width: '18px', height: '18px' }}
                       onClick={() => handleDownloadReceipt(receipt.id)}
                     />
@@ -1472,10 +1464,10 @@ const EmployerWallet = () => {
                   </div>
                 </ReceiptCard>
               ))}
-              
-              <Button 
-                $variant="ghost" 
-                $fullWidth 
+
+              <Button
+                $variant="ghost"
+                $fullWidth
                 style={{ marginTop: '16px' }}
               >
                 {language === 'vi' ? 'Xem Tất Cả Hóa Đơn' : 'View All Invoices'}

@@ -3,12 +3,11 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
-import { 
-  Wallet as WalletIcon, 
-  TrendingUp, 
+import {
+  Wallet as WalletIcon,
+  TrendingUp,
   TrendingDown,
-  Download, 
-  CreditCard,
+  Download,
   ArrowUpRight,
   ArrowDownLeft,
   Settings,
@@ -227,14 +226,14 @@ const StatCard = styled(motion.div)`
   
   &:hover {
     border-color: ${props => {
-      const colorMap = {
-        'success': props.theme.colors.success,
-        'error': props.theme.colors.error,
-        'warning': props.theme.colors.warning,
-        'primary': props.theme.colors.primary
-      };
-      return colorMap[props.$color] || props.theme.colors.primary;
-    }};
+    const colorMap = {
+      'success': props.theme.colors.success,
+      'error': props.theme.colors.error,
+      'warning': props.theme.colors.warning,
+      'primary': props.theme.colors.primary
+    };
+    return colorMap[props.$color] || props.theme.colors.primary;
+  }};
     transform: translateX(4px);
     box-shadow: ${props => props.theme.shadows.md};
   }
@@ -250,14 +249,14 @@ const StatCard = styled(motion.div)`
       height: 48px;
       border-radius: ${props => props.theme.borderRadius.lg};
       background: ${props => {
-        const colorMap = {
-          'success': props.theme.colors.successBg,
-          'error': props.theme.colors.errorBg,
-          'warning': props.theme.colors.warningBg,
-          'primary': props.theme.colors.primary + '15'
-        };
-        return colorMap[props.$color] || props.theme.colors.primary + '15';
-      }};
+    const colorMap = {
+      'success': props.theme.colors.successBg,
+      'error': props.theme.colors.errorBg,
+      'warning': props.theme.colors.warningBg,
+      'primary': props.theme.colors.primary + '15'
+    };
+    return colorMap[props.$color] || props.theme.colors.primary + '15';
+  }};
       display: flex;
       align-items: center;
       justify-content: center;
@@ -267,14 +266,14 @@ const StatCard = styled(motion.div)`
         width: 24px;
         height: 24px;
         color: ${props => {
-          const colorMap = {
-            'success': props.theme.colors.success,
-            'error': props.theme.colors.error,
-            'warning': props.theme.colors.warning,
-            'primary': props.theme.colors.primary
-          };
-          return colorMap[props.$color] || props.theme.colors.primary;
-        }};
+    const colorMap = {
+      'success': props.theme.colors.success,
+      'error': props.theme.colors.error,
+      'warning': props.theme.colors.warning,
+      'primary': props.theme.colors.primary
+    };
+    return colorMap[props.$color] || props.theme.colors.primary;
+  }};
       }
     }
     
@@ -719,8 +718,8 @@ const Wallet = () => {
     { id: 4, title: language === 'vi' ? 'Hóa đơn #INV-2026-004' : 'Invoice #INV-2026-004', date: '01/02/2026', amount: '2,200,000 VND' }
   ];
 
-  const filteredTransactions = filterType === 'all' 
-    ? transactions 
+  const filteredTransactions = filterType === 'all'
+    ? transactions
     : transactions.filter(t => t.type === filterType);
 
   return (
@@ -732,16 +731,16 @@ const Wallet = () => {
             {language === 'vi' ? 'Ví Điện Tử' : 'E-Wallet'}
           </h1>
           <div className="header-actions">
-            <Button 
-              $variant="secondary" 
+            <Button
+              $variant="secondary"
               $size="small"
               onClick={() => setIsDevModalOpen(true)}
             >
               <Settings style={{ width: '18px', height: '18px' }} />
               {language === 'vi' ? 'Cài Đặt' : 'Settings'}
             </Button>
-            <Button 
-              $variant="primary" 
+            <Button
+              $variant="primary"
               $size="small"
               onClick={() => setIsDevModalOpen(true)}
             >
@@ -763,7 +762,7 @@ const Wallet = () => {
                 <div className="amount">
                   {showBalance ? balance.toLocaleString('vi-VN') + ' VND' : '••••••••'}
                 </div>
-                <button 
+                <button
                   className="toggle-balance"
                   onClick={() => setShowBalance(!showBalance)}
                 >
@@ -786,14 +785,7 @@ const Wallet = () => {
               <ArrowUpRight />
               {language === 'vi' ? 'Rút Tiền' : 'Withdraw'}
             </ActionButton>
-            <ActionButton
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setIsDevModalOpen(true)}
-            >
-              <CreditCard />
-              {language === 'vi' ? 'Liên Kết Ngân Hàng' : 'Link Bank'}
-            </ActionButton>
+
           </div>
         </BalanceCard>
 
@@ -839,8 +831,8 @@ const Wallet = () => {
                   {language === 'vi' ? 'Lịch Sử Giao Dịch' : 'Transaction History'}
                 </h2>
                 <div className="header-action">
-                  <Button 
-                    $variant="secondary" 
+                  <Button
+                    $variant="secondary"
                     $size="small"
                     onClick={() => setIsDevModalOpen(true)}
                   >
@@ -849,10 +841,10 @@ const Wallet = () => {
                   </Button>
                 </div>
               </div>
-              
+
               <FilterBar>
                 <div className="filter-group">
-                  <FilterButton 
+                  <FilterButton
                     $active={filterType === 'all'}
                     onClick={() => setFilterType('all')}
                     whileHover={{ scale: 1.05 }}
@@ -860,7 +852,7 @@ const Wallet = () => {
                   >
                     {language === 'vi' ? 'Tất Cả' : 'All'}
                   </FilterButton>
-                  <FilterButton 
+                  <FilterButton
                     $active={filterType === 'income'}
                     onClick={() => setFilterType('income')}
                     whileHover={{ scale: 1.05 }}
@@ -868,7 +860,7 @@ const Wallet = () => {
                   >
                     {language === 'vi' ? 'Thu Nhập' : 'Income'}
                   </FilterButton>
-                  <FilterButton 
+                  <FilterButton
                     $active={filterType === 'expense'}
                     onClick={() => setFilterType('expense')}
                     whileHover={{ scale: 1.05 }}
@@ -877,16 +869,16 @@ const Wallet = () => {
                     {language === 'vi' ? 'Rút tiền' : 'Withdraw'}
                   </FilterButton>
                 </div>
-                <Input 
-                  type="date" 
-                  style={{ width: 'auto', padding: '10px 16px' }} 
+                <Input
+                  type="date"
+                  style={{ width: 'auto', padding: '10px 16px' }}
                 />
               </FilterBar>
-              
+
               <TransactionList>
                 {filteredTransactions.map((transaction, index) => (
-                  <TransactionItem 
-                    key={transaction.id} 
+                  <TransactionItem
+                    key={transaction.id}
                     $type={transaction.type}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -932,9 +924,9 @@ const Wallet = () => {
                   {language === 'vi' ? 'Hóa Đơn Điện Tử' : 'Electronic Invoices'}
                 </h2>
               </div>
-              
+
               {receipts.map((receipt, index) => (
-                <ReceiptCard 
+                <ReceiptCard
                   key={receipt.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -954,10 +946,10 @@ const Wallet = () => {
                   </div>
                 </ReceiptCard>
               ))}
-              
-              <Button 
-                $variant="ghost" 
-                $fullWidth 
+
+              <Button
+                $variant="ghost"
+                $fullWidth
                 style={{ marginTop: '16px' }}
               >
                 {language === 'vi' ? 'Xem Tất Cả Hóa Đơn' : 'View All Invoices'}

@@ -4,9 +4,10 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import employerProfileService from '../../services/employerProfileService';
-import { Check, Zap, Star, Rocket, Sparkles, X, HelpCircle, CreditCard, Shield, Clock, CheckCircle } from 'lucide-react';
+import { Check, Zap, Star, Rocket, Sparkles, X, HelpCircle, CreditCard, Shield, Clock, CheckCircle, Mail, Phone } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { createPackagePurchaseRequestNotification } from '../../services/notificationService';
+import { getDefaultPackageCatalog, getPackageCatalog } from '../../services/packageCatalogService';
 
 // ─── Animations ───────────────────────────────────────────────
 const rotateBorder = keyframes`
@@ -600,11 +601,19 @@ const ErrorMessage = styled.p`
   margin-bottom: 28px;
 `;
 
+const PACKAGE_ICONS = {
+  star: Star,
+  zap: Zap,
+  rocket: Rocket,
+  sparkles: Sparkles
+};
+
 // ─── Component ────────────────────────────────────────────────
 const Subscription = () => {
   const { language: lang } = useLanguage();
   const navigate = useNavigate();
   const vi = lang === 'vi';
+  const [packageCatalog, setPackageCatalog] = React.useState(getDefaultPackageCatalog());
   const [selectedPackage, setSelectedPackage] = React.useState(null);
   const [selectedDuration, setSelectedDuration] = React.useState(null);
   const [showConfirmModal, setShowConfirmModal] = React.useState(false);
@@ -612,10 +621,58 @@ const Subscription = () => {
   const [showSuccessModal, setShowSuccessModal] = React.useState(false);
   const [showInsufficientBalanceModal, setShowInsufficientBalanceModal] = React.useState(false);
 
+  React.useEffect(() => {
+    let isMounted = true;
+
+    const loadPackageCatalog = async () => {
+      try {
+        const catalog = await getPackageCatalog();
+        if (isMounted) {
+          setPackageCatalog(catalog);
+        }
+      } catch (error) {
+        console.error('Error loading package catalog:', error);
+        if (isMounted) {
+          setPackageCatalog(getDefaultPackageCatalog());
+        }
+      }
+    };
+
+    loadPackageCatalog();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const plans = React.useMemo(() => (
+    packageCatalog.map((item) => {
+      const iconKey = item.iconKey || 'sparkles';
+      const IconComponent = PACKAGE_ICONS[iconKey] || Sparkles;
+
+      return {
+        packageId: item.packageId,
+        packageName: item.packageName,
+        name: vi ? `${item.order}. ${item.packageName}` : `${item.order}. ${item.packageName}`,
+        subtitle: vi ? item.subtitle.vi : item.subtitle.en,
+        prices: item.prices.map((priceOption) => ({
+          duration: priceOption.duration,
+          amount: `${Number(priceOption.amount || 0).toLocaleString('vi-VN')} VND`
+        })),
+        Icon: IconComponent,
+        color: item.color,
+        bg: item.bg,
+        bd: item.bd,
+        dur: item.dur,
+        featured: item.featured,
+        feats: vi ? item.features.vi : item.features.en
+      };
+    })
+  ), [packageCatalog, vi]);
+
   const handleSelectPackage = (plan, priceOption) => {
     setSelectedPackage(plan);
-    setSelectedDuration(priceOption);
-    setShowConfirmModal(true);
+    setShowDurationModal(true);
   };
 
   const handleClickPackageButton = (plan) => {
@@ -687,7 +744,7 @@ const Subscription = () => {
     
     // Create purchase record and send to API
     console.log('🚀 Starting purchase process...');
-    console.log('   Package:', selectedPackage.name);
+    console.log('   Package:', selectedPackage.packageName);
     console.log('   Duration:', selectedDuration.duration);
     console.log('   Price:', packagePrice);
     console.log('   Employer:', employerId);
@@ -704,7 +761,7 @@ const Subscription = () => {
       const purchaseData = {
         employerId: employerId,
         companyName: companyName,
-        packageName: selectedPackage.name,
+        packageName: selectedPackage.packageName,
         duration: selectedDuration.duration
       };
       
@@ -757,7 +814,7 @@ const Subscription = () => {
           subscriptionId: apiSubscriptionId,
           employerId: employerId,
           companyName: companyName,
-          packageName: selectedPackage.name,
+          packageName: selectedPackage.packageName,
           duration: selectedDuration.duration,
           price: packagePrice
         };
@@ -830,88 +887,6 @@ const Subscription = () => {
       localStorage.setItem('employer_wallet', JSON.stringify(walletData));
     }
   };
-
-  const plans = [
-    {
-      name:    vi ? 'Quick Boost' : 'Quick Boost',
-      subtitle: vi ? 'Gói Boost' : 'Boost Package',
-      prices: [
-        { duration: vi ? '24h' : '24h', amount: '29,000 VND' },
-        { duration: vi ? '7 ngày' : '7 days', amount: '145,000 VND' }
-      ],
-      Icon: Zap,
-      color: '#10B981', bg: '#ECFDF5', bd: '#A7F3D0', dur: '4.2s',
-      feats: [
-        vi ? 'Đẩy tin lên đầu trang' : 'Push post to top',
-        vi ? 'Hiển thị nổi bật' : 'Featured display',
-        vi ? 'Tăng lượt xem 3x' : '3x more views',
-        vi ? 'Báo cáo chi tiết' : 'Detailed reports',
-      ]
-    },
-    {
-      name:     vi ? 'Hot Search' : 'Hot Search',
-      subtitle: vi ? 'Tìm kiếm hot' : 'Hot Search',
-      prices: [
-        { duration: vi ? '24h' : '24h', amount: '49,000 VND' },
-        { duration: vi ? '7 ngày' : '7 days', amount: '245,000 VND' }
-      ],
-      Icon: Star,
-      color: '#1e40af', bg: '#EFF6FF', bd: '#BFDBFE', dur: '3.6s',
-      featured: true,
-      feats: [
-        vi ? 'Ưu tiên kết quả tìm kiếm' : 'Priority in search results',
-        vi ? 'Hiển thị với badge đặc biệt' : 'Special badge display',
-        vi ? 'Tăng lượt xem 5x' : '5x more views',
-        vi ? 'Thông báo cho ứng viên phù hợp' : 'Notify matching candidates',
-        vi ? 'Phân tích nâng cao' : 'Advanced analytics',
-      ]
-    },
-    {
-      name:    vi ? 'Spotlight Banner' : 'Spotlight Banner',
-      subtitle: vi ? 'Banner Nổi bật 1' : 'Featured Banner 1',
-      prices: [
-        { duration: vi ? '24h' : '24h', amount: '99,000 VND' },
-        { duration: vi ? '7 ngày' : '7 days', amount: '495,000 VND' }
-      ],
-      Icon: Rocket,
-      color: '#F59E0B', bg: '#FFFBEB', bd: '#FDE68A', dur: '5s',
-      feats: [
-        vi ? 'Hiển thị banner trang chủ' : 'Homepage banner display',
-        vi ? 'Vị trí nổi bật nhất' : 'Top spotlight position',
-        vi ? 'Tăng lượt xem 10x' : '10x more views',
-        vi ? 'Tiếp cận tối đa ứng viên' : 'Maximum candidate reach',
-        vi ? 'Thống kê chi tiết theo giờ' : 'Hourly detailed stats',
-      ]
-    },
-    {
-      name:    vi ? 'Top Spotlight' : 'Top Spotlight',
-      subtitle: vi ? 'Banner Nổi bật 2' : 'Featured Banner 2',
-      prices: [
-        { duration: vi ? '24h' : '24h', amount: '149,000 VND' },
-        { duration: vi ? '7 ngày' : '7 days', amount: '745,000 VND' }
-      ],
-      Icon: Sparkles,
-      color: '#DC2626', bg: '#FEE2E2', bd: '#FECACA', dur: '4.5s',
-      feats: [
-        vi ? 'Banner siêu nổi bật đa nền tảng' : 'Super spotlight multi-platform banner',
-        vi ? 'Hiển thị tất cả các trang' : 'Display on all pages',
-        vi ? 'Tăng lượt xem 15x' : '15x more views',
-      ]
-    },
-  ];
-
-  const compareRows = [
-    [vi ? 'Giá 24h' : '24h Price', '29,000', '49,000', '99,000', '149,000'],
-    [vi ? 'Giá 7 ngày' : '7 days Price', '145,000', '245,000', '495,000', '745,000'],
-    [vi ? 'Tăng lượt xem' : 'Views boost', '3x', '5x', '10x', '15x'],
-    [vi ? 'Đẩy tin lên đầu' : 'Push to top', true, false, false, false],
-    [vi ? 'Ưu tiên tìm kiếm' : 'Priority search', false, true, false, false],
-    [vi ? 'Badge đặc biệt' : 'Special badge', false, true, false, false],
-    [vi ? 'Thông báo ứng viên' : 'Notify candidates', false, true, false, false],
-    [vi ? 'Banner trang chủ' : 'Homepage banner', false, false, true, true],
-    [vi ? 'Hiển thị đa trang' : 'Multi-page display', false, false, false, true],
-    [vi ? 'Phân tích' : 'Analytics', vi ? 'Cơ bản' : 'Basic', vi ? 'Nâng cao' : 'Advanced', vi ? 'Theo giờ' : 'Hourly', vi ? 'Theo giờ' : 'Hourly'],
-  ];
 
   const faqs = [
     { Icon: CreditCard, q: vi ? 'Các phương thức thanh toán nào được chấp nhận?' : 'Which payment methods are accepted?',    a: vi ? 'Chúng tôi chấp nhận thẻ tín dụng, thẻ ghi nợ, chuyển khoản ngân hàng và ví điện tử. Tất cả giao dịch đều được bảo mật SSL 256-bit.' : 'We accept credit cards, debit cards, bank transfers, and e-wallets. All transactions use 256-bit SSL security.' },
@@ -1011,12 +986,10 @@ const Subscription = () => {
         transition={{ delay: i * 0.1 + 0.45 }}
       >
         <Btn 
-          $primary={plan.featured} 
           whileTap={{ scale: 0.97 }}
           onClick={() => handleClickPackageButton(plan)}
         >
-          {plan.featured && <Sparkles />}
-          {plan.featured ? (vi ? 'Bắt Đầu Ngay' : 'Start Now') : (vi ? 'Chọn Gói' : 'Select Plan')}
+          {vi ? 'Chọn Gói' : 'Select Plan'}
         </Btn>
       </motion.div>
     </PricingCard>
@@ -1058,51 +1031,111 @@ const Subscription = () => {
             <CompTable>
               <thead>
                 <tr>
-                  <th>{vi ? 'Tính Năng' : 'Feature'}</th>
-                  <th style={{ color: '#10B981' }}>Quick Boost</th>
-                  <th style={{ color: '#1e40af' }}>Hot Search</th>
-                  <th style={{ color: '#F59E0B' }}>Spotlight Banner</th>
-                  <th style={{ color: '#DC2626' }}>Top Spotlight</th>
+                  <th style={{ width: '18%', textAlign: 'left' }}>{vi ? 'Tên Gói' : 'Package Name'}</th>
+                  <th style={{ width: '10%', textAlign: 'center' }}>{vi ? 'Giá 24h' : '24h Price'}</th>
+                  <th style={{ width: '10%', textAlign: 'center' }}>{vi ? 'Giá 5 Ngày' : '5 Days Price'}</th>
+                  <th style={{ width: '10%', textAlign: 'center' }}>{vi ? 'Giá 7 Ngày' : '7 Days Price'}</th>
+                  <th style={{ width: '22%', textAlign: 'left' }}>{vi ? 'Điểm nổi bật' : 'Highlights'}</th>
+                  <th style={{ width: '30%', textAlign: 'left' }}>{vi ? 'Chi tiết' : 'Details'}</th>
                 </tr>
               </thead>
               <tbody>
-                {compareRows.map(([label, ...vals], ri) => (
-                  <tr key={ri}>
-                    <td>{label}</td>
-                    {vals.map((v, vi2) => (
-                      <td key={vi2}>
-                        {typeof v === 'boolean'
-                          ? v ? <Check style={{ color: '#10B981' }} /> : <X style={{ color: '#EF4444' }} />
-                          : v}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
+                {/* 1. Hot Search */}
+                <tr>
+                  <td style={{ fontWeight: '700', color: '#1e40af', textAlign: 'left' }}>
+                    1. Hot Search<br/><span style={{ fontSize: '11.5px', color: '#64748B', fontWeight: '500' }}>(Ưu tiên tìm kiếm)</span>
+                  </td>
+                  <td style={{ textAlign: 'center', fontWeight: '700', color: '#1e40af' }}>19.000đ</td>
+                  <td style={{ textAlign: 'center', fontWeight: '700', color: '#1e40af' }}>79.000đ</td>
+                  <td style={{ textAlign: 'center', fontWeight: '700', color: '#1e40af' }}>99.000đ</td>
+                  <td style={{ textAlign: 'left', fontSize: '13px', lineHeight: '1.5' }}>
+                    <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                      <li>Lên Top tìm kiếm theo ngành nghề/khu vực</li>
+                      <li>Tăng lượt click & ứng tuyển</li>
+                      <li>Ưu tiên hiển thị trước đối thủ</li>
+                    </ul>
+                  </td>
+                  <td style={{ textAlign: 'left', fontSize: '12.5px', lineHeight: '1.6', color: '#475569' }}>
+                    Khi ứng viên dùng thanh tìm kiếm để gõ từ khóa (ví dụ: pha chế, phục vụ) hoặc dùng bộ lọc (quận, huyện), tin tuyển dụng của quán sẽ luôn được ghim ở các vị trí đầu tiên của danh sách kết quả.
+                  </td>
+                </tr>
+
+                {/* 2. Quick Boost */}
+                <tr>
+                  <td style={{ fontWeight: '700', color: '#10B981', textAlign: 'left' }}>
+                    2. Quick Boost<br/><span style={{ fontSize: '11.5px', color: '#64748B', fontWeight: '500' }}>(Đẩy tin bảng tin chung)</span>
+                  </td>
+                  <td style={{ textAlign: 'center', fontWeight: '700', color: '#10B981' }}>29.000đ</td>
+                  <td style={{ textAlign: 'center', fontWeight: '700', color: '#10B981' }}>99.000đ</td>
+                  <td style={{ textAlign: 'center', fontWeight: '700', color: '#10B981' }}>149.000đ</td>
+                  <td style={{ textAlign: 'left', fontSize: '13px', lineHeight: '1.5' }}>
+                    <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                      <li>Tự động đẩy tin lên đầu bảng tin</li>
+                      <li>Không lo bài đăng bị trôi</li>
+                      <li>Gắn tag nổi bật [Tuyển Gấp]</li>
+                    </ul>
+                  </td>
+                  <td style={{ textAlign: 'left', fontSize: '12.5px', lineHeight: '1.6', color: '#475569' }}>
+                    <ul style={{ margin: 0, paddingLeft: '16px', listStyleType: 'square' }}>
+                      <li>Tác động vào Bảng tin chung (Home Feed) - nơi hiển thị tất cả các tin mới đăng.</li>
+                      <li>Hệ thống sẽ tự động cập nhật lại thời gian đăng bài (Auto-bump) cứ mỗi 3 tiếng/lần. Việc này giúp tin của quán luôn được đẩy ngược lên Top đầu bảng tin chung, không bị các tin của quán khác đè xuống dưới.</li>
+                      <li>Tiêu đề job tự động đính kèm một nhãn chữ (Text tag) dạng [Tuyển gấp] ở ngay phía trước.</li>
+                    </ul>
+                  </td>
+                </tr>
+
+                {/* 3. Spotlight */}
+                <tr>
+                  <td style={{ fontWeight: '700', color: '#F59E0B', textAlign: 'left' }}>
+                    3. Spotlight<br/><span style={{ fontSize: '11.5px', color: '#64748B', fontWeight: '500' }}>(1 Banner Tĩnh)</span>
+                  </td>
+                  <td style={{ textAlign: 'center', fontWeight: '700', color: '#F59E0B' }}>39.000đ</td>
+                  <td style={{ textAlign: 'center', fontWeight: '700', color: '#F59E0B' }}>129.000đ</td>
+                  <td style={{ textAlign: 'center', fontWeight: '700', color: '#F59E0B' }}>199.000đ</td>
+                  <td style={{ textAlign: 'left', fontSize: '13px', lineHeight: '1.5' }}>
+                    <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                      <li>Hiển thị Banner riêng tại Trang chủ</li>
+                      <li>Tăng nhận diện thương hiệu tuyển dụng</li>
+                      <li>Click banner → vào thẳng job</li>
+                    </ul>
+                  </td>
+                  <td style={{ textAlign: 'left', fontSize: '12.5px', lineHeight: '1.6', color: '#475569' }}>
+                    <ul style={{ margin: 0, paddingLeft: '16px', listStyleType: 'square' }}>
+                      <li>Chủ quán cung cấp 01 hình ảnh Banner tĩnh (định dạng JPG/PNG thông thường).</li>
+                      <li>Vị trí: Đặt tại ô Banner cố định nằm ở khu vực giữa Trang chủ.</li>
+                      <li>Hiển thị xoay vòng, mỗi nhà tuyển dụng xuất hiện 5 giây.</li>
+                      <li>Khi ứng viên bấm vào Banner này, hệ thống sẽ tự động chuyển hướng (Redirect) thẳng về bài đăng tuyển dụng chi tiết của quán.</li>
+                    </ul>
+                  </td>
+                </tr>
+
+                {/* 4. Top Spotlight */}
+                <tr>
+                  <td style={{ fontWeight: '700', color: '#DC2626', textAlign: 'left' }}>
+                    4. Top Spotlight<br/><span style={{ fontSize: '11.5px', color: '#64748B', fontWeight: '500' }}>(2 Banner Động + Tĩnh)</span>
+                  </td>
+                  <td style={{ textAlign: 'center', fontWeight: '700', color: '#DC2626' }}>59.000đ</td>
+                  <td style={{ textAlign: 'center', fontWeight: '700', color: '#DC2626' }}>249.000đ</td>
+                  <td style={{ textAlign: 'center', fontWeight: '700', color: '#DC2626' }}>349.000đ</td>
+                  <td style={{ textAlign: 'left', fontSize: '13px', lineHeight: '1.5' }}>
+                    <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                      <li>Sở hữu Hero Banner nổi bật nhất</li>
+                      <li>Banner động + Banner tĩnh Premium</li>
+                      <li>Thu hút tối đa lượt xem & ứng tuyển</li>
+                    </ul>
+                  </td>
+                  <td style={{ textAlign: 'left', fontSize: '12.5px', lineHeight: '1.6', color: '#475569' }}>
+                    <ul style={{ margin: 0, paddingLeft: '16px', listStyleType: 'square' }}>
+                      <li>01 Banner Động: Dạng ảnh GIF hoặc Slide chạy lướt qua, đặt ở vị trí Banner lớn nhất (Hero Banner) nằm ngay trên cùng của Trang chủ.</li>
+                      <li>01 Banner Tĩnh: Đặt ở đầu trang chuyên mục dành riêng cho việc làm ngành F&B.</li>
+                      <li>Cả 2 banner đều cài link dẫn trực tiếp về bài đăng tuyển dụng của quán khi ứng viên click vào.</li>
+                    </ul>
+                  </td>
+                </tr>
               </tbody>
             </CompTable>
           </SectionCard>
 
-          {/* FAQ */}
-          <SectionCard
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.1 }}
-            transition={{ duration: 0.32 }}
-          >
-            <SectionHead><h2>{vi ? 'Câu Hỏi Thường Gặp' : 'FAQ'}</h2></SectionHead>
-            {faqs.map(({ Icon, q, a }, i) => (
-              <FAQItem
-                key={i}
-                initial={{ opacity: 0, x: -14 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.09, duration: 0.24 }}
-              >
-                <h3><Icon />{q}</h3>
-                <p>{a}</p>
-              </FAQItem>
-            ))}
-          </SectionCard>
         </Inner>
 
         {/* Duration Selection Modal */}
@@ -1110,7 +1143,7 @@ const Subscription = () => {
           <ModalOverlay onClick={() => setShowDurationModal(false)}>
             <ModalContent onClick={(e) => e.stopPropagation()}>
               <ModalHeader>
-                <h3>{vi ? 'Chọn thời hạn gói' : 'Select Package Duration'}</h3>
+                <h3>{vi ? 'Thông tin liên hệ mua gói' : 'Contact to Purchase'}</h3>
                 <CloseButton onClick={() => setShowDurationModal(false)}>
                   <X />
                 </CloseButton>
@@ -1123,18 +1156,39 @@ const Subscription = () => {
                     <p>{selectedPackage.subtitle}</p>
                   </div>
                 </PackageInfo>
-                <DurationOptions>
-                  {selectedPackage.prices.map((priceOption, idx) => (
-                    <DurationOptionCard 
-                      key={idx}
-                      $color={selectedPackage.color}
-                      onClick={() => handleSelectDuration(priceOption)}
-                    >
-                      <DurationLabel>{priceOption.duration}</DurationLabel>
-                      <DurationPrice $color={selectedPackage.color}>{priceOption.amount}</DurationPrice>
-                    </DurationOptionCard>
-                  ))}
-                </DurationOptions>
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '16px', 
+                  marginTop: '20px', 
+                  padding: '20px', 
+                  background: '#F8FAFC', 
+                  borderRadius: '16px', 
+                  border: '1.5px dashed #E2E8F0',
+                  textAlign: 'left'
+                }}>
+                  <div style={{ fontWeight: '700', color: '#1e40af', fontSize: '15px', lineHeight: '1.5', marginBottom: '4px' }}>
+                    {vi ? 'Liên hệ để biết thêm thông tin chi tiết' : 'Contact for more details'}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14.5px', color: '#475569' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Mail size={16} style={{ color: '#1e40af' }} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '12px', color: '#64748B', fontWeight: 600 }}>Email</div>
+                      <strong style={{ color: '#1e293b' }}>oppohiringplatform@gmail.com</strong>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14.5px', color: '#475569' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#ECFDF5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Phone size={16} style={{ color: '#10B981' }} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '12px', color: '#64748B', fontWeight: 600 }}>{vi ? 'Số điện thoại' : 'Phone'}</div>
+                      <strong style={{ color: '#1e293b' }}>0563 518 922</strong>
+                    </div>
+                  </div>
+                </div>
               </ModalBody>
             </ModalContent>
           </ModalOverlay>

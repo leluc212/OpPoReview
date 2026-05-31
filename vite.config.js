@@ -1,27 +1,34 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+// Optional dev-only proxy target for package subscriptions API. Set
+// PACKAGE_SUBSCRIPTIONS_PROXY_TARGET or VITE_PACKAGE_SUBSCRIPTIONS_PROXY_TARGET
+// in your environment if you want to forward `/api-packages` to the real API
+// to avoid CORS while developing.
+const packageProxyTarget = process.env.PACKAGE_SUBSCRIPTIONS_PROXY_TARGET || process.env.VITE_PACKAGE_SUBSCRIPTIONS_PROXY_TARGET || '';
+
 export default defineConfig({
   base: '/OpPoReview/',
   plugins: [react()],
   server: {
     port: 3000,
     open: true,
-    proxy: {
-      // Lambda Function URL proxies (bypasses browser CORS)
-      '/api-employer': {
-        target: 'https://dlidp35x33.execute-api.ap-southeast-1.amazonaws.com/prod',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api-employer/, ''),
-        secure: true,
-        configure: (proxy) => {
-          proxy.on('proxyReq', (proxyReq, req) => {
-            if (req.headers.authorization) {
-              proxyReq.setHeader('Authorization', req.headers.authorization);
-            }
-          });
-        }
-      },
+    proxy: (() => {
+      const p = {
+        // Lambda Function URL proxies (bypasses browser CORS)
+        '/api-employer': {
+          target: 'https://dlidp35x33.execute-api.ap-southeast-1.amazonaws.com/prod',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api-employer/, ''),
+          secure: true,
+          configure: (proxy) => {
+            proxy.on('proxyReq', (proxyReq, req) => {
+              if (req.headers.authorization) {
+                proxyReq.setHeader('Authorization', req.headers.authorization);
+              }
+            });
+          }
+        },
       '/api-lambda-candidates': {
         target: 'https://gvxkjnavgu4lelloct5chgyjaa0jmyab.lambda-url.ap-southeast-1.on.aws',
         changeOrigin: true,
@@ -91,7 +98,21 @@ export default defineConfig({
           });
         }
       }
-    }
+      // End built-in proxies
+      };
+
+      // Add optional packages proxy when PACKAGE_SUBSCRIPTIONS_PROXY_TARGET is provided
+      if (packageProxyTarget) {
+        p['/api-packages'] = {
+          target: packageProxyTarget,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api-packages/, ''),
+          secure: true
+        };
+      }
+
+      return p;
+    })()
   },
   build: {
     rollupOptions: {

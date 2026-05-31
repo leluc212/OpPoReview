@@ -11,6 +11,8 @@ from botocore.exceptions import ClientError
 dynamodb = boto3.resource('dynamodb')
 table_name = os.environ.get('TABLE_NAME', 'PackageSubscriptions')
 table = dynamodb.Table(table_name)
+catalog_table_name = os.environ.get('PACKAGE_CATALOG_TABLE', 'PackageCatalog')
+catalog_table = dynamodb.Table(catalog_table_name)
 notifications_table_name = os.environ.get('NOTIFICATIONS_TABLE', 'Notifications')
 notifications_table = dynamodb.Table(notifications_table_name)
 
@@ -93,6 +95,13 @@ def lambda_handler(event, context):
     
     try:
         # Route requests
+        if http_method == 'GET' and path == '/packages':
+            return get_all_packages(headers)
+
+        elif http_method == 'PUT' and '/packages/' in path:
+            package_id = path_parameters.get('packageId')
+            return update_package(package_id, body, headers)
+
         if http_method == 'POST' and path == '/subscriptions':
             return create_subscription(body, headers)
         
@@ -162,6 +171,231 @@ def calculate_expiry_datetime(duration, start_dt):
         expiry = start_dt + timedelta(days=7)
 
     return expiry
+
+DEFAULT_PACKAGE_CATALOG = [
+    {
+        'packageId': 'hot-search',
+        'packageName': 'Hot Search',
+        'order': 1,
+        'subtitle': {
+            'vi': 'Ưu tiên tìm kiếm',
+            'en': 'Priority Search'
+        },
+        'prices': [
+            {'duration': '24h', 'amount': 19000},
+            {'duration': '5 ngày', 'amount': 79000},
+            {'duration': '7 ngày', 'amount': 99000}
+        ],
+        'features': {
+            'vi': [
+                'Lên Top tìm kiếm theo ngành nghề/khu vực',
+                'Tăng lượt click & ứng tuyển',
+                'Ưu tiên hiển thị trước đối thủ'
+            ],
+            'en': [
+                'Top search by industry/area',
+                'Boost clicks & applications',
+                'Priority visibility over competitors'
+            ]
+        },
+        'color': '#1e40af',
+        'bg': '#EFF6FF',
+        'bd': '#BFDBFE',
+        'dur': '3.6s',
+        'featured': True,
+        'iconKey': 'star'
+    },
+    {
+        'packageId': 'quick-boost',
+        'packageName': 'Quick Boost',
+        'order': 2,
+        'subtitle': {
+            'vi': 'Đẩy tin bảng tin chung',
+            'en': 'Push to general feed'
+        },
+        'prices': [
+            {'duration': '24h', 'amount': 29000},
+            {'duration': '5 ngày', 'amount': 99000},
+            {'duration': '7 ngày', 'amount': 149000}
+        ],
+        'features': {
+            'vi': [
+                'Tự động đẩy tin lên đầu bảng tin',
+                'Không lo bài đăng bị trôi',
+                'Gắn tag nổi bật [Tuyển Gấp]'
+            ],
+            'en': [
+                'Auto-push post to top of feed',
+                'No worries about post fading away',
+                'Featured tag [Urgent Hiring]'
+            ]
+        },
+        'color': '#10B981',
+        'bg': '#ECFDF5',
+        'bd': '#A7F3D0',
+        'dur': '4.2s',
+        'featured': False,
+        'iconKey': 'zap'
+    },
+    {
+        'packageId': 'spotlight-banner',
+        'packageName': 'Spotlight Banner',
+        'order': 3,
+        'subtitle': {
+            'vi': '1 Banner Tĩnh',
+            'en': '1 Static Banner'
+        },
+        'prices': [
+            {'duration': '24h', 'amount': 39000},
+            {'duration': '5 ngày', 'amount': 129000},
+            {'duration': '7 ngày', 'amount': 199000}
+        ],
+        'features': {
+            'vi': [
+                'Hiển thị Banner riêng tại Trang chủ',
+                'Tăng nhận diện thương hiệu tuyển dụng',
+                'Click banner → vào thẳng job'
+            ],
+            'en': [
+                'Display custom banner on homepage',
+                'Boost employer branding',
+                'Click banner directly to job'
+            ]
+        },
+        'color': '#F59E0B',
+        'bg': '#FFFBEB',
+        'bd': '#FDE68A',
+        'dur': '5s',
+        'featured': False,
+        'iconKey': 'rocket'
+    },
+    {
+        'packageId': 'top-spotlight',
+        'packageName': 'Top Spotlight',
+        'order': 4,
+        'subtitle': {
+            'vi': '2 Banner Động + Tĩnh',
+            'en': '2 Dynamic + Static Banners'
+        },
+        'prices': [
+            {'duration': '24h', 'amount': 59000},
+            {'duration': '5 ngày', 'amount': 249000},
+            {'duration': '7 ngày', 'amount': 349000}
+        ],
+        'features': {
+            'vi': [
+                'Sở hữu Hero Banner nổi bật nhất',
+                'Banner động + Banner tĩnh Premium',
+                'Thu hút tối đa lượt xem & ứng tuyển'
+            ],
+            'en': [
+                'Own the most prominent Hero Banner',
+                'Dynamic + static Premium banner',
+                'Attract maximum views & applications'
+            ]
+        },
+        'color': '#DC2626',
+        'bg': '#FEE2E2',
+        'bd': '#FECACA',
+        'dur': '4.5s',
+        'featured': False,
+        'iconKey': 'sparkles'
+    }
+]
+
+def merge_package_catalog(default_item, stored_item):
+    if not stored_item:
+        return default_item
+
+    merged = default_item.copy()
+    merged.update({
+        key: value for key, value in stored_item.items()
+        if key not in ['subtitle', 'prices', 'features']
+    })
+
+    subtitle = default_item.get('subtitle', {}).copy()
+    subtitle.update(stored_item.get('subtitle', {}))
+    merged['subtitle'] = subtitle
+
+    prices = stored_item.get('prices')
+    merged['prices'] = prices if prices else default_item.get('prices', [])
+
+    features = default_item.get('features', {}).copy()
+    stored_features = stored_item.get('features', {})
+    if isinstance(stored_features, dict):
+        features.update({k: v for k, v in stored_features.items() if v})
+    merged['features'] = features
+
+    return merged
+
+def load_package_catalog():
+    try:
+        response = catalog_table.scan()
+        items = response.get('Items', [])
+        stored_by_id = {item.get('packageId'): item for item in items if item.get('packageId')}
+        return [merge_package_catalog(default_item, stored_by_id.get(default_item['packageId'])) for default_item in DEFAULT_PACKAGE_CATALOG]
+    except Exception as error:
+        print(f"⚠️ Failed to load package catalog from DynamoDB: {str(error)}")
+        return DEFAULT_PACKAGE_CATALOG
+
+def get_package_definition(package_name):
+    catalog = load_package_catalog()
+    for item in catalog:
+        if item.get('packageName') == package_name:
+            return item
+    return None
+
+def get_package_price(package_name, duration):
+    """Get package price based on name and duration"""
+    package = get_package_definition(package_name)
+    if not package:
+        return 0
+
+    for price_option in package.get('prices', []):
+        if price_option.get('duration') == duration:
+            return price_option.get('amount', 0)
+
+    return 0
+
+def normalize_package_item(body, package_id):
+    package_name = body.get('packageName') or body.get('name') or package_id
+    subtitle = body.get('subtitle') or {}
+    if isinstance(subtitle, str):
+        subtitle = {'vi': subtitle, 'en': subtitle}
+
+    features = body.get('features') or {}
+    if isinstance(features, list):
+        features = {'vi': features, 'en': features}
+
+    prices = []
+    for price in body.get('prices', []):
+        if not isinstance(price, dict):
+            continue
+        prices.append({
+            'duration': price.get('duration', ''),
+            'amount': int(price.get('amount', 0) or 0)
+        })
+
+    return {
+        'packageId': package_id,
+        'packageName': package_name,
+        'order': int(body.get('order', 1) or 1),
+        'subtitle': {
+            'vi': subtitle.get('vi', ''),
+            'en': subtitle.get('en', '')
+        },
+        'prices': prices,
+        'features': {
+            'vi': features.get('vi', []) if isinstance(features, dict) else [],
+            'en': features.get('en', []) if isinstance(features, dict) else []
+        },
+        'color': body.get('color', '#1e40af'),
+        'bg': body.get('bg', '#EFF6FF'),
+        'bd': body.get('bd', '#BFDBFE'),
+        'dur': body.get('dur', '4s'),
+        'featured': bool(body.get('featured', False)),
+        'iconKey': body.get('iconKey', 'sparkles')
+    }
 
 def format_vn_date(dt):
     return dt.strftime('%Y-%m-%d')
@@ -384,17 +618,6 @@ def process_expired_subscriptions():
 
     return expired_count
 
-def get_package_price(package_name, duration):
-    """Get package price based on name and duration"""
-    prices = {
-        'Quick Boost': {'24h': 29000, '7 ngày': 145000, '7 days': 145000},
-        'Hot Search': {'24h': 49000, '7 ngày': 245000, '7 days': 245000},
-        'Spotlight Banner': {'24h': 99000, '7 ngày': 495000, '7 days': 495000},
-        'Top Spotlight': {'24h': 149000, '7 ngày': 745000, '7 days': 745000}
-    }
-    
-    return prices.get(package_name, {}).get(duration, 0)
-
 def create_subscription(body_str, headers):
     """Create new subscription request"""
     try:
@@ -466,6 +689,80 @@ def create_subscription(body_str, headers):
             'body': json.dumps({
                 'success': False,
                 'message': f'Error creating subscription: {str(e)}'
+            })
+        }
+
+def get_all_packages(headers):
+    try:
+        packages = load_package_catalog()
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True,
+                'data': packages
+            }, default=decimal_default)
+        }
+    except Exception as e:
+        print(f"Error getting packages: {str(e)}")
+        return {
+            'statusCode': 500,
+            'headers': headers,
+            'body': json.dumps({
+                'success': False,
+                'message': f'Error getting packages: {str(e)}'
+            })
+        }
+
+def update_package(package_id, body_str, headers):
+    try:
+        body = json.loads(body_str) if isinstance(body_str, str) else body_str
+        package_item = normalize_package_item(body, package_id)
+        now_dt = get_vn_now().isoformat()
+
+        update_params = {
+            'Key': {'packageId': package_id},
+            'UpdateExpression': 'SET packageName = :packageName, #order = :order, subtitle = :subtitle, prices = :prices, features = :features, color = :color, bg = :bg, bd = :bd, dur = :dur, featured = :featured, iconKey = :iconKey, updatedAt = :updatedAt',
+            'ExpressionAttributeNames': {
+                '#order': 'order'
+            },
+            'ExpressionAttributeValues': {
+                ':packageName': package_item['packageName'],
+                ':order': package_item['order'],
+                ':subtitle': package_item['subtitle'],
+                ':prices': package_item['prices'],
+                ':features': package_item['features'],
+                ':color': package_item['color'],
+                ':bg': package_item['bg'],
+                ':bd': package_item['bd'],
+                ':dur': package_item['dur'],
+                ':featured': package_item['featured'],
+                ':iconKey': package_item['iconKey'],
+                ':updatedAt': now_dt
+            },
+            'ReturnValues': 'ALL_NEW'
+        }
+
+        response = catalog_table.update_item(**update_params)
+        updated_item = response.get('Attributes', {})
+
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True,
+                'message': 'Package catalog updated successfully',
+                'data': updated_item
+            }, default=decimal_default)
+        }
+    except Exception as e:
+        print(f"Error updating package catalog: {str(e)}")
+        return {
+            'statusCode': 500,
+            'headers': headers,
+            'body': json.dumps({
+                'success': False,
+                'message': f'Error updating package catalog: {str(e)}'
             })
         }
 

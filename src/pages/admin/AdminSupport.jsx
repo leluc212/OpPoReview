@@ -232,36 +232,12 @@ const AdminSupport = () => {
       <PageContainer>
         <PageHeader>
           <Title>{language === 'vi' ? 'Trung Tâm Hỗ Trợ' : 'Support Center'}</Title>
-          <Subtitle>{language === 'vi' ? 'Câu hỏi thường gặp và liên hệ hỗ trợ' : 'Frequently asked questions and support contact'}</Subtitle>
+          <Subtitle>{language === 'vi' ? 'Liên hệ hỗ trợ' : 'Support contact'}</Subtitle>
         </PageHeader>
 
         <Grid>
           <MainContent>
-            <Section>
-              <SectionTitle>
-                <HelpCircle size={24} />
-                {language === 'vi' ? 'Câu Hỏi Thường Gặp' : 'Frequently Asked Questions'}
-              </SectionTitle>
-              <FAQList>
-                {faqs.map(faq => (
-                  <FAQItem key={faq.id}>
-                    <FAQQuestion 
-                      $isOpen={openFAQ === faq.id}
-                      onClick={() => toggleFAQ(faq.id)}
-                    >
-                      <span>{faq.question}</span>
-                      {openFAQ === faq.id ? 
-                        <ChevronUp size={20} /> : 
-                        <ChevronDown size={20} />
-                      }
-                    </FAQQuestion>
-                    {openFAQ === faq.id && (
-                      <FAQAnswer>{faq.answer}</FAQAnswer>
-                    )}
-                  </FAQItem>
-                ))}
-              </FAQList>
-            </Section>
+            
 
             <Section>
               <SectionTitle>

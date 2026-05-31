@@ -30,7 +30,6 @@ import CandidateProfile from './pages/candidate/CandidateProfile';
 import CandidateSettings from './pages/candidate/CandidateSettings';
 import CandidateNotifications from './pages/candidate/CandidateNotifications';
 import EmployerProfileView from './pages/candidate/EmployerProfileView';
-import Support from './pages/candidate/Support';
 import Wallet from './pages/candidate/Wallet';
 import Availability from './pages/candidate/Availability';
 import CandidatePosts from './pages/candidate/CandidatePosts';
@@ -51,7 +50,6 @@ import Subscription from './pages/employer/Subscription';
 import HRManagement from './pages/employer/HRManagement';
 import EmployerSettings from './pages/employer/EmployerSettings';
 import Analytics from './pages/employer/Analytics';
-import EmployerSupport from './pages/employer/EmployerSupport';
 import EmployerWallet from './pages/employer/EmployerWallet';
 
 // Admin Pages
@@ -200,11 +198,7 @@ function AppRoutes() {
           <EmployerProfileView />
         </ProtectedRoute>
       } />
-      <Route path="/candidate/support" element={
-        <ProtectedRoute allowedRoles={['candidate']}>
-          <Support />
-        </ProtectedRoute>
-      } />
+
       <Route path="/candidate/wallet" element={
         <ProtectedRoute allowedRoles={['candidate']}>
           <Wallet />
@@ -298,11 +292,7 @@ function AppRoutes() {
           <Analytics />
         </ProtectedRoute>
       } />
-      <Route path="/employer/support" element={
-        <ProtectedRoute allowedRoles={['employer']}>
-          <EmployerSupport />
-        </ProtectedRoute>
-      } />
+
       <Route path="/employer/wallet" element={
         <ProtectedRoute allowedRoles={['employer']}>
           <EmployerWallet />

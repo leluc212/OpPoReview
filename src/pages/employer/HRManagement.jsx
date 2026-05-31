@@ -2871,10 +2871,10 @@ const HRManagement = () => {
 
     // Validate hourly rate
     const hourlyRate = parseFloat(editJobData.hourlyRate);
-    if (isNaN(hourlyRate) || hourlyRate < 31875) {
+    if (isNaN(hourlyRate) || hourlyRate < 29500) {
       setErrorNotificationMessage(language === 'vi'
-        ? 'Lương phải lớn hơn hoặc bằng 31.875 VNĐ/giờ'
-        : 'Hourly rate must be greater than or equal to 31,875 VND');
+        ? 'Lương phải lớn hơn hoặc bằng 29.500 VNĐ/giờ'
+        : 'Hourly rate must be greater than or equal to 29,500 VND');
       setShowErrorNotification(true);
       return;
     }
@@ -4750,16 +4750,16 @@ const HRManagement = () => {
                     style={{
                       width: '100%',
                       padding: '12px 16px',
-                      border: `2px solid ${editJobData.hourlyRate && parseFloat(editJobData.hourlyRate) < 31875 ? '#EF4444' : '#e2e8f0'}`,
+                      border: `2px solid ${editJobData.hourlyRate && parseFloat(editJobData.hourlyRate) < 29500 ? '#EF4444' : '#e2e8f0'}`,
                       borderRadius: '12px',
                       fontSize: '14px',
-                      background: editJobData.hourlyRate && parseFloat(editJobData.hourlyRate) < 31875 ? '#FEE2E2' : 'white'
+                      background: editJobData.hourlyRate && parseFloat(editJobData.hourlyRate) < 29500 ? '#FEE2E2' : 'white'
                     }}
-                    min="31875"
+                    min="29500"
                   />
-                  {editJobData.hourlyRate && parseFloat(editJobData.hourlyRate) < 31875 && (
+                  {editJobData.hourlyRate && parseFloat(editJobData.hourlyRate) < 29500 && (
                     <small style={{ color: '#DC2626', fontSize: '12px', marginTop: '4px', display: 'block', fontWeight: '600' }}>
-                      ⚠️ {language === 'vi' ? 'Lương phải lớn hơn hoặc bằng 31.875 VNĐ' : 'Salary must be >= 31,875 VND'}
+                      ⚠️ {language === 'vi' ? 'Lương phải lớn hơn hoặc bằng 29.500 VNĐ' : 'Salary must be >= 29,500 VND'}
                     </small>
                   )}
                 </div>

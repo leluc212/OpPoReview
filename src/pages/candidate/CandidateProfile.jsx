@@ -27,7 +27,6 @@ import {
   Calendar,
   Globe,
   Shield,
-  Award,
   Star,
   CheckCircle,
   ArrowRight,
@@ -1275,11 +1274,7 @@ const CandidateProfile = () => {
   
   const profileCompletion = calculateProfileCompletion();
 
-  const stats = [
-    { label: language === 'vi' ? 'Công việc hoàn thành' : 'Completed Jobs', value: '23', color: '#10B981' },
-    { label: language === 'vi' ? 'Đánh giá' : 'Rating', value: '4.8', color: '#F59E0B' },
-    { label: language === 'vi' ? 'Tỷ lệ thành công' : 'Success Rate', value: '95%', color: '#1e40af' }
-  ];
+
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -2196,27 +2191,7 @@ const CandidateProfile = () => {
               )}
             </Card>
 
-            <Card
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <div className="card-header">
-                <h2>
-                  <Award />
-                  {language === 'vi' ? 'Thống Kê' : 'Statistics'}
-                </h2>
-              </div>
 
-              <StatsGrid>
-                {stats.map((stat, index) => (
-                  <StatItem key={index} $color={stat.color}>
-                    <div className="stat-value">{stat.value}</div>
-                    <div className="stat-label">{stat.label}</div>
-                  </StatItem>
-                ))}
-              </StatsGrid>
-            </Card>
 
             <Card
               initial={{ opacity: 0, x: 20 }}
