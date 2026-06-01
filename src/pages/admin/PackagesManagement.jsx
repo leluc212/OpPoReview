@@ -5,6 +5,8 @@ import DashboardLayout from '../../components/DashboardLayout';
 import TableFilter from '../../components/TableFilter';
 import { useLanguage } from '../../context/LanguageContext';
 import { createPackageApprovedNotification } from '../../services/notificationService';
+import { getDefaultPackageCatalog, getPackageCatalog, updatePackageCatalogItem } from '../../services/packageCatalogService';
+import { translationService } from '../../services/translationService';
 import { 
   Package, 
   Zap, 
@@ -23,7 +25,10 @@ import {
   Users,
   Activity,
   X,
-  Send
+  Send,
+  Edit3,
+  Save,
+  Sparkles
 } from 'lucide-react';
 
 const PageContainer = styled.div``;
@@ -472,15 +477,18 @@ const ModalOverlay = styled(motion.div)`
 
 const ModalBox = styled(motion.div)`
   background: #fff;
-  border-radius: 24px;
+  border-radius: 16px;
   width: 100%;
-  max-width: 480px;
-  box-shadow: 0 24px 60px rgba(16, 185, 129, 0.25);
+  max-width: 640px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 18px 48px rgba(2,6,23,0.12);
   overflow: hidden;
 `;
 
 const ModalHeader = styled.div`
-  padding: 32px 32px 24px;
+  padding: 16px 18px 12px;
   background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
   text-align: center;
   position: relative;
@@ -514,39 +522,44 @@ const ModalCloseBtn = styled.button`
 `;
 
 const SuccessIconWrapper = styled(motion.div)`
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 20px;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 12px;
   border-radius: 50%;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.25);
   
   svg {
-    width: 44px;
-    height: 44px;
+    width: 28px;
+    height: 28px;
     color: white;
   }
 `;
 
 const ModalTitle = styled.h2`
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 800;
   color: #1E293B;
-  margin-bottom: 8px;
-  line-height: 1.3;
+  margin-bottom: 6px;
+  line-height: 1.2;
 `;
 
 const ModalSubtitle = styled.p`
-  font-size: 15px;
+  font-size: 13px;
   color: #64748B;
   font-weight: 500;
 `;
 
 const ModalBody = styled.div`
-  padding: 28px 32px;
+  padding: 14px 16px;
+  max-width: 600px;
+  margin: 0 auto;
+  overflow-y: auto;
+  /* Leave space for header/footer */
+  max-height: calc(80vh - 140px);
 `;
 
 const InfoRow = styled.div`
@@ -646,6 +659,376 @@ const ConfirmButton = styled(ModalButton)`
   box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
 `;
 
+const PackageCatalogSection = styled.div`
+  background: ${props => props.theme.colors.bgLight};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  box-shadow: ${props => props.theme.shadows.sm};
+  padding: 20px;
+  margin-bottom: 24px;
+`;
+
+const PackageCatalogHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+
+  h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: ${props => props.theme.colors.text};
+    margin-bottom: 4px;
+  }
+
+  p {
+    font-size: 14px;
+    color: ${props => props.theme.colors.textLight};
+  }
+`;
+
+const PackageCatalogGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const PackageCatalogCard = styled.div`
+  background: white;
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+`;
+
+const PackageCatalogTop = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+`;
+
+const PackageCatalogName = styled.div`
+  h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: ${props => props.theme.colors.text};
+    margin-bottom: 4px;
+  }
+
+  p {
+    font-size: 13px;
+    color: ${props => props.theme.colors.textLight};
+    line-height: 1.5;
+  }
+`;
+
+const PackageCatalogBadge = styled.span`
+  padding: 6px 10px;
+  border-radius: ${props => props.theme.borderRadius.full};
+  font-size: 12px;
+  font-weight: 700;
+  background: ${props => props.$active ? '#dcfce7' : '#eef2ff'};
+  color: ${props => props.$active ? '#15803d' : '#4338ca'};
+`;
+
+const PackagePriceList = styled.div`
+  display: grid;
+  gap: 8px;
+`;
+
+const PackagePriceRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: ${props => props.theme.borderRadius.md};
+  background: ${props => props.theme.colors.bgDark};
+  font-size: 13px;
+  font-weight: 600;
+  color: ${props => props.theme.colors.text};
+`;
+
+const PackageFeatureList = styled.ul`
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  color: ${props => props.theme.colors.textLight};
+  font-size: 13px;
+  line-height: 1.5;
+`;
+
+const PackageCardFooter = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+`;
+
+const PackageSummary = styled.div`
+  font-size: 13px;
+  color: ${props => props.theme.colors.textLight};
+`;
+
+const PackageEditButton = styled.button`
+  padding: 10px 14px;
+  border: none;
+  border-radius: ${props => props.theme.borderRadius.md};
+  background: #3b82f6;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+  }
+`;
+
+const EditModalHeader = styled(ModalHeader)`
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+`;
+
+const EditIconWrapper = styled(SuccessIconWrapper)`
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.35);
+`;
+
+const EditButton = styled(ModalButton)`
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+`;
+
+const EditForm = styled.div`
+  display: grid;
+  gap: 14px;
+`;
+
+const FormGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const FieldLabel = styled.label`
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: ${props => props.theme.colors.text};
+  margin-bottom: 6px;
+`;
+
+const FieldInput = styled.input`
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.md};
+  font-size: 14px;
+  color: ${props => props.theme.colors.text};
+  background: white;
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
+  }
+`;
+
+const FieldTextarea = styled.textarea`
+  width: 100%;
+  min-height: 72px;
+  padding: 10px 12px;
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.md};
+  font-size: 14px;
+  color: ${props => props.theme.colors.text};
+  background: white;
+  resize: vertical;
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
+  }
+`;
+
+const FieldHint = styled.div`
+  font-size: 12px;
+  color: ${props => props.theme.colors.textLight};
+  margin-top: 4px;
+`;
+
+const EditLayout = styled.div`
+  display: grid;
+  grid-template-columns: 1fr minmax(260px, 360px);
+  gap: 20px;
+  align-items: start;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const SectionCard = styled.div`
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  background: white;
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+`;
+
+const SectionTitle = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+
+  h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: ${props => props.theme.colors.text};
+  }
+
+  span {
+    font-size: 12px;
+    color: ${props => props.theme.colors.textLight};
+  }
+`;
+
+const PreviewCard = styled.div`
+  border-radius: ${props => props.theme.borderRadius.lg};
+  border: 1px solid ${props => props.theme.colors.border};
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  padding: 18px;
+  position: sticky;
+  top: 16px;
+  display: grid;
+  gap: 14px;
+
+  @media (max-width: 900px) {
+    position: static;
+  }
+`;
+
+const PreviewHero = styled.div`
+  border-radius: 18px;
+  padding: 18px;
+  background: ${props => props.$bg || '#EFF6FF'};
+  border: 1px solid ${props => props.$bd || '#BFDBFE'};
+  display: grid;
+  gap: 8px;
+`;
+
+const PreviewBadge = styled.div`
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.75);
+  color: ${props => props.$color || '#1e40af'};
+  font-size: 12px;
+  font-weight: 700;
+`;
+
+const PreviewPackageName = styled.h3`
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.2;
+  color: ${props => props.theme.colors.text};
+`;
+
+const PreviewSub = styled.p`
+  margin: 0;
+  font-size: 13px;
+  color: ${props => props.theme.colors.textLight};
+  line-height: 1.5;
+`;
+
+const PreviewBlock = styled.div`
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: 14px;
+  background: white;
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+`;
+
+const PreviewMiniTitle = styled.div`
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: ${props => props.theme.colors.textLight};
+`;
+
+const PreviewList = styled.ul`
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: ${props => props.theme.colors.text};
+`;
+
+const PreviewPriceGrid = styled.div`
+  display: grid;
+  gap: 8px;
+`;
+
+const PreviewPriceRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: ${props => props.theme.colors.text};
+`;
+
+const PreviewPanel = styled.div`
+  background: #f8fafc;
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+  max-height: calc(80vh - 240px);
+  overflow: auto;
+`;
+
+const PreviewTitle = styled.div`
+  font-size: 13px;
+  font-weight: 700;
+  color: ${props => props.theme.colors.text};
+`;
+
+const PreviewText = styled.div`
+  font-size: 13px;
+  color: ${props => props.theme.colors.textLight};
+  line-height: 1.6;
+`;
+
 const PackagesManagement = () => {
   const { language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
@@ -662,6 +1045,11 @@ const PackagesManagement = () => {
   const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [packageCatalog, setPackageCatalog] = useState(getDefaultPackageCatalog());
+  const [packageCatalogLoading, setPackageCatalogLoading] = useState(true);
+  const [editingPackage, setEditingPackage] = useState(null);
+  const [savingPackage, setSavingPackage] = useState(false);
+  const [packageSaveError, setPackageSaveError] = useState(null);
 
   const formatDateTime = (value) => {
     if (!value) return '';
@@ -717,6 +1105,198 @@ const PackagesManagement = () => {
     
     loadSubscriptions();
   }, []);
+
+  useEffect(() => {
+    const loadPackageCatalog = async () => {
+      try {
+        setPackageCatalogLoading(true);
+        const catalog = await getPackageCatalog();
+        setPackageCatalog(catalog);
+        setPackageSaveError(null);
+      } catch (err) {
+        console.error('Error loading package catalog:', err);
+        setPackageCatalog(getDefaultPackageCatalog());
+      } finally {
+        setPackageCatalogLoading(false);
+      }
+    };
+
+    loadPackageCatalog();
+  }, []);
+
+  const getPackageIcon = (iconKey) => {
+    if (iconKey === 'zap') return Zap;
+    if (iconKey === 'rocket') return Package;
+    if (iconKey === 'sparkles') return Sparkles;
+    return Star;
+  };
+
+  const openPackageEditor = (packageItem) => {
+    setEditingPackage({
+      ...packageItem,
+      subtitle: {
+        vi: packageItem.subtitle?.vi || '',
+        en: packageItem.subtitle?.en || ''
+      },
+      features: {
+        vi: [...(packageItem.features?.vi || [])],
+        en: [...(packageItem.features?.en || [])]
+      },
+      prices: [...(packageItem.prices || [])]
+    });
+    setPackageSaveError(null);
+  };
+
+  const updateEditingPackage = (field, value) => {
+    setEditingPackage(prev => {
+      if (!prev) return prev;
+      return { ...prev, [field]: value };
+    });
+  };
+
+  const updateEditingPackageSubtitle = (locale, value) => {
+    setEditingPackage(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        subtitle: {
+          ...prev.subtitle,
+          [locale]: value
+        }
+      };
+    });
+  };
+
+  const updateEditingPackagePrice = (index, value) => {
+    setEditingPackage(prev => {
+      if (!prev) return prev;
+      const prices = [...(prev.prices || [])];
+      prices[index] = {
+        ...prices[index],
+        amount: value === '' ? '' : Number(value)
+      };
+      return { ...prev, prices };
+    });
+  };
+
+  const updateEditingPackageFeatures = (locale, value) => {
+    setEditingPackage(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        features: {
+          ...prev.features,
+          [locale]: value.split('\n').map(item => item.trim()).filter(Boolean)
+        }
+      };
+    });
+  };
+
+  const translateArrayToEnglish = async (items) => {
+    const translated = [];
+
+    for (const item of items) {
+      const result = await translationService.translate(item, 'en', 'vi');
+      translated.push(result.translatedText || item);
+    }
+
+    return translated;
+  };
+
+  const buildEnglishPackageCopy = async (packageData) => {
+    const [subtitleEn, featuresEn] = await Promise.all([
+      translationService.translate(packageData.subtitle?.vi || '', 'en', 'vi'),
+      translateArrayToEnglish(packageData.features?.vi || [])
+    ]);
+
+    const englishPrices = (packageData.prices || []).map(price => ({
+      duration: price.duration,
+      amount: Number(price.amount || 0)
+    }));
+
+    return {
+      packageId: packageData.packageId,
+      packageName: packageData.packageName,
+      order: packageData.order,
+      subtitle: {
+        vi: packageData.subtitle?.vi || '',
+        en: subtitleEn.translatedText || packageData.subtitle?.vi || ''
+      },
+      prices: englishPrices,
+      features: {
+        vi: packageData.features?.vi || [],
+        en: featuresEn
+      },
+      color: packageData.color,
+      bg: packageData.bg,
+      bd: packageData.bd,
+      dur: packageData.dur,
+      featured: Boolean(packageData.featured),
+      iconKey: packageData.iconKey
+    };
+  };
+
+  const previewPackage = editingPackage ? {
+    ...editingPackage,
+    subtitle: editingPackage.subtitle?.vi || '',
+    features: editingPackage.features?.vi || [],
+    prices: editingPackage.prices || []
+  } : null;
+
+  const handleSavePackage = async (e) => {
+    e.preventDefault();
+    if (!editingPackage) return;
+
+    try {
+      setSavingPackage(true);
+      setPackageSaveError(null);
+
+      const payloadVi = {
+        packageId: editingPackage.packageId,
+        packageName: editingPackage.packageName,
+        order: editingPackage.order,
+        subtitle: {
+          vi: editingPackage.subtitle?.vi || ''
+        },
+        prices: (editingPackage.prices || []).map(price => ({
+          duration: price.duration,
+          amount: Number(price.amount || 0)
+        })),
+        color: editingPackage.color,
+        bg: editingPackage.bg,
+        bd: editingPackage.bd,
+        dur: editingPackage.dur,
+        featured: Boolean(editingPackage.featured),
+        iconKey: editingPackage.iconKey
+      };
+
+      const payload = await buildEnglishPackageCopy({
+        ...payloadVi,
+        features: {
+          vi: editingPackage.features?.vi || []
+        }
+      });
+
+      const updatedPackage = await updatePackageCatalogItem(payload);
+      const normalizedPackage = {
+        ...payload,
+        ...updatedPackage,
+        subtitle: updatedPackage.subtitle || payload.subtitle,
+        prices: updatedPackage.prices || payload.prices,
+        features: updatedPackage.features || payload.features
+      };
+
+      setPackageCatalog(prev => prev.map(item => (
+        item.packageId === normalizedPackage.packageId ? normalizedPackage : item
+      )));
+      setEditingPackage(null);
+    } catch (err) {
+      console.error('Error updating package catalog:', err);
+      setPackageSaveError(err.message);
+    } finally {
+      setSavingPackage(false);
+    }
+  };
 
   // Dữ liệu theo tháng cho biểu đồ (6 tháng gần nhất) - Tính toán động từ purchases
   const monthlyData = useMemo(() => {
@@ -1063,6 +1643,73 @@ const PackagesManagement = () => {
           <p>{language === 'vi' ? 'Quản lý gói dịch vụ của nhà tuyển dụng F&B' : 'Manage F&B employer service packages'}</p>
         </PageHeader>
 
+        <PackageCatalogSection>
+          <PackageCatalogHeader>
+            <div>
+              <h2>{language === 'vi' ? 'Thông Tin Gói Dịch Vụ' : 'Service Package Info'}</h2>
+              <p>{language === 'vi' ? 'Chỉnh sửa thông tin hiển thị cho Employer và lưu trực tiếp vào database.' : 'Edit the package information shown to employers and save it to the database.'}</p>
+            </div>
+            <PackageCatalogBadge $active={true}>
+              {language === 'vi' ? 'Đang đồng bộ' : 'Synced'}
+            </PackageCatalogBadge>
+          </PackageCatalogHeader>
+
+          {packageCatalogLoading ? (
+            <div style={{ padding: '20px 0', color: '#64748B', fontWeight: 600 }}>
+              {language === 'vi' ? 'Đang tải thông tin gói...' : 'Loading package information...'}
+            </div>
+          ) : (
+            <PackageCatalogGrid>
+              {packageCatalog.map((packageItem) => {
+                const IconComponent = getPackageIcon(packageItem.iconKey);
+                const durationSummary = packageItem.prices.map(price => `${price.duration}: ${Number(price.amount || 0).toLocaleString('vi-VN')} VNĐ`).join(' · ');
+
+                return (
+                  <PackageCatalogCard key={packageItem.packageId}>
+                    <PackageCatalogTop>
+                      <PackageBadge $color={packageItem.color}>
+                        <IconComponent />
+                        {packageItem.order}. {packageItem.packageName}
+                      </PackageBadge>
+                      <PackageCatalogBadge $active={packageItem.featured}>
+                        {packageItem.featured ? (language === 'vi' ? 'Nổi bật' : 'Featured') : (language === 'vi' ? 'Tiêu chuẩn' : 'Standard')}
+                      </PackageCatalogBadge>
+                    </PackageCatalogTop>
+
+                    <PackageCatalogName>
+                      <h3>{packageItem.packageName}</h3>
+                      <p>{language === 'vi' ? packageItem.subtitle?.vi : packageItem.subtitle?.en}</p>
+                    </PackageCatalogName>
+
+                    <PackagePriceList>
+                      {packageItem.prices.map((priceOption) => (
+                        <PackagePriceRow key={`${packageItem.packageId}-${priceOption.duration}`}>
+                          <span>{priceOption.duration}</span>
+                          <span>{Number(priceOption.amount || 0).toLocaleString('vi-VN')} VNĐ</span>
+                        </PackagePriceRow>
+                      ))}
+                    </PackagePriceList>
+
+                    <PackageFeatureList>
+                      {((language === 'vi' ? packageItem.features?.vi : packageItem.features?.en) || []).slice(0, 3).map((feature, index) => (
+                        <li key={index}>{feature}</li>
+                      ))}
+                    </PackageFeatureList>
+
+                    <PackageCardFooter>
+                      <PackageSummary>{durationSummary}</PackageSummary>
+                      <PackageEditButton onClick={() => openPackageEditor(packageItem)}>
+                        <Edit3 size={16} />
+                        {language === 'vi' ? 'Chỉnh sửa' : 'Edit'}
+                      </PackageEditButton>
+                    </PackageCardFooter>
+                  </PackageCatalogCard>
+                );
+              })}
+            </PackageCatalogGrid>
+          )}
+        </PackageCatalogSection>
+
         {loading && (
           <div style={{ textAlign: 'center', padding: '40px', color: '#64748B' }}>
             <div style={{ fontSize: '16px', fontWeight: '600' }}>
@@ -1357,6 +2004,160 @@ const PackagesManagement = () => {
         </>
         )}
       </PageContainer>
+
+      <AnimatePresence>
+        {editingPackage && (
+          <ModalOverlay
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => !savingPackage && setEditingPackage(null)}
+          >
+              <ModalBox
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              onClick={(e) => e.stopPropagation()}
+              style={{ width: 'min(90vw, 640px)', maxWidth: '640px' }}
+            >
+              <EditModalHeader>
+                <ModalCloseBtn onClick={() => !savingPackage && setEditingPackage(null)}>
+                  <X />
+                </ModalCloseBtn>
+                <EditIconWrapper
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                >
+                  <Edit3 />
+                </EditIconWrapper>
+                <ModalTitle>
+                  {language === 'vi' ? 'Chỉnh sửa gói dịch vụ' : 'Edit service package'}
+                </ModalTitle>
+                <ModalSubtitle>
+                  {language === 'vi' ? 'Thay đổi thông tin hiển thị cho Employer.' : 'Update the information shown to employers.'}
+                </ModalSubtitle>
+              </EditModalHeader>
+
+              <ModalBody>
+                <form onSubmit={handleSavePackage}>
+                  <EditForm>
+                    <FormGrid>
+                      <div>
+                        <FieldLabel>{language === 'vi' ? 'Tên gói' : 'Package name'}</FieldLabel>
+                        <FieldInput
+                          type="text"
+                          value={editingPackage.packageName}
+                          onChange={(e) => updateEditingPackage('packageName', e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <FieldLabel>{language === 'vi' ? 'Thứ tự hiển thị' : 'Display order'}</FieldLabel>
+                        <FieldInput
+                          type="number"
+                          min="1"
+                          value={editingPackage.order}
+                          onChange={(e) => updateEditingPackage('order', Number(e.target.value) || 1)}
+                          required
+                        />
+                      </div>
+                    </FormGrid>
+
+                    <div>
+                      <FieldLabel>{language === 'vi' ? 'Mô tả tiếng Việt' : 'Vietnamese subtitle'}</FieldLabel>
+                      <FieldInput
+                        type="text"
+                        value={editingPackage.subtitle?.vi || ''}
+                        onChange={(e) => updateEditingPackageSubtitle('vi', e.target.value)}
+                      />
+                    </div>
+
+                    <div>
+                      <FieldLabel>{language === 'vi' ? 'Tính năng tiếng Việt' : 'Vietnamese features'}</FieldLabel>
+                      <FieldTextarea
+                        value={(editingPackage.features?.vi || []).join('\n')}
+                        onChange={(e) => updateEditingPackageFeatures('vi', e.target.value)}
+                        placeholder={language === 'vi' ? 'Mỗi dòng một tính năng' : 'One feature per line'}
+                      />
+                      <FieldHint>{language === 'vi' ? 'Nhập mỗi tính năng trên một dòng.' : 'Enter one feature per line.'}</FieldHint>
+                    </div>
+
+                    <FormGrid>
+                      {(editingPackage.prices || []).map((priceOption, index) => (
+                        <div key={`${editingPackage.packageId}-price-${index}`}>
+                          <FieldLabel>{priceOption.duration}</FieldLabel>
+                          <FieldInput
+                            type="number"
+                            min="0"
+                            step="1000"
+                            value={priceOption.amount}
+                            onChange={(e) => updateEditingPackagePrice(index, e.target.value)}
+                            required
+                          />
+                        </div>
+                      ))}
+                    </FormGrid>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', paddingTop: '4px' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '600', color: '#334155' }}>
+                        <input
+                          type="checkbox"
+                          checked={Boolean(editingPackage.featured)}
+                          onChange={(e) => updateEditingPackage('featured', e.target.checked)}
+                        />
+                        {language === 'vi' ? 'Nổi bật' : 'Featured'}
+                      </label>
+                    </div>
+
+                    {previewPackage && (
+                      <PreviewPanel>
+                        <PreviewTitle>{language === 'vi' ? 'Xem trước tiếng Anh' : 'English preview'}</PreviewTitle>
+                        <PreviewText>
+                          {language === 'vi'
+                            ? 'Tiêu đề và nội dung tiếng Anh sẽ được hệ thống tự dịch khi bạn lưu.'
+                            : 'English title and content will be auto-generated when you save.'}
+                        </PreviewText>
+                        <PreviewText>
+                          <strong>{previewPackage.packageName}</strong><br />
+                          {previewPackage.subtitle?.vi}
+                        </PreviewText>
+                      </PreviewPanel>
+                    )}
+
+                    {packageSaveError && (
+                      <div style={{ color: '#dc2626', fontSize: '13px', fontWeight: 600 }}>
+                        {packageSaveError}
+                      </div>
+                    )}
+                  </EditForm>
+                </form>
+              </ModalBody>
+
+              <ModalFooter style={{ gap: '12px' }}>
+                <ModalButton
+                  type="button"
+                  onClick={() => !savingPackage && setEditingPackage(null)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {language === 'vi' ? 'Hủy' : 'Cancel'}
+                </ModalButton>
+                <EditButton
+                  type="button"
+                  onClick={handleSavePackage}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  disabled={savingPackage}
+                >
+                  {savingPackage ? (language === 'vi' ? 'Đang lưu...' : 'Saving...') : <><Save />{language === 'vi' ? 'Lưu thay đổi' : 'Save changes'}</>}
+                </EditButton>
+              </ModalFooter>
+            </ModalBox>
+          </ModalOverlay>
+        )}
+      </AnimatePresence>
 
       {/* Success Modal */}
       <AnimatePresence>

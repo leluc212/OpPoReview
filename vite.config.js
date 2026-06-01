@@ -1,6 +1,12 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+// Optional dev-only proxy target for package subscriptions API. Set
+// PACKAGE_SUBSCRIPTIONS_PROXY_TARGET or VITE_PACKAGE_SUBSCRIPTIONS_PROXY_TARGET
+// in your environment if you want to forward `/api-packages` to the real API
+// to avoid CORS while developing.
+const packageProxyTarget = process.env.PACKAGE_SUBSCRIPTIONS_PROXY_TARGET || process.env.VITE_PACKAGE_SUBSCRIPTIONS_PROXY_TARGET || '';
+
 export default defineConfig({
   base: '/OpPoReview/',
   plugins: [react()],
@@ -104,7 +110,7 @@ export default defineConfig({
           });
         }
       }
-    }
+    },
   },
   build: {
     rollupOptions: {

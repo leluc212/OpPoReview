@@ -419,8 +419,8 @@ const PostQuickJob = () => {
     if (name === 'hourlyRate') {
       const numValue = parseHourlyRateInput(value);
 
-      // Show error if value is entered and < 31875
-      if (value !== '' && !isNaN(numValue) && numValue < 31875) {
+      // Show error if value is entered and < 29500
+      if (value !== '' && !isNaN(numValue) && numValue < 29500) {
         setSalaryError(true);
       } else {
         setSalaryError(false);
@@ -462,7 +462,7 @@ const PostQuickJob = () => {
     }
 
     const rate = parseHourlyRateInput(hourlyRate);
-    if (isNaN(rate) || rate < 31875) {
+    if (isNaN(rate) || rate < 29500) {
       return null;
     }
 
@@ -534,9 +534,9 @@ const PostQuickJob = () => {
       return;
     }
 
-    // Validate hourly rate must be >= 31875
+    // Validate hourly rate must be >= 29500
     const rate = parseHourlyRateInput(formData.hourlyRate);
-    if (isNaN(rate) || rate < 31875) {
+    if (isNaN(rate) || rate < 29500) {
       setSalaryError(true);
       setModalType('error');
       setShowModal(true);
@@ -732,7 +732,7 @@ const PostQuickJob = () => {
       jobTypePlaceholder: 'Chọn loại hình',
       hourlyRate: 'Lương (VND)',
       hourlyRatePlaceholder: '',
-      hourlyRateMin: 'Phải lớn hơn hoặc bằng 31.875 VNĐ',
+      hourlyRateMin: 'Phải lớn hơn hoặc bằng 29.500 VNĐ',
       workDate: 'Ngày làm',
       workDatePlaceholder: 'Chọn ngày làm việc',
       workingHours: 'Khung giờ làm việc',
@@ -759,12 +759,12 @@ const PostQuickJob = () => {
       submitButton: 'Đăng bài ngay',
       
       // Modal
-      successTitle: 'Đăng bài thành công!',
-      successMessage: 'Bài đăng tuyển gấp của bạn đã được tạo và sẽ hiển thị trong vài phút.',
+      successTitle: 'Đã gửi yêu cầu',
+      successMessage: 'Bài đăng của bạn đã được gửi và đang chờ admin duyệt. Nó sẽ hiển thị sau khi được phê duyệt.',
       paymentDeducted: 'Đã trừ phí đăng bài',
       remainingBalance: 'Số dư còn lại',
       errorTitle: 'Có lỗi xảy ra',
-      errorMessage: 'Vui lòng điền đầy đủ các thông tin bắt buộc và đảm bảo lương theo giờ tối thiểu 31.875 VNĐ.',
+      errorMessage: 'Vui lòng điền đầy đủ các thông tin bắt buộc và đảm bảo lương theo giờ tối thiểu 29.500 VNĐ.',
       closeButton: 'Đóng'
     },
     en: {
@@ -786,7 +786,6 @@ const PostQuickJob = () => {
       jobTypePlaceholder: 'Select type',
       hourlyRate: 'Salary (VND)',
       hourlyRatePlaceholder: '',
-      hourlyRateMin: 'Must be greater than or equal to 31,875 VND',
       workDate: 'Work Date',
       workDatePlaceholder: 'Select work date',
       workingHours: 'Working Hours',
@@ -813,12 +812,13 @@ const PostQuickJob = () => {
       submitButton: 'Post Now',
       
       // Modal
-      successTitle: 'Posted Successfully!',
-      successMessage: 'Your urgent job posting has been created and will be visible in a few minutes.',
+      successTitle: 'Submitted for Approval',
+      successMessage: 'Your job posting has been submitted and is awaiting admin approval. It will be visible once approved.',
       paymentDeducted: 'Posting fee deducted',
       remainingBalance: 'Remaining balance',
       errorTitle: 'Error Occurred',
-      errorMessage: 'Please fill in all required fields and ensure hourly rate is at least 31.875 VND.',
+      hourlyRateMin: 'Must be greater than or equal to 29,500 VND',
+      errorMessage: 'Please fill in all required fields and ensure hourly rate is at least 29,500 VND.',
       closeButton: 'Close'
     }
   };
@@ -917,7 +917,7 @@ const PostQuickJob = () => {
                 />
                 {salaryError ? (
                   <small style={{ color: '#DC2626', fontSize: '12px', marginTop: '4px', display: 'block', fontWeight: '600' }}>
-                    ⚠️ {language === 'vi' ? 'Lương phải lớn hơn hoặc bằng 31.875 VNĐ' : 'Salary must be >= 31,875 VND'}
+                    ⚠️ {language === 'vi' ? 'Lương phải lớn hơn hoặc bằng 29.500 VNĐ' : 'Salary must be >= 29,500 VND'}
                   </small>
                 ) : (
                   <small style={{ color: '#000000', fontSize: '12px', marginTop: '4px', display: 'block' }}>
@@ -1118,22 +1118,7 @@ const PostQuickJob = () => {
                   {paymentInfo.newBalance.toLocaleString('vi-VN')} VNĐ
                 </span>
               </div>
-              {paymentInfo.escrow && (
-                <div style={{
-                  marginTop: '10px',
-                  padding: '8px 12px',
-                  background: '#FEF3C7',
-                  border: '1px solid #FCD34D',
-                  borderRadius: '8px',
-                  fontSize: '12px',
-                  color: '#92400E',
-                  lineHeight: '1.5'
-                }}>
-                  🔒 {language === 'vi'
-                    ? 'Số tiền đang được giữ trong Ví Escrow. Khi cả hai bên xác nhận hoàn thành, 85% sẽ chuyển cho ứng viên và 15% cho nền tảng.'
-                    : 'Funds are held in Escrow. When both parties confirm completion, 85% goes to the candidate and 15% to the platform.'}
-                </div>
-              )}
+              
             </div>
           )}
           {modalType === 'error' && (paymentInfo?.message?.includes('Số dư không đủ') || paymentInfo?.message?.includes('Insufficient balance')) ? (

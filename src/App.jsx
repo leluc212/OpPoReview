@@ -55,7 +55,6 @@ import Subscription from './pages/employer/Subscription';
 import HRManagement from './pages/employer/HRManagement';
 import EmployerSettings from './pages/employer/EmployerSettings';
 import Analytics from './pages/employer/Analytics';
-import EmployerSupport from './pages/employer/EmployerSupport';
 import EmployerWallet from './pages/employer/EmployerWallet';
 
 // Admin Pages
@@ -209,11 +208,7 @@ function AppRoutes() {
           <EmployerProfileView />
         </ProtectedRoute>
       } />
-      <Route path="/candidate/support" element={
-        <ProtectedRoute allowedRoles={['candidate']}>
-          <Support />
-        </ProtectedRoute>
-      } />
+
       <Route path="/candidate/wallet" element={
         <ProtectedRoute allowedRoles={['candidate']}>
           <Wallet />
@@ -307,11 +302,7 @@ function AppRoutes() {
           <Analytics />
         </ProtectedRoute>
       } />
-      <Route path="/employer/support" element={
-        <ProtectedRoute allowedRoles={['employer']}>
-          <EmployerSupport />
-        </ProtectedRoute>
-      } />
+
       <Route path="/employer/wallet" element={
         <ProtectedRoute allowedRoles={['employer']}>
           <EmployerWallet />

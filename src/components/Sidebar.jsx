@@ -16,7 +16,6 @@ import {
   Package,
   MapPin,
   ShieldCheck,
-  HelpCircle,
   Wallet,
   LogOut,
   UsersRound,
@@ -383,8 +382,7 @@ const Sidebar = ({ role, onHoverChange }) => {
       { to: '/candidate/profile', icon: Users, label: t.sidebar.myProfile },
     ]},
     { section: t.sidebar.utilities, items: [
-      { to: '/candidate/wallet', icon: Wallet, label: t.sidebar.digitalWallet },
-      { to: '/candidate/support', icon: HelpCircle, label: t.sidebar.support }
+      { to: '/candidate/wallet', icon: Wallet, label: t.sidebar.digitalWallet }
     ]}
   ];
   
@@ -403,8 +401,7 @@ const Sidebar = ({ role, onHoverChange }) => {
     ]},
     { section: t.sidebar.utilities, items: [
       { to: '/employer/analytics', icon: BarChart3, label: t.sidebar.reports || 'Analytics' },
-      { to: '/employer/wallet', icon: Wallet, label: t.sidebar.digitalWallet },
-      { to: '/employer/support', icon: HelpCircle, label: t.sidebar.support }
+      { to: '/employer/wallet', icon: Wallet, label: t.sidebar.digitalWallet }
     ]}
   ];
   

@@ -11,7 +11,6 @@ import {
   Briefcase,
   CheckCircle,
   AlertCircle,
-  Eye,
   Clock,
   X,
   TrendingUp,
@@ -730,17 +729,11 @@ function CandidateNotifications() {
                   }).length}</div>
                 </StatItem>
 
-                <StatItem $color="#10B981">
-                  <div className="stat-header">
-                    <span className="stat-label">{language === 'vi' ? 'Lượt xem hồ sơ' : 'Profile views'}</span>
-                    <Eye />
-                  </div>
-                  <div className="stat-value">{notifications.filter(n => n.type === 'application' && (n.title.includes('xem') || n.title.includes('viewed'))).length}</div>
-                </StatItem>
+
 
                 <StatItem $color="#10B981">
                   <div className="stat-header">
-                    <span className="stat-label">{language === 'vi' ? 'Hồ sơ được chấp nhận' : 'Accepted applications'}</span>
+                    <span className="stat-label">{language === 'vi' ? 'CV được chấp nhận' : 'Accepted CVs'}</span>
                     <CheckCircle />
                   </div>
                   <div className="stat-value">{notifications.filter(n => n.type === 'success' && n.title.includes(language === 'vi' ? 'chấp nhận' : 'accepted')).length}</div>
