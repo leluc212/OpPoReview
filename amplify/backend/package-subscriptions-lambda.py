@@ -140,6 +140,9 @@ def lambda_handler(event, context):
             employer_id = path_parameters.get('employerId')
             return get_employer_wallet(employer_id, headers)
         
+        elif http_method == 'POST' and path == '/wallet/transaction':
+            return handle_wallet_transaction(body, headers)
+            
         elif http_method == 'POST' and path == '/wallet/withdraw':
             return withdraw_wallet(body, headers)
             
@@ -1002,6 +1005,93 @@ def withdraw_wallet(body_str, headers):
             'body': json.dumps({
                 'success': False,
                 'message': f'Error processing withdrawal: {str(e)}'
+            })
+        }
+
+def handle_wallet_transaction(body_str, headers):
+    try:
+        body = json.loads(body_str) if isinstance(body_str, str) else body_str
+        
+        employer_id = body.get('employerId')
+        amount = Decimal(str(body.get('amount', 0)))
+        txn_type = body.get('type') # 'debit' or 'credit'
+        description = body.get('description', 'Giao dịch ví')
+        
+        if not employer_id or amount <= 0 or txn_type not in ['debit', 'credit']:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({
+                    'success': False,
+                    'message': 'Missing required fields or invalid transaction type/amount'
+                })
+            }
+            
+        wallet_info = get_or_create_wallet(employer_id)
+        balance = wallet_info.get('walletBalance', Decimal('0'))
+        
+        if txn_type == 'debit':
+            if balance < amount:
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({
+                        'success': False,
+                        'message': 'Số dư tài khoản không đủ để thực hiện giao dịch này.'
+                    })
+                }
+            new_balance = balance - amount
+        else:
+            new_balance = balance + amount
+            
+        now_dt = get_vn_now()
+        txn_id = f"TXN-{txn_type.upper()}-{now_dt.strftime('%Y%m%d')}-{str(uuid.uuid4())[:6].upper()}"
+        
+        transaction = {
+            'transactionId': txn_id,
+            'type': txn_type,
+            'amount': amount,
+            'description': description,
+            'timestamp': now_dt.isoformat(),
+            'status': 'completed',
+            'paymentDetails': body.get('paymentDetails', {})
+        }
+        
+        transactions = wallet_info.get('walletTransactions', [])
+        transactions.insert(0, transaction)
+        
+        # Update wallet balance and transaction history in DB
+        employer_profile_table.update_item(
+            Key={'userId': employer_id},
+            UpdateExpression="SET walletBalance = :bal, walletTransactions = :txs, updatedAt = :updatedAt",
+            ExpressionAttributeValues={
+                ':bal': new_balance,
+                ':txs': transactions,
+                ':updatedAt': now_dt.isoformat()
+            }
+        )
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True,
+                'message': 'Giao dịch thành công',
+                'data': {
+                    'walletBalance': new_balance,
+                    'walletTransactions': transactions
+                }
+            }, default=decimal_default)
+        }
+        
+    except Exception as e:
+        print(f"Error in handle_wallet_transaction: {str(e)}")
+        return {
+            'statusCode': 500,
+            'headers': headers,
+            'body': json.dumps({
+                'success': False,
+                'message': f'Error processing wallet transaction: {str(e)}'
             })
         }
 

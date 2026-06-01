@@ -1,14 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
+import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import Modal from '../../components/Modal';
 import AddressInput from '../../components/AddressInput';
 import { Button, Input, TextArea, Select, FormGroup, Label } from '../../components/FormElements';
-import { Save, ArrowLeft, AlertCircle, CheckCircle, Clock, Zap, Globe } from 'lucide-react';
+import { Save, ArrowLeft, AlertCircle, CheckCircle, Clock, Zap, Globe, X, Banknote, Copy, Check } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import quickJobService from '../../services/quickJobService';
 import employerProfileService from '../../services/employerProfileService';
+import { useAuth } from '../../context/AuthContext';
+import { getWallet, createWalletTransaction } from '../../services/packageCatalogService';
+
 
 // Keyframe animations
 const fadeIn = keyframes`
@@ -366,6 +370,369 @@ const ModalMessage = styled.p`
   margin-bottom: 24px;
 `;
 
+// ── Deposit Modal Styled Components ──────────────────────────────────────────
+
+const DepModalOverlay = styled(motion.div)`
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 18, 40, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+`;
+
+const DepModalBox = styled(motion.div)`
+  background: #ffffff;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 460px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 32px 64px -12px rgba(14, 57, 149, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+`;
+
+const DepModalHead = styled.div`
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+  padding: 20px 24px 16px;
+  position: relative;
+  color: white;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 180px;
+    height: 180px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+  }
+`;
+
+const DepModalHeadIcon = styled.div`
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
+
+  svg { width: 20px; height: 20px; }
+`;
+
+const DepModalHeadTitle = styled.div`
+  position: relative;
+  z-index: 1;
+  h2 {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 2px;
+  }
+  p {
+    font-size: 12px;
+    opacity: 0.8;
+  }
+`;
+
+const DepModalCloseBtn = styled.button`
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 2;
+
+  &:hover { background: rgba(255, 255, 255, 0.28); transform: scale(1.1); }
+  svg { width: 16px; height: 16px; }
+`;
+
+const DepModalBody = styled.div`
+  padding: 16px 24px 8px;
+  overflow-y: auto;
+  flex: 1;
+`;
+
+const DepSectionLabel = styled.div`
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #94a3b8;
+  margin-bottom: 6px;
+`;
+
+const DepQuickAmountsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+`;
+
+const DepQuickAmountBtn = styled.button`
+  padding: 9px 6px;
+  border: 2px solid ${props => props.$selected ? '#1e40af' : '#e2e8f0'};
+  background: ${props => props.$selected ? '#EFF6FF' : '#f8fafc'};
+  color: ${props => props.$selected ? '#1e40af' : '#475569'};
+  border-radius: 12px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s;
+
+  &:hover {
+    border-color: #1e40af;
+    background: #EFF6FF;
+    color: #1e40af;
+    transform: translateY(-1px);
+  }
+`;
+
+const DepAmountInputWrapper = styled.div`
+  position: relative;
+  margin-bottom: 8px;
+`;
+
+const DepCurrencyLabel = styled.div`
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  font-weight: 700;
+  color: #94a3b8;
+  pointer-events: none;
+`;
+
+const DepDepositInput = styled.input`
+  width: 100%;
+  padding: 11px 60px 11px 16px;
+  border: 2px solid ${props => props.$invalid ? '#ef4444' : '#e2e8f0'};
+  border-radius: 14px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #1e293b;
+  outline: none;
+  transition: all 0.2s;
+  box-sizing: border-box;
+  letter-spacing: 0.5px;
+
+  &:focus {
+    border-color: #1e40af;
+    box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1);
+  }
+
+  &::placeholder {
+    color: #cbd5e1;
+    font-weight: 500;
+    font-size: 15px;
+  }
+`;
+
+const DepAmountPreview = styled.div`
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 12px;
+  min-height: 18px;
+  padding-left: 4px;
+`;
+
+const DepModalFooter = styled.div`
+  padding: 12px 24px 20px;
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+`;
+
+const DepCancelBtn = styled.button`
+  flex: 1;
+  padding: 12px;
+  background: #f1f5f9;
+  color: #64748b;
+  border: none;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover { background: #e2e8f0; color: #475569; }
+`;
+
+const DepConfirmBtn = styled(motion.button)`
+  flex: 2;
+  padding: 14px;
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(30, 64, 175, 0.35);
+  transition: box-shadow 0.2s;
+
+  &:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; }
+  &:not(:disabled):hover { box-shadow: 0 8px 24px rgba(30, 64, 175, 0.5); }
+  svg { width: 18px; height: 18px; }
+`;
+
+const DepSuccessState = styled(motion.div)`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 28px 48px;
+  text-align: center;
+
+  svg {
+    width: 64px;
+    height: 64px;
+    color: #10b981;
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 8px;
+  }
+
+  p {
+    font-size: 15px;
+    color: #64748b;
+  }
+
+  .amount-text {
+    font-size: 28px;
+    font-weight: 900;
+    color: #10b981;
+    margin: 8px 0 4px;
+  }
+`;
+
+const DepLoadingSpinner = styled(motion.div)`
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: white;
+  border-radius: 50%;
+`;
+
+const DepQRContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+`;
+
+const DepQRCodeImage = styled.img`
+  width: 220px;
+  height: 220px;
+  border-radius: 16px;
+  border: 4px solid #f1f5f9;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+`;
+
+const DepPaymentDetailsTable = styled.div`
+  width: 100%;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const DepDetailRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13.5px;
+  
+  .label {
+    color: #64748b;
+    font-weight: 500;
+  }
+  
+  .value {
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+`;
+
+const DepCopyButton = styled.button`
+  background: #EFF6FF;
+  border: none;
+  color: #1e40af;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: #BFDBFE;
+  }
+`;
+
+const DepPollingStatus = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #1e40af;
+  font-weight: 600;
+  background: #EFF6FF;
+  padding: 10px 16px;
+  border-radius: 20px;
+  margin-top: 8px;
+  animation: pulseStatus 2.2s infinite ease-in-out;
+  
+  @keyframes pulseStatus {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(0.98); }
+  }
+`;
+
 const PostQuickJob = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
@@ -374,6 +741,92 @@ const PostQuickJob = () => {
   const [salaryBoxActive, setSalaryBoxActive] = useState(false);
   const [salaryError, setSalaryError] = useState(false);
   const [paymentInfo, setPaymentInfo] = useState(null);
+  
+  const { user } = useAuth();
+  const employerId = user?.userId || user?.id || user?.email || 'mock_employer_id';
+  const [realBalance, setRealBalance] = useState(0);
+
+  // Deposit modal state
+  const [walletCode, setWalletCode] = useState('');
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [depositStep, setDepositStep] = useState(1); // 1: Select amount, 2: Show VietQR and polling
+  const [depositRawAmount, setDepositRawAmount] = useState('');
+  const [depositLoading, setDepositLoading] = useState(false);
+  const [depositSuccess, setDepositSuccess] = useState(false);
+  const [copiedText, setCopiedText] = useState('');
+  const depositInputRef = useRef(null);
+
+  const QUICK_AMOUNTS = [100000, 200000, 500000, 1000000, 2000000, 5000000];
+
+  const formatQuickAmount = (n) => {
+    if (n >= 1000000) return (n / 1000000) + 'M';
+    return (n / 1000) + 'K';
+  };
+
+  const parsedDepositAmount = parseInt(depositRawAmount.replace(/\D/g, '') || '0');
+  const formattedDepositPreview = parsedDepositAmount > 0
+    ? parsedDepositAmount.toLocaleString('vi-VN') + ' VND'
+    : '';
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (!employerId || employerId === 'mock_employer_id') return;
+      try {
+        const wallet = await getWallet(employerId);
+        setRealBalance(wallet.walletBalance || 0);
+        setWalletCode(wallet.walletCode || '');
+      } catch (err) {
+        console.error('Error fetching wallet balance:', err);
+      }
+    };
+    fetchBalance();
+  }, [employerId]);
+
+  // Polling for deposits while deposit modal is open in step 2
+  useEffect(() => {
+    let intervalId;
+    if (showDepositModal && depositStep === 2 && employerId) {
+      intervalId = setInterval(async () => {
+        try {
+          const wallet = await getWallet(employerId);
+          const newBal = wallet.walletBalance || 0;
+          if (newBal > realBalance) {
+            setRealBalance(newBal);
+            setDepositSuccess(true);
+            setDepositRawAmount('');
+            clearInterval(intervalId);
+
+            setTimeout(() => {
+              setShowDepositModal(false);
+              setDepositSuccess(false);
+            }, 2200);
+          }
+        } catch (err) {
+          console.error('Error polling wallet balance:', err);
+        }
+      }, 5000);
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [showDepositModal, depositStep, employerId, realBalance]);
+
+  const handleDepositAmountInput = (e) => {
+    const raw = e.target.value.replace(/\D/g, '');
+    setDepositRawAmount(raw);
+  };
+
+  const handleConfirmDeposit = () => {
+    if (parsedDepositAmount <= 0) return;
+    setDepositStep(2);
+  };
+
+  const handleCopyText = (text, label) => {
+    navigator.clipboard.writeText(text);
+    setCopiedText(label);
+    setTimeout(() => setCopiedText(''), 2000);
+  };
+
 
   const parseHourlyRateInput = (input) => {
     const rawValue = String(input ?? '').trim();
@@ -572,43 +1025,81 @@ const PostQuickJob = () => {
 
     const totalFee = Math.round(calculation.total); // Lấy tổng lương làm phí
 
-    // Check wallet balance
-    const walletData = JSON.parse(localStorage.getItem('employer_wallet') || '{"balance": 0}');
-    const currentBalance = walletData.balance || 0;
+    // Fetch fresh balance from wallet API
+    let currentBalance = realBalance;
+    try {
+      if (employerId && employerId !== 'mock_employer_id') {
+        const wallet = await getWallet(employerId);
+        currentBalance = wallet.walletBalance || 0;
+        setRealBalance(currentBalance);
+      }
+    } catch (err) {
+      console.warn('API getWallet failed, falling back to local state:', err);
+    }
 
     if (currentBalance < totalFee) {
+      const missingAmount = totalFee - currentBalance;
       setModalType('error');
       setPaymentInfo({
         error: true,
+        missingAmount: missingAmount,
         message: language === 'vi' 
-          ? `Số dư không đủ. Bạn cần ${totalFee.toLocaleString('vi-VN')} VNĐ nhưng chỉ có ${currentBalance.toLocaleString('vi-VN')} VNĐ.`
-          : `Insufficient balance. You need ${totalFee.toLocaleString('vi-VN')} VND but only have ${currentBalance.toLocaleString('vi-VN')} VND.`
+          ? `Số dư không đủ. Bạn cần nạp thêm ${missingAmount.toLocaleString('vi-VN')} VNĐ (Tổng chi phí: ${totalFee.toLocaleString('vi-VN')} VNĐ, Số dư hiện tại: ${currentBalance.toLocaleString('vi-VN')} VNĐ).`
+          : `Insufficient balance. You need an additional ${missingAmount.toLocaleString('vi-VN')} VND (Total fee: ${totalFee.toLocaleString('vi-VN')} VND, Current balance: ${currentBalance.toLocaleString('vi-VN')} VND).`
       });
       setShowModal(true);
       return;
     }
 
+    const walletData = JSON.parse(localStorage.getItem('employer_wallet') || '{"balance": 0}');
+    let newBalance = 0;
+    let didDeductRealWallet = false;
+
     try {
-      // Deduct fee from wallet
-      const newBalance = currentBalance - totalFee;
-      walletData.balance = newBalance;
-      localStorage.setItem('employer_wallet', JSON.stringify(walletData));
-
-      // Save transaction (wallet debit)
-      const transaction = {
-        id: Date.now(),
-        type: 'debit',
-        amount: totalFee,
-        description: language === 'vi' 
+      // Deduct fee from wallet (backend database)
+      try {
+        const description = language === 'vi' 
           ? `Escrow - Đăng bài: ${formData.title} (${calculation.hours.toFixed(1)}h x ${rate.toLocaleString('vi-VN')} VNĐ)`
-          : `Escrow - Post job: ${formData.title} (${calculation.hours.toFixed(1)}h x ${rate.toLocaleString('vi-VN')} VND)`,
-        date: new Date().toISOString(),
-        balanceAfter: newBalance
-      };
+          : `Escrow - Post job: ${formData.title} (${calculation.hours.toFixed(1)}h x ${rate.toLocaleString('vi-VN')} VND)`;
 
-      const transactions = JSON.parse(localStorage.getItem('employer_transactions') || '[]');
-      transactions.unshift(transaction);
-      localStorage.setItem('employer_transactions', JSON.stringify(transactions));
+        const result = await createWalletTransaction(
+          employerId,
+          totalFee,
+          'debit',
+          description,
+          {
+            jobTitle: formData.title,
+            hours: calculation.hours,
+            hourlyRate: rate
+          }
+        );
+        newBalance = result.walletBalance || 0;
+        setRealBalance(newBalance);
+        didDeductRealWallet = true;
+      } catch (apiError) {
+        console.warn('⚠️ API wallet debit failed, falling back to simulated localStorage wallet:', apiError);
+        newBalance = currentBalance - totalFee;
+        
+        // Update mock local wallet
+        walletData.balance = newBalance;
+        localStorage.setItem('employer_wallet', JSON.stringify(walletData));
+
+        // Save mock local transaction
+        const transaction = {
+          id: Date.now(),
+          type: 'debit',
+          amount: totalFee,
+          description: language === 'vi' 
+            ? `Escrow - Đăng bài: ${formData.title} (${calculation.hours.toFixed(1)}h x ${rate.toLocaleString('vi-VN')} VNĐ)`
+            : `Escrow - Post job: ${formData.title} (${calculation.hours.toFixed(1)}h x ${rate.toLocaleString('vi-VN')} VND)`,
+          date: new Date().toISOString(),
+          balanceAfter: newBalance
+        };
+
+        const transactions = JSON.parse(localStorage.getItem('employer_transactions') || '[]');
+        transactions.unshift(transaction);
+        localStorage.setItem('employer_transactions', JSON.stringify(transactions));
+      }
 
       // Get company name from employer profile
       let companyName = 'Unknown Company';
@@ -691,8 +1182,28 @@ const PostQuickJob = () => {
       console.error('❌ Error creating quick job:', error);
       
       // Rollback wallet deduction
-      walletData.balance = currentBalance;
-      localStorage.setItem('employer_wallet', JSON.stringify(walletData));
+      if (didDeductRealWallet) {
+        try {
+          const description = language === 'vi'
+            ? `Hoàn tiền - Lỗi đăng bài: ${formData.title}`
+            : `Refund - Job posting error: ${formData.title}`;
+          const result = await createWalletTransaction(
+            employerId,
+            totalFee,
+            'credit',
+            description,
+            {
+              error: error.message
+            }
+          );
+          setRealBalance(result.walletBalance || 0);
+        } catch (refundError) {
+          console.error('❌ Failed to refund wallet balance:', refundError);
+        }
+      } else {
+        walletData.balance = currentBalance;
+        localStorage.setItem('employer_wallet', JSON.stringify(walletData));
+      }
       
       setModalType('error');
       setPaymentInfo({
@@ -1136,7 +1647,9 @@ const PostQuickJob = () => {
               <Button 
                 onClick={() => {
                   setShowModal(false);
-                  navigate('/employer/wallet');
+                  setDepositRawAmount(String(paymentInfo?.missingAmount || ''));
+                  setDepositStep(2); // Go directly to step 2 (show QR code for the missing amount)
+                  setShowDepositModal(true);
                 }}
                 style={{ 
                   flex: 1,
@@ -1154,6 +1667,190 @@ const PostQuickJob = () => {
           )}
         </ModalContent>
       </Modal>
+
+      {/* ── Deposit Modal ── */}
+      <AnimatePresence>
+        {showDepositModal && (
+          <DepModalOverlay
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={(e) => { if (e.target === e.currentTarget && !depositLoading) setShowDepositModal(false); }}
+          >
+            <DepModalBox
+              initial={{ opacity: 0, scale: 0.92, y: 24 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 24 }}
+              transition={{ type: 'spring', damping: 26, stiffness: 380 }}
+            >
+              {depositSuccess ? (
+                <DepSuccessState
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.1, type: 'spring', damping: 16, stiffness: 260 }}
+                  >
+                    <CheckCircle />
+                  </motion.div>
+                  <h3>{language === 'vi' ? 'Nạp tiền thành công!' : 'Deposit Successful!'}</h3>
+                  <div className="amount-text">
+                    +{parsedDepositAmount.toLocaleString('vi-VN')} VND
+                  </div>
+                  <p>{language === 'vi' ? 'Số dư ví của bạn đã được cập nhật.' : 'Your wallet balance has been updated.'}</p>
+                </DepSuccessState>
+              ) : (
+                <>
+                  {/* Header */}
+                  <DepModalHead>
+                    <DepModalCloseBtn type="button" onClick={() => !depositLoading && setShowDepositModal(false)}>
+                      <X />
+                    </DepModalCloseBtn>
+                    <DepModalHeadIcon>
+                      <Banknote />
+                    </DepModalHeadIcon>
+                    <DepModalHeadTitle>
+                      <h2>{language === 'vi' ? 'Nạp tiền vào ví' : 'Deposit to Wallet'}</h2>
+                      <p>{language === 'vi' ? 'Chọn hoặc nhập số tiền muốn nạp' : 'Select or enter the amount to deposit'}</p>
+                    </DepModalHeadTitle>
+                  </DepModalHead>
+
+                  {/* Body */}
+                  <DepModalBody>
+                    {depositStep === 1 ? (
+                      <>
+                        <DepSectionLabel>{language === 'vi' ? 'Chọn nhanh' : 'Quick select'}</DepSectionLabel>
+                        <DepQuickAmountsGrid>
+                          {QUICK_AMOUNTS.map(amt => (
+                            <DepQuickAmountBtn
+                              key={amt}
+                              type="button"
+                              $selected={parseInt(depositRawAmount.replace(/\D/g, '') || '0') === amt}
+                              onClick={() => setDepositRawAmount(String(amt))}
+                            >
+                              {formatQuickAmount(amt)}
+                            </DepQuickAmountBtn>
+                          ))}
+                        </DepQuickAmountsGrid>
+
+                        <DepSectionLabel>{language === 'vi' ? 'Nhập số tiền' : 'Enter amount'}</DepSectionLabel>
+                        <DepAmountInputWrapper>
+                          <DepDepositInput
+                            ref={depositInputRef}
+                            type="text"
+                            inputMode="numeric"
+                            placeholder={language === 'vi' ? '0' : '0'}
+                            value={depositRawAmount ? parseInt(depositRawAmount).toLocaleString('vi-VN') : ''}
+                            onChange={handleDepositAmountInput}
+                            $invalid={depositRawAmount !== '' && parsedDepositAmount <= 0}
+                          />
+                          <DepCurrencyLabel>VND</DepCurrencyLabel>
+                        </DepAmountInputWrapper>
+                        <DepAmountPreview>
+                          {formattedDepositPreview
+                            ? `≈ ${formattedDepositPreview}`
+                            : (language === 'vi' ? 'Tối thiểu 1.000 VND' : 'Minimum 1,000 VND')}
+                        </DepAmountPreview>
+                      </>
+                    ) : (
+                      <DepQRContainer>
+                        <DepQRCodeImage
+                          src={`https://img.vietqr.io/image/MB-0777799991702-compact.png?amount=${parsedDepositAmount}&addInfo=OPPOWALLET%20${walletCode}&accountName=NGUYEN%20THI%20THUY%20DUNG`}
+                          alt="VietQR Transfer Code"
+                        />
+                        <DepPollingStatus>
+                          <Clock size={16} />
+                          {language === 'vi' ? 'Đang chờ giao dịch chuyển khoản...' : 'Waiting for transfer transaction...'}
+                        </DepPollingStatus>
+                        <DepPaymentDetailsTable>
+                          <DepDetailRow>
+                            <span className="label">{language === 'vi' ? 'Ngân hàng' : 'Bank'}</span>
+                            <span className="value">MBBank</span>
+                          </DepDetailRow>
+                          <DepDetailRow>
+                            <span className="label">{language === 'vi' ? 'Số tài khoản' : 'Account No.'}</span>
+                            <span className="value">
+                              0777799991702
+                              <DepCopyButton type="button" onClick={() => handleCopyText('0777799991702', 'account')}>
+                                {copiedText === 'account' ? <><Check size={11} /> {language === 'vi' ? 'Đã chép' : 'Copied'}</> : <><Copy size={11} /> {language === 'vi' ? 'Sao chép' : 'Copy'}</>}
+                              </DepCopyButton>
+                            </span>
+                          </DepDetailRow>
+                          <DepDetailRow>
+                            <span className="label">{language === 'vi' ? 'Tên thụ hưởng' : 'Account Name'}</span>
+                            <span className="value">NGUYEN THI THUY DUNG</span>
+                          </DepDetailRow>
+                          <DepDetailRow>
+                            <span className="label">{language === 'vi' ? 'Số tiền' : 'Amount'}</span>
+                            <span className="value" style={{ color: '#10b981', fontSize: '15px' }}>
+                              {parsedDepositAmount.toLocaleString('vi-VN')} VND
+                            </span>
+                          </DepDetailRow>
+                          <DepDetailRow>
+                            <span className="label">{language === 'vi' ? 'Nội dung chuyển' : 'Content'}</span>
+                            <span className="value" style={{ color: '#1e40af' }}>
+                              {`OPPOWALLET ${walletCode}`}
+                              <DepCopyButton type="button" onClick={() => handleCopyText(`OPPOWALLET ${walletCode}`, 'content')}>
+                                {copiedText === 'content' ? <><Check size={11} /> {language === 'vi' ? 'Đã chép' : 'Copied'}</> : <><Copy size={11} /> {language === 'vi' ? 'Sao chép' : 'Copy'}</>}
+                              </DepCopyButton>
+                            </span>
+                          </DepDetailRow>
+                        </DepPaymentDetailsTable>
+                      </DepQRContainer>
+                    )}
+                  </DepModalBody>
+
+                  {/* Footer */}
+                  <DepModalFooter>
+                    {depositStep === 1 ? (
+                      <>
+                        <DepCancelBtn type="button" onClick={() => !depositLoading && setShowDepositModal(false)}>
+                          {language === 'vi' ? 'Huỷ' : 'Cancel'}
+                        </DepCancelBtn>
+                        <DepConfirmBtn
+                          type="button"
+                          onClick={handleConfirmDeposit}
+                          disabled={depositLoading || parsedDepositAmount <= 0}
+                          whileTap={{ scale: 0.97 }}
+                        >
+                          {depositLoading ? (
+                            <DepLoadingSpinner
+                              animate={{ rotate: 360 }}
+                              transition={{ repeat: Infinity, duration: 0.75, ease: 'linear' }}
+                            />
+                          ) : (
+                            <>
+                              <Zap />
+                              {language === 'vi' ? 'Tạo mã QR' : 'Generate QR'}
+                            </>
+                          )}
+                        </DepConfirmBtn>
+                      </>
+                    ) : (
+                      <>
+                        <DepCancelBtn type="button" onClick={() => setDepositStep(1)} style={{ flex: 1 }}>
+                          {language === 'vi' ? 'Quay lại' : 'Back'}
+                        </DepCancelBtn>
+                        <DepConfirmBtn
+                          type="button"
+                          onClick={() => setShowDepositModal(false)}
+                          style={{ flex: 1, background: '#64748b', boxShadow: 'none' }}
+                          whileTap={{ scale: 0.97 }}
+                        >
+                          {language === 'vi' ? 'Đóng' : 'Close'}
+                        </DepConfirmBtn>
+                      </>
+                    )}
+                  </DepModalFooter>
+                </>
+              )}
+            </DepModalBox>
+          </DepModalOverlay>
+        )}
+      </AnimatePresence>
     </DashboardLayout>
   );
 };
