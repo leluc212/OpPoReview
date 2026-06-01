@@ -29,6 +29,15 @@ def decimal_default(obj):
         return int(obj) if obj % 1 == 0 else float(obj)
     raise TypeError
 
+def float_to_decimal(obj):
+    if isinstance(obj, float):
+        return Decimal(str(obj))
+    elif isinstance(obj, dict):
+        return {k: float_to_decimal(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [float_to_decimal(x) for x in obj]
+    return obj
+
 
 def get_cors_headers():
     return {
@@ -1011,6 +1020,7 @@ def withdraw_wallet(body_str, headers):
 def handle_wallet_transaction(body_str, headers):
     try:
         body = json.loads(body_str) if isinstance(body_str, str) else body_str
+        body = float_to_decimal(body)
         
         employer_id = body.get('employerId')
         amount = Decimal(str(body.get('amount', 0)))
