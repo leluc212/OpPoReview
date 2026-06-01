@@ -5,6 +5,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
 import { Button, Input } from '../../components/FormElements';
 import { useAuth } from '../../context/AuthContext';
+import { useLocation, useNavigate } from 'react-router-dom';
 import employerProfileService from '../../services/employerProfileService';
 import { getWallet, withdrawWallet } from '../../services/packageCatalogService';
 import {
@@ -1043,6 +1044,8 @@ const PollingStatus = styled.div`
 const EmployerWallet = () => {
   const { language } = useLanguage();
   const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const employerId = user?.userId || user?.id || user?.email || 'mock_employer_id';
 
   const [balance, setBalance] = useState(0);
@@ -1050,6 +1053,7 @@ const EmployerWallet = () => {
   const [transactions, setTransactions] = useState([]);
   const [companyName, setCompanyName] = useState('N/A');
   const [companyLogo, setCompanyLogo] = useState('');
+  const [redirectBackUrl, setRedirectBackUrl] = useState(null);
 
   // Fetch company profile on mount
   useEffect(() => {
@@ -1079,6 +1083,7 @@ const EmployerWallet = () => {
   const [loading, setLoading] = useState(true);
   const [showBalance, setShowBalance] = useState(false);
   const [filterType, setFilterType] = useState('all');
+  const [filterDate, setFilterDate] = useState('');
 
   // Deposit modal state
   const [showDepositModal, setShowDepositModal] = useState(false);
@@ -1151,6 +1156,20 @@ const EmployerWallet = () => {
     fetchWalletData();
   }, [employerId]);
 
+  // Handle redirect from post quick job page with pre-entered deposit amount
+  useEffect(() => {
+    if (location.state && location.state.depositAmount && walletCode) {
+      setDepositRawAmount(String(location.state.depositAmount));
+      setDepositStep(2);
+      setShowDepositModal(true);
+      if (location.state.fromPage) {
+        setRedirectBackUrl(location.state.fromPage);
+      }
+      // Clear location state to prevent modal reopening on refresh
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, walletCode, navigate, location.pathname]);
+
   // Polling for deposits while deposit modal is open in step 2
   useEffect(() => {
     let intervalId;
@@ -1177,6 +1196,9 @@ const EmployerWallet = () => {
             setTimeout(() => {
               setShowDepositModal(false);
               setDepositSuccess(false);
+              if (redirectBackUrl) {
+                navigate(redirectBackUrl, { replace: true });
+              }
             }, 2200);
           }
         } catch (err) {
@@ -1187,7 +1209,7 @@ const EmployerWallet = () => {
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [showDepositModal, depositStep, employerId, balance]);
+  }, [showDepositModal, depositStep, employerId, balance, redirectBackUrl, navigate]);
 
   const receipts = [
     { id: 1, title: language === 'vi' ? 'Hóa đơn #2026021401' : 'Invoice #2026021401', date: '14/02/2026', amount: '2,500,000 VND' },
@@ -1344,14 +1366,26 @@ const EmployerWallet = () => {
     .filter(t => t.type === 'expense' || t.type === 'debit')
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
-  // Filter transactions based on filter type
-  const filteredTransactions = filterType === 'all'
-    ? transactions
-    : transactions.filter(t => {
-      if (filterType === 'income') return t.type === 'income' || t.type === 'credit';
-      if (filterType === 'expense') return t.type === 'expense' || t.type === 'debit';
-      return true;
-    });
+  // Filter transactions based on filter type and date
+  const filteredTransactions = transactions.filter(t => {
+    // Filter by type
+    if (filterType === 'income' && !(t.type === 'income' || t.type === 'credit')) return false;
+    if (filterType === 'expense' && !(t.type === 'expense' || t.type === 'debit')) return false;
+    
+    // Filter by date
+    if (filterDate) {
+      if (!t.date) return false;
+      const txDate = new Date(t.date);
+      const yyyy = txDate.getFullYear();
+      const mm = String(txDate.getMonth() + 1).padStart(2, '0');
+      const dd = String(txDate.getDate()).padStart(2, '0');
+      const formattedTxDate = `${yyyy}-${mm}-${dd}`;
+      
+      if (formattedTxDate !== filterDate) return false;
+    }
+    
+    return true;
+  });
 
   return (
     <DashboardLayout role="employer" key={language}>
@@ -1518,10 +1552,25 @@ const EmployerWallet = () => {
                     {language === 'vi' ? 'Rút tiền' : 'Withdrawals'}
                   </FilterButton>
                 </div>
-                <Input
-                  type="date"
-                  style={{ width: 'auto', padding: '10px 16px' }}
-                />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Input
+                    type="date"
+                    value={filterDate}
+                    onChange={(e) => setFilterDate(e.target.value)}
+                    style={{ width: 'auto', padding: '10px 16px' }}
+                  />
+                  {filterDate && (
+                    <Button
+                      $variant="ghost"
+                      $size="small"
+                      onClick={() => setFilterDate('')}
+                      style={{ padding: '8px', minWidth: 'auto', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      title={language === 'vi' ? 'Xóa lọc' : 'Clear filter'}
+                    >
+                      <X size={16} />
+                    </Button>
+                  )}
+                </div>
               </FilterBar>
 
               <TransactionList>

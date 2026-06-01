@@ -226,3 +226,34 @@ export const updateWithdrawalStatus = async (requestId, status) => {
   const payload = await response.json();
   return payload?.data || payload;
 };
+
+export const createWalletTransaction = async (employerId, amount, type, description, paymentDetails = {}) => {
+  const base = API_ENDPOINT || (import.meta.env.DEV ? DEV_PROXY_BASE : null);
+  if (!base) {
+    throw new Error('API endpoint is not configured');
+  }
+
+  const url = `${base.replace(/\/$/, '')}/wallet/transaction`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      employerId,
+      amount,
+      type,
+      description,
+      paymentDetails
+    })
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    throw new Error(errorBody.message || 'Failed to process wallet transaction');
+  }
+
+  const payload = await response.json();
+  return payload?.data || payload;
+};
+
