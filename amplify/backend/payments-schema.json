@@ -1,0 +1,28 @@
+{
+  "TableName": "Payments",
+  "BillingMode": "PAY_PER_REQUEST",
+  "AttributeDefinitions": [
+    { "AttributeName": "paymentId", "AttributeType": "S" },
+    { "AttributeName": "transferCode", "AttributeType": "S" },
+    { "AttributeName": "userId", "AttributeType": "S" }
+  ],
+  "KeySchema": [
+    { "AttributeName": "paymentId", "KeyType": "HASH" }
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "TransferCodeIndex",
+      "KeySchema": [{ "AttributeName": "transferCode", "KeyType": "HASH" }],
+      "Projection": { "ProjectionType": "ALL" }
+    },
+    {
+      "IndexName": "UserIdIndex",
+      "KeySchema": [{ "AttributeName": "userId", "KeyType": "HASH" }],
+      "Projection": { "ProjectionType": "ALL" }
+    }
+  ],
+  "TimeToLiveSpecification": {
+    "AttributeName": "ttl",
+    "Enabled": true
+  }
+}

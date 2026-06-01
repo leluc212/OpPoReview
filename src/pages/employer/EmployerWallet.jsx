@@ -3,6 +3,8 @@ import styled, { keyframes } from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
+import PaymentModal from '../../components/PaymentModal';
 import { Button, Input } from '../../components/FormElements';
 import { 
   Wallet as WalletIcon, 
@@ -947,13 +949,14 @@ const WithdrawSuccessState = styled(SuccessState)`
 
 const EmployerWallet = () => {
   const { language } = useLanguage();
+  const { user } = useAuth();
   
   // Initialize wallet if not exists
   const initializeWallet = () => {
     const walletData = localStorage.getItem('employer_wallet');
     if (!walletData) {
       const initialWallet = {
-        balance: 500000, // 500,000 VNĐ số dư ban đầu
+        balance: 500000,
         createdAt: new Date().toISOString()
       };
       localStorage.setItem('employer_wallet', JSON.stringify(initialWallet));
@@ -971,6 +974,10 @@ const EmployerWallet = () => {
   const [depositRawAmount, setDepositRawAmount] = useState('');
   const [depositLoading, setDepositLoading] = useState(false);
   const [depositSuccess, setDepositSuccess] = useState(false);
+
+  // QR Payment modal state
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [pendingDepositAmount, setPendingDepositAmount] = useState(0);
   const depositInputRef = useRef(null);
 
   // Withdraw modal state
@@ -1139,38 +1146,40 @@ const EmployerWallet = () => {
   const handleConfirmDeposit = () => {
     const amount = parseInt(depositRawAmount.replace(/\D/g, '') || '0');
     if (!amount || amount <= 0) return;
+    // Đóng deposit modal, mở PaymentModal QR
+    setPendingDepositAmount(amount);
+    setShowDepositModal(false);
+    setShowPaymentModal(true);
+  };
 
-    setDepositLoading(true);
+  const handlePaymentSuccess = (paymentId) => {
+    const amount = pendingDepositAmount;
+    setShowPaymentModal(false);
 
-    setTimeout(() => {
-      const walletData = JSON.parse(localStorage.getItem('employer_wallet') || '{"balance": 0}');
-      const newBalance = (walletData.balance || 0) + amount;
-      walletData.balance = newBalance;
-      localStorage.setItem('employer_wallet', JSON.stringify(walletData));
+    // Cộng tiền vào ví
+    const walletData = JSON.parse(localStorage.getItem('employer_wallet') || '{"balance":0}');
+    const newBalance = (walletData.balance || 0) + amount;
+    walletData.balance = newBalance;
+    localStorage.setItem('employer_wallet', JSON.stringify(walletData));
 
-      const transaction = {
-        id: Date.now(),
-        type: 'credit',
-        amount: amount,
-        description: language === 'vi' ? 'Nạp tiền vào ví' : 'Wallet deposit',
-        date: new Date().toISOString(),
-        balanceAfter: newBalance
-      };
+    // Lưu transaction
+    const transaction = {
+      id: paymentId || Date.now(),
+      type: 'credit',
+      amount,
+      description: language === 'vi' ? 'Nạp tiền qua VietQR' : 'Deposit via VietQR',
+      date: new Date().toISOString(),
+      balanceAfter: newBalance,
+    };
+    const savedTxs = JSON.parse(localStorage.getItem('employer_transactions') || '[]');
+    savedTxs.unshift(transaction);
+    localStorage.setItem('employer_transactions', JSON.stringify(savedTxs));
 
-      const savedTxs = JSON.parse(localStorage.getItem('employer_transactions') || '[]');
-      savedTxs.unshift(transaction);
-      localStorage.setItem('employer_transactions', JSON.stringify(savedTxs));
-
-      setBalance(newBalance);
-      reloadTransactions();
-      setDepositLoading(false);
-      setDepositSuccess(true);
-
-      setTimeout(() => {
-        setShowDepositModal(false);
-        setDepositSuccess(false);
-      }, 2200);
-    }, 900);
+    setBalance(newBalance);
+    reloadTransactions();
+    window.dispatchEvent(new Event('storage'));
+    setDepositSuccess(true);
+    setTimeout(() => setDepositSuccess(false), 2200);
   };
 
   const handleDepositAmountInput = (e) => {
@@ -1716,6 +1725,18 @@ const EmployerWallet = () => {
           </ModalOverlay>
         )}
       </AnimatePresence>
+
+      {/* QR Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onSuccess={handlePaymentSuccess}
+        userId={user?.username || 'unknown'}
+        packageId="wallet-deposit"
+        amount={pendingDepositAmount}
+        packageName={language === 'vi' ? 'Nạp tiền vào ví' : 'Wallet Deposit'}
+        duration=""
+      />
     </DashboardLayout>
   );
 };

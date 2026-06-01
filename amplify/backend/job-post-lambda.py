@@ -105,13 +105,13 @@ def lambda_handler(event, context):
                 'idJob': body.get('idJob', f"JOB-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"),
                 'employerId': body.get('employerId', user_id),
                 'title': body.get('title', 'Untitled Job'),
-                'status': 'active',
+                'status': 'pending',
                 'createdAt': datetime.utcnow().isoformat() + 'Z',
                 'updatedAt': datetime.utcnow().isoformat() + 'Z'
             }
-            # Add all other body fields
+            # Add all other body fields (but don't allow overriding status)
             for k, v in body.items():
-                if k not in item: item[k] = v
+                if k not in item and k != 'status': item[k] = v
             table.put_item(Item=item)
             return {'statusCode': 201, 'headers': headers, 'body': json.dumps({'success': True, 'data': item}, default=decimal_default)}
 

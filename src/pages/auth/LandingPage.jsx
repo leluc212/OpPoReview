@@ -6,6 +6,7 @@ import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, ArrowRight, Sp
 import { Button } from '../../components/FormElements';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import UnderDevelopmentModal from '../../components/UnderDevelopmentModal';
 
 const LandingContainer = styled.div`
@@ -685,6 +686,11 @@ const AnimatedBackground = styled.div`
       transform: translate(20px, -20px);
     }
   }
+
+  @keyframes floatY {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-18px); }
+  }
 `;
 
 const GradientGlow = styled(motion.div)`
@@ -748,25 +754,14 @@ const NoiseTexture = styled.div`
 
 const AuroraLayer = styled(motion.div)`
   position: absolute;
-  inset: -20%;
+  inset: -10%;
   background: 
     radial-gradient(circle at 25% 25%, rgba(147, 197, 253, 0.3) 0%, transparent 50%),
     radial-gradient(circle at 75% 75%, rgba(251, 207, 232, 0.25) 0%, transparent 50%),
     radial-gradient(circle at 50% 50%, rgba(253, 242, 248, 0.2) 0%, transparent 60%);
-  filter: blur(100px);
-  opacity: 0.7;
-  animation: auroraDrift 25s ease-in-out infinite alternate;
-  will-change: transform;
+  filter: blur(80px);
+  opacity: 0.6;
   z-index: 0;
-
-  @keyframes auroraDrift {
-    0% {
-      transform: rotate(-2deg) scale(1) translate(0, 0);
-    }
-    100% {
-      transform: rotate(2deg) scale(1.08) translate(-3%, -2%);
-    }
-  }
 `;
 
 const StarLayer = styled.div`
@@ -784,6 +779,7 @@ const Particle = styled(motion.span)`
   border-radius: 50%;
   opacity: 0.8;
   box-shadow: 0 0 10px rgba(30, 64, 175, 0.3);
+  will-change: transform;
 `;
 
 const WavePattern = styled(motion.div)`
@@ -811,6 +807,7 @@ const FloatingIcon = styled(motion.div)`
   justify-content: center;
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  will-change: transform;
   
   svg {
     width: 20px;
@@ -822,7 +819,6 @@ const FloatingIcon = styled(motion.div)`
 const GeometricShape = styled(motion.div)`
   position: absolute;
   border: 2px solid rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(5px);
   background: rgba(255, 255, 255, 0.05);
 `;
 
@@ -2486,6 +2482,243 @@ const SectionHeading = styled(motion.div)`
   }
 `;
 
+const FeaturesSection = styled(motion.section)`
+  width: 100%;
+  min-height: 100vh;
+  padding: 80px 80px;
+  background: ${props => props.$isDark ? '#0f172a' : '#f8fafc'};
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  @media (max-width: 1024px) { padding: 60px 40px; }
+  @media (max-width: 768px) { padding: 48px 24px; min-height: auto; }
+`;
+
+const FeaturesSectionInner = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+`;
+
+const FeaturesSectionTag = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: ${props => props.$isDark ? 'rgba(26,98,255,0.15)' : '#eff6ff'};
+  color: #1a62ff;
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+`;
+
+const FeaturesSectionTitle = styled.h2`
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 900;
+  color: ${props => props.$isDark ? '#e2e8f0' : '#1e293b'};
+  margin-bottom: 12px;
+  letter-spacing: -1px;
+`;
+
+const FeaturesSectionSub = styled.p`
+  font-size: 1rem;
+  color: ${props => props.$isDark ? '#94a3b8' : '#64748b'};
+  margin-bottom: 48px;
+  max-width: 560px;
+  line-height: 1.7;
+`;
+
+const FeaturesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  @media (max-width: 968px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 640px) { grid-template-columns: 1fr; }
+`;
+
+const FeatureCard = styled(motion.div)`
+  background: ${props => props.$isDark ? 'rgba(30,41,59,0.7)' : '#fff'};
+  border: 1.5px solid ${props => props.$isDark ? 'rgba(75,85,99,0.3)' : '#e2e8f0'};
+  border-radius: 20px;
+  padding: 28px 24px;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  &:hover {
+    border-color: #1a62ff;
+    box-shadow: 0 12px 40px rgba(26,98,255,0.12);
+    transform: translateY(-3px);
+  }
+`;
+
+const FeatureIconBox = styled.div`
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: ${props => props.$bg || 'linear-gradient(135deg, #eff6ff, #dbeafe)'};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  svg { color: ${props => props.$color || '#1a62ff'}; }
+`;
+
+const FeatureCardTitle = styled.div`
+  font-size: 1rem;
+  font-weight: 700;
+  color: ${props => props.$isDark ? '#e2e8f0' : '#1e293b'};
+  margin-bottom: 8px;
+`;
+
+const FeatureCardDesc = styled.div`
+  font-size: 0.85rem;
+  color: ${props => props.$isDark ? '#94a3b8' : '#64748b'};
+  line-height: 1.7;
+`;
+
+const FeatureCardLink = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1a62ff;
+  margin-top: 14px;
+  cursor: pointer;
+`;
+
+const AboutInlineSection = styled(motion.section)`
+  width: 100%;
+  min-height: 100vh;
+  background: ${props => props.$isDark ? '#0a0e1a' : '#001a6e'};
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 80px;
+  position: relative;
+  overflow: hidden;
+  &::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+    top: -200px; left: -150px; pointer-events: none;
+  }
+  &::after {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(147,197,253,0.08) 0%, transparent 70%);
+    bottom: -100px; right: -100px; pointer-events: none;
+  }
+  @media (max-width: 1024px) { padding: 60px 40px; }
+  @media (max-width: 768px) { padding: 48px 24px; min-height: auto; }
+`;
+
+const AboutInlineInner = styled.div`
+  max-width: 1200px; margin: 0 auto; width: 100%;
+  position: relative; z-index: 1;
+`;
+
+const AboutInlineGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+  @media (max-width: 768px) { grid-template-columns: 1fr; gap: 40px; }
+`;
+
+const AboutInlineLeft = styled.div``;
+
+const AboutInlineBadge = styled.div`
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px; padding: 6px 16px;
+  font-size: 0.78rem; font-weight: 700;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: 0.5px; text-transform: uppercase;
+  margin-bottom: 20px;
+`;
+
+const AboutInlineTitle = styled(motion.h2)`
+  font-size: clamp(1.8rem, 3.5vw, 3rem);
+  font-weight: 900; color: #fff;
+  line-height: 1.2; letter-spacing: -1px;
+  margin-bottom: 20px;
+  span { color: #93c5fd; }
+`;
+
+const AboutInlineDesc = styled(motion.p)`
+  font-size: 1rem; line-height: 1.8;
+  color: rgba(255,255,255,0.78);
+  margin-bottom: 32px;
+`;
+
+const AboutInlineStats = styled.div`
+  display: flex; gap: 0;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px; overflow: hidden;
+  margin-bottom: 32px;
+`;
+
+const AboutInlineStat = styled.div`
+  flex: 1; padding: 18px 12px; text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.1);
+  &:last-child { border-right: none; }
+  .n { font-size: 1.6rem; font-weight: 900; color: #fff; display: block; }
+  .l { font-size: 0.72rem; color: rgba(255,255,255,0.65); margin-top: 2px; }
+`;
+
+const AboutInlineRight = styled.div`
+  display: flex; flex-direction: column; gap: 16px;
+`;
+
+const AboutVMCard = styled(motion.div)`
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 18px; padding: 24px 22px;
+`;
+
+const AboutVMLabel = styled.div`
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: #93c5fd; margin-bottom: 8px;
+`;
+
+const AboutVMTitle = styled.div`
+  font-size: 1.05rem; font-weight: 800; color: #fff; margin-bottom: 8px;
+`;
+
+const AboutVMDesc = styled.div`
+  font-size: 0.85rem; line-height: 1.7; color: rgba(255,255,255,0.72);
+`;
+
+const AboutInlineCTA = styled.div`
+  display: flex; gap: 10px; flex-wrap: wrap;
+`;
+
+const AboutBtnWhite = styled(Link)`
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #fff; color: #1a62ff;
+  border-radius: 10px; padding: 11px 22px;
+  font-weight: 700; font-size: 0.88rem;
+  text-decoration: none; transition: all 0.2s;
+  &:hover { background: #f0f4ff; transform: translateY(-1px); }
+`;
+
+const AboutBtnGhost = styled(Link)`
+  display: inline-flex; align-items: center; gap: 6px;
+  background: transparent; color: #fff;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 10px; padding: 11px 22px;
+  font-weight: 700; font-size: 0.88rem;
+  text-decoration: none; transition: all 0.2s;
+  &:hover { border-color: #fff; background: rgba(255,255,255,0.08); }
+`;
+
 const CompanyBannerSection = styled(motion.section)`
   background: ${props => props.$isDark
     ? '#1e293b'
@@ -2626,15 +2859,9 @@ const BannerCompanyLogo = styled.div`
 
 const particleConfigs = [
   { top: '8%', left: '15%', duration: 16, delay: 0 },
-  { top: '22%', left: '78%', duration: 19, delay: 1.2 },
-  { top: '35%', left: '42%', duration: 18, delay: 0.8 },
-  { top: '48%', left: '68%', duration: 21, delay: 1.8 },
-  { top: '62%', left: '25%', duration: 17, delay: 2.4 },
-  { top: '75%', left: '55%', duration: 20, delay: 1.5 },
-  { top: '18%', left: '88%', duration: 22, delay: 0.5 },
-  { top: '85%', left: '12%', duration: 19, delay: 2.1 },
-  { top: '42%', left: '8%', duration: 18, delay: 1.1 },
-  { top: '68%', left: '82%', duration: 20, delay: 2.8 },
+  { top: '35%', left: '78%', duration: 19, delay: 1.2 },
+  { top: '62%', left: '25%', duration: 18, delay: 0.8 },
+  { top: '75%', left: '68%', duration: 21, delay: 1.8 },
 ];
 
 const companyLogos = [
@@ -2649,11 +2876,25 @@ const companyLogos = [
   { name: 'HIGHLANDS', logo: '/OpPoReview/images/highlands.jpg' },
 ];
 
-const LandingPage = () => {
+const LandingPage = ({ children }) => {
   const navigate = useNavigate();
   const { isDarkMode, toggleTheme } = useTheme();
   const { language, changeLanguage, t } = useLanguage();
+  const { isAuthenticated, user } = useAuth();
   const [isDevModalOpen, setIsDevModalOpen] = useState(false);
+
+  // CV actions require login as candidate
+  const handleCVAction = (e) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      navigate('/login?redirect=/candidate/profile&role=candidate');
+    } else if (user?.role === 'candidate') {
+      setIsDevModalOpen(true);
+    } else {
+      // admin or employer - redirect to candidate login
+      navigate('/login?redirect=/candidate/profile&role=candidate');
+    }
+  };
   const [searchTerm, setSearchTerm] = useState('');
   const [location, setLocation] = useState('');
   const [titleText, setTitleText] = useState('');
@@ -2738,39 +2979,10 @@ const LandingPage = () => {
 
   // Typewriter effect - re-run when language changes
   useEffect(() => {
-    // Reset states when language changes
-    setTitleText('');
-    setSubtitleText('');
-    setShowCursor(true);
-
-    let titleIndex = 0;
-    let subtitleIndex = 0;
-    let subtitleInterval;
-
-    // Type title first
-    const titleInterval = setInterval(() => {
-      if (titleIndex < fullTitle.length) {
-        setTitleText(fullTitle.substring(0, titleIndex + 1));
-        titleIndex++;
-      } else {
-        clearInterval(titleInterval);
-        // Start subtitle after title is done
-        subtitleInterval = setInterval(() => {
-          if (subtitleIndex < fullSubtitle.length) {
-            setSubtitleText(fullSubtitle.substring(0, subtitleIndex + 1));
-            subtitleIndex++;
-          } else {
-            clearInterval(subtitleInterval);
-            setShowCursor(false);
-          }
-        }, 50);
-      }
-    }, 80);
-
-    return () => {
-      clearInterval(titleInterval);
-      if (subtitleInterval) clearInterval(subtitleInterval);
-    };
+    // Set text immediately - use CSS for typewriter effect to avoid re-renders
+    setTitleText(fullTitle);
+    setSubtitleText(fullSubtitle);
+    setShowCursor(false);
   }, [language]);
 
   // Close dropdown when clicking outside
@@ -2815,45 +3027,44 @@ const LandingPage = () => {
                 <ChevronDown />
               </DropdownButton>
               {isJobDropdownOpen && (
-                <LargeDropdownMenu
+                <DropdownMenu
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                   $isDark={isDarkMode}
+                  style={{ minWidth: '220px' }}
                 >
-                  <DropdownLeftColumn $isDark={isDarkMode}>
-                    <DropdownSection>
-                      <GreenSectionTitle>
-                        {language === 'vi' ? 'Việc làm' : 'Jobs'}
-                        <ArrowRight />
-                      </GreenSectionTitle>
-                      <CVTemplateItem to="/candidate/jobs" $isDark={isDarkMode}>
-                        <Search />
-                        {language === 'vi' ? 'Tìm việc làm' : 'Find Jobs'}
-                      </CVTemplateItem>
-                      <CVTemplateItem to="/candidate/jobs?tab=saved" $isDark={isDarkMode}>
-                        <Bookmark />
-                        {language === 'vi' ? 'Việc làm đã lưu' : 'Saved Jobs'}
-                      </CVTemplateItem>
-                    </DropdownSection>
+                  <DropdownSection>
+                    <GreenSectionTitle>
+                      {language === 'vi' ? 'Việc làm' : 'Jobs'}
+                      <ArrowRight />
+                    </GreenSectionTitle>
+                    <CVTemplateItem to="/jobs" $isDark={isDarkMode}>
+                      <Search />
+                      {language === 'vi' ? 'Tìm việc làm' : 'Find Jobs'}
+                    </CVTemplateItem>
+                    <CVTemplateItem to="/candidate/jobs?tab=saved" $isDark={isDarkMode}>
+                      <Bookmark />
+                      {language === 'vi' ? 'Việc làm đã lưu' : 'Saved Jobs'}
+                    </CVTemplateItem>
+                  </DropdownSection>
 
-                    <DropdownSection>
-                      <GreenSectionTitle>
-                        {language === 'vi' ? 'Nhà tuyển dụng' : 'Employers'}
-                        <ArrowRight />
-                      </GreenSectionTitle>
-                      <CVTemplateItem to="/companies" $isDark={isDarkMode}>
-                        <Building2 />
-                        {language === 'vi' ? 'Danh sách nhà tuyển dụng' : 'Employer Directory'}
-                      </CVTemplateItem>
-                      <CVTemplateItem to="/companies/top-companies" $isDark={isDarkMode}>
-                        <Star />
-                        {language === 'vi' ? 'Nhà tuyển dụng' : 'Top Employers'}
-                      </CVTemplateItem>
-                    </DropdownSection>
-                  </DropdownLeftColumn>
-                </LargeDropdownMenu>
+                  <DropdownSection>
+                    <GreenSectionTitle>
+                      {language === 'vi' ? 'Nhà tuyển dụng' : 'Employers'}
+                      <ArrowRight />
+                    </GreenSectionTitle>
+                    <CVTemplateItem to="/companies" $isDark={isDarkMode}>
+                      <Building2 />
+                      {language === 'vi' ? 'Danh sách nhà tuyển dụng' : 'Employer Directory'}
+                    </CVTemplateItem>
+                    <CVTemplateItem to="/companies/top-companies" $isDark={isDarkMode}>
+                      <Star />
+                      {language === 'vi' ? 'Nhà tuyển dụng' : 'Top Employers'}
+                    </CVTemplateItem>
+                  </DropdownSection>
+                </DropdownMenu>
               )}
             </DropdownContainer>
 
@@ -2882,11 +3093,11 @@ const LandingPage = () => {
                         {language === 'vi' ? 'Mẫu CV theo style' : 'CV Templates by Style'}
                         <ArrowRight />
                       </GreenSectionTitle>
-                      <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
+                      <CVTemplateItem to="/cv-templates" $isDark={isDarkMode}>
                         <Package />
                         {language === 'vi' ? 'Mẫu CV Đơn giản' : 'Simple CV Template'}
                       </CVTemplateItem>
-                      <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
+                      <CVTemplateItem to="/cv-templates" $isDark={isDarkMode}>
                         <Star />
                         {language === 'vi' ? 'Mẫu CV Ấn tượng' : 'Impressive CV Template'}
                       </CVTemplateItem>
@@ -2897,19 +3108,19 @@ const LandingPage = () => {
                         {language === 'vi' ? 'Tạo CV bằng AI' : 'Create CV with AI'}
                         <ArrowRight />
                       </GreenSectionTitle>
-                      <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
+                      <CVTemplateItem onClick={handleCVAction}>
                         <Briefcase />
                         {language === 'vi' ? 'Nhân viên pha chế' : 'Barista'}
                       </CVTemplateItem>
-                      <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
+                      <CVTemplateItem onClick={handleCVAction}>
                         <Briefcase />
                         {language === 'vi' ? 'Lập trình viên' : 'Developer'}
                       </CVTemplateItem>
-                      <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
+                      <CVTemplateItem onClick={handleCVAction}>
                         <Briefcase />
                         {language === 'vi' ? 'Nhân viên kế toán' : 'Accountant'}
                       </CVTemplateItem>
-                      <CVTemplateItem onClick={() => setIsDevModalOpen(true)}>
+                      <CVTemplateItem onClick={handleCVAction}>
                         <Briefcase />
                         {language === 'vi' ? 'Chuyên viên marketing' : 'Marketing Specialist'}
                       </CVTemplateItem>
@@ -2918,19 +3129,19 @@ const LandingPage = () => {
 
                   <DropdownRightColumn>
                     <DropdownSection>
-                      <DropdownItem onClick={() => setIsDevModalOpen(true)}>
+                      <DropdownItem onClick={handleCVAction}>
                         <Folder />
                         {language === 'vi' ? 'Quản lý CV' : 'Manage CVs'}
                       </DropdownItem>
-                      <DropdownItem onClick={() => setIsDevModalOpen(true)}>
+                      <DropdownItem onClick={handleCVAction}>
                         <Upload />
                         {language === 'vi' ? 'Tải CV lên' : 'Upload CV'}
                       </DropdownItem>
-                      <DropdownItem onClick={() => setIsDevModalOpen(true)}>
+                      <DropdownItem onClick={handleCVAction}>
                         <Edit3 />
                         {language === 'vi' ? 'Quản lý Cover Letter' : 'Manage Cover Letters'}
                       </DropdownItem>
-                      <DropdownItem onClick={() => setIsDevModalOpen(true)}>
+                      <DropdownItem onClick={handleCVAction}>
                         <FileText />
                         {language === 'vi' ? 'Mẫu Cover Letter' : 'Cover Letter Templates'}
                       </DropdownItem>
@@ -2940,7 +3151,13 @@ const LandingPage = () => {
               )}
             </DropdownContainer>
 
-            <NavLinkItem to="/login?redirect=/employer/quick-jobs&role=employer">
+            <NavLinkItem
+              to={
+                isAuthenticated && user?.role === 'employer'
+                  ? '/employer/quick-jobs'
+                  : '/register/employer'
+              }
+            >
               {language === 'vi' ? 'Đăng tuyển' : 'Post a Job'}
             </NavLinkItem>
           </NavLinks>
@@ -2961,9 +3178,15 @@ const LandingPage = () => {
           <Button as={Link} to="/register" $variant="primary" $size="small">
             {t.nav.signUp}
           </Button>
+          <Button as={Link} to="/register/employer" $variant="primary" $size="small">
+            {language === 'vi' ? 'Dành cho Nhà Tuyển Dụng' : 'For Employers'}
+          </Button>
         </RightSection>
       </Header>
 
+      {children ? (
+        <div style={{ paddingTop: '56px' }}>{children}</div>
+      ) : (
       <ScrollContainer ref={scrollContainerRef}>
         <HeroSection
           ref={heroRef}
@@ -2988,21 +3211,11 @@ const LandingPage = () => {
               transition={{ duration: 1.5, ease: "easeOut" }}
             />
 
-            {/* Large gradient blobs - premium floating shapes */}
+            {/* Large gradient blobs - static for performance */}
             <GradientBlob
               rounded
               opacity={0.25}
               blur={100}
-              animate={{
-                x: [0, 80, 0],
-                y: [0, -60, 0],
-                scale: [1, 1.15, 1],
-              }}
-              transition={{
-                duration: 22,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
               style={{
                 width: '600px',
                 height: '600px',
@@ -3016,16 +3229,6 @@ const LandingPage = () => {
               rounded
               opacity={0.2}
               blur={120}
-              animate={{
-                x: [0, -70, 0],
-                y: [0, 80, 0],
-                scale: [1, 1.2, 1],
-              }}
-              transition={{
-                duration: 26,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
               style={{
                 width: '700px',
                 height: '700px',
@@ -3039,16 +3242,6 @@ const LandingPage = () => {
               rounded
               opacity={0.18}
               blur={90}
-              animate={{
-                x: [0, 50, 0],
-                y: [0, -50, 0],
-                scale: [1, 1.1, 1],
-              }}
-              transition={{
-                duration: 20,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
               style={{
                 width: '500px',
                 height: '500px',
@@ -3163,247 +3356,56 @@ const LandingPage = () => {
               </svg>
             </WavePattern>
 
-            {/* Floating Icons */}
-            <FloatingIcon
-              style={{ top: '15%', left: '8%' }}
-              animate={{
-                y: [0, -20, 0],
-                rotate: [0, 5, 0],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            >
+            {/* Floating Icons - CSS animation for performance */}
+            <FloatingIcon style={{ top: '15%', left: '8%', animation: 'floatY 4s ease-in-out infinite' }}>
               <Clock />
             </FloatingIcon>
-
-            <FloatingIcon
-              style={{ top: '25%', right: '12%' }}
-              animate={{
-                y: [0, -15, 0],
-                rotate: [0, -5, 0],
-              }}
-              transition={{
-                duration: 5,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.5,
-              }}
-            >
+            <FloatingIcon style={{ top: '25%', right: '12%', animation: 'floatY 5s ease-in-out infinite 0.5s' }}>
               <Mail />
             </FloatingIcon>
-
-            <FloatingIcon
-              style={{ bottom: '30%', left: '10%' }}
-              animate={{
-                y: [0, -25, 0],
-                rotate: [0, 10, 0],
-              }}
-              transition={{
-                duration: 4.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 1,
-              }}
-            >
+            <FloatingIcon style={{ bottom: '30%', left: '10%', animation: 'floatY 4.5s ease-in-out infinite 1s' }}>
               <Send />
             </FloatingIcon>
-
-            <FloatingIcon
-              style={{ bottom: '20%', right: '15%' }}
-              animate={{
-                y: [0, -18, 0],
-                rotate: [0, -8, 0],
-              }}
-              transition={{
-                duration: 5.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 1.5,
-              }}
-            >
+            <FloatingIcon style={{ bottom: '20%', right: '15%', animation: 'floatY 5.5s ease-in-out infinite 1.5s' }}>
               <Award />
             </FloatingIcon>
-
-            <FloatingIcon
-              style={{ top: '40%', right: '8%' }}
-              animate={{
-                y: [0, -22, 0],
-                rotate: [0, 12, 0],
-              }}
-              transition={{
-                duration: 4.8,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.8,
-              }}
-            >
+            <FloatingIcon style={{ top: '40%', right: '8%', animation: 'floatY 4.8s ease-in-out infinite 0.8s' }}>
               <Zap />
             </FloatingIcon>
-
-            <FloatingIcon
-              style={{ top: '60%', left: '12%' }}
-              animate={{
-                y: [0, -16, 0],
-                rotate: [0, -6, 0],
-              }}
-              transition={{
-                duration: 5.2,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 1.2,
-              }}
-            >
+            <FloatingIcon style={{ top: '60%', left: '12%', animation: 'floatY 5.2s ease-in-out infinite 1.2s' }}>
               <Target />
             </FloatingIcon>
 
-            {/* Geometric Shapes */}
+            {/* Geometric Shapes - static for performance */}
             <GeometricShape
               style={{
-                top: '20%',
-                left: '5%',
-                width: '60px',
-                height: '60px',
-                borderRadius: '12px',
-                transform: 'rotate(15deg)',
-              }}
-              animate={{
-                rotate: [15, 25, 15],
-                scale: [1, 1.05, 1],
-              }}
-              transition={{
-                duration: 6,
-                repeat: Infinity,
-                ease: "easeInOut",
+                top: '20%', left: '5%',
+                width: '60px', height: '60px',
+                borderRadius: '12px', transform: 'rotate(15deg)',
               }}
             />
-
             <GeometricShape
               style={{
-                bottom: '25%',
-                right: '8%',
-                width: '80px',
-                height: '80px',
-                borderRadius: '50%',
-              }}
-              animate={{
-                scale: [1, 1.1, 1],
-                opacity: [0.3, 0.5, 0.3],
-              }}
-              transition={{
-                duration: 5,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 1,
+                bottom: '25%', right: '8%',
+                width: '80px', height: '80px', borderRadius: '50%',
               }}
             />
-
             <GeometricShape
               style={{
-                top: '35%',
-                right: '18%',
-                width: '50px',
-                height: '50px',
-                transform: 'rotate(45deg)',
-              }}
-              animate={{
-                rotate: [45, 60, 45],
-              }}
-              transition={{
-                duration: 7,
-                repeat: Infinity,
-                ease: "easeInOut",
+                top: '35%', right: '18%',
+                width: '50px', height: '50px', transform: 'rotate(45deg)',
               }}
             />
 
-            {/* Mini Squares */}
-            <MiniSquare
-              style={{ top: '28%', left: '22%' }}
-              animate={{
-                rotate: [0, 90, 0],
-                scale: [1, 1.2, 1],
-              }}
-              transition={{
-                duration: 6,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
+            {/* Mini Squares - static */}
+            <MiniSquare style={{ top: '28%', left: '22%' }} />
+            <MiniSquare style={{ top: '48%', right: '25%' }} />
+            <MiniSquare style={{ bottom: '32%', left: '20%' }} />
+            <MiniSquare style={{ top: '65%', right: '30%' }} />
 
-            <MiniSquare
-              style={{ top: '48%', right: '25%' }}
-              animate={{
-                rotate: [0, -90, 0],
-                scale: [1, 1.15, 1],
-              }}
-              transition={{
-                duration: 7,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 1,
-              }}
-            />
-
-            <MiniSquare
-              style={{ bottom: '32%', left: '20%' }}
-              animate={{
-                rotate: [0, 180, 0],
-                scale: [1, 1.3, 1],
-              }}
-              transition={{
-                duration: 5.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.5,
-              }}
-            />
-
-            <MiniSquare
-              style={{ top: '65%', right: '30%' }}
-              animate={{
-                rotate: [0, 90, 0],
-                opacity: [0.3, 0.6, 0.3],
-              }}
-              transition={{
-                duration: 6.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 1.5,
-              }}
-            />
-
-            {/* Dotted Circles */}
-            <DottedCircle
-              style={{
-                top: '12%',
-                right: '20%',
-              }}
-              animate={{
-                rotate: [0, 360],
-                scale: [1, 1.1, 1],
-              }}
-              transition={{
-                rotate: { duration: 20, repeat: Infinity, ease: "linear" },
-                scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
-              }}
-            />
-
-            <DottedCircle
-              style={{
-                bottom: '15%',
-                left: '18%',
-              }}
-              animate={{
-                rotate: [0, -360],
-                scale: [1, 1.15, 1],
-              }}
-              transition={{
-                rotate: { duration: 25, repeat: Infinity, ease: "linear" },
-                scale: { duration: 5, repeat: Infinity, ease: "easeInOut" },
-              }}
-            />
+            {/* Dotted Circles - static */}
+            <DottedCircle style={{ top: '12%', right: '20%' }} />
+            <DottedCircle style={{ bottom: '15%', left: '18%' }} />
 
             {/* Connection Lines */}
             <ConnectionLine
@@ -3459,107 +3461,16 @@ const LandingPage = () => {
               }}
             />
 
-            {/* Small Floating Dots */}
-            <SmallFloatingDot
-              style={{ top: '22%', left: '25%' }}
-              animate={{
-                y: [0, -15, 0],
-                opacity: [0.4, 0.8, 0.4],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
+            {/* Small Floating Dots - CSS animation */}
+            <SmallFloatingDot style={{ top: '22%', left: '25%', animation: 'floatY 3s ease-in-out infinite' }} />
+            <SmallFloatingDot style={{ top: '55%', right: '22%', animation: 'floatY 4s ease-in-out infinite 1s' }} />
+            <SmallFloatingDot style={{ bottom: '35%', left: '28%', animation: 'floatY 3.5s ease-in-out infinite 0.7s' }} />
+            <SmallFloatingDot style={{ top: '38%', left: '18%', animation: 'floatY 4.5s ease-in-out infinite 1.5s' }} />
+            <SmallFloatingDot style={{ bottom: '40%', right: '18%', animation: 'floatY 3.8s ease-in-out infinite 0.3s' }} />
 
-            <SmallFloatingDot
-              style={{ top: '55%', right: '22%' }}
-              animate={{
-                y: [0, -20, 0],
-                opacity: [0.3, 0.7, 0.3],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 1,
-              }}
-            />
-
-            <SmallFloatingDot
-              style={{ bottom: '35%', left: '28%' }}
-              animate={{
-                y: [0, -12, 0],
-                opacity: [0.35, 0.75, 0.35],
-              }}
-              transition={{
-                duration: 3.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.7,
-              }}
-            />
-
-            <SmallFloatingDot
-              style={{ top: '38%', left: '18%' }}
-              animate={{
-                y: [0, -18, 0],
-                opacity: [0.3, 0.8, 0.3],
-              }}
-              transition={{
-                duration: 4.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 1.5,
-              }}
-            />
-
-            <SmallFloatingDot
-              style={{ bottom: '40%', right: '18%' }}
-              animate={{
-                y: [0, -16, 0],
-                opacity: [0.4, 0.75, 0.4],
-              }}
-              transition={{
-                duration: 3.8,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.3,
-              }}
-            />
-
-            {/* Circuit Patterns */}
-            <CircuitPattern
-              style={{
-                top: '30%',
-                left: '15%',
-              }}
-              animate={{
-                opacity: [0.2, 0.4, 0.2],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-
-            <CircuitPattern
-              style={{
-                bottom: '35%',
-                right: '25%',
-              }}
-              animate={{
-                opacity: [0.15, 0.35, 0.15],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 1.5,
-              }}
-            />
+            {/* Circuit Patterns - static opacity */}
+            <CircuitPattern style={{ top: '30%', left: '15%' }} />
+            <CircuitPattern style={{ bottom: '35%', right: '25%' }} />
 
             {/* Glassmorphism overlay */}
             <GlassmorphismLayer />
@@ -3597,7 +3508,7 @@ const LandingPage = () => {
                   placeholder={language === 'vi' ? 'Vị trí công việc hoặc công ty' : 'Job title or company'}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && navigate('/candidate/jobs', { state: { searchKeyword: searchTerm, searchLocation: location } })}
+                  onKeyDown={(e) => e.key === 'Enter' && navigate('/jobs', { state: { searchKeyword: searchTerm, searchLocation: location } })}
                 />
               </SearchInput>
 
@@ -3608,11 +3519,11 @@ const LandingPage = () => {
                   placeholder={language === 'vi' ? 'Địa điểm' : 'Location'}
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && navigate('/candidate/jobs', { state: { searchKeyword: searchTerm, searchLocation: location } })}
+                  onKeyDown={(e) => e.key === 'Enter' && navigate('/jobs', { state: { searchKeyword: searchTerm, searchLocation: location } })}
                 />
               </SearchInput>
 
-              <Button $variant="primary" onClick={() => navigate('/candidate/jobs', {
+              <Button $variant="primary" onClick={() => navigate('/jobs', {
                 state: { searchKeyword: searchTerm, searchLocation: location }
               })}>
                 {language === 'vi' ? 'Tìm việc' : 'Search Jobs'}
@@ -3707,12 +3618,217 @@ const LandingPage = () => {
           </HeroContent>
         </HeroSection>
 
+        {/* ─── Tính năng nổi bật ─── */}
+        <FeaturesSection
+          $isDark={isDarkMode}
+          initial={{ opacity: 0, y: 60 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+        >
+          <FeaturesSectionInner>
+            <FeaturesSectionTag $isDark={isDarkMode}>
+              <Sparkles size={13} />
+              {language === 'vi' ? 'Tính năng nổi bật' : 'Key Features'}
+            </FeaturesSectionTag>
+            <FeaturesSectionTitle $isDark={isDarkMode}>
+              {language === 'vi' ? 'Mọi thứ bạn cần để tuyển dụng & tìm việc' : 'Everything You Need to Hire & Get Hired'}
+            </FeaturesSectionTitle>
+            <FeaturesSectionSub $isDark={isDarkMode}>
+              {language === 'vi'
+                ? 'OpPo cung cấp đầy đủ công cụ hiện đại giúp ứng viên và nhà tuyển dụng kết nối nhanh chóng, hiệu quả.'
+                : 'OpPo provides all the modern tools to help candidates and employers connect quickly and effectively.'}
+            </FeaturesSectionSub>
+            <FeaturesGrid>
+              {[
+                {
+                  icon: <Search size={24} />,
+                  bg: 'linear-gradient(135deg, #eff6ff, #dbeafe)',
+                  color: '#1a62ff',
+                  title: language === 'vi' ? 'Tìm việc thông minh' : 'Smart Job Search',
+                  desc: language === 'vi' ? 'Tìm kiếm việc làm theo vị trí, địa điểm, mức lương. Kết quả chính xác, cập nhật liên tục.' : 'Search jobs by position, location, salary. Accurate results, continuously updated.',
+                  to: '/jobs'
+                },
+                {
+                  icon: <Zap size={24} />,
+                  bg: 'linear-gradient(135deg, #fef9c3, #fef08a)',
+                  color: '#ca8a04',
+                  title: language === 'vi' ? 'Tuyển gấp 24h' : 'Urgent Hiring 24h',
+                  desc: language === 'vi' ? 'Đăng tin tuyển gấp, nhận CV ứng viên ngay lập tức. Lấp đầy vị trí trống trong vòng 24 giờ.' : 'Post urgent jobs, receive CVs instantly. Fill vacancies within 24 hours.',
+                  to: '/register/employer'
+                },
+                {
+                  icon: <FileText size={24} />,
+                  bg: 'linear-gradient(135deg, #f0fdf4, #dcfce7)',
+                  color: '#16a34a',
+                  title: language === 'vi' ? 'Tạo CV chuyên nghiệp' : 'Professional CV Builder',
+                  desc: language === 'vi' ? 'Tạo CV đẹp, chuyên nghiệp với nhiều mẫu thiết kế. Hỗ trợ AI tạo nội dung tự động.' : 'Create beautiful, professional CVs with multiple design templates. AI-powered content generation.',
+                  to: '/cv-templates'
+                },
+                {
+                  icon: <Building2 size={24} />,
+                  bg: 'linear-gradient(135deg, #fdf4ff, #ede9fe)',
+                  color: '#7c3aed',
+                  title: language === 'vi' ? 'Hồ sơ công ty' : 'Company Profiles',
+                  desc: language === 'vi' ? 'Khám phá hồ sơ nhà tuyển dụng uy tín. Xem văn hóa công ty, phúc lợi trước khi ứng tuyển.' : 'Explore trusted employer profiles. View company culture and benefits before applying.',
+                  to: '/companies'
+                },
+                {
+                  icon: <Shield size={24} />,
+                  bg: 'linear-gradient(135deg, #fff7ed, #fed7aa)',
+                  color: '#ea580c',
+                  title: language === 'vi' ? 'Xác thực doanh nghiệp' : 'Business Verification',
+                  desc: language === 'vi' ? 'Mọi nhà tuyển dụng đều được xác thực giấy phép kinh doanh. Đảm bảo an toàn cho ứng viên.' : 'All employers are verified with business licenses. Ensuring safety for candidates.',
+                  to: '/companies'
+                },
+                {
+                  icon: <Users size={24} />,
+                  bg: 'linear-gradient(135deg, #fdf2f8, #fce7f3)',
+                  color: '#db2777',
+                  title: language === 'vi' ? 'Quản lý ứng tuyển' : 'Application Management',
+                  desc: language === 'vi' ? 'Theo dõi trạng thái ứng tuyển, nhận thông báo phản hồi từ nhà tuyển dụng theo thời gian thực.' : 'Track application status, receive real-time feedback notifications from employers.',
+                  to: '/register/candidate'
+                },
+              ].map((f, i) => (
+                <FeatureCard
+                  key={i}
+                  $isDark={isDarkMode}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.08 }}
+                >
+                  <FeatureIconBox $bg={f.bg} $color={f.color}>
+                    {f.icon}
+                  </FeatureIconBox>
+                  <FeatureCardTitle $isDark={isDarkMode}>{f.title}</FeatureCardTitle>
+                  <FeatureCardDesc $isDark={isDarkMode}>{f.desc}</FeatureCardDesc>
+                </FeatureCard>
+              ))}
+            </FeaturesGrid>
+          </FeaturesSectionInner>
+        </FeaturesSection>
+
+        {/* ─── Giới thiệu về công ty ─── */}
+        <AboutInlineSection
+          $isDark={isDarkMode}
+          initial={{ opacity: 0, y: 60 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+        >
+          <AboutInlineInner>
+            <AboutInlineGrid>
+              <AboutInlineLeft>
+                <AboutInlineBadge>
+                  <Heart size={12} />
+                  {language === 'vi' ? 'Giới thiệu về công ty' : 'About OpPo'}
+                </AboutInlineBadge>
+                <AboutInlineTitle
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
+                >
+                  {language === 'vi'
+                    ? <>Nền tảng tìm kiếm nhân sự <span>F&B</span></>
+                    : <>OpPo — <span>F&B</span> Staffing Platform</>}
+                </AboutInlineTitle>
+                <AboutInlineDesc
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  {language === 'vi'
+                    ? 'Ốp Pờ hỗ trợ các chủ doanh nghiệp F&B tiêu chuẩn hóa hoạt động kinh doanh bằng cách giải quyết tình trạng biến động nhân sự và rủi ro tuyển dụng. Nền tảng kết nối doanh nghiệp với đội ngũ nhân sự bán thời gian đã được xác thực và có kỹ năng.'
+                    : 'OpPo helps F&B business owners standardize operations by solving staff turnover and hiring risks. The platform connects businesses with verified, skilled part-time staff.'}
+                </AboutInlineDesc>
+                <AboutInlineStats>
+                  <AboutInlineStat>
+                    <span className="n">70%</span>
+                    <span className="l">{language === 'vi' ? 'Rút ngắn tuyển dụng' : 'Faster Hiring'}</span>
+                  </AboutInlineStat>
+                  <AboutInlineStat>
+                    <span className="n">99%</span>
+                    <span className="l">{language === 'vi' ? 'Giảm rủi ro bảo mật' : 'Security Risk Reduced'}</span>
+                  </AboutInlineStat>
+                  <AboutInlineStat>
+                    <span className="n">5K+</span>
+                    <span className="l">{language === 'vi' ? 'Doanh nghiệp tin dùng' : 'Businesses'}</span>
+                  </AboutInlineStat>
+                </AboutInlineStats>
+              </AboutInlineLeft>
+
+              <AboutInlineRight>
+                <AboutVMCard
+                  initial={{ opacity: 0, x: 30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
+                >
+                  <AboutVMLabel>{language === 'vi' ? 'Tầm nhìn' : 'Vision'}</AboutVMLabel>
+                  <AboutVMTitle>
+                    {language === 'vi'
+                      ? 'Nền tảng hàng đầu kết nối nhân sự F&B đã xác thực tại Việt Nam'
+                      : 'Leading platform connecting verified F&B staff in Vietnam'}
+                  </AboutVMTitle>
+                  <AboutVMDesc>
+                    {language === 'vi'
+                      ? 'Trở thành nền tảng hàng đầu dành cho việc cung cấp và kết nối nhân sự F&B đã được xác thực tại Việt Nam.'
+                      : 'Become the leading platform for providing and connecting verified F&B staff in Vietnam.'}
+                  </AboutVMDesc>
+                </AboutVMCard>
+
+                <AboutVMCard
+                  initial={{ opacity: 0, x: 30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  <AboutVMLabel>{language === 'vi' ? 'Sứ mệnh' : 'Mission'}</AboutVMLabel>
+                  <AboutVMTitle>
+                    {language === 'vi'
+                      ? 'Xây dựng thị trường lao động "sạch" — minh bạch & an toàn'
+                      : 'Build a "clean" labor market — transparent & safe'}
+                  </AboutVMTitle>
+                  <AboutVMDesc>
+                    {language === 'vi'
+                      ? 'Loại bỏ các rủi ro trong tuyển dụng và xây dựng một thị trường lao động "sạch" — nơi công việc ít rủi ro, minh bạch, an toàn và tôn trọng người lao động.'
+                      : 'Eliminate hiring risks and build a "clean" labor market — where work is low-risk, transparent, safe, and respects workers.'}
+                  </AboutVMDesc>
+                </AboutVMCard>
+
+                <AboutVMCard
+                  initial={{ opacity: 0, x: 30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  style={{ background: 'rgba(147,197,253,0.1)', borderColor: 'rgba(147,197,253,0.25)' }}
+                >
+                  <div style={{ display: 'flex', gap: 24 }}>
+                    {[
+                      { n: '70%', l: language === 'vi' ? 'Rút ngắn tuyển dụng' : 'Faster Hiring' },
+                      { n: '99%', l: language === 'vi' ? 'Giảm rủi ro' : 'Risk Reduced' },
+                    ].map((s, i) => (
+                      <div key={i} style={{ textAlign: 'center', flex: 1 }}>
+                        <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#93c5fd' }}>{s.n}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.65)', marginTop: 2 }}>{s.l}</div>
+                      </div>
+                    ))}
+                  </div>
+                </AboutVMCard>
+              </AboutInlineRight>
+            </AboutInlineGrid>
+          </AboutInlineInner>
+        </AboutInlineSection>
+
         <CompanyBannerSection
           $isDark={isDarkMode}
           ref={companyRef}
           initial={{ opacity: 0, y: 100, scale: 0.95 }}
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: false, amount: 0.3 }}
+          viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
         >
           <CompanyBannerContent>
@@ -3720,7 +3836,7 @@ const LandingPage = () => {
               $isDark={isDarkMode}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false, amount: 0.5 }}
+              viewport={{ once: true, amount: 0.5 }}
               transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
             >
               {language === 'vi' ? (
@@ -3769,7 +3885,7 @@ const LandingPage = () => {
         <TechBannerSection
           initial={{ opacity: 0, y: 60 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.3 }}
+          viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
         >
           <TechBannerContent>
@@ -3778,7 +3894,7 @@ const LandingPage = () => {
               alt="Le Moments Technology"
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: false, amount: 0.3 }}
+              viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             />
           </TechBannerContent>
@@ -3820,7 +3936,7 @@ const LandingPage = () => {
           ref={downloadRef}
           initial={{ opacity: 0, y: 100, scale: 0.95 }}
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: false, amount: 0.3 }}
+          viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
         >
           <DownloadAppContainer>
@@ -3829,7 +3945,7 @@ const LandingPage = () => {
                 $isDark={isDarkMode}
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: false, amount: 0.8 }}
+                viewport={{ once: true, amount: 0.8 }}
                 transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
               >
                 {language === 'vi' ? 'Tải ứng dụng' : 'Download the App'}
@@ -3839,7 +3955,7 @@ const LandingPage = () => {
                 $isDark={isDarkMode}
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: false, amount: 0.8 }}
+                viewport={{ once: true, amount: 0.8 }}
                 transition={{ duration: 0.8, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
               >
                 {language === 'vi' ? 'để trải nghiệm các dịch vụ của chúng tôi' : 'to experience our services'}
@@ -4213,6 +4329,7 @@ const LandingPage = () => {
           </Copyright>
         </Footer>
       </ScrollContainer>
+      )}
 
       <UnderDevelopmentModal
         isOpen={isDevModalOpen}

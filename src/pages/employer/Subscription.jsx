@@ -7,6 +7,8 @@ import employerProfileService from '../../services/employerProfileService';
 import { Check, Zap, Star, Rocket, Sparkles, X, HelpCircle, CreditCard, Shield, Clock, CheckCircle } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { createPackagePurchaseRequestNotification } from '../../services/notificationService';
+import PaymentModal from '../../components/PaymentModal';
+import { useAuth } from '../../context/AuthContext';
 
 // ─── Animations ───────────────────────────────────────────────
 const rotateBorder = keyframes`
@@ -603,6 +605,7 @@ const ErrorMessage = styled.p`
 // ─── Component ────────────────────────────────────────────────
 const Subscription = () => {
   const { language: lang } = useLanguage();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const vi = lang === 'vi';
   const [selectedPackage, setSelectedPackage] = React.useState(null);
@@ -611,6 +614,7 @@ const Subscription = () => {
   const [showDurationModal, setShowDurationModal] = React.useState(false);
   const [showSuccessModal, setShowSuccessModal] = React.useState(false);
   const [showInsufficientBalanceModal, setShowInsufficientBalanceModal] = React.useState(false);
+  const [showPaymentModal, setShowPaymentModal] = React.useState(false);
 
   const handleSelectPackage = (plan, priceOption) => {
     setSelectedPackage(plan);
@@ -630,207 +634,60 @@ const Subscription = () => {
   };
 
   const handleConfirmPurchase = async () => {
-    // Parse price from string (e.g., "495,000 VND" -> 495000)
-    const priceString = selectedDuration.amount.replace(/[^0-9]/g, '');
-    const packagePrice = parseInt(priceString);
-    
-    // Get wallet balance
-    const walletData = JSON.parse(localStorage.getItem('employer_wallet') || '{"balance": 0}');
-    const currentBalance = walletData.balance || 0;
-    
-    // Get employerId from Cognito session
-    let employerId = 'unknown';
-    try {
-      const { fetchAuthSession } = await import('aws-amplify/auth');
-      const session = await fetchAuthSession();
-      if (session && session.tokens) {
-        const idTokenPayload = session.tokens.idToken?.payload;
-        employerId = idTokenPayload?.sub || 'unknown';
-      }
-    } catch (error) {
-      console.error('Error getting Cognito session:', error);
-    }
-    
-    // Get companyName from DynamoDB
-    let companyName = 'Unknown Company';
-    try {
-      const profile = await employerProfileService.getMyProfile();
-      if (profile && (profile.companyName || profile.businessName)) {
-        companyName = profile.companyName || profile.businessName;
-      }
-    } catch (error) {
-      console.error('Error getting employer profile:', error);
-      // Fallback to localStorage if API fails
-      const employerProfile = JSON.parse(localStorage.getItem('employerProfile') || '{}');
-      companyName = employerProfile.companyName || 'Unknown Company';
-    }
-    
-    console.log('Package price:', packagePrice);
-    console.log('Current balance:', currentBalance);
-    console.log('Employer ID:', employerId);
-    console.log('Company Name:', companyName);
-    
-    // Check if balance is sufficient
-    if (currentBalance < packagePrice) {
-      // Show insufficient balance modal
-      setShowConfirmModal(false);
-      setShowInsufficientBalanceModal(true);
-      return;
-    }
-    
-    // Deduct from wallet
-    const newBalance = currentBalance - packagePrice;
-    walletData.balance = newBalance;
-    localStorage.setItem('employer_wallet', JSON.stringify(walletData));
-    
-    console.log('New balance after purchase:', newBalance);
-    
-    // Create purchase record and send to API
-    console.log('🚀 Starting purchase process...');
-    console.log('   Package:', selectedPackage.name);
-    console.log('   Duration:', selectedDuration.duration);
-    console.log('   Price:', packagePrice);
-    console.log('   Employer:', employerId);
-    console.log('   Company:', companyName);
-    
-    // Generate subscription ID first (in case API fails)
-    const subscriptionId = `SUB-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    console.log('   Subscription ID:', subscriptionId);
-    
-    try {
-      const API_ENDPOINT = import.meta.env.VITE_PACKAGE_SUBSCRIPTIONS_API;
-      console.log('📡 Subscription API:', API_ENDPOINT);
-      
-      const purchaseData = {
-        employerId: employerId,
-        companyName: companyName,
-        packageName: selectedPackage.name,
-        duration: selectedDuration.duration
-      };
-      
-      console.log('📤 Sending purchase to subscription API...');
-      
-      let subscriptionCreated = false;
-      let apiSubscriptionId = subscriptionId;
-      
-      try {
-        const response = await fetch(`${API_ENDPOINT}/subscriptions`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json; charset=utf-8'
-          },
-          body: JSON.stringify(purchaseData)
-        });
-        
-        if (response.ok) {
-          const result = await response.json();
-          console.log('✅ Subscription created via API:', result);
-          apiSubscriptionId = result.data?.subscriptionId || subscriptionId;
-          subscriptionCreated = true;
-        } else {
-          console.warn('⚠️ Subscription API returned error:', response.status);
-          console.warn('   Will still create notification with local subscription ID');
-        }
-      } catch (apiError) {
-        console.warn('⚠️ Subscription API failed:', apiError.message);
-        console.warn('   Will still create notification with local subscription ID');
-      }
-      
-      // ALWAYS create notification for admin (even if subscription API fails)
-      console.log('');
-      console.log('📤 Creating notification for admin...');
-      console.log('   This is CRITICAL - notification must be created!');
-      console.log('   Environment check:');
-      console.log('   - VITE_NOTIFICATIONS_API:', import.meta.env.VITE_NOTIFICATIONS_API);
-      console.log('   - typeof:', typeof import.meta.env.VITE_NOTIFICATIONS_API);
-      
-      // Verify API endpoint is available
-      if (!import.meta.env.VITE_NOTIFICATIONS_API) {
-        console.error('❌ CRITICAL: VITE_NOTIFICATIONS_API is undefined!');
-        console.error('   All env vars:', import.meta.env);
-        alert('Lỗi: Không thể kết nối đến hệ thống thông báo. Vui lòng liên hệ admin.');
-        return;
-      }
-      
-      try {
-        const notificationData = {
-          subscriptionId: apiSubscriptionId,
-          employerId: employerId,
-          companyName: companyName,
-          packageName: selectedPackage.name,
-          duration: selectedDuration.duration,
-          price: packagePrice
-        };
-        
-        console.log('📦 Notification data:', notificationData);
-        console.log('📤 Calling createPackagePurchaseRequestNotification...');
-        
-        const notificationResult = await createPackagePurchaseRequestNotification(notificationData);
-        
-        console.log('✅ Notification function returned!');
-        console.log('   Result:', notificationResult);
-        console.log('   Result type:', typeof notificationResult);
-        console.log('   Result.success:', notificationResult?.success);
-        
-        if (notificationResult && notificationResult.success) {
-          console.log('✅ Notification ID:', notificationResult.data?.notificationId);
-          console.log('✅ Notification saved to DynamoDB!');
-          console.log('✅ Admin will see this notification in their dashboard');
-        } else {
-          console.error('❌ Notification API returned success=false');
-          console.error('   Full response:', JSON.stringify(notificationResult, null, 2));
-          // Don't block the purchase flow, but log the error
-          console.warn('⚠️ Continuing with purchase despite notification error');
-        }
-        
-        // Trigger a storage event to update navbar immediately
-        console.log('📡 Dispatching storage event to update navbar...');
-        window.dispatchEvent(new Event('storage'));
-        console.log('✅ Storage event dispatched');
-        
-      } catch (notifError) {
-        console.error('❌ CRITICAL ERROR: Failed to create notification!');
-        console.error('   Error type:', notifError.constructor.name);
-        console.error('   Error:', notifError);
-        console.error('   Message:', notifError.message);
-        console.error('   Stack:', notifError.stack);
-        
-        // Log additional debugging info
-        if (notifError.response) {
-          console.error('   Response status:', notifError.response.status);
-          console.error('   Response data:', notifError.response.data);
-        }
-        
-        // Show alert to user but don't block the purchase
-        console.warn('⚠️ Showing alert to user about notification error');
-        alert('Cảnh báo: Đơn hàng đã được tạo nhưng thông báo cho admin có thể bị lỗi. Vui lòng liên hệ admin để xác nhận.');
-      }
-      
-      // Show success modal
-      console.log('✅ Purchase process completed!');
-      setShowConfirmModal(false);
-      setShowSuccessModal(true);
-      
-      // Auto close after 3 seconds
-      setTimeout(() => {
-        setShowSuccessModal(false);
-        setSelectedPackage(null);
-        setSelectedDuration(null);
-      }, 3000);
-      
-    } catch (error) {
-      console.error('❌ Error in purchase process:', error);
-      console.error('   Message:', error.message);
-      console.error('   Stack:', error.stack);
-      
-      alert(vi ? 'Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại.' : 'Error creating order. Please try again.');
-      
-      // Refund the balance
-      walletData.balance = currentBalance;
-      localStorage.setItem('employer_wallet', JSON.stringify(walletData));
-    }
+    // Chuyển sang thanh toán QR thay vì trừ wallet
+    setShowConfirmModal(false);
+    setShowPaymentModal(true);
   };
 
+  const handlePaymentSuccess = async (paymentId) => {
+    setShowPaymentModal(false);
+
+    // Cộng tiền vào ví localStorage
+    const amount = parseInt((selectedDuration?.amount || '0').replace(/[^0-9]/g, ''));
+    if (amount > 0) {
+      const walletData = JSON.parse(localStorage.getItem('employer_wallet') || '{"balance":0,"transactions":[]}');
+      walletData.balance = (walletData.balance || 0) + amount;
+      if (!Array.isArray(walletData.transactions)) walletData.transactions = [];
+      walletData.transactions.unshift({
+        id: paymentId,
+        type: 'deposit',
+        amount,
+        description: `Nạp tiền qua VietQR — ${selectedPackage?.name || ''} ${selectedDuration?.duration || ''}`,
+        date: new Date().toISOString(),
+        status: 'completed',
+      });
+      localStorage.setItem('employer_wallet', JSON.stringify(walletData));
+      window.dispatchEvent(new Event('storage'));
+    }
+
+    setShowSuccessModal(true);
+
+    // Gửi notification cho admin
+    try {
+      let employerId = user?.username || 'unknown';
+      let companyName = 'Unknown Company';
+      try {
+        const profile = await employerProfileService.getMyProfile();
+        companyName = profile?.companyName || profile?.businessName || companyName;
+      } catch (_) {}
+      await createPackagePurchaseRequestNotification({
+        subscriptionId: paymentId,
+        employerId,
+        companyName,
+        packageName: selectedPackage?.name || '',
+        duration: selectedDuration?.duration || '',
+        price: amount,
+      });
+    } catch (err) {
+      console.warn('Notification error:', err.message);
+    }
+
+    setTimeout(() => {
+      setShowSuccessModal(false);
+      setSelectedPackage(null);
+      setSelectedDuration(null);
+    }, 3000);
+  };
   const plans = [
     {
       name:    vi ? 'Quick Boost' : 'Quick Boost',
@@ -1255,6 +1112,20 @@ const Subscription = () => {
           </ModalOverlay>
         )}
       </PageContainer>
+
+      {/* Payment Modal — VietQR */}
+      {selectedPackage && selectedDuration && (
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          onSuccess={handlePaymentSuccess}
+          userId={user?.username || 'unknown'}
+          packageId={selectedPackage.name?.toLowerCase().replace(/\s+/g, '-') || 'pkg'}
+          amount={parseInt((selectedDuration.amount || '0').replace(/[^0-9]/g, ''))}
+          packageName={selectedPackage.name}
+          duration={selectedDuration.duration}
+        />
+      )}
     </DashboardLayout>
   );
 };

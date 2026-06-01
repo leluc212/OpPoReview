@@ -710,7 +710,48 @@ const Reports = () => {
   ];
 
   // Revenue charts data
-  const revenueData = useMemo(() => adminReportService.getRevenueByMonth(reportData.subscriptions), [reportData.subscriptions]);
+  const [revenueView, setRevenueView] = useState('month'); // 'day' | 'week' | 'month'
+
+  const revenueData = useMemo(() => {
+    const subs = reportData.subscriptions || [];
+    const now = new Date();
+
+    if (revenueView === 'day') {
+      // Last 12 days
+      return Array.from({ length: 12 }, (_, i) => {
+        const d = new Date(now);
+        d.setDate(now.getDate() - (11 - i));
+        const dateStr = d.toISOString().split('T')[0];
+        const revenue = subs
+          .filter(s => (s.status === 'active' || s.status === 'expired' || s.status === 'expiring') &&
+            (s.purchaseDateTime || s.createdAt || '').startsWith(dateStr))
+          .reduce((sum, s) => sum + (parseFloat(s.price) || 0), 0) / 1000000;
+        return { month: `${d.getDate()}/${d.getMonth() + 1}`, revenue };
+      });
+    }
+
+    if (revenueView === 'week') {
+      // Last 12 weeks
+      return Array.from({ length: 12 }, (_, i) => {
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - now.getDay() - (11 - i) * 7);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        const revenue = subs
+          .filter(s => {
+            if (!(s.status === 'active' || s.status === 'expired' || s.status === 'expiring')) return false;
+            const d = new Date(s.purchaseDateTime || s.createdAt || '');
+            return d >= weekStart && d <= weekEnd;
+          })
+          .reduce((sum, s) => sum + (parseFloat(s.price) || 0), 0) / 1000000;
+        return { month: `T${weekStart.getDate()}/${weekStart.getMonth() + 1}`, revenue };
+      });
+    }
+
+    // Default: month
+    return adminReportService.getRevenueByMonth(subs);
+  }, [reportData.subscriptions, revenueView]);
+
   const maxRevenue = useMemo(() => Math.max(...revenueData.map(d => d.revenue), 10), [revenueData]);
   
   // Top employers processing - REVENUE BASED
@@ -990,11 +1031,38 @@ const Reports = () => {
             <ChartHeader>
               <h3>
                 <BarChart3 />
-                {language === 'vi' ? 'Tổng Doanh Thu Hàng Tháng' : 'Total Monthly Revenue'}
+                {language === 'vi' ? 'Tổng Doanh Thu' : 'Total Revenue'}
               </h3>
-              <RevenueTotal>
-                {(statsSummary.totalRevenue / 1000000).toFixed(1)}M VND
-              </RevenueTotal>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', background: '#f1f5f9', borderRadius: '8px', padding: '3px' }}>
+                  {[
+                    { key: 'day', label: language === 'vi' ? 'Ngày' : 'Day' },
+                    { key: 'week', label: language === 'vi' ? 'Tuần' : 'Week' },
+                    { key: 'month', label: language === 'vi' ? 'Tháng' : 'Month' },
+                  ].map(opt => (
+                    <button
+                      key={opt.key}
+                      onClick={() => setRevenueView(opt.key)}
+                      style={{
+                        padding: '4px 12px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        background: revenueView === opt.key ? '#3b82f6' : 'transparent',
+                        color: revenueView === opt.key ? 'white' : '#64748b',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                <RevenueTotal>
+                  {(statsSummary.totalRevenue / 1000000).toFixed(1)}M VND
+                </RevenueTotal>
+              </div>
             </ChartHeader>
             <ChartContainer>
               <ChartSVG viewBox="0 0 700 300">

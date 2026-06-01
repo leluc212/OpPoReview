@@ -8,6 +8,7 @@ import jobPostService from '../../services/jobPostService';
 import quickJobService from '../../services/quickJobService';
 import { Button } from '../../components/FormElements';
 import notificationService from '../../services/notificationService';
+import adminReportService from '../../services/adminReportService';
 import { 
   Briefcase, 
   Zap, 
@@ -503,6 +504,7 @@ const PostsManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [standardJobs, setStandardJobs] = useState([]);
   const [urgentJobs, setUrgentJobs] = useState([]);
+  const [subscriptions, setSubscriptions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState('');
   const itemsPerPage = 20;
@@ -654,16 +656,19 @@ const PostsManagement = () => {
     setLoadError('');
 
     try {
-      const [standardResponse, urgentResponse] = await Promise.all([
+      const [standardResponse, urgentResponse, subsResponse] = await Promise.all([
         jobPostService.getAllJobPosts ? jobPostService.getAllJobPosts() : jobPostService.getAllActiveJobs(),
-        quickJobService.getAllQuickJobs ? quickJobService.getAllQuickJobs() : quickJobService.getAllActiveQuickJobs()
+        quickJobService.getAllQuickJobs ? quickJobService.getAllQuickJobs() : quickJobService.getAllActiveQuickJobs(),
+        adminReportService.getAllSubscriptions().catch(() => [])
       ]);
 
       const standardList = Array.isArray(standardResponse) ? standardResponse : standardResponse?.data || [];
       const urgentList = Array.isArray(urgentResponse) ? urgentResponse : urgentResponse?.data || [];
+      const subsList = Array.isArray(subsResponse) ? subsResponse : [];
 
       setStandardJobs(sortJobsForModeration(standardList.map(mapStandardJob)));
       setUrgentJobs(sortJobsForModeration(urgentList.map(mapQuickJob)));
+      setSubscriptions(subsList);
     } catch (err) {
       setLoadError(err?.message || 'Failed to load posts');
       setStandardJobs([]);
@@ -1014,6 +1019,10 @@ const PostsManagement = () => {
               <h3>{language === 'vi' ? 'Tổng CV đã gửi' : 'Total CV Sent'}</h3>
               <p>{totalCVSent}</p>
             </StatBox>
+            <StatBox $color="#4338ca">
+              <h3>{language === 'vi' ? 'Bài đăng được duyệt' : 'Approved Posts'}</h3>
+              <p>{(stats.approved || 0) + (stats['ai-approved'] || 0)}</p>
+            </StatBox>
           </div>
           
           <ChartCard>
@@ -1246,7 +1255,8 @@ const PostsManagement = () => {
                 <th>{language === 'vi' ? 'Ngày kết thúc' : 'End Date'}</th>
                 <th>{language === 'vi' ? 'Ứng tuyển' : 'Applications'}</th>
                 <th>{language === 'vi' ? 'CV đã gửi' : 'CV Sent'}</th>
-                <th>{language === 'vi' ? 'Thao tác' : 'Actions'}</th>
+                <th>{language === 'vi' ? 'Gói hỗ trợ' : 'Support Package'}</th>
+                <th>{language === 'vi' ? 'Trạng thái' : 'Status'}</th>
               </tr>
             </thead>
             <tbody>
@@ -1279,7 +1289,40 @@ const PostsManagement = () => {
                     </div>
                   </td>
                   <td>
-                    <ActionButtons>
+                    {(() => {
+                      const activeSub = subscriptions.find(s =>
+                        s.status === 'active' &&
+                        (s.employerId === job.employerId || s.companyEmail === job.employerEmail)
+                      );
+                      return activeSub ? (
+                        <span style={{ background: '#ede9fe', color: '#5b21b6', borderRadius: '12px', padding: '3px 10px', fontSize: '12px', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                          {activeSub.packageName || (language === 'vi' ? 'Có gói' : 'Active')}
+                        </span>
+                      ) : (
+                        <span style={{ color: '#9ca3af', fontSize: '12px' }}>—</span>
+                      );
+                    })()}
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
+                      {(() => {
+                        const s = job.status;
+                        const cfg = s === 'pending'
+                          ? { bg: '#fef3c7', color: '#92400e', text: language === 'vi' ? 'Chờ duyệt' : 'Pending' }
+                          : s === 'approved' || s === 'ai-approved'
+                          ? { bg: '#d1fae5', color: '#065f46', text: language === 'vi' ? 'Đã duyệt' : 'Approved' }
+                          : s === 'rejected'
+                          ? { bg: '#fee2e2', color: '#991b1b', text: language === 'vi' ? 'Từ chối' : 'Rejected' }
+                          : s === 'warning'
+                          ? { bg: '#fff7ed', color: '#9a3412', text: language === 'vi' ? 'Cảnh báo' : 'Warning' }
+                          : { bg: '#f1f5f9', color: '#475569', text: s };
+                        return (
+                          <span style={{ background: cfg.bg, color: cfg.color, borderRadius: '12px', padding: '3px 10px', fontSize: '12px', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                            {cfg.text}
+                          </span>
+                        );
+                      })()}
+                      <ActionButtons>
                       <IconButton 
                         type="button"
                         onClick={() => handleViewDetails(job)}
@@ -1306,6 +1349,7 @@ const PostsManagement = () => {
                         <Ban size={16} />
                       </IconButton>
                     </ActionButtons>
+                    </div>
                   </td>
                 </tr>
               ))}

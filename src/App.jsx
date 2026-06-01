@@ -30,6 +30,10 @@ import CandidateProfile from './pages/candidate/CandidateProfile';
 import CandidateSettings from './pages/candidate/CandidateSettings';
 import CandidateNotifications from './pages/candidate/CandidateNotifications';
 import EmployerProfileView from './pages/candidate/EmployerProfileView';
+import EmployerDirectory from './pages/candidate/EmployerDirectory';
+import PublicJobListing from './pages/candidate/PublicJobListing';
+import AboutPage from './pages/auth/AboutPage';
+import CVTemplates from './pages/auth/CVTemplates';
 import Support from './pages/candidate/Support';
 import Wallet from './pages/candidate/Wallet';
 import Availability from './pages/candidate/Availability';
@@ -166,6 +170,11 @@ function AppRoutes() {
       } />
       <Route path="/pending-approval" element={<PendingApproval />} />
       <Route path="/terms-urgent-jobs" element={<TermsUrgentJobs />} />
+      <Route path="/companies" element={<LandingPage><EmployerDirectory /></LandingPage>} />
+      <Route path="/companies/:employerId" element={<LandingPage><EmployerProfileView /></LandingPage>} />
+      <Route path="/jobs" element={<LandingPage><PublicJobListing /></LandingPage>} />
+      <Route path="/about" element={<LandingPage><AboutPage /></LandingPage>} />
+      <Route path="/cv-templates" element={<LandingPage><CVTemplates /></LandingPage>} />
       
       {/* Candidate Routes */}
       <Route path="/candidate" element={<Navigate to="/candidate/dashboard" replace />} />
