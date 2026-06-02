@@ -3,6 +3,7 @@ import boto3
 import uuid
 from datetime import datetime
 from decimal import Decimal
+from urllib.parse import urlparse, unquote
 
 
 def get_cors_headers():
@@ -15,6 +16,8 @@ def get_cors_headers():
     }
 
 dynamodb = boto3.resource('dynamodb')
+s3_client = boto3.client('s3')
+BUCKET_NAME = 'opporeview-cv-storage'
 applications_table = dynamodb.Table('StandardApplications')
 jobs_table = dynamodb.Table('PostStandardJob')
 quick_jobs_table = dynamodb.Table('PostQuickJob')
@@ -236,6 +239,44 @@ def submit_application(event, candidate_id, candidate_email, create_response):
         print(f"❌ Error submitting application: {str(e)}")
         return create_response(500, {'error': str(e)})
 
+
+def refresh_cv_urls(applications):
+    """Refresh presigned CV URLs in a list of applications"""
+    for app in applications:
+        cv_url = app.get('cvUrl')
+        if cv_url:
+            try:
+                # Only refresh if it is an S3 URL
+                if 'amazonaws.com' in cv_url:
+                    parsed = urlparse(cv_url)
+                    path = unquote(parsed.path.lstrip('/'))
+                    
+                    # Determine S3 key
+                    hostname = parsed.hostname or ''
+                    if 's3' in hostname:
+                        # Virtual-host style: bucket-name.s3.region.amazonaws.com/key
+                        key = path
+                    else:
+                        # Path style: s3.region.amazonaws.com/bucket-name/key
+                        path_parts = path.split('/', 1)
+                        key = path_parts[1] if len(path_parts) > 1 else path
+                    
+                    # Generate fresh presigned URL (valid for 7 days)
+                    new_url = s3_client.generate_presigned_url(
+                        'get_object',
+                        Params={
+                            'Bucket': BUCKET_NAME,
+                            'Key': key,
+                            'ResponseContentDisposition': f'inline; filename="{app.get("cvFilename", "CV.pdf")}"'
+                        },
+                        ExpiresIn=604800  # 7 days
+                    )
+                    app['cvUrl'] = new_url
+            except Exception as e:
+                print(f"⚠️ Warning: Could not refresh CV URL for application {app.get('applicationId')}: {str(e)}")
+    return applications
+
+
 def get_candidate_applications(candidate_id, create_response):
     """Get all applications for a candidate"""
     try:
@@ -246,6 +287,7 @@ def get_candidate_applications(candidate_id, create_response):
             ScanIndexForward=False
         )
         applications = response.get('Items', [])
+        applications = refresh_cv_urls(applications)
         return create_response(200, {
             'applications': applications,
             'count': len(applications)
@@ -263,6 +305,7 @@ def get_job_applications(job_id, user_id, create_response):
             ExpressionAttributeValues={':jid': job_id}
         )
         applications = response.get('Items', [])
+        applications = refresh_cv_urls(applications)
         # In real life, we should check if requester is the employer here
         return create_response(200, {
             'applications': applications,
@@ -308,6 +351,7 @@ def get_all_applications(create_response):
         # In a high-traffic app, we'd use pagination
         response = applications_table.scan()
         applications = response.get('Items', [])
+        applications = refresh_cv_urls(applications)
         
         return create_response(200, {
             'success': True,

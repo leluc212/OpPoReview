@@ -6,7 +6,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 import Modal from '../../components/Modal';
 import AddressInput from '../../components/AddressInput';
 import { Button, Input, TextArea, Select, FormGroup, Label } from '../../components/FormElements';
-import { Save, ArrowLeft, AlertCircle, CheckCircle, Clock, Zap, Globe, X, Banknote, Copy, Check } from 'lucide-react';
+import { Save, ArrowLeft, AlertCircle, CheckCircle, Clock, Zap, Globe, X, Banknote, Copy, Check, RefreshCw } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import quickJobService from '../../services/quickJobService';
 import employerProfileService from '../../services/employerProfileService';
@@ -745,6 +745,41 @@ const PostQuickJob = () => {
   const { user } = useAuth();
   const employerId = user?.userId || user?.id || user?.email || 'mock_employer_id';
   const [realBalance, setRealBalance] = useState(0);
+
+  const [checkingAccess, setCheckingAccess] = useState(true);
+
+  useEffect(() => {
+    const checkAccess = async () => {
+      try {
+        setCheckingAccess(true);
+        const profile = await employerProfileService.getMyProfile();
+        if (!profile || profile.quickJobStatus !== 'approved') {
+          console.warn('⚠️ Access denied - Quick jobs feature not approved');
+          navigate('/employer/quick-jobs');
+        } else {
+          setCheckingAccess(false);
+        }
+      } catch (err) {
+        console.error('Error checking profile quick job access:', err);
+        navigate('/employer/quick-jobs');
+      }
+    };
+    checkAccess();
+  }, [navigate]);
+
+  if (checkingAccess) {
+    return (
+      <DashboardLayout role="employer">
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '60vh', gap: '16px' }}>
+          <RefreshCw className="animate-spin" size={36} style={{ color: '#1e40af', animation: 'spin 1s linear infinite' }} />
+          <span style={{ fontSize: '15px', fontWeight: '600', color: '#1e40af' }}>
+            {language === 'vi' ? 'Đang kiểm tra quyền truy cập...' : 'Checking access...'}
+          </span>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
 
   // Deposit modal state
   const [walletCode, setWalletCode] = useState('');

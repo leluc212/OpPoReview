@@ -8,7 +8,9 @@ import { useAuth } from '../../context/AuthContext';
 import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Edit3, Trash2, Eye, CheckCircle, Send, Search, Calendar, Newspaper, TrendingUp, TrendingDown, AlertCircle, User, Plus, X, XCircle, Wallet, Save, Award, Star, Briefcase, Zap, Banknote, ThumbsUp, ThumbsDown, ArrowRight, RefreshCw } from 'lucide-react';
 import Modal from '../../components/Modal';
 import CVPreviewModal from '../../components/CVPreviewModal';
+import ConfirmModal from '../../components/ConfirmModal';
 import quickJobService from '../../services/quickJobService';
+import employerProfileService from '../../services/employerProfileService';
 import applicationService from '../../services/applicationService';
 import { createCandidateCvAcceptedNotification, createCandidateCvRejectedNotification } from '../../services/notificationService';
 import DynamicTranslate from '../../components/DynamicTranslate';
@@ -403,6 +405,343 @@ const ChangeRequestBanner = styled.div`
     align-items: center;
     gap: 4px;
     svg { width: 11px; height: 11px; }
+  }
+`;
+
+// --- Styled components for Quick Jobs Introduction ---
+const IntroWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 16px;
+  font-family: 'Outfit', 'Inter', sans-serif;
+`;
+
+const IntroHero = styled.div`
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+  border-radius: 24px;
+  padding: 48px 40px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(30, 64, 175, 0.2);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -60px;
+    left: 10%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(59,130,246,0.2) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+`;
+
+const HeroBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #fef08a;
+  margin-bottom: 20px;
+  backdrop-filter: blur(8px);
+  
+  svg {
+    width: 14px;
+    height: 14px;
+    fill: #fef08a;
+  }
+`;
+
+const HeroTitle = styled.h1`
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  margin-bottom: 16px;
+  line-height: 1.2;
+  color: white !important;
+`;
+
+const HeroDesc = styled.p`
+  font-size: 16px;
+  line-height: 1.6;
+  max-width: 680px;
+  opacity: 0.92;
+  margin: 0;
+  font-weight: 500;
+`;
+
+const IntroGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const IntroCard = styled.div`
+  background: white;
+  border-radius: 20px;
+  padding: 32px 24px;
+  border: 1.5px solid #e8efff;
+  box-shadow: 0 10px 30px rgba(30, 64, 175, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  
+  &:hover {
+    transform: translateY(-6px);
+    border-color: #bfdbfe;
+    box-shadow: 0 16px 36px rgba(30, 64, 175, 0.09);
+  }
+`;
+
+const CardIconBox = styled.div`
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: ${props => props.$bgColor || '#EFF6FF'};
+  border: 1.5px solid ${props => props.$borderColor || '#BFDBFE'};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  svg {
+    width: 22px;
+    height: 22px;
+    color: ${props => props.$color || '#1e40af'};
+  }
+`;
+
+const CardTitle = styled.h3`
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+`;
+
+const CardText = styled.p`
+  font-size: 14px;
+  line-height: 1.6;
+  color: #64748b;
+  margin: 0;
+  font-weight: 500;
+`;
+
+const IntroSectionHeader = styled.div`
+  margin-top: 16px;
+  margin-bottom: 24px;
+  h2 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #1e293b;
+    letter-spacing: -0.5px;
+    margin: 0;
+  }
+  p {
+    font-size: 14px;
+    color: #64748b;
+    margin-top: 6px;
+    margin-bottom: 0;
+    font-weight: 500;
+  }
+`;
+
+const StepsTimeline = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const StepItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  
+  .step-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #1e40af;
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(30, 64, 175, 0.3);
+  }
+  
+  .step-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-top: 4px;
+  }
+  
+  .step-desc {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: #64748b;
+    font-weight: 500;
+  }
+`;
+
+const FaqPanel = styled.div`
+  background: #f8fafc;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+`;
+
+const FaqItem = styled.div`
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  
+  svg {
+    width: 20px;
+    height: 20px;
+    color: #3b82f6;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  
+  .faq-q {
+    font-size: 15.5px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 6px;
+  }
+  
+  .faq-a {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #64748b;
+    font-weight: 500;
+  }
+`;
+
+const ActionBanner = styled.div`
+  background: white;
+  border-radius: 24px;
+  border: 2px solid #e8efff;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(30, 64, 175, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%);
+  }
+`;
+
+const PendingBanner = styled(ActionBanner)`
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-color: #fde68a;
+  
+  &::before {
+    background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+  }
+`;
+
+const ActionButton = styled(motion.button)`
+  padding: 16px 36px;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+`;
+
+const CancelButton = styled(motion.button)`
+  padding: 16px 36px;
+  background: white;
+  color: #ef4444;
+  font-size: 16px;
+  font-weight: 700;
+  border: 2px solid #fee2e2;
+  border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover:not(:disabled) {
+    background: #fef2f2;
+    border-color: #fecaca;
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.1);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 `;
 
@@ -2164,6 +2503,68 @@ const HRManagement = () => {
   const [hrStaff, setHrStaff] = useState(() => getHRStaff(language).map(s => ({ ...s, rated: false, pendingRating: false })));
   const [selectedStaff, setSelectedStaff] = useState(null);
 
+  const [profile, setProfile] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [requestSending, setRequestSending] = useState(false);
+  const [showCancelConfirmModal, setShowCancelConfirmModal] = useState(false);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoadingProfile(true);
+        const data = await employerProfileService.getMyProfile();
+        setProfile(data);
+      } catch (err) {
+        console.error('Error fetching employer profile:', err);
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const handleRequestActivation = async () => {
+    try {
+      setRequestSending(true);
+      const updated = await employerProfileService.updateProfile({
+        quickJobStatus: 'pending'
+      });
+      setProfile(updated);
+      setSuccessToastMessage(language === 'vi' ? 'Gửi yêu cầu thành công! Chúng tôi sẽ liên hệ sớm nhất.' : 'Request sent successfully! We will contact you soon.');
+      setShowSuccessToast(true);
+      setTimeout(() => setShowSuccessToast(false), 4000);
+    } catch (err) {
+      console.error('Error requesting quick jobs activation:', err);
+      alert(language === 'vi' ? 'Không thể gửi yêu cầu, vui lòng thử lại sau.' : 'Failed to send request, please try again later.');
+    } finally {
+      setRequestSending(false);
+    }
+  };
+
+  const handleCancelRequest = () => {
+    setShowCancelConfirmModal(true);
+  };
+
+  const executeCancelRequest = async () => {
+    try {
+      setRequestSending(true);
+      const updated = await employerProfileService.updateProfile({
+        quickJobStatus: 'not_requested'
+      });
+      setProfile(updated);
+      setShowCancelConfirmModal(false);
+      setSuccessToastMessage(language === 'vi' ? 'Hủy yêu cầu thành công!' : 'Request cancelled successfully!');
+      setShowSuccessToast(true);
+      setTimeout(() => setShowSuccessToast(false), 4000);
+    } catch (err) {
+      console.error('Error cancelling quick jobs request:', err);
+      alert(language === 'vi' ? 'Không thể hủy yêu cầu, vui lòng thử lại sau.' : 'Failed to cancel request, please try again later.');
+    } finally {
+      setRequestSending(false);
+    }
+  };
+
+
   // Auto-switch to HR/applications tab when coming from notifications
   useEffect(() => {
     if (location.state?.fromNotifications) {
@@ -2975,6 +3376,248 @@ const HRManagement = () => {
       window.removeEventListener('focus', handleFocus);
     };
   }, [language]);
+
+  if (loadingProfile) {
+    return (
+      <DashboardLayout role="employer" key={language}>
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '60vh', gap: '16px' }}>
+          <RefreshCw size={36} style={{ color: '#1e40af', animation: 'spin 1s linear infinite' }} />
+          <span style={{ fontSize: '15px', fontWeight: '600', color: '#1e40af' }}>
+            {language === 'vi' ? 'Đang tải thông tin...' : 'Loading profile...'}
+          </span>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (profile?.quickJobStatus !== 'approved') {
+    return (
+      <DashboardLayout role="employer" key={language}>
+        <IntroWrapper>
+          <IntroHero>
+            <HeroBadge>
+              <Zap /> {language === 'vi' ? 'TÍNH NĂNG ĐẶC BIỆT' : 'PREMIUM FEATURE'}
+            </HeroBadge>
+            <HeroTitle>
+              {language === 'vi' ? 'Dịch vụ Công việc tuyển gấp' : 'Urgent Recruitment Jobs'}
+            </HeroTitle>
+            <HeroDesc>
+              {language === 'vi' 
+                ? 'Giải pháp tuyển dụng tức thì tối ưu. Tìm kiếm nhân sự chất lượng cao và lấp đầy ca làm trống chỉ trong vài giờ thay vì nhiều ngày.' 
+                : 'The ultimate real-time hiring solution. Match with high-quality workers and fill empty shifts within hours instead of days.'}
+            </HeroDesc>
+          </IntroHero>
+
+          <IntroSectionHeader>
+            <h2>{language === 'vi' ? 'Công việc tuyển gấp là gì?' : 'What is Urgent Recruitment?'}</h2>
+            <p>{language === 'vi' ? 'Các ưu điểm vượt trội của tính năng tuyển gấp' : 'Key benefits of urgent job postings'}</p>
+          </IntroSectionHeader>
+
+          <IntroGrid>
+            <IntroCard>
+              <CardIconBox $bgColor="#fee2e2" $borderColor="#fca5a5" $color="#dc2626">
+                <Zap />
+              </CardIconBox>
+              <CardTitle>{language === 'vi' ? 'Nổi bật & Đẩy tin' : 'Highlighted & Boosted'}</CardTitle>
+              <CardText>
+                {language === 'vi' 
+                  ? 'Bài đăng của bạn sẽ có biểu tượng "Tuyển gấp" nổi bật và hiển thị ở vị trí ưu tiên trên trang chủ của ứng viên.' 
+                  : 'Your posts will feature a prominent "Urgent" badge and display at the top of the candidates\' feed.'}
+              </CardText>
+            </IntroCard>
+
+            <IntroCard>
+              <CardIconBox $bgColor="#dcfce7" $borderColor="#86efac" $color="#16a34a">
+                <UsersRound />
+              </CardIconBox>
+              <CardTitle>{language === 'vi' ? 'Tiếp cận Real-time' : 'Real-time Matching'}</CardTitle>
+              <CardText>
+                {language === 'vi' 
+                  ? 'Hệ thống tự động gửi thông báo đẩy (push) đến điện thoại của ứng viên phù hợp trong phạm vi lân cận ngay khi tạo tin.' 
+                  : 'The system instantly sends push notifications to suitable candidates nearby as soon as the job is posted.'}
+              </CardText>
+            </IntroCard>
+
+            <IntroCard>
+              <CardIconBox $bgColor="#eff6ff" $borderColor="#bfdbfe" $color="#2563eb">
+                <Wallet />
+              </CardIconBox>
+              <CardTitle>{language === 'vi' ? 'Ký quỹ an toàn' : 'Secure Escrow'}</CardTitle>
+              <CardText>
+                {language === 'vi' 
+                  ? 'Lương được giữ an toàn qua tài khoản ký quỹ (Escrow) và tự động giải ngân cho ứng viên ngay sau khi hoàn thành công việc.' 
+                  : 'Funds are securely held in escrow and automatically released to the worker once the shift is completed.'}
+              </CardText>
+            </IntroCard>
+          </IntroGrid>
+
+          <IntroSectionHeader>
+            <h2>{language === 'vi' ? 'Cách thức hoạt động' : 'How it works'}</h2>
+            <p>{language === 'vi' ? 'Quy trình tuyển dụng tinh gọn và nhanh chóng qua 4 bước' : 'A streamlined 4-step recruitment process'}</p>
+          </IntroSectionHeader>
+
+          <StepsTimeline>
+            <StepItem>
+              <div className="step-num">1</div>
+              <div className="step-title">{language === 'vi' ? 'Gửi yêu cầu kích hoạt' : 'Request Activation'}</div>
+              <div className="step-desc">
+                {language === 'vi' 
+                  ? 'Đăng ký sử dụng tính năng và chờ hệ thống kiểm duyệt hồ sơ doanh nghiệp của bạn.' 
+                  : 'Submit an activation request and wait for the system to verify your company profile.'}
+              </div>
+            </StepItem>
+
+            <StepItem>
+              <div className="step-num">2</div>
+              <div className="step-title">{language === 'vi' ? 'Ký quỹ tin đăng' : 'Escrow Shift Pay'}</div>
+              <div className="step-desc">
+                {language === 'vi' 
+                  ? 'Nạp tiền lương tương ứng vào ví điện tử Oppo. Hệ thống sẽ ký quỹ để đảm bảo quyền lợi ứng viên.' 
+                  : 'Deposit the shift salary into your Oppo wallet. The system holds it in escrow to secure candidates.'}
+              </div>
+            </StepItem>
+
+            <StepItem>
+              <div className="step-num">3</div>
+              <div className="step-title">{language === 'vi' ? 'Chat Real-time' : 'Real-time Chat'}</div>
+              <div className="step-desc">
+                {language === 'vi' 
+                  ? 'Ứng viên sẽ nhận việc tức thì. Bạn có thể chat realtime để trao đổi và hướng dẫn công việc.' 
+                  : 'Candidates accept the job instantly. Chat with them in real-time to organize the shift details.'}
+              </div>
+            </StepItem>
+
+            <StepItem>
+              <div className="step-num">4</div>
+              <div className="step-title">{language === 'vi' ? 'Xác nhận & Thanh toán' : 'Complete & Pay'}</div>
+              <div className="step-desc">
+                {language === 'vi' 
+                  ? 'Xác nhận công việc hoàn thành. Hệ thống sẽ tự động chuyển khoản từ tài khoản ký quỹ vào ví của ứng viên.' 
+                  : 'Confirm job completion. The system automatically releases escrowed funds to the worker\'s wallet.'}
+              </div>
+            </StepItem>
+          </StepsTimeline>
+
+          <IntroSectionHeader>
+            <h2>{language === 'vi' ? 'Các thông tin quan trọng' : 'Important Details'}</h2>
+            <p>{language === 'vi' ? 'Quy định và chính sách hoạt động của công việc tuyển gấp' : 'Urgent jobs policies and terms'}</p>
+          </IntroSectionHeader>
+
+          <FaqPanel>
+            <FaqItem>
+              <AlertCircle />
+              <div>
+                <div className="faq-q">{language === 'vi' ? 'Mức lương sàn tuyển gấp là bao nhiêu?' : 'What is the minimum hourly rate?'}</div>
+                <div className="faq-a">
+                  {language === 'vi' 
+                    ? 'Để đảm bảo thu hút ứng viên trong thời gian ngắn, lương của Công việc tuyển gấp phải từ 29.500 VNĐ/giờ trở lên.' 
+                    : 'To attract workers quickly, the urgent hourly wage must be at least 29,500 VND/hour.'}
+                </div>
+              </div>
+            </FaqItem>
+
+            <FaqItem>
+              <TrendingUp />
+              <div>
+                <div className="faq-q">{language === 'vi' ? 'Phí hoa hồng dịch vụ là bao nhiêu?' : 'What is the service fee?'}</div>
+                <div className="faq-a">
+                  {language === 'vi' 
+                    ? 'Hệ thống thu phí dịch vụ 15% tính trên tổng lương ca làm việc khi bài đăng được hoàn thành thành công.' 
+                    : 'The system charges a 15% commission fee based on the total shift salary upon successful completion.'}
+                </div>
+              </div>
+            </FaqItem>
+
+            <FaqItem>
+              <CheckCircle />
+              <div>
+                <div className="faq-q">{language === 'vi' ? 'Chính sách hoàn tiền ký quỹ ra sao?' : 'What is the refund policy?'}</div>
+                <div className="faq-a">
+                  {language === 'vi' 
+                    ? 'Nếu ca làm việc không diễn ra hoặc không có ứng viên nhận việc, 100% số tiền đã ký quỹ sẽ được hoàn trả lại ví của bạn.' 
+                    : 'If the shift does not occur or no worker accepts it, 100% of the escrowed funds are returned to your wallet.'}
+                </div>
+              </div>
+            </FaqItem>
+          </FaqPanel>
+
+          {profile?.quickJobStatus === 'pending' ? (
+            <PendingBanner>
+              <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#854d0e', margin: '0 0 8px 0' }}>
+                {language === 'vi' ? 'Yêu cầu đang chờ duyệt' : 'Request Pending Approval'}
+              </h3>
+              <p style={{ fontSize: '14px', color: '#a16207', margin: '0 0 16px 0', fontWeight: '500' }}>
+                {language === 'vi' 
+                  ? 'Chúng tôi đã nhận được yêu cầu kích hoạt của bạn và sẽ liên hệ sớm nhất trong vòng 24 giờ.' 
+                  : 'We have received your activation request and will contact you as soon as possible within 24 hours.'}
+              </p>
+              <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', width: '100%', marginTop: '16px' }}>
+                <ActionButton disabled={true} style={{ background: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)', boxShadow: 'none', padding: '12px 28px' }}>
+                  <RefreshCw size={18} style={{ animation: 'spin 1.5s linear infinite' }} />
+                  {language === 'vi' ? 'Đang xử lý...' : 'Processing...'}
+                </ActionButton>
+                <CancelButton
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleCancelRequest}
+                  disabled={requestSending}
+                  style={{ padding: '12px 28px' }}
+                >
+                  <X size={18} />
+                  {language === 'vi' ? 'Hủy yêu cầu' : 'Cancel Request'}
+                </CancelButton>
+              </div>
+            </PendingBanner>
+          ) : (
+            <ActionBanner>
+              <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#1e293b', margin: '0 0 8px 0' }}>
+                {language === 'vi' ? 'Bắt đầu sử dụng Công việc tuyển gấp' : 'Start using Urgent Recruitment'}
+              </h3>
+              <p style={{ fontSize: '14px', color: '#64748b', margin: '0 0 24px 0', fontWeight: '500' }}>
+                {language === 'vi' 
+                  ? 'Kích hoạt tính năng tuyển gấp ngay hôm nay để lấp đầy ca làm việc của bạn trong tích tắc.' 
+                  : 'Activate the urgent recruitment feature today and fill your empty work shifts in no time.'}
+              </p>
+              <ActionButton
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                disabled={requestSending}
+                onClick={handleRequestActivation}
+              >
+                <Zap />
+                {language === 'vi' ? 'Gửi yêu cầu kích hoạt Công việc tuyển gấp' : 'Request Urgent Jobs Activation'}
+              </ActionButton>
+            </ActionBanner>
+          )}
+        </IntroWrapper>
+        <AnimatePresence>
+          {showSuccessToast && (
+            <SuccessToast
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <CheckCircle />
+              <span>{successToastMessage}</span>
+            </SuccessToast>
+          )}
+        </AnimatePresence>
+        <ConfirmModal
+          isOpen={showCancelConfirmModal}
+          title={language === 'vi' ? 'Hủy yêu cầu kích hoạt' : 'Cancel Activation Request'}
+          message={language === 'vi' 
+            ? 'Bạn có chắc chắn muốn hủy yêu cầu kích hoạt Công việc tuyển gấp? Bạn sẽ phải gửi lại yêu cầu nếu muốn kích hoạt sau này.' 
+            : 'Are you sure you want to cancel the Urgent Jobs activation request? You will need to resubmit the request if you change your mind.'}
+          confirmText={language === 'vi' ? 'Hủy yêu cầu' : 'Cancel Request'}
+          cancelText={language === 'vi' ? 'Giữ lại' : 'Keep Request'}
+          onConfirm={executeCancelRequest}
+          onCancel={() => setShowCancelConfirmModal(false)}
+          type="danger"
+          isLoading={requestSending}
+        />
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout role="employer" key={language}>
