@@ -767,18 +767,7 @@ const PostQuickJob = () => {
     checkAccess();
   }, [navigate]);
 
-  if (checkingAccess) {
-    return (
-      <DashboardLayout role="employer">
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '60vh', gap: '16px' }}>
-          <RefreshCw className="animate-spin" size={36} style={{ color: '#1e40af', animation: 'spin 1s linear infinite' }} />
-          <span style={{ fontSize: '15px', fontWeight: '600', color: '#1e40af' }}>
-            {language === 'vi' ? 'Đang kiểm tra quyền truy cập...' : 'Checking access...'}
-          </span>
-        </div>
-      </DashboardLayout>
-    );
-  }
+
 
 
   // Deposit modal state
@@ -1368,6 +1357,19 @@ const PostQuickJob = () => {
       closeButton: 'Close'
     }
   };
+
+  if (checkingAccess) {
+    return (
+      <DashboardLayout role="employer">
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '60vh', gap: '16px' }}>
+          <RefreshCw className="animate-spin" size={36} style={{ color: '#1e40af', animation: 'spin 1s linear infinite' }} />
+          <span style={{ fontSize: '15px', fontWeight: '600', color: '#1e40af' }}>
+            {language === 'vi' ? 'Đang kiểm tra quyền truy cập...' : 'Checking access...'}
+          </span>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   const t = translations[language];
 

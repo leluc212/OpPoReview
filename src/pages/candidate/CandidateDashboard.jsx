@@ -39,7 +39,9 @@ import {
   Send,
   ChevronDown,
   Phone,
-  MoreVertical
+  MoreVertical,
+  AlertCircle,
+  DollarSign
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 
@@ -954,12 +956,12 @@ const CurrentJobMeta = styled.div`
 
 const CurrentJobBadge = styled.span`
   padding: 6px 16px;
-  background: ${props => props.theme.colors.success}15;
-  color: ${props => props.theme.colors.success};
+  background: ${props => props.$status === 'completed_pending_candidate' ? 'rgba(245, 158, 11, 0.15)' : props.theme.colors.success + '15'};
+  color: ${props => props.$status === 'completed_pending_candidate' ? '#D97706' : props.theme.colors.success};
   border-radius: ${props => props.theme.borderRadius.full};
   font-size: 13px;
   font-weight: 700;
-  border: 1px solid ${props => props.theme.colors.success}30;
+  border: 1px solid ${props => props.$status === 'completed_pending_candidate' ? 'rgba(245, 158, 11, 0.3)' : props.theme.colors.success + '30'};
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1331,6 +1333,8 @@ const CandidateDashboard = () => {
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [ratings, setRatings] = useState({ overall: 0, environment: 0, attitude: 0, accuracy: 0 });
   const [reviewText, setReviewText] = useState('');
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [candidateProfile, setCandidateProfile] = useState(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
@@ -1400,14 +1404,24 @@ const CandidateDashboard = () => {
       ).slice(0, 5);
       
       setRealRecommendedJobs(recommended.map(job => {
-        const isQuick = job.jobType === 'quick' || !!(job.jobID && !job.idJob);
+        const isQuick = job.jobType === 'quick' || !!(job.jobID && !job.idJob) || !!job.totalSalary;
+        const totalSalary = Number(job.totalSalary || 0);
+        const hourlyRate = Number(job.hourlyRate || 0);
+        const totalHours = Number(job.totalHours || 0);
+        const candidateIncome = Math.round(totalSalary * 0.85);
+        const jobSalary = isQuick
+          ? (candidateIncome > 0
+              ? `${candidateIncome.toLocaleString('vi-VN')} VNĐ/${totalHours}h`
+              : `${Math.round(hourlyRate * 0.85).toLocaleString('vi-VN')} VNĐ/giờ`)
+          : formatSalary(job.salary || job.totalSalary);
+
         return {
           id: job.idJob || job.jobID || job.id,
           title: job.title || 'Untitled',
           company: job.employerName || job.companyName || (language === 'vi' ? 'Công ty' : 'Company'),
           location: job.location || '',
           type: isQuick ? (language === 'vi' ? 'Việc làm ngắn hạn' : 'Quick Job') : (job.jobType === 'full-time' ? 'Toàn thời gian' : 'Bán thời gian'),
-          salary: formatSalary(job.salary || job.totalSalary),
+          salary: jobSalary,
           postedAt: formatRelativeTime(job.createdAt),
           tags: typeof job.tags === 'string' ? job.tags.split(',').map(t => t.trim()) : (job.tags || [])
         };
@@ -1469,32 +1483,53 @@ const CandidateDashboard = () => {
         
       setRealApplications(mappedApps);
 
-      // Find current job (latest accepted application)
+      // Find current job (latest accepted or completed_pending_candidate application)
       const acceptedApp = apps
-        .filter(app => app.status === 'accepted')
+        .filter(app => 
+          app.status === 'accepted' || 
+          app.status === 'completed_pending_candidate' ||
+          (app.status === 'completed' && !app.candidateRating)
+        )
         .sort((a, b) => new Date(b.appliedAt || b.createdAt || 0) - new Date(a.appliedAt || a.createdAt || 0))[0];
 
       if (acceptedApp) {
         const job = finalAllJobs.find(j => (j.idJob || j.id || j.jobID) === acceptedApp.jobId);
         
-        // Only set current job if it's a valid job with real details
+        const companyVal = job.employerName || job.companyName;
         const isJobValid = job && 
                           job.title && 
                           !job.title.includes('Unknown') && 
-                          job.employerName && 
-                          !job.employerName.includes('Unknown') &&
-                          !job.employerName.includes('không xác định');
+                          companyVal && 
+                          !companyVal.includes('Unknown') &&
+                          !companyVal.includes('không xác định');
 
         if (isJobValid) {
+          const isQuick = job.jobType === 'quick' || !!job.totalSalary;
+          const totalSalary = Number(job.totalSalary || 0);
+          const hourlyRate = Number(job.hourlyRate || 0);
+          const totalHours = Number(job.totalHours || 0);
+          const candidateIncome = Math.round(totalSalary * 0.85);
+          const jobSalary = isQuick
+            ? (candidateIncome > 0
+                ? `${candidateIncome.toLocaleString('vi-VN')} VNĐ/${totalHours}h`
+                : `${Math.round(hourlyRate * 0.85).toLocaleString('vi-VN')} VNĐ/giờ`)
+            : formatSalary(job.salary || job.totalSalary);
+
           setCurrentJob({
             jobId: job.idJob || job.id || job.jobID,
             title: job.title,
             company: job.employerName || job.companyName || '---',
             location: job.location || '',
-            salary: formatSalary(job.salary || job.totalSalary),
-            workHours: job.workHours || '---',
+            salary: jobSalary,
+            workHours: job.workHours || (job.startTime && job.endTime ? `${job.startTime} - ${job.endTime}` : '---'),
+            rawSalary: totalSalary,
+            hourlyRate: hourlyRate,
+            totalHours: totalHours,
             startDate: new Date(acceptedApp.appliedAt || acceptedApp.createdAt).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US'),
-            status: 'active'
+            status: acceptedApp.status,
+            applicationId: acceptedApp.applicationId,
+            employerRating: acceptedApp.employerRating || null,
+            employerConfirmedAt: acceptedApp.employerConfirmedAt || null
           });
         } else {
           setCurrentJob(null);
@@ -1582,8 +1617,316 @@ const CandidateDashboard = () => {
     return statusMap[status] || 'unseen';
   };
 
-  const handleSubmitReview = () => {
-    setReviewSubmitted(true);
+  const releaseEscrowFunds = (job) => {
+    try {
+      const jobId = job.jobId;
+      const jobTitle = job.title || 'Công việc tuyển gấp';
+      const companyName = job.company || 'Nhà tuyển dụng';
+      const totalAmount = Number(job.rawSalary) || 0;
+      
+      if (totalAmount <= 0) {
+        console.warn('Escrow release: totalAmount is 0, skipping release');
+        return;
+      }
+      
+      const candidateAmount = Math.round(totalAmount * 0.85);
+      const adminAmount = totalAmount - candidateAmount; // Exactly 15%
+      
+      console.log(`💰 Releasing escrow for job ${jobId}. Total: ${totalAmount}, Candidate: ${candidateAmount}, Admin: ${adminAmount}`);
+      
+      // 1. Update escrow_jobs status
+      const savedJobs = JSON.parse(localStorage.getItem('escrow_jobs') || '[]');
+      let foundJobInEscrow = false;
+      const updatedJobs = savedJobs.map(j => {
+        if (String(j.jobId) === String(jobId)) {
+          foundJobInEscrow = true;
+          return {
+            ...j,
+            status: 'released',
+            candidateConfirmed: true,
+            releasedAt: new Date().toISOString()
+          };
+        }
+        return j;
+      });
+      
+      if (!foundJobInEscrow) {
+        // If not found in escrow_jobs (e.g. demo data), prepend a new one
+        updatedJobs.unshift({
+          jobId: jobId,
+          jobTitle: jobTitle,
+          amount: totalAmount,
+          status: 'released',
+          employerConfirmed: true,
+          candidateConfirmed: true,
+          createdAt: new Date(Date.now() - 24 * 3600 * 1000).toISOString(), // Simulated yesterday
+          releasedAt: new Date().toISOString(),
+          totalHours: job.totalHours || 8,
+          hourlyRate: job.hourlyRate || Math.round(totalAmount / (job.totalHours || 8))
+        });
+      }
+      localStorage.setItem('escrow_jobs', JSON.stringify(updatedJobs));
+      
+      // 2. Add to escrow_transactions
+      const savedTx = JSON.parse(localStorage.getItem('escrow_transactions') || '[]');
+      const newTxId = 2000 + savedTx.length + 1; // Unique transaction ID
+      const escrowTxObj = {
+        id: newTxId,
+        jobId: jobId,
+        jobTitle: jobTitle,
+        totalAmount: totalAmount,
+        candidateAmount: candidateAmount,
+        adminAmount: adminAmount,
+        date: new Date().toISOString(),
+        type: 'release'
+      };
+      savedTx.unshift(escrowTxObj);
+      localStorage.setItem('escrow_transactions', JSON.stringify(savedTx));
+      
+      // 3. Update candidate_wallet
+      const candidateWallet = JSON.parse(localStorage.getItem('candidate_wallet') || 'null');
+      const currentCandidateBalance = candidateWallet ? candidateWallet.balance : 15750000;
+      const currentCandidateTx = candidateWallet?.transactions || [
+        {
+          id: 1,
+          type: 'income',
+          title: language === 'vi' ? 'Nhận tiền từ The Coffee House' : 'Payment from The Coffee House',
+          description: language === 'vi' ? 'Thanh toán cho công việc #12345' : 'Payment for job #12345',
+          amount: 2500000,
+          date: '2026-02-13'
+        },
+        {
+          id: 2,
+          type: 'income',
+          title: language === 'vi' ? 'Nhận tiền từ Highlands Coffee' : 'Payment from Highlands Coffee',
+          description: language === 'vi' ? 'Thanh toán cho công việc #12344' : 'Payment for job #12344',
+          amount: 3000000,
+          date: '2026-02-10'
+        },
+        {
+          id: 3,
+          type: 'expense',
+          title: language === 'vi' ? 'Rút tiền về ngân hàng' : 'Withdraw to bank',
+          description: language === 'vi' ? 'Chuyển về tài khoản VCB' : 'Transfer to VCB account',
+          amount: -5000000,
+          date: '2026-02-08'
+        },
+        {
+          id: 4,
+          type: 'income',
+          title: language === 'vi' ? 'Nhận tiền từ Pizza 4P\'s' : 'Payment from Pizza 4P\'s',
+          description: language === 'vi' ? 'Thanh toán cho công việc #12343' : 'Payment for job #12343',
+          amount: 1800000,
+          date: '2026-02-05'
+        },
+        {
+          id: 5,
+          type: 'income',
+          title: language === 'vi' ? 'Nhận tiền từ Golden Gate Group' : 'Payment from Golden Gate Group',
+          description: language === 'vi' ? 'Thanh toán cho công việc #12342' : 'Payment for job #12342',
+          amount: 2200000,
+          date: '2026-02-01'
+        }
+      ];
+      
+      const newCandidateTxId = currentCandidateTx.length + 1;
+      const candidateTxObj = {
+        id: newCandidateTxId,
+        type: 'income',
+        title: language === 'vi' ? `Nhận tiền từ ${companyName}` : `Payment from ${companyName}`,
+        description: language === 'vi' ? `Thanh toán cho công việc tuyển gấp: ${jobTitle}` : `Payment for urgent job: ${jobTitle}`,
+        amount: candidateAmount,
+        date: new Date().toISOString().split('T')[0]
+      };
+      
+      const newCandidateWallet = {
+        balance: currentCandidateBalance + candidateAmount,
+        transactions: [candidateTxObj, ...currentCandidateTx]
+      };
+      localStorage.setItem('candidate_wallet', JSON.stringify(newCandidateWallet));
+      
+      // 4. Update admin_wallet
+      const adminWallet = JSON.parse(localStorage.getItem('admin_wallet') || 'null');
+      const currentAdminBalance = adminWallet ? adminWallet.balance : 2458750000;
+      const currentAdminTx = adminWallet?.transactions || [
+        {
+          id: 1,
+          type: 'income',
+          title: language === 'vi' ? 'Thanh toán gói Premium - Bamos chi nhánh Thủ Đức' : 'Premium package - Bamos Thu Duc Branch',
+          meta: language === 'vi' ? 'Chuyển khoản' : 'Bank transfer',
+          amount: 5000000,
+          date: '15/02/2026',
+          time: '14:30',
+          status: 'completed'
+        },
+        {
+          id: 2,
+          type: 'expense',
+          title: language === 'vi' ? 'Hoàn tiền cho ứng viên Nguyễn Thị Mỹ Chi' : 'Refund to candidate Nguyen Thi My Chi',
+          meta: language === 'vi' ? 'Ví điện tử' : 'E-wallet',
+          amount: 500000,
+          date: '14/02/2026',
+          time: '10:15',
+          status: 'completed'
+        },
+        {
+          id: 3,
+          type: 'income',
+          title: language === 'vi' ? 'Phí dịch vụ quảng cáo - Highlands quận 9' : 'Ad service fee - Highlands Q9',
+          meta: 'PayPal',
+          amount: 2500000,
+          date: '14/02/2026',
+          time: '09:00',
+          status: 'completed'
+        },
+        {
+          id: 4,
+          type: 'income',
+          title: language === 'vi' ? 'Thanh toán gói Basic - Katinat quận 8' : 'Basic package - Katinat Q8',
+          meta: language === 'vi' ? 'Chuyển khoản' : 'Bank transfer',
+          amount: 1500000,
+          date: '13/02/2026',
+          time: '16:45',
+          status: 'pending'
+        },
+        {
+          id: 5,
+          type: 'expense',
+          title: language === 'vi' ? 'Chi phí vận hành hệ thống' : 'System operation cost',
+          meta: language === 'vi' ? 'Chuyển khoản' : 'Bank transfer',
+          amount: 10000000,
+          date: '13/02/2026',
+          time: '08:00',
+          status: 'completed'
+        },
+        {
+          id: 6,
+          type: 'income',
+          title: language === 'vi' ? 'Phí đăng tin - Nhiều nhà tuyển dụng' : 'Job posting fee - Multiple employers',
+          meta: language === 'vi' ? 'Ví điện tử' : 'E-wallet',
+          amount: 8500000,
+          date: '12/02/2026',
+          time: '15:20',
+          status: 'completed'
+        },
+        {
+          id: 7,
+          type: 'expense',
+          title: language === 'vi' ? 'Hoàn tiền do lỗi hệ thống' : 'Refund due to system error',
+          meta: language === 'vi' ? 'Chuyển khoản' : 'Bank transfer',
+          amount: 1200000,
+          date: '12/02/2026',
+          time: '11:30',
+          status: 'failed'
+        },
+        {
+          id: 8,
+          type: 'income',
+          title: language === 'vi' ? 'Gia hạn gói Premium - Công ty GHI' : 'Premium renewal - GHI Company',
+          meta: 'PayPal',
+          amount: 5000000,
+          date: '11/02/2026',
+          time: '13:00',
+          status: 'completed'
+        }
+      ];
+      
+      const newAdminTxId = currentAdminTx.length + 1;
+      const now = new Date();
+      const adminTxObj = {
+        id: newAdminTxId,
+        type: 'income',
+        title: language === 'vi' ? `Hoa hồng (15%) Escrow - Job #${jobId}` : `Commission (15%) Escrow - Job #${jobId}`,
+        meta: language === 'vi' ? 'Ký quỹ Escrow' : 'Escrow Deposit',
+        amount: adminAmount,
+        date: now.toLocaleDateString('vi-VN'),
+        time: now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+        status: 'completed'
+      };
+      
+      const newAdminWallet = {
+        balance: currentAdminBalance + adminAmount,
+        transactions: [adminTxObj, ...currentAdminTx]
+      };
+      localStorage.setItem('admin_wallet', JSON.stringify(newAdminWallet));
+      
+    } catch (err) {
+      console.error('Error executing escrow release:', err);
+    }
+  };
+
+  const handleConfirmCompletion = async () => {
+    if (!currentJob?.applicationId) return;
+    try {
+      setIsConfirming(true);
+      const appId = currentJob.applicationId;
+      await applicationService.updateApplicationStatus(appId, 'completed', {
+        candidateConfirmed: true,
+        candidateConfirmedAt: new Date().toISOString()
+      });
+      
+      // Perform Escrow Release
+      releaseEscrowFunds(currentJob);
+
+      setJobCompleted(true);
+      fetchData(false); // Refresh data
+    } catch (err) {
+      console.error('Error confirming job completion:', err);
+      alert(language === 'vi' ? 'Xác nhận hoàn thành thất bại, vui lòng thử lại!' : 'Failed to confirm completion, please try again!');
+    } finally {
+      setIsConfirming(false);
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (!currentJob?.applicationId) return;
+    try {
+      setIsSubmittingReview(true);
+      const appId = currentJob.applicationId;
+      const candidateRating = {
+        overall: ratings.overall,
+        environment: ratings.environment,
+        attitude: ratings.attitude,
+        accuracy: ratings.accuracy,
+        comment: reviewText
+      };
+      await applicationService.updateApplicationStatus(appId, 'completed', {
+        candidateRating
+      });
+
+      // Save to client-side Completed Jobs Database table
+      try {
+        const completedJobs = JSON.parse(localStorage.getItem('completed_jobs_db') || '[]');
+        const newCompletedJob = {
+          applicationId: appId,
+          jobId: currentJob.jobId,
+          title: currentJob.title,
+          company: currentJob.company,
+          location: currentJob.location,
+          salary: currentJob.salary,
+          workHours: currentJob.workHours,
+          startDate: currentJob.startDate,
+          candidateRating,
+          employerRating: currentJob.employerRating || null,
+          completedAt: new Date().toISOString()
+        };
+        localStorage.setItem('completed_jobs_db', JSON.stringify([newCompletedJob, ...completedJobs]));
+        console.log('✅ Saved completed job and ratings to local database: completed_jobs_db');
+      } catch (dbErr) {
+        console.error('Failed to save to local completed_jobs_db:', dbErr);
+      }
+
+      setReviewSubmitted(true);
+      setTimeout(() => {
+        handleCloseModal();
+        fetchData(false); // Refresh data to hide the card
+      }, 1500);
+    } catch (err) {
+      console.error('Error submitting candidate review:', err);
+      alert(language === 'vi' ? 'Gửi đánh giá thất bại, vui lòng thử lại!' : 'Failed to submit review, please try again!');
+    } finally {
+      setIsSubmittingReview(false);
+    }
   };
 
   const handleCloseModal = () => {
@@ -1887,18 +2230,27 @@ const CandidateDashboard = () => {
                   <CurrentJobMeta>
                     <span><MapPin /><DynamicTranslate text={currentJob.location} showIndicator={false} /></span>
                     <span><Clock />{currentJob.workHours}</span>
-                    <span><span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập trung bình:' : 'Income:'}</span> {currentJob.salary}</span>
+                    <span><span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span> {currentJob.salary}</span>
                     <span><Calendar />{language === 'vi' ? `Từ ${currentJob.startDate}` : `Since ${currentJob.startDate}`}</span>
                   </CurrentJobMeta>
                 </CurrentJobInfo>
-                <CurrentJobBadge>
-                  <CheckCircle />
-                  {language === 'vi' ? 'Đang làm việc' : 'Active'}
+                <CurrentJobBadge $status={currentJob.status}>
+                  {currentJob.status === 'completed_pending_candidate' ? (
+                    <>
+                      <Clock style={{ width: '14px', height: '14px', marginRight: '4px' }} />
+                      {language === 'vi' ? 'Chờ bạn xác nhận' : 'Pending Your Confirm'}
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle />
+                      {language === 'vi' ? 'Đang làm việc' : 'Active'}
+                    </>
+                  )}
                 </CurrentJobBadge>
                 <ViewDetailButton
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setShowJobDetail(true)}
+                  onClick={(e) => { e.stopPropagation(); setShowJobDetail(true); }}
                 >
                   <Eye />
                   {language === 'vi' ? 'Xem chi tiết' : 'Details'}
@@ -1932,6 +2284,78 @@ const CandidateDashboard = () => {
                 <ModalBody>
                   {!jobCompleted ? (
                     <>
+                      {currentJob?.status === 'completed_pending_candidate' && (
+                        <div style={{
+                          background: 'linear-gradient(135deg, #FEF3C7, #FDE68A20)',
+                          border: '1.5px solid #FCD34D',
+                          borderRadius: '12px',
+                          padding: '12px 14px',
+                          marginBottom: '16px',
+                          fontSize: '13px',
+                          color: '#B45309',
+                          fontWeight: '600',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}>
+                          <AlertCircle style={{ color: '#D97706', width: '18px', height: '18px', flexShrink: 0 }} />
+                          {language === 'vi'
+                            ? 'Nhà tuyển dụng đã xác nhận hoàn thành công việc và gửi đánh giá cho bạn. Vui lòng kiểm tra và xác nhận hoàn thành!'
+                            : 'Employer has confirmed job completion and rated you. Please review and confirm completion!'}
+                        </div>
+                      )}
+
+                      {currentJob?.employerRating && (
+                        <div style={{
+                          background: 'linear-gradient(135deg, #EFF6FF, #DBEAFE40)',
+                          border: '1.5px solid #BFDBFE',
+                          borderRadius: '16px',
+                          padding: '18px',
+                          marginBottom: '20px',
+                          textAlign: 'left'
+                        }}>
+                          <h4 style={{ fontSize: '15px', fontWeight: '800', color: '#1e40af', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <Star style={{ fill: '#3b82f6', color: '#3b82f6', width: '18px', height: '18px' }} />
+                            {language === 'vi' ? 'Đánh giá từ Nhà tuyển dụng' : 'Employer\'s Review'}
+                          </h4>
+                          
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 16px', marginBottom: '14px' }}>
+                            {/* Overall */}
+                            <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '8px', borderBottom: '1px dashed #BFDBFE' }}>
+                              <span style={{ fontWeight: '700', fontSize: '14px', color: '#1E293B' }}>{language === 'vi' ? 'Đánh giá chung' : 'Overall'}</span>
+                              <span style={{ display: 'flex', gap: '2px' }}>
+                                {[1, 2, 3, 4, 5].map(star => (
+                                  <Star key={star} style={{ width: '14px', height: '14px', fill: currentJob.employerRating.overall >= star ? '#F59E0B' : 'transparent', color: '#F59E0B' }} />
+                                ))}
+                              </span>
+                            </div>
+                            
+                            {/* Categories */}
+                            {[
+                              { key: 'attitude', label: language === 'vi' ? 'Thái độ làm việc' : 'Work Attitude' },
+                              { key: 'efficiency', label: language === 'vi' ? 'Hiệu quả công việc' : 'Work Efficiency' },
+                              { key: 'discipline', label: language === 'vi' ? 'Kỷ luật & Đúng giờ' : 'Discipline & Punctuality' },
+                              { key: 'skills', label: language === 'vi' ? 'Kỹ năng công việc' : 'Job Skills' }
+                            ].map(cat => (
+                              <div key={cat.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '13px', color: '#475569', fontWeight: '500' }}>{cat.label}</span>
+                                <span style={{ display: 'flex', gap: '2px' }}>
+                                  {[1, 2, 3, 4, 5].map(star => (
+                                    <Star key={star} style={{ width: '12px', height: '12px', fill: currentJob.employerRating[cat.key] >= star ? '#F59E0B' : 'transparent', color: '#F59E0B' }} />
+                                  ))}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          {currentJob.employerRating.comment && (
+                            <div style={{ background: '#F8FAFC', borderRadius: '8px', padding: '10px 12px', borderLeft: '3px solid #3B82F6', fontSize: '13px', color: '#334155', fontStyle: 'italic' }}>
+                              "{currentJob.employerRating.comment}"
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       <JobDetailRow>
                         <Briefcase />
                         <span className="label">{language === 'vi' ? 'Vị trí' : 'Position'}</span>
@@ -1953,8 +2377,13 @@ const CandidateDashboard = () => {
                         <span className="value">{currentJob?.workHours || '---'}</span>
                       </JobDetailRow>
                       <JobDetailRow>
-                        <span style={{ fontWeight: '500', minWidth: '80px' }}>{language === 'vi' ? 'Thu nhập trung bình:' : 'Income:'}</span>
-                        <span className="value">{currentJob?.salary || '---'}</span>
+                        <DollarSign style={{ width: '18px', height: '18px', color: '#10B981', flexShrink: 0 }} />
+                        <span className="label" style={{ color: '#10B981', fontWeight: '700' }}>
+                          {language === 'vi' ? 'Thu nhập:' : 'Income:'}
+                        </span>
+                        <span className="value" style={{ color: '#10B981', fontWeight: '800' }}>
+                          {currentJob?.salary || '---'}
+                        </span>
                       </JobDetailRow>
                       <JobDetailRow>
                         <Calendar />
@@ -1980,12 +2409,15 @@ const CandidateDashboard = () => {
                         </ModalButton>
                         <ModalButton
                           className="success"
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => setJobCompleted(true)}
+                          whileHover={!isConfirming ? { scale: 1.02 } : {}}
+                          whileTap={!isConfirming ? { scale: 0.98 } : {}}
+                          onClick={handleConfirmCompletion}
+                          disabled={isConfirming}
                         >
                           <CheckCircle />
-                          {language === 'vi' ? 'Xác nhận hoàn thành' : 'Confirm Completion'}
+                          {isConfirming
+                            ? (language === 'vi' ? 'Đang xác nhận...' : 'Confirming...')
+                            : (language === 'vi' ? 'Xác nhận hoàn thành' : 'Confirm Completion')}
                         </ModalButton>
                       </ModalActions>
                     </>
@@ -2021,7 +2453,7 @@ const CandidateDashboard = () => {
                         animate={{ opacity: 1, y: 0 }}
                       >
                         <p style={{ fontSize: '14px', color: 'inherit', marginBottom: '12px', fontWeight: 600 }}>
-                          Katinat - Quận 8
+                          {currentJob?.company || 'Employer'}
                         </p>
                         <ReviewCategory style={{ background: 'linear-gradient(135deg, #FEF3C7, #FDE68A40)', padding: '14px 16px', borderRadius: '12px', border: '2px solid #F59E0B30', marginBottom: '16px' }}>
                           <div className="category-label" style={{ fontSize: '15px', fontWeight: 700, color: '#B45309' }}>
@@ -2066,14 +2498,16 @@ const CandidateDashboard = () => {
                       <ModalActions>
                         <ModalButton
                           className="primary"
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
+                          whileHover={(ratings.overall && ratings.environment && ratings.attitude && ratings.accuracy && !isSubmittingReview) ? { scale: 1.02 } : {}}
+                          whileTap={(ratings.overall && ratings.environment && ratings.attitude && ratings.accuracy && !isSubmittingReview) ? { scale: 0.98 } : {}}
                           onClick={handleSubmitReview}
                           style={{ opacity: (ratings.overall && ratings.environment && ratings.attitude && ratings.accuracy) ? 1 : 0.5 }}
-                          disabled={!ratings.overall || !ratings.environment || !ratings.attitude || !ratings.accuracy}
+                          disabled={!ratings.overall || !ratings.environment || !ratings.attitude || !ratings.accuracy || isSubmittingReview}
                         >
                           <CheckCircle />
-                          {language === 'vi' ? 'Gửi đánh giá' : 'Submit Review'}
+                          {isSubmittingReview
+                            ? (language === 'vi' ? 'Đang gửi...' : 'Submitting...')
+                            : (language === 'vi' ? 'Gửi đánh giá' : 'Submit Review')}
                         </ModalButton>
                       </ModalActions>
                     </>

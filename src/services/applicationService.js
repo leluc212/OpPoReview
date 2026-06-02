@@ -205,16 +205,19 @@ export async function getJobApplications(jobId) {
  * @param {string} status - New status (pending, reviewed, accepted, rejected)
  * @returns {Promise<Object>} Updated application
  */
-export async function updateApplicationStatus(applicationId, status) {
+export async function updateApplicationStatus(applicationId, status, extraFields = {}) {
   try {
-    console.log('📝 Updating application status:', { applicationId, status });
+    console.log('📝 Updating application status:', { applicationId, status, extraFields });
     
     const headers = await getAuthHeaders();
     
     const response = await fetch(`${API_BASE_URL}/applications/${applicationId}/status`, {
       method: 'PUT',
       headers,
-      body: JSON.stringify({ status })
+      body: JSON.stringify({ 
+        status,
+        ...extraFields
+      })
     });
     
     if (!response.ok) {

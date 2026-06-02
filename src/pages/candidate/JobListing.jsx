@@ -3650,7 +3650,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, onApply, delay = 0, sho
         </JobTags>
 
         <JobSalary>
-          <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập trung bình:' : 'Income:'}</span>
+          <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập:' : 'Income:'}</span>
           <span>{translateSalary(job.category === 'shift' ? calculateShiftSalary(job, language) : job.salary, language)}</span>
         </JobSalary>
       </JobCardBody>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -632,10 +632,73 @@ const EmptyState = styled.div`
 
 const Wallet = () => {
   const { language } = useLanguage();
-  const [balance] = useState(15750000);
+  const [balance, setBalance] = useState(15750000);
+  const [transactions, setTransactions] = useState([]);
   const [showBalance, setShowBalance] = useState(false);
   const [filterType, setFilterType] = useState('all');
   const [isDevModalOpen, setIsDevModalOpen] = useState(false);
+
+  useEffect(() => {
+    const savedWallet = localStorage.getItem('candidate_wallet');
+    const defaultTx = [
+      {
+        id: 1,
+        type: 'income',
+        title: language === 'vi' ? 'Nhận tiền từ The Coffee House' : 'Payment from The Coffee House',
+        description: language === 'vi' ? 'Thanh toán cho công việc #12345' : 'Payment for job #12345',
+        amount: 2500000,
+        date: '2026-02-13'
+      },
+      {
+        id: 2,
+        type: 'income',
+        title: language === 'vi' ? 'Nhận tiền từ Highlands Coffee' : 'Payment from Highlands Coffee',
+        description: language === 'vi' ? 'Thanh toán cho công việc #12344' : 'Payment for job #12344',
+        amount: 3000000,
+        date: '2026-02-10'
+      },
+      {
+        id: 3,
+        type: 'expense',
+        title: language === 'vi' ? 'Rút tiền về ngân hàng' : 'Withdraw to bank',
+        description: language === 'vi' ? 'Chuyển về tài khoản VCB' : 'Transfer to VCB account',
+        amount: -5000000,
+        date: '2026-02-08'
+      },
+      {
+        id: 4,
+        type: 'income',
+        title: language === 'vi' ? 'Nhận tiền từ Pizza 4P\'s' : 'Payment from Pizza 4P\'s',
+        description: language === 'vi' ? 'Thanh toán cho công việc #12343' : 'Payment for job #12343',
+        amount: 1800000,
+        date: '2026-02-05'
+      },
+      {
+        id: 5,
+        type: 'income',
+        title: language === 'vi' ? 'Nhận tiền từ Golden Gate Group' : 'Payment from Golden Gate Group',
+        description: language === 'vi' ? 'Thanh toán cho công việc #12342' : 'Payment for job #12342',
+        amount: 2200000,
+        date: '2026-02-01'
+      }
+    ];
+
+    if (savedWallet) {
+      try {
+        const parsed = JSON.parse(savedWallet);
+        setBalance(parsed.balance !== undefined ? parsed.balance : 15750000);
+        setTransactions(parsed.transactions || defaultTx);
+      } catch (e) {
+        setTransactions(defaultTx);
+      }
+    } else {
+      localStorage.setItem('candidate_wallet', JSON.stringify({
+        balance: 15750000,
+        transactions: defaultTx
+      }));
+      setTransactions(defaultTx);
+    }
+  }, [language]);
 
   const stats = [
     {
@@ -661,49 +724,6 @@ const Wallet = () => {
       color: 'primary',
       change: '+12',
       positive: true
-    }
-  ];
-
-  const transactions = [
-    {
-      id: 1,
-      type: 'income',
-      title: language === 'vi' ? 'Nhận tiền từ The Coffee House' : 'Payment from The Coffee House',
-      description: language === 'vi' ? 'Thanh toán cho công việc #12345' : 'Payment for job #12345',
-      amount: 2500000,
-      date: '2026-02-13'
-    },
-    {
-      id: 2,
-      type: 'income',
-      title: language === 'vi' ? 'Nhận tiền từ Highlands Coffee' : 'Payment from Highlands Coffee',
-      description: language === 'vi' ? 'Thanh toán cho công việc #12344' : 'Payment for job #12344',
-      amount: 3000000,
-      date: '2026-02-10'
-    },
-    {
-      id: 3,
-      type: 'expense',
-      title: language === 'vi' ? 'Rút tiền về ngân hàng' : 'Withdraw to bank',
-      description: language === 'vi' ? 'Chuyển về tài khoản VCB' : 'Transfer to VCB account',
-      amount: -5000000,
-      date: '2026-02-08'
-    },
-    {
-      id: 4,
-      type: 'income',
-      title: language === 'vi' ? 'Nhận tiền từ Pizza 4P\'s' : 'Payment from Pizza 4P\'s',
-      description: language === 'vi' ? 'Thanh toán cho công việc #12343' : 'Payment for job #12343',
-      amount: 1800000,
-      date: '2026-02-05'
-    },
-    {
-      id: 5,
-      type: 'income',
-      title: language === 'vi' ? 'Nhận tiền từ Golden Gate Group' : 'Payment from Golden Gate Group',
-      description: language === 'vi' ? 'Thanh toán cho công việc #12342' : 'Payment for job #12342',
-      amount: 2200000,
-      date: '2026-02-01'
     }
   ];
 

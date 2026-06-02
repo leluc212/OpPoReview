@@ -3735,6 +3735,7 @@ const HRManagement = () => {
                 { key: 'working', label: language === 'vi' ? 'Đang làm' : 'Working', color: '#10B981', status: 'active' },
                 { key: 'pending_confirm', label: language === 'vi' ? 'Chờ xác nhận' : 'Pending Confirmation', color: '#EF4444', status: 'pending_confirmation' },
                 { key: 'pending_change', label: language === 'vi' ? 'Chờ thay đổi' : 'Pending Changes', color: '#F97316', status: 'pending_change' },
+                { key: 'completed', label: language === 'vi' ? 'Đã hoàn thành' : 'Completed', color: '#6366F1', status: 'completed' },
               ].map(tab => (
                 <StaffTabButton
                   key={tab.key}
@@ -3750,9 +3751,10 @@ const HRManagement = () => {
             </StaffTabBar>
 
             {allStaff.filter(staff => {
-              if (staffTabFilter === 'working') return staff.status === 'active';
+              if (staffTabFilter === 'working') return staff.status === 'active' || staff.status === 'completed_pending_candidate';
               if (staffTabFilter === 'pending_confirm') return staff.status === 'pending_confirmation';
               if (staffTabFilter === 'pending_change') return staff.status === 'pending_change';
+              if (staffTabFilter === 'completed') return staff.status === 'completed';
               return false;
             }).length === 0 ? (
               <div style={{
@@ -3775,9 +3777,10 @@ const HRManagement = () => {
                 <AnimatePresence>
                   {allStaff
                     .filter(staff => {
-                      if (staffTabFilter === 'working') return staff.status === 'active';
+                      if (staffTabFilter === 'working') return staff.status === 'active' || staff.status === 'completed_pending_candidate';
                       if (staffTabFilter === 'pending_confirm') return staff.status === 'pending_confirmation';
                       if (staffTabFilter === 'pending_change') return staff.status === 'pending_change';
+                      if (staffTabFilter === 'completed') return staff.status === 'completed';
                       return false;
                     })
                     .map((staff, index) => (
@@ -3793,15 +3796,13 @@ const HRManagement = () => {
                             <StaffPosition>{staff.position}</StaffPosition>
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
-                            {/* Hide the small 'Đang làm' badge only when viewing the 'Đang làm' (working) tab.
-                                When viewing 'Chờ xác nhận', always show 'Chờ xác nhận' regardless of shift time. */}
-                            {staffTabFilter === 'working' ? null : (
+                            {staffTabFilter === 'working' && staff.status !== 'completed_pending_candidate' ? null : (
                               staffTabFilter === 'pending_confirm' ? (
                                 <StaffStatus $status="pending_confirmation">
                                   {language === 'vi' ? 'Chờ xác nhận' : 'Pending Confirm'}
                                 </StaffStatus>
                               ) : (
-                                isCurrentlyWorking(staff.shift) && !staff.pendingRating ? (
+                                isCurrentlyWorking(staff.shift) && !staff.pendingRating && staff.status !== 'completed_pending_candidate' ? (
                                   <StaffStatus $status="active">
                                     {language === 'vi' ? 'Đang làm' : 'Working'}
                                   </StaffStatus>
@@ -3815,11 +3816,13 @@ const HRManagement = () => {
                                       ? (language === 'vi' ? 'Đang làm' : 'Active')
                                       : staff.status === 'completed'
                                         ? (language === 'vi' ? 'Hoàn thành' : 'Completed')
-                                        : staff.status === 'pending_confirmation'
-                                          ? (language === 'vi' ? 'Chờ xác nhận' : 'Pending Confirm')
-                                          : staff.status === 'pending_change'
-                                            ? (language === 'vi' ? 'Chờ thay đổi' : 'Pending Change')
-                                            : (language === 'vi' ? 'Đang làm' : 'Active')}
+                                        : staff.status === 'completed_pending_candidate'
+                                          ? (language === 'vi' ? 'Chờ ứng viên xác nhận' : 'Pending Candidate Confirm')
+                                          : staff.status === 'pending_confirmation'
+                                            ? (language === 'vi' ? 'Chờ xác nhận' : 'Pending Confirm')
+                                            : staff.status === 'pending_change'
+                                              ? (language === 'vi' ? 'Chờ thay đổi' : 'Pending Change')
+                                              : (language === 'vi' ? 'Đang làm' : 'Active')}
                                   </StaffStatus>
                                 )
                               )
@@ -3844,6 +3847,98 @@ const HRManagement = () => {
                             <Banknote />{language === 'vi' ? 'Số tiền chi:' : 'Amount paid:'} {staff.totalPaid.toLocaleString('vi-VN')} VNĐ
                           </div>
                         </StaffMeta>
+
+                        {staff.status === 'completed' && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px', width: '100%' }}>
+                            {/* Employer's review of the candidate */}
+                            {staff.employerRating && (
+                              <div style={{
+                                background: 'rgba(16, 185, 129, 0.05)',
+                                border: '1px solid rgba(16, 185, 129, 0.2)',
+                                borderRadius: '12px',
+                                padding: '12px',
+                                fontSize: '13px'
+                              }}>
+                                <div style={{ fontWeight: '700', color: '#047857', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                                  <Star style={{ fill: '#10B981', color: '#10B981', width: '13px', height: '13px' }} />
+                                  {language === 'vi' ? 'Đánh giá của bạn về nhân viên' : 'Your Rating of Employee'}
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                  <span style={{ fontWeight: '600', color: '#334155' }}>{staff.employerRating.overall}/5</span>
+                                  <span style={{ display: 'flex', gap: '1px' }}>
+                                    {[1, 2, 3, 4, 5].map(star => (
+                                      <Star key={star} style={{ width: '11px', height: '11px', fill: staff.employerRating.overall >= star ? '#F59E0B' : 'transparent', color: '#F59E0B' }} />
+                                    ))}
+                                  </span>
+                                </div>
+                                {staff.employerRating.comment && (
+                                  <div style={{ fontStyle: 'italic', color: '#475569' }}>
+                                    "{staff.employerRating.comment}"
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Candidate's review of the employer */}
+                            {staff.candidateRating ? (
+                              <div style={{
+                                background: 'rgba(99, 102, 241, 0.05)',
+                                border: '1px solid rgba(99, 102, 241, 0.2)',
+                                borderRadius: '12px',
+                                padding: '12px',
+                                fontSize: '13px'
+                              }}>
+                                <div style={{ fontWeight: '700', color: '#4F46E5', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                                  <Star style={{ fill: '#6366F1', color: '#6366F1', width: '13px', height: '13px' }} />
+                                  {language === 'vi' ? 'Đánh giá từ Ứng viên' : 'Candidate\'s Feedback'}
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                                  <span style={{ fontWeight: '600', color: '#334155' }}>{staff.candidateRating.overall}/5</span>
+                                  <span style={{ display: 'flex', gap: '1px' }}>
+                                    {[1, 2, 3, 4, 5].map(star => (
+                                      <Star key={star} style={{ width: '11px', height: '11px', fill: staff.candidateRating.overall >= star ? '#F59E0B' : 'transparent', color: '#F59E0B' }} />
+                                    ))}
+                                  </span>
+                                </div>
+                                
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 8px', margin: '6px 0', padding: '6px 0', borderTop: '1px dashed rgba(99, 102, 241, 0.2)', borderBottom: '1px dashed rgba(99, 102, 241, 0.2)' }}>
+                                  {[
+                                    { key: 'environment', label: language === 'vi' ? 'Môi trường' : 'Environment' },
+                                    { key: 'attitude', label: language === 'vi' ? 'Thái độ' : 'Attitude' },
+                                    { key: 'accuracy', label: language === 'vi' ? 'Đúng mô tả' : 'Accuracy' }
+                                  ].map(cat => (
+                                    <div key={cat.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                      <span style={{ fontSize: '11px', color: '#64748B' }}>{cat.label}</span>
+                                      <span style={{ display: 'flex', gap: '1px' }}>
+                                        {[1, 2, 3, 4, 5].map(star => (
+                                          <Star key={star} style={{ width: '10px', height: '10px', fill: staff.candidateRating[cat.key] >= star ? '#F59E0B' : 'transparent', color: '#F59E0B' }} />
+                                        ))}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+
+                                {staff.candidateRating.comment && (
+                                  <div style={{ fontStyle: 'italic', color: '#475569' }}>
+                                    "{staff.candidateRating.comment}"
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div style={{
+                                padding: '10px',
+                                background: '#F8FAFC',
+                                border: '1px dashed #E2E8F0',
+                                borderRadius: '12px',
+                                fontSize: '12px',
+                                color: '#64748B',
+                                textAlign: 'center'
+                              }}>
+                                {language === 'vi' ? 'Chờ ứng viên gửi đánh giá...' : 'Waiting for candidate review...'}
+                              </div>
+                            )}
+                          </div>
+                        )}
 
                         {staff.status === 'pending_change' && staff.changeRequest && (
                           <ChangeRequestBanner>
@@ -4760,22 +4855,56 @@ const HRManagement = () => {
 
                         <RateActions>
                           <RateActionButton
-                            whileHover={canSubmit ? { scale: 1.02 } : {}}
-                            whileTap={canSubmit ? { scale: 0.98 } : {}}
-                            disabled={!canSubmit}
-                            onClick={() => {
+                            whileHover={canSubmit && !requestSending ? { scale: 1.02 } : {}}
+                            whileTap={canSubmit && !requestSending ? { scale: 0.98 } : {}}
+                            disabled={!canSubmit || requestSending}
+                            onClick={async () => {
                               if (!canSubmit) return;
                               const staffId = rateStaff.id;
-                              setHrStaff(prev => prev.map(s =>
-                                s.id === staffId
-                                  ? { ...s, status: 'completed', rated: true, pendingRating: false, canRequestChange: false, isWithinTimeWindow: false }
-                                  : s
-                              ));
-                              setRatingSubmitted(true);
+                              try {
+                                setRequestSending(true);
+                                const employerRating = {
+                                  overall: ratings.overall,
+                                  attitude: ratings.attitude,
+                                  efficiency: ratings.efficiency,
+                                  discipline: ratings.discipline,
+                                  skills: ratings.skills,
+                                  comment: ratingComment
+                                };
+                                const employerConfirmedAt = new Date().toISOString();
+
+                                await applicationService.updateApplicationStatus(staffId, 'completed_pending_candidate', {
+                                  employerRating,
+                                  employerConfirmedAt
+                                });
+
+                                setHrStaff(prev => prev.map(s =>
+                                  s.id === staffId
+                                    ? { 
+                                        ...s, 
+                                        status: 'completed_pending_candidate', 
+                                        rated: true, 
+                                        pendingRating: false, 
+                                        canRequestChange: false, 
+                                        isWithinTimeWindow: false,
+                                        employerRating,
+                                        employerConfirmedAt
+                                      }
+                                    : s
+                                ));
+                                setRatingSubmitted(true);
+                              } catch (err) {
+                                console.error('Failed to submit employer rating:', err);
+                                alert(language === 'vi' ? 'Đánh giá thất bại, vui lòng thử lại!' : 'Failed to submit rating, please try again!');
+                              } finally {
+                                setRequestSending(false);
+                              }
                             }}
                           >
                             <CheckCircle />
-                            {language === 'vi' ? 'Gửi đánh giá' : 'Submit Review'}
+                            {requestSending 
+                              ? (language === 'vi' ? 'Đang gửi...' : 'Submitting...')
+                              : (language === 'vi' ? 'Gửi đánh giá' : 'Submit Review')}
                           </RateActionButton>
                         </RateActions>
                       </>

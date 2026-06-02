@@ -325,15 +325,85 @@ def update_application_status(event, application_id, user_id, create_response):
         
         now_iso = datetime.utcnow().isoformat() + 'Z'
         
+        update_expr = 'SET #status = :status, updatedAt = :now'
+        expr_attr_names = {'#status': 'status'}
+        expr_attr_values = {
+            ':status': new_status,
+            ':now': now_iso
+        }
+        
+        optional_fields = [
+            'employerRating',
+            'employerConfirmedAt',
+            'candidateRating',
+            'candidateConfirmed',
+            'candidateConfirmedAt'
+        ]
+        
+        for field in optional_fields:
+            if field in body:
+                update_expr += f', {field} = :{field}'
+                expr_attr_values[f':{field}'] = body[field]
+        
+        print(f"DEBUG: updating item with expression: {update_expr}")
+        print(f"DEBUG: values: {expr_attr_values}")
+
         applications_table.update_item(
             Key={'applicationId': application_id},
-            UpdateExpression='SET #status = :status, updatedAt = :now',
-            ExpressionAttributeNames={'#status': 'status'},
-            ExpressionAttributeValues={
-                ':status': new_status,
-                ':now': now_iso
-            }
+            UpdateExpression=update_expr,
+            ExpressionAttributeNames=expr_attr_names,
+            ExpressionAttributeValues=expr_attr_values
         )
+
+        # Check if we are completing the job and save to a new table "CompletedJobs" if it exists
+        try:
+            if new_status == 'completed':
+                completed_jobs_table = dynamodb.Table('CompletedJobs')
+                # Get the latest application info
+                app_item = applications_table.get_item(Key={'applicationId': application_id}).get('Item', {})
+                
+                # Fetch job details to get full job info
+                job_id = app_item.get('jobId')
+                job_title = '---'
+                company_name = '---'
+                if job_id:
+                    try:
+                        job_resp = jobs_table.get_item(Key={'idJob': str(job_id)})
+                        if 'Item' in job_resp:
+                            job_item = job_resp['Item']
+                            job_title = job_item.get('title', '---')
+                            company_name = job_item.get('employerName') or job_item.get('companyName', '---')
+                        else:
+                            job_resp = quick_jobs_table.get_item(Key={'idJob': str(job_id)})
+                            if 'Item' in job_resp:
+                                job_item = job_resp['Item']
+                                job_title = job_item.get('title', '---')
+                                company_name = job_item.get('companyName', '---')
+                    except Exception as je:
+                        print(f"Warning: Could not fetch job info for completed record: {je}")
+                
+                # Construct completed job record
+                completed_record = {
+                    'recordId': str(uuid.uuid4()),
+                    'applicationId': application_id,
+                    'jobId': job_id or '---',
+                    'jobTitle': job_title,
+                    'companyName': company_name,
+                    'candidateId': app_item.get('candidateId', '---'),
+                    'candidateEmail': app_item.get('candidateEmail', '---'),
+                    'employerId': app_item.get('employerId', '---'),
+                    'employerRating': app_item.get('employerRating') or body.get('employerRating') or {},
+                    'candidateRating': app_item.get('candidateRating') or body.get('candidateRating') or {},
+                    'completedAt': now_iso,
+                    'status': 'completed'
+                }
+                
+                # Try to write to CompletedJobs table
+                completed_jobs_table.put_item(Item=completed_record)
+                print(f"✅ Successfully wrote completed job record to DynamoDB CompletedJobs table: {application_id}")
+        except Exception as dbe:
+            print(f"⚠️ Warning: Could not write completed job to CompletedJobs DynamoDB table (it might not exist or lacks IAM permissions): {str(dbe)}")
+
         return create_response(200, {
             'message': 'Status updated successfully',
             'applicationId': application_id,
