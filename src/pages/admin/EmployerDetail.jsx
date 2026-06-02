@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -19,8 +19,18 @@ import {
   Building2,
   Users,
   Briefcase,
-  DollarSign
+  DollarSign,
+  Zap,
+  Clock,
+  RefreshCw
 } from 'lucide-react';
+import adminEmployerService from '../../services/adminEmployerService';
+import { 
+  createQuickJobActivationApprovedNotification, 
+  createQuickJobActivationRejectedNotification, 
+  createQuickJobActivationDeactivatedNotification 
+} from '../../services/notificationService';
+
 
 const PageContainer = styled.div`
   animation: fadeIn 0.5s ease-in;
@@ -425,8 +435,10 @@ const EmployerDetail = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState('info');
+  const [employer, setEmployer] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [updatingQuickJob, setUpdatingQuickJob] = useState(false);
 
-  // Sample data - trong thực tế sẽ fetch từ API dựa trên id
   const employersData = {
     1: {
       id: 1,
@@ -444,7 +456,8 @@ const EmployerDetail = () => {
       totalRevenue: '15,500,000',
       violations: [],
       companySize: '50-100 nhân viên',
-      industry: 'F&B - Cafe'
+      industry: 'F&B - Cafe',
+      quickJobStatus: 'not_requested'
     },
     2: {
       id: 2,
@@ -462,7 +475,8 @@ const EmployerDetail = () => {
       totalRevenue: '12,800,000',
       violations: [],
       companySize: '100-200 nhân viên',
-      industry: 'F&B - Cafe'
+      industry: 'F&B - Cafe',
+      quickJobStatus: 'not_requested'
     },
     3: {
       id: 3,
@@ -482,7 +496,8 @@ const EmployerDetail = () => {
         { date: '10/3', content: 'Không thanh toán đúng hạn cho ứng viên' }
       ],
       companySize: '10-50 nhân viên',
-      industry: 'F&B - Cafe'
+      industry: 'F&B - Cafe',
+      quickJobStatus: 'not_requested'
     },
     4: {
       id: 4,
@@ -500,7 +515,8 @@ const EmployerDetail = () => {
       totalRevenue: '6,500,000',
       violations: [],
       companySize: '10-50 nhân viên',
-      industry: 'F&B - Nhà hàng'
+      industry: 'F&B - Nhà hàng',
+      quickJobStatus: 'not_requested'
     },
     5: {
       id: 5,
@@ -518,11 +534,95 @@ const EmployerDetail = () => {
       totalRevenue: '22,400,000',
       violations: [],
       companySize: '200+ nhân viên',
-      industry: 'F&B - Nhà hàng tiệc cưới'
+      industry: 'F&B - Nhà hàng tiệc cưới',
+      quickJobStatus: 'not_requested'
     }
   };
 
-  const employer = employersData[id] || employersData[1];
+  useEffect(() => {
+    const fetchEmployer = async () => {
+      try {
+        setLoading(true);
+        const data = await adminEmployerService.getAllEmployers();
+        const found = data.find(e => e.id === id || e.userId === id);
+        if (found) {
+          setEmployer({
+            id: found.id || found.userId,
+            name: found.companyName || 'N/A',
+            email: found.email || 'N/A',
+            phone: found.phone || 'N/A',
+            address: found.address || 'N/A',
+            website: found.website || '',
+            verified: found.isVerified || false,
+            approvalStatus: found.approvalStatus || 'pending',
+            joined: found.createdAt ? new Date(found.createdAt).toLocaleDateString('vi-VN') : 'N/A',
+            totalJobs: 0,
+            activeJobs: 0,
+            totalApplications: 0,
+            totalRevenue: '0',
+            violations: [],
+            companySize: found.companySize || 'N/A',
+            industry: found.industry || 'N/A',
+            quickJobStatus: found.quickJobStatus || 'not_requested'
+          });
+        } else {
+          setEmployer(employersData[id] || employersData[1]);
+        }
+      } catch (err) {
+        console.error('Error fetching employer:', err);
+        setEmployer(employersData[id] || employersData[1]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEmployer();
+  }, [id]);
+
+  const handleUpdateQuickJobStatus = async (status) => {
+    try {
+      setUpdatingQuickJob(true);
+      await adminEmployerService.updateQuickJobStatus(id, status);
+      setEmployer(prev => ({ ...prev, quickJobStatus: status }));
+
+      // Send status change notification to Employer
+      try {
+        const companyName = employer?.name || 'Nhà tuyển dụng';
+        if (status === 'approved') {
+          await createQuickJobActivationApprovedNotification(id, companyName);
+          console.log(`✅ Approved notification sent to employer: ${companyName}`);
+        } else if (status === 'rejected') {
+          await createQuickJobActivationRejectedNotification(id, companyName);
+          console.log(`✅ Rejected notification sent to employer: ${companyName}`);
+        } else if (status === 'not_requested') {
+          await createQuickJobActivationDeactivatedNotification(id, companyName);
+          console.log(`✅ Deactivated notification sent to employer: ${companyName}`);
+        }
+      } catch (notifyErr) {
+        console.error('❌ Error sending quick job status notification to employer:', notifyErr);
+      }
+
+      alert(language === 'vi' ? 'Cập nhật trạng thái thành công!' : 'Status updated successfully!');
+    } catch (err) {
+      console.error('Error updating quick job status:', err);
+      alert(language === 'vi' ? 'Lỗi khi cập nhật trạng thái' : 'Error updating status');
+    } finally {
+      setUpdatingQuickJob(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <DashboardLayout role="admin" key={language}>
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '60vh', gap: '16px' }}>
+          <RefreshCw size={36} style={{ color: '#1e40af', animation: 'spin 1s linear infinite' }} />
+          <span style={{ fontSize: '15px', fontWeight: '600', color: '#1e40af' }}>
+            {language === 'vi' ? 'Đang tải thông tin...' : 'Loading details...'}
+          </span>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
 
   return (
     <DashboardLayout role="admin" key={language}>
@@ -684,7 +784,53 @@ const EmployerDetail = () => {
                 {employer.verified ? <CheckCircle size={20} /> : <XCircle size={20} />}
               </VerificationCard>
 
+              <SectionTitle style={{ marginTop: '32px' }}>
+                {language === 'vi' ? 'Trạng thái Công việc tuyển gấp' : 'Urgent Jobs Status'}
+              </SectionTitle>
+              <VerificationCard $verified={employer.quickJobStatus === 'approved'}>
+                {employer.quickJobStatus === 'approved' ? <Shield /> : <AlertTriangle />}
+                <div className="content">
+                  <div className="title">
+                    {employer.quickJobStatus === 'approved' && (language === 'vi' ? 'Đã kích hoạt tuyển gấp' : 'Urgent Jobs Activated')}
+                    {employer.quickJobStatus === 'pending' && (language === 'vi' ? 'Đang chờ duyệt kích hoạt' : 'Pending Activation Approval')}
+                    {employer.quickJobStatus === 'rejected' && (language === 'vi' ? 'Bị từ chối kích hoạt' : 'Activation Rejected')}
+                    {(employer.quickJobStatus === 'not_requested' || !employer.quickJobStatus) && (language === 'vi' ? 'Chưa đăng ký kích hoạt' : 'Not Requested')}
+                  </div>
+                  <div className="desc">
+                    {language === 'vi' 
+                      ? 'Quyền tạo và quản lý bài đăng tuyển dụng realtime' 
+                      : 'Permission to create and manage realtime job posts'}
+                  </div>
+                </div>
+                {employer.quickJobStatus === 'approved' && <CheckCircle size={20} />}
+                {employer.quickJobStatus === 'pending' && <Clock size={20} />}
+                {employer.quickJobStatus === 'rejected' && <XCircle size={20} />}
+              </VerificationCard>
+
+              <div style={{ marginTop: '16px', display: 'flex', gap: '12px' }}>
+                {employer.quickJobStatus === 'pending' && (
+                  <>
+                    <ActionButton $variant="success" onClick={() => handleUpdateQuickJobStatus('approved')} disabled={updatingQuickJob}>
+                      <CheckCircle /> {language === 'vi' ? 'Duyệt kích hoạt' : 'Approve Activation'}
+                    </ActionButton>
+                    <ActionButton $variant="danger" onClick={() => handleUpdateQuickJobStatus('rejected')} disabled={updatingQuickJob}>
+                      <XCircle /> {language === 'vi' ? 'Từ chối' : 'Reject'}
+                    </ActionButton>
+                  </>
+                )}
+                {employer.quickJobStatus === 'approved' && (
+                  <ActionButton $variant="danger" onClick={() => handleUpdateQuickJobStatus('not_requested')} disabled={updatingQuickJob}>
+                    <XCircle /> {language === 'vi' ? 'Hủy kích hoạt' : 'Deactivate'}
+                  </ActionButton>
+                )}
+                {(employer.quickJobStatus === 'rejected' || employer.quickJobStatus === 'not_requested' || !employer.quickJobStatus) && (
+                  <ActionButton onClick={() => handleUpdateQuickJobStatus('approved')} disabled={updatingQuickJob}>
+                    <CheckCircle /> {language === 'vi' ? 'Kích hoạt trực tiếp' : 'Activate Directly'}
+                  </ActionButton>
+                )}
+              </div>
             </>
+
           )}
 
           {activeTab === 'jobs' && (

@@ -198,6 +198,34 @@ class AdminEmployerService {
       throw error;
     }
   }
+
+  /**
+   * Update employer's quick job activation status (Admin only)
+   */
+  async updateQuickJobStatus(userId, status) {
+    try {
+      console.log(`⚡ Updating quick job status for ${userId}: ${status}`);
+
+      const result = await this.makeRequest(`/admin/employers/${userId}/quick-job-status`, {
+        method: 'POST',
+        body: JSON.stringify({
+          quickJobStatus: status,
+          updatedAt: new Date().toISOString()
+        })
+      });
+
+      if (result.success) {
+        console.log('✅ Quick job status updated');
+        return result.data;
+      }
+
+      throw new Error('Failed to update quick job status');
+    } catch (error) {
+      console.error('❌ Error updating quick job status:', error);
+      throw error;
+    }
+  }
 }
 
 export default new AdminEmployerService();
+

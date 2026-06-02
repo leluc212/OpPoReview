@@ -60,10 +60,29 @@ exports.handler = async (event) => {
 
   try {
     const userId = getUserIdFromToken(event);
-    const pathUserId = event.pathParameters?.userId;
+    let pathUserId = event.pathParameters?.userId;
+
+    // Fallback parsing for API Gateway wildcard proxy routing
+    if (!pathUserId && event.path) {
+      if (event.path.includes('/admin/employers/')) {
+        const parts = event.path.split('/');
+        const empIndex = parts.indexOf('employers');
+        if (empIndex !== -1 && parts.length > empIndex + 1) {
+          pathUserId = parts[empIndex + 1];
+          console.log('Parsed pathUserId from event.path (admin):', pathUserId);
+        }
+      } else if (event.path.includes('/profile/')) {
+        const parts = event.path.split('/');
+        const profIndex = parts.indexOf('profile');
+        if (profIndex !== -1 && parts.length > profIndex + 1) {
+          pathUserId = parts[profIndex + 1];
+          console.log('Parsed pathUserId from event.path (profile):', pathUserId);
+        }
+      }
+    }
     const httpMethod = event.httpMethod;
 
-    console.log('Request:', { httpMethod, userId, pathUserId });
+    console.log('Request:', { httpMethod, userId, pathUserId, rawPath: event.path });
 
     // If no userId from token, return 401
     if (!userId) {
@@ -84,6 +103,64 @@ exports.handler = async (event) => {
         statusCode: 200,
         headers: corsHeaders,
         body: JSON.stringify({ success: true, data: result.profiles })
+      };
+    }
+
+    // POST /admin/employers/{userId}/approve
+    if (httpMethod === 'POST' && pathUserId && event.path?.endsWith('/approve')) {
+      const body = JSON.parse(event.body || '{}');
+      const result = await employerProfileService.updateApprovalStatus(pathUserId, 'approved', body);
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({ success: true, data: result })
+      };
+    }
+
+    // POST /admin/employers/{userId}/reject
+    if (httpMethod === 'POST' && pathUserId && event.path?.endsWith('/reject')) {
+      const body = JSON.parse(event.body || '{}');
+      const result = await employerProfileService.updateApprovalStatus(pathUserId, 'rejected', body);
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({ success: true, data: result })
+      };
+    }
+
+    // POST /admin/employers/{userId}/verify
+    if (httpMethod === 'POST' && pathUserId && event.path?.endsWith('/verify')) {
+      const body = JSON.parse(event.body || '{}');
+      const result = await employerProfileService.updateVerificationStatus(pathUserId, body.isVerified, body);
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({ success: true, data: result })
+      };
+    }
+
+    // POST /admin/employers/{userId}/quick-job-status
+    if (httpMethod === 'POST' && pathUserId && event.path?.endsWith('/quick-job-status')) {
+      const body = JSON.parse(event.body || '{}');
+      const { DynamoDB } = require('@aws-sdk/client-dynamodb');
+      const { DynamoDBDocument } = require('@aws-sdk/lib-dynamodb');
+      const ddb = DynamoDBDocument.from(new DynamoDB({ region: 'ap-southeast-1' }));
+      
+      const result = await ddb.update({
+        TableName: 'EmployerProfiles',
+        Key: { userId: pathUserId },
+        UpdateExpression: 'SET quickJobStatus = :qs, updatedAt = :ua',
+        ExpressionAttributeValues: {
+          ':qs': body.quickJobStatus,
+          ':ua': body.updatedAt || new Date().toISOString()
+        },
+        ReturnValues: 'ALL_NEW'
+      });
+      
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({ success: true, data: result.Attributes })
       };
     }
 

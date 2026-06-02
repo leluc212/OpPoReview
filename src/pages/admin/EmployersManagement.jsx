@@ -17,11 +17,18 @@ import {
   Users,
   TrendingUp,
   AlertCircle,
-  RefreshCw
+  RefreshCw,
+  Zap
 } from 'lucide-react';
 import adminEmployerService from '../../services/adminEmployerService';
 import { getWithdrawalRequests, updateWithdrawalStatus } from '../../services/packageCatalogService';
-import { createWithdrawalApprovedNotification, createWithdrawalRejectedNotification } from '../../services/notificationService';
+import {
+  createWithdrawalApprovedNotification,
+  createWithdrawalRejectedNotification,
+  createQuickJobActivationApprovedNotification,
+  createQuickJobActivationRejectedNotification,
+  createQuickJobActivationDeactivatedNotification
+} from '../../services/notificationService';
 
 const PageContainer = styled.div``;
 
@@ -410,6 +417,21 @@ const Tab = styled.button`
   }
 `;
 
+const TabBadge = styled.span`
+  background: #ef4444;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 6px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
 const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
@@ -625,6 +647,7 @@ const EmployersManagement = () => {
         isVerified: item.isVerified || false,
         isActive: item.isActive !== false,
         approvalStatus: item.approvalStatus || 'pending',
+        quickJobStatus: item.quickJobStatus || 'not_requested',
         profileCompletion: item.profileCompletion || 0,
         createdAt: item.createdAt || '',
         updatedAt: item.updatedAt || ''
@@ -697,12 +720,64 @@ const EmployersManagement = () => {
     }
   };
 
+  const handleUpdateQuickJobStatus = async (employerId, status) => {
+    try {
+      console.log(`⚡ Admin updating quick job status for ${employerId} to ${status}`);
+      await adminEmployerService.updateQuickJobStatus(employerId, status);
+      
+      // Get the employer's company name from current state
+      const targetEmployer = employers.find(e => e.id === employerId);
+      const companyName = targetEmployer?.companyName || 'Nhà tuyển dụng';
+
+      setEmployers(prev => prev.map(employer =>
+        employer.id === employerId
+          ? { ...employer, quickJobStatus: status }
+          : employer
+      ));
+
+      // Send status change notification to Employer
+      try {
+        if (status === 'approved') {
+          await createQuickJobActivationApprovedNotification(employerId, companyName);
+          console.log(`✅ Approved notification sent to employer: ${companyName}`);
+        } else if (status === 'rejected') {
+          await createQuickJobActivationRejectedNotification(employerId, companyName);
+          console.log(`✅ Rejected notification sent to employer: ${companyName}`);
+        } else if (status === 'not_requested') {
+          await createQuickJobActivationDeactivatedNotification(employerId, companyName);
+          console.log(`✅ Deactivated notification sent to employer: ${companyName}`);
+        }
+      } catch (notifyErr) {
+        console.error('❌ Error sending quick job status notification to employer:', notifyErr);
+      }
+
+      alert(language === 'vi' ? 'Cập nhật trạng thái tuyển gấp thành công!' : 'Urgent Job status updated successfully!');
+    } catch (error) {
+      console.error('❌ Error updating quick job status:', error);
+      alert(language === 'vi' ? 'Không thể cập nhật trạng thái tuyển gấp' : 'Failed to update Urgent Job status');
+    }
+  };
+
+  const pendingWithdrawCount = useMemo(() => {
+    return withdrawRequests.filter(req => req.status === 'pending').length;
+  }, [withdrawRequests]);
+
+  const pendingQuickJobCount = useMemo(() => {
+    return employers.filter(e => e.quickJobStatus === 'pending').length;
+  }, [employers]);
+
   const filteredEmployers = useMemo(() => {
     return employers.filter(employer => {
       // Filter by tab
-      const matchesTab = activeTab === 'pending' 
-        ? (employer.approvalStatus === 'pending' || !employer.approvalStatus)
-        : (employer.approvalStatus === 'approved');
+      let matchesTab = false;
+      if (activeTab === 'pending') {
+        matchesTab = (employer.approvalStatus === 'pending' || !employer.approvalStatus);
+      } else if (activeTab === 'approved') {
+        matchesTab = (employer.approvalStatus === 'approved');
+      } else if (activeTab === 'quick_jobs') {
+        // Show employers that have requested, approved or rejected status
+        matchesTab = (employer.quickJobStatus && employer.quickJobStatus !== 'not_requested');
+      }
       
       const matchesSearch = searchTerm === '' || 
         employer.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -841,6 +916,15 @@ const EmployersManagement = () => {
               >
                 <TrendingUp size={18} style={{ marginRight: '8px' }} />
                 {language === 'vi' ? 'Yêu cầu rút tiền' : 'Withdrawal Requests'}
+                {pendingWithdrawCount > 0 && <TabBadge>{pendingWithdrawCount}</TabBadge>}
+              </Tab>
+              <Tab 
+                $active={activeTab === 'quick_jobs'}
+                onClick={() => setActiveTab('quick_jobs')}
+              >
+                <Zap size={18} style={{ marginRight: '8px' }} />
+                {language === 'vi' ? 'Duyệt tuyển gấp' : 'Urgent Jobs'}
+                {pendingQuickJobCount > 0 && <TabBadge>{pendingQuickJobCount}</TabBadge>}
               </Tab>
             </TabsContainer>
 
@@ -955,6 +1039,122 @@ const EmployersManagement = () => {
                       <tr>
                         <td colSpan="6" style={{ textAlign: 'center', padding: '32px', color: '#64748B' }}>
                           {language === 'vi' ? 'Không tìm thấy yêu cầu rút tiền nào' : 'No withdrawal requests found'}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </Table>
+              ) : activeTab === 'quick_jobs' ? (
+                <Table>
+                  <thead>
+                    <tr>
+                      <th>{language === 'vi' ? 'Công ty' : 'Company'}</th>
+                      <th>{language === 'vi' ? 'Liên hệ' : 'Contact'}</th>
+                      <th>{language === 'vi' ? 'Ngành' : 'Industry'}</th>
+                      <th>{language === 'vi' ? 'Quy mô' : 'Size'}</th>
+                      <th>{language === 'vi' ? 'Trạng thái tuyển gấp' : 'Urgent Status'}</th>
+                      <th>{language === 'vi' ? 'Thao tác' : 'Actions'}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentEmployers.map((employer, index) => {
+                      const colorScheme = getColorScheme(index);
+                      const initials = getCompanyInitials(employer.companyName);
+                      
+                      return (
+                        <tr key={employer.id}>
+                          <td>
+                            <CompanyInfo>
+                              <CompanyLogo $bgColor={colorScheme.bg} $color={colorScheme.color}>
+                                {employer.companyLogo ? (
+                                  <img src={employer.companyLogo} alt={employer.companyName} />
+                                ) : (
+                                  initials
+                                )}
+                              </CompanyLogo>
+                              <CompanyDetails>
+                                <CompanyName>{employer.companyName}</CompanyName>
+                                <CompanyMeta>
+                                  <Building2 size={12} />
+                                  ID: {employer.id}
+                                </CompanyMeta>
+                              </CompanyDetails>
+                            </CompanyInfo>
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '13px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#64748B' }}>
+                                <Mail size={12} />
+                                {employer.email}
+                              </div>
+                              {employer.phone !== 'N/A' && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#64748B' }}>
+                                  <Phone size={12} />
+                                  {employer.phone}
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                          <td>
+                            <span style={{ fontWeight: 600 }}>{employer.industry}</span>
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <Users size={14} />
+                              {employer.companySize}
+                            </div>
+                          </td>
+                          <td>
+                            <StatusBadge $status={employer.quickJobStatus === 'approved' ? 'approved' : employer.quickJobStatus === 'pending' ? 'pending' : 'rejected'}>
+                              {employer.quickJobStatus === 'approved' && <CheckCircle size={12} />}
+                              {employer.quickJobStatus === 'pending' && <Clock size={12} />}
+                              {employer.quickJobStatus === 'rejected' && <XCircle size={12} />}
+                              {employer.quickJobStatus === 'approved' && (language === 'vi' ? 'Đã kích hoạt' : 'Activated')}
+                              {employer.quickJobStatus === 'pending' && (language === 'vi' ? 'Chờ duyệt' : 'Pending')}
+                              {employer.quickJobStatus === 'rejected' && (language === 'vi' ? 'Bị từ chối' : 'Rejected')}
+                            </StatusBadge>
+                          </td>
+                          <td>
+                            <ActionButtons>
+                              {employer.quickJobStatus === 'pending' && (
+                                <>
+                                  <ApproveButton onClick={() => handleUpdateQuickJobStatus(employer.id, 'approved')}>
+                                    <CheckCircle size={16} />
+                                    {language === 'vi' ? 'Duyệt kích hoạt' : 'Approve'}
+                                  </ApproveButton>
+                                  <RejectButton onClick={() => handleUpdateQuickJobStatus(employer.id, 'rejected')}>
+                                    <XCircle size={16} />
+                                    {language === 'vi' ? 'Từ chối' : 'Reject'}
+                                  </RejectButton>
+                                </>
+                              )}
+                              {employer.quickJobStatus === 'approved' && (
+                                <RejectButton onClick={() => handleUpdateQuickJobStatus(employer.id, 'not_requested')}>
+                                  <XCircle size={16} />
+                                  {language === 'vi' ? 'Hủy kích hoạt' : 'Deactivate'}
+                                </RejectButton>
+                              )}
+                              {employer.quickJobStatus === 'rejected' && (
+                                <ApproveButton onClick={() => handleUpdateQuickJobStatus(employer.id, 'approved')}>
+                                  <CheckCircle size={16} />
+                                  {language === 'vi' ? 'Kích hoạt' : 'Activate'}
+                                </ApproveButton>
+                              )}
+                              <IconButton 
+                                title={language === 'vi' ? 'Xem chi tiết' : 'View details'}
+                                onClick={() => navigate(`/admin/employers/${employer.id}`)}
+                              >
+                                <Eye size={16} />
+                              </IconButton>
+                            </ActionButtons>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {currentEmployers.length === 0 && (
+                      <tr>
+                        <td colSpan="6" style={{ textAlign: 'center', padding: '32px', color: '#64748B' }}>
+                          {language === 'vi' ? 'Không tìm thấy yêu cầu tuyển gấp nào' : 'No urgent job activation requests found'}
                         </td>
                       </tr>
                     )}
@@ -1076,6 +1276,10 @@ const EmployersManagement = () => {
                   language === 'vi' 
                     ? `Hiển thị ${startIndex + 1}-${Math.min(endIndex, filteredWithdrawRequests.length)} trong tổng số ${filteredWithdrawRequests.length} yêu cầu rút tiền`
                     : `Showing ${startIndex + 1}-${Math.min(endIndex, filteredWithdrawRequests.length)} of ${filteredWithdrawRequests.length} withdrawal requests`
+                ) : activeTab === 'quick_jobs' ? (
+                  language === 'vi' 
+                    ? `Hiển thị ${startIndex + 1}-${Math.min(endIndex, filteredEmployers.length)} trong tổng số ${filteredEmployers.length} yêu cầu tuyển gấp`
+                    : `Showing ${startIndex + 1}-${Math.min(endIndex, filteredEmployers.length)} of ${filteredEmployers.length} urgent job requests`
                 ) : (
                   language === 'vi' 
                     ? `Hiển thị ${startIndex + 1}-${Math.min(endIndex, filteredEmployers.length)} trong tổng số ${filteredEmployers.length} nhà tuyển dụng`
