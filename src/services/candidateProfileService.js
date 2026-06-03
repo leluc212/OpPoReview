@@ -295,6 +295,26 @@ class CandidateProfileService {
   }
 
   /**
+   * Update specific candidate profile (for Admin operations)
+   */
+  async adminUpdateCandidateProfile(candidateId, updates) {
+    try {
+      const result = await this.makeRequest(`/profile/${candidateId}`, {
+        method: 'PUT',
+        body: JSON.stringify(updates)
+      });
+      if (result.success && result.data) {
+        console.log(`✅ Profile for ${candidateId} updated in DynamoDB:`, result.data);
+        return result.data;
+      }
+      throw new Error('Failed to update candidate profile');
+    } catch (error) {
+      console.error(`Error in adminUpdateCandidateProfile for ${candidateId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Delete current user's profile (soft delete)
    */
   async deleteProfile() {

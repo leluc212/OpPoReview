@@ -545,14 +545,16 @@ const EmployersManagement = () => {
       const mapped = (data || []).map(item => ({
         ...item,
         id: item.requestId || item.id
-      }));
+      })).filter(req => req.isCandidate !== true);
       setWithdrawRequests(mapped);
     } catch (e) {
       console.error('Error loading withdraw requests:', e);
       try {
         const stored = localStorage.getItem('admin_withdraw_requests');
         if (stored) {
-          setWithdrawRequests(JSON.parse(stored));
+          const allRequests = JSON.parse(stored);
+          const employerRequests = allRequests.filter(req => req.isCandidate !== true);
+          setWithdrawRequests(employerRequests);
         }
       } catch (_) {}
     }

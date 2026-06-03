@@ -698,6 +698,7 @@ const AdminNotifications = () => {
       case 'posts':
         return AlertCircle;
       case 'payments':
+      case 'candidate_withdrawal_request':
         return DollarSign;
       case 'urgent':
         return AlertCircle;
@@ -736,7 +737,7 @@ const AdminNotifications = () => {
       
       // Filter by type
       if (filterType === 'all') return true;
-      if (filterType === 'payments') return notification.type === 'package_purchase_request' || notification.type === 'package_approved';
+      if (filterType === 'payments') return notification.type === 'package_purchase_request' || notification.type === 'package_approved' || notification.type === 'candidate_withdrawal_request';
       return notification.type === filterType;
     })
     .sort((a, b) => {
@@ -867,6 +868,8 @@ const AdminNotifications = () => {
                         return '#ef4444';
                       case 'payments':
                         return '#8b5cf6';
+                      case 'candidate_withdrawal_request':
+                        return '#3b82f6';
                       case 'urgent':
                         return '#f59e0b';
                       default:

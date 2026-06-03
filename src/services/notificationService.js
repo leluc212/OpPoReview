@@ -852,6 +852,76 @@ export const clearAllNotifications = async (userId, role) => {
   }
 };
 
+/**
+ * Create notification when candidate requests withdrawal
+ * @param {object} request - Withdrawal request details
+ */
+export const createCandidateWithdrawalRequestNotification = async (request) => {
+  const notification = {
+    type: 'candidate_withdrawal_request',
+    title: 'Yêu cầu rút tiền từ ứng viên',
+    titleEn: 'New Candidate Withdrawal Request',
+    message: `${request.companyName} yêu cầu rút số tiền ${request.amount.toLocaleString('vi-VN')} VND về ngân hàng ${request.bankName}.`,
+    messageEn: `${request.companyName} requested to withdraw ${request.amount.toLocaleString('vi-VN')} VND to bank ${request.bankName}.`,
+    recipientId: 'admin',
+    recipientRole: 'admin',
+    senderId: request.employerId || 'candidate',
+    senderName: request.companyName,
+    data: {
+      withdrawalId: request.id,
+      amount: request.amount,
+      bankName: request.bankName,
+      accountNumber: request.accountNumber,
+      accountName: request.accountName,
+      candidateId: request.employerId || 'candidate'
+    },
+    icon: 'dollar-sign',
+    color: '#3b82f6',
+    actionUrl: '/admin/candidates',
+    actionText: 'Xem chi tiết',
+    actionTextEn: 'View Details'
+  };
+
+  return await saveNotification(notification);
+};
+
+/**
+ * Create notification when admin updates candidate withdrawal status
+ * @param {object} request - Withdrawal request details
+ * @param {string} status - 'approved' or 'rejected'
+ */
+export const createCandidateWithdrawalStatusNotification = async (request, status) => {
+  const isApproved = status === 'approved';
+  const notification = {
+    type: isApproved ? 'success' : 'system',
+    title: isApproved ? 'Yêu cầu rút tiền được phê duyệt' : 'Yêu cầu rút tiền bị từ chối',
+    titleEn: isApproved ? 'Withdrawal Request Approved' : 'Withdrawal Request Rejected',
+    message: isApproved
+      ? `Yêu cầu rút số tiền ${request.amount.toLocaleString('vi-VN')} VND về ngân hàng ${request.bankName} đã được duyệt.`
+      : `Yêu cầu rút số tiền ${request.amount.toLocaleString('vi-VN')} VND về ngân hàng ${request.bankName} đã bị từ chối.`,
+    messageEn: isApproved
+      ? `Your withdrawal request of ${request.amount.toLocaleString('vi-VN')} VND to ${request.bankName} has been approved.`
+      : `Your withdrawal request of ${request.amount.toLocaleString('vi-VN')} VND to ${request.bankName} has been rejected.`,
+    recipientId: request.employerId || 'candidate',
+    recipientRole: 'candidate',
+    senderId: 'admin',
+    senderName: 'Admin',
+    data: {
+      withdrawalId: request.id,
+      amount: request.amount,
+      bankName: request.bankName,
+      status: status
+    },
+    icon: isApproved ? 'check-circle' : 'alert-circle',
+    color: isApproved ? '#10b981' : '#ef4444',
+    actionUrl: '/candidate/wallet',
+    actionText: 'Xem ví',
+    actionTextEn: 'View Wallet'
+  };
+
+  return await saveNotification(notification);
+};
+
 export default {
   getAllNotifications,
   getNotifications,
@@ -870,6 +940,8 @@ export default {
   createQuickJobActivationApprovedNotification,
   createQuickJobActivationRejectedNotification,
   createQuickJobActivationDeactivatedNotification,
+  createCandidateWithdrawalRequestNotification,
+  createCandidateWithdrawalStatusNotification,
   markAsRead,
   markAllAsRead,
   deleteNotification,

@@ -27,6 +27,7 @@ import { Button, Input, FormGroup, Label } from '../../components/FormElements';
 import quickJobService from '../../services/quickJobService';
 import applicationService from '../../services/applicationService';
 import candidateProfileService from '../../services/candidateProfileService';
+import notificationService from '../../services/notificationService';
 
 const WalletContainer = styled.div`
   max-width: 1400px;
@@ -766,11 +767,18 @@ const Wallet = () => {
       // Get withdrawal transactions from database candidate profile and sync status with admin requests
       const adminRequests = JSON.parse(localStorage.getItem('admin_withdraw_requests') || '[]');
       const savedWithdrawals = profile?.withdrawals || [];
-      const withdrawalTransactions = savedWithdrawals.map(w => {
+      const withdrawalTransactions = [];
+
+      savedWithdrawals.forEach(w => {
         const adminReq = adminRequests.find(r => String(r.id) === String(w.id));
-        const currentStatus = adminReq ? adminReq.status : (w.status || 'pending');
+        // Prioritize actual database status w.status if it is approved/rejected.
+        // Fallback to local storage adminReq.status if present, and finally 'pending'.
+        const currentStatus = (w.status && w.status !== 'pending')
+          ? w.status
+          : (adminReq && adminReq.status ? adminReq.status : (w.status || 'pending'));
         
-        return {
+        // Add the main withdrawal transaction (expense)
+        withdrawalTransactions.push({
           id: w.id || `withdraw-${w.date}`,
           type: 'expense',
           title: w.title || (language === 'vi' ? 'Rút tiền về ngân hàng' : 'Withdraw to bank'),
@@ -778,7 +786,22 @@ const Wallet = () => {
           amount: -Math.abs(Number(w.amount || 0)), // Ensure negative
           date: w.date,
           status: currentStatus
-        };
+        });
+
+        // If the request was rejected, add a corresponding Refund transaction (income) to transaction list
+        if (currentStatus === 'rejected') {
+          withdrawalTransactions.push({
+            id: `refund-${w.id || w.date}`,
+            type: 'income',
+            title: language === 'vi' ? 'Hoàn tiền rút chi tiêu' : 'Refund of withdrawal',
+            description: language === 'vi' 
+              ? `Hoàn trả giao dịch rút tiền bị từ chối` 
+              : `Refund for rejected withdrawal request`,
+            amount: Math.abs(Number(w.amount || 0)), // Positive refund amount
+            date: w.date,
+            status: 'approved'
+          });
+        }
       });
 
       // Merge and sort
@@ -787,9 +810,18 @@ const Wallet = () => {
       
       setTransactions(mergedTx);
       
-      // Sums
+      // Sums calculation - correctly compute available balance by only counting approved/pending withdrawals
       const sumIncome = incomeTransactions.reduce((sum, tx) => sum + tx.amount, 0);
-      const sumWithdrawn = withdrawalTransactions.reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
+      const sumWithdrawn = savedWithdrawals
+        .filter(w => {
+          const adminReq = adminRequests.find(r => String(r.id) === String(w.id));
+          const currentStatus = (w.status && w.status !== 'pending')
+            ? w.status
+            : (adminReq && adminReq.status ? adminReq.status : (w.status || 'pending'));
+          return currentStatus !== 'rejected';
+        })
+        .reduce((sum, w) => sum + Math.abs(Number(w.amount || 0)), 0);
+      
       const currentBalance = sumIncome - sumWithdrawn;
       
       setBalance(currentBalance);
@@ -859,6 +891,21 @@ const Wallet = () => {
       const adminRequests = JSON.parse(localStorage.getItem('admin_withdraw_requests') || '[]');
       adminRequests.unshift(newAdminRequest);
       localStorage.setItem('admin_withdraw_requests', JSON.stringify(adminRequests));
+
+      // 3. Send notification to admin
+      try {
+        await notificationService.createCandidateWithdrawalRequestNotification({
+          id: newWithdrawal.id,
+          employerId: candidateProfile?.userId || 'candidate-user',
+          companyName: candidateProfile?.fullName || 'Ứng viên',
+          amount: amountNum,
+          bankName: withdrawBankName,
+          accountNumber: withdrawAccountNumber,
+          accountName: withdrawAccountName
+        });
+      } catch (notifyErr) {
+        console.error('Error sending withdrawal notification to admin:', notifyErr);
+      }
 
       setWithdrawSuccess(true);
       
@@ -1162,22 +1209,13 @@ const Wallet = () => {
               <ModalBody>
                 <FormGroup>
                   <Label>{language === 'vi' ? 'Chọn Ngân Hàng' : 'Select Bank'}</Label>
-                  <Select
+                  <Input
+                    type="text"
+                    placeholder={language === 'vi' ? 'Nhập tên ngân hàng (Ví dụ: Vietcombank, MB Bank...)' : 'Enter bank name (e.g. Vietcombank, MB Bank...)'}
                     value={withdrawBankName}
                     onChange={e => setWithdrawBankName(e.target.value)}
                     disabled={withdrawLoading}
-                  >
-                    <option value="">-- {language === 'vi' ? 'Chọn ngân hàng' : 'Choose a bank'} --</option>
-                    <option value="Vietcombank">Vietcombank</option>
-                    <option value="Techcombank">Techcombank</option>
-                    <option value="MB Bank">MB Bank</option>
-                    <option value="VietinBank">VietinBank</option>
-                    <option value="BIDV">BIDV</option>
-                    <option value="Agribank">Agribank</option>
-                    <option value="ACB">ACB</option>
-                    <option value="Sacombank">Sacombank</option>
-                    <option value="TPBank">TPBank</option>
-                  </Select>
+                  />
                 </FormGroup>
                 
                 <FormGroup>
