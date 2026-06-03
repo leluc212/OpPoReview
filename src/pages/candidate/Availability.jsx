@@ -604,9 +604,18 @@ const ConfirmationContent = styled.div`
 
 const Availability = () => {
   const { language } = useLanguage();
-  const [isAvailable, setIsAvailable] = useState(true);
-  const [enableJobSearch, setEnableJobSearch] = useState(true);
-  const [enableRecommendations, setEnableRecommendations] = useState(true);
+  const [isAvailable, setIsAvailable] = useState(() => {
+    const saved = localStorage.getItem('candidate_job_search_is_available');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
+  const [enableJobSearch, setEnableJobSearch] = useState(() => {
+    const saved = localStorage.getItem('candidate_job_search_is_available');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
+  const [enableRecommendations, setEnableRecommendations] = useState(() => {
+    const saved = localStorage.getItem('candidate_job_search_is_available');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
   const [enableNotifications, setEnableNotifications] = useState(true);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
@@ -615,16 +624,19 @@ const Availability = () => {
   };
   
   const confirmToggle = () => {
-    setIsAvailable(!isAvailable);
-    if (isAvailable) {
-      setEnableJobSearch(false);
-      setEnableRecommendations(false);
-    } else {
+    const newStatus = !isAvailable;
+    setIsAvailable(newStatus);
+    localStorage.setItem('candidate_job_search_is_available', JSON.stringify(newStatus));
+    if (newStatus) {
       setEnableJobSearch(true);
       setEnableRecommendations(true);
+    } else {
+      setEnableJobSearch(false);
+      setEnableRecommendations(false);
     }
     setShowConfirmModal(false);
   };
+
 
   const stats = [
     { label: language === 'vi' ? 'Lượt Xem Hồ Sơ' : 'Profile Views', value: isAvailable ? '156' : '0', icon: Eye, color: '#1e40af' },

@@ -1855,7 +1855,13 @@ const Applications = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeSection, setActiveSection] = useState(location.state?.section || 'posts');
+  const [activeSection, setActiveSection] = useState(() => {
+    if (location.state?.section) {
+      return location.state.section;
+    }
+    const saved = sessionStorage.getItem('employer_applications_active_section');
+    return saved !== null ? saved : 'posts';
+  });
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilters, setStatusFilters] = useState([]);
   const [timeFilter, setTimeFilter] = useState('all');
@@ -1884,6 +1890,11 @@ const Applications = () => {
   const [isWalletConnected] = useState(() => {
     return localStorage.getItem('employer_wallet_connected') === 'true';
   });
+
+  // Persist active section to sessionStorage on change
+  useEffect(() => {
+    sessionStorage.setItem('employer_applications_active_section', activeSection);
+  }, [activeSection]);
 
   // Load job posts from DynamoDB
   useEffect(() => {

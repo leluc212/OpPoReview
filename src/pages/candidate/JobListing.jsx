@@ -7,7 +7,7 @@ import {
   Search, MapPin, Briefcase, Clock, TrendingUp,
   ChevronDown, Building2, Bookmark, Eye, ArrowUpRight, Filter,
   X, SlidersHorizontal, Grid, List, Sparkles, Zap, Navigation, Target,
-  Power, XCircle, AlertCircle, CheckCircle
+  Power, XCircle, AlertCircle, CheckCircle, RotateCw
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import StatusBadge from '../../components/StatusBadge';
@@ -883,6 +883,39 @@ const ViewButton = styled.button`
   }
 `;
 
+const ReloadButton = styled(motion.button)`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: ${props => props.theme.colors.bgLight};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  color: ${props => props.theme.colors.text};
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: ${props => props.theme.colors.primary};
+    color: ${props => props.theme.colors.primary};
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+
 // Job Cards
 const JobsGrid = styled.div`
   display: grid;
@@ -1646,159 +1679,176 @@ const JobListing = () => {
   const [savedJobs, setSavedJobs] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
-  const [jobCategory, setJobCategory] = useState('standard'); // 'standard' or 'shift'
+  const [jobCategory, setJobCategory] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'shift') return 'shift';
+    if (tab === 'saved') return 'standard';
+    if (tab === 'standard') return 'standard';
+    
+    const saved = localStorage.getItem('candidate_job_listing_category');
+    return saved !== null ? saved : 'standard';
+  }); // 'standard' or 'shift'
   const [candidateProfile, setCandidateProfile] = useState(null);
   const [dynamoDBJobs, setDynamoDBJobs] = useState([]);
   const [quickJobs, setQuickJobs] = useState([]);
   const [isLoadingDynamoJobs, setIsLoadingDynamoJobs] = useState(true);
+  const [isReloading, setIsReloading] = useState(false);
 
   // Load jobs from DynamoDB
-  useEffect(() => {
-    const loadDynamoDBJobs = async () => {
-      try {
-        setIsLoadingDynamoJobs(true);
-        console.log('📥 Loading jobs from DynamoDB for candidate view...');
-        const jobs = await jobPostService.getAllActiveJobs();
-        console.log('✅ Loaded DynamoDB jobs:', jobs);
+  const loadDynamoDBJobs = async () => {
+    try {
+      setIsLoadingDynamoJobs(true);
+      console.log('📥 Loading jobs from DynamoDB for candidate view...');
+      const jobs = await jobPostService.getAllActiveJobs();
+      console.log('✅ Loaded DynamoDB jobs:', jobs);
 
-        // Transform DynamoDB jobs to match JOBS_DATA format
-        const transformedJobs = jobs
-          .filter(job => job && job.idJob && job.title && job.salary) // Filter out invalid jobs and jobs without salary
-          .filter(job => job.status !== 'deleted') // Filter out deleted jobs
-          .map(job => {
-            try {
-              // Use coordinates from job if available, otherwise use default HCM location
-              const lat = job.latitude || job.lat || 10.7769;
-              const lng = job.longitude || job.lng || 106.7009;
-              
-              console.log(`📍 DynamoDB Job: ${job.title} at ${job.location} - Coords: ${lat}, ${lng}`);
-              
-              return {
-                id: `dynamo-${job.idJob}`,
-                idJob: job.idJob,
-                employerId: job.employerId,
-                title: String(job.title || 'Untitled Job'),
-                company: String(job.employerName || job.employerEmail || (language === 'vi' ? 'Công ty' : 'Company')),
-                location: String(job.location || ''),
-                lat: lat, // Add coordinates for location-based filtering
-                lng: lng,
-                salary: formatSalaryFromDB(job.salary, language === 'vi' ? 'Thỏa thuận' : 'Negotiable'),
-                type: job.jobType === 'part-time' ? (language === 'vi' ? 'Bán thời gian' : 'Part-time') : (language === 'vi' ? 'Toàn thời gian' : 'Full-time'),
-                category: String(job.category || 'standard'), // Use category from DynamoDB
-                tags: job.tags ? String(job.tags).split(',').map(t => String(t).trim()).filter(t => t) : [],
-                postedDate: String(job.createdAt || new Date().toISOString()),
-                postedAt: formatPostedDate(job.createdAt || new Date().toISOString(), language), // Add formatted text
-                applicants: parseInt(job.applicants) || 0,
-                views: parseInt(job.views) || 0,
-                description: String(job.description || ''),
-                responsibilities: String(job.responsibilities || ''),
-                requirements: String(job.requirements || ''),
-                benefits: String(job.benefits || ''),
-                workHours: String(job.workHours || ''),
-                workDays: String(job.workDays || ''),
-                status: String(job.status || 'active'),
-                isFromDynamoDB: true // Flag to identify DynamoDB jobs
-              };
-            } catch (err) {
-              console.error('Error transforming job:', job, err);
-              return null;
-            }
-          })
-          .filter(job => job !== null); // Remove failed transformations
+      // Transform DynamoDB jobs to match JOBS_DATA format
+      const transformedJobs = jobs
+        .filter(job => job && job.idJob && job.title && job.salary) // Filter out invalid jobs and jobs without salary
+        .filter(job => job.status !== 'deleted') // Filter out deleted jobs
+        .map(job => {
+          try {
+            // Use coordinates from job if available, otherwise use default HCM location
+            const lat = job.latitude || job.lat || 10.7769;
+            const lng = job.longitude || job.lng || 106.7009;
+            
+            console.log(`📍 DynamoDB Job: ${job.title} at ${job.location} - Coords: ${lat}, ${lng}`);
+            
+            return {
+              id: `dynamo-${job.idJob}`,
+              idJob: job.idJob,
+              employerId: job.employerId,
+              title: String(job.title || 'Untitled Job'),
+              company: String(job.employerName || job.employerEmail || (language === 'vi' ? 'Công ty' : 'Company')),
+              location: String(job.location || ''),
+              lat: lat, // Add coordinates for location-based filtering
+              lng: lng,
+              salary: formatSalaryFromDB(job.salary, language === 'vi' ? 'Thỏa thuận' : 'Negotiable'),
+              type: job.jobType === 'part-time' ? (language === 'vi' ? 'Bán thời gian' : 'Part-time') : (language === 'vi' ? 'Toàn thời gian' : 'Full-time'),
+              category: String(job.category || 'standard'), // Use category from DynamoDB
+              tags: job.tags ? String(job.tags).split(',').map(t => String(t).trim()).filter(t => t) : [],
+              postedDate: String(job.createdAt || new Date().toISOString()),
+              postedAt: formatPostedDate(job.createdAt || new Date().toISOString(), language), // Add formatted text
+              applicants: parseInt(job.applicants) || 0,
+              views: parseInt(job.views) || 0,
+              description: String(job.description || ''),
+              responsibilities: String(job.responsibilities || ''),
+              requirements: String(job.requirements || ''),
+              benefits: String(job.benefits || ''),
+              workHours: String(job.workHours || ''),
+              workDays: String(job.workDays || ''),
+              status: String(job.status || 'active'),
+              isFromDynamoDB: true // Flag to identify DynamoDB jobs
+            };
+          } catch (err) {
+            console.error('Error transforming job:', job, err);
+            return null;
+          }
+        })
+        .filter(job => job !== null); // Remove failed transformations
 
-        setDynamoDBJobs(transformedJobs);
-        console.log('✅ Transformed DynamoDB jobs:', transformedJobs);
-      } catch (error) {
-        console.error('❌ Error loading DynamoDB jobs:', error);
-        setDynamoDBJobs([]);
-      } finally {
-        setIsLoadingDynamoJobs(false);
-      }
-    };
-
-    loadDynamoDBJobs();
-  }, [language]);
+      setDynamoDBJobs(transformedJobs);
+      console.log('✅ Transformed DynamoDB jobs:', transformedJobs);
+    } catch (error) {
+      console.error('❌ Error loading DynamoDB jobs:', error);
+      setDynamoDBJobs([]);
+    } finally {
+      setIsLoadingDynamoJobs(false);
+    }
+  };
 
   // Load quick jobs from PostQuickJob table
+  const loadQuickJobs = async () => {
+    try {
+      console.log('📥 Loading quick jobs from PostQuickJob table...');
+      const jobs = await quickJobService.getAllActiveQuickJobs();
+      console.log('✅ Loaded quick jobs:', jobs);
+
+      // Transform quick jobs to match JOBS_DATA format
+      const transformedQuickJobs = jobs
+        .filter(job => job && (job.jobID || job.idJob) && job.title)
+        .filter(job => job.status !== 'deleted') // Filter out deleted jobs
+        .map(job => {
+          try {
+            const jobId = job.jobID || job.idJob;
+            const hourlyRate = parseInt(job.hourlyRate) || 0;
+            const totalHours = parseFloat(job.totalHours) || 0;
+            const totalSalary = parseInt(job.totalSalary) || (hourlyRate * totalHours);
+
+            // Calculate candidate income (85% of totalSalary - 15% platform fee)
+            const candidateIncome = Math.round(totalSalary * 0.85);
+
+            // Map jobType from database to display format
+            const jobType = job.jobType === 'part-time'
+              ? 'Part-time'
+              : job.jobType === 'full-time'
+                ? 'Full-time'
+                : job.jobType || 'Part-time';
+
+            // Use coordinates from job if available, otherwise use default HCM location
+            const lat = job.latitude || job.lat || 10.7769;
+            const lng = job.longitude || job.lng || 106.7009;
+            
+            console.log(`📍 Quick Job: ${job.title} at ${job.location} - Coords: ${lat}, ${lng}`);
+
+            return {
+              id: `quick-${jobId}`,
+              idJob: jobId,
+              employerId: job.employerId,
+              title: String(job.title || 'Untitled Job'),
+              company: String(job.companyName || (language === 'vi' ? 'Công ty' : 'Company')),
+              location: String(job.location || ''),
+              lat: lat, // Add coordinates for location-based filtering
+              lng: lng,
+              salary: candidateIncome > 0
+                ? `${candidateIncome.toLocaleString()} VNĐ/${totalHours}h`
+                : `${Math.round(hourlyRate * 0.85).toLocaleString()} VNĐ/giờ`,
+              type: jobType, // Use jobType from database
+              category: 'shift', // Quick jobs are shift-based
+              tags: [language === 'vi' ? 'Tuyển gấp' : 'Urgent', language === 'vi' ? 'Làm ngay' : 'Start Now'],
+              postedDate: String(job.createdAt || new Date().toISOString()),
+              postedAt: formatPostedDate(job.createdAt || new Date().toISOString(), language),
+              applicants: parseInt(job.applicants) || 0,
+              views: parseInt(job.views) || 0,
+              description: String(job.description || ''),
+              requirements: String(job.requirements || ''),
+              workHours: job.startTime && job.endTime ? `${job.startTime} - ${job.endTime}` : '',
+              workDate: job.workDate || '',
+              status: String(job.status || 'active'),
+              isQuickJob: true, // Flag to identify quick jobs
+              urgent: true, // Mark as urgent to show red badge
+              isUrgent: true
+            };
+          } catch (err) {
+            console.error('Error transforming quick job:', job, err);
+            return null;
+          }
+        })
+        .filter(job => job !== null);
+
+      setQuickJobs(transformedQuickJobs);
+      console.log('✅ Transformed quick jobs:', transformedQuickJobs);
+    } catch (error) {
+      console.error('❌ Error loading quick jobs:', error);
+      setQuickJobs([]);
+    }
+  };
+
+  // Run on mount or language change
   useEffect(() => {
-    const loadQuickJobs = async () => {
-      try {
-        console.log('📥 Loading quick jobs from PostQuickJob table...');
-        const jobs = await quickJobService.getAllActiveQuickJobs();
-        console.log('✅ Loaded quick jobs:', jobs);
-
-        // Transform quick jobs to match JOBS_DATA format
-        const transformedQuickJobs = jobs
-          .filter(job => job && (job.jobID || job.idJob) && job.title)
-          .filter(job => job.status !== 'deleted') // Filter out deleted jobs
-          .map(job => {
-            try {
-              const jobId = job.jobID || job.idJob;
-              const hourlyRate = parseInt(job.hourlyRate) || 0;
-              const totalHours = parseFloat(job.totalHours) || 0;
-              const totalSalary = parseInt(job.totalSalary) || (hourlyRate * totalHours);
-
-              // Calculate candidate income (85% of totalSalary - 15% platform fee)
-              const candidateIncome = Math.round(totalSalary * 0.85);
-
-              // Map jobType from database to display format
-              const jobType = job.jobType === 'part-time'
-                ? 'Part-time'
-                : job.jobType === 'full-time'
-                  ? 'Full-time'
-                  : job.jobType || 'Part-time';
-
-              // Use coordinates from job if available, otherwise use default HCM location
-              const lat = job.latitude || job.lat || 10.7769;
-              const lng = job.longitude || job.lng || 106.7009;
-              
-              console.log(`📍 Quick Job: ${job.title} at ${job.location} - Coords: ${lat}, ${lng}`);
-
-              return {
-                id: `quick-${jobId}`,
-                idJob: jobId,
-                employerId: job.employerId,
-                title: String(job.title || 'Untitled Job'),
-                company: String(job.companyName || (language === 'vi' ? 'Công ty' : 'Company')),
-                location: String(job.location || ''),
-                lat: lat, // Add coordinates for location-based filtering
-                lng: lng,
-                salary: candidateIncome > 0
-                  ? `${candidateIncome.toLocaleString()} VNĐ/${totalHours}h`
-                  : `${Math.round(hourlyRate * 0.85).toLocaleString()} VNĐ/giờ`,
-                type: jobType, // Use jobType from database
-                category: 'shift', // Quick jobs are shift-based
-                tags: [language === 'vi' ? 'Tuyển gấp' : 'Urgent', language === 'vi' ? 'Làm ngay' : 'Start Now'],
-                postedDate: String(job.createdAt || new Date().toISOString()),
-                postedAt: formatPostedDate(job.createdAt || new Date().toISOString(), language),
-                applicants: parseInt(job.applicants) || 0,
-                views: parseInt(job.views) || 0,
-                description: String(job.description || ''),
-                requirements: String(job.requirements || ''),
-                workHours: job.startTime && job.endTime ? `${job.startTime} - ${job.endTime}` : '',
-                workDate: job.workDate || '',
-                status: String(job.status || 'active'),
-                isQuickJob: true, // Flag to identify quick jobs
-                urgent: true, // Mark as urgent to show red badge
-                isUrgent: true
-              };
-            } catch (err) {
-              console.error('Error transforming quick job:', job, err);
-              return null;
-            }
-          })
-          .filter(job => job !== null);
-
-        setQuickJobs(transformedQuickJobs);
-        console.log('✅ Transformed quick jobs:', transformedQuickJobs);
-      } catch (error) {
-        console.error('❌ Error loading quick jobs:', error);
-        setQuickJobs([]);
-      }
-    };
-
+    loadDynamoDBJobs();
     loadQuickJobs();
   }, [language]);
+
+  const handleReloadJobs = async () => {
+    setIsReloading(true);
+    await Promise.all([
+      loadDynamoDBJobs(),
+      loadQuickJobs()
+    ]);
+    setIsReloading(false);
+  };
 
   // Merge DynamoDB jobs AND quick jobs
   const allJobs = useMemo(() => {
@@ -1824,10 +1874,21 @@ const JobListing = () => {
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [showNearbyJobs, setShowNearbyJobs] = useState(false);
   const [nearbyRadius, setNearbyRadius] = useState(3); // km - radius to find jobs near candidate
-  const [showSavedJobsOnly, setShowSavedJobsOnly] = useState(false);
+  const [showSavedJobsOnly, setShowSavedJobsOnly] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'saved') return true;
+    if (tab === 'standard' || tab === 'shift') return false;
+
+    const saved = localStorage.getItem('candidate_job_listing_saved_only');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
 
   // Job search status states
-  const [isAvailable, setIsAvailable] = useState(false); // Mặc định TẮT
+  const [isAvailable, setIsAvailable] = useState(() => {
+    const saved = localStorage.getItem('candidate_job_search_is_available');
+    return saved !== null ? JSON.parse(saved) : false;
+  }); // Load from localStorage, default false
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [applyModal, setApplyModal] = useState(null); // { job } or null
   const [selectedCV, setSelectedCV] = useState(null); // CV được chọn để ứng tuyển
@@ -1862,6 +1923,7 @@ const JobListing = () => {
   const confirmToggle = () => {
     const newStatus = !isAvailable;
     setIsAvailable(newStatus);
+    localStorage.setItem('candidate_job_search_is_available', JSON.stringify(newStatus));
     setShowConfirmModal(false);
 
     // Khi BẬT trạng thái tìm việc → tự động bật "Tìm việc gần tôi"
@@ -1874,13 +1936,40 @@ const JobListing = () => {
     }
   };
 
-  // Check if we're on saved jobs tab via query param
+  // Automatically request location when job search status is active and user switches to shift tab
+  useEffect(() => {
+    if (isAvailable && jobCategory === 'shift' && !userLocation) {
+      getUserLocation();
+    }
+  }, [isAvailable, jobCategory]);
+
+  // Sync tab state with URL query param and localStorage
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    if (params.get('tab') === 'saved') {
-      setShowSavedJobsOnly(true);
+    const tab = params.get('tab');
+    if (tab) {
+      if (tab === 'shift') {
+        setJobCategory('shift');
+        localStorage.setItem('candidate_job_listing_category', 'shift');
+        setShowSavedJobsOnly(false);
+        localStorage.setItem('candidate_job_listing_saved_only', JSON.stringify(false));
+      } else if (tab === 'saved') {
+        setShowSavedJobsOnly(true);
+        localStorage.setItem('candidate_job_listing_saved_only', JSON.stringify(true));
+      } else if (tab === 'standard') {
+        setJobCategory('standard');
+        localStorage.setItem('candidate_job_listing_category', 'standard');
+        setShowSavedJobsOnly(false);
+        localStorage.setItem('candidate_job_listing_saved_only', JSON.stringify(false));
+      }
+    } else {
+      // If no URL parameter, make sure URL reflects current state
+      const currentTab = showSavedJobsOnly ? 'saved' : jobCategory;
+      const searchParams = new URLSearchParams(window.location.search);
+      searchParams.set('tab', currentTab);
+      navigate({ search: searchParams.toString() }, { replace: true });
     }
-  }, [location.search]);
+  }, [location.search, jobCategory, showSavedJobsOnly, navigate]);
 
   // Load saved jobs from candidate profile instead of localStorage
   useEffect(() => {
@@ -2726,7 +2815,7 @@ const JobListing = () => {
               setJobCategory('standard');
               setQuickFilter('all');
               setShowSavedJobsOnly(false);
-              navigate('/candidate/jobs');
+              navigate('/candidate/jobs?tab=standard');
             }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -2744,7 +2833,7 @@ const JobListing = () => {
               setJobCategory('shift');
               setQuickFilter('all');
               setShowSavedJobsOnly(false);
-              navigate('/candidate/jobs');
+              navigate('/candidate/jobs?tab=shift');
             }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -2760,6 +2849,7 @@ const JobListing = () => {
             $active={showSavedJobsOnly}
             onClick={() => {
               setShowSavedJobsOnly(true);
+              navigate('/candidate/jobs?tab=saved');
             }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -2924,6 +3014,23 @@ const JobListing = () => {
               </ResultsInfo>
 
               <ViewControls>
+                <ReloadButton
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleReloadJobs}
+                  disabled={isReloading || isLoadingDynamoJobs}
+                  title={language === 'vi' ? 'Làm mới danh sách công việc' : 'Reload job list'}
+                >
+                  <motion.div
+                    animate={isReloading ? { rotate: 360 } : { rotate: 0 }}
+                    transition={isReloading ? { repeat: Infinity, duration: 1, ease: "linear" } : {}}
+                    style={{ display: 'flex', alignItems: 'center' }}
+                  >
+                    <RotateCw />
+                  </motion.div>
+                  {language === 'vi' ? 'Làm mới' : 'Reload'}
+                </ReloadButton>
+
                 <SortSelect value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
                   <option value="newest">{language === 'vi' ? 'Mới nhất' : 'Newest'}</option>
                   <option value="salary">{language === 'vi' ? 'Lương cao nhất' : 'Highest Salary'}</option>

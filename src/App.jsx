@@ -81,7 +81,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   
   if (!isAuthenticated) {
     const redirect = location.pathname + location.search;
-    return <Navigate to={`${BASE}login?redirect=${encodeURIComponent(redirect)}`} replace />;
+    return <Navigate to={`/login?redirect=${encodeURIComponent(redirect)}`} replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(user?.role)) {
@@ -172,7 +172,12 @@ function AppRoutes() {
       <Route path="/companies/:employerId" element={<LandingPage><EmployerProfileView /></LandingPage>} />
       <Route path="/jobs" element={<LandingPage><PublicJobListing /></LandingPage>} />
       <Route path="/about" element={<LandingPage><AboutPage /></LandingPage>} />
-      <Route path="/cv-templates" element={<LandingPage><CVTemplates /></LandingPage>} />
+      <Route path="/cv-templates" element={<Navigate to="/candidate/cv-templates" replace />} />
+      <Route path="/candidate/cv-templates" element={
+        <ProtectedRoute allowedRoles={['candidate']}>
+          <CVTemplates />
+        </ProtectedRoute>
+      } />
       
       {/* Candidate Routes */}
       <Route path="/candidate" element={<Navigate to="/candidate/dashboard" replace />} />

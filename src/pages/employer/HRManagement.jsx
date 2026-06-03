@@ -2499,7 +2499,10 @@ const HRManagement = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeSection, setActiveSection] = useState('posts'); // Default to 'posts' (Quản lý bài đăng)
+  const [activeSection, setActiveSection] = useState(() => {
+    const saved = sessionStorage.getItem('employer_hr_active_section');
+    return saved !== null ? saved : 'posts';
+  }); // Default to 'posts' (Quản lý bài đăng)
   const [hrStaff, setHrStaff] = useState(() => getHRStaff(language).map(s => ({ ...s, rated: false, pendingRating: false })));
   const [selectedStaff, setSelectedStaff] = useState(null);
 
@@ -2507,6 +2510,11 @@ const HRManagement = () => {
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [requestSending, setRequestSending] = useState(false);
   const [showCancelConfirmModal, setShowCancelConfirmModal] = useState(false);
+
+  // Persist active section to sessionStorage on change
+  useEffect(() => {
+    sessionStorage.setItem('employer_hr_active_section', activeSection);
+  }, [activeSection]);
 
   useEffect(() => {
     const fetchProfile = async () => {

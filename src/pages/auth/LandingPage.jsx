@@ -3093,11 +3093,11 @@ const LandingPage = ({ children }) => {
                         {language === 'vi' ? 'Mẫu CV theo style' : 'CV Templates by Style'}
                         <ArrowRight />
                       </GreenSectionTitle>
-                      <CVTemplateItem to="/cv-templates" $isDark={isDarkMode}>
+                      <CVTemplateItem to="/candidate/cv-templates" $isDark={isDarkMode}>
                         <Package />
                         {language === 'vi' ? 'Mẫu CV Đơn giản' : 'Simple CV Template'}
                       </CVTemplateItem>
-                      <CVTemplateItem to="/cv-templates" $isDark={isDarkMode}>
+                      <CVTemplateItem to="/candidate/cv-templates" $isDark={isDarkMode}>
                         <Star />
                         {language === 'vi' ? 'Mẫu CV Ấn tượng' : 'Impressive CV Template'}
                       </CVTemplateItem>
@@ -3663,7 +3663,7 @@ const LandingPage = ({ children }) => {
                   color: '#16a34a',
                   title: language === 'vi' ? 'Tạo CV chuyên nghiệp' : 'Professional CV Builder',
                   desc: language === 'vi' ? 'Tạo CV đẹp, chuyên nghiệp với nhiều mẫu thiết kế. Hỗ trợ AI tạo nội dung tự động.' : 'Create beautiful, professional CVs with multiple design templates. AI-powered content generation.',
-                  to: '/cv-templates'
+                  to: '/candidate/cv-templates'
                 },
                 {
                   icon: <Building2 size={24} />,
