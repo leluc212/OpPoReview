@@ -10,10 +10,15 @@ Secrets Manager: vnpt-ekyc-credentials
   { "token_id":"...", "token_key":"...", "bearer_token":"..." }
 """
 
-import json, boto3, base64, urllib.error, urllib.parse, time, ssl
+import json, boto3, base64, urllib.error, urllib.parse, time, ssl, io
 from datetime import datetime, timezone
 from decimal import Decimal
 import requests as req_lib
+try:
+    from PIL import Image
+    HAS_PIL = True
+except ImportError:
+    HAS_PIL = False
 
 # ─── AWS ──────────────────────────────────────────────────────────────────────
 dynamodb       = boto3.resource('dynamodb', region_name='ap-southeast-1')
@@ -31,7 +36,7 @@ SECRET_NAME         = 'vnpt-ekyc-credentials'
 
 SIMILARITY_THRESHOLD = 85.0
 MAX_DAILY_ATTEMPTS   = 3
-MAC_ADDRESS          = 'TEST1'
+MAC_ADDRESS          = '00:00:00:00:00:00'
 CLIENT_SESSION       = 'ANDROID_opporeview_1.0_Device_1234567890'
 
 _token_cache = {'bearer': None, 'exp': 0, 'token_id': None, 'token_key': None}
@@ -48,6 +53,44 @@ def get_cors_headers():
 def resp(status, body):
     return {'statusCode': status, 'headers': get_cors_headers(),
             'body': json.dumps(body, ensure_ascii=False)}
+
+def resize_b64(b64_data, max_bytes=300_000, max_dim=1200):
+    """
+    Nén ảnh xuống dưới max_bytes và max_dim px.
+    Trả về base64 string (không có data URL prefix).
+    """
+    clean = b64_data.split(',', 1)[-1] if ',' in b64_data else b64_data
+    clean += '=' * (-len(clean) % 4)
+    img_bytes = base64.b64decode(clean)
+
+    if len(img_bytes) <= max_bytes:
+        return clean  # đã đủ nhỏ
+
+    if not HAS_PIL:
+        # Không có PIL — trả về ảnh gốc, để VNPT tự xử lý
+        print(f'PIL not available, skipping resize (size={len(img_bytes)})')
+        return clean
+
+    img = Image.open(io.BytesIO(img_bytes))
+    # Resize nếu quá lớn
+    w, h = img.size
+    if max(w, h) > max_dim:
+        ratio = max_dim / max(w, h)
+        img = img.resize((int(w * ratio), int(h * ratio)), Image.LANCZOS)
+
+    # Nén JPEG với chất lượng giảm dần cho đến khi đủ nhỏ
+    for quality in [85, 75, 65, 55]:
+        buf = io.BytesIO()
+        img.convert('RGB').save(buf, format='JPEG', quality=quality, optimize=True)
+        result = buf.getvalue()
+        print(f'Resize: quality={quality} size={len(result)} bytes')
+        if len(result) <= max_bytes:
+            return base64.b64encode(result).decode()
+
+    # Nếu vẫn lớn — dùng cái nhỏ nhất
+    buf = io.BytesIO()
+    img.convert('RGB').save(buf, format='JPEG', quality=45, optimize=True)
+    return base64.b64encode(buf.getvalue()).decode()
 
 def strip_prefix(b64):
     if b64 and ',' in b64:
@@ -129,8 +172,39 @@ def vnpt_headers(bearer, tid, tkey):
 
 def vnpt_upload(b64_data, bearer, tid, tkey):
     """Upload ảnh lên VNPT file-service (multipart/form-data), trả về (hash, token)."""
-    img_bytes = base64.b64decode(b64_data)
-    files  = {'file': ('image.jpg', img_bytes, 'image/jpeg')}
+    # Đảm bảo bỏ data URL prefix và padding đúng
+    clean = b64_data
+    if ',' in clean:
+        clean = clean.split(',', 1)[1]
+    # Thêm padding nếu thiếu
+    clean += '=' * (4 - len(clean) % 4) if len(clean) % 4 else ''
+    try:
+        img_bytes = base64.b64decode(clean)
+    except Exception as e:
+        raise ValueError(f'Base64 decode lỗi: {e}')
+
+    # Detect content type từ base64 header
+    content_type = 'image/jpeg'
+    if ',' in b64_data:
+        prefix = b64_data.split(',')[0].lower()
+        if 'png' in prefix:
+            content_type = 'image/png'
+        elif 'webp' in prefix:
+            content_type = 'image/webp'
+
+    # Detect từ magic bytes nếu không có prefix
+    if img_bytes[:4] == b'\x89PNG':
+        content_type = 'image/png'
+    elif img_bytes[:2] == b'\xff\xd8':
+        content_type = 'image/jpeg'
+
+    ext = 'png' if content_type == 'image/png' else 'jpg'
+    filename = f'cccd.{ext}'
+    print(f'Upload: image size={len(img_bytes)} bytes, type={content_type}')
+    if len(img_bytes) < 1000:
+        raise ValueError(f'Ảnh quá nhỏ ({len(img_bytes)} bytes) — cần ảnh JPEG/PNG hợp lệ')
+
+    files  = {'file': (filename, img_bytes, content_type)}
     data   = {'title': 'ekyc', 'description': 'ekyc'}
     hdrs   = {
         'Authorization': f'Bearer {bearer}',
@@ -156,25 +230,23 @@ def vnpt_upload(b64_data, bearer, tid, tkey):
     print(f'Upload hash={h} token={token}')
     return h, token
 
-def vnpt_ocr(img_hash, trans_token, bearer, tid, tkey):
-    """OCR CCCD mặt trước."""
-    import uuid
-    # token là transaction identifier — dùng UUID nếu không có từ upload
-    token_val = trans_token if trans_token else str(uuid.uuid4())
+def vnpt_ocr(front_hash, trans_token, bearer, tid, tkey):
+    """
+    OCR CCCD mặt trước — gửi hash Minio (từ bước upload), KHÔNG phải base64.
+    Theo API docs VNPT: img_front là hash Minio, token là trans_token từ upload.
+    """
     payload = {
-        'img_front':         img_hash,
+        'img_front':         front_hash,
         'client_session':    CLIENT_SESSION,
         'type':              1,
         'validate_postcode': False,
-        'token':             token_val,
+        'token':             trans_token or tid,
     }
-    print(f'OCR payload token={token_val[:20]}...')
-    r = req_lib.post(VNPT_OCR_FRONT_URL,
-                     headers=vnpt_headers(bearer, tid, tkey),
-                     json=payload, timeout=30)
-    print(f'OCR: status={r.status_code} body={r.text[:300]}')
+    print(f'OCR with hash={front_hash[:60]} token={payload["token"][:36]}')
+    r = req_lib.post(VNPT_OCR_FRONT_URL, headers=vnpt_headers(bearer, tid, tkey), json=payload, timeout=30)
+    print(f'OCR: status={r.status_code} body={r.text[:500]}')
     if r.status_code >= 400:
-        raise urllib.error.HTTPError(VNPT_OCR_FRONT_URL, r.status_code, r.text[:300], {}, None)
+        raise urllib.error.HTTPError(VNPT_OCR_FRONT_URL, r.status_code, r.text[:500], {}, None)
     return r.json()
 
 def check_rate_limit(user_id):
@@ -196,6 +268,13 @@ def check_rate_limit(user_id):
 # ─── Route handlers ───────────────────────────────────────────────────────────
 
 def handle_ocr(event, user_id):
+    """
+    POST /ekyc/ocr
+    Luồng đúng theo VNPT API docs:
+      1. Upload ảnh mặt trước → lấy hash Minio + trans_token
+      2. Gọi OCR với hash (img_front = hash, token = trans_token)
+      3. Trả kết quả + front_hash để dùng ở bước face verify
+    """
     try:
         body = json.loads(event.get('body') or '{}')
     except Exception:
@@ -206,54 +285,63 @@ def handle_ocr(event, user_id):
         return resp(400, {'success': False, 'errorMsg': 'imageFront là bắt buộc'})
 
     try:
-        creds          = load_creds()
+        creds             = load_creds()
         bearer, tid, tkey = get_auth(creds)
 
-        # Upload ảnh mặt trước, lấy hash và transaction token
-        print('Uploading front image...')
-        front_hash, front_token = vnpt_upload(front, bearer, tid, tkey)
-        print(f'Front hash={front_hash} token={front_token}')
+        # Bước 1: Resize ảnh nếu cần, rồi upload lên VNPT → lấy hash Minio
+        print(f'Original base64 length={len(front)}')
+        front_resized = resize_b64(front, max_bytes=400_000, max_dim=1400)
+        print(f'Resized base64 length={len(front_resized)}')
 
-        # OCR dùng hash + transaction token
+        print('Uploading front image to VNPT...')
+        front_hash, front_token = vnpt_upload(front_resized, bearer, tid, tkey)
+        print(f'front_hash={front_hash[:80]} front_token={front_token[:40] if front_token else "-"}')
+
+        # Bước 2: OCR bằng hash Minio (không gửi base64)
+        print('Calling OCR with hash...')
         ocr = vnpt_ocr(front_hash, front_token, bearer, tid, tkey)
 
         err_code = ocr.get('errorCode')
         msg      = ocr.get('message') or ocr.get('msg') or ''
-        # VNPT trả IDG-00000000 khi thành công
-        is_ok = (err_code == 0) or (msg == 'IDG-00000000')
+        is_ok    = (err_code == 0) or (msg == 'IDG-00000000')
+
         if not is_ok:
-            # Decode lỗi nghiệp vụ từ VNPT
-            vnpt_err = ocr.get('error') or ocr.get('errorMessage') or msg or 'OCR thất bại'
-            return resp(422, {'success': False,
-                              'errorCode': err_code,
-                              'errorMsg': vnpt_err})
+            vnpt_err = msg or 'OCR thất bại'
+            for mf in (ocr.get('messageFields') or []):
+                if mf.get('fieldName') == 'img_front':
+                    code = mf.get('message', '')
+                    if code == 'IDG-00000001':
+                        vnpt_err = 'Không đọc được CCCD — ảnh không rõ hoặc không phải CCCD/CMND hợp lệ'
+                    else:
+                        vnpt_err = f'VNPT: {code}'
+            return resp(422, {'success': False, 'errorCode': err_code, 'errorMsg': vnpt_err})
 
         ocr_obj = ocr.get('object') or {}
-        print(f'OCR object keys: {list(ocr_obj.keys())[:10]}')
+        print(f'OCR ok: id={ocr_obj.get("id","?")} name={ocr_obj.get("name","?")}')
 
-        # Map field names sang format frontend expect
         mapped = {
-            'id':          ocr_obj.get('id') or ocr_obj.get('citizen_id', ''),
-            'name':        ocr_obj.get('name', ''),
-            'dob':         ocr_obj.get('birth_day', ''),
-            'sex':         ocr_obj.get('gender', ''),
-            'nationality': ocr_obj.get('nationality', ''),
-            'home':        ocr_obj.get('origin_location', ''),
-            'address':     ocr_obj.get('recent_location', ''),
-            'issue_date':  ocr_obj.get('issue_date', ''),
-            'issue_place': ocr_obj.get('issue_place', ''),
-            'doe':         ocr_obj.get('valid_date', ''),
-            'type':        ocr_obj.get('card_type', ''),
-            'confidence':  ocr_obj.get('name_prob', 0),
+            'id':              ocr_obj.get('id') or ocr_obj.get('citizen_id', ''),
+            'name':            ocr_obj.get('name', ''),
+            'dob':             ocr_obj.get('birth_day', ''),
+            'sex':             ocr_obj.get('gender', ''),
+            'nationality':     ocr_obj.get('nationality', ''),
+            'home':            ocr_obj.get('origin_location', ''),
+            'address':         ocr_obj.get('recent_location', ''),
+            'issue_date':      ocr_obj.get('issue_date', ''),
+            'issue_place':     ocr_obj.get('issue_place', ''),
+            'doe':             ocr_obj.get('valid_date', ''),
+            'type':            ocr_obj.get('card_type', ''),
+            'confidence':      ocr_obj.get('name_prob', 0),
             'id_fake_warning': ocr_obj.get('id_fake_warning', 'no'),
         }
 
         return resp(200, {
-            'success':   True,
-            'errorCode': 0,
-            'errorMsg':  'Successful!',
-            'object':    mapped,
-            'raw':       ocr_obj,
+            'success':     True,
+            'errorCode':   0,
+            'errorMsg':    'Successful!',
+            'object':      mapped,
+            'front_hash':  front_hash,
+            'front_token': front_token,
         })
 
     except urllib.error.HTTPError as e:
@@ -267,7 +355,15 @@ def handle_ocr(event, user_id):
         return resp(500, {'success': False, 'errorMsg': str(e)})
 
 
+
+
 def handle_verify_face(event, user_id):
+    """
+    POST /ekyc/verify-face
+    Body: { faceImage: base64, front_hash: str, front_token: str }
+    front_hash + front_token lấy từ response của /ekyc/ocr — KHÔNG upload lại ảnh CCCD.
+    Nếu không có front_hash thì chỉ check liveness (không face compare).
+    """
     if not user_id:
         return resp(401, {'success': False, 'errorMsg': 'Cần đăng nhập'})
 
@@ -281,8 +377,10 @@ def handle_verify_face(event, user_id):
     except Exception:
         return resp(400, {'success': False, 'errorMsg': 'Invalid JSON'})
 
-    face     = strip_prefix(body.get('faceImage', ''))
-    id_front = strip_prefix(body.get('idFrontImage', '')) if body.get('idFrontImage') else None
+    face        = strip_prefix(body.get('faceImage', ''))
+    front_hash  = body.get('front_hash') or body.get('idFrontHash')   # hash từ bước OCR
+    front_token = body.get('front_token') or body.get('idFrontToken') or ''
+
     if not face:
         return resp(400, {'success': False, 'errorMsg': 'faceImage là bắt buộc'})
 
@@ -291,19 +389,13 @@ def handle_verify_face(event, user_id):
         bearer, tid, tkey = get_auth(creds)
         hdrs              = vnpt_headers(bearer, tid, tkey)
 
-        # Upload ảnh selfie
+        # Upload selfie — nén < 300KB
         print('Uploading selfie...')
-        face_hash, face_token = vnpt_upload(face, bearer, tid, tkey)
-        print(f'Face hash: {face_hash}')
+        face_small = resize_b64(face, max_bytes=250_000, max_dim=1000)
+        face_hash, face_token = vnpt_upload(face_small, bearer, tid, tkey)
+        print(f'Face hash={face_hash}')
 
-        # Upload CCCD nếu có
-        id_hash, id_token = None, ''
-        if id_front:
-            print('Uploading ID front...')
-            id_hash, id_token = vnpt_upload(id_front, bearer, tid, tkey)
-            print(f'ID hash: {id_hash}')
-
-        # Liveness
+        # Liveness check
         liveness, liveness_score = False, 0.0
         try:
             lv = req_lib.post(VNPT_LIVENESS_URL, headers=hdrs,
@@ -312,30 +404,31 @@ def handle_verify_face(event, user_id):
                               timeout=20)
             print(f'Liveness: {lv.status_code} {lv.text[:200]}')
             if lv.status_code == 200:
-                lv_data = lv.json()
-                obj = lv_data.get('object') or {}
+                obj            = (lv.json().get('object') or {})
                 liveness       = bool(obj.get('liveness', obj.get('is_live', False)))
                 liveness_score = float(obj.get('liveness_score', obj.get('score', 0)))
         except Exception as e:
             print(f'Liveness warning: {e}')
 
-        # Face compare
+        # Face compare — dùng front_hash từ bước OCR, không upload lại
         similarity, matching = 0.0, False
-        if id_hash:
+        if front_hash:
             try:
                 fm = req_lib.post(VNPT_FACE_MATCH_URL, headers=hdrs,
-                                  json={'img_face': face_hash, 'img_front': id_hash,
-                                        'client_session': CLIENT_SESSION, 'token': face_token},
+                                  json={'img_face':       face_hash,
+                                        'img_front':      front_hash,   # hash đã có từ OCR
+                                        'client_session': CLIENT_SESSION,
+                                        'token':          front_token or face_token},
                                   timeout=20)
                 print(f'Face compare: {fm.status_code} {fm.text[:200]}')
                 if fm.status_code == 200:
-                    fm_data    = fm.json()
-                    obj        = fm_data.get('object') or {}
+                    obj        = (fm.json().get('object') or {})
                     similarity = float(obj.get('similarity', obj.get('prob', obj.get('score', 0))))
                     matching   = similarity >= SIMILARITY_THRESHOLD and liveness
             except Exception as e:
                 print(f'Face compare warning: {e}')
         else:
+            # Không có ảnh CCCD → chỉ dựa vào liveness
             matching = liveness
 
         kyc_status = 'VERIFIED' if matching else 'FAILED'
@@ -346,13 +439,13 @@ def handle_verify_face(event, user_id):
                 table.update_item(Key={'userId': user_id},
                     UpdateExpression='SET kycStatus=:s, kycCompleted=:d, kycVerifiedAt=:t, updatedAt=:t',
                     ExpressionAttributeValues={':s': 'VERIFIED', ':d': True, ':t': now_iso})
-                print(f'DynamoDB: {user_id} -> VERIFIED')
+                print(f'DynamoDB updated: {user_id} -> VERIFIED')
             except Exception as e:
                 print(f'DynamoDB error: {e}')
 
         return resp(200, {
-            'success':    True,
-            'kycStatus':  kyc_status,
+            'success':   True,
+            'kycStatus': kyc_status,
             'object': {
                 'matching':       matching,
                 'similarity':     round(similarity, 2),

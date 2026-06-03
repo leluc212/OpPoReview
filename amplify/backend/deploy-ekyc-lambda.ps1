@@ -12,7 +12,7 @@ $API_ID        = "sd7ds72m8g"       # API Gateway HTTP API — dùng chung với
 $ZIP_FILE      = "ekyc-handler.zip"
 
 Write-Host "📦 Zipping Lambda..."
-Compress-Archive -Path ekyc-handler.py -DestinationPath $ZIP_FILE -Force
+Compress-Archive -Path ekyc_handler.py -DestinationPath $ZIP_FILE -Force
 
 # ── Deploy Lambda ──────────────────────────────────────────────────────────────
 $exists = aws lambda get-function --function-name $FUNCTION_NAME --region $REGION 2>$null
@@ -43,7 +43,7 @@ if ($LASTEXITCODE -eq 0) {
         --function-name $FUNCTION_NAME `
         --runtime python3.11 `
         --role $ROLE_ARN `
-        --handler ekyc-handler.lambda_handler `
+        --handler ekyc_handler.lambda_handler `
         --zip-file "fileb://$ZIP_FILE" `
         --region $REGION `
         --timeout 30 `
