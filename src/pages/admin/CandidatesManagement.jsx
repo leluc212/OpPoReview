@@ -13,11 +13,15 @@ import {
   TrendingUp,
   Briefcase,
   Zap,
-  RefreshCw
+  RefreshCw,
+  CheckCircle,
+  XCircle,
+  Clock
 } from 'lucide-react';
 import jobPostService from '../../services/jobPostService';
 import quickJobService from '../../services/quickJobService';
 import candidateProfileService from '../../services/candidateProfileService';
+import notificationService from '../../services/notificationService';
 
 const API_URL = import.meta.env.VITE_CANDIDATE_API_URL;
 
@@ -482,6 +486,104 @@ const PageEllipsis = styled.span`
   padding: 0 4px;
 `;
 
+const TabsContainer = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid ${props => props.theme.colors.border};
+`;
+
+const Tab = styled.button`
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  color: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.textLight};
+  background: ${props => props.$active ? props.theme.colors.bgLight : 'transparent'};
+  border: none;
+  border-bottom: 3px solid ${props => props.$active ? props.theme.colors.primary : 'transparent'};
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: -2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    color: ${props => props.theme.colors.primary};
+    background: ${props => props.theme.colors.bgLight};
+  }
+`;
+
+const TabBadge = styled.span`
+  background: #ef4444;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 6px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ApproveButton = styled.button`
+  padding: 6px 16px;
+  border: none;
+  border-radius: ${props => props.theme.borderRadius.md};
+  background: #10b981;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  
+  &:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const RejectButton = styled(ApproveButton)`
+  background: #ef4444;
+  &:hover {
+    background: #dc2626;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  }
+`;
+
+const StatusBadge = styled.span`
+  padding: 4px 12px;
+  border-radius: ${props => props.theme.borderRadius.full};
+  font-size: 12px;
+  font-weight: 600;
+  background: ${props => {
+    if (props.$status === 'approved') return '#dcfce7';
+    if (props.$status === 'rejected') return '#fee2e2';
+    if (props.$status === 'pending') return '#fef3c7';
+    return '#f3f4f6';
+  }};
+  color: ${props => {
+    if (props.$status === 'approved') return '#15803d';
+    if (props.$status === 'rejected') return '#dc2626';
+    if (props.$status === 'pending') return '#ca8a04';
+    return '#6b7280';
+  }};
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+`;
+
 const CandidatesManagement = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
@@ -504,6 +606,136 @@ const CandidatesManagement = () => {
   });
   const [apiChartData, setApiChartData] = useState([]);
   const [apiJobChartData, setApiJobChartData] = useState([]);
+
+  const [activeTab, setActiveTab] = useState('candidates'); // 'candidates' or 'withdrawals'
+  const [withdrawRequests, setWithdrawRequests] = useState([]);
+
+  const loadWithdrawRequests = () => {
+    const dbRequests = [];
+    
+    // 1. Gather from candidates list (database)
+    if (Array.isArray(candidates)) {
+      candidates.forEach(candidate => {
+        if (Array.isArray(candidate.withdrawals)) {
+          candidate.withdrawals.forEach(w => {
+            dbRequests.push({
+              id: w.id || `withdraw-${w.date}`,
+              employerId: candidate.id,
+              companyName: candidate.name,
+              amount: Math.abs(Number(w.amount || 0)),
+              bankName: w.bankName || '',
+              accountNumber: w.accountNumber || '',
+              accountName: w.accountName || '',
+              status: w.status || 'pending',
+              createdAt: w.date || new Date().toISOString(),
+              isCandidate: true
+            });
+          });
+        }
+      });
+    }
+
+    // 2. Gather from localStorage as fallback
+    try {
+      const stored = localStorage.getItem('admin_withdraw_requests');
+      if (stored) {
+        const allRequests = JSON.parse(stored);
+        const localCandidateReqs = allRequests.filter(req => req.isCandidate === true);
+        localCandidateReqs.forEach(localReq => {
+          if (!dbRequests.some(dbReq => dbReq.id === localReq.id)) {
+            dbRequests.push(localReq);
+          }
+        });
+      }
+    } catch (e) {
+      console.error('Error loading candidate withdraw requests from localStorage:', e);
+    }
+
+    dbRequests.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    setWithdrawRequests(dbRequests);
+  };
+
+  const handleApproveWithdrawal = async (requestId) => {
+    try {
+      const request = withdrawRequests.find(req => req.id === requestId);
+      if (!request) return;
+
+      const candidateId = request.employerId;
+
+      const profile = await candidateProfileService.getProfile(candidateId);
+      if (profile) {
+        const existingWithdrawals = profile.withdrawals || [];
+        const updatedWithdrawals = existingWithdrawals.map(w => 
+          w.id === requestId ? { ...w, status: 'approved' } : w
+        );
+        await candidateProfileService.adminUpdateCandidateProfile(candidateId, {
+          withdrawals: updatedWithdrawals
+        });
+      }
+
+      const stored = JSON.parse(localStorage.getItem('admin_withdraw_requests') || '[]');
+      const updated = stored.map(req => req.id === requestId ? { ...req, status: 'approved' } : req);
+      localStorage.setItem('admin_withdraw_requests', JSON.stringify(updated));
+
+      setWithdrawRequests(prev => 
+        prev.map(req => 
+          req.id === requestId ? { ...req, status: 'approved' } : req
+        )
+      );
+
+      try {
+        await notificationService.createCandidateWithdrawalStatusNotification(request, 'approved');
+      } catch (notifyErr) {
+        console.error('Error sending approval notification:', notifyErr);
+      }
+
+      alert(language === 'vi' ? 'Duyệt yêu cầu rút tiền thành công!' : 'Withdrawal request approved successfully!');
+    } catch (err) {
+      console.error('Error approving withdrawal:', err);
+      alert(language === 'vi' ? 'Không thể duyệt yêu cầu rút tiền' : 'Failed to approve withdrawal');
+    }
+  };
+
+  const handleRejectWithdrawal = async (requestId) => {
+    try {
+      const request = withdrawRequests.find(req => req.id === requestId);
+      if (!request) return;
+
+      const candidateId = request.employerId;
+
+      const profile = await candidateProfileService.getProfile(candidateId);
+      if (profile) {
+        const existingWithdrawals = profile.withdrawals || [];
+        const updatedWithdrawals = existingWithdrawals.map(w => 
+          w.id === requestId ? { ...w, status: 'rejected' } : w
+        );
+        await candidateProfileService.adminUpdateCandidateProfile(candidateId, {
+          withdrawals: updatedWithdrawals
+        });
+      }
+
+      const stored = JSON.parse(localStorage.getItem('admin_withdraw_requests') || '[]');
+      const updated = stored.map(req => req.id === requestId ? { ...req, status: 'rejected' } : req);
+      localStorage.setItem('admin_withdraw_requests', JSON.stringify(updated));
+
+      setWithdrawRequests(prev => 
+        prev.map(req => 
+          req.id === requestId ? { ...req, status: 'rejected' } : req
+        )
+      );
+
+      try {
+        await notificationService.createCandidateWithdrawalStatusNotification(request, 'rejected');
+      } catch (notifyErr) {
+        console.error('Error sending rejection notification:', notifyErr);
+      }
+
+      alert(language === 'vi' ? 'Đã từ chối yêu cầu rút tiền!' : 'Withdrawal request rejected!');
+    } catch (err) {
+      console.error('Error rejecting withdrawal:', err);
+      alert(language === 'vi' ? 'Không thể từ chối yêu cầu rút tiền' : 'Failed to reject withdrawal');
+    }
+  };
 
   const loadData = async () => {
     setLoading(true);
@@ -533,9 +765,50 @@ const CandidatesManagement = () => {
             joined: item.createdAt ? new Date(item.createdAt).toISOString().split('T')[0] : 'Incomplete setup',
             location: item.location || 'Unknown',
             title: item.title || 'Candidate',
-            createdAt: item.createdAt // Keep raw for processing
+            createdAt: item.createdAt, // Keep raw for processing
+            withdrawals: item.withdrawals || [] // Keep withdrawals array!
           }));
         setCandidates(transformedData);
+
+        // Compute withdrawals from candidates directly
+        const dbRequests = [];
+        transformedData.forEach(candidate => {
+          if (Array.isArray(candidate.withdrawals)) {
+            candidate.withdrawals.forEach(w => {
+              dbRequests.push({
+                id: w.id || `withdraw-${w.date}`,
+                employerId: candidate.id,
+                companyName: candidate.name,
+                amount: Math.abs(Number(w.amount || 0)),
+                bankName: w.bankName || '',
+                accountNumber: w.accountNumber || '',
+                accountName: w.accountName || '',
+                status: w.status || 'pending',
+                createdAt: w.date || new Date().toISOString(),
+                isCandidate: true
+              });
+            });
+          }
+        });
+
+        // Merge from localStorage as fallback
+        try {
+          const stored = localStorage.getItem('admin_withdraw_requests');
+          if (stored) {
+            const allRequests = JSON.parse(stored);
+            const localCandidateReqs = allRequests.filter(req => req.isCandidate === true);
+            localCandidateReqs.forEach(localReq => {
+              if (!dbRequests.some(dbReq => dbReq.id === localReq.id)) {
+                dbRequests.push(localReq);
+              }
+            });
+          }
+        } catch (e) {
+          console.error('Error loading candidate withdraw requests from localStorage:', e);
+        }
+
+        dbRequests.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setWithdrawRequests(dbRequests);
       }
 
       setJobs([...standardJobs, ...quickJobs]);
@@ -551,6 +824,16 @@ const CandidatesManagement = () => {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'withdrawals') {
+      loadWithdrawRequests();
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
 
   const getApprovalStatusText = (status) => {
     if (status === 'approved') return language === 'vi' ? 'Đã duyệt' : 'Approved';
@@ -574,11 +857,22 @@ const CandidatesManagement = () => {
     return matchesSearch;
   });
 
+  const filteredWithdrawRequests = withdrawRequests.filter(req => {
+    const matchesSearch = searchTerm === '' || 
+      req.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      req.bankName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      req.accountNumber.includes(searchTerm);
+    return matchesSearch;
+  });
+
   // Pagination calculations
-  const totalPages = Math.ceil(filteredCandidates.length / itemsPerPage);
+  const totalPages = activeTab === 'withdrawals'
+    ? Math.ceil(filteredWithdrawRequests.length / itemsPerPage)
+    : Math.ceil(filteredCandidates.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentCandidates = filteredCandidates.slice(startIndex, endIndex);
+  const currentWithdrawRequests = filteredWithdrawRequests.slice(startIndex, endIndex);
 
   // Reset to page 1 when filter changes
   const handleSearchChange = (e) => {
@@ -749,239 +1043,261 @@ const CandidatesManagement = () => {
           }
         </StatsGrid>
 
-        <ChartsSection>
-          <ChartCard>
-            <ChartHeader>
-              <h3>
-                <TrendingUp />
-                {language === 'vi' ? 'Tăng Trưởng Ứng Viên' : 'Candidate Growth'}
-              </h3>
-              <TimeFilterTabs>
-                <TimeTab
-                  $active={timeFilter === 'month'}
-                  onClick={() => setTimeFilter('month')}
-                >
-                  {language === 'vi' ? 'Tháng' : 'Month'}
-                </TimeTab>
-                <TimeTab
-                  $active={timeFilter === 'quarter'}
-                  onClick={() => setTimeFilter('quarter')}
-                >
-                  {language === 'vi' ? 'Quý' : 'Quarter'}
-                </TimeTab>
-                <TimeTab
-                  $active={timeFilter === 'year'}
-                  onClick={() => setTimeFilter('year')}
-                >
-                  {language === 'vi' ? 'Năm' : 'Year'}
-                </TimeTab>
-              </TimeFilterTabs>
-            </ChartHeader>
-            <ChartContainer>
-              <ChartSVG viewBox="0 0 700 350">
-                {[0, 1, 2, 3, 4, 5].map((i) => (
-                  <line
-                    key={i}
-                    x1="50"
-                    y1={50 + i * 50}
-                    x2="650"
-                    y2={50 + i * 50}
-                    stroke="#e5e7eb"
-                    strokeWidth="1"
-                  />
-                ))}
+        <TabsContainer>
+          <Tab 
+            $active={activeTab === 'candidates'}
+            onClick={() => setActiveTab('candidates')}
+          >
+            <Users size={18} style={{ marginRight: '8px' }} />
+            {language === 'vi' ? 'Danh sách ứng viên' : 'Candidates List'}
+          </Tab>
+          <Tab 
+            $active={activeTab === 'withdrawals'}
+            onClick={() => setActiveTab('withdrawals')}
+          >
+            <TrendingUp size={18} style={{ marginRight: '8px' }} />
+            {language === 'vi' ? 'Yêu cầu rút tiền' : 'Withdrawal Requests'}
+            {withdrawRequests.filter(req => req.status === 'pending').length > 0 && (
+              <TabBadge>{withdrawRequests.filter(req => req.status === 'pending').length}</TabBadge>
+            )}
+          </Tab>
+        </TabsContainer>
 
-                {/* Dynamic polyline based on real data */}
-                <polyline
-                  points={currentChartData.map((item, i) => {
+        {activeTab === 'candidates' && (
+          <ChartsSection>
+            <ChartCard>
+              <ChartHeader>
+                <h3>
+                  <TrendingUp />
+                  {language === 'vi' ? 'Tăng Trưởng Ứng Viên' : 'Candidate Growth'}
+                </h3>
+                <TimeFilterTabs>
+                  <TimeTab
+                    $active={timeFilter === 'month'}
+                    onClick={() => setTimeFilter('month')}
+                  >
+                    {language === 'vi' ? 'Tháng' : 'Month'}
+                  </TimeTab>
+                  <TimeTab
+                    $active={timeFilter === 'quarter'}
+                    onClick={() => setTimeFilter('quarter')}
+                  >
+                    {language === 'vi' ? 'Quý' : 'Quarter'}
+                  </TimeTab>
+                  <TimeTab
+                    $active={timeFilter === 'year'}
+                    onClick={() => setTimeFilter('year')}
+                  >
+                    {language === 'vi' ? 'Năm' : 'Year'}
+                  </TimeTab>
+                </TimeFilterTabs>
+              </ChartHeader>
+              <ChartContainer>
+                <ChartSVG viewBox="0 0 700 350">
+                  {[0, 1, 2, 3, 4, 5].map((i) => (
+                    <line
+                      key={i}
+                      x1="50"
+                      y1={50 + i * 50}
+                      x2="650"
+                      y2={50 + i * 50}
+                      stroke="#e5e7eb"
+                      strokeWidth="1"
+                    />
+                  ))}
+
+                  {/* Dynamic polyline based on real data */}
+                  <polyline
+                    points={currentChartData.map((item, i) => {
+                      const x = 100 + (i * (500 / Math.max(currentChartData.length - 1, 1)));
+                      const maxCandidates = Math.max(...currentChartData.map(d => d.count), 1);
+                      const y = 280 - (item.count / maxCandidates) * 200;
+                      return `${x},${y}`;
+                    }).join(' ')}
+                    fill="none"
+                    stroke="#667eea"
+                    strokeWidth="4"
+                  />
+
+                  {/* Dynamic points based on real data */}
+                  {currentChartData.map((item, i) => {
                     const x = 100 + (i * (500 / Math.max(currentChartData.length - 1, 1)));
                     const maxCandidates = Math.max(...currentChartData.map(d => d.count), 1);
                     const y = 280 - (item.count / maxCandidates) * 200;
-                    return `${x},${y}`;
-                  }).join(' ')}
-                  fill="none"
-                  stroke="#667eea"
-                  strokeWidth="4"
-                />
 
-                {/* Dynamic points based on real data */}
-                {currentChartData.map((item, i) => {
-                  const x = 100 + (i * (500 / Math.max(currentChartData.length - 1, 1)));
-                  const maxCandidates = Math.max(...currentChartData.map(d => d.count), 1);
-                  const y = 280 - (item.count / maxCandidates) * 200;
+                    return (
+                      <g key={i}>
+                        <circle cx={x} cy={y} r="6" fill="#667eea" stroke="white" strokeWidth="2" />
+                        <text
+                          x={x}
+                          y="320"
+                          textAnchor="middle"
+                          fontSize="14"
+                          fill="#6b7280"
+                          fontWeight="600"
+                        >
+                          {item.label}
+                        </text>
+                        <text
+                          x={x}
+                          y={y - 15}
+                          textAnchor="middle"
+                          fontSize="12"
+                          fill="#667eea"
+                          fontWeight="700"
+                        >
+                          {item.count}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </ChartSVG>
+              </ChartContainer>
+              <ChartLegend>
+                <LegendItem>
+                  <LegendDot $color="#667eea" />
+                  {language === 'vi' ? 'Số lượng ứng viên mới' : 'New candidates count'}
+                </LegendItem>
+              </ChartLegend>
+            </ChartCard>
 
-                  return (
-                    <g key={i}>
-                      <circle cx={x} cy={y} r="6" fill="#667eea" stroke="white" strokeWidth="2" />
-                      <text
-                        x={x}
-                        y="320"
-                        textAnchor="middle"
-                        fontSize="14"
-                        fill="#6b7280"
-                        fontWeight="600"
-                      >
-                        {item.label}
-                      </text>
-                      <text
-                        x={x}
-                        y={y - 15}
-                        textAnchor="middle"
-                        fontSize="12"
-                        fill="#667eea"
-                        fontWeight="700"
-                      >
-                        {item.count}
-                      </text>
-                    </g>
-                  );
-                })}
-              </ChartSVG>
-            </ChartContainer>
-            <ChartLegend>
-              <LegendItem>
-                <LegendDot $color="#667eea" />
-                {language === 'vi' ? 'Số lượng ứng viên mới' : 'New candidates count'}
-              </LegendItem>
-            </ChartLegend>
-          </ChartCard>
+            <ChartCard>
+              <ChartHeader>
+                <h3>
+                  <Briefcase />
+                  {language === 'vi' ? 'Tăng Trưởng Công Việc' : 'Job Growth'}
+                </h3>
+                <TimeFilterTabs>
+                  <TimeTab
+                    $active={timeFilter === 'month'}
+                    onClick={() => setTimeFilter('month')}
+                  >
+                    {language === 'vi' ? 'Tháng' : 'Month'}
+                  </TimeTab>
+                  <TimeTab
+                    $active={timeFilter === 'quarter'}
+                    onClick={() => setTimeFilter('quarter')}
+                  >
+                    {language === 'vi' ? 'Quý' : 'Quarter'}
+                  </TimeTab>
+                  <TimeTab
+                    $active={timeFilter === 'year'}
+                    onClick={() => setTimeFilter('year')}
+                  >
+                    {language === 'vi' ? 'Năm' : 'Year'}
+                  </TimeTab>
+                </TimeFilterTabs>
+              </ChartHeader>
+              <ChartContainer>
+                <ChartSVG viewBox="0 0 700 350">
+                  {[0, 1, 2, 3, 4, 5].map((i) => (
+                    <line
+                      key={i}
+                      x1="50"
+                      y1={50 + i * 50}
+                      x2="650"
+                      y2={50 + i * 50}
+                      stroke="#e5e7eb"
+                      strokeWidth="1"
+                    />
+                  ))}
 
-          <ChartCard>
-            <ChartHeader>
-              <h3>
-                <Briefcase />
-                {language === 'vi' ? 'Tăng Trưởng Công Việc' : 'Job Growth'}
-              </h3>
-              <TimeFilterTabs>
-                <TimeTab
-                  $active={timeFilter === 'month'}
-                  onClick={() => setTimeFilter('month')}
-                >
-                  {language === 'vi' ? 'Tháng' : 'Month'}
-                </TimeTab>
-                <TimeTab
-                  $active={timeFilter === 'quarter'}
-                  onClick={() => setTimeFilter('quarter')}
-                >
-                  {language === 'vi' ? 'Quý' : 'Quarter'}
-                </TimeTab>
-                <TimeTab
-                  $active={timeFilter === 'year'}
-                  onClick={() => setTimeFilter('year')}
-                >
-                  {language === 'vi' ? 'Năm' : 'Year'}
-                </TimeTab>
-              </TimeFilterTabs>
-            </ChartHeader>
-            <ChartContainer>
-              <ChartSVG viewBox="0 0 700 350">
-                {[0, 1, 2, 3, 4, 5].map((i) => (
-                  <line
-                    key={i}
-                    x1="50"
-                    y1={50 + i * 50}
-                    x2="650"
-                    y2={50 + i * 50}
-                    stroke="#e5e7eb"
-                    strokeWidth="1"
+                  {/* Job thường - Dynamic polyline */}
+                  <polyline
+                    points={currentChartData.map((item, i) => {
+                      const x = 100 + (i * (500 / Math.max(currentChartData.length - 1, 1)));
+                      const maxJobs = Math.max(...currentChartData.map(d => Math.max(d.regularJobs, d.urgentJobs)), 1);
+                      const y = 280 - (item.regularJobs / maxJobs) * 200;
+                      return `${x},${y}`;
+                    }).join(' ')}
+                    fill="none"
+                    stroke="#10b981"
+                    strokeWidth="3"
                   />
-                ))}
 
-                {/* Job thường - Dynamic polyline */}
-                <polyline
-                  points={currentChartData.map((item, i) => {
+                  {/* Công việc Tuyển gấp - Dynamic polyline */}
+                  <polyline
+                    points={currentChartData.map((item, i) => {
+                      const x = 100 + (i * (500 / Math.max(currentChartData.length - 1, 1)));
+                      const maxJobs = Math.max(...currentChartData.map(d => Math.max(d.regularJobs, d.urgentJobs)), 1);
+                      const y = 280 - (item.urgentJobs / maxJobs) * 200;
+                      return `${x},${y}`;
+                    }).join(' ')}
+                    fill="none"
+                    stroke="#f59e0b"
+                    strokeWidth="3"
+                  />
+
+                  {/* Dynamic points for regular jobs */}
+                  {currentChartData.map((item, i) => {
                     const x = 100 + (i * (500 / Math.max(currentChartData.length - 1, 1)));
                     const maxJobs = Math.max(...currentChartData.map(d => Math.max(d.regularJobs, d.urgentJobs)), 1);
                     const y = 280 - (item.regularJobs / maxJobs) * 200;
-                    return `${x},${y}`;
-                  }).join(' ')}
-                  fill="none"
-                  stroke="#10b981"
-                  strokeWidth="3"
-                />
 
-                {/* Công việc Tuyển gấp - Dynamic polyline */}
-                <polyline
-                  points={currentChartData.map((item, i) => {
+                    return (
+                      <g key={`regular-${i}`}>
+                        <circle cx={x} cy={y} r="5" fill="#10b981" stroke="white" strokeWidth="2" />
+                        <text
+                          x={x}
+                          y="320"
+                          textAnchor="middle"
+                          fontSize="14"
+                          fill="#6b7280"
+                          fontWeight="600"
+                        >
+                          {item.label}
+                        </text>
+                        <text
+                          x={x}
+                          y={y - 15}
+                          textAnchor="middle"
+                          fontSize="11"
+                          fill="#10b981"
+                          fontWeight="700"
+                        >
+                          {item.regularJobs}
+                        </text>
+                      </g>
+                    );
+                  })}
+
+                  {/* Dynamic points for urgent jobs */}
+                  {currentChartData.map((item, i) => {
                     const x = 100 + (i * (500 / Math.max(currentChartData.length - 1, 1)));
                     const maxJobs = Math.max(...currentChartData.map(d => Math.max(d.regularJobs, d.urgentJobs)), 1);
                     const y = 280 - (item.urgentJobs / maxJobs) * 200;
-                    return `${x},${y}`;
-                  }).join(' ')}
-                  fill="none"
-                  stroke="#f59e0b"
-                  strokeWidth="3"
-                />
 
-                {/* Dynamic points for regular jobs */}
-                {currentChartData.map((item, i) => {
-                  const x = 100 + (i * (500 / Math.max(currentChartData.length - 1, 1)));
-                  const maxJobs = Math.max(...currentChartData.map(d => Math.max(d.regularJobs, d.urgentJobs)), 1);
-                  const y = 280 - (item.regularJobs / maxJobs) * 200;
-
-                  return (
-                    <g key={`regular-${i}`}>
-                      <circle cx={x} cy={y} r="5" fill="#10b981" stroke="white" strokeWidth="2" />
-                      <text
-                        x={x}
-                        y="320"
-                        textAnchor="middle"
-                        fontSize="14"
-                        fill="#6b7280"
-                        fontWeight="600"
-                      >
-                        {item.label}
-                      </text>
-                      <text
-                        x={x}
-                        y={y - 15}
-                        textAnchor="middle"
-                        fontSize="11"
-                        fill="#10b981"
-                        fontWeight="700"
-                      >
-                        {item.regularJobs}
-                      </text>
-                    </g>
-                  );
-                })}
-
-                {/* Dynamic points for urgent jobs */}
-                {currentChartData.map((item, i) => {
-                  const x = 100 + (i * (500 / Math.max(currentChartData.length - 1, 1)));
-                  const maxJobs = Math.max(...currentChartData.map(d => Math.max(d.regularJobs, d.urgentJobs)), 1);
-                  const y = 280 - (item.urgentJobs / maxJobs) * 200;
-
-                  return (
-                    <g key={`urgent-${i}`}>
-                      <circle cx={x} cy={y} r="5" fill="#f59e0b" stroke="white" strokeWidth="2" />
-                      <text
-                        x={x}
-                        y={y - 15}
-                        textAnchor="middle"
-                        fontSize="11"
-                        fill="#f59e0b"
-                        fontWeight="700"
-                      >
-                        {item.urgentJobs}
-                      </text>
-                    </g>
-                  );
-                })}
-              </ChartSVG>
-            </ChartContainer>
-            <ChartLegend>
-              <LegendItem>
-                <LegendDot $color="#10b981" />
-                {language === 'vi' ? 'Job thường' : 'Regular Jobs'}
-              </LegendItem>
-              <LegendItem>
-                <LegendDot $color="#f59e0b" />
-                {language === 'vi' ? 'Công việc Tuyển gấp' : 'Urgent Jobs'}
-              </LegendItem>
-            </ChartLegend>
-          </ChartCard>
-        </ChartsSection>
+                    return (
+                      <g key={`urgent-${i}`}>
+                        <circle cx={x} cy={y} r="5" fill="#f59e0b" stroke="white" strokeWidth="2" />
+                        <text
+                          x={x}
+                          y={y - 15}
+                          textAnchor="middle"
+                          fontSize="11"
+                          fill="#f59e0b"
+                          fontWeight="700"
+                        >
+                          {item.urgentJobs}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </ChartSVG>
+              </ChartContainer>
+              <ChartLegend>
+                <LegendItem>
+                  <LegendDot $color="#10b981" />
+                  {language === 'vi' ? 'Job thường' : 'Regular Jobs'}
+                </LegendItem>
+                <LegendItem>
+                  <LegendDot $color="#f59e0b" />
+                  {language === 'vi' ? 'Công việc Tuyển gấp' : 'Urgent Jobs'}
+                </LegendItem>
+              </ChartLegend>
+            </ChartCard>
+          </ChartsSection>
+        )}
 
         <FilterSection>
           <SearchBox>
@@ -1003,58 +1319,136 @@ const CandidatesManagement = () => {
         </FilterSection>
 
         <TableWrapper>
-          <Table>
-            <thead>
-              <tr>
-                <th style={{ width: '60px', textAlign: 'center' }}>{language === 'vi' ? 'STT' : 'No.'}</th>
-                <th>{language === 'vi' ? 'Tên ứng viên' : 'Candidate Name'}</th>
-                <th>{language === 'vi' ? 'Email' : 'Email'}</th>
-                <th>{language === 'vi' ? 'Số điện thoại' : 'Phone Number'}</th>
-                <th>{language === 'vi' ? 'Xác nhận 4 bước eKYC' : 'eKYC 4 Steps Verification'}</th>
-                <th>{language === 'vi' ? 'Ngày tham gia' : 'Join Date'}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentCandidates.map((candidate, index) => (
-                <tr
-                  key={candidate.id}
-                  onClick={() => navigate(`/admin/candidates/${candidate.id}`)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <td style={{ textAlign: 'center', fontWeight: 600, color: '#6b7280' }}>
-                    {startIndex + index + 1}
-                  </td>
-                  <td style={{ fontWeight: 600 }}>{candidate.name}</td>
-                  <td>{candidate.email}</td>
-                  <td style={{ color: '#64748b' }}>
-                    {candidate.phone}
-                  </td>
-                  <td>
-                    <VerificationBadge $verified={candidate.ekycVerified}>
-                      {candidate.ekycVerified ? <CheckSquare /> : <XSquare />}
-                      {candidate.ekycVerified
-                        ? (language === 'vi' ? 'Đã xác thực' : 'Verified')
-                        : (language === 'vi' ? 'Chưa xác thực' : 'Not Verified')
-                      }
-                    </VerificationBadge>
-                  </td>
-                  <td>
-                    <DateText>
-                      <Calendar size={14} />
-                      {candidate.joined}
-                    </DateText>
-                  </td>
+          {activeTab === 'candidates' ? (
+            <Table>
+              <thead>
+                <tr>
+                  <th style={{ width: '60px', textAlign: 'center' }}>{language === 'vi' ? 'STT' : 'No.'}</th>
+                  <th>{language === 'vi' ? 'Tên ứng viên' : 'Candidate Name'}</th>
+                  <th>{language === 'vi' ? 'Email' : 'Email'}</th>
+                  <th>{language === 'vi' ? 'Số điện thoại' : 'Phone Number'}</th>
+                  <th>{language === 'vi' ? 'Xác nhận 4 bước eKYC' : 'eKYC 4 Steps Verification'}</th>
+                  <th>{language === 'vi' ? 'Ngày tham gia' : 'Join Date'}</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              </thead>
+              <tbody>
+                {currentCandidates.map((candidate, index) => (
+                  <tr
+                    key={candidate.id}
+                    onClick={() => navigate(`/admin/candidates/${candidate.id}`)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <td style={{ textAlign: 'center', fontWeight: 600, color: '#6b7280' }}>
+                      {startIndex + index + 1}
+                    </td>
+                    <td style={{ fontWeight: 600 }}>{candidate.name}</td>
+                    <td>{candidate.email}</td>
+                    <td style={{ color: '#64748b' }}>
+                      {candidate.phone}
+                    </td>
+                    <td>
+                      <VerificationBadge $verified={candidate.ekycVerified}>
+                        {candidate.ekycVerified ? <CheckSquare /> : <XSquare />}
+                        {candidate.ekycVerified
+                          ? (language === 'vi' ? 'Đã xác thực' : 'Verified')
+                          : (language === 'vi' ? 'Chưa xác thực' : 'Not Verified')
+                        }
+                      </VerificationBadge>
+                    </td>
+                    <td>
+                      <DateText>
+                        <Calendar size={14} />
+                        {candidate.joined}
+                      </DateText>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          ) : (
+            <Table>
+              <thead>
+                <tr>
+                  <th>{language === 'vi' ? 'Ứng viên' : 'Candidate'}</th>
+                  <th>{language === 'vi' ? 'Số tiền rút' : 'Withdraw Amount'}</th>
+                  <th>{language === 'vi' ? 'Thông tin thụ hưởng' : 'Beneficiary Details'}</th>
+                  <th>{language === 'vi' ? 'Ngày yêu cầu' : 'Requested Date'}</th>
+                  <th>{language === 'vi' ? 'Trạng thái' : 'Status'}</th>
+                  <th>{language === 'vi' ? 'Thao tác' : 'Actions'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentWithdrawRequests.map((req, index) => (
+                  <tr key={req.id}>
+                    <td>
+                      <div style={{ fontWeight: 600 }}>{req.companyName}</div>
+                      <div style={{ fontSize: '12px', color: '#64748b' }}>ID: {req.employerId}</div>
+                    </td>
+                    <td>
+                      <span style={{ fontWeight: 800, color: '#b45309', fontSize: '15px' }}>
+                        -{req.amount.toLocaleString('vi-VN')} VND
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ fontSize: '13px', lineHeight: '1.5' }}>
+                        <div><strong>NH:</strong> {req.bankName}</div>
+                        <div><strong>STK:</strong> {req.accountNumber}</div>
+                        <div style={{ textTransform: 'uppercase', color: '#64748B', fontWeight: 600 }}>
+                          <strong>Tên:</strong> {req.accountName}
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Calendar size={12} />
+                        {new Date(req.createdAt).toLocaleDateString('vi-VN')}
+                      </div>
+                    </td>
+                    <td>
+                      <StatusBadge $status={req.status}>
+                        {req.status === 'approved' && <CheckSquare size={12} />}
+                        {req.status === 'pending' && <Clock size={12} />}
+                        {req.status === 'rejected' && <XCircle size={12} />}
+                        {getApprovalStatusText(req.status)}
+                      </StatusBadge>
+                    </td>
+                    <td>
+                      {req.status === 'pending' ? (
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <ApproveButton onClick={() => handleApproveWithdrawal(req.id)}>
+                            <CheckCircle size={16} />
+                            {language === 'vi' ? 'Duyệt' : 'Approve'}
+                          </ApproveButton>
+                          <RejectButton onClick={() => handleRejectWithdrawal(req.id)}>
+                            <XCircle size={16} />
+                            {language === 'vi' ? 'Từ chối' : 'Reject'}
+                          </RejectButton>
+                        </div>
+                      ) : (
+                        <span style={{ color: '#94a3b8', fontSize: '13px', fontStyle: 'italic' }}>
+                          {language === 'vi' ? 'Đã xử lý' : 'Processed'}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+                {currentWithdrawRequests.length === 0 && (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: 'center', padding: '32px', color: '#64748B' }}>
+                      {language === 'vi' ? 'Không tìm thấy yêu cầu rút tiền nào' : 'No withdrawal requests found'}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </Table>
+          )}
         </TableWrapper>
 
         <PaginationContainer>
           <PaginationInfo>
             {language === 'vi'
-              ? `Đang xem ${startIndex + 1}-${Math.min(endIndex, filteredCandidates.length)} trên ${filteredCandidates.length} kết quả`
-              : `Showing ${startIndex + 1}-${Math.min(endIndex, filteredCandidates.length)} of ${filteredCandidates.length} results`
+              ? `Đang xem ${startIndex + 1}-${Math.min(endIndex, activeTab === 'withdrawals' ? filteredWithdrawRequests.length : filteredCandidates.length)} trên ${activeTab === 'withdrawals' ? filteredWithdrawRequests.length : filteredCandidates.length} kết quả`
+              : `Showing ${startIndex + 1}-${Math.min(endIndex, activeTab === 'withdrawals' ? filteredWithdrawRequests.length : filteredCandidates.length)} of ${activeTab === 'withdrawals' ? filteredWithdrawRequests.length : filteredCandidates.length} results`
             }
           </PaginationInfo>
 
