@@ -1538,26 +1538,25 @@ const PostsManagement = () => {
                     )}
                   </p>
                 </InfoItem>
-                <InfoItem style={{ marginTop: '16px' }}>
-                  <label style={{ fontWeight: '700', fontSize: '15px', color: '#1e293b' }}>
-                    {language === 'vi' ? 'CHẾ ĐỘ PHÚC LỢI:' : 'BENEFITS:'}
-                  </label>
-                  <p style={{ 
-                    lineHeight: '1.8', 
-                    whiteSpace: 'pre-line',
-                    background: '#ffffff',
-                    padding: '16px',
-                    borderRadius: '8px',
-                    border: '1px solid #e5e7eb',
-                    fontSize: '14px',
-                    marginTop: '8px'
-                  }}>
-                    {selectedJob.benefits || (language === 'vi'
-                      ? `• Được đào tạo kỹ năng pha chế chuyên nghiệp\n• Thưởng hiệu suất làm việc hàng tháng\n• Nghỉ phép có lương theo quy định\n• Được hưởng BHXH sau thời gian thử việc\n• Môi trường làm việc trẻ trung, năng động\n• Cơ hội thăng tiến lên vị trí quản lý`
-                      : `• Professional barista skills training\n• Monthly performance bonus\n• Paid leave according to regulations\n• Social insurance after probation period\n• Young and dynamic work environment\n• Promotion opportunities to management positions`
-                    )}
-                  </p>
-                </InfoItem>
+                {selectedJob.benefits && (
+                  <InfoItem style={{ marginTop: '16px' }}>
+                    <label style={{ fontWeight: '700', fontSize: '15px', color: '#1e293b' }}>
+                      {language === 'vi' ? 'CHẾ ĐỘ PHÚC LỢI:' : 'BENEFITS:'}
+                    </label>
+                    <p style={{ 
+                      lineHeight: '1.8', 
+                      whiteSpace: 'pre-line',
+                      background: '#ffffff',
+                      padding: '16px',
+                      borderRadius: '8px',
+                      border: '1px solid #e5e7eb',
+                      fontSize: '14px',
+                      marginTop: '8px'
+                    }}>
+                      {selectedJob.benefits}
+                    </p>
+                  </InfoItem>
+                )}
               </DetailSection>
 
               <DetailSection>

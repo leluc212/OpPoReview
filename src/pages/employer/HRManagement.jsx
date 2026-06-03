@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -2811,29 +2811,58 @@ const HRManagement = () => {
     }
   };
 
-  // Create chat conversations from accepted staff (realApplications with status 'accepted')
+  // Create chat conversations from accepted & completed staff
   const chatConversations = useMemo(() => {
     if (!realApplications || !Array.isArray(realApplications)) {
       return [];
     }
 
     return realApplications
-      .filter(app => app.status === 'accepted')
-      .map(app => ({
-        id: app.applicationId, // Use applicationId as chat ID
-        name: app.candidateEmail || 'Ứng viên', // Use email as name for now
-        role: language === 'vi' ? 'Nhân viên' : 'Staff',
-        position: app.jobTitle || (language === 'vi' ? 'Vị trí' : 'Position'),
-        status: 'online', // Default to online
-        lastMessage: language === 'vi' ? 'Bắt đầu trò chuyện...' : 'Start conversation...',
-        time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-        unread: 0
-      }));
+      .filter(app => app.status === 'accepted' || app.status === 'completed')
+      .map(app => {
+        let unread = 0;
+        let lastMessageText = language === 'vi' ? 'Bắt đầu trò chuyện...' : 'Start conversation...';
+        let lastMessageTime = '';
+        
+        const savedMessages = localStorage.getItem(`chat_${app.applicationId}`);
+        if (savedMessages) {
+          try {
+            const msgs = JSON.parse(savedMessages);
+            const lastMsg = msgs[msgs.length - 1];
+            if (lastMsg) {
+              lastMessageText = lastMsg.text;
+              lastMessageTime = lastMsg.time;
+              
+              if (lastMsg.sender === 'them') { // sent by candidate
+                const lastReadId = localStorage.getItem(`chat_read_employer_${app.applicationId}`);
+                if (lastReadId !== String(lastMsg.id)) {
+                  unread = 1;
+                }
+              }
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
+
+        return {
+          id: app.applicationId, // Use applicationId as chat ID
+          name: app.candidateEmail || 'Ứng viên', // Use email as name for now
+          role: language === 'vi' ? 'Nhân viên' : 'Staff',
+          position: app.jobTitle || (language === 'vi' ? 'Vị trí' : 'Position'),
+          status: 'online', // Default to online
+          lastMessage: lastMessageText,
+          time: lastMessageTime || new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+          unread: unread,
+          isCompleted: app.status === 'completed'
+        };
+      });
   }, [realApplications, language]);
 
   const [activeChatId, setActiveChatId] = useState(null);
   const [currentMessages, setCurrentMessages] = useState([]);
   const [messageInput, setMessageInput] = useState('');
+  const chatMessagesEndRef = useRef(null);
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [deleteJobId, setDeleteJobId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -2841,6 +2870,39 @@ const HRManagement = () => {
   const [successToastMessage, setSuccessToastMessage] = useState('');
   const [showErrorNotification, setShowErrorNotification] = useState(false);
   const [errorNotificationMessage, setErrorNotificationMessage] = useState('');
+
+  // Poll applications periodically when in 'hr' section to get new chat messages
+  useEffect(() => {
+    if (activeSection !== 'hr' || quickJobPosts.length === 0) return;
+    
+    const intervalId = setInterval(() => {
+      console.log('🔄 Polling latest applications for chat sync...');
+      loadApplicationsFromQuickJobs();
+    }, 10000); // refresh applications every 10s
+    
+    return () => clearInterval(intervalId);
+  }, [activeSection, quickJobPosts]);
+
+  // Sync DB chat messages to localStorage on realApplications update
+  useEffect(() => {
+    if (!realApplications || !Array.isArray(realApplications)) return;
+    realApplications.forEach(app => {
+      if (app.chatMessages && Array.isArray(app.chatMessages) && app.chatMessages.length > 0) {
+        const savedMessagesStr = localStorage.getItem(`chat_${app.applicationId}`);
+        const dbStr = JSON.stringify(app.chatMessages);
+        if (savedMessagesStr !== dbStr) {
+          // DB has different content than local — DB is source of truth
+          console.log(`[Employer Sync] Syncing chat messages from DB for ${app.applicationId}`);
+          localStorage.setItem(`chat_${app.applicationId}`, dbStr);
+          // If this is the active chat, trigger a change immediately
+          if (activeChatId === app.applicationId) {
+            setCurrentMessages(app.chatMessages);
+          }
+        }
+      }
+    });
+  }, [realApplications, activeChatId]);
+
   const [confirmCompleteStaff, setConfirmCompleteStaff] = useState(null);
   const [showCompleteToast, setShowCompleteToast] = useState(false);
   const [completedStaffSummary, setCompletedStaffSummary] = useState(null);
@@ -3021,8 +3083,14 @@ const HRManagement = () => {
   useEffect(() => {
     if (activeChatId) {
       const savedMessages = localStorage.getItem(`chat_${activeChatId}`);
+      let currentMsgs = [];
       if (savedMessages) {
-        setCurrentMessages(JSON.parse(savedMessages));
+        try {
+          currentMsgs = JSON.parse(savedMessages);
+          setCurrentMessages(currentMsgs);
+        } catch (e) {
+          console.error(e);
+        }
       } else {
         const chat = chatConversations && chatConversations.find(c => c.id === activeChatId);
         if (chat) {
@@ -3036,16 +3104,74 @@ const HRManagement = () => {
               : `Hello! ${companyName} has approved your urgent job application. You can contact us here! 😊`,
             time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
           };
-          setCurrentMessages([greetingMessage]);
+          currentMsgs = [greetingMessage];
+          setCurrentMessages(currentMsgs);
+          localStorage.setItem(`chat_${activeChatId}`, JSON.stringify(currentMsgs));
         }
+      }
+
+      // Mark as read immediately on open
+      const lastMsg = currentMsgs[currentMsgs.length - 1];
+      if (lastMsg) {
+        localStorage.setItem(`chat_read_employer_${activeChatId}`, String(lastMsg.id));
       }
     }
   }, [activeChatId, chatConversations, language, user]);
+
+  // Sync active chat messages in real time for employer
+  useEffect(() => {
+    if (!activeChatId) return;
+
+    const syncMessages = () => {
+      const savedMessages = localStorage.getItem(`chat_${activeChatId}`);
+      if (savedMessages) {
+        try {
+          const parsed = JSON.parse(savedMessages);
+          setCurrentMessages(prev => {
+            if (JSON.stringify(prev) !== JSON.stringify(parsed)) {
+              // Mark as read when new messages are received while the chat is open
+              const lastMsg = parsed[parsed.length - 1];
+              if (lastMsg) {
+                localStorage.setItem(`chat_read_employer_${activeChatId}`, String(lastMsg.id));
+              }
+              return parsed;
+            }
+            return prev;
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+
+    // Poll every 1 second
+    const interval = setInterval(syncMessages, 1000);
+
+    // Listen for storage events (updates from other tabs)
+    const handleStorageChange = (e) => {
+      if (e.key === `chat_${activeChatId}`) {
+        syncMessages();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [activeChatId]);
 
   // Save messages to localStorage whenever they change
   useEffect(() => {
     if (activeChatId && currentMessages.length > 0) {
       localStorage.setItem(`chat_${activeChatId}`, JSON.stringify(currentMessages));
+    }
+  }, [currentMessages, activeChatId]);
+
+  // Auto-scroll employer chat to bottom when messages update
+  useEffect(() => {
+    if (chatMessagesEndRef.current) {
+      chatMessagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [currentMessages, activeChatId]);
 
@@ -3060,17 +3186,27 @@ const HRManagement = () => {
   };
 
   const handleSendMessage = () => {
-    if (!messageInput.trim()) return;
+    if (!messageInput.trim() || !activeChatId || activeChat?.isCompleted) return;
 
     const newMessage = {
       id: Date.now(), // Use timestamp for unique ID
       sender: 'me',
-      text: messageInput,
+      text: messageInput.trim(),
       time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
     };
 
-    setCurrentMessages([...currentMessages, newMessage]);
+    const updated = [...currentMessages, newMessage];
+    setCurrentMessages(updated);
     setMessageInput('');
+    localStorage.setItem(`chat_${activeChatId}`, JSON.stringify(updated));
+    localStorage.setItem(`chat_read_employer_${activeChatId}`, String(newMessage.id));
+
+    // Sync to DynamoDB
+    applicationService.updateApplicationStatus(
+      activeChatId, 
+      activeChat?.isCompleted ? 'completed' : 'accepted', 
+      { chatMessages: updated }
+    ).catch(err => console.error('Failed to sync employer message to DB:', err));
   };
 
   const handleDeleteMessage = (messageId) => {
@@ -3084,6 +3220,13 @@ const HRManagement = () => {
       } else {
         localStorage.removeItem(`chat_${activeChatId}`);
       }
+
+      // Sync deletion to DynamoDB
+      applicationService.updateApplicationStatus(
+        activeChatId, 
+        activeChat?.isCompleted ? 'completed' : 'accepted', 
+        { chatMessages: updatedMessages }
+      ).catch(err => console.error('Failed to sync deletion to DB:', err));
     }
   };
 
@@ -3979,42 +4122,42 @@ const HRManagement = () => {
                             <User />{language === 'vi' ? 'Xem hồ sơ' : 'View profile'}
                           </StaffButton> */}
 
-                          {/* Only show chat and request change buttons when job is active */}
-                          {staff.status === 'active' && (
+                          {/* Show chat button when job is active or completed, change request only when active */}
+                          {(staff.status === 'active' || staff.status === 'completed') && (
                             <>
                               <StaffButton
                                 $variant="success"
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={() => {
-                                  const isWorking = isCurrentlyWorking(staff.shift);
-                                  console.log(`👤 ${staff.name} - Đang làm việc:`, isWorking);
                                   handleChatWithStaff(staff);
                                 }}
                               >
                                 <MessageSquare />{language === 'vi' ? 'Nhắn tin' : 'Chat'}
                               </StaffButton>
-                              <StaffButton
-                                $variant="warning"
-                                whileHover={{ scale: hasPassedOneHourSinceConfirmed(staff.confirmedAt) ? 1 : 1.02 }}
-                                whileTap={{ scale: hasPassedOneHourSinceConfirmed(staff.confirmedAt) ? 1 : 0.98 }}
-                                onClick={() => {
-                                  if (hasPassedOneHourSinceConfirmed(staff.confirmedAt)) return;
-                                  setChangeRequestStaff(staff);
-                                  setChangeRequestReason('');
-                                  setChangeRequestType('');
-                                }}
-                                style={{
-                                  opacity: hasPassedOneHourSinceConfirmed(staff.confirmedAt) ? 0.5 : 1,
-                                  cursor: hasPassedOneHourSinceConfirmed(staff.confirmedAt) ? 'not-allowed' : 'pointer',
-                                  pointerEvents: hasPassedOneHourSinceConfirmed(staff.confirmedAt) ? 'none' : 'auto'
-                                }}
-                                title={hasPassedOneHourSinceConfirmed(staff.confirmedAt)
-                                  ? (language === 'vi' ? 'Đã quá thời gian cho phép (1 giờ)' : 'Time limit exceeded (1 hour)')
-                                  : ''}
-                              >
-                                <AlertCircle />{language === 'vi' ? 'Yêu cầu thay đổi' : 'Request Change'}
-                              </StaffButton>
+                              {staff.status === 'active' && (
+                                <StaffButton
+                                  $variant="warning"
+                                  whileHover={{ scale: hasPassedOneHourSinceConfirmed(staff.confirmedAt) ? 1 : 1.02 }}
+                                  whileTap={{ scale: hasPassedOneHourSinceConfirmed(staff.confirmedAt) ? 1 : 0.98 }}
+                                  onClick={() => {
+                                    if (hasPassedOneHourSinceConfirmed(staff.confirmedAt)) return;
+                                    setChangeRequestStaff(staff);
+                                    setChangeRequestReason('');
+                                    setChangeRequestType('');
+                                  }}
+                                  style={{
+                                    opacity: hasPassedOneHourSinceConfirmed(staff.confirmedAt) ? 0.5 : 1,
+                                    cursor: hasPassedOneHourSinceConfirmed(staff.confirmedAt) ? 'not-allowed' : 'pointer',
+                                    pointerEvents: hasPassedOneHourSinceConfirmed(staff.confirmedAt) ? 'none' : 'auto'
+                                  }}
+                                  title={hasPassedOneHourSinceConfirmed(staff.confirmedAt)
+                                    ? (language === 'vi' ? 'Đã quá thời gian cho phép (1 giờ)' : 'Time limit exceeded (1 hour)')
+                                    : ''}
+                                >
+                                  <AlertCircle />{language === 'vi' ? 'Yêu cầu thay đổi' : 'Request Change'}
+                                </StaffButton>
+                              )}
                             </>
                           )}
                           {staff.status === 'pending_confirmation' ? (
@@ -4291,22 +4434,40 @@ const HRManagement = () => {
                     <ChatModalHeaderText>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <h3>{activeChat.name}</h3>
-                        <span style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          background: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)',
-                          color: '#B45309',
-                          padding: '3px 8px',
-                          borderRadius: '6px',
-                          fontSize: '11px',
-                          fontWeight: '700',
-                          letterSpacing: '0.3px',
-                          border: '1px solid #FCD34D'
-                        }}>
-                          <Zap style={{ width: '11px', height: '11px' }} />
-                          REALTIME
-                        </span>
+                        {activeChat.isCompleted ? (
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            background: '#F1F5F9',
+                            color: '#64748B',
+                            padding: '3px 8px',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: '700',
+                            letterSpacing: '0.3px',
+                            border: '1px solid #CBD5E1'
+                          }}>
+                            🔒 {language === 'vi' ? 'ĐÃ HOÀN THÀNH' : 'COMPLETED'}
+                          </span>
+                        ) : (
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            background: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)',
+                            color: '#B45309',
+                            padding: '3px 8px',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: '700',
+                            letterSpacing: '0.3px',
+                            border: '1px solid #FCD34D'
+                          }}>
+                            <Zap style={{ width: '11px', height: '11px' }} />
+                            REALTIME
+                          </span>
+                        )}
                       </div>
                       <p>{activeChat.role} • {activeChat.position}</p>
                     </ChatModalHeaderText>
@@ -4355,30 +4516,50 @@ const HRManagement = () => {
                       )}
                     </ChatMessage>
                   ))}
+                  <div ref={chatMessagesEndRef} />
                 </ChatModalMessages>
 
-                <ChatModalInput>
-                  <ChatInputField
-                    type="text"
-                    placeholder={language === 'vi' ? 'Nhập tin nhắn...' : 'Type a message...'}
-                    value={messageInput}
-                    onChange={(e) => setMessageInput(e.target.value)}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSendMessage();
-                      }
-                    }}
-                  />
-                  <ChatSendButton
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleSendMessage}
-                    disabled={!messageInput.trim()}
-                  >
-                    <Send />
-                  </ChatSendButton>
-                </ChatModalInput>
+                {activeChat.isCompleted ? (
+                  <div style={{
+                    padding: '18px 24px',
+                    textAlign: 'center',
+                    background: '#F1F5F9',
+                    borderTop: '1px solid #E2E8F0',
+                    color: '#64748B',
+                    fontSize: '13.5px',
+                    fontWeight: '600',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    width: '100%'
+                  }}>
+                    🔒 {language === 'vi' ? 'Cuộc trò chuyện đã khóa do công việc đã hoàn thành' : 'Chat locked because the job is completed'}
+                  </div>
+                ) : (
+                  <ChatModalInput>
+                    <ChatInputField
+                      type="text"
+                      placeholder={language === 'vi' ? 'Nhập tin nhắn...' : 'Type a message...'}
+                      value={messageInput}
+                      onChange={(e) => setMessageInput(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSendMessage();
+                        }
+                      }}
+                    />
+                    <ChatSendButton
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleSendMessage}
+                      disabled={!messageInput.trim()}
+                    >
+                      <Send />
+                    </ChatSendButton>
+                  </ChatModalInput>
+                )}
               </ChatModalContainer>
             </ChatModalOverlay>
           )}

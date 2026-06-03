@@ -337,7 +337,8 @@ def update_application_status(event, application_id, user_id, create_response):
             'employerConfirmedAt',
             'candidateRating',
             'candidateConfirmed',
-            'candidateConfirmedAt'
+            'candidateConfirmedAt',
+            'chatMessages'
         ]
         
         for field in optional_fields:

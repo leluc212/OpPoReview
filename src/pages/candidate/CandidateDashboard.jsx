@@ -45,148 +45,7 @@ import {
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 
-const chatSlideUp = keyframes`
-  from { opacity: 0; transform: translateY(20px) scale(0.95); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-`;
 
-const ChatBubbleBtn = styled(motion.button)`
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  border: none;
-  padding: 0;
-  cursor: grab;
-  z-index: 1000;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.22);
-  overflow: hidden;
-  position: relative;
-  &:active { cursor: grabbing; }
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-`;
-
-const UnreadDot = styled.span`
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #ef4444;
-  border: 2px solid white;
-  display: ${p => p.$show ? 'block' : 'none'};
-`;
-
-const ChatWindow = styled(motion.div)`
-  position: fixed;
-  bottom: 108px;
-  right: 32px;
-  width: 360px;
-  height: 480px;
-  background: ${props => props.theme?.colors?.bg || '#ffffff'};
-  background-color: ${props => props.theme?.colors?.bg || '#ffffff'};
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-  z-index: 10000;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border: 1px solid ${props => props.theme?.colors?.border || '#e5e7eb'};
-  animation: ${chatSlideUp} 0.25s ease;
-  isolation: isolate;
-`;
-
-const ChatHeader = styled.div`
-  background: linear-gradient(135deg, #1e40af, #3b82f6);
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: white;
-  img {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid rgba(255,255,255,0.4);
-  }
-  .info { flex: 1; }
-  .info h4 { font-size: 15px; font-weight: 700; margin: 0; }
-  .info p  { font-size: 12px; opacity: 0.85; margin: 0; display: flex; align-items: center; gap: 4px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; display: inline-block; }
-  .actions { display: flex; gap: 8px; }
-  .actions button { background: none; border: none; color: white; cursor: pointer; opacity: 0.8; &:hover { opacity: 1; } }
-`;
-
-const ChatMessages = styled.div`
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  background: ${props => props.theme?.colors?.bgDark || '#f3f4f6'};
-  background-color: ${props => props.theme?.colors?.bgDark || '#f3f4f6'};
-  &::-webkit-scrollbar { width: 4px; }
-  &::-webkit-scrollbar-thumb { background: ${props => props.theme?.colors?.border || '#d1d5db'}; border-radius: 2px; }
-`;
-
-const ChatMsg = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: ${p => p.$mine ? 'flex-end' : 'flex-start'};
-  .bubble {
-    max-width: 75%;
-    padding: 10px 14px;
-    border-radius: ${p => p.$mine ? '18px 18px 4px 18px' : '18px 18px 18px 4px'};
-    background: ${p => p.$mine ? 'linear-gradient(135deg, #1e40af, #3b82f6)' : props => props.theme?.colors?.bg || '#fff'};
-    color: ${p => p.$mine ? 'white' : 'inherit'};
-    font-size: 14px;
-    line-height: 1.5;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  }
-  .time { font-size: 11px; opacity: 0.5; margin-top: 3px; }
-`;
-
-const ChatInputRow = styled.div`
-  padding: 12px 14px;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  background: ${props => props.theme.colors.bg};
-  border-top: 1px solid ${props => props.theme.colors.border};
-  input {
-    flex: 1;
-    border: 1.5px solid ${props => props.theme.colors.border};
-    border-radius: 24px;
-    padding: 10px 16px;
-    font-size: 14px;
-    background: ${props => props.theme.colors.bgDark};
-    color: ${props => props.theme.colors.text};
-    outline: none;
-    &:focus { border-color: #3b82f6; }
-    &::placeholder { color: ${props => props.theme.colors.textLight}; }
-  }
-  button {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #1e40af, #3b82f6);
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: opacity 0.2s;
-    &:hover { opacity: 0.85; }
-    svg { color: white; width: 18px; height: 18px; }
-  }
-`;
 
 const fadeIn = keyframes`
   from {
@@ -2045,27 +1904,7 @@ const CandidateDashboard = () => {
 
 
 
-  const [chatOpen, setChatOpen] = useState(false);
-  const [chatInput, setChatInput] = useState('');
-  const [chatMessages, setChatMessages] = useState([
-    { id: 1, mine: false, text: 'Xin chào! Katinat Quận Cam đã duyệt CV ứng tuyển công việc tuyển gấp của bạn. Bạn có thể liên hệ với chúng tôi qua đây nhé! 😊', time: '3 ngày trước' },
-  ]);
-  const [hasUnread, setHasUnread] = useState(true);
 
-  const sendChatMessage = () => {
-    if (!chatInput.trim()) return;
-    setChatMessages(prev => [...prev, { id: Date.now(), mine: true, text: chatInput.trim(), time: language === 'vi' ? 'Vừa xong' : 'Just now' }]);
-    setChatInput('');
-    setTimeout(() => {
-      setChatMessages(prev => [...prev, { id: Date.now() + 1, mine: false, text: language === 'vi' ? 'Cảm ơn bạn đã phản hồi! Chúng tôi sẽ liên hệ lại sớm nhất có thể.' : 'Thank you for your message! We will get back to you as soon as possible.', time: language === 'vi' ? 'Vừa xong' : 'Just now' }]);
-    }, 1200);
-  };
-
-  const openChat = () => { setChatOpen(true); setHasUnread(false); };
-  const isDragging = useRef(false);
-
-  const bubbleX = useMotionValue(typeof window !== 'undefined' ? window.innerWidth - 96 : 800);
-  const bubbleY = useMotionValue(typeof window !== 'undefined' ? window.innerHeight - 96 : 600);
 
   // Get profile completion from DynamoDB
   const profileCompletion = candidateProfile?.profileCompletion || 0;
@@ -2745,50 +2584,7 @@ const CandidateDashboard = () => {
         </DashboardContainer>
       </DashboardLayout>
 
-      {/* Katinat Chat Bubble */}
-      <ChatBubbleBtn
-        onClick={openChat}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        style={{ position: 'fixed', bottom: '32px', right: '32px', zIndex: 1000, cursor: 'pointer' }}
-      >
-        <img src="/OpPoReview/images/katinatlogo.jpg" alt="Katinat" draggable="false" />
-        <UnreadDot $show={hasUnread} />
-      </ChatBubbleBtn>
 
-      {chatOpen && (
-        <ChatWindow>
-          <ChatHeader>
-            <img src="/OpPoReview/images/katinatlogo.jpg" alt="Katinat" />
-            <div className="info">
-              <h4>Katinat Quận Cam</h4>
-              <p><span className="dot" /> {language === 'vi' ? 'Đang hoạt động' : 'Active'}</p>
-            </div>
-            <div className="actions">
-              <button onClick={() => setChatOpen(false)}><ChevronDown /></button>
-              <button onClick={() => setChatOpen(false)}><X /></button>
-            </div>
-          </ChatHeader>
-          <ChatMessages>
-            {chatMessages.map(msg => (
-              <ChatMsg key={msg.id} $mine={msg.mine}>
-                <div className="bubble">{msg.text}</div>
-                <span className="time">{msg.time}</span>
-              </ChatMsg>
-            ))}
-          </ChatMessages>
-          <ChatInputRow>
-            <input
-              type="text"
-              placeholder={language === 'vi' ? 'Nhắn tin cho Katinat Quận Cam...' : 'Message Katinat Quan Cam...'}
-              value={chatInput}
-              onChange={e => setChatInput(e.target.value)}
-              onKeyPress={e => e.key === 'Enter' && sendChatMessage()}
-            />
-            <button onClick={sendChatMessage}><Send /></button>
-          </ChatInputRow>
-        </ChatWindow>
-      )}
     </>
   );
 };
