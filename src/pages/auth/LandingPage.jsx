@@ -4018,18 +4018,6 @@ const LandingPage = ({ children }) => {
                 </QRCodeSection>
 
                 <StoreButtons>
-                  <StoreButton href="https://apps.apple.com" target="_blank">
-                    <img
-                      src={s3Images.system.appstore}
-                      alt="App Store"
-                      style={{
-                        width: '120px',
-                        height: 'auto',
-                        objectFit: 'contain'
-                      }}
-                    />
-                  </StoreButton>
-
                   <StoreButton href="https://play.google.com" target="_blank">
                     <img
                       src={s3Images.system.chplay}
