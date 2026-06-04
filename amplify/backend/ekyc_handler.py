@@ -301,17 +301,20 @@ def vnpt_ocr(front_hash, trans_token, bearer, tid, tkey):
             skip_codes = ('IDG-00010445', 'IDG-00010444', 'input_khong_hop_le',
                           'IDG-00000401', 'No permission', 'UNAUTHORIZED')
             if any(c in body for c in skip_codes):
-                print(f'OCR [{label}] skipping ({r.status_code}): no permission or wrong type, trying next...')
-                last_error = r
+                if 'input_khong_hop_le' in body or 'IDG-00010445' in body:
+                    last_error = type('E', (), {'text': 'CCCD gắn chip (loại mới 2021+) chưa được hỗ trợ ở gói hiện tại. Vui lòng liên hệ admin.'})()
+                else:
+                    last_error = r
+                print(f'OCR [{label}] skipping ({r.status_code}): {body[:100]}')
                 continue
         # Lỗi khác (500...) → raise ngay
         raise urllib.error.HTTPError(url, r.status_code, r.text[:800], {}, None)
 
-    # Tất cả đều fail với wrong doc type
-    raise urllib.error.HTTPError(
-        VNPT_OCR_FRONT_URL, 400,
-        last_error.text[:800] if last_error else 'Không nhận diện được loại giấy tờ', {}, None
-    )
+    # Tất cả đều fail
+    err_msg = 'Không nhận diện được loại giấy tờ'
+    if last_error and hasattr(last_error, 'text'):
+        err_msg = last_error.text
+    raise urllib.error.HTTPError(VNPT_OCR_FRONT_URL, 400, err_msg, {}, None)
 
 def check_rate_limit(user_id):
     today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
