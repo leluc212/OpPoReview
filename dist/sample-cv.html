@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV - Đỗ Hoàng Hiếu</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            padding: 40px;
+            background: white;
+        }
+        .cv-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            border-radius: 12px 12px 0 0;
+        }
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .header p {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .contact-info span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        .content {
+            padding: 30px 40px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 3px solid #1e40af;
+        }
+        .experience-item, .education-item {
+            margin-bottom: 20px;
+        }
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 8px;
+        }
+        .item-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .item-company {
+            font-size: 16px;
+            color: #64748b;
+            font-weight: 500;
+        }
+        .item-date {
+            font-size: 14px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+        .item-description {
+            margin-top: 8px;
+            color: #475569;
+            line-height: 1.7;
+        }
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+        }
+        .skill-tag {
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+            color: #1e40af;
+            border: 2px solid #BFDBFE;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+        }
+        ul {
+            margin-left: 20px;
+            color: #475569;
+        }
+        ul li {
+            margin-bottom: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="cv-container">
+        <div class="header">
+            <h1>ĐỖ HOÀNG HIẾU</h1>
+            <p>Store Manager | F&B Management Expert</p>
+            <div class="contact-info">
+                <span>📧 hieuseu@example.com</span>
+                <span>📱 0123 456 789</span>
+                <span>📍 Quận 1, TP.HCM</span>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2 class="section-title">🎯 Mục tiêu nghề nghiệp</h2>
+                <p class="item-description">
+                    Quản lý cửa hàng F&B có 5 năm kinh nghiệm trong việc điều hành, phát triển đội ngũ và tối ưu hóa doanh thu.
+                    Đam mê xây dựng văn hóa làm việc tích cực và mang đến trải nghiệm khách hàng xuất sắc.
+                </p>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">💼 Kinh nghiệm làm việc</h2>
+
+                <div class="experience-item">
+                    <div class="item-header">
+                        <div>
+                            <div class="item-title">Cửa hàng trưởng</div>
+                            <div class="item-company">Phúc Long Coffee & Tea</div>
+                        </div>
+                        <div class="item-date">01/2022 - Hiện tại</div>
+                    </div>
+                    <ul class="item-description">
+                        <li>Quản lý đội ngũ 15 nhân viên, điều phối ca làm việc và đào tạo nhân viên mới</li>
+                        <li>Tăng doanh thu cửa hàng 35% trong năm 2023 thông qua các chiến dịch marketing địa phương</li>
+                        <li>Duy trì tỷ lệ hài lòng khách hàng 4.8/5 sao trên các nền tảng đánh giá</li>
+                        <li>Quản lý ngân sách, kiểm soát chi phí và tối ưu hóa lợi nhuận</li>
+                    </ul>
+                </div>
+
+                <div class="experience-item">
+                    <div class="item-header">
+                        <div>
+                            <div class="item-title">Giám sát cửa hàng</div>
+                            <div class="item-company">The Coffee House</div>
+                        </div>
+                        <div class="item-date">03/2020 - 12/2021</div>
+                    </div>
+                    <ul class="item-description">
+                        <li>Hỗ trợ quản lý điều hành cửa hàng với doanh thu 2 tỷ/tháng</li>
+                        <li>Đào tạo 30+ nhân viên mới về kỹ năng pha chế và phục vụ khách hàng</li>
+                        <li>Xử lý khiếu nại khách hàng và duy trì chất lượng dịch vụ cao</li>
+                    </ul>
+                </div>
+
+                <div class="experience-item">
+                    <div class="item-header">
+                        <div>
+                            <div class="item-title">Trưởng ca</div>
+                            <div class="item-company">Highlands Coffee</div>
+                        </div>
+                        <div class="item-date">06/2019 - 02/2020</div>
+                    </div>
+                    <ul class="item-description">
+                        <li>Điều phối đội ngũ 8 nhân viên trong ca làm việc</li>
+                        <li>Đảm bảo quy trình vận hành, vệ sinh và chất lượng sản phẩm</li>
+                        <li>Báo cáo doanh thu và tồn kho hàng ngày</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">🎓 Học vấn</h2>
+                <div class="education-item">
+                    <div class="item-header">
+                        <div>
+                            <div class="item-title">Cử nhân Quản trị Kinh doanh</div>
+                            <div class="item-company">Đại học Kinh Tế TP.HCM</div>
+                        </div>
+                        <div class="item-date">2015 - 2019</div>
+                    </div>
+                    <p class="item-description">
+                        Chuyên ngành: Quản trị Dịch vụ & Du lịch<br>
+                        GPA: 3.6/4.0 | Tốt nghiệp Loại Giỏi
+                    </p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">🌟 Kỹ năng</h2>
+                <div class="skills-grid">
+                    <div class="skill-tag">Quản lý vận hành</div>
+                    <div class="skill-tag">Đào tạo nhân sự</div>
+                    <div class="skill-tag">Quản lý tồn kho</div>
+                    <div class="skill-tag">Pha chế chuyên nghiệp</div>
+                    <div class="skill-tag">Chăm sóc khách hàng</div>
+                    <div class="skill-tag">Phân tích doanh thu</div>
+                    <div class="skill-tag">Marketing địa phương</div>
+                    <div class="skill-tag">Lãnh đạo đội nhóm</div>
+                    <div class="skill-tag">MS Office</div>
+                    <div class="skill-tag">POS Systems</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">🏆 Chứng chỉ</h2>
+                <ul>
+                    <li><strong>Barista Professional Certificate</strong> - Specialty Coffee Association (2021)</li>
+                    <li><strong>Food Safety & Hygiene Level 1</strong> - Bộ Y tế (2020)</li>
+                    <li><strong>Leadership & Management</strong> - Dale Carnegie (2022)</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">🗣️ Ngôn ngữ</h2>
+                <ul>
+                    <li><strong>Tiếng Việt:</strong> Bản ngữ</li>
+                    <li><strong>Tiếng Anh:</strong> Giao tiếp tốt (TOEIC 750)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
