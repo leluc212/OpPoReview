@@ -144,7 +144,9 @@ class QuickJobService {
 
       if (!response.ok) {
         const errorBody = await response.json().catch(() => ({ message: 'Request failed' }));
-        console.error(`❌ QuickJobService API Error ${response.status}:`, errorBody);
+        if (response.status !== 404) {
+          console.error(`❌ QuickJobService API Error ${response.status}:`, errorBody);
+        }
         throw new Error(errorBody.message || `HTTP ${response.status} from ${fullUrl}`);
       }
 
@@ -152,7 +154,9 @@ class QuickJobService {
       console.log('✅ QuickJobService API request successful');
       return data;
     } catch (error) {
-      console.error(`❌ QuickJobService Request error for ${fullUrl}:`, error);
+      if (!error.message.includes('not found') && !error.message.includes('404')) {
+        console.error(`❌ QuickJobService Request error for ${fullUrl}:`, error);
+      }
       if (error.message.includes('Failed to fetch') || 
           error.message.includes('CORS') ||
           error.message.includes('NetworkError') ||
@@ -304,7 +308,9 @@ class QuickJobService {
 
       return null;
     } catch (error) {
-      console.error('❌ Error fetching quick job:', error);
+      if (!error.message.includes('not found') && !error.message.includes('404')) {
+        console.error('❌ Error fetching quick job:', error);
+      }
       return null;
     }
   }

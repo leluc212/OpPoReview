@@ -51,6 +51,83 @@ def lambda_handler(event, context):
         user_id = path.split('/profile/')[-1].strip('/')
 
     try:
+        # Check if feedback route
+        if '/feedback' in path:
+            feedbacks_table = dynamodb.Table('Feedbacks')
+            
+            # Parse feedback ID from path if present, e.g. /feedback/feed-123 or /prod/feedback/feed-123
+            feedback_id = None
+            parts = path.strip('/').split('/')
+            try:
+                feedback_idx = parts.index('feedback')
+                if len(parts) > feedback_idx + 1:
+                    feedback_id = parts[feedback_idx + 1]
+            except ValueError:
+                pass
+
+                
+            if http_method == 'GET':
+                if feedback_id:
+                    # GET /feedback/{id}
+                    result = feedbacks_table.get_item(Key={'id': feedback_id})
+                    item = result.get('Item')
+                    if not item:
+                        return response(404, {'success': False, 'message': 'Feedback not found'})
+                    return response(200, {'success': True, 'data': item})
+                else:
+                    # GET /feedback - List all feedbacks
+                    result = feedbacks_table.scan()
+                    items = result.get('Items', [])
+                    # Sort by createdAt descending
+                    items.sort(key=lambda x: x.get('createdAt', ''), reverse=True)
+                    return response(200, items)
+                    
+            elif http_method == 'POST':
+                # POST /feedback - Submit new feedback
+                body = json.loads(event.get('body') or '{}')
+                timestamp = datetime.utcnow().isoformat() + 'Z'
+                
+                # Generate random ID
+                import uuid
+                new_id = f"feed-{str(uuid.uuid4())[:8]}"
+                
+                item = {
+                    'id': new_id,
+                    'category': body.get('category', 'other'),
+                    'comment': body.get('comment', ''),
+                    'userId': body.get('userId', 'anonymous-guest'),
+                    'userName': body.get('userName', 'Khách vãng lai'),
+                    'userEmail': body.get('userEmail', 'guest.anonymous@oppo.com'),
+                    'userRole': body.get('userRole', 'guest'),
+                    'status': 'unread',
+                    'createdAt': timestamp
+                }
+                feedbacks_table.put_item(Item=item)
+                return response(200, {'success': True, 'data': item})
+                
+            elif http_method == 'PUT' and feedback_id:
+                # PUT /feedback/{id} - Mark as read / update
+                body = json.loads(event.get('body') or '{}')
+                status = body.get('status', 'read')
+                
+                result = feedbacks_table.update_item(
+                    Key={'id': feedback_id},
+                    UpdateExpression='SET #st = :status',
+                    ExpressionAttributeNames={'#st': 'status'},
+                    ExpressionAttributeValues={':status': status},
+                    ReturnValues='ALL_NEW'
+                )
+                return response(200, {'success': True, 'data': result.get('Attributes', {})})
+                
+            elif http_method == 'DELETE' and feedback_id:
+                # DELETE /feedback/{id} - Delete feedback
+                feedbacks_table.delete_item(Key={'id': feedback_id})
+                return response(200, {'success': True, 'message': 'Feedback deleted'})
+                
+            else:
+                return response(400, {'success': False, 'message': 'Invalid feedback request'})
+
+        # Profile routes
         if http_method == 'GET' and user_id:
             # GET /profile/{userId}
             result = table.get_item(Key={'userId': user_id})
@@ -58,7 +135,7 @@ def lambda_handler(event, context):
             if not item:
                 return response(404, {'success': False, 'message': 'Profile not found'})
             return response(200, {'success': True, 'data': item})
-
+ 
         elif http_method == 'POST':
             # POST /profile - Create profile
             body = json.loads(event.get('body') or '{}')
@@ -67,8 +144,8 @@ def lambda_handler(event, context):
                 user_id = body.get('userId')
             if not user_id:
                 return response(400, {'success': False, 'message': 'userId is required'})
-
-            timestamp = datetime.utcnow().isoformat()
+ 
+            timestamp = datetime.utcnow().isoformat() + 'Z'
             item = {
                 'userId': user_id,
                 'fullName': body.get('fullName', ''),
@@ -87,18 +164,18 @@ def lambda_handler(event, context):
             }
             table.put_item(Item=item)
             return response(200, {'success': True, 'data': item})
-
+ 
         elif http_method == 'PUT' and user_id:
             # PUT /profile/{userId} - Update profile
             body = json.loads(event.get('body') or '{}')
             body.pop('userId', None)
             body.pop('createdAt', None)
-            body['updatedAt'] = datetime.utcnow().isoformat()
-
+            body['updatedAt'] = datetime.utcnow().isoformat() + 'Z'
+ 
             update_expr = 'SET ' + ', '.join(f'#k{i} = :v{i}' for i, k in enumerate(body))
             attr_names = {f'#k{i}': k for i, k in enumerate(body)}
             attr_values = {f':v{i}': v for i, (k, v) in enumerate(body.items())}
-
+ 
             result = table.update_item(
                 Key={'userId': user_id},
                 UpdateExpression=update_expr,
@@ -107,7 +184,7 @@ def lambda_handler(event, context):
                 ReturnValues='ALL_NEW'
             )
             return response(200, {'success': True, 'data': result.get('Attributes', {})})
-
+ 
         elif http_method == 'DELETE' and user_id:
             # DELETE /profile/{userId} - Soft delete
             table.update_item(
@@ -115,13 +192,14 @@ def lambda_handler(event, context):
                 UpdateExpression='SET isActive = :false, updatedAt = :ts',
                 ExpressionAttributeValues={
                     ':false': False,
-                    ':ts': datetime.utcnow().isoformat()
+                    ':ts': datetime.utcnow().isoformat() + 'Z'
                 }
             )
             return response(200, {'success': True, 'message': 'Profile deactivated'})
-
+ 
         else:
             return response(400, {'success': False, 'message': 'Invalid request'})
+
 
     except Exception as e:
         print(f'Error: {str(e)}')

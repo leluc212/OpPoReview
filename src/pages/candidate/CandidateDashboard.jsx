@@ -45,148 +45,7 @@ import {
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 
-const chatSlideUp = keyframes`
-  from { opacity: 0; transform: translateY(20px) scale(0.95); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-`;
 
-const ChatBubbleBtn = styled(motion.button)`
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  border: none;
-  padding: 0;
-  cursor: grab;
-  z-index: 1000;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.22);
-  overflow: hidden;
-  position: relative;
-  &:active { cursor: grabbing; }
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-`;
-
-const UnreadDot = styled.span`
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #ef4444;
-  border: 2px solid white;
-  display: ${p => p.$show ? 'block' : 'none'};
-`;
-
-const ChatWindow = styled(motion.div)`
-  position: fixed;
-  bottom: 108px;
-  right: 32px;
-  width: 360px;
-  height: 480px;
-  background: ${props => props.theme?.colors?.bg || '#ffffff'};
-  background-color: ${props => props.theme?.colors?.bg || '#ffffff'};
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-  z-index: 10000;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border: 1px solid ${props => props.theme?.colors?.border || '#e5e7eb'};
-  animation: ${chatSlideUp} 0.25s ease;
-  isolation: isolate;
-`;
-
-const ChatHeader = styled.div`
-  background: linear-gradient(135deg, #1e40af, #3b82f6);
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: white;
-  img {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid rgba(255,255,255,0.4);
-  }
-  .info { flex: 1; }
-  .info h4 { font-size: 15px; font-weight: 700; margin: 0; }
-  .info p  { font-size: 12px; opacity: 0.85; margin: 0; display: flex; align-items: center; gap: 4px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; display: inline-block; }
-  .actions { display: flex; gap: 8px; }
-  .actions button { background: none; border: none; color: white; cursor: pointer; opacity: 0.8; &:hover { opacity: 1; } }
-`;
-
-const ChatMessages = styled.div`
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  background: ${props => props.theme?.colors?.bgDark || '#f3f4f6'};
-  background-color: ${props => props.theme?.colors?.bgDark || '#f3f4f6'};
-  &::-webkit-scrollbar { width: 4px; }
-  &::-webkit-scrollbar-thumb { background: ${props => props.theme?.colors?.border || '#d1d5db'}; border-radius: 2px; }
-`;
-
-const ChatMsg = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: ${p => p.$mine ? 'flex-end' : 'flex-start'};
-  .bubble {
-    max-width: 75%;
-    padding: 10px 14px;
-    border-radius: ${p => p.$mine ? '18px 18px 4px 18px' : '18px 18px 18px 4px'};
-    background: ${p => p.$mine ? 'linear-gradient(135deg, #1e40af, #3b82f6)' : props => props.theme?.colors?.bg || '#fff'};
-    color: ${p => p.$mine ? 'white' : 'inherit'};
-    font-size: 14px;
-    line-height: 1.5;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  }
-  .time { font-size: 11px; opacity: 0.5; margin-top: 3px; }
-`;
-
-const ChatInputRow = styled.div`
-  padding: 12px 14px;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  background: ${props => props.theme.colors.bg};
-  border-top: 1px solid ${props => props.theme.colors.border};
-  input {
-    flex: 1;
-    border: 1.5px solid ${props => props.theme.colors.border};
-    border-radius: 24px;
-    padding: 10px 16px;
-    font-size: 14px;
-    background: ${props => props.theme.colors.bgDark};
-    color: ${props => props.theme.colors.text};
-    outline: none;
-    &:focus { border-color: #3b82f6; }
-    &::placeholder { color: ${props => props.theme.colors.textLight}; }
-  }
-  button {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #1e40af, #3b82f6);
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: opacity 0.2s;
-    &:hover { opacity: 0.85; }
-    svg { color: white; width: 18px; height: 18px; }
-  }
-`;
 
 const fadeIn = keyframes`
   from {
@@ -304,109 +163,78 @@ const IllustrationContainer = styled.div`
   }
 `;
 
-const ProfileCompletionBanner = styled(motion.div)`
-  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
+const ProfileReminderBanner = styled(motion.div)`
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1.5px solid #fcd34d;
   border-radius: ${props => props.theme.borderRadius.xl};
-  padding: 24px 28px;
+  padding: 16px 24px;
+  margin-bottom: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 24px;
-  color: white;
-  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.3);
-  flex: 1;
-  min-width: 0;
-  position: relative;
-  overflow: hidden;
+  gap: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -30%;
-    right: 10%;
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.05);
-  }
-  
-  .banner-content {
-    flex: 1;
-    min-width: 0;
-    position: relative;
-    z-index: 1;
-  }
-
-  h3 {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    line-height: 1.4;
-
-    svg {
-      width: 20px;
-      height: 20px;
-      flex-shrink: 0;
-    }
-  }
-  
-  p {
-    font-size: 13px;
-    opacity: 0.9;
-    margin-bottom: 2px;
-  }
-
-  .progress-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 10px;
-  }
-
-  .progress-percent {
-    font-size: 13px;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-
-  .banner-action {
-    position: relative;
-    z-index: 1;
-    flex-shrink: 0;
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: flex-start;
   }
 `;
 
-const ProgressBar = styled.div`
-  flex: 1;
-  max-width: 200px;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: ${props => props.theme.borderRadius.full};
-  overflow: hidden;
-  
-  &::after {
-    content: '';
-    display: block;
-    width: ${props => props.$progress || 0}%;
-    height: 100%;
-    background: white;
-    border-radius: ${props => props.theme.borderRadius.full};
-    transition: width 0.5s ease;
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+const ReminderContent = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #92400e;
+
+  svg {
+    width: 24px;
+    height: 24px;
+    color: #d97706;
+    flex-shrink: 0;
+  }
+
+  div {
+    h4 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 2px;
+      margin-top: 0;
+      color: #92400e;
+    }
+    p {
+      font-size: 13px;
+      opacity: 0.95;
+      margin: 0;
+      color: #b45309;
+      font-weight: 500;
+    }
+  }
+`;
+
+const ReminderAction = styled(Link)`
+  padding: 8px 16px;
+  background: #d97706;
+  color: white !important;
+  border-radius: ${props => props.theme.borderRadius.md};
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: #b45309;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
   }
 `;
 
@@ -423,9 +251,9 @@ const TopInfoRow = styled.div`
 
 const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: ${props => props.$fullWidth ? 'repeat(4, 1fr)' : 'repeat(2, 1fr)'};
-  gap: 10px;
-  flex: ${props => props.$fullWidth ? '1' : '2'};
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
   min-width: 0;
 
   @media (max-width: 768px) {
@@ -1343,6 +1171,7 @@ const CandidateDashboard = () => {
   const [allActiveJobs, setAllActiveJobs] = useState([]);
   const [currentJob, setCurrentJob] = useState(null);
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [successfulMatchesCount, setSuccessfulMatchesCount] = useState(0);
 
   const banners = [
     { src: "/images/seoul.jpg", alt: "Seoul Vua Mì Cay" },
@@ -1495,7 +1324,7 @@ const CandidateDashboard = () => {
       if (acceptedApp) {
         const job = finalAllJobs.find(j => (j.idJob || j.id || j.jobID) === acceptedApp.jobId);
         
-        const companyVal = job.employerName || job.companyName;
+        const companyVal = job ? (job.employerName || job.companyName) : null;
         const isJobValid = job && 
                           job.title && 
                           !job.title.includes('Unknown') && 
@@ -1537,6 +1366,32 @@ const CandidateDashboard = () => {
       } else {
         setCurrentJob(null);
       }
+
+      // Calculate successful matches count for the current month
+      const nowObj = new Date();
+      const currentYear = nowObj.getFullYear();
+      const currentMonth = nowObj.getMonth();
+      
+      const monthlyMatches = apps.filter(app => {
+        // Must be accepted or completed status
+        const isAccepted = app.status === 'accepted' || 
+                           app.status === 'completed' || 
+                           app.status === 'completed_pending_candidate';
+        if (!isAccepted) return false;
+        
+        // Must be urgent job
+        const job = finalAllJobs.find(j => (j.idJob || j.id || j.jobID) === app.jobId);
+        const isUrgent = job?.isUrgent || app.jobType === 'quick' || !!job?.jobID || false;
+        if (!isUrgent) return false;
+        
+        // Must be in current month
+        const appDateStr = app.updatedAt || app.appliedAt || app.createdAt;
+        if (!appDateStr) return false;
+        const appDate = new Date(appDateStr);
+        return appDate.getFullYear() === currentYear && appDate.getMonth() === currentMonth;
+      });
+      
+      setSuccessfulMatchesCount(monthlyMatches.length);
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -2045,27 +1900,7 @@ const CandidateDashboard = () => {
 
 
 
-  const [chatOpen, setChatOpen] = useState(false);
-  const [chatInput, setChatInput] = useState('');
-  const [chatMessages, setChatMessages] = useState([
-    { id: 1, mine: false, text: 'Xin chào! Katinat Quận Cam đã duyệt CV ứng tuyển công việc tuyển gấp của bạn. Bạn có thể liên hệ với chúng tôi qua đây nhé! 😊', time: '3 ngày trước' },
-  ]);
-  const [hasUnread, setHasUnread] = useState(true);
 
-  const sendChatMessage = () => {
-    if (!chatInput.trim()) return;
-    setChatMessages(prev => [...prev, { id: Date.now(), mine: true, text: chatInput.trim(), time: language === 'vi' ? 'Vừa xong' : 'Just now' }]);
-    setChatInput('');
-    setTimeout(() => {
-      setChatMessages(prev => [...prev, { id: Date.now() + 1, mine: false, text: language === 'vi' ? 'Cảm ơn bạn đã phản hồi! Chúng tôi sẽ liên hệ lại sớm nhất có thể.' : 'Thank you for your message! We will get back to you as soon as possible.', time: language === 'vi' ? 'Vừa xong' : 'Just now' }]);
-    }, 1200);
-  };
-
-  const openChat = () => { setChatOpen(true); setHasUnread(false); };
-  const isDragging = useRef(false);
-
-  const bubbleX = useMotionValue(typeof window !== 'undefined' ? window.innerWidth - 96 : 800);
-  const bubbleY = useMotionValue(typeof window !== 'undefined' ? window.innerHeight - 96 : 600);
 
   // Get profile completion from DynamoDB
   const profileCompletion = candidateProfile?.profileCompletion || 0;
@@ -2130,43 +1965,33 @@ const CandidateDashboard = () => {
             </IllustrationContainer>
           </WelcomeBanner>
 
-          {/* Profile + Stats Row */}
-          <TopInfoRow>
-            {profileCompletion < 100 && (
-              <ProfileCompletionBanner
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
+          {/* Profile Warning Reminder Banner */}
+          {profileCompletion < 100 && (
+            <ProfileReminderBanner
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <ReminderContent>
+                <AlertCircle />
+                <div>
+                  <h4>{language === 'vi' ? 'Hồ sơ của bạn chưa hoàn thiện' : 'Your profile is incomplete'}</h4>
+                  <p>{language === 'vi' ? 'Hoàn thành hồ sơ để tăng cơ hội tiếp cận nhà tuyển dụng.' : 'Complete your profile to increase visibility to employers.'}</p>
+                </div>
+              </ReminderContent>
+              <ReminderAction
+                to="/candidate/profile"
+                onClick={(e) => { e.preventDefault(); navigate('/candidate/profile'); }}
               >
-                <div className="banner-content">
-                  <h3>
-                    <Sparkles />
-                    {language === 'vi' ? 'Hoàn thiện hồ sơ để tăng cơ hội được tuyển dụng' : 'Complete your profile to increase hiring chances'}
-                  </h3>
-                  <p>{language === 'vi' ? `Hồ sơ của bạn đã hoàn thành` : `Your profile is ${profileCompletion}% complete`}</p>
-                  <div className="progress-row">
-                    <ProgressBar $progress={profileCompletion} />
-                    <span className="progress-percent">{profileCompletion}%</span>
-                  </div>
-                </div>
-                <div className="banner-action">
-                  <ActionButton
-                    as={motion.a}
-                    href="/candidate/profile"
-                    onClick={(e) => { e.preventDefault(); navigate('/candidate/profile'); }}
-                    $variant="primary"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.98 }}
-                    style={{ padding: '10px 20px', fontSize: '13px', background: 'white', color: '#1e40af', fontWeight: 700, borderRadius: '12px', whiteSpace: 'nowrap' }}
-                  >
-                    <Upload />
-                    {language === 'vi' ? 'Hoàn Thiện Ngay' : 'Complete Now'}
-                  </ActionButton>
-                </div>
-              </ProfileCompletionBanner>
-            )}
+                <Upload />
+                {language === 'vi' ? 'Hoàn thiện ngay' : 'Complete now'}
+              </ReminderAction>
+            </ProfileReminderBanner>
+          )}
 
-            <StatsGrid $fullWidth={profileCompletion >= 100}>
+          {/* Stats Row */}
+          <TopInfoRow>
+            <StatsGrid>
               <StatsCard
                 title={language === 'vi' ? 'Hồ Sơ Đã Nộp' : 'Applications'}
                 value={realApplications.length.toString()}
@@ -2187,22 +2012,13 @@ const CandidateDashboard = () => {
                 onClick={() => navigate('/candidate/jobs?tab=saved')}
               />
               <StatsCard
-                title={language === 'vi' ? 'Lượt Xem Hồ Sơ' : 'Profile Views'}
-                value={(candidateProfile?.profileViews || (120 + realApplications.length * 5)).toString()}
-                change="+12%"
-                changeText={language === 'vi' ? 'tháng này' : 'this month'}
-                icon={Eye}
-                color="#10B981"
-                positive
-              />
-              <StatsCard
                 title={language === 'vi' ? 'Job Match Thành Công' : 'Successful Matches'}
-                value={currentJob ? "1" : "0"}
-                change={currentJob ? "+1" : "0"}
+                value={successfulMatchesCount.toString()}
+                change={successfulMatchesCount > 0 ? `+${successfulMatchesCount}` : "0"}
                 changeText={language === 'vi' ? 'tháng này' : 'this month'}
                 icon={CheckCircle}
                 color="#1e40af"
-                positive={!!currentJob}
+                positive={successfulMatchesCount > 0}
               />
             </StatsGrid>
           </TopInfoRow>
@@ -2745,50 +2561,7 @@ const CandidateDashboard = () => {
         </DashboardContainer>
       </DashboardLayout>
 
-      {/* Katinat Chat Bubble */}
-      <ChatBubbleBtn
-        onClick={openChat}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        style={{ position: 'fixed', bottom: '32px', right: '32px', zIndex: 1000, cursor: 'pointer' }}
-      >
-        <img src="/images/katinatlogo.jpg" alt="Katinat" draggable="false" />
-        <UnreadDot $show={hasUnread} />
-      </ChatBubbleBtn>
 
-      {chatOpen && (
-        <ChatWindow>
-          <ChatHeader>
-            <img src="/images/katinatlogo.jpg" alt="Katinat" />
-            <div className="info">
-              <h4>Katinat Quận Cam</h4>
-              <p><span className="dot" /> {language === 'vi' ? 'Đang hoạt động' : 'Active'}</p>
-            </div>
-            <div className="actions">
-              <button onClick={() => setChatOpen(false)}><ChevronDown /></button>
-              <button onClick={() => setChatOpen(false)}><X /></button>
-            </div>
-          </ChatHeader>
-          <ChatMessages>
-            {chatMessages.map(msg => (
-              <ChatMsg key={msg.id} $mine={msg.mine}>
-                <div className="bubble">{msg.text}</div>
-                <span className="time">{msg.time}</span>
-              </ChatMsg>
-            ))}
-          </ChatMessages>
-          <ChatInputRow>
-            <input
-              type="text"
-              placeholder={language === 'vi' ? 'Nhắn tin cho Katinat Quận Cam...' : 'Message Katinat Quan Cam...'}
-              value={chatInput}
-              onChange={e => setChatInput(e.target.value)}
-              onKeyPress={e => e.key === 'Enter' && sendChatMessage()}
-            />
-            <button onClick={sendChatMessage}><Send /></button>
-          </ChatInputRow>
-        </ChatWindow>
-      )}
     </>
   );
 };

@@ -3,15 +3,8 @@ import react from '@vitejs/plugin-react'
 
 const packageProxyTarget = process.env.PACKAGE_SUBSCRIPTIONS_PROXY_TARGET || process.env.VITE_PACKAGE_SUBSCRIPTIONS_PROXY_TARGET || '';
 
-export default defineConfig(({ mode }) => {
-  // Đọc .env, .env.production, v.v. theo mode
-  const env = loadEnv(mode, process.cwd(), '');
-  const base = env.VITE_BASE_URL || process.env.VITE_BASE_URL || '/';
-
-  return {
-  // LOCAL dev: base = '/'   (không có VITE_BASE_URL)
-  // GitHub Pages: VITE_BASE_URL=/OpPoReview/ trong .env.production hoặc CI env
-  base,
+export default defineConfig({
+  base: '/',
   plugins: [react()],
   server: {
     port: 3000,
@@ -152,5 +145,4 @@ export default defineConfig(({ mode }) => {
   optimizeDeps: {
     include: ['@popperjs/core']
   }
-  } // end return
 })

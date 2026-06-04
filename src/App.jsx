@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { ThemeProvider as CustomThemeProvider, useTheme } from './context/ThemeContext';
 import ScrollToTop from './components/ScrollToTop';
+import FloatingSupportBar from './components/FloatingSupportBar';
 
 // Auth Pages
 import LandingPage from './pages/auth/LandingPage';
@@ -171,7 +172,12 @@ function AppRoutes() {
       <Route path="/companies/:employerId" element={<LandingPage><EmployerProfileView /></LandingPage>} />
       <Route path="/jobs" element={<LandingPage><PublicJobListing /></LandingPage>} />
       <Route path="/about" element={<LandingPage><AboutPage /></LandingPage>} />
-      <Route path="/cv-templates" element={<LandingPage><CVTemplates /></LandingPage>} />
+      <Route path="/cv-templates" element={<Navigate to="/candidate/cv-templates" replace />} />
+      <Route path="/candidate/cv-templates" element={
+        <ProtectedRoute allowedRoles={['candidate']}>
+          <CVTemplates />
+        </ProtectedRoute>
+      } />
       
       {/* Candidate Routes */}
       <Route path="/candidate" element={<Navigate to="/candidate/dashboard" replace />} />
@@ -411,9 +417,10 @@ function ThemedApp() {
   return (
     <ThemeProvider theme={isDarkMode ? darkTheme : theme}>
       <GlobalStyles />
-      <Router basename={basename}>
+      <Router basename="/">
         <ScrollToTop />
         <AppRoutes />
+        <FloatingSupportBar />
       </Router>
     </ThemeProvider>
   );

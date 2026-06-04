@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { Bell, Package, CheckCircle, AlertCircle, DollarSign, Users, Briefcase } from 'lucide-react';
+import { Bell, Package, CheckCircle, AlertCircle, DollarSign, Users, Briefcase, Zap, XCircle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { getNotifications, markAsRead } from '../services/notificationService';
@@ -283,15 +283,31 @@ const NotificationsSidebar = () => {
       case 'package_purchase_request':
         return Package;
       case 'package_approved':
+      case 'success':
+      case 'CV_ACCEPTED':
+      case 'withdrawal_approved':
+      case 'quick_job_activation_approved':
+      case 'job_approved':
         return CheckCircle;
       case 'employers':
         return Briefcase;
       case 'posts':
         return AlertCircle;
       case 'payments':
+      case 'candidate_withdrawal_request':
+      case 'withdrawal_request':
         return DollarSign;
       case 'urgent':
         return AlertCircle;
+      case 'system':
+      case 'CV_REJECTED':
+      case 'withdrawal_rejected':
+      case 'quick_job_activation_rejected':
+      case 'quick_job_activation_deactivated':
+      case 'job_rejected':
+        return AlertCircle;
+      case 'quick_job_activation_request':
+        return Zap;
       default:
         return Bell;
     }

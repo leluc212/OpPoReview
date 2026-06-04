@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 import { Eye, Trash2, Plus } from 'lucide-react';
 import { uploadCV, getCVInfo, deleteCV } from '../services/cvUploadService';
 import { useAuth } from '../context/AuthContext';
@@ -14,14 +15,44 @@ const CVUploadContainer = styled.div`
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 `;
 
+const HeaderRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 12px;
+`;
+
 const Title = styled.h3`
   font-size: 18px;
   font-weight: 600;
   color: #1e293b;
-  margin-bottom: 16px;
   display: flex;
   align-items: center;
   gap: 8px;
+  margin: 0;
+`;
+
+const CreateCVLink = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #eff6ff;
+  color: #1a62ff;
+  border: 1px solid #1a62ff;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #1a62ff;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(26, 98, 255, 0.15);
+  }
 `;
 
 const UploadArea = styled.div`
@@ -406,9 +437,15 @@ const CVUpload = () => {
   return (
     <>
       <CVUploadContainer>
-        <Title>
-          📄 {language === 'vi' ? 'CV / Hồ Sơ' : 'CV / Resume'} ({cvList.length}/{MAX_CV_COUNT})
-        </Title>
+        <HeaderRow>
+          <Title>
+            📄 {language === 'vi' ? 'CV / Hồ Sơ' : 'CV / Resume'} ({cvList.length}/{MAX_CV_COUNT})
+          </Title>
+          <CreateCVLink to="/candidate/cv-templates">
+            <Plus size={14} />
+            {language === 'vi' ? 'Tạo CV theo style' : 'Create Styled CV'}
+          </CreateCVLink>
+        </HeaderRow>
 
         {loadingUserId ? (
           <UploadArea>

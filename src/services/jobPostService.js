@@ -106,7 +106,9 @@ class JobPostService {
 
       if (!response.ok) {
         const errorBody = await response.json().catch(() => ({ message: 'Request failed' }));
-        console.error(`❌ API Error ${response.status}:`, errorBody);
+        if (response.status !== 404) {
+          console.error(`❌ API Error ${response.status}:`, errorBody);
+        }
         throw new Error(errorBody.message || `HTTP ${response.status}`);
       }
 
@@ -114,7 +116,9 @@ class JobPostService {
       console.log('✅ API request successful:', data);
       return data;
     } catch (error) {
-      console.error('❌ Request error:', error);
+      if (!error.message.includes('not found') && !error.message.includes('404')) {
+        console.error('❌ Request error:', error);
+      }
       if (error.message.includes('Failed to fetch') || 
           error.message.includes('CORS') ||
           error.message.includes('NetworkError') ||
@@ -292,7 +296,9 @@ class JobPostService {
 
       return null;
     } catch (error) {
-      console.error('❌ Error fetching job post:', error);
+      if (!error.message.includes('not found') && !error.message.includes('404')) {
+        console.error('❌ Error fetching job post:', error);
+      }
       throw error;
     }
   }

@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { Bell, Search, LogOut, User, Users, Briefcase, DollarSign, AlertCircle, Settings, Eye, CheckCircle, Star, UserPlus, History, Building2, Tag as TagIcon } from 'lucide-react';
+import { Bell, Search, LogOut, User, Users, Briefcase, DollarSign, AlertCircle, Settings, Eye, CheckCircle, Star, UserPlus, History, Building2, Tag as TagIcon, Package, Zap, XCircle, MessageSquare, Send, Trash2, Home } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import candidateProfileService from '../services/candidateProfileService';
@@ -223,6 +223,404 @@ const NotificationDropdown = styled.div`
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+`;
+
+const ChatDropdown = styled.div`
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 320px;
+  max-height: 400px;
+  background: ${props => props.theme.colors.bgLight};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border: 1px solid ${props => props.theme.colors.border};
+  overflow: hidden;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  animation: slideDown 0.2s ease-out;
+`;
+
+const ChatDropdownHeader = styled.div`
+  padding: 12px 16px;
+  font-weight: 700;
+  font-size: 15px;
+  border-bottom: 1px solid ${props => props.theme.colors.border};
+  color: ${props => props.theme.colors.text};
+`;
+
+const ChatDropdownList = styled.div`
+  overflow-y: auto;
+  flex: 1;
+  max-height: 340px;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: ${props => props.theme.colors.border};
+    border-radius: 3px;
+  }
+`;
+
+const DeleteChatButton = styled.button`
+  background: none;
+  border: none;
+  color: ${props => props.theme.colors.textLight};
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  opacity: 0;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  
+  &:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+  }
+`;
+
+const ChatDropdownItem = styled.div`
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid ${props => props.theme.colors.border};
+  transition: background 0.2s;
+  
+  &:hover {
+    background: ${props => props.theme.colors.bgDark};
+    
+    ${DeleteChatButton} {
+      opacity: 1;
+    }
+  }
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const ChatDropdownAvatar = styled.div`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: ${props => props.theme.colors.gradientPrimary};
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  text-transform: uppercase;
+`;
+
+const ChatDropdownInfo = styled.div`
+  flex: 1;
+  min-width: 0;
+  
+  .name {
+    font-weight: 600;
+    font-size: 13.5px;
+    color: ${props => props.theme.colors.text};
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .job {
+    font-size: 11.5px;
+    color: ${props => props.theme.colors.textLight};
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+`;
+
+const EmptyChats = styled.div`
+  padding: 24px;
+  text-align: center;
+  color: ${props => props.theme.colors.textLight};
+  font-size: 13px;
+`;
+
+const FloatingChatWindow = styled.div`
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 340px;
+  height: 420px;
+  background: ${props => props.theme.colors.bgLight};
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  border: 1px solid ${props => props.theme.colors.border};
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 9999;
+  animation: slideUp 0.25s ease-out;
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+
+const FloatingChatHeader = styled.div`
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  padding: 12px 16px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
+  .title-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  
+  h4 {
+    margin: 0;
+    font-size: 14.5px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  p {
+    margin: 0;
+    font-size: 11px;
+    opacity: 0.9;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    background: #4ade80;
+    border-radius: 50%;
+  }
+  
+  .close-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    opacity: 0.8;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    
+    &:hover {
+      opacity: 1;
+    }
+  }
+`;
+
+const FloatingChatMessages = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: ${props => props.theme.colors.bgDark}80;
+  
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: ${props => props.theme.colors.border};
+    border-radius: 2px;
+  }
+`;
+
+const FloatingChatMsg = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: ${props => props.$mine ? 'flex-end' : 'flex-start'};
+  
+  .bubble {
+    max-width: 80%;
+    padding: 8px 12px;
+    border-radius: ${props => props.$mine ? '14px 14px 2px 14px' : '14px 14px 14px 2px'};
+    background: ${props => props.$mine ? 'linear-gradient(135deg, #1e40af, #3b82f6)' : props.theme.colors.bgLight};
+    color: ${props => props.$mine ? 'white' : props.theme.colors.text};
+    border: ${props => props.$mine ? 'none' : `1px solid ${props.theme.colors.border}`};
+    font-size: 13px;
+    line-height: 1.4;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  
+  .time {
+    font-size: 10px;
+    color: ${props => props.theme.colors.textLight};
+    margin-top: 3px;
+    padding: 0 4px;
+  }
+`;
+
+const FloatingChatInputRow = styled.div`
+  padding: 10px 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: ${props => props.theme.colors.bgLight};
+  border-top: 1px solid ${props => props.theme.colors.border};
+  
+  input {
+    flex: 1;
+    border: 1px solid ${props => props.theme.colors.border};
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-size: 13px;
+    background: ${props => props.theme.colors.bgDark};
+    color: ${props => props.theme.colors.text};
+    outline: none;
+    
+    &:focus {
+      border-color: #3b82f6;
+    }
+  }
+  
+  button {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: opacity 0.2s;
+    
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+`;
+
+const ModalBackdrop = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.2s ease-out;
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+`;
+
+const ConfirmModal = styled.div`
+  background: ${props => props.theme.colors.bgLight};
+  border-radius: 16px;
+  width: 90%;
+  max-width: 400px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  border: 1px solid ${props => props.theme.colors.border};
+  text-align: center;
+  animation: scaleUp 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  
+  @keyframes scaleUp {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  
+  .icon-wrapper {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    
+    svg {
+      width: 28px;
+      height: 28px;
+    }
+  }
+  
+  h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+    font-weight: 700;
+    color: ${props => props.theme.colors.text};
+  }
+  
+  p {
+    margin: 0 0 24px;
+    font-size: 14px;
+    color: ${props => props.theme.colors.textLight};
+    line-height: 1.5;
+  }
+`;
+
+const ConfirmButtonGroup = styled.div`
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  
+  button {
+    flex: 1;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .cancel-btn {
+    background: ${props => props.theme.colors.bgDark};
+    border: 1px solid ${props => props.theme.colors.border};
+    color: ${props => props.theme.colors.text};
+    
+    &:hover {
+      background: ${props => props.theme.colors.border};
+    }
+  }
+  
+  .delete-btn {
+    background: #ef4444;
+    border: none;
+    color: white;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+    
+    &:hover {
+      background: #dc2626;
+      transform: translateY(-1px);
     }
   }
 `;
@@ -449,6 +847,18 @@ const Navbar = ({ showSearch = true }) => {
   const [employerProfile, setEmployerProfile] = useState(null);
   const notificationRef = useRef(null);
 
+  // Candidate Chat state
+  const [showChatDropdown, setShowChatDropdown] = useState(false);
+  const [candidateChats, setCandidateChats] = useState([]);
+  const [activeChatApp, setActiveChatApp] = useState(null);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState('');
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
+  const chatRef = useRef(null);
+  const messagesEndRef = useRef(null);
+  const resolvedJobsRef = useRef({});
+  const [deleteConfirmAppId, setDeleteConfirmAppId] = useState(null);
+
   // Load job titles for suggestions
   useEffect(() => {
     if (user?.role !== 'candidate') return;
@@ -650,6 +1060,298 @@ const Navbar = ({ showSearch = true }) => {
     };
   }, [showNotifications]);
 
+  // Close chat dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (chatRef.current && !chatRef.current.contains(event.target)) {
+        setShowChatDropdown(false);
+      }
+    };
+
+    if (showChatDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showChatDropdown]);
+
+  // Load candidate chats (accepted and completed applications)
+  useEffect(() => {
+    if (user?.role !== 'candidate') return;
+
+    const loadCandidateChats = async () => {
+      try {
+        const { default: applicationService } = await import('../services/applicationService');
+        const apps = await applicationService.getMyCandidateApplications();
+        console.log('📥 [Navbar Chat] Raw applications:', apps);
+        // Filter applications where status is 'accepted' or 'completed'
+        const validChats = (apps || []).filter(app => app.status === 'accepted' || app.status === 'completed');
+
+        // Filter out locally deleted chats
+        const deletedChatIds = JSON.parse(localStorage.getItem('deleted_chats') || '[]');
+        const filteredValidChats = validChats.filter(app => !deletedChatIds.includes(app.applicationId));
+
+        // Fetch company logo and name for each chat dynamically
+        const enrichedChats = await Promise.all(
+          filteredValidChats.map(async (app) => {
+            try {
+              let job = null;
+              if (app.jobId) {
+                if (resolvedJobsRef.current[app.jobId] !== undefined) {
+                  const cached = resolvedJobsRef.current[app.jobId];
+                  job = cached === 'not_found' ? null : cached;
+                } else {
+                  if (app.jobId.startsWith('QJOB-')) {
+                    const { default: quickJobService } = await import('../services/quickJobService');
+                    job = await quickJobService.getQuickJob(app.jobId).catch(() => null);
+                  } else if (app.jobId.startsWith('JOB-')) {
+                    job = await jobPostService.getJobPost(app.jobId).catch(() => null);
+                  }
+                  resolvedJobsRef.current[app.jobId] = job || 'not_found';
+                }
+              }
+
+              // Search realNotifications for a matching notification by jobId
+              const matchingNotif = (realNotifications || []).find(
+                (notif) => notif.data?.jobId === app.jobId
+              );
+
+              const companyName = job 
+                ? (job.employerName || job.companyName) 
+                : (matchingNotif?.data?.companyName || app.employerName || app.companyName || 'Công ty');
+
+              const jobTitle = job 
+                ? job.title 
+                : (matchingNotif?.data?.jobTitle || app.jobTitle || 'Công việc');
+
+              let logo = job?.companyLogo;
+              if (!logo && companyName && companyName.toLowerCase().includes('katinat')) {
+                logo = '/OpPoReview/images/katinatlogo.jpg';
+              }
+              if (!logo) {
+                logo = '/OpPoReview/images/katinatlogo.jpg'; // default fallback
+              }
+
+              return {
+                ...app,
+                employerName: companyName,
+                companyLogo: logo,
+                jobTitle: jobTitle
+              };
+            } catch (err) {
+              console.error(`Error resolving job details for chat:`, err);
+            }
+
+            // Fallback for catch block
+            const matchingNotif = (realNotifications || []).find(
+              (notif) => notif.data?.jobId === app.jobId
+            );
+            const fallbackCompanyName = matchingNotif?.data?.companyName || app.employerName || app.companyName || 'Công ty';
+            let logo = '/OpPoReview/images/katinatlogo.jpg';
+            if (fallbackCompanyName.toLowerCase().includes('katinat')) {
+              logo = '/OpPoReview/images/katinatlogo.jpg';
+            }
+
+            return {
+              ...app,
+              employerName: fallbackCompanyName,
+              companyLogo: logo,
+              jobTitle: matchingNotif?.data?.jobTitle || app.jobTitle || 'Công việc'
+            };
+          })
+        );
+        setCandidateChats(enrichedChats);
+
+        // Sync database-stored messages to localStorage
+        enrichedChats.forEach(app => {
+          if (app.chatMessages && Array.isArray(app.chatMessages) && app.chatMessages.length > 0) {
+            const savedMessagesStr = localStorage.getItem(`chat_${app.applicationId}`);
+            const dbStr = JSON.stringify(app.chatMessages);
+            if (savedMessagesStr !== dbStr) {
+              // DB has different content than local — DB is source of truth
+              console.log(`[Candidate Sync] Syncing chat messages from DB for ${app.applicationId}`);
+              localStorage.setItem(`chat_${app.applicationId}`, dbStr);
+              window.dispatchEvent(new Event('storage'));
+            }
+          }
+        });
+
+        // Simple count of unread chats
+        let unreadTotal = 0;
+        enrichedChats.forEach(app => {
+          const savedMessages = localStorage.getItem(`chat_${app.applicationId}`);
+          if (savedMessages) {
+            try {
+              const msgs = JSON.parse(savedMessages);
+              const lastMsg = msgs[msgs.length - 1];
+              if (lastMsg && lastMsg.sender === 'me') { // sent by employer
+                const lastReadId = localStorage.getItem(`chat_read_${app.applicationId}`);
+                if (lastReadId !== String(lastMsg.id)) {
+                  unreadTotal++;
+                }
+              }
+            } catch (e) {
+              console.error(e);
+            }
+          }
+        });
+        setUnreadChatCount(unreadTotal);
+      } catch (error) {
+        console.error('Error loading candidate chats:', error);
+      }
+    };
+
+    loadCandidateChats();
+    const interval = setInterval(loadCandidateChats, 10000); // refresh every 10s
+    return () => clearInterval(interval);
+  }, [user, realNotifications]);
+
+  // Load chat messages when activeChatApp changes
+  useEffect(() => {
+    if (activeChatApp) {
+      const savedMessages = localStorage.getItem(`chat_${activeChatApp.applicationId}`);
+      let currentMsgs = [];
+      if (savedMessages) {
+        try {
+          currentMsgs = JSON.parse(savedMessages);
+          setChatMessages(currentMsgs);
+        } catch (e) {
+          console.error(e);
+        }
+      } else {
+        const companyName = activeChatApp.employerName || activeChatApp.companyName || 'Nhà tuyển dụng';
+        const greetingMessage = {
+          id: Date.now(),
+          sender: 'me',
+          text: language === 'vi'
+            ? `Xin chào! ${companyName} đã duyệt CV ứng tuyển công việc tuyển gấp của bạn. Bạn có thể liên hệ với chúng tôi qua đây nhé! 😊`
+            : `Hello! ${companyName} has approved your urgent job application. You can contact us here! 😊`,
+          time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+        };
+        currentMsgs = [greetingMessage];
+        setChatMessages(currentMsgs);
+        localStorage.setItem(`chat_${activeChatApp.applicationId}`, JSON.stringify(currentMsgs));
+      }
+
+      // Mark as read immediately on open
+      const lastMsg = currentMsgs[currentMsgs.length - 1];
+      if (lastMsg) {
+        localStorage.setItem(`chat_read_${activeChatApp.applicationId}`, String(lastMsg.id));
+      }
+    }
+  }, [activeChatApp, language]);
+
+  // Sync active chat messages in real time for candidate
+  useEffect(() => {
+    if (!activeChatApp) return;
+
+    const syncMessages = () => {
+      const savedMessages = localStorage.getItem(`chat_${activeChatApp.applicationId}`);
+      if (savedMessages) {
+        try {
+          const parsed = JSON.parse(savedMessages);
+          setChatMessages(prev => {
+            if (JSON.stringify(prev) !== JSON.stringify(parsed)) {
+              // Mark as read when new messages are received while the chat is open
+              const lastMsg = parsed[parsed.length - 1];
+              if (lastMsg) {
+                localStorage.setItem(`chat_read_${activeChatApp.applicationId}`, String(lastMsg.id));
+              }
+              return parsed;
+            }
+            return prev;
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+
+    // Poll every 1 second
+    const interval = setInterval(syncMessages, 1000);
+
+    // Listen for storage events (updates from other tabs)
+    const handleStorageChange = (e) => {
+      if (!e.key || e.key === `chat_${activeChatApp.applicationId}`) {
+        syncMessages();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [activeChatApp]);
+
+  // Scroll to bottom when messages update
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    if (activeChatApp) {
+      scrollToBottom();
+    }
+  }, [chatMessages, activeChatApp]);
+
+  const handleSendChatMessage = () => {
+    if (!chatInput.trim() || !activeChatApp || activeChatApp.status === 'completed') return;
+
+    const newMessage = {
+      id: Date.now(),
+      sender: 'them', // Candidate is 'them' on the shared storage
+      text: chatInput.trim(),
+      time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    };
+
+    const updated = [...chatMessages, newMessage];
+    setChatMessages(updated);
+    setChatInput('');
+    localStorage.setItem(`chat_${activeChatApp.applicationId}`, JSON.stringify(updated));
+    localStorage.setItem(`chat_read_${activeChatApp.applicationId}`, String(newMessage.id));
+
+    // Sync to DynamoDB — this is the bridge for cross-browser messaging
+    import('../services/applicationService').then(({ default: applicationService }) => {
+      applicationService.updateApplicationStatus(
+        activeChatApp.applicationId, 
+        activeChatApp.status, 
+        { chatMessages: updated }
+      ).catch(err => console.error('Failed to sync candidate message to DB:', err));
+    });
+  };
+
+  const handleDeleteChat = (applicationId, event) => {
+    event.stopPropagation(); // prevent opening the chat window
+    setDeleteConfirmAppId(applicationId);
+  };
+
+  const executeDeleteChat = () => {
+    if (!deleteConfirmAppId) return;
+    const applicationId = deleteConfirmAppId;
+    try {
+      const deletedChats = JSON.parse(localStorage.getItem('deleted_chats') || '[]');
+      if (!deletedChats.includes(applicationId)) {
+        deletedChats.push(applicationId);
+        localStorage.setItem('deleted_chats', JSON.stringify(deletedChats));
+      }
+      
+      // Update local state immediately
+      setCandidateChats(prev => prev.filter(chat => chat.applicationId !== applicationId));
+      
+      // Close active chat if it was the one deleted
+      if (activeChatApp && activeChatApp.applicationId === applicationId) {
+        setActiveChatApp(null);
+      }
+    } catch (e) {
+      console.error('Error deleting chat:', e);
+    } finally {
+      setDeleteConfirmAppId(null);
+    }
+  };
+
   const getRoleTranslation = (role) => {
     if (role === 'candidate') return t.login.roleCandidate;
     if (role === 'employer') return t.login.roleEmployer;
@@ -719,8 +1421,9 @@ const Navbar = ({ showSearch = true }) => {
   };
 
   return (
-    <NavbarContainer>
-      <NavLeft>
+    <>
+      <NavbarContainer>
+        <NavLeft>
         {showSearch && (
           <SearchBar ref={searchBarRef}>
             <Search onClick={handleSearchIconClick} style={{ cursor: 'pointer' }} />
@@ -764,6 +1467,63 @@ const Navbar = ({ showSearch = true }) => {
       </NavLeft>
 
       <NavRight>
+        {user?.role === 'candidate' && (
+          <div style={{ position: 'relative' }} ref={chatRef}>
+            <IconButton onClick={() => setShowChatDropdown(!showChatDropdown)} title={language === 'vi' ? 'Trò chuyện' : 'Chat'}>
+              <MessageSquare />
+              {unreadChatCount > 0 && <Badge>{unreadChatCount}</Badge>}
+            </IconButton>
+
+            {showChatDropdown && (
+              <ChatDropdown>
+                <ChatDropdownHeader>
+                  {language === 'vi' ? 'Trò chuyện' : 'Conversations'}
+                </ChatDropdownHeader>
+                <ChatDropdownList>
+                  {candidateChats.length > 0 ? (
+                    candidateChats.map((chat) => (
+                      <ChatDropdownItem
+                        key={chat.applicationId}
+                        onClick={() => {
+                          setActiveChatApp(chat);
+                          setShowChatDropdown(false);
+                        }}
+                      >
+                        <ChatDropdownAvatar>
+                          {chat.companyLogo ? (
+                            <img src={chat.companyLogo} alt="Logo" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                          ) : (
+                            (chat.employerName || chat.companyName || 'C').charAt(0)
+                          )}
+                        </ChatDropdownAvatar>
+                        <ChatDropdownInfo>
+                          <div className="name" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            {chat.employerName || chat.companyName || 'Công ty'}
+                            {chat.status === 'completed' && <span style={{ fontSize: '11px' }} title={language === 'vi' ? 'Công việc đã hoàn thành' : 'Job completed'}>🔒</span>}
+                          </div>
+                          <div className="job">{chat.jobTitle || chat.position || 'Công việc'}</div>
+                        </ChatDropdownInfo>
+                        <DeleteChatButton 
+                          onClick={(e) => handleDeleteChat(chat.applicationId, e)}
+                          title={language === 'vi' ? 'Xóa cuộc trò chuyện' : 'Delete conversation'}
+                        >
+                          <Trash2 size={16} />
+                        </DeleteChatButton>
+                      </ChatDropdownItem>
+                    ))
+                  ) : (
+                    <EmptyChats>
+                      {language === 'vi' 
+                        ? 'Chưa có cuộc trò chuyện nào. (Nhà tuyển dụng cần phê duyệt CV của bạn trước)' 
+                        : 'No conversations yet. (Employer needs to approve your CV first)'}
+                    </EmptyChats>
+                  )}
+                </ChatDropdownList>
+              </ChatDropdown>
+            )}
+          </div>
+        )}
+
         <div style={{ position: 'relative' }} ref={notificationRef}>
           <IconButton onClick={toggleNotifications}>
             <Bell />
@@ -797,14 +1557,17 @@ const Navbar = ({ showSearch = true }) => {
                   .filter(n => notificationTab === 'all' || !n.read)
                   .map((notification) => {
                     // Check if this is a real notification from service or static one
-                    const isRealNotification = notification.notificationId && notification.recipientId;
+                    const isRealNotification = !!notification.notificationId;
                     
-                    // Get icon based on notification type
+                    // Get icon based on notification type or icon name
                     let Icon = Bell;
-                    if (isRealNotification) {
-                      switch (notification.type) {
+                    const type = notification.type;
+                    const iconName = notification.icon;
+
+                    if (type) {
+                      switch (type) {
                         case 'package_purchase_request':
-                          Icon = Briefcase;
+                          Icon = Package;
                           break;
                         case 'package_approved':
                           Icon = CheckCircle;
@@ -816,16 +1579,72 @@ const Navbar = ({ showSearch = true }) => {
                           Icon = AlertCircle;
                           break;
                         case 'payments':
+                        case 'candidate_withdrawal_request':
+                        case 'withdrawal_request':
                           Icon = DollarSign;
                           break;
                         case 'urgent':
                           Icon = AlertCircle;
                           break;
+                        case 'success':
+                        case 'CV_ACCEPTED':
+                        case 'withdrawal_approved':
+                        case 'quick_job_activation_approved':
+                        case 'job_approved':
+                          Icon = CheckCircle;
+                          break;
+                        case 'system':
+                        case 'CV_REJECTED':
+                        case 'withdrawal_rejected':
+                        case 'quick_job_activation_rejected':
+                        case 'quick_job_activation_deactivated':
+                        case 'job_rejected':
+                          Icon = AlertCircle;
+                          break;
+                        case 'quick_job_activation_request':
+                          Icon = Zap;
+                          break;
                         default:
                           Icon = Bell;
                       }
-                    } else {
-                      Icon = notification.icon;
+                    } else if (iconName && typeof iconName === 'string') {
+                      switch (iconName.toLowerCase()) {
+                        case 'check-circle':
+                          Icon = CheckCircle;
+                          break;
+                        case 'alert-circle':
+                          Icon = AlertCircle;
+                          break;
+                        case 'bell':
+                          Icon = Bell;
+                          break;
+                        case 'dollar-sign':
+                          Icon = DollarSign;
+                          break;
+                        case 'briefcase':
+                          Icon = Briefcase;
+                          break;
+                        case 'package':
+                          Icon = Package;
+                          break;
+                        case 'zap':
+                          Icon = Zap;
+                          break;
+                        case 'x-circle':
+                          Icon = XCircle;
+                          break;
+                        case 'user-plus':
+                          Icon = UserPlus;
+                          break;
+                        case 'building':
+                        case 'building2':
+                          Icon = Building2;
+                          break;
+                        default:
+                          Icon = Bell;
+                      }
+                    } else if (iconName && typeof iconName !== 'string') {
+                      Icon = iconName;
                     }
                     
                     return (
@@ -905,11 +1724,109 @@ const Navbar = ({ showSearch = true }) => {
           </UserInfo>
         </UserMenu>
 
-        <IconButton onClick={handleLogout}>
-          <LogOut />
+        <IconButton onClick={() => navigate('/')} title={language === 'vi' ? 'Trở về trang chủ' : 'Return to Home'}>
+          <Home />
         </IconButton>
       </NavRight>
     </NavbarContainer>
+
+    {activeChatApp && (
+      <FloatingChatWindow>
+        <FloatingChatHeader>
+          <div className="title-group">
+            <ChatDropdownAvatar style={{ width: '28px', height: '28px', fontSize: '12px' }}>
+              {activeChatApp.companyLogo ? (
+                <img src={activeChatApp.companyLogo} alt="Logo" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                (activeChatApp.employerName || activeChatApp.companyName || 'C').charAt(0)
+              )}
+            </ChatDropdownAvatar>
+            <div>
+              <h4>{activeChatApp.employerName || activeChatApp.companyName}</h4>
+              <p style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                {activeChatApp.status === 'completed' ? (
+                  <>
+                    <span className="status-dot" style={{ backgroundColor: '#64748b' }} />
+                    {language === 'vi' ? 'Đã hoàn thành' : 'Completed'}
+                  </>
+                ) : (
+                  <>
+                    <span className="status-dot" style={{ backgroundColor: '#4ade80' }} />
+                    {language === 'vi' ? 'Đang hoạt động' : 'Active'}
+                  </>
+                )}
+              </p>
+            </div>
+          </div>
+          <button className="close-btn" onClick={() => setActiveChatApp(null)}>
+            <XCircle size={18} />
+          </button>
+        </FloatingChatHeader>
+        <FloatingChatMessages>
+          {chatMessages.map((msg) => (
+            <FloatingChatMsg key={msg.id} $mine={msg.sender === 'them'}>
+              <div className="bubble">{msg.text}</div>
+              <span className="time">{msg.time}</span>
+            </FloatingChatMsg>
+          ))}
+          <div ref={messagesEndRef} />
+        </FloatingChatMessages>
+        {activeChatApp.status === 'completed' ? (
+          <div style={{
+            padding: '14px 16px',
+            textAlign: 'center',
+            background: '#f8fafc',
+            borderTop: '1px solid #e2e8f0',
+            color: '#64748b',
+            fontSize: '12px',
+            fontWeight: '600',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px'
+          }}>
+            🔒 {language === 'vi' ? 'Cuộc trò chuyện đã khóa (Công việc hoàn thành)' : 'Chat locked (Job completed)'}
+          </div>
+        ) : (
+          <FloatingChatInputRow>
+            <input
+              type="text"
+              placeholder={language === 'vi' ? 'Nhắn tin...' : 'Type a message...'}
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSendChatMessage()}
+            />
+            <button onClick={handleSendChatMessage}>
+              <Send size={16} />
+            </button>
+          </FloatingChatInputRow>
+        )}
+      </FloatingChatWindow>
+    )}
+    {deleteConfirmAppId && (
+      <ModalBackdrop onClick={() => setDeleteConfirmAppId(null)}>
+        <ConfirmModal onClick={(e) => e.stopPropagation()}>
+          <div className="icon-wrapper">
+            <Trash2 />
+          </div>
+          <h3>{language === 'vi' ? 'Xóa cuộc trò chuyện' : 'Delete conversation'}</h3>
+          <p>
+            {language === 'vi'
+              ? 'Bạn có chắc chắn muốn xóa cuộc trò chuyện này không?'
+              : 'Are you sure you want to delete this conversation?'}
+          </p>
+          <ConfirmButtonGroup>
+            <button className="cancel-btn" onClick={() => setDeleteConfirmAppId(null)}>
+              {language === 'vi' ? 'Hủy' : 'Cancel'}
+            </button>
+            <button className="delete-btn" onClick={executeDeleteChat}>
+              {language === 'vi' ? 'Xóa' : 'Delete'}
+            </button>
+          </ConfirmButtonGroup>
+        </ConfirmModal>
+      </ModalBackdrop>
+    )}
+    </>
   );
 };
 
