@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { Bell, Search, LogOut, User, Users, Briefcase, DollarSign, AlertCircle, Settings, Eye, CheckCircle, Star, UserPlus, History, Building2, Tag as TagIcon, Package, Zap, XCircle, MessageSquare, Send, Trash2 } from 'lucide-react';
+import { Bell, Search, LogOut, User, Users, Briefcase, DollarSign, AlertCircle, Settings, Eye, CheckCircle, Star, UserPlus, History, Building2, Tag as TagIcon, Package, Zap, XCircle, MessageSquare, Send, Trash2, Home } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import candidateProfileService from '../services/candidateProfileService';
@@ -1724,8 +1724,8 @@ const Navbar = ({ showSearch = true }) => {
           </UserInfo>
         </UserMenu>
 
-        <IconButton onClick={handleLogout}>
-          <LogOut />
+        <IconButton onClick={() => navigate('/')} title={language === 'vi' ? 'Trở về trang chủ' : 'Return to Home'}>
+          <Home />
         </IconButton>
       </NavRight>
     </NavbarContainer>

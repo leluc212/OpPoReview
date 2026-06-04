@@ -361,6 +361,12 @@ class CandidateProfileService {
       console.log(`🔄 Toggling job ${jobId}. New list:`, updatedSavedJobs);
       
       const result = await this.updateProfile({ savedJobs: updatedSavedJobs });
+      
+      // Dispatch a custom event to notify components like FloatingSupportBar
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('savedJobsChanged', { detail: { savedJobs: updatedSavedJobs } }));
+      }
+      
       return result.savedJobs || [];
     } catch (error) {
       console.error('❌ Error toggling saved job:', error);

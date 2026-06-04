@@ -223,6 +223,18 @@ export const AuthProvider = ({ children }) => {
         } else {
           // No valid Cognito session
           console.log('❌ [AuthContext] No valid Cognito session');
+          const savedUser = localStorage.getItem('user');
+          if (savedUser && isMounted) {
+            try {
+              const userData = JSON.parse(savedUser);
+              console.log('✅ [AuthContext] Falling back to saved user in localStorage (no Cognito session):', userData.email);
+              setUser(userData);
+              setIsAuthenticated(true);
+              setIsLoading(false);
+              return;
+            } catch (e) { /* ignore */ }
+          }
+          
           if (isMounted) {
             setUser(null);
             setIsAuthenticated(false);
@@ -231,6 +243,22 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (error) {
         console.log('❌ [AuthContext] No authenticated user:', error.name, error.message);
+        
+        // Fallback: Check if we have user in localStorage to keep them logged in
+        const savedUser = localStorage.getItem('user');
+        if (savedUser && isMounted) {
+          try {
+            const userData = JSON.parse(savedUser);
+            console.log('✅ [AuthContext] Falling back to saved user in localStorage (Cognito error):', userData.email);
+            setUser(userData);
+            setIsAuthenticated(true);
+            setIsLoading(false);
+            return;
+          } catch (e) {
+            console.error('Failed to parse saved user:', e);
+          }
+        }
+        
         // No authenticated user, clear state
         if (isMounted) {
           setUser(null);

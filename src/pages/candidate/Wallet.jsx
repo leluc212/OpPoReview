@@ -713,6 +713,7 @@ const Wallet = () => {
   const [transactions, setTransactions] = useState([]);
   const [showBalance, setShowBalance] = useState(false);
   const [filterType, setFilterType] = useState('all');
+  const [filterDate, setFilterDate] = useState('');
   const [isDevModalOpen, setIsDevModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [candidateProfile, setCandidateProfile] = useState(null);
@@ -930,6 +931,55 @@ const Wallet = () => {
     }
   };
 
+  const handleExportTransactions = () => {
+    try {
+      // 1. Define CSV headers
+      const headers = language === 'vi' 
+        ? ['Mã giao dịch', 'Loại giao dịch', 'Tiêu đề', 'Chi tiết', 'Số tiền (VND)', 'Ngày giao dịch', 'Trạng thái']
+        : ['Transaction ID', 'Type', 'Title', 'Description', 'Amount (VND)', 'Date', 'Status'];
+        
+      // 2. Format row data
+      const rows = transactions.map(tx => {
+        const txType = tx.type === 'income' 
+          ? (language === 'vi' ? 'Thu nhập' : 'Income')
+          : (language === 'vi' ? 'Rút tiền / Chi tiêu' : 'Withdrawal / Expense');
+          
+        const txStatus = tx.status 
+          ? (tx.status === 'approved' ? (language === 'vi' ? 'Đã duyệt' : 'Approved')
+             : tx.status === 'rejected' ? (language === 'vi' ? 'Từ chối' : 'Rejected')
+             : (language === 'vi' ? 'Đang xử lý' : 'Pending'))
+          : (language === 'vi' ? 'Thành công' : 'Success');
+          
+        return [
+          tx.id,
+          txType,
+          tx.title,
+          tx.description ? tx.description.replace(/,/g, ';') : '', // Replace commas in description to avoid CSV cell splitting
+          tx.amount,
+          new Date(tx.date).toLocaleString(language === 'vi' ? 'vi-VN' : 'en-US'),
+          txStatus
+        ];
+      });
+      
+      // 3. Construct CSV Content (with UTF-8 BOM for Excel to display Vietnamese characters correctly)
+      const csvContent = "\uFEFF" // UTF-8 BOM
+        + [headers.join(','), ...rows.map(e => e.map(val => `"${val}"`).join(','))].join('\n');
+        
+      // 4. Create blob and download link
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `opporeview_transactions_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('Error exporting transactions:', err);
+      alert(language === 'vi' ? 'Xuất báo cáo thất bại!' : 'Failed to export report!');
+    }
+  };
+
   const stats = [
     {
       label: language === 'vi' ? 'Tổng Thu Nhập' : 'Total Income',
@@ -951,9 +1001,26 @@ const Wallet = () => {
     }
   ];
 
-  const filteredTransactions = filterType === 'all'
-    ? transactions
-    : transactions.filter(t => t.type === filterType);
+  const filteredTransactions = transactions.filter(t => {
+    // Filter by type
+    if (filterType !== 'all' && t.type !== filterType) {
+      return false;
+    }
+    
+    // Filter by date (compare local YYYY-MM-DD date representation)
+    if (filterDate) {
+      const d = new Date(t.date);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const date = String(d.getDate()).padStart(2, '0');
+      const localDateStr = `${year}-${month}-${date}`;
+      if (localDateStr !== filterDate) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
 
   return (
     <DashboardLayout role="candidate" showSearch={false} key={language}>
@@ -977,24 +1044,6 @@ const Wallet = () => {
                 <WalletIcon />
                 {language === 'vi' ? 'Ví Điện Tử' : 'E-Wallet'}
               </h1>
-              <div className="header-actions">
-                <Button
-                  $variant="secondary"
-                  $size="small"
-                  onClick={() => setIsDevModalOpen(true)}
-                >
-                  <Settings style={{ width: '18px', height: '18px' }} />
-                  {language === 'vi' ? 'Cài Đặt' : 'Settings'}
-                </Button>
-                <Button
-                  $variant="primary"
-                  $size="small"
-                  onClick={() => setIsDevModalOpen(true)}
-                >
-                  <Download style={{ width: '18px', height: '18px' }} />
-                  {language === 'vi' ? 'Xuất Báo Cáo' : 'Export Report'}
-                </Button>
-              </div>
             </Header>
 
             <BalanceCard
@@ -1069,7 +1118,7 @@ const Wallet = () => {
                       <Button
                         $variant="secondary"
                         $size="small"
-                        onClick={() => setIsDevModalOpen(true)}
+                        onClick={handleExportTransactions}
                       >
                         <Download style={{ width: '16px', height: '16px' }} />
                         {language === 'vi' ? 'Xuất' : 'Export'}
@@ -1106,6 +1155,8 @@ const Wallet = () => {
                     </div>
                     <Input
                       type="date"
+                      value={filterDate}
+                      onChange={(e) => setFilterDate(e.target.value)}
                       style={{ width: 'auto', padding: '10px 16px' }}
                     />
                   </FilterBar>

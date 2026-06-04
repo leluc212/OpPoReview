@@ -11,6 +11,9 @@ import { useLanguage } from '../../context/LanguageContext';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import CVUpload from '../../components/CVUpload';
 import candidateProfileService from '../../services/candidateProfileService';
+import applicationService from '../../services/applicationService';
+import jobPostService from '../../services/jobPostService';
+import quickJobService from '../../services/quickJobService';
 import { 
   Upload, 
   Save, 
@@ -1068,6 +1071,9 @@ const CandidateProfile = () => {
   const [profileImage, setProfileImage] = useState(null); // Will be loaded from DynamoDB
   const [cognitoEmail, setCognitoEmail] = useState('');
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [workHistory, setWorkHistory] = useState([]);
+  const [averageRating, setAverageRating] = useState(null);
+  const [totalReviews, setTotalReviews] = useState(0);
   
   // Default profile data - empty for new users
   const defaultFormData = {
@@ -1097,6 +1103,70 @@ const CandidateProfile = () => {
     return saved ? JSON.parse(saved) : { cccd: false, dateOfBirth: false, email: true }; // Email is always locked
   });
 
+  const loadWorkHistory = async () => {
+    try {
+      const apps = await applicationService.getMyCandidateApplications();
+      
+      // Resolve job details (Standard + Quick)
+      const [standardJobs, quickJobs] = await Promise.all([
+        jobPostService.getAllActiveJobs().catch(() => []),
+        quickJobService.getAllActiveQuickJobs().catch(() => [])
+      ]);
+      const allJobs = [...standardJobs, ...quickJobs];
+      
+      // Resolve missing jobs (e.g. inactive or archived)
+      const missingJobIds = [...new Set(apps.map(app => app.jobId).filter(id => id && !allJobs.find(j => (j.idJob || j.id || j.jobID) === id)))];
+      let additionalJobs = [];
+      if (missingJobIds.length > 0) {
+        console.log('🔍 Fetching missing jobs for profile work history:', missingJobIds);
+        const jobResults = await Promise.all(missingJobIds.map(async (id) => {
+          try {
+            const standard = await jobPostService.getJobPost(id);
+            if (standard) return standard;
+            return await quickJobService.getQuickJob(id);
+          } catch (e) {
+            return null;
+          }
+        }));
+        additionalJobs = jobResults.filter(Boolean);
+      }
+      const finalAllJobs = [...allJobs, ...additionalJobs];
+
+      // Process apps to find those with employerRating
+      const ratedApps = apps.filter(app => app.employerRating && typeof app.employerRating.overall === 'number');
+      if (ratedApps.length > 0) {
+        const sum = ratedApps.reduce((acc, app) => acc + app.employerRating.overall, 0);
+        const avg = sum / ratedApps.length;
+        setAverageRating(Math.round(avg * 10) / 10);
+        setTotalReviews(ratedApps.length);
+      } else {
+        setAverageRating(null);
+        setTotalReviews(0);
+      }
+
+      // Map completed and completed_pending_candidate apps for Work History
+      const completedApps = apps
+        .filter(app => app.status === 'completed' || app.status === 'completed_pending_candidate')
+        .map(app => {
+          const job = finalAllJobs.find(j => (j.idJob || j.id || j.jobID) === app.jobId);
+          return {
+            id: app.applicationId || app.id,
+            jobTitle: job?.title || app.jobTitle || '---',
+            companyName: job?.employerName || job?.companyName || app.employerName || '---',
+            location: job?.location || app.location || '---',
+            salary: job?.salary || job?.totalSalary || '---',
+            completedAt: app.updatedAt || app.appliedAt || app.createdAt,
+            employerRating: app.employerRating || null
+          };
+        })
+        .sort((a, b) => new Date(b.completedAt || 0) - new Date(a.completedAt || 0));
+
+      setWorkHistory(completedApps);
+    } catch (err) {
+      console.error('Error loading work history and ratings:', err);
+    }
+  };
+
   // Load Cognito email and profile from DynamoDB on mount
   useEffect(() => {
     const loadProfile = async () => {
@@ -1116,6 +1186,7 @@ const CandidateProfile = () => {
           
           // Try to load profile from DynamoDB
           try {
+            await loadWorkHistory();
             const profile = await candidateProfileService.getMyProfile();
             
             if (profile) {
@@ -1727,7 +1798,28 @@ const CandidateProfile = () => {
             </AvatarWrapper>
 
             <HeaderInfo>
-              <h1>{formData.fullName || (language === 'vi' ? 'Ứng viên mới' : 'New Candidate')}</h1>
+              <h1>
+                {formData.fullName || (language === 'vi' ? 'Ứng viên mới' : 'New Candidate')}
+                {averageRating !== null && (
+                  <span style={{ 
+                    fontSize: '18px', 
+                    fontWeight: '600', 
+                    background: 'rgba(245, 158, 11, 0.2)', 
+                    color: '#F59E0B', 
+                    padding: '4px 10px', 
+                    borderRadius: '20px', 
+                    marginLeft: '12px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    verticalAlign: 'middle',
+                    border: '1.5px solid rgba(245, 158, 11, 0.4)'
+                  }}>
+                    <Star size={16} fill="#F59E0B" style={{ strokeWidth: 0 }} />
+                    {averageRating}/5 ({totalReviews})
+                  </span>
+                )}
+              </h1>
               <div className="title">{formData.title || (language === 'vi' ? 'Chưa cập nhật vị trí' : 'Position not updated')}</div>
               
               <div className="info-row">
@@ -2271,6 +2363,116 @@ const CandidateProfile = () => {
             <CVUpload />
           </Sidebar>
         </ContentGrid>
+
+        {/* Work History Section */}
+        <Card
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          style={{ marginTop: '24px' }}
+        >
+          <div className="card-header">
+            <h2>
+              <Briefcase />
+              {language === 'vi' ? 'Lịch Sử Làm Việc' : 'Work History'}
+            </h2>
+          </div>
+          
+          {workHistory.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {workHistory.map((item) => (
+                <div key={item.id} style={{ 
+                  background: 'white', 
+                  border: '1.5px solid #E2E8F0', 
+                  borderRadius: '16px', 
+                  padding: '20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#1E40AF';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(30, 64, 175, 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#E2E8F0';
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.05)';
+                }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
+                    <div>
+                      <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1E293B', margin: '0 0 4px 0' }}>
+                        {item.jobTitle}
+                      </h3>
+                      <p style={{ fontSize: '14px', fontWeight: '600', color: '#475569', margin: 0 }}>
+                        {item.companyName}
+                      </p>
+                    </div>
+                    <span style={{ 
+                      fontSize: '13px', 
+                      color: '#64748B', 
+                      background: '#F1F5F9', 
+                      padding: '4px 10px', 
+                      borderRadius: '8px',
+                      fontWeight: '500'
+                    }}>
+                      {new Date(item.completedAt).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </span>
+                  </div>
+                  
+                  {item.employerRating && (
+                    <div style={{ 
+                      background: '#FFFBEB', 
+                      border: '1px solid #FDE68A', 
+                      borderRadius: '12px', 
+                      padding: '12px 16px' 
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                        <span style={{ fontSize: '14px', fontWeight: '700', color: '#B45309' }}>
+                          {language === 'vi' ? 'Đánh giá của nhà tuyển dụng:' : 'Employer review:'}
+                        </span>
+                        <div style={{ display: 'flex', gap: '2px' }}>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star 
+                              key={star} 
+                              size={14} 
+                              fill={item.employerRating.overall >= star ? '#F59E0B' : 'transparent'} 
+                              color="#F59E0B"
+                              style={{ strokeWidth: item.employerRating.overall >= star ? 0 : 2 }}
+                            />
+                          ))}
+                        </div>
+                        <span style={{ fontSize: '14px', fontWeight: '700', color: '#B45309' }}>
+                          {item.employerRating.overall}/5
+                        </span>
+                      </div>
+                      {item.employerRating.comment && (
+                        <p style={{ fontSize: '13.5px', color: '#475569', fontStyle: 'italic', margin: 0 }}>
+                          "{item.employerRating.comment}"
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94A3B8' }}>
+              <Briefcase size={48} style={{ marginBottom: '12px', opacity: 0.5 }} />
+              <p style={{ fontSize: '14px', fontWeight: '600' }}>
+                {language === 'vi' ? 'Chưa có lịch sử làm việc nào' : 'No work history found'}
+              </p>
+            </div>
+          )}
+        </Card>
 
         {isEditing && (
           <motion.div

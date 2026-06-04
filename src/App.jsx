@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { ThemeProvider as CustomThemeProvider, useTheme } from './context/ThemeContext';
 import ScrollToTop from './components/ScrollToTop';
+import FloatingSupportBar from './components/FloatingSupportBar';
 
 // Auth Pages
 import LandingPage from './pages/auth/LandingPage';
@@ -415,6 +416,7 @@ function ThemedApp() {
       <Router basename="/OpPoReview/">
         <ScrollToTop />
         <AppRoutes />
+        <FloatingSupportBar />
       </Router>
     </ThemeProvider>
   );

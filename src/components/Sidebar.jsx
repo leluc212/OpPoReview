@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useLayoutEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { 
   LayoutDashboard, 
   Briefcase, 
@@ -297,6 +298,7 @@ const NavLink = styled.div`
 
 const Sidebar = ({ role, onHoverChange }) => {
   const { t, language } = useLanguage();
+  const { logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const navRef = useRef(null);
@@ -349,9 +351,16 @@ const Sidebar = ({ role, onHoverChange }) => {
     isNavigatingRef.current = false;
   }, [location.pathname]);
   
-  const handleNavClick = (path, e) => {
-    if (path === '#') {
+  const handleNavClick = (link, e) => {
+    if (link.to === '#') {
       e?.preventDefault();
+      return;
+    }
+    
+    if (link.isLogout) {
+      e?.preventDefault();
+      logout();
+      navigate('/');
       return;
     }
     
@@ -363,10 +372,10 @@ const Sidebar = ({ role, onHoverChange }) => {
     }
     
     // special case for applications section
-    if (path === '/employer/standard-jobs') {
-      navigate(path, { state: { section: 'applications' } });
+    if (link.to === '/employer/standard-jobs') {
+      navigate(link.to, { state: { section: 'applications' } });
     } else {
-      navigate(path);
+      navigate(link.to);
     }
   };
   
@@ -382,7 +391,8 @@ const Sidebar = ({ role, onHoverChange }) => {
       { to: '/candidate/profile', icon: Users, label: t.sidebar.myProfile },
     ]},
     { section: t.sidebar.utilities, items: [
-      { to: '/candidate/wallet', icon: Wallet, label: t.sidebar.digitalWallet }
+      { to: '/candidate/wallet', icon: Wallet, label: t.sidebar.digitalWallet },
+      { to: 'logout', icon: LogOut, label: language === 'vi' ? 'Đăng xuất' : 'Log Out', isLogout: true }
     ]}
   ];
   
@@ -401,7 +411,8 @@ const Sidebar = ({ role, onHoverChange }) => {
     ]},
     { section: t.sidebar.utilities, items: [
       { to: '/employer/analytics', icon: BarChart3, label: t.sidebar.reports || 'Analytics' },
-      { to: '/employer/wallet', icon: Wallet, label: t.sidebar.digitalWallet }
+      { to: '/employer/wallet', icon: Wallet, label: t.sidebar.digitalWallet },
+      { to: 'logout', icon: LogOut, label: language === 'vi' ? 'Đăng xuất' : 'Log Out', isLogout: true }
     ]}
   ];
   
@@ -422,6 +433,7 @@ const Sidebar = ({ role, onHoverChange }) => {
       { to: '/admin/escrow', icon: ShieldCheck, label: language === 'vi' ? 'Ví Escrow' : 'Escrow Wallet' },
       { to: '/admin/notifications', icon: Bell, label: t.sidebar.notifications },
       { to: '/admin/profile', icon: User, label: t.sidebar.myProfile },
+      { to: 'logout', icon: LogOut, label: language === 'vi' ? 'Đăng xuất' : 'Log Out', isLogout: true }
     ]}
   ];
   
@@ -449,7 +461,7 @@ const Sidebar = ({ role, onHoverChange }) => {
                 <NavLink
                   key={linkIdx}
                   $active={location.pathname === link.to}
-                  onClick={() => handleNavClick(link.to)}
+                  onClick={(e) => handleNavClick(link, e)}
                   onMouseDown={(e) => e.preventDefault()}
                   tabIndex={0}
                 >

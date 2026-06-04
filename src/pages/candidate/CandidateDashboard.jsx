@@ -163,109 +163,78 @@ const IllustrationContainer = styled.div`
   }
 `;
 
-const ProfileCompletionBanner = styled(motion.div)`
-  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
+const ProfileReminderBanner = styled(motion.div)`
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1.5px solid #fcd34d;
   border-radius: ${props => props.theme.borderRadius.xl};
-  padding: 24px 28px;
+  padding: 16px 24px;
+  margin-bottom: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 24px;
-  color: white;
-  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.3);
-  flex: 1;
-  min-width: 0;
-  position: relative;
-  overflow: hidden;
+  gap: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -30%;
-    right: 10%;
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.05);
-  }
-  
-  .banner-content {
-    flex: 1;
-    min-width: 0;
-    position: relative;
-    z-index: 1;
-  }
-
-  h3 {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    line-height: 1.4;
-
-    svg {
-      width: 20px;
-      height: 20px;
-      flex-shrink: 0;
-    }
-  }
-  
-  p {
-    font-size: 13px;
-    opacity: 0.9;
-    margin-bottom: 2px;
-  }
-
-  .progress-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 10px;
-  }
-
-  .progress-percent {
-    font-size: 13px;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-
-  .banner-action {
-    position: relative;
-    z-index: 1;
-    flex-shrink: 0;
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: flex-start;
   }
 `;
 
-const ProgressBar = styled.div`
-  flex: 1;
-  max-width: 200px;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: ${props => props.theme.borderRadius.full};
-  overflow: hidden;
-  
-  &::after {
-    content: '';
-    display: block;
-    width: ${props => props.$progress || 0}%;
-    height: 100%;
-    background: white;
-    border-radius: ${props => props.theme.borderRadius.full};
-    transition: width 0.5s ease;
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+const ReminderContent = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #92400e;
+
+  svg {
+    width: 24px;
+    height: 24px;
+    color: #d97706;
+    flex-shrink: 0;
+  }
+
+  div {
+    h4 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 2px;
+      margin-top: 0;
+      color: #92400e;
+    }
+    p {
+      font-size: 13px;
+      opacity: 0.95;
+      margin: 0;
+      color: #b45309;
+      font-weight: 500;
+    }
+  }
+`;
+
+const ReminderAction = styled(Link)`
+  padding: 8px 16px;
+  background: #d97706;
+  color: white !important;
+  border-radius: ${props => props.theme.borderRadius.md};
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: #b45309;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
   }
 `;
 
@@ -282,9 +251,9 @@ const TopInfoRow = styled.div`
 
 const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: ${props => props.$fullWidth ? 'repeat(4, 1fr)' : 'repeat(2, 1fr)'};
-  gap: 10px;
-  flex: ${props => props.$fullWidth ? '1' : '2'};
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
   min-width: 0;
 
   @media (max-width: 768px) {
@@ -1202,6 +1171,7 @@ const CandidateDashboard = () => {
   const [allActiveJobs, setAllActiveJobs] = useState([]);
   const [currentJob, setCurrentJob] = useState(null);
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [successfulMatchesCount, setSuccessfulMatchesCount] = useState(0);
 
   const banners = [
     { src: "/OpPoReview/images/seoul.jpg", alt: "Seoul Vua Mì Cay" },
@@ -1354,7 +1324,7 @@ const CandidateDashboard = () => {
       if (acceptedApp) {
         const job = finalAllJobs.find(j => (j.idJob || j.id || j.jobID) === acceptedApp.jobId);
         
-        const companyVal = job.employerName || job.companyName;
+        const companyVal = job ? (job.employerName || job.companyName) : null;
         const isJobValid = job && 
                           job.title && 
                           !job.title.includes('Unknown') && 
@@ -1396,6 +1366,32 @@ const CandidateDashboard = () => {
       } else {
         setCurrentJob(null);
       }
+
+      // Calculate successful matches count for the current month
+      const nowObj = new Date();
+      const currentYear = nowObj.getFullYear();
+      const currentMonth = nowObj.getMonth();
+      
+      const monthlyMatches = apps.filter(app => {
+        // Must be accepted or completed status
+        const isAccepted = app.status === 'accepted' || 
+                           app.status === 'completed' || 
+                           app.status === 'completed_pending_candidate';
+        if (!isAccepted) return false;
+        
+        // Must be urgent job
+        const job = finalAllJobs.find(j => (j.idJob || j.id || j.jobID) === app.jobId);
+        const isUrgent = job?.isUrgent || app.jobType === 'quick' || !!job?.jobID || false;
+        if (!isUrgent) return false;
+        
+        // Must be in current month
+        const appDateStr = app.updatedAt || app.appliedAt || app.createdAt;
+        if (!appDateStr) return false;
+        const appDate = new Date(appDateStr);
+        return appDate.getFullYear() === currentYear && appDate.getMonth() === currentMonth;
+      });
+      
+      setSuccessfulMatchesCount(monthlyMatches.length);
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -1969,43 +1965,33 @@ const CandidateDashboard = () => {
             </IllustrationContainer>
           </WelcomeBanner>
 
-          {/* Profile + Stats Row */}
-          <TopInfoRow>
-            {profileCompletion < 100 && (
-              <ProfileCompletionBanner
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
+          {/* Profile Warning Reminder Banner */}
+          {profileCompletion < 100 && (
+            <ProfileReminderBanner
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <ReminderContent>
+                <AlertCircle />
+                <div>
+                  <h4>{language === 'vi' ? 'Hồ sơ của bạn chưa hoàn thiện' : 'Your profile is incomplete'}</h4>
+                  <p>{language === 'vi' ? 'Hoàn thành hồ sơ để tăng cơ hội tiếp cận nhà tuyển dụng.' : 'Complete your profile to increase visibility to employers.'}</p>
+                </div>
+              </ReminderContent>
+              <ReminderAction
+                to="/candidate/profile"
+                onClick={(e) => { e.preventDefault(); navigate('/candidate/profile'); }}
               >
-                <div className="banner-content">
-                  <h3>
-                    <Sparkles />
-                    {language === 'vi' ? 'Hoàn thiện hồ sơ để tăng cơ hội được tuyển dụng' : 'Complete your profile to increase hiring chances'}
-                  </h3>
-                  <p>{language === 'vi' ? `Hồ sơ của bạn đã hoàn thành` : `Your profile is ${profileCompletion}% complete`}</p>
-                  <div className="progress-row">
-                    <ProgressBar $progress={profileCompletion} />
-                    <span className="progress-percent">{profileCompletion}%</span>
-                  </div>
-                </div>
-                <div className="banner-action">
-                  <ActionButton
-                    as={motion.a}
-                    href="/candidate/profile"
-                    onClick={(e) => { e.preventDefault(); navigate('/candidate/profile'); }}
-                    $variant="primary"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.98 }}
-                    style={{ padding: '10px 20px', fontSize: '13px', background: 'white', color: '#1e40af', fontWeight: 700, borderRadius: '12px', whiteSpace: 'nowrap' }}
-                  >
-                    <Upload />
-                    {language === 'vi' ? 'Hoàn Thiện Ngay' : 'Complete Now'}
-                  </ActionButton>
-                </div>
-              </ProfileCompletionBanner>
-            )}
+                <Upload />
+                {language === 'vi' ? 'Hoàn thiện ngay' : 'Complete now'}
+              </ReminderAction>
+            </ProfileReminderBanner>
+          )}
 
-            <StatsGrid $fullWidth={profileCompletion >= 100}>
+          {/* Stats Row */}
+          <TopInfoRow>
+            <StatsGrid>
               <StatsCard
                 title={language === 'vi' ? 'Hồ Sơ Đã Nộp' : 'Applications'}
                 value={realApplications.length.toString()}
@@ -2026,22 +2012,13 @@ const CandidateDashboard = () => {
                 onClick={() => navigate('/candidate/jobs?tab=saved')}
               />
               <StatsCard
-                title={language === 'vi' ? 'Lượt Xem Hồ Sơ' : 'Profile Views'}
-                value={(candidateProfile?.profileViews || (120 + realApplications.length * 5)).toString()}
-                change="+12%"
-                changeText={language === 'vi' ? 'tháng này' : 'this month'}
-                icon={Eye}
-                color="#10B981"
-                positive
-              />
-              <StatsCard
                 title={language === 'vi' ? 'Job Match Thành Công' : 'Successful Matches'}
-                value={currentJob ? "1" : "0"}
-                change={currentJob ? "+1" : "0"}
+                value={successfulMatchesCount.toString()}
+                change={successfulMatchesCount > 0 ? `+${successfulMatchesCount}` : "0"}
                 changeText={language === 'vi' ? 'tháng này' : 'this month'}
                 icon={CheckCircle}
                 color="#1e40af"
-                positive={!!currentJob}
+                positive={successfulMatchesCount > 0}
               />
             </StatsGrid>
           </TopInfoRow>

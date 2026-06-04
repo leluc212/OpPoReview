@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
 import adminReportService from '../../services/adminReportService';
+import feedbackService from '../../services/feedbackService';
 import { motion } from 'framer-motion';
 import { 
   BarChart3,
@@ -17,8 +18,21 @@ import {
   Zap,
   Briefcase,
   Package,
-  Award
+  Award,
+  MessageSquare,
+  CheckCircle,
+  Trash2
 } from 'lucide-react';
+
+const parseDateTime = (str) => {
+  if (!str) return new Date();
+  if (typeof str !== 'string') return new Date(str);
+  // If it's a naive ISO string like "2026-06-04T04:27:00.123" without offset
+  if (str.includes('T') && !str.endsWith('Z') && !str.includes('+') && !str.substring(str.indexOf('T')).includes('-')) {
+    return new Date(str + 'Z');
+  }
+  return new Date(str);
+};
 
 const PageContainer = styled.div`
   animation: fadeIn 0.5s ease-in;
@@ -640,6 +654,62 @@ const Reports = () => {
     subscriptions: []
   });
 
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [feedbackCategoryFilter, setFeedbackCategoryFilter] = useState('all');
+  const [feedbackStatusFilter, setFeedbackStatusFilter] = useState('all');
+
+  const loadFeedbacks = async () => {
+    try {
+      const list = await feedbackService.getAllFeedbacks();
+      setFeedbacks(list);
+      const unread = list.filter(item => item.status === 'unread').length;
+      setUnreadCount(unread);
+    } catch (e) {
+      console.error('Error loading feedbacks:', e);
+    }
+  };
+
+  const handleMarkAsRead = async (id) => {
+    await feedbackService.markAsRead(id);
+    await loadFeedbacks();
+  };
+
+  const handleDeleteFeedback = async (id) => {
+    const msg = language === 'vi' 
+      ? 'Bạn có chắc chắn muốn xóa ý kiến góp ý này không?' 
+      : 'Are you sure you want to delete this feedback?';
+    if (window.confirm(msg)) {
+      await feedbackService.deleteFeedback(id);
+      await loadFeedbacks();
+    }
+  };
+
+
+  useEffect(() => {
+    loadFeedbacks();
+
+    const handleFeedbackUpdate = () => {
+      loadFeedbacks();
+    };
+
+    window.addEventListener('newFeedbackSubmitted', handleFeedbackUpdate);
+    window.addEventListener('feedbackStatusChanged', handleFeedbackUpdate);
+
+    return () => {
+      window.removeEventListener('newFeedbackSubmitted', handleFeedbackUpdate);
+      window.removeEventListener('feedbackStatusChanged', handleFeedbackUpdate);
+    };
+  }, []);
+
+  const filteredFeedbacks = useMemo(() => {
+    return feedbacks.filter(item => {
+      const matchCat = feedbackCategoryFilter === 'all' || item.category === feedbackCategoryFilter;
+      const matchStat = feedbackStatusFilter === 'all' || item.status === feedbackStatusFilter;
+      return matchCat && matchStat;
+    });
+  }, [feedbacks, feedbackCategoryFilter, feedbackStatusFilter]);
+
   // Load report data from consolidated service
   useEffect(() => {
     const fetchAllData = async () => {
@@ -740,7 +810,7 @@ const Reports = () => {
         const revenue = subs
           .filter(s => {
             if (!(s.status === 'active' || s.status === 'expired' || s.status === 'expiring')) return false;
-            const d = new Date(s.purchaseDateTime || s.createdAt || '');
+            const d = parseDateTime(s.purchaseDateTime || s.createdAt || '');
             return d >= weekStart && d <= weekEnd;
           })
           .reduce((sum, s) => sum + (parseFloat(s.price) || 0), 0) / 1000000;
@@ -874,29 +944,74 @@ const Reports = () => {
             <Award size={18} style={{ display: 'inline', marginRight: '8px' }} />
             {language === 'vi' ? 'Trạng thái các gói' : 'Package Status'}
           </Tab>
+          <Tab 
+            $active={activeTab === 'feedback'}
+            onClick={() => setActiveTab('feedback')}
+            style={{ display: 'flex', alignItems: 'center' }}
+          >
+            <MessageSquare size={18} style={{ marginRight: '8px' }} />
+            {language === 'vi' ? 'Góp ý' : 'Feedback'}
+            {unreadCount > 0 && (
+              <span style={{ 
+                marginLeft: '8px', 
+                background: '#ef4444', 
+                color: 'white', 
+                borderRadius: '10px', 
+                padding: '2px 8px', 
+                fontSize: '11px',
+                fontWeight: 'bold',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '18px',
+                minWidth: '18px'
+              }}>
+                {unreadCount}
+              </span>
+            )}
+          </Tab>
         </TabsContainer>
 
         <ControlBar>
-          <FilterGroup>
-            <Filter size={18} />
-            <Select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}>
-              <option value="day">{language === 'vi' ? 'Theo ngày' : 'By Day'}</option>
-              <option value="month">{language === 'vi' ? 'Theo tháng' : 'By Month'}</option>
-              <option value="year">{language === 'vi' ? 'Theo năm' : 'By Year'}</option>
-            </Select>
-            <MapPin size={18} />
-            <Select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}>
-              {districts.map((district, index) => (
-                <option key={index} value={index === 0 ? 'all' : district}>
-                  {district}
-                </option>
-              ))}
-            </Select>
-          </FilterGroup>
-          <DownloadButton onClick={handleExportExcel}>
-            <Download />
-            {language === 'vi' ? 'Xuất Excel' : 'Export Excel'}
-          </DownloadButton>
+          {activeTab === 'feedback' ? (
+            <FilterGroup>
+              <Filter size={18} />
+              <Select value={feedbackCategoryFilter} onChange={(e) => setFeedbackCategoryFilter(e.target.value)}>
+                <option value="all">{language === 'vi' ? 'Tất cả phân loại' : 'All Categories'}</option>
+                <option value="bug">{language === 'vi' ? 'Báo lỗi' : 'Bugs'}</option>
+                <option value="suggestion">{language === 'vi' ? 'Góp ý' : 'Suggestions'}</option>
+                <option value="other">{language === 'vi' ? 'Khác' : 'Others'}</option>
+              </Select>
+              <Select value={feedbackStatusFilter} onChange={(e) => setFeedbackStatusFilter(e.target.value)}>
+                <option value="all">{language === 'vi' ? 'Tất cả trạng thái' : 'All Status'}</option>
+                <option value="unread">{language === 'vi' ? 'Chưa đọc' : 'Unread'}</option>
+                <option value="read">{language === 'vi' ? 'Đã đọc' : 'Read'}</option>
+              </Select>
+            </FilterGroup>
+          ) : (
+            <FilterGroup>
+              <Filter size={18} />
+              <Select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}>
+                <option value="day">{language === 'vi' ? 'Theo ngày' : 'By Day'}</option>
+                <option value="month">{language === 'vi' ? 'Theo tháng' : 'By Month'}</option>
+                <option value="year">{language === 'vi' ? 'Theo năm' : 'By Year'}</option>
+              </Select>
+              <MapPin size={18} />
+              <Select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}>
+                {districts.map((district, index) => (
+                  <option key={index} value={index === 0 ? 'all' : district}>
+                    {district}
+                  </option>
+                ))}
+              </Select>
+            </FilterGroup>
+          )}
+          {activeTab !== 'feedback' && (
+            <DownloadButton onClick={handleExportExcel}>
+              <Download />
+              {language === 'vi' ? 'Xuất Excel' : 'Export Excel'}
+            </DownloadButton>
+          )}
         </ControlBar>
 
         {activeTab === 'statistics' && (
@@ -1277,7 +1392,7 @@ const Reports = () => {
                         </TableCell>
                         <TableCell $align="center" style={{ color: '#6b7280', fontSize: '13px' }}>VNĐ</TableCell>
                         <TableCell $align="center">
-                          {purchase.purchaseDate || (purchase.purchaseDateTime ? new Date(purchase.purchaseDateTime).toLocaleDateString('vi-VN') : (purchase.createdAt ? new Date(purchase.createdAt).toLocaleDateString('vi-VN') : 'N/A'))}
+                          {purchase.purchaseDate || (purchase.purchaseDateTime ? parseDateTime(purchase.purchaseDateTime).toLocaleDateString('vi-VN') : (purchase.createdAt ? parseDateTime(purchase.createdAt).toLocaleDateString('vi-VN') : 'N/A'))}
                         </TableCell>
                         <TableCell $align="center">
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
@@ -1326,7 +1441,7 @@ const Reports = () => {
                         </TableCell>
                         <TableCell $align="center" style={{ color: '#6b7280', fontSize: '13px' }}>VNĐ</TableCell>
                         <TableCell $align="center">
-                          {purchase.purchaseDate || (purchase.purchaseDateTime ? new Date(purchase.purchaseDateTime).toLocaleDateString('vi-VN') : (purchase.createdAt ? new Date(purchase.createdAt).toLocaleDateString('vi-VN') : 'N/A'))}
+                          {purchase.purchaseDate || (purchase.purchaseDateTime ? parseDateTime(purchase.purchaseDateTime).toLocaleDateString('vi-VN') : (purchase.createdAt ? parseDateTime(purchase.createdAt).toLocaleDateString('vi-VN') : 'N/A'))}
                         </TableCell>
                         <TableCell $align="center">
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
@@ -1373,8 +1488,8 @@ const Reports = () => {
                         </TableCell>
                         <TableCell style={{ fontWeight: 600 }}>{pkg.companyName || pkg.employer || 'Unknown'}</TableCell>
                         <TableCell>{pkg.packageName}</TableCell>
-                        <TableCell $align="center">{pkg.purchaseDate || (pkg.purchaseDateTime ? new Date(pkg.purchaseDateTime).toLocaleDateString('vi-VN') : (pkg.createdAt ? new Date(pkg.createdAt).toLocaleDateString('vi-VN') : 'N/A'))}</TableCell>
-                        <TableCell $align="center">{pkg.expiryDate || (pkg.expiryDateTime ? new Date(pkg.expiryDateTime).toLocaleDateString('vi-VN') : (pkg.updatedAt ? new Date(new Date(pkg.updatedAt).getTime() + (7 * 24 * 60 * 60 * 1000)).toLocaleDateString('vi-VN') : 'N/A'))}</TableCell>
+                        <TableCell $align="center">{pkg.purchaseDate || (pkg.purchaseDateTime ? parseDateTime(pkg.purchaseDateTime).toLocaleDateString('vi-VN') : (pkg.createdAt ? parseDateTime(pkg.createdAt).toLocaleDateString('vi-VN') : 'N/A'))}</TableCell>
+                        <TableCell $align="center">{pkg.expiryDate || (pkg.expiryDateTime ? parseDateTime(pkg.expiryDateTime).toLocaleDateString('vi-VN') : (pkg.updatedAt ? new Date(parseDateTime(pkg.updatedAt).getTime() + (7 * 24 * 60 * 60 * 1000)).toLocaleDateString('vi-VN') : 'N/A'))}</TableCell>
                         <TableCell $align="center">
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
                             {pkg.status === 'pending' && <span style={{ background: '#fef3c7', color: '#92400e', borderRadius: '12px', padding: '2px 10px', fontSize: '12px', fontWeight: 600 }}>{language === 'vi' ? 'Chưa kích hoạt' : 'Inactive'}</span>}
@@ -1416,8 +1531,8 @@ const Reports = () => {
                         </TableCell>
                         <TableCell style={{ fontWeight: 600 }}>{pkg.companyName || pkg.employer || 'Unknown'}</TableCell>
                         <TableCell>{pkg.packageName}</TableCell>
-                        <TableCell $align="center">{pkg.purchaseDate || (pkg.purchaseDateTime ? new Date(pkg.purchaseDateTime).toLocaleDateString('vi-VN') : 'N/A')}</TableCell>
-                        <TableCell $align="center">{pkg.expiryDate || (pkg.expiryDateTime ? new Date(pkg.expiryDateTime).toLocaleDateString('vi-VN') : 'N/A')}</TableCell>
+                        <TableCell $align="center">{pkg.purchaseDate || (pkg.purchaseDateTime ? parseDateTime(pkg.purchaseDateTime).toLocaleDateString('vi-VN') : 'N/A')}</TableCell>
+                        <TableCell $align="center">{pkg.expiryDate || (pkg.expiryDateTime ? parseDateTime(pkg.expiryDateTime).toLocaleDateString('vi-VN') : 'N/A')}</TableCell>
                         <TableCell $align="center">
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
                             {pkg.status === 'pending' && <span style={{ background: '#fef3c7', color: '#92400e', borderRadius: '12px', padding: '2px 10px', fontSize: '12px', fontWeight: 600 }}>{language === 'vi' ? 'Chưa kích hoạt' : 'Inactive'}</span>}
@@ -1434,6 +1549,131 @@ const Reports = () => {
               </ServiceTableContent>
             </ServiceTable>
           </>
+        )}
+
+        {activeTab === 'feedback' && (
+          <ServiceTable>
+            <ServiceTableHeader>
+              <MessageSquare size={24} />
+              {language === 'vi' ? 'Danh sách góp ý & Báo lỗi từ người dùng' : 'User Feedbacks & Bug Reports'}
+            </ServiceTableHeader>
+            <ServiceTableContent>
+              <ServiceTableGrid style={{ minWidth: '1000px' }}>
+                <thead>
+                  <TableHeaderRow>
+                    <TableHeaderCell $align="center" style={{ width: '60px' }}>{language === 'vi' ? 'STT' : 'No.'}</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '220px' }}>{language === 'vi' ? 'Người gửi' : 'Sender'}</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '120px' }}>{language === 'vi' ? 'Phân loại' : 'Category'}</TableHeaderCell>
+                    <TableHeaderCell>{language === 'vi' ? 'Nội dung góp ý' : 'Feedback Content'}</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '180px' }}>{language === 'vi' ? 'Thời gian' : 'Time'}</TableHeaderCell>
+                    <TableHeaderCell $align="center" style={{ width: '120px' }}>{language === 'vi' ? 'Trạng thái' : 'Status'}</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '180px' }}>{language === 'vi' ? 'Thao tác' : 'Actions'}</TableHeaderCell>
+                  </TableHeaderRow>
+                </thead>
+                <tbody>
+                  {filteredFeedbacks.length > 0 ? (
+                    filteredFeedbacks.map((item, index) => (
+                      <TableRow key={item.id}>
+                        <TableCell $align="center" style={{ fontWeight: 600, color: '#6b7280' }}>
+                          {index + 1}
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div style={{ fontWeight: 600 }}>{item.userName}</div>
+                            <div style={{ fontSize: '12px', color: '#6b7280' }}>{item.userEmail}</div>
+                            <div style={{ marginTop: '4px' }}>
+                              <span style={{
+                                fontSize: '11px',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                fontWeight: 600,
+                                background: item.userRole === 'employer' ? '#f3e8ff' : item.userRole === 'candidate' ? '#dbeafe' : '#f3f4f6',
+                                color: item.userRole === 'employer' ? '#6b21a8' : item.userRole === 'candidate' ? '#1e40af' : '#4b5563',
+                              }}>
+                                {item.userRole === 'employer' ? (language === 'vi' ? 'Nhà tuyển dụng' : 'Employer') :
+                                 item.userRole === 'candidate' ? (language === 'vi' ? 'Ứng viên' : 'Candidate') :
+                                 (language === 'vi' ? 'Khách' : 'Guest')}
+                              </span>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span style={{
+                            padding: '4px 10px',
+                            borderRadius: '12px',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            background: item.category === 'bug' ? '#fee2e2' : item.category === 'suggestion' ? '#e0f2fe' : '#f3f4f6',
+                            color: item.category === 'bug' ? '#dc2626' : item.category === 'suggestion' ? '#0369a1' : '#4b5563',
+                          }}>
+                            {item.category === 'bug' ? (language === 'vi' ? 'Báo lỗi' : 'Bug') :
+                             item.category === 'suggestion' ? (language === 'vi' ? 'Góp ý' : 'Suggestion') :
+                             (language === 'vi' ? 'Ý kiến khác' : 'Other')}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <div style={{ maxWidth: '400px', whiteSpace: 'normal', wordBreak: 'break-word', lineHeight: '1.4' }}>
+                            {item.comment}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div style={{ fontSize: '13px', color: '#4b5563' }}>
+                            {parseDateTime(item.createdAt).toLocaleString(language === 'vi' ? 'vi-VN' : 'en-US', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric'
+                            })}
+                          </div>
+                        </TableCell>
+                        <TableCell $align="center">
+                          <span style={{
+                            padding: '4px 10px',
+                            borderRadius: '12px',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            background: item.status === 'unread' ? '#fef3c7' : '#d1fae5',
+                            color: item.status === 'unread' ? '#d97706' : '#059669',
+                          }}>
+                            {item.status === 'unread' ? (language === 'vi' ? 'Chưa đọc' : 'Unread') : (language === 'vi' ? 'Đã đọc' : 'Read')}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            {item.status === 'unread' && (
+                              <ActionButtonSmall 
+                                $variant="primary" 
+                                onClick={() => handleMarkAsRead(item.id)}
+                                title={language === 'vi' ? 'Đánh dấu đã đọc' : 'Mark as read'}
+                              >
+                                <CheckCircle size={14} />
+                                {language === 'vi' ? 'Đọc' : 'Read'}
+                              </ActionButtonSmall>
+                            )}
+                            <ActionButtonSmall 
+                              onClick={() => handleDeleteFeedback(item.id)}
+                              style={{ background: '#fee2e2', color: '#dc2626' }}
+                              title={language === 'vi' ? 'Xóa góp ý' : 'Delete feedback'}
+                            >
+                              <Trash2 size={14} />
+                              {language === 'vi' ? 'Xóa' : 'Delete'}
+                            </ActionButtonSmall>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="7" style={{ textAlign: 'center', padding: '32px', color: '#64748b', fontSize: '15px' }}>
+                        {language === 'vi' ? 'Không tìm thấy ý kiến góp ý nào phù hợp.' : 'No matching feedbacks found.'}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </ServiceTableGrid>
+            </ServiceTableContent>
+          </ServiceTable>
         )}
       </PageContainer>
     </DashboardLayout>
