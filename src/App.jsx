@@ -78,7 +78,6 @@ import AdminManagement from './pages/admin/AdminManagement';
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { isAuthenticated, user, logout } = useAuth();
   const location = useLocation();
-  const BASE = import.meta.env.BASE_URL || '/';
   
   if (!isAuthenticated) {
     const redirect = location.pathname + location.search;
@@ -100,8 +99,8 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
         <h2>Tài khoản đã đăng nhập ở vai trò khác</h2>
         <p>Tài khoản này hiện đang ở vai trò "{user?.role || 'chưa xác định'}" và không thể truy cập trang này.</p>
         <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-          <button onClick={() => window.location.replace(`${BASE}${dashboardPath.replace(/^\//,'')}`)}>Đi tới bảng điều khiển</button>
-          <button onClick={async () => { await logout(); window.location.replace(`${BASE}login`); }}>Đăng xuất</button>
+          <button onClick={() => window.location.href = dashboardPath}>Đi tới bảng điều khiển</button>
+          <button onClick={async () => { await logout(); window.location.href = '/login'; }}>Đăng xuất</button>
         </div>
       </div>
     );
@@ -115,7 +114,7 @@ const GuestRoute = ({ children }) => {
   const { isAuthenticated, user, isLoading } = useAuth();
   
   if (isLoading) {
-    return null; // Let AppRoutes handle global loading state
+    return null;
   }
   
   // If there is a pending Google login error, keep user on login page so modal can show
@@ -391,6 +390,9 @@ function AppRoutes() {
           <AdminManagement />
         </ProtectedRoute>
       } />
+
+      {/* Catch-all: redirect mọi URL không khớp về trang chủ */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
@@ -409,7 +411,9 @@ function App() {
 
 function ThemedApp() {
   const { isDarkMode } = useTheme();
-  
+  // Đọc BASE_URL từ Vite (vite.config.js base: '/') — local: '/', GitHub Pages: '/OpPoReview/'
+  const basename = import.meta.env.BASE_URL || '/';
+
   return (
     <ThemeProvider theme={isDarkMode ? darkTheme : theme}>
       <GlobalStyles />

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+﻿import React, { useState, useRef, useEffect, useCallback } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { motion, useMotionValue, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -1174,9 +1174,9 @@ const CandidateDashboard = () => {
   const [successfulMatchesCount, setSuccessfulMatchesCount] = useState(0);
 
   const banners = [
-    { src: "/OpPoReview/images/seoul.jpg", alt: "Seoul Vua Mì Cay" },
-    { src: "/OpPoReview/images/unnamed1.jpg", alt: "Banner" },
-    { src: "/OpPoReview/images/unnamed.jpg", alt: "Banner" }
+    { src: "/images/seoul.jpg", alt: "Seoul Vua Mì Cay" },
+    { src: "/images/unnamed1.jpg", alt: "Banner" },
+    { src: "/images/unnamed.jpg", alt: "Banner" }
   ];
 
   useEffect(() => {
@@ -2553,7 +2553,7 @@ const CandidateDashboard = () => {
                 whileHover={{ y: -3 }}
               >
                 <SideAdTag>✨ Hot Hot Hot</SideAdTag>
-                <img src="/OpPoReview/images/phucloctho.jpg" alt="Phúc Lộc Thọ" />
+                <img src="/images/phucloctho.jpg" alt="Phúc Lộc Thọ" />
               </SideAdWrap>
             </SidebarCol>
           </ContentGrid>
