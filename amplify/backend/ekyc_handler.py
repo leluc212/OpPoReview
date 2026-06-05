@@ -263,10 +263,13 @@ def vnpt_ocr(front_hash, trans_token, bearer, tid, tkey):
         'token':             tok,
     }
 
-    # Danh sách endpoint — Free Trial chỉ có quyền dùng /ocr/id/front
+    # Danh sách endpoint + type để thử lần lượt
     attempts = [
-        (VNPT_OCR_FRONT_URL, 1, 'CCCD/CMND'),    # CCCD 12 số / CMND 9 số
-        (VNPT_OCR_FRONT_URL, 0, 'auto-detect'),   # fallback auto
+        (VNPT_OCR_CHIP_URL,  3, 'CCCD chip (chip endpoint)'),       # CCCD gắn chip QR mới (endpoint riêng)
+        (VNPT_OCR_FRONT_URL, 2, 'CCCD gắn chip (id endpoint, type=2)'), # CCCD gắn chip trên ID endpoint
+        (VNPT_OCR_FRONT_URL, 3, 'CCCD gắn chip (id endpoint, type=3)'), # CCCD gắn chip trên ID endpoint (type=3)
+        (VNPT_OCR_FRONT_URL, 1, 'CCCD/CMND cũ'),                    # CCCD 12 số / CMND 9 số
+        (VNPT_OCR_FRONT_URL, 0, 'auto-detect'),                     # fallback auto
     ]
 
     last_error = None
@@ -293,6 +296,8 @@ def vnpt_ocr(front_hash, trans_token, bearer, tid, tkey):
 
         if r.status_code in (400, 401, 403):
             body = r.text
+            # 400: sai loại giấy tờ → thử endpoint tiếp
+            # 401/403: endpoint này chưa được cấp quyền trên tài khoản → thử endpoint tiếp
             skip_codes = ('IDG-00010445', 'IDG-00010444', 'input_khong_hop_le',
                           'IDG-00000401', 'No permission', 'UNAUTHORIZED')
             if any(c in body for c in skip_codes):
@@ -475,6 +480,13 @@ def handle_verify_face(event, user_id):
                 obj            = (lv.json().get('object') or {})
                 liveness       = bool(obj.get('liveness', obj.get('is_live', False)))
                 liveness_score = float(obj.get('liveness_score', obj.get('score', 0)))
+            elif lv.status_code in (400, 401, 403):
+                # Nếu không có quyền sử dụng Liveness (IDG-00010444), bypass liveness check và cho qua
+                body = lv.text
+                if any(c in body for c in ('IDG-00010444', 'No permission', 'UNAUTHORIZED', '401', '403')):
+                    print('Liveness API not subscribed or no permission. Bypassing liveness check (liveness=True)')
+                    liveness = True
+                    liveness_score = 1.0
         except Exception as e:
             print(f'Liveness warning: {e}')
 

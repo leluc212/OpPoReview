@@ -11,8 +11,8 @@ $FUNCTION_NAME = "ekyc-handler"
 $API_ID        = "sd7ds72m8g"       # API Gateway HTTP API — dùng chung với candidate profile
 $ZIP_FILE      = "ekyc-handler.zip"
 
-Write-Host "📦 Zipping Lambda..."
-Compress-Archive -Path ekyc_handler.py -DestinationPath $ZIP_FILE -Force
+Write-Host "📦 Updating ekyc_handler.py inside zip..."
+python update_ekyc_zip.py
 
 # ── Deploy Lambda ──────────────────────────────────────────────────────────────
 $exists = aws lambda get-function --function-name $FUNCTION_NAME --region $REGION 2>$null
@@ -116,17 +116,12 @@ aws apigatewayv2 update-api `
     --region $REGION
 
 Write-Host ""
-Write-Host "╔══════════════════════════════════════════════════════╗"
-Write-Host "║  ✅ eKYC Lambda deployed thành công!                 ║"
-Write-Host "║                                                      ║"
-Write-Host "║  Endpoint base:                                      ║"
-Write-Host "║  https://sd7ds72m8g.execute-api.ap-southeast-1...   ║"
-Write-Host "║  /prod/ekyc/ocr                                      ║"
-Write-Host "║  /prod/ekyc/verify-face                              ║"
-Write-Host "║  /prod/ekyc/status/{userId}                          ║"
-Write-Host "║                                                      ║"
-Write-Host "║  ⚠️  Nhớ tạo secret trước khi test:                  ║"
-Write-Host "║  aws secretsmanager create-secret \                  ║"
-Write-Host "║    --name vnpt-ekyc-credentials \                    ║"
-Write-Host "║    --secret-string '{...}'                           ║"
-Write-Host "╚══════════════════════════════════════════════════════╝"
+Write-Host "=================================================="
+Write-Host "  eKYC Lambda deployed successfully!"
+Write-Host ""
+Write-Host "  Endpoint base:"
+Write-Host "  https://sd7ds72m8g.execute-api.ap-southeast-1.amazonaws.com"
+Write-Host "  /prod/ekyc/ocr"
+Write-Host "  /prod/ekyc/verify-face"
+Write-Host "  /prod/ekyc/status/{userId}"
+Write-Host "=================================================="
