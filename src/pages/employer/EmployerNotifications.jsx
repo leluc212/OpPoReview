@@ -776,10 +776,17 @@ const EmployerNotifications = () => {
     return notification.type === activeTab;
   });
 
-  const handleMarkAsRead = (id) => {
-    setNotifications(notifications.map(n =>
+  const handleMarkAsRead = async (id) => {
+    // Optimistic update
+    setNotifications(prev => prev.map(n =>
       n.id === id ? { ...n, read: true } : n
     ));
+    // Persist to DB
+    try {
+      await markAsRead(id);
+    } catch (err) {
+      console.error('Error marking notification as read:', err);
+    }
   };
 
   // Opens the detail modal (marks as read too)

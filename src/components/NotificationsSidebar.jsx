@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { Bell, Package, CheckCircle, AlertCircle, DollarSign, Users, Briefcase, Zap, XCircle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
-import { getNotifications, markAsRead } from '../services/notificationService';
+import { getNotifications, markAsRead, markAllAsRead } from '../services/notificationService';
 import RelativeTime from './RelativeTime';
 
 const SidebarContainer = styled.div`
@@ -317,7 +317,16 @@ const NotificationsSidebar = () => {
     ? notifications 
     : notifications.filter(n => !n.read);
 
-  const handleViewAll = () => {
+  const handleViewAll = async () => {
+    // Mark all as read before navigating
+    try {
+      const userId = user.role === 'admin' ? 'admin' : (user.userId || user.id || user.email);
+      await markAllAsRead(userId, user.role);
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+    }
+
     if (user.role === 'admin') {
       navigate('/admin/notifications');
     } else if (user.role === 'employer') {

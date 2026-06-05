@@ -7,7 +7,7 @@ import { useLanguage } from '../context/LanguageContext';
 import candidateProfileService from '../services/candidateProfileService';
 import employerProfileService from '../services/employerProfileService';
 import jobPostService from '../services/jobPostService';
-import { getNotifications, getUnreadCount, markAsRead } from '../services/notificationService';
+import { getNotifications, getUnreadCount, markAsRead, markAllAsRead } from '../services/notificationService';
 import RelativeTime from './RelativeTime';
 import { s3Images } from '../utils/s3Images';
 
@@ -1355,8 +1355,31 @@ const Navbar = ({ showSearch = true }) => {
     setShowNotifications(!showNotifications);
   };
 
-  const handleNotificationItemClick = () => {
+  const handleNotificationItemClick = async () => {
     setShowNotifications(false);
+
+    // Mark all as read and reset badge immediately, then re-fetch from DB
+    try {
+      const effectiveUser = user || JSON.parse(localStorage.getItem('user') || '{}');
+      const userId = effectiveUser.role === 'admin' ? 'admin' : (effectiveUser.userId || effectiveUser.id || effectiveUser.email);
+      if (userId) {
+        // Optimistic update
+        setUnreadCount(0);
+        setRealNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        // Persist to DB
+        await markAllAsRead(userId, effectiveUser.role);
+        // Re-fetch from DB to confirm
+        const [freshNotifs, freshCount] = await Promise.all([
+          getNotifications(userId, effectiveUser.role),
+          getUnreadCount(userId, effectiveUser.role)
+        ]);
+        setRealNotifications(freshNotifs || []);
+        setUnreadCount(freshCount || 0);
+      }
+    } catch (err) {
+      console.error('Error marking all as read on view all:', err);
+    }
+
     if (user?.role === 'candidate') {
       navigate('/candidate/notifications');
     } else if (user?.role === 'employer') {
