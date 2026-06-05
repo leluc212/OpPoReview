@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
 import { TrendingUp, TrendingDown, Users, Eye, DollarSign, Calendar, BarChart3, PieChart, Briefcase, Download, Filter } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
+import jobPostService from '../../services/jobPostService';
+import { getJobApplications } from '../../services/applicationService';
+import applicationService from '../../services/applicationService';
+import quickJobService from '../../services/quickJobService';
+import { getWallet } from '../../services/packageCatalogService';
 
 // ─── Page wrapper ────────────────────────────────────────────
 const PageContainer = styled(motion.div)``;
@@ -591,44 +597,275 @@ const StatusBadge = styled.span`
 // ─── Component ────────────────────────────────────────────────
 const Analytics = () => {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const [timeFilter, setTimeFilter] = useState('month');
   const [hoveredPoint, setHoveredPoint] = useState(null);
   const [hoveredSegment, setHoveredSegment] = useState(null);
 
-  // Handler xuất Excel
-  const handleExportExcel = () => {
-    alert(
-      language === 'vi'
-        ? '📊 Xuất báo cáo thống kê\n\nDữ liệu sẽ bao gồm:\n• Tổng số ứng viên và lượt xem\n• Chi phí tuyển dụng\n• Xu hướng ứng tuyển theo thời gian\n• Phân bổ ứng viên theo ngành nghề\n• Pipeline tuyển dụng'
-        : '📊 Export Analytics Report\n\nData includes:\n• Total applicants and views\n• Recruitment costs\n• Application trends over time\n• Candidate distribution by field\n• Recruitment pipeline'
-    );
+  // ── DB state ──────────────────────────────────────────────
+  const [jobPosts, setJobPosts] = useState([]);
+  const [quickJobs, setQuickJobs] = useState([]);
+  const [applications, setApplications] = useState([]);
+  const [totalSpent, setTotalSpent] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [jobs, qJobs] = await Promise.all([
+          jobPostService.getMyJobPosts().catch(() => []),
+          quickJobService.getMyQuickJobs ? quickJobService.getMyQuickJobs().catch(() => []) : Promise.resolve([]),
+        ]);
+        const jobArr = Array.isArray(jobs) ? jobs : [];
+        const qJobArr = Array.isArray(qJobs) ? qJobs : [];
+        setJobPosts(jobArr);
+        setQuickJobs(qJobArr);
+
+        // Fetch tất cả applications của employer bằng 1 request, tránh throttling
+        let allApps = [];
+        try {
+          // Thử lấy tất cả rồi filter theo employerId
+          const allResult = await applicationService.getAllApplications().catch(() => null);
+          if (allResult && Array.isArray(allResult)) {
+            const employerJobIds = new Set([
+              ...jobArr.map(j => j.idJob || j.id),
+              ...qJobArr.map(j => j.jobID || j.id),
+            ].filter(Boolean));
+            allApps = allResult.filter(app => employerJobIds.has(app.jobId || app.jobID));
+          } else {
+            // Fallback: batch 3 jobs cùng lúc để tránh throttle
+            const allJobIds = [
+              ...jobArr.map(j => j.idJob || j.id),
+              ...qJobArr.map(j => j.jobID || j.id),
+            ].filter(Boolean);
+            const BATCH = 3;
+            for (let i = 0; i < allJobIds.length; i += BATCH) {
+              const batch = allJobIds.slice(i, i + BATCH);
+              const results = await Promise.all(batch.map(id => getJobApplications(id).catch(() => [])));
+              allApps.push(...results.flat());
+              if (i + BATCH < allJobIds.length) await new Promise(r => setTimeout(r, 200));
+            }
+          }
+        } catch (_) {}
+        setApplications(allApps);
+
+        // Fetch wallet for spending data
+        if (user?.userId) {
+          try {
+            const wallet = await getWallet(user.userId);
+            const spent = wallet?.transactions
+              ? wallet.transactions
+                  .filter(t => t.type === 'debit' || t.amount < 0)
+                  .reduce((sum, t) => sum + Math.abs(Number(t.amount) || 0), 0)
+              : null;
+            setTotalSpent(spent);
+          } catch (_) { /* wallet not available */ }
+        }
+      } catch (e) {
+        console.error('Analytics fetch error:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [user?.userId]);
+
+  // ── Helper: lọc theo timeFilter ──────────────────────────
+  const getCutoff = (filter) => {
+    const now = new Date();
+    const cutoff = new Date();
+    if (filter === 'week')    cutoff.setDate(now.getDate() - 7);
+    else if (filter === 'month')   cutoff.setDate(now.getDate() - 30);
+    else if (filter === 'quarter') cutoff.setDate(now.getDate() - 90);
+    else if (filter === 'year')    cutoff.setFullYear(now.getFullYear(), 0, 1);
+    return cutoff;
   };
 
-  // Application trend data
-  const applicationData = [
-    { month: language === 'vi' ? 'T1' : 'Jan', value: 45 },
-    { month: language === 'vi' ? 'T2' : 'Feb', value: 52 },
-    { month: language === 'vi' ? 'T3' : 'Mar', value: 48 },
-    { month: language === 'vi' ? 'T4' : 'Apr', value: 65 },
-    { month: language === 'vi' ? 'T5' : 'May', value: 78 },
-    { month: language === 'vi' ? 'T6' : 'Jun', value: 92 },
-    { month: language === 'vi' ? 'T7' : 'Jul', value: 88 },
-    { month: language === 'vi' ? 'T8' : 'Aug', value: 105 },
-    { month: language === 'vi' ? 'T9' : 'Sep', value: 98 },
-    { month: language === 'vi' ? 'T10' : 'Oct', value: 112 },
-    { month: language === 'vi' ? 'T11' : 'Nov', value: 128 },
-    { month: language === 'vi' ? 'T12' : 'Dec', value: 145 },
-  ];
+  const filterByTime = (items, dateField) => {
+    const cutoff = getCutoff(timeFilter);
+    return items.filter(j => {
+      const dateStr = j[dateField] || j.createdAt || '';
+      if (!dateStr) return true;
+      const d = new Date(dateStr);
+      return !isNaN(d) && d >= cutoff;
+    });
+  };
 
-  const maxValue = 160;
+  // Kỳ trước (để tính trend)
+  const getPrevCutoff = () => {
+    const now = new Date();
+    const curr = getCutoff(timeFilter);
+    const diff = now - curr;
+    return new Date(curr - diff);
+  };
 
-  // Generate smooth curve path
+  const filterByPrevPeriod = (items, dateField) => {
+    const currCutoff = getCutoff(timeFilter);
+    const prevCutoff = getPrevCutoff();
+    return items.filter(j => {
+      const dateStr = j[dateField] || j.createdAt || '';
+      if (!dateStr) return false;
+      const d = new Date(dateStr);
+      return !isNaN(d) && d >= prevCutoff && d < currCutoff;
+    });
+  };
+
+  const calcTrend = (curr, prev) => {
+    if (prev === 0) return curr > 0 ? '+100%' : '0%';
+    const pct = Math.round(((curr - prev) / prev) * 100);
+    return `${pct >= 0 ? '+' : ''}${pct}%`;
+  };
+
+  const filteredJobs      = useMemo(() => filterByTime(jobPosts, 'createdAt'),  [jobPosts, timeFilter]);
+  const filteredQuickJobs = useMemo(() => filterByTime(quickJobs, 'createdAt'), [quickJobs, timeFilter]);
+  const filteredApps      = useMemo(() => filterByTime(applications, 'createdAt'), [applications, timeFilter]);
+  const prevApps          = useMemo(() => filterByPrevPeriod(applications, 'createdAt'), [applications, timeFilter]);
+
+  // ── Computed stats từ DB thực ──────────────────────────
+  const totalJobs = filteredJobs.length + filteredQuickJobs.length;
+  const prevJobs  = useMemo(() => {
+    const c = getPrevCutoff(); const cu = getCutoff(timeFilter);
+    return [...jobPosts, ...quickJobs].filter(j => {
+      const d = new Date(j.createdAt || '');
+      return !isNaN(d) && d >= c && d < cu;
+    }).length;
+  }, [jobPosts, quickJobs, timeFilter]);
+
+  // Ứng viên từ applications thực tế
+  const totalApplications = filteredApps.length;
+  const prevApplications  = prevApps.length;
+
+  // Views từ field views trong job
+  const totalViews = useMemo(() =>
+    filteredJobs.reduce((sum, j) => sum + (Number(j.views) || 0), 0) +
+    filteredQuickJobs.reduce((sum, j) => sum + (Number(j.views) || 0), 0),
+  [filteredJobs, filteredQuickJobs]);
+
+  const prevViews = useMemo(() => {
+    const c = getPrevCutoff(); const cu = getCutoff(timeFilter);
+    return [...jobPosts, ...quickJobs].filter(j => {
+      const d = new Date(j.createdAt || '');
+      return !isNaN(d) && d >= c && d < cu;
+    }).reduce((sum, j) => sum + (Number(j.views) || 0), 0);
+  }, [jobPosts, quickJobs, timeFilter]);
+
+  // Xu hướng ứng tuyển theo tháng — dùng applications.createdAt thực tế
+  const applicationData = useMemo(() => {
+    const months = language === 'vi'
+      ? ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12']
+      : ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    const counts = Array(12).fill(0);
+    applications.forEach(app => {
+      const date = app.createdAt ? new Date(app.createdAt) : null;
+      if (date && !isNaN(date)) {
+        counts[date.getMonth()] += 1;
+      }
+    });
+    // Fallback: nếu không có applications, dùng applicants từ jobs
+    const hasRealData = counts.some(v => v > 0);
+    if (!hasRealData) {
+      [...jobPosts, ...quickJobs].forEach(j => {
+        const date = j.createdAt ? new Date(j.createdAt) : null;
+        if (date && !isNaN(date)) {
+          counts[date.getMonth()] += (Number(j.applicants) || 0);
+        }
+      });
+    }
+
+    return months.map((month, i) => ({ month, value: counts[i] }));
+  }, [applications, jobPosts, quickJobs, language]);
+
+  const maxValue = useMemo(() => Math.max(10, ...applicationData.map(d => d.value)), [applicationData]);
+  const hasChartData = useMemo(() => applicationData.some(d => d.value > 0), [applicationData]);
+
+  // Top jobs: dùng applications thực tế để đếm
+  const topJobs = useMemo(() => {
+    const appCountMap = {};
+    applications.forEach(app => {
+      const id = app.jobId || app.jobID;
+      if (id) appCountMap[id] = (appCountMap[id] || 0) + 1;
+    });
+
+    const allJobs = [
+      ...jobPosts.map(j => ({
+        id: j.idJob || j.id,
+        title: j.title || '',
+        applications: appCountMap[j.idJob || j.id] ?? (Number(j.applicants) || 0),
+        views: Number(j.views) || 0,
+        status: j.status === 'active' ? 'active' : j.status === 'closed' ? 'closed' : 'draft',
+      })),
+      ...quickJobs.map(j => ({
+        id: j.jobID || j.id,
+        title: j.title || '',
+        applications: appCountMap[j.jobID || j.id] ?? (Number(j.applicants) || 0),
+        views: Number(j.views) || 0,
+        status: (j.status === 'approved' || j.status === 'active') ? 'active' : 'closed',
+      })),
+    ];
+    return allJobs.sort((a, b) => b.applications - a.applications).slice(0, 5);
+  }, [jobPosts, quickJobs, applications]);
+
+  const candidateDistribution = useMemo(() => {
+    const catMap = {};
+
+    const mapLabel = (raw) => {
+      const r = (raw || '').toLowerCase();
+      if (r.includes('part') || r === 'part-time') return language === 'vi' ? 'Bán thời gian' : 'Part-time';
+      if (r.includes('full') || r === 'full-time') return language === 'vi' ? 'Toàn thời gian' : 'Full-time';
+      if (r.includes('standard') || r === 'standard') return language === 'vi' ? 'Tiêu chuẩn' : 'Standard';
+      if (r.includes('urgent') || r.includes('gấp')) return language === 'vi' ? 'Tuyển gấp' : 'Urgent';
+      if (r.includes('intern') || r.includes('thực tập')) return language === 'vi' ? 'Thực tập' : 'Internship';
+      return raw || (language === 'vi' ? 'Khác' : 'Other');
+    };
+
+    // Dùng applications thực tế để đếm theo loại job
+    const jobTypeMap = {};
+    jobPosts.forEach(j => { jobTypeMap[j.idJob || j.id] = mapLabel(j.category || j.jobType || 'standard'); });
+    quickJobs.forEach(j => { jobTypeMap[j.jobID || j.id] = language === 'vi' ? 'Tuyển gấp' : 'Urgent'; });
+
+    applications.forEach(app => {
+      const id = app.jobId || app.jobID;
+      const cat = jobTypeMap[id] || (language === 'vi' ? 'Khác' : 'Other');
+      catMap[cat] = (catMap[cat] || 0) + 1;
+    });
+
+    // Fallback nếu không có applications
+    if (Object.keys(catMap).length === 0) {
+      jobPosts.forEach(j => {
+        const cat = mapLabel(j.category || j.jobType || 'standard');
+        catMap[cat] = (catMap[cat] || 0) + (Number(j.applicants) || 0);
+      });
+      quickJobs.forEach(j => {
+        const cat = language === 'vi' ? 'Tuyển gấp' : 'Urgent';
+        catMap[cat] = (catMap[cat] || 0) + (Number(j.applicants) || 0);
+      });
+    }
+
+    const colors = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4'];
+    const entries = Object.entries(catMap).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const total = entries.reduce((s, [, v]) => s + v, 0) || 1;
+
+    if (entries.length === 0) {
+      return [
+        { label: language === 'vi' ? 'Tiêu chuẩn' : 'Standard', value: 60, color: '#3B82F6' },
+        { label: language === 'vi' ? 'Tuyển gấp' : 'Urgent', value: 40, color: '#EC4899' },
+      ];
+    }
+    return entries.map(([label, val], i) => ({
+      label,
+      value: Math.round((val / total) * 100),
+      color: colors[i % colors.length],
+    }));
+  }, [jobPosts, quickJobs, applications, language]);
+
+  // ── Generate smooth curve path ────────────────────────────
   const generatePath = (data) => {
     const points = data.map((d, i) => ({
       x: 60 + (i * 50),
       y: 220 - (d.value / maxValue) * 180
     }));
-
     let path = `M ${points[0].x} ${points[0].y}`;
     for (let i = 0; i < points.length - 1; i++) {
       const xMid = (points[i].x + points[i + 1].x) / 2;
@@ -643,36 +880,91 @@ const Analytics = () => {
 
   const applicationPath = generatePath(applicationData);
 
-  // Candidate distribution data
-  const candidateDistribution = [
-    { label: language === 'vi' ? 'Kinh doanh' : 'Sales', value: 35, color: '#3B82F6' },
-    { label: language === 'vi' ? 'Kỹ thuật' : 'Technical', value: 25, color: '#10B981' },
-    { label: language === 'vi' ? 'Dịch vụ' : 'Service', value: 20, color: '#F59E0B' },
-    { label: language === 'vi' ? 'Khác' : 'Others', value: 20, color: '#8B5CF6' },
-  ];
+  // Handler xuất CSV
+  const handleExportExcel = () => {
+    const vi = language === 'vi';
+    const periodLabel = timePills.find(p => p.id === timeFilter)?.label || timeFilter;
 
-  // Application pipeline stages
-  const pipelineStages = [
-    { name: language === 'vi' ? 'Đã nộp hồ sơ' : 'Applied', count: 234, total: 234, color: '#3B82F6' },
-    { name: language === 'vi' ? 'Đang xem xét' : 'Reviewing', count: 156, total: 234, color: '#10B981' },
-    { name: language === 'vi' ? 'Phỏng vấn' : 'Interview', count: 89, total: 234, color: '#F59E0B' },
-    { name: language === 'vi' ? 'Chào nhận việc' : 'Offered', count: 45, total: 234, color: '#EC4899' },
-    { name: language === 'vi' ? 'Đã tuyển' : 'Hired', count: 28, total: 234, color: '#8B5CF6' },
-  ];
+    // Sheet 1: Thống kê tổng quan
+    const summaryRows = [
+      [vi ? 'Chỉ số' : 'Metric', vi ? 'Giá trị' : 'Value'],
+      [vi ? 'Khoảng thời gian' : 'Period', periodLabel],
+      [vi ? 'Tổng tin tuyển dụng' : 'Total Jobs', totalJobs],
+      [vi ? 'Tổng ứng viên' : 'Total Applications', totalApplications],
+      [vi ? 'Lượt xem' : 'Total Views', totalViews],
+      [vi ? 'Chi phí tuyển dụng' : 'Hiring Cost', totalSpent != null ? totalSpent.toLocaleString('vi-VN') + '₫' : '—'],
+    ];
+
+    // Sheet 2: Top công việc
+    const jobRows = [
+      [vi ? 'Tiêu đề' : 'Title', vi ? 'Ứng viên' : 'Applications', vi ? 'Lượt xem' : 'Views', vi ? 'Trạng thái' : 'Status'],
+      ...topJobs.map(j => [j.title, j.applications, j.views, j.status]),
+    ];
+
+    // Sheet 3: Xu hướng theo tháng
+    const trendRows = [
+      [vi ? 'Tháng' : 'Month', vi ? 'Số ứng tuyển' : 'Applications'],
+      ...applicationData.map(d => [d.month, d.value]),
+    ];
+
+    // Gộp thành 1 CSV với separator
+    const toCSV = (rows) => rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+
+    const csv = [
+      `=== ${vi ? 'THỐNG KÊ TỔNG QUAN' : 'SUMMARY'} ===`,
+      toCSV(summaryRows),
+      '',
+      `=== ${vi ? 'TOP CÔNG VIỆC' : 'TOP JOBS'} ===`,
+      toCSV(jobRows),
+      '',
+      `=== ${vi ? 'XU HƯỚNG ỨNG TUYỂN' : 'APPLICATION TREND'} ===`,
+      toCSV(trendRows),
+    ].join('\n');
+
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href     = url;
+    link.download = `analytics_${timeFilter}_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   const stats = [
-    { icon: <Briefcase />, label: language === 'vi' ? 'Tổng tin tuyển dụng' : 'Total job posts', value: '24', trend: '+12%', positive: true, accent: '#1e40af', bg: '#EFF6FF', border: '#BFDBFE', iconColor: '#1e40af' },
-    { icon: <Users />, label: language === 'vi' ? 'Tổng ứng viên' : 'Total candidates', value: '1,234', trend: '+28%', positive: true, accent: '#EC4899', bg: '#FDF2F8', border: '#FBCFE8', iconColor: '#EC4899' },
-    { icon: <Eye />, label: language === 'vi' ? 'Lượt xem công việc' : 'Job views', value: '8,456', trend: '+15%', positive: true, accent: '#06B6D4', bg: '#ECFEFF', border: '#A5F3FC', iconColor: '#06B6D4' },
-    { icon: <DollarSign />, label: language === 'vi' ? 'Chi phí tuyển dụng' : 'Hiring cost', value: '45M VNĐ', trend: '-8%', positive: true, accent: '#10B981', bg: '#ECFDF5', border: '#A7F3D0', iconColor: '#10B981' },
-  ];
-
-  const topJobs = [
-    { title: language === 'vi' ? 'Nhân viên kinh doanh' : 'Sales Executive', applications: 156, views: 1234, status: 'active' },
-    { title: language === 'vi' ? 'Nhân viên kho' : 'Warehouse Staff', applications: 89, views: 876, status: 'active' },
-    { title: language === 'vi' ? 'Lễ tân' : 'Receptionist', applications: 67, views: 654, status: 'closed' },
-    { title: language === 'vi' ? 'Nhân viên Phục Vụ' : 'Service Staff', applications: 45, views: 432, status: 'active' },
-    { title: language === 'vi' ? 'Nhân viên Giao Hàng' : 'Delivery Staff', applications: 34, views: 321, status: 'draft' },
+    {
+      icon: <Briefcase />,
+      label: language === 'vi' ? 'Tổng tin tuyển dụng' : 'Total job posts',
+      value: loading ? '...' : String(totalJobs),
+      trend: calcTrend(totalJobs, prevJobs),
+      positive: totalJobs >= prevJobs,
+      accent: '#1e40af', bg: '#EFF6FF', border: '#BFDBFE', iconColor: '#1e40af'
+    },
+    {
+      icon: <Users />,
+      label: language === 'vi' ? 'Tổng ứng viên' : 'Total candidates',
+      value: loading ? '...' : totalApplications.toLocaleString('vi-VN'),
+      trend: calcTrend(totalApplications, prevApplications),
+      positive: totalApplications >= prevApplications,
+      accent: '#EC4899', bg: '#FDF2F8', border: '#FBCFE8', iconColor: '#EC4899'
+    },
+    {
+      icon: <Eye />,
+      label: language === 'vi' ? 'Lượt xem công việc' : 'Job views',
+      value: loading ? '...' : totalViews.toLocaleString('vi-VN'),
+      trend: calcTrend(totalViews, prevViews),
+      positive: totalViews >= prevViews,
+      accent: '#06B6D4', bg: '#ECFEFF', border: '#A5F3FC', iconColor: '#06B6D4'
+    },
+    {
+      icon: <DollarSign />,
+      label: language === 'vi' ? 'Chi phí tuyển dụng' : 'Hiring cost',
+      value: loading ? '...' : totalSpent != null
+        ? totalSpent.toLocaleString('vi-VN') + '₫'
+        : '—',
+      trend: '—',
+      positive: true,
+      accent: '#10B981', bg: '#ECFDF5', border: '#A7F3D0', iconColor: '#10B981'
+    },
   ];
 
   const timePills = [
@@ -757,6 +1049,17 @@ const Analytics = () => {
             <ChartLegend>
               <LegendItem $color="#1e40af">{language === 'vi' ? 'Số lượng ứng tuyển' : 'Applications'}</LegendItem>
             </ChartLegend>
+            {!hasChartData ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '260px', color: '#94A3B8', gap: '8px' }}>
+                <BarChart3 size={40} strokeWidth={1.5} />
+                <div style={{ fontSize: '14px', fontWeight: '600' }}>
+                  {language === 'vi' ? 'Chưa có dữ liệu ứng tuyển' : 'No application data yet'}
+                </div>
+                <div style={{ fontSize: '12px' }}>
+                  {language === 'vi' ? 'Dữ liệu sẽ xuất hiện khi có ứng viên apply' : 'Data will appear when candidates apply'}
+                </div>
+              </div>
+            ) : (
             <ChartSvg viewBox="0 0 660 260">
               <defs>
                 <linearGradient id="applicationGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -786,19 +1089,22 @@ const Analytics = () => {
               ))}
 
               {/* Y-axis labels */}
-              {['160', '120', '80', '40', '0'].map((label, i) => (
-                <text
-                  key={i}
-                  x="30"
-                  y={45 + i * 45}
-                  textAnchor="end"
-                  fontSize="11"
-                  fill="#94A3B8"
-                  fontWeight="500"
-                >
-                  {label}
-                </text>
-              ))}
+              {[4, 3, 2, 1, 0].map((i) => {
+                const yVal = Math.round((maxValue / 4) * i);
+                return (
+                  <text
+                    key={i}
+                    x="30"
+                    y={45 + (4 - i) * 45}
+                    textAnchor="end"
+                    fontSize="11"
+                    fill="#94A3B8"
+                    fontWeight="500"
+                  >
+                    {yVal}
+                  </text>
+                );
+              })}
 
               {/* Area under curve */}
               <path
@@ -917,6 +1223,7 @@ const Analytics = () => {
                 </text>
               ))}
             </ChartSvg>
+            )}
           </ChartCard>
 
           <ChartCard>
@@ -1035,7 +1342,18 @@ const Analytics = () => {
               </tr>
             </thead>
             <tbody>
-              {topJobs.map((job, i) => (
+              {topJobs.length === 0 ? (
+                <tr>
+                  <td colSpan="4" style={{ textAlign: 'center', padding: '40px', color: '#94A3B8' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                      <Briefcase size={36} strokeWidth={1.5} />
+                      <div style={{ fontSize: '14px', fontWeight: '600' }}>
+                        {language === 'vi' ? 'Chưa có tin tuyển dụng nào' : 'No job posts yet'}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              ) : topJobs.map((job, i) => (
                 <tr key={i}>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

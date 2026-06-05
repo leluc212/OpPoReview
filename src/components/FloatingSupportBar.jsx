@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,7 +17,9 @@ import {
   ChevronUp,
   Copy,
   Check,
-  PenSquare
+  PenSquare,
+  ImagePlus,
+  Trash2
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -381,6 +383,84 @@ const Input = styled.input`
   }
 `;
 
+const ImageUploadArea = styled.div`
+  border: 1.5px dashed ${props => props.theme.colors.border};
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+
+  &:hover {
+    border-color: ${props => props.theme.colors.primary};
+    background: ${props => props.theme.colors.primary}05;
+  }
+
+  input[type='file'] {
+    display: none;
+  }
+`;
+
+const ImageUploadLabel = styled.label`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  color: ${props => props.theme.colors.textLight};
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 0;
+
+  svg {
+    color: ${props => props.theme.colors.primary};
+  }
+`;
+
+const ImagePreviewGrid = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+`;
+
+const ImagePreviewItem = styled.div`
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid ${props => props.theme.colors.border};
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
+
+const RemoveImageBtn = styled.button`
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.55);
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+
+  svg {
+    width: 10px;
+    height: 10px;
+  }
+`;
+
 const SubmitBtn = styled.button`
   width: 100%;
   padding: 14px;
@@ -613,6 +693,8 @@ export default function FloatingSupportBar() {
   const [expandedFAQ, setExpandedFAQ] = useState(null);
   const [copiedText, setCopiedText] = useState(null);
   const [guestEmail, setGuestEmail] = useState('');
+  const [feedbackImages, setFeedbackImages] = useState([]); // [{file, preview, base64}]
+  const fileInputRef = useRef(null);
 
   // Fetch initial saved jobs count if candidate
   useEffect(() => {
@@ -691,6 +773,44 @@ export default function FloatingSupportBar() {
     setTimeout(() => setCopiedText(null), 2000);
   };
 
+  const MAX_IMAGES = 3;
+  const MAX_SIZE_MB = 5;
+
+  const handleImageSelect = (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    const remaining = MAX_IMAGES - feedbackImages.length;
+    const toProcess = files.slice(0, remaining);
+
+    toProcess.forEach(file => {
+      if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+        toastError(
+          language === 'vi'
+            ? `Ảnh "${file.name}" vượt quá ${MAX_SIZE_MB}MB`
+            : `Image "${file.name}" exceeds ${MAX_SIZE_MB}MB`
+        );
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const base64 = ev.target.result; // data:image/...;base64,...
+        setFeedbackImages(prev => [
+          ...prev,
+          { name: file.name, preview: base64, base64 }
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // reset input so same file can be re-selected
+    e.target.value = '';
+  };
+
+  const handleRemoveImage = (index) => {
+    setFeedbackImages(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
     if (!feedbackComment.trim()) return;
@@ -724,7 +844,7 @@ export default function FloatingSupportBar() {
       };
 
       // Store feedback to DynamoDB
-      await feedbackService.submitFeedback(feedbackCategory, feedbackComment, userContext);
+      await feedbackService.submitFeedback(feedbackCategory, feedbackComment, userContext, feedbackImages.map(img => img.base64));
       
       success(
         language === 'vi'
@@ -742,6 +862,7 @@ export default function FloatingSupportBar() {
       setIsSubmittingFeedback(false);
       setFeedbackComment('');
       setGuestEmail('');
+      setFeedbackImages([]);
       setActiveModal(null);
     }
   };
@@ -939,6 +1060,42 @@ export default function FloatingSupportBar() {
                       }
                       required
                     />
+                  </FormGroup>
+
+                  {/* Image Upload */}
+                  <FormGroup>
+                    <label>
+                      {language === 'vi' ? 'Đính kèm ảnh' : 'Attach images'}
+                    </label>
+                    <ImageUploadArea>
+                      <ImageUploadLabel htmlFor="feedback-image-input">
+                        <ImagePlus size={18} />
+                        {feedbackImages.length < MAX_IMAGES
+                          ? (language === 'vi' ? 'Chọn ảnh' : 'Select images')
+                          : (language === 'vi' ? `Đã đạt tối đa ${MAX_IMAGES} ảnh` : `Max ${MAX_IMAGES} images reached`)}
+                      </ImageUploadLabel>
+                      <input
+                        id="feedback-image-input"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        disabled={feedbackImages.length >= MAX_IMAGES}
+                        onChange={handleImageSelect}
+                        ref={fileInputRef}
+                      />
+                    </ImageUploadArea>
+                    {feedbackImages.length > 0 && (
+                      <ImagePreviewGrid>
+                        {feedbackImages.map((img, idx) => (
+                          <ImagePreviewItem key={idx}>
+                            <img src={img.preview} alt={img.name} />
+                            <RemoveImageBtn type="button" onClick={() => handleRemoveImage(idx)}>
+                              <X />
+                            </RemoveImageBtn>
+                          </ImagePreviewItem>
+                        ))}
+                      </ImagePreviewGrid>
+                    )}
                   </FormGroup>
 
                   <SubmitBtn type="submit" disabled={isSubmittingFeedback || !feedbackComment.trim()}>

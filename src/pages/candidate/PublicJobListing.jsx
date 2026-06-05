@@ -4,12 +4,14 @@ import styled, { keyframes } from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import jobPostService from '../../services/jobPostService';
 import quickJobService from '../../services/quickJobService';
+import candidateProfileService from '../../services/candidateProfileService';
 import {
   Search, MapPin, Briefcase, Clock, Building2,
   Zap, Filter, ChevronRight, X, DollarSign,
-  Calendar, Users, Globe, FileText, LogIn
+  Calendar, Users, Globe, FileText, LogIn, Bookmark
 } from 'lucide-react';
 
 const fadeUp = keyframes`
@@ -420,10 +422,51 @@ const ResultCount = styled.div`
   font-weight: 500;
 `;
 
+const TabBar = styled.div`
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  border-bottom: 2px solid ${p => p.$isDark ? 'rgba(75,85,99,0.3)' : '#e2e8f0'};
+`;
+
+const TabBtn = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  border-bottom: 2.5px solid ${p => p.$active ? '#1a62ff' : 'transparent'};
+  margin-bottom: -2px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: ${p => p.$active ? '#1a62ff' : (p.$isDark ? '#94a3b8' : '#64748b')};
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover { color: #1a62ff; }
+  svg { width: 15px; height: 15px; }
+`;
+
+const SaveBtn = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  color: ${p => p.$saved ? '#f59e0b' : (p.$isDark ? '#64748b' : '#94a3b8')};
+  transition: all 0.2s;
+  &:hover { color: #f59e0b; transform: scale(1.1); }
+  svg {
+    width: 18px; height: 18px;
+    fill: ${p => p.$saved ? '#f59e0b' : 'none'};
+  }
+`;
+
 /* ─── Component ─── */
 const PublicJobListing = () => {
   const { language } = useLanguage();
   const { isDarkMode } = useTheme();
+  const { user, isAuthenticated } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -436,6 +479,50 @@ const PublicJobListing = () => {
   const [loading, setLoading] = useState(true);
   const [jobType, setJobType] = useState('all');
   const [selectedJob, setSelectedJob] = useState(null);
+  const [activeTab, setActiveTab] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('tab') === 'saved' ? 'saved' : 'all';
+  });
+  const [savedJobIds, setSavedJobIds] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('public_saved_jobs') || '[]'); } catch { return []; }
+  });
+
+  // Sync tab với URL param
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    setActiveTab(params.get('tab') === 'saved' ? 'saved' : 'all');
+  }, [location.search]);
+
+  // If authenticated candidate, sync savedJobs from profile
+  useEffect(() => {
+    if (isAuthenticated && user?.role === 'candidate') {
+      candidateProfileService.getMyProfile().then(profile => {
+        if (profile && Array.isArray(profile.savedJobs)) {
+          setSavedJobIds(profile.savedJobs);
+        }
+      }).catch(() => {});
+    }
+  }, [isAuthenticated, user?.role]);
+
+  const handleToggleSave = async (e, job) => {
+    e.stopPropagation();
+    const id = job.idJob || job.jobID;
+    if (!id) return;
+
+    const isSaved = savedJobIds.includes(id);
+    const next = isSaved ? savedJobIds.filter(x => x !== id) : [...savedJobIds, id];
+    setSavedJobIds(next);
+
+    if (isAuthenticated && user?.role === 'candidate') {
+      try {
+        await candidateProfileService.toggleSavedJob(id);
+      } catch (_) {
+        setSavedJobIds(savedJobIds); // rollback
+      }
+    } else {
+      localStorage.setItem('public_saved_jobs', JSON.stringify(next));
+    }
+  };
 
   useEffect(() => {
     Promise.all([
@@ -451,13 +538,17 @@ const PublicJobListing = () => {
   const filtered = useMemo(() => {
     const kw = keyword.toLowerCase();
     const lc = loc.toLowerCase();
-    return jobs.filter(j => {
+    let result = jobs.filter(j => {
       const matchKw = !kw || (j.title || '').toLowerCase().includes(kw) || (j.companyName || j.employerName || '').toLowerCase().includes(kw);
       const matchLoc = !lc || (j.location || '').toLowerCase().includes(lc);
       const matchType = jobType === 'all' || j._type === jobType;
       return matchKw && matchLoc && matchType;
     });
-  }, [jobs, keyword, loc, jobType]);
+    if (activeTab === 'saved') {
+      result = result.filter(j => savedJobIds.includes(j.idJob || j.jobID));
+    }
+    return result;
+  }, [jobs, keyword, loc, jobType, activeTab, savedJobIds]);
 
   const handleSearch = () => {
     // just re-filter, state already updated
@@ -562,6 +653,28 @@ const PublicJobListing = () => {
 
         {/* Job List */}
         <div>
+          {/* Tabs */}
+          <TabBar $isDark={isDarkMode}>
+            <TabBtn
+              $active={activeTab === 'all'}
+              $isDark={isDarkMode}
+              onClick={() => navigate('/jobs', { replace: true })}
+            >
+              <Briefcase />
+              {language === 'vi' ? 'Tất cả việc làm' : 'All Jobs'}
+              <span style={{ fontSize: '0.78rem', opacity: 0.7 }}>({jobs.length})</span>
+            </TabBtn>
+            <TabBtn
+              $active={activeTab === 'saved'}
+              $isDark={isDarkMode}
+              onClick={() => navigate('/jobs?tab=saved', { replace: true })}
+            >
+              <Bookmark />
+              {language === 'vi' ? 'Đã lưu' : 'Saved'}
+              <span style={{ fontSize: '0.78rem', opacity: 0.7 }}>({savedJobIds.length})</span>
+            </TabBtn>
+          </TabBar>
+
           {!loading && (
             <ResultCount $isDark={isDarkMode}>
               {language === 'vi'
@@ -575,8 +688,22 @@ const PublicJobListing = () => {
               Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} $isDark={isDarkMode} />)
             ) : filtered.length === 0 ? (
               <EmptyState $isDark={isDarkMode}>
-                <Briefcase size={40} />
-                <p>{language === 'vi' ? 'Không tìm thấy việc làm phù hợp' : 'No jobs found'}</p>
+                {activeTab === 'saved' ? (
+                  <>
+                    <Bookmark size={40} />
+                    <p style={{ fontWeight: 600, fontSize: '1rem', marginBottom: 6 }}>
+                      {language === 'vi' ? 'Chưa có việc làm nào được lưu' : "You haven't saved any jobs yet"}
+                    </p>
+                    <p style={{ fontSize: '0.85rem' }}>
+                      {language === 'vi' ? 'Nhấn icon 🔖 trên tin tuyển dụng để lưu lại' : 'Click the bookmark icon on a job to save it'}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <Briefcase size={40} />
+                    <p>{language === 'vi' ? 'Không tìm thấy việc làm phù hợp' : 'No jobs found'}</p>
+                  </>
+                )}
               </EmptyState>
             ) : (
               filtered.map((job, i) => (
@@ -605,6 +732,14 @@ const PublicJobListing = () => {
                     </Tags>
                   </JobInfo>
                   <JobRight>
+                    <SaveBtn
+                      $saved={savedJobIds.includes(job.idJob || job.jobID)}
+                      $isDark={isDarkMode}
+                      onClick={e => handleToggleSave(e, job)}
+                      title={language === 'vi' ? 'Lưu việc làm' : 'Save job'}
+                    >
+                      <Bookmark />
+                    </SaveBtn>
                     <PostDate $isDark={isDarkMode}>{formatDate(job.createdAt)}</PostDate>
                     <ApplyBtn>
                       {language === 'vi' ? 'Xem & Ứng tuyển' : 'View & Apply'}

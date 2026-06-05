@@ -3351,7 +3351,12 @@ const HRManagement = () => {
   };
 
   const handleCreatePost = () => {
-    navigate('/employer/post-quick-job');
+    const hasAgreed = localStorage.getItem('quick_job_wallet_terms_agreed') === 'true';
+    if (!hasAgreed) {
+      setShowWalletModal(true);
+    } else {
+      navigate('/employer/post-quick-job');
+    }
   };
 
   const closeWalletModal = () => {
@@ -3360,12 +3365,9 @@ const HRManagement = () => {
   };
 
   const handleConnectWallet = () => {
-    // Simulate wallet connection success
-    localStorage.setItem('employer_wallet_connected', 'true');
+    localStorage.setItem('quick_job_wallet_terms_agreed', 'true');
     setShowWalletModal(false);
     setAgreedToTerms(false);
-
-    // Navigate to post quick job page
     navigate('/employer/post-quick-job');
   };
 
@@ -5821,6 +5823,81 @@ const HRManagement = () => {
           />
         )}
       </PageContainer>
+
+      {/* ── Wallet Terms Modal (lần đầu dùng Job Gấp) ── */}
+      <AnimatePresence>
+        {showWalletModal && (
+          <WalletModalOverlay
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={closeWalletModal}
+          >
+            <WalletModalContainer
+              initial={{ scale: 0.88, opacity: 0, y: 24 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.88, opacity: 0, y: 24 }}
+              transition={{ type: 'spring', damping: 22, stiffness: 300 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <WalletModalIcon>
+                <Wallet />
+              </WalletModalIcon>
+
+              <WalletModalTitle>
+                {language === 'vi' ? 'Xác nhận sử dụng Ví Job Gấp' : 'Confirm Quick Job Wallet Use'}
+              </WalletModalTitle>
+
+              <WalletModalMessage>
+                {language === 'vi'
+                  ? 'Tính năng Job Gấp sử dụng ví ký quỹ. Khi đăng ca, hệ thống sẽ tự động trừ phí từ số dư ví của bạn. Vui lòng đọc và đồng ý với điều khoản trước khi tiếp tục.'
+                  : 'The Quick Job feature uses an escrow wallet. When posting a shift, the system will automatically deduct fees from your wallet balance. Please read and agree to the terms before continuing.'}
+              </WalletModalMessage>
+
+              <TermsCheckboxContainer>
+                <input
+                  type="checkbox"
+                  id="wallet-terms-check"
+                  checked={agreedToTerms}
+                  onChange={e => setAgreedToTerms(e.target.checked)}
+                />
+                <label htmlFor="wallet-terms-check">
+                  {language === 'vi' ? 'Tôi đã đọc và đồng ý với ' : 'I have read and agree to the '}
+                  <a
+                    href="/terms-urgent-jobs"
+                    onClick={e => {
+                      e.preventDefault();
+                      closeWalletModal();
+                      navigate('/terms-urgent-jobs', { state: { returnToWallet: true } });
+                    }}
+                  >
+                    {language === 'vi' ? 'Điều khoản sử dụng Job Gấp & Ví ký quỹ' : 'Quick Job & Escrow Wallet Terms'}
+                  </a>
+                  {language === 'vi' ? ' của Ốp Pờ.' : ' of Ốp Pờ.'}
+                </label>
+              </TermsCheckboxContainer>
+
+              <WalletModalActions>
+                <WalletModalButton
+                  $variant="secondary"
+                  whileTap={{ scale: 0.97 }}
+                  onClick={closeWalletModal}
+                >
+                  {language === 'vi' ? 'Để sau' : 'Later'}
+                </WalletModalButton>
+                <WalletModalButton
+                  $variant="primary"
+                  whileTap={{ scale: 0.97 }}
+                  disabled={!agreedToTerms}
+                  onClick={agreedToTerms ? handleConnectWallet : undefined}
+                >
+                  {language === 'vi' ? 'Đồng ý & Tiếp tục' : 'Agree & Continue'}
+                </WalletModalButton>
+              </WalletModalActions>
+            </WalletModalContainer>
+          </WalletModalOverlay>
+        )}
+      </AnimatePresence>
     </DashboardLayout>
   );
 };

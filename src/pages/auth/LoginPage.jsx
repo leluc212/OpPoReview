@@ -1166,7 +1166,9 @@ const LoginPage = () => {
             </FootNote>
             <span style={{ color: '#d1d9e0', fontSize: 14, fontWeight: 'bold', userSelect: 'none' }}>·</span>
             <FootNote>
-              <a href="#" onClick={(e) => { e.preventDefault(); setShowModal(true); }}>{language === 'vi' ? 'Gặp sự cố?' : 'Having trouble?'}</a>
+              <Link to="/policy">
+                {language === 'vi' ? 'Chính Sách' : 'Policy'}
+              </Link>
             </FootNote>
           </FootRow>
         </Card>

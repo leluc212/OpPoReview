@@ -1,10 +1,13 @@
 import json
 import boto3
+import base64
 from decimal import Decimal
 from datetime import datetime
 
 dynamodb = boto3.resource('dynamodb', region_name='ap-southeast-1')
 table = dynamodb.Table('CandidateProfiles')
+s3_client = boto3.client('s3', region_name='ap-southeast-1')
+S3_BUCKET = 'opporeview-cv-storage'
 
 
 def get_cors_headers():
@@ -95,6 +98,36 @@ def lambda_handler(event, context):
                 import uuid
                 new_id = f"feed-{str(uuid.uuid4())[:8]}"
                 
+                image_urls = body.get('imageUrls', [])
+
+                # Upload base64 images to S3, replace with public URLs
+                uploaded_image_urls = []
+                for idx, img_data in enumerate(image_urls):
+                    try:
+                        # img_data is a data URL: "data:image/png;base64,..."
+                        if ',' in img_data:
+                            header, b64_data = img_data.split(',', 1)
+                            # Extract mime type e.g. "image/png"
+                            mime = header.split(':')[1].split(';')[0] if ':' in header else 'image/jpeg'
+                        else:
+                            b64_data = img_data
+                            mime = 'image/jpeg'
+                        
+                        ext = mime.split('/')[-1].replace('jpeg', 'jpg')
+                        s3_key = f"feedback-images/{new_id}/img-{idx + 1}.{ext}"
+                        image_bytes = base64.b64decode(b64_data)
+                        
+                        s3_client.put_object(
+                            Bucket=S3_BUCKET,
+                            Key=s3_key,
+                            Body=image_bytes,
+                            ContentType=mime
+                        )
+                        url = f"https://{S3_BUCKET}.s3.ap-southeast-1.amazonaws.com/{s3_key}"
+                        uploaded_image_urls.append(url)
+                    except Exception as img_err:
+                        print(f"Error uploading feedback image {idx}: {str(img_err)}")
+
                 item = {
                     'id': new_id,
                     'category': body.get('category', 'other'),
@@ -106,6 +139,8 @@ def lambda_handler(event, context):
                     'status': 'unread',
                     'createdAt': timestamp
                 }
+                if uploaded_image_urls:
+                    item['imageUrls'] = uploaded_image_urls
                 feedbacks_table.put_item(Item=item)
                 return response(200, {'success': True, 'data': item})
                 
@@ -130,6 +165,16 @@ def lambda_handler(event, context):
                 
             else:
                 return response(400, {'success': False, 'message': 'Invalid feedback request'})
+
+        # GET /candidates - List all candidates (admin)
+        if http_method == 'GET' and '/candidates' in path and not user_id:
+            result = table.scan()
+            items = result.get('Items', [])
+            # Handle DynamoDB pagination
+            while 'LastEvaluatedKey' in result:
+                result = table.scan(ExclusiveStartKey=result['LastEvaluatedKey'])
+                items.extend(result.get('Items', []))
+            return response(200, {'success': True, 'data': items, 'count': len(items)})
 
         # Profile routes
         if http_method == 'GET' and user_id:
@@ -301,7 +346,4 @@ def handle_verification_routes(event, http_method, path, path_params):
         )
         return response(200, {'success': True, 'message': 'Candidate verification rejected'})
 
-
-    except Exception as e:
-        print(f'Error: {str(e)}')
-        return response(500, {'success': False, 'message': str(e)})
+    return response(400, {'success': False, 'message': 'Unknown verification route'})

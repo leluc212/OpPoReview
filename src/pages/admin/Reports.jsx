@@ -21,7 +21,10 @@ import {
   Award,
   MessageSquare,
   CheckCircle,
-  Trash2
+  Trash2,
+  Eye,
+  X as XIcon,
+  ZoomIn
 } from 'lucide-react';
 
 const parseDateTime = (str) => {
@@ -658,6 +661,8 @@ const Reports = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [feedbackCategoryFilter, setFeedbackCategoryFilter] = useState('all');
   const [feedbackStatusFilter, setFeedbackStatusFilter] = useState('all');
+  const [selectedFeedback, setSelectedFeedback] = useState(null);
+  const [lightboxImage, setLightboxImage] = useState(null);
 
   const loadFeedbacks = async () => {
     try {
@@ -1609,6 +1614,34 @@ const Reports = () => {
                           <div style={{ maxWidth: '400px', whiteSpace: 'normal', wordBreak: 'break-word', lineHeight: '1.4' }}>
                             {item.comment}
                           </div>
+                          {Array.isArray(item.imageUrls) && item.imageUrls.length > 0 && (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
+                              {item.imageUrls.map((src, imgIdx) => (
+                                <div
+                                  key={imgIdx}
+                                  onClick={() => setLightboxImage(src)}
+                                  title={language === 'vi' ? 'Xem ảnh đầy đủ' : 'View full image'}
+                                  style={{ cursor: 'zoom-in' }}
+                                >
+                                  <img
+                                    src={src}
+                                    alt={`screenshot-${imgIdx + 1}`}
+                                    style={{
+                                      width: '100px',
+                                      height: '100px',
+                                      objectFit: 'cover',
+                                      borderRadius: '6px',
+                                      border: '1px solid #e2e8f0',
+                                      cursor: 'pointer',
+                                      transition: 'opacity 0.2s',
+                                    }}
+                                    onMouseEnter={e => e.target.style.opacity = '0.8'}
+                                    onMouseLeave={e => e.target.style.opacity = '1'}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </TableCell>
                         <TableCell>
                           <div style={{ fontSize: '13px', color: '#4b5563' }}>
@@ -1635,6 +1668,17 @@ const Reports = () => {
                         </TableCell>
                         <TableCell>
                           <div style={{ display: 'flex', gap: '8px' }}>
+                            <ActionButtonSmall
+                              onClick={() => {
+                                setSelectedFeedback(item);
+                                if (item.status === 'unread') handleMarkAsRead(item.id);
+                              }}
+                              style={{ background: '#eff6ff', color: '#2563eb' }}
+                              title={language === 'vi' ? 'Xem chi tiết' : 'View detail'}
+                            >
+                              <Eye size={14} />
+                              {language === 'vi' ? 'Xem' : 'View'}
+                            </ActionButtonSmall>
                             {item.status === 'unread' && (
                               <ActionButtonSmall 
                                 $variant="primary" 
@@ -1670,6 +1714,207 @@ const Reports = () => {
           </ServiceTable>
         )}
       </PageContainer>
+
+      {/* Feedback Detail Modal */}
+      {selectedFeedback && (
+        <div
+          onClick={() => setSelectedFeedback(null)}
+          style={{
+            position: 'fixed', inset: 0,
+            background: 'rgba(15,23,42,0.5)',
+            backdropFilter: 'blur(6px)',
+            zIndex: 9999,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '20px'
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: 'white',
+              borderRadius: '16px',
+              width: '100%',
+              maxWidth: '780px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              boxShadow: '0 25px 50px rgba(0,0,0,0.2)',
+            }}
+          >
+            {/* Header */}
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '20px 24px',
+              borderBottom: '1px solid #f1f5f9',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{
+                  width: '36px', height: '36px', borderRadius: '50%',
+                  background: selectedFeedback.category === 'bug' ? '#fee2e2' : selectedFeedback.category === 'suggestion' ? '#e0f2fe' : '#f3f4f6',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <MessageSquare size={18} style={{
+                    color: selectedFeedback.category === 'bug' ? '#dc2626' : selectedFeedback.category === 'suggestion' ? '#0369a1' : '#4b5563'
+                  }} />
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '16px', color: '#0f172a' }}>
+                    {selectedFeedback.category === 'bug'
+                      ? (language === 'vi' ? 'Báo lỗi' : 'Bug Report')
+                      : selectedFeedback.category === 'suggestion'
+                      ? (language === 'vi' ? 'Góp ý' : 'Suggestion')
+                      : (language === 'vi' ? 'Ý kiến khác' : 'Other')}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#64748b' }}>
+                    {parseDateTime(selectedFeedback.createdAt).toLocaleString(language === 'vi' ? 'vi-VN' : 'en-US', {
+                      hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric'
+                    })}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedFeedback(null)}
+                style={{
+                  background: '#f8fafc', border: '1px solid #e2e8f0',
+                  borderRadius: '50%', width: '32px', height: '32px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer', color: '#64748b', transition: 'all 0.2s'
+                }}
+              >
+                <XIcon size={16} />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Sender info */}
+              <div style={{
+                background: '#f8fafc', borderRadius: '10px', padding: '12px 14px',
+                display: 'flex', alignItems: 'center', gap: '12px'
+              }}>
+                <div style={{
+                  width: '40px', height: '40px', borderRadius: '50%',
+                  background: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontWeight: 700, fontSize: '16px', color: '#1e40af', flexShrink: 0
+                }}>
+                  {(selectedFeedback.userName || 'U')[0].toUpperCase()}
+                </div>
+                <div>
+                  <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '14px' }}>{selectedFeedback.userName}</div>
+                  <div style={{ fontSize: '12px', color: '#64748b' }}>{selectedFeedback.userEmail}</div>
+                  <span style={{
+                    marginTop: '3px', display: 'inline-block',
+                    fontSize: '11px', padding: '1px 6px', borderRadius: '4px', fontWeight: 600,
+                    background: selectedFeedback.userRole === 'employer' ? '#f3e8ff' : selectedFeedback.userRole === 'candidate' ? '#dbeafe' : '#f3f4f6',
+                    color: selectedFeedback.userRole === 'employer' ? '#6b21a8' : selectedFeedback.userRole === 'candidate' ? '#1e40af' : '#4b5563',
+                  }}>
+                    {selectedFeedback.userRole === 'employer' ? (language === 'vi' ? 'Nhà tuyển dụng' : 'Employer')
+                      : selectedFeedback.userRole === 'candidate' ? (language === 'vi' ? 'Ứng viên' : 'Candidate')
+                      : (language === 'vi' ? 'Khách' : 'Guest')}
+                  </span>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div>
+                <div style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  {language === 'vi' ? 'Nội dung' : 'Content'}
+                </div>
+                <div style={{
+                  background: '#f8fafc', border: '1px solid #e2e8f0',
+                  borderRadius: '10px', padding: '14px 16px',
+                  fontSize: '14px', lineHeight: '1.7', color: '#1e293b',
+                  whiteSpace: 'pre-wrap', wordBreak: 'break-word'
+                }}>
+                  {selectedFeedback.comment}
+                </div>
+              </div>
+
+              {/* Images */}
+              {Array.isArray(selectedFeedback.imageUrls) && selectedFeedback.imageUrls.length > 0 && (
+                <div>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    {language === 'vi' ? `Ảnh đính kèm (${selectedFeedback.imageUrls.length})` : `Attached images (${selectedFeedback.imageUrls.length})`}
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {selectedFeedback.imageUrls.map((src, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => setLightboxImage(src)}
+                        style={{
+                          position: 'relative', width: '200px', height: '200px',
+                          borderRadius: '10px', overflow: 'hidden',
+                          border: '2px solid #e2e8f0', cursor: 'zoom-in',
+                          transition: 'border-color 0.2s, transform 0.2s',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.transform = 'scale(1.03)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.transform = 'scale(1)'; }}
+                      >
+                        <img src={src} alt={`img-${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <div style={{
+                          position: 'absolute', inset: 0, background: 'rgba(0,0,0,0)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          transition: 'background 0.2s',
+                        }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.25)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,0,0,0)'}
+                        >
+                          <ZoomIn size={22} style={{ color: 'white', opacity: 0, transition: 'opacity 0.2s' }}
+                            onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lightbox */}
+      {lightboxImage && (
+        <div
+          onClick={() => setLightboxImage(null)}
+          style={{
+            position: 'fixed', inset: 0,
+            background: 'rgba(0,0,0,0.85)',
+            zIndex: 10000,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '20px', cursor: 'zoom-out'
+          }}
+        >
+          <button
+            onClick={() => setLightboxImage(null)}
+            style={{
+              position: 'absolute', top: '16px', right: '16px',
+              background: 'rgba(255,255,255,0.15)', border: 'none',
+              borderRadius: '50%', width: '40px', height: '40px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', color: 'white'
+            }}
+          >
+            <XIcon size={20} />
+          </button>
+          <img
+            src={lightboxImage}
+            alt="full"
+            onClick={e => e.stopPropagation()}
+            style={{
+              maxWidth: '92vw',
+              maxHeight: '92vh',
+              minWidth: '60vw',
+              width: 'auto',
+              height: 'auto',
+              borderRadius: '8px',
+              boxShadow: '0 25px 60px rgba(0,0,0,0.6)',
+              cursor: 'default',
+              imageRendering: 'auto',
+            }}
+          />
+        </div>
+      )}
+
     </DashboardLayout>
   );
 };

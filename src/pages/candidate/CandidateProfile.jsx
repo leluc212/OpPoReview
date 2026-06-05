@@ -1121,9 +1121,15 @@ const CandidateProfile = () => {
         console.log('🔍 Fetching missing jobs for profile work history:', missingJobIds);
         const jobResults = await Promise.all(missingJobIds.map(async (id) => {
           try {
-            const standard = await jobPostService.getJobPost(id);
+            // Quick job IDs bắt đầu bằng QJOB- → không fetch từ standard endpoint
+            if (id.startsWith('QJOB-')) {
+              return await quickJobService.getQuickJob(id).catch(() => null);
+            }
+            // Bỏ qua numeric test IDs không có format hợp lệ
+            if (/^\d+$/.test(id)) return null;
+            const standard = await jobPostService.getJobPost(id).catch(() => null);
             if (standard) return standard;
-            return await quickJobService.getQuickJob(id);
+            return await quickJobService.getQuickJob(id).catch(() => null);
           } catch (e) {
             return null;
           }

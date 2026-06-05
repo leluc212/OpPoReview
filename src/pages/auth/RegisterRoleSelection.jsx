@@ -696,6 +696,10 @@ const RegisterRoleSelection = () => {
             <LoginNote>
               <Link to="/"> Về trang chủ</Link>
             </LoginNote>
+            <DividerDot />
+            <LoginNote>
+              <Link to="/policyregister">Chính Sách</Link>
+            </LoginNote>
           </BottomRow>
         </motion.div>
       </Wrap>

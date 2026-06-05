@@ -3,8 +3,8 @@
 
 import { fetchAuthSession } from 'aws-amplify/auth';
 
-// API base URL - use direct URL (CORS is now fixed)
-const API_BASE_URL = 'https://dlidp35x33.execute-api.ap-southeast-1.amazonaws.com/prod';
+// API base URL - dùng Vite proxy để tránh CORS khi dev local
+const API_BASE_URL = import.meta.env.VITE_EMPLOYER_API_URL || '/api-employer';
 
 /**
  * Generate random job ID

@@ -2552,7 +2552,10 @@ const JobListing = () => {
 
     // Filter by saved jobs only
     if (showSavedJobsOnly) {
-      result = result.filter(job => savedJobs.includes(job.id));
+      result = result.filter(job => {
+        const rawId = job.idJob || job.id;
+        return savedJobs.includes(rawId) || savedJobs.includes(job.id);
+      });
       // Don't apply category filter for saved jobs
     } else {
       // For shift jobs
@@ -3153,7 +3156,7 @@ const JobListing = () => {
                   <JobCardComponent
                     key={job.id}
                     job={job}
-                    saved={savedJobs.includes(job.id)}
+                    saved={savedJobs.includes(job.idJob || job.id) || savedJobs.includes(job.id)}
                     onSave={handleSaveJob}
                     onClick={handleJobClick}
                     onApply={handleApplyJob}
@@ -3849,7 +3852,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, onApply, delay = 0, sho
               $saved={saved}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              onClick={(e) => onSave(job.id, e)}
+              onClick={(e) => onSave(job.idJob || job.id, e)}
             >
               <Bookmark />
             </SaveButton>

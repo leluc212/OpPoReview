@@ -3046,7 +3046,7 @@ const LandingPage = ({ children }) => {
                       <Search />
                       {language === 'vi' ? 'Tìm việc làm' : 'Find Jobs'}
                     </CVTemplateItem>
-                    <CVTemplateItem to="/candidate/jobs?tab=saved" $isDark={isDarkMode}>
+                    <CVTemplateItem to="/jobs?tab=saved" $isDark={isDarkMode}>
                       <Bookmark />
                       {language === 'vi' ? 'Việc làm đã lưu' : 'Saved Jobs'}
                     </CVTemplateItem>
@@ -4265,8 +4265,8 @@ const LandingPage = ({ children }) => {
                 <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>{language === 'vi' ? 'Tuyển dụng' : 'Careers'}</a>
                 <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>{language === 'vi' ? 'Liên hệ' : 'Contact'}</a>
                 <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>{language === 'vi' ? 'Hỏi đáp' : 'FAQ'}</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>{language === 'vi' ? 'Chính sách bảo mật' : 'Privacy Policy'}</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>{language === 'vi' ? 'Điều khoản dịch vụ' : 'Terms of Service'}</a>
+                <Link to="/policy">{language === 'vi' ? 'Chính sách bảo mật' : 'Privacy Policy'}</Link>
+                <Link to="/policy">{language === 'vi' ? 'Điều khoản dịch vụ' : 'Terms of Service'}</Link>
               </FooterLinkCol>
 
               <FooterLinkCol $isDark={isDarkMode}>

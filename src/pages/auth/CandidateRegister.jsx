@@ -1036,8 +1036,10 @@ const CandidateRegister = () => {
             <ChkRow onClick={() => setAgreed(p => !p)}>
               <Chk $on={agreed}><IcoCheck /></Chk>
               <ChkTxt>
-                Tôi đồng ý với <a href="#" onClick={e => e.stopPropagation()}>Điều khoản</a>
-                {' '}và <a href="#" onClick={e => e.stopPropagation()}>Chính sách bảo mật</a> của Ốp Pờ.
+                <Link to="/policy/candidate" onClick={e => e.stopPropagation()}>Điều khoản</Link>
+                {' & '}
+                <Link to="/policyregister" onClick={e => e.stopPropagation()}>Chính sách bảo mật</Link>
+                {' '}của Ốp Pờ.
               </ChkTxt>
             </ChkRow>
             {errors.agreed && <FErr style={{ marginTop: -8, marginBottom: 10 }}>{errors.agreed}</FErr>}

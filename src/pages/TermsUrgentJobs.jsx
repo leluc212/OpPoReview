@@ -1,316 +1,373 @@
 import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+import { s3Images } from '../utils/s3Images';
+import {
+  ArrowLeft, CreditCard, Wallet, Receipt,
+  ShieldCheck, HelpCircle, Info, Landmark,
+  Banknote, History, CheckCircle, AlertTriangle
+} from 'lucide-react';
 
-const Container = styled.div`
+/* 
+  Note: I'll use Wallet, Receipt, Info, Banknote, History, CheckCircle, AlertTriangle.
+  Wait, I'll use standard names verified before: HelpCircle, AlertTriangle.
+*/
+
+const Wrapper = styled.div`
   min-height: 100vh;
-  background: #f8f9fa;
-  padding: 40px 20px;
+  background: ${p => p.$isDark ? '#0f172a' : '#f8fafc'};
+  color: ${p => p.$isDark ? '#e2e8f0' : '#1e293b'};
 `;
 
-const BackButton = styled(motion.button)`
-  display: inline-flex;
+const Header = styled.div`
+  background: linear-gradient(135deg, #1a62ff 0%, #002e9d 100%);
+  padding: 40px 24px 56px;
+  text-align: center;
+  position: relative;
+`;
+
+const BackBtn = styled.button`
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  display: flex;
   align-items: center;
-  gap: 8px;
-  background: white;
-  border: 1px solid #e0e0e0;
-  color: #333;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
+  gap: 6px;
+  color: rgba(255,255,255,0.85);
+  background: none;
+  border: none;
   cursor: pointer;
-  margin-bottom: 24px;
-  transition: all 0.2s;
-
-  &:hover {
-    background: #f5f5f5;
-    border-color: #d0d0d0;
-  }
-
-  svg {
-    width: 18px;
-    height: 18px;
-  }
-`;
-
-const ContentWrapper = styled(motion.div)`
-  max-width: 900px;
-  margin: 0 auto;
-  background: white;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-  padding: 48px;
-
-  @media (max-width: 768px) {
-    padding: 32px 24px;
-  }
-`;
-
-const Title = styled.h1`
-  font-size: 28px;
-  font-weight: 700;
-  color: #222;
-  margin-bottom: 16px;
-
-  @media (max-width: 768px) {
-    font-size: 24px;
-  }
-`;
-
-const Subtitle = styled.p`
   font-size: 14px;
-  color: #666;
-  margin-bottom: 32px;
-  line-height: 1.5;
-`;
-
-const Section = styled.section`
-  margin-bottom: 32px;
-`;
-
-const SectionTitle = styled.h2`
-  font-size: 18px;
   font-weight: 600;
-  color: #333;
+  transition: color 0.2s;
+  &:hover { color: #fff; }
+`;
+
+const Logo = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 14px;
+`;
+
+const HeaderTitle = styled.h1`
+  font-size: clamp(1.3rem, 3vw, 1.9rem);
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 8px;
+  letter-spacing: -0.3px;
+`;
+
+const HeaderSub = styled.p`
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.75);
   margin-bottom: 12px;
 `;
 
-const SectionContent = styled.div`
-  font-size: 14px;
-  color: #555;
-  line-height: 1.7;
+const HeaderMeta = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+`;
 
-  p {
-    margin-bottom: 12px;
-  }
+const MetaTag = styled.span`
+  background: rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.92);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+`;
 
-  ul {
-    list-style: disc;
-    padding-left: 20px;
+const Container = styled.div`
+  max-width: 860px;
+  margin: -28px auto 0;
+  padding: 0 24px 80px;
+  position: relative;
+  z-index: 1;
+`;
 
-    li {
-      margin-bottom: 8px;
-    }
-  }
+const Card = styled.div`
+  background: ${p => p.$isDark ? 'rgba(30,41,59,0.95)' : '#fff'};
+  border: 1px solid ${p => p.$isDark ? 'rgba(75,85,99,0.3)' : '#e2e8f0'};
+  border-radius: 16px;
+  padding: 28px 32px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.07);
 
-  strong {
-    color: #333;
-    font-weight: 600;
+  @media (max-width: 640px) {
+    padding: 20px 18px;
   }
 `;
 
-const Highlight = styled.div`
-  background: #fff8e1;
-  border-left: 3px solid #ffa726;
-  padding: 16px 20px;
-  border-radius: 4px;
-  margin: 20px 0;
-  font-size: 14px;
-  color: #555;
-  line-height: 1.6;
+const SectionTitle = styled.h2`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #1a62ff;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid ${p => p.$isDark ? 'rgba(26,98,255,0.2)' : '#eff6ff'};
+  svg { flex-shrink: 0; }
+`;
+
+const SubTitle = styled.h3`
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: ${p => p.$isDark ? '#e2e8f0' : '#1e293b'};
+  margin: 14px 0 6px;
+`;
+
+const P = styled.p`
+  font-size: 0.88rem;
+  line-height: 1.85;
+  color: ${p => p.$isDark ? '#94a3b8' : '#475569'};
+  margin-bottom: 8px;
+`;
+
+const UL = styled.ul`
+  padding-left: 18px;
+  margin: 6px 0 10px;
+  li {
+    font-size: 0.88rem;
+    line-height: 1.85;
+    color: ${p => p.$isDark ? '#94a3b8' : '#475569'};
+    margin-bottom: 3px;
+  }
+`;
+
+const TableWrapper = styled.div`
+  width: 100%;
+  overflow-x: auto;
+  margin: 16px 0;
+  border-radius: 12px;
+  border: 1px solid ${p => p.$isDark ? 'rgba(75,85,99,0.3)' : '#e2e8f0'};
+`;
+
+const Table = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  text-align: left;
+  
+  th {
+     background: ${p => p.$isDark ? 'rgba(26,98,255,0.15)' : '#eff6ff'};
+     color: ${p => p.$isDark ? '#e2e8f0' : '#1e293b'};
+     padding: 12px 14px;
+     font-weight: 700;
+     border-bottom: 1.5px solid ${p => p.$isDark ? 'rgba(26,98,255,0.2)' : '#dbeafe'};
+  }
+  
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid ${p => p.$isDark ? 'rgba(75,85,99,0.2)' : '#f1f5f9'};
+    color: ${p => p.$isDark ? '#94a3b8' : '#475569'};
+    line-height: 1.6;
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+`;
+
+const HighlightBox = styled.div`
+  background: ${p => p.$isDark ? 'rgba(26,98,255,0.1)' : '#eff6ff'};
+  border-left: 4px solid #1a62ff;
+  border-radius: 0 10px 10px 0;
+  padding: 12px 16px;
+  margin: 12px 0;
+  font-size: 0.88rem;
+  color: ${p => p.$isDark ? '#93c5fd' : '#1e40af'};
+  font-weight: 500;
+  line-height: 1.7;
+`;
+
+const FooterBox = styled.div`
+  text-align: center;
+  font-size: 0.8rem;
+  color: ${p => p.$isDark ? '#475569' : '#94a3b8'};
+  margin-top: 32px;
+  line-height: 1.7;
+  a { color: #1a62ff; text-decoration: none; font-weight: 600; }
+  .slogan {
+     margin-top: 14px;
+     font-size: 0.75rem;
+     font-weight: 700;
+     color: #1a62ff;
+     text-transform: uppercase;
+     letter-spacing: 0.5px;
+  }
 `;
 
 const TermsUrgentJobs = () => {
   const { language } = useLanguage();
+  const { isDarkMode } = useTheme();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const handleBackClick = () => {
-    if (location.state?.returnToWallet) {
-      // Return to HR Management page with state to reopen modal
-      navigate('/employer/quick-jobs', { state: { fromTermsPage: true } });
-    } else {
-      navigate(-1);
-    }
-  };
+  const vi = language === 'vi';
 
   return (
-    <Container>
-      <ContentWrapper
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <BackButton
-          onClick={handleBackClick}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <ArrowLeft />
-          {language === 'vi' ? 'Quay lại' : 'Go Back'}
-        </BackButton>
+    <Wrapper $isDark={isDarkMode}>
+      <Header>
+        <BackBtn onClick={() => navigate(-1)}>
+          <ArrowLeft size={16} />
+          {vi ? 'Quay lại' : 'Back'}
+        </BackBtn>
+        <Logo>
+          <img src={s3Images.system.logo} alt="Ốp Pờ" style={{ height: 52, objectFit: 'contain' }} onError={e => { e.target.style.display = 'none'; }} />
+        </Logo>
+        <HeaderTitle>
+          {vi ? 'CHÍNH SÁCH 05: PHÍ & THANH TOÁN' : 'POLICY 05: FEES & PAYMENTS'}
+        </HeaderTitle>
+        <HeaderSub>
+          {vi
+            ? 'Áp dụng cho: Nhà tuyển dụng sử dụng dịch vụ trả phí'
+            : 'Applies to: Employers using paid services'}
+        </HeaderSub>
+        <HeaderMeta>
+          <MetaTag>{vi ? 'Cập nhật: 2025' : 'Updated: 2025'}</MetaTag>
+          <MetaTag>{vi ? 'Mô hình: Freemium' : 'Model: Freemium'}</MetaTag>
+        </HeaderMeta>
+      </Header>
 
-        <Title>
-          {language === 'vi' ? 'Điều khoản sử dụng Job Gấp - Ốp Pờ Nhà Tuyển Dụng' : 'Urgent Jobs Terms of Service - Employer'}
-        </Title>
+      <Container>
+        <Card $isDark={isDarkMode}>
+          <HighlightBox $isDark={isDarkMode}>
+            {vi
+              ? 'Ốp Pờ hoạt động theo mô hình freemium, ứng viên và nhà tuyển dụng đều được dùng miễn phí các tính năng cơ bản. Phí chỉ phát sinh khi bạn muốn tăng hiệu quả tuyển dụng.'
+              : 'Ốp Pờ operates on a freemium model, candidates and employers get free basic features. Fees only apply when you want to increase recruitment efficiency.'}
+          </HighlightBox>
+        </Card>
 
-        <Subtitle>
-          {language === 'vi'
-            ? 'Cập nhật lần cuối: 08/03/2026'
-            : 'Last updated: March 8, 2026'}
-        </Subtitle>
-
-        <Section>
-          <SectionTitle>
-            {language === 'vi' ? '1. Phí dịch vụ nền tảng' : '1. Platform Service Fee'}
+        {/* 1. Bảng tổng quan phí dịch vụ */}
+        <Card $isDark={isDarkMode}>
+          <SectionTitle $isDark={isDarkMode}>
+            <Banknote size={19} />
+            {vi ? '1. Bảng tổng quan phí dịch vụ' : '1. Service Fee Overview'}
           </SectionTitle>
-          <SectionContent>
-            <ul>
-              <li>
-                {language === 'vi'
-                  ? 'Nền tảng Ốp Pờ áp dụng phí dịch vụ 15% trên tổng tiền lương của ca làm việc khi sử dụng dịch vụ Job Gấp.'
-                  : 'OpPo platform applies a 15% service fee on total salary for each shift when using Urgent Jobs service.'}
-              </li>
-              <li>
-                {language === 'vi'
-                  ? 'Khoản phí này được khấu trừ trực tiếp từ số tiền thanh toán của Nhà tuyển dụng.'
-                  : 'This fee is deducted directly from the employer\'s payment amount.'}
-              </li>
-            </ul>
-          </SectionContent>
-        </Section>
+          <TableWrapper $isDark={isDarkMode}>
+            <Table $isDark={isDarkMode}>
+              <thead>
+                <tr>
+                  <th>{vi ? 'Dịch vụ' : 'Service'}</th>
+                  <th>{vi ? 'Đối tượng' : 'Target'}</th>
+                  <th>{vi ? 'Mức phí' : 'Fee'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{vi ? 'Đăng ký tài khoản ứng viên' : 'Candidate registration'}</td>
+                  <td>{vi ? 'Ứng viên' : 'Candidate'}</td>
+                  <td><strong style={{color: '#10b981'}}>{vi ? 'Miễn phí' : 'Free'}</strong></td>
+                </tr>
+                <tr>
+                  <td>{vi ? 'Đăng ký tài khoản nhà tuyển dụng' : 'Employer registration'}</td>
+                  <td>{vi ? 'Nhà tuyển dụng' : 'Employer'}</td>
+                  <td><strong style={{color: '#10b981'}}>{vi ? 'Miễn phí' : 'Free'}</strong></td>
+                </tr>
+                <tr>
+                  <td>{vi ? 'Đăng tin tuyển dụng thông thường' : 'Standard job posting'}</td>
+                  <td>{vi ? 'Nhà tuyển dụng' : 'Employer'}</td>
+                  <td><strong style={{color: '#10b981'}}>{vi ? 'Miễn phí' : 'Free'}</strong></td>
+                </tr>
+                <tr>
+                  <td>{vi ? 'Ứng tuyển vào bất kỳ vị trí nào' : 'Applying for any job'}</td>
+                  <td>{vi ? 'Ứng viên' : 'Candidate'}</td>
+                  <td><strong style={{color: '#10b981'}}>{vi ? 'Miễn phí' : 'Free'}</strong></td>
+                </tr>
+                <tr>
+                  <td>{vi ? 'Đẩy tin lên Top trang chủ' : 'Boost post to Top'}</td>
+                  <td>{vi ? 'Nhà tuyển dụng' : 'Employer'}</td>
+                  <td>{vi ? 'Có phí (xem CS Quảng Cáo)' : 'Paid (see Ad Policy)'}</td>
+                </tr>
+                <tr>
+                  <td>{vi ? 'Chạy quảng cáo tin tuyển dụng' : 'Run job advertising'}</td>
+                  <td>{vi ? 'Nhà tuyển dụng' : 'Employer'}</td>
+                  <td>{vi ? 'Có phí (xem CS Quảng Cáo)' : 'Paid (see Ad Policy)'}</td>
+                </tr>
+                <tr>
+                  <td>{vi ? 'Tính năng Job Gấp' : 'Urgent Job feature'}</td>
+                  <td>{vi ? 'Nhà tuyển dụng' : 'Employer'}</td>
+                  <td>{vi ? 'xem Chính sách Job Gấp' : 'see Urgent Job Policy'}</td>
+                </tr>
+              </tbody>
+            </Table>
+          </TableWrapper>
+        </Card>
 
-        <Section>
-          <SectionTitle>
-            {language === 'vi' ? '2. Quy định mức lương' : '2. Salary Regulations'}
+        {/* 2. Phương thức thanh toán */}
+        <Card $isDark={isDarkMode}>
+          <SectionTitle $isDark={isDarkMode}>
+            <Landmark size={19} />
+            {vi ? '2. Phương thức thanh toán được hỗ trợ' : '2. Supported Payment Methods'}
           </SectionTitle>
-          <SectionContent>
-            <ul>
-              <li>
-                {language === 'vi'
-                  ? 'Mức lương đăng tuyển cho Job Gấp phải cao hơn mức lương tối thiểu theo quy định của Nhà nước.'
-                  : 'Salary posted for Urgent Jobs must be higher than the minimum wage regulated by the government.'}
-              </li>
-              <li>
-                {language === 'vi'
-                  ? 'Nhà tuyển dụng cần đảm bảo rằng sau khi trừ 15% phí dịch vụ, thu nhập thực nhận của Ứng viên vẫn cao hơn mức lương tối thiểu theo quy định.'
-                  : 'Employers must ensure that after deducting the 15% service fee, the candidate\'s actual income is still higher than the regulated minimum wage.'}
-              </li>
-            </ul>
-          </SectionContent>
-        </Section>
 
-        <Section>
-          <SectionTitle>
-            {language === 'vi' ? '3. Ví nhà tuyển dụng và ký quỹ thanh toán' : '3. Employer Wallet and Payment Escrow'}
+          <SubTitle $isDark={isDarkMode}>{vi ? '2.1 Thanh toán trực tuyến' : '2.1 Online Payment'}</SubTitle>
+          <UL $isDark={isDarkMode}>
+            <li>{vi ? 'Ví điện tử: MoMo, VNPay' : 'E-wallets: MoMo, VNPay'}</li>
+            <li>{vi ? 'Thẻ tín dụng/ghi nợ nội địa: Visa, Mastercard, JCB phát hành tại Việt Nam' : 'Domestic credit/debit: Visa, Mastercard, JCB issued in Vietnam'}</li>
+            <li>{vi ? 'Thẻ quốc tế: Visa, Mastercard (có thể phát sinh phí chuyển đổi ngoại tệ)' : 'International cards: Visa, Mastercard (currency conversion fees may apply)'}</li>
+          </UL>
+
+          <SubTitle $isDark={isDarkMode}>{vi ? '2.2 Chuyển khoản ngân hàng' : '2.2 Bank Transfer'}</SubTitle>
+          <UL $isDark={isDarkMode}>
+            <li>{vi ? 'Áp dụng cho các gói dịch vụ có giá trị từ 10.000 VNĐ trở lên.' : 'Applies to service packages from 10,000 VND.'}</li>
+            <li>{vi ? 'Thông tin tài khoản ngân hàng sẽ được cung cấp sau khi xác nhận đơn hàng.' : 'Bank account info provided after order confirmation.'}</li>
+            <li>{vi ? 'Dịch vụ có hiệu lực trong vòng 30 phút sau khi xác nhận nhận tiền.' : 'Service starts within 30 mins after payment confirmation.'}</li>
+          </UL>
+
+          <SubTitle $isDark={isDarkMode}>{vi ? '2.3 Rút tiền tại Ốp Pờ' : '2.3 Withdrawal from Ốp Pờ'}</SubTitle>
+          <HighlightBox $isDark={isDarkMode}>
+            {vi
+              ? 'Tiền sẽ được quyết toán vào Thứ Bảy hằng tuần. Yêu cầu rút tiền cần được gửi trước 23h59 ngày Thứ Sáu để đảm bảo nhận tiền đúng hẹn vào ngày hôm sau.'
+              : 'Payments are settled every Saturday. Withdrawal requests must be sent before 11:59 PM Friday to ensure timely payment the next day.'}
+          </HighlightBox>
+        </Card>
+
+        {/* 3. Hóa đơn & biên lai */}
+        <Card $isDark={isDarkMode}>
+          <SectionTitle $isDark={isDarkMode}>
+            <Receipt size={19} />
+            {vi ? '3. Hóa đơn & biên lai' : '3. Invoices & Receipts'}
           </SectionTitle>
-          <SectionContent>
-            <ul>
-              <li>
-                {language === 'vi'
-                  ? 'Để đăng Job Gấp, ví Nhà tuyển dụng trên nền tảng Ốp Pờ phải có đủ số dư tương ứng với tổng tiền lương của ca làm việc.'
-                  : 'To post Urgent Jobs, the employer\'s wallet on OpPo platform must have sufficient balance equivalent to the total salary of the work shift.'}
-              </li>
-              <li>
-                {language === 'vi'
-                  ? 'Sau khi Job Gấp được đăng, số tiền này sẽ được nền tảng tạm giữ (ký quỹ) nhằm đảm bảo thanh toán cho Ứng viên.'
-                  : 'After the Urgent Job is posted, this amount will be held in escrow by the platform to ensure payment to candidates.'}
-              </li>
-            </ul>
-          </SectionContent>
-        </Section>
+          <UL $isDark={isDarkMode}>
+            <li>{vi ? 'Hóa đơn điện tử (VAT 10%) được xuất tự động sau mỗi giao dịch thành công.' : 'E-invoices (10% VAT) issued automatically after successful transaction.'}</li>
+            <li>{vi ? 'Nhà tuyển dụng có thể tải lại lịch sử hóa đơn trong mục Quản lý thanh toán.' : 'Employers can download invoice history in Payment Management.'}</li>
+            <li>{vi ? 'Cần hóa đơn đỏ cho doanh nghiệp? Vui lòng cập nhật thông tin trong phần liên hệ.' : 'Need business red invoice? Update info in contact section.'}</li>
+          </UL>
+        </Card>
 
-        <Highlight>
-          {language === 'vi'
-            ? '⚠️ Lưu ý quan trọng: Số tiền sẽ được tạm giữ (ký quỹ) trên nền tảng và chỉ được chuyển cho ứng viên sau khi ca làm hoàn thành và được xác nhận bởi cả hai bên.'
-            : '⚠️ Important note: The amount will be held in escrow on the platform and will only be transferred to candidates after the shift is completed and confirmed by both parties.'}
-        </Highlight>
-
-        <Section>
-          <SectionTitle>
-            {language === 'vi' ? '4. Cơ chế đề xuất và thay thế ứng viên' : '4. Candidate Recommendation and Replacement Mechanism'}
+        {/* 4. Bảo mật giao dịch */}
+        <Card $isDark={isDarkMode}>
+          <SectionTitle $isDark={isDarkMode}>
+            <ShieldCheck size={19} />
+            {vi ? '4. Bảo mật giao dịch' : '4. Transaction Security'}
           </SectionTitle>
-          <SectionContent>
-            <ul>
-              <li>
-                {language === 'vi'
-                  ? 'Ứng viên cho Job Gấp sẽ được hệ thống Ốp Pờ đề xuất tự động bằng công nghệ AI, dựa trên JD, kỹ năng, vị trí và mức độ phù hợp với công việc.'
-                  : 'Candidates for Urgent Jobs will be automatically recommended by OpPo\'s AI system based on JD, skills, location, and job suitability.'}
-              </li>
-              <li>
-                {language === 'vi'
-                  ? 'Nhà tuyển dụng có quyền chấp nhận hoặc từ chối ứng viên được đề xuất.'
-                  : 'Employers have the right to accept or reject recommended candidates.'}
-              </li>
-            </ul>
-            <p>
-              <strong>{language === 'vi' ? 'Sau khi Nhà tuyển dụng đã chấp nhận ứng viên:' : 'After employer accepts a candidate:'}</strong>
-            </p>
-            <ul>
-              <li>
-                {language === 'vi'
-                  ? 'Trong 30 phút đầu kể từ khi ca làm bắt đầu, nếu ứng viên không đến làm việc hoặc không đáp ứng yêu cầu công việc, Nhà tuyển dụng có quyền từ chối ứng viên trên hệ thống.'
-                  : 'Within the first 30 minutes from shift start, if the candidate does not show up or does not meet job requirements, employers have the right to reject the candidate on the system.'}
-              </li>
-              <li>
-                {language === 'vi'
-                  ? 'Hệ thống sẽ tự động đề xuất ứng viên thay thế tiếp theo.'
-                  : 'The system will automatically recommend the next replacement candidate.'}
-              </li>
-              <li>
-                {language === 'vi'
-                  ? 'Mỗi Job Gấp được tối đa 02 lần đề xuất ứng viên thay thế.'
-                  : 'Each Urgent Job is allowed a maximum of 2 replacement candidate recommendations.'}
-              </li>
-              <li>
-                {language === 'vi'
-                  ? 'Sau 30 phút đầu, Nhà tuyển dụng không thể huỷ hoặc thay thế ứng viên.'
-                  : 'After the first 30 minutes, employers cannot cancel or replace candidates.'}
-              </li>
-            </ul>
-          </SectionContent>
-        </Section>
+          <UL $isDark={isDarkMode}>
+            <li>{vi ? 'Ốp Pờ KHÔNG lưu trữ thông tin thẻ tín dụng/ghi nợ của người dùng trên hệ thống.' : 'Ốp Pờ does NOT store user credit/debit card information.'}</li>
+            <li>{vi ? 'Giao dịch thất bại (đã trừ tiền): liên hệ hỗ trợ trong 24 giờ để được xử lý.' : 'Failed transaction (charged): contact support within 24h.'}</li>
+          </UL>
+        </Card>
 
-        <Section>
-          <SectionTitle>
-            {language === 'vi' ? '5. Xác nhận hoàn thành và thanh toán' : '5. Completion Confirmation and Payment'}
-          </SectionTitle>
-          <SectionContent>
-            <ul>
-              <li>
-                {language === 'vi'
-                  ? 'Sau khi ca làm kết thúc, Nhà tuyển dụng và Ứng viên cần xác nhận hoàn thành công việc trên hệ thống.'
-                  : 'After the shift ends, both employer and candidate need to confirm job completion on the system.'}
-              </li>
-              <li>
-                {language === 'vi'
-                  ? 'Sau khi xác nhận, tiền lương của Ứng viên sẽ được chuyển vào ví ứng viên trong vòng tối đa 48 giờ.'
-                  : 'After confirmation, the candidate\'s salary will be transferred to their wallet within a maximum of 48 hours.'}
-              </li>
-            </ul>
-          </SectionContent>
-        </Section>
-
-        <Section>
-          <SectionTitle>
-            {language === 'vi' ? '6. Huỷ công việc và xử lý tranh chấp' : '6. Job Cancellation and Dispute Resolution'}
-          </SectionTitle>
-          <SectionContent>
-            <ul>
-              <li>
-                {language === 'vi'
-                  ? 'Trong trường hợp Job Gấp bị huỷ hoặc phát sinh tranh chấp giữa Nhà tuyển dụng và Ứng viên, nền tảng Ốp Pờ sẽ tiến hành xem xét và xử lý dựa trên dữ liệu hệ thống và thông tin từ các bên liên quan.'
-                  : 'In case of Urgent Job cancellation or dispute between employer and candidate, OpPo platform will review and process based on system data and information from related parties.'}
-              </li>
-              <li>
-                {language === 'vi'
-                  ? 'Nếu Job Gấp bị huỷ hợp lệ, số tiền đã ký quỹ sẽ được hoàn lại vào ví Nhà tuyển dụng trong vòng tối đa 48 giờ.'
-                  : 'If the Urgent Job is legitimately cancelled, the escrowed amount will be refunded to the employer\'s wallet within a maximum of 48 hours.'}
-              </li>
-              <li>
-                {language === 'vi'
-                  ? 'Nếu Job Gấp bị huỷ không hợp lệ, nền tảng vẫn áp dụng phí dịch vụ 15% trên tổng giá trị Job Gấp.'
-                  : 'If the Urgent Job is cancelled illegitimately, the platform will still apply a 15% service fee on the total Urgent Job value.'}
-              </li>
-            </ul>
-          </SectionContent>
-        </Section>
-      </ContentWrapper>
-    </Container>
+        <FooterBox $isDark={isDarkMode}>
+          <Link to="/login">{vi ? 'Đăng nhập' : 'Login'}</Link>
+          {' · '}
+          <Link to="/register">{vi ? 'Đăng ký' : 'Register'}</Link>
+          {' · '}
+          <Link to="/policy">{vi ? 'Điều khoản chung' : 'General Terms'}</Link>
+          
+          <div className="slogan">
+             {vi ? 'ỐP PỜ - BẠN VỪA BỊ ĐUỔI & ĐÃ CÓ ỐP PỜ LO' : 'ỐP PỜ - JUST GOT FIRED? ỐP PỜ GOT YOU'}
+          </div>
+        </FooterBox>
+      </Container>
+    </Wrapper>
   );
 };
 

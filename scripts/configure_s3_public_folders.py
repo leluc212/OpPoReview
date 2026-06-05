@@ -57,7 +57,8 @@ def main():
                 "Resource": [
                     f"arn:aws:s3:::{args.bucket}/banner/*",
                     f"arn:aws:s3:::{args.bucket}/poster/*",
-                    f"arn:aws:s3:::{args.bucket}/system/*"
+                    f"arn:aws:s3:::{args.bucket}/system/*",
+                    f"arn:aws:s3:::{args.bucket}/feedback-images/*"
                 ]
             }
         ]

@@ -34,6 +34,10 @@ import EmployerProfileView from './pages/candidate/EmployerProfileView';
 import EmployerDirectory from './pages/candidate/EmployerDirectory';
 import PublicJobListing from './pages/candidate/PublicJobListing';
 import AboutPage from './pages/auth/AboutPage';
+import PolicyPage from './pages/PolicyPage';
+import RegisterPolicyPage from './pages/RegisterPolicyPage';
+import CandidatePolicyPage from './pages/CandidatePolicyPage';
+import EmployerPolicyPage from './pages/EmployerPolicyPage';
 import CVTemplates from './pages/auth/CVTemplates';
 import Wallet from './pages/candidate/Wallet';
 import Availability from './pages/candidate/Availability';
@@ -173,6 +177,10 @@ function AppRoutes() {
       <Route path="/companies/:employerId" element={<LandingPage><EmployerProfileView /></LandingPage>} />
       <Route path="/jobs" element={<LandingPage><PublicJobListing /></LandingPage>} />
       <Route path="/about" element={<LandingPage><AboutPage /></LandingPage>} />
+      <Route path="/policy" element={<PolicyPage />} />
+      <Route path="/policyregister" element={<RegisterPolicyPage />} />
+      <Route path="/policy/candidate" element={<CandidatePolicyPage />} />
+      <Route path="/policy/employer" element={<EmployerPolicyPage />} />
       <Route path="/cv-templates" element={<Navigate to="/candidate/cv-templates" replace />} />
       <Route path="/candidate/cv-templates" element={
         <ProtectedRoute allowedRoles={['candidate']}>

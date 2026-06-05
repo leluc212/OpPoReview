@@ -56,7 +56,7 @@ class FeedbackService {
     }
   }
 
-  async submitFeedback(category, comment, user = null) {
+  async submitFeedback(category, comment, user = null, imageBase64List = []) {
     try {
       const payload = {
         category: category || 'other',
@@ -64,7 +64,8 @@ class FeedbackService {
         userId: user?.userId || 'anonymous-guest',
         userName: user?.fullName || user?.name || (user?.email ? user.email.split('@')[0] : 'Khách vãng lai'),
         userEmail: user?.email || 'guest.anonymous@oppo.com',
-        userRole: user?.role || 'guest'
+        userRole: user?.role || 'guest',
+        ...(imageBase64List && imageBase64List.length > 0 && { imageUrls: imageBase64List })
       };
 
       const result = await this.makeRequest('/feedback', {

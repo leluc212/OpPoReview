@@ -1276,10 +1276,10 @@ const EmployerRegister = () => {
                   </CheckBox>
                   <CheckText>
                     Tôi đã đọc và đồng ý với{' '}
-                    <a href="#" onClick={e => e.stopPropagation()}>Điều khoản dịch vụ</a>
-                    {' '}và{' '}
-                    <a href="#" onClick={e => e.stopPropagation()}>Chính sách bảo mật</a>{' '}
-                    của Ốp Pờ.
+                      <Link to="/policy/employer" onClick={e => e.stopPropagation()}>Điều khoản</Link>
+                      {' & '}
+                      <Link to="/policyregister" onClick={e => e.stopPropagation()}>Chính sách bảo mật</Link>
+                    {' '}của Ốp Pờ.
                   </CheckText>
                 </CheckRow>
                 {errors.agreed && <FieldErr style={{ marginTop: -8, marginBottom: 10 }}>⚠ {errors.agreed}</FieldErr>}
