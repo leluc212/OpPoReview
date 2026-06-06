@@ -840,12 +840,17 @@ const CandidateRegister = () => {
           });
           return;
         } catch (resendErr) {
-          if (resendErr.name === 'InvalidParameterException' || resendErr.message?.includes('confirmed')) {
+          console.log('resendSignUpCode error:', resendErr.name, resendErr.message);
+          const isAlreadyConfirmed =
+            resendErr.name === 'InvalidParameterException' ||
+            resendErr.name === 'NotAuthorizedException' ||
+            resendErr.message?.toLowerCase().includes('confirmed') ||
+            resendErr.message?.toLowerCase().includes('current status is confirmed');
+          if (isAlreadyConfirmed) {
             // User is already confirmed — truly duplicate account
             errorMessage = 'Email này đã được đăng ký và xác thực. Vui lòng đăng nhập hoặc dùng email khác.';
-          } else {
-            // Any other resend error (LimitExceeded, network...) — still send to OTP page
-            // because the root cause is UsernameExists (unconfirmed)
+          } else if (resendErr.name === 'LimitExceededException') {
+            // Rate limited — user likely exists unconfirmed, send them to OTP anyway
             navigate('/verify-otp', {
               state: {
                 email: form.email,
@@ -856,6 +861,9 @@ const CandidateRegister = () => {
               }
             });
             return;
+          } else {
+            // Unknown resend error — treat as already confirmed to avoid confusion
+            errorMessage = 'Email này đã được đăng ký. Vui lòng đăng nhập hoặc dùng email khác.';
           }
         }
       } else if (err.name === 'InvalidPasswordException') {

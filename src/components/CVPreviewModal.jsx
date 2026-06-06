@@ -319,62 +319,225 @@ const ZoomIndicator = styled.div`
   }
 `;
 
-const CVPreviewModal = ({ cvUrl, fileName, onClose, onDownload }) => {
+const CVPreviewModal = ({ cvUrl, fileName, onClose, onDownload, onGetFreshUrl }) => {
+  // Detect file type first (before any hooks)
+  const isPDF = !!(fileName?.toLowerCase().endsWith('.pdf') ||
+    (cvUrl?.includes('.pdf') && !cvUrl?.includes('.docx')));
+  const isDOCX = !!(fileName?.toLowerCase().endsWith('.docx') ||
+    fileName?.toLowerCase().endsWith('.doc') ||
+    cvUrl?.includes('.docx'));
+
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [scale, setScale] = useState(1.5); // Increased from 1.2 to 1.5 for better visibility
+  const [scale, setScale] = useState(1.5);
   const [showZoomIndicator, setShowZoomIndicator] = useState(false);
   const [pdfData, setPdfData] = useState(null);
-  const [useIframe, setUseIframe] = useState(false); // Fallback to iframe if PDF.js fails
+  const [useGoogleViewer, setUseGoogleViewer] = useState(false);
+  // DOCX rendered HTML
+  const [docxHtml, setDocxHtml] = useState(null);
+  // Fresh URL after refresh
+  const [activeCvUrl, setActiveCvUrl] = useState(cvUrl);
 
-  // Fetch PDF with proper CORS handling
+  // Check if a presigned URL is expired or near expiry
+  const isUrlExpired = (url) => {
+    if (!url) return true;
+    try {
+      // Query-string presigned URL: has Expires= param (Unix timestamp)
+      const expiresMatch = url.match(/[?&]Expires=(\d+)/i);
+      if (expiresMatch) {
+        const expireTs = parseInt(expiresMatch[1], 10) * 1000;
+        return Date.now() >= expireTs - 60000; // expired or expires within 1 min
+      }
+      // X-Amz-Date style: check X-Amz-Expires duration
+      const amzDateMatch = url.match(/X-Amz-Date=(\d{8}T\d{6}Z)/i);
+      const amzExpiresMatch = url.match(/X-Amz-Expires=(\d+)/i);
+      if (amzDateMatch && amzExpiresMatch) {
+        const d = amzDateMatch[1]; // e.g. 20260101T120000Z
+        const signedAt = new Date(
+          `${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6,8)}T${d.slice(9,11)}:${d.slice(11,13)}:${d.slice(13,15)}Z`
+        ).getTime();
+        const expiresIn = parseInt(amzExpiresMatch[1], 10) * 1000;
+        return Date.now() >= signedAt + expiresIn - 60000;
+      }
+    } catch (_) { /* ignore */ }
+    return false;
+  };
+
+  // On open, refresh URL if it's expired
   React.useEffect(() => {
-    if (!cvUrl) return;
-    
-    const fetchPDF = async () => {
+    const refreshIfNeeded = async () => {
+      if (isUrlExpired(cvUrl) && onGetFreshUrl) {
+        console.log('⚠️ CV URL expired on open, requesting fresh URL...');
+        try {
+          const freshUrl = await onGetFreshUrl();
+          if (freshUrl) {
+            console.log('✅ Got fresh CV URL');
+            setActiveCvUrl(freshUrl);
+            return;
+          }
+        } catch (e) {
+          console.warn('Could not refresh CV URL:', e);
+        }
+      }
+      setActiveCvUrl(cvUrl);
+    };
+    refreshIfNeeded();
+  }, [cvUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fetch + convert DOCX → HTML using mammoth
+  React.useEffect(() => {
+    if (!activeCvUrl || !isDOCX) return;
+
+    const fetchAndConvert = async (url) => {
+      // Kiểm tra URL có phải presigned S3 không
+      const hasExpiry = url?.includes('X-Amz-Expires') || url?.includes('X-Amz-Credential');
+      if (!hasExpiry && url?.includes('amazonaws.com')) {
+        console.warn('⚠️ URL có vẻ không phải presigned URL — có thể bị từ chối');
+      }
+
+      const response = await fetch(url, { method: 'GET', mode: 'cors', credentials: 'omit' });
+      if (!response.ok) {
+        // HTTP error (403, 404, 500...) → URL hết hạn hoặc không có quyền
+        const errText = await response.text().catch(() => '');
+        console.error('❌ [DEBUG] HTTP', response.status, 'body:', errText.slice(0, 300));
+        const expiredError = new Error('URL đã hết hạn hoặc không có quyền truy cập file.');
+        expiredError.isExpired = true;
+        throw expiredError;
+      }
+
+      const contentType = response.headers.get('content-type') || '';
+      console.log('📄 Content-Type:', contentType);
+
+      // Đọc toàn bộ body dưới dạng ArrayBuffer trước
+      const arrayBuffer = await response.arrayBuffer();
+      const header = new Uint8Array(arrayBuffer.slice(0, 4));
+
+      console.log('🔍 [DEBUG] Magic bytes:', header[0].toString(16), header[1].toString(16), header[2].toString(16), header[3].toString(16));
+
+      // Kiểm tra magic bytes: DOCX/ZIP bắt đầu bằng PK (0x50 0x4B)
+      const isPKZip = header[0] === 0x50 && header[1] === 0x4B;
+
+      if (!isPKZip) {
+        // Không phải ZIP → đây là XML/HTML error từ S3 (AccessDenied, ExpiredToken...)
+        const errText = new TextDecoder().decode(arrayBuffer.slice(0, 500));
+        console.error('❌ [DEBUG] S3 error body:', errText);
+
+        // Phân tích loại lỗi từ XML S3 trả về
+        const isExpiredToken = errText.includes('ExpiredToken') || errText.includes('Request has expired') || errText.includes('TokenExpired');
+        const isAccessDenied = errText.includes('AccessDenied') || errText.includes('NoSuchKey');
+
+        const expiredError = new Error(
+          isExpiredToken ? 'URL đã hết hạn hoặc không có quyền truy cập file.' :
+          isAccessDenied ? 'URL đã hết hạn hoặc không có quyền truy cập file.' :
+          'File không hợp lệ hoặc không thể đọc được.'
+        );
+        expiredError.isExpired = isExpiredToken || isAccessDenied;
+        throw expiredError;
+      }
+
+      const mammoth = (await import('mammoth')).default;
+      const result = await mammoth.convertToHtml({ arrayBuffer });
+      return result.value;
+    };
+
+    const convertDocx = async () => {
       try {
-        console.log('📥 Fetching PDF from:', cvUrl);
         setLoading(true);
         setError(null);
-        
-        const response = await fetch(cvUrl, {
-          method: 'GET',
-          mode: 'cors',
-          credentials: 'omit',
-          headers: {
-            'Accept': 'application/pdf'
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const blob = await response.blob();
-        console.log('✅ PDF fetched successfully, size:', blob.size);
-        
-        // Create object URL instead of data URL for better performance
-        const objectUrl = URL.createObjectURL(blob);
-        setPdfData(objectUrl);
-        
+        console.log('📥 Fetching DOCX from:', activeCvUrl);
+
+        const html = await fetchAndConvert(activeCvUrl);
+        console.log('✅ DOCX converted to HTML');
+        setDocxHtml(html);
+        setLoading(false);
+
       } catch (err) {
-        console.error('❌ Error fetching PDF:', err);
-        setError('Không thể tải file CV. Vui lòng thử tải xuống để xem.');
+        console.error('❌ DOCX convert error:', err);
+
+        // URL hết hạn → thử lấy URL mới và fetch lại
+        if (err.isExpired && onGetFreshUrl) {
+          console.log('🔄 URL expired, requesting fresh URL...');
+          try {
+            const freshUrl = await onGetFreshUrl();
+            if (freshUrl) {
+              // Kiểm tra URL mới có hợp lệ không trước khi fetch
+              if (isUrlExpired(freshUrl)) {
+                console.warn('⚠️ Fresh URL cũng đã hết hạn, không thể tải file.');
+                setError('Link xem file đã hết hạn. Vui lòng tải xuống để xem.');
+                setLoading(false);
+                return;
+              }
+              console.log('✅ Got fresh URL, retrying DOCX fetch...');
+              setActiveCvUrl(freshUrl);
+              const html = await fetchAndConvert(freshUrl);
+              console.log('✅ DOCX converted to HTML (retry)');
+              setDocxHtml(html);
+              setLoading(false);
+              return;
+            }
+          } catch (retryErr) {
+            console.error('❌ Retry also failed:', retryErr);
+            // Nếu retry cũng lỗi hết hạn → hiển thị nút tải xuống
+            setError('Link xem file đã hết hạn. Vui lòng tải xuống để xem.');
+            setLoading(false);
+            return;
+          }
+        }
+
+        setError(
+          err.isExpired
+            ? 'Link xem file đã hết hạn. Vui lòng tải xuống để xem.'
+            : `Không thể đọc file: ${err.message}`
+        );
         setLoading(false);
       }
     };
-    
-    fetchPDF();
-    
-    // Cleanup object URL on unmount
-    return () => {
-      if (pdfData && pdfData.startsWith('blob:')) {
-        URL.revokeObjectURL(pdfData);
+
+    convertDocx();
+  }, [activeCvUrl, isDOCX]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fetch PDF blob (chỉ với file PDF, skip DOCX)
+  React.useEffect(() => {
+    if (!activeCvUrl || !isPDF) {
+      setLoading(false);
+      return;
+    }
+
+    let objectUrl = null;
+
+    const fetchPDF = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        console.log('📥 Fetching PDF from:', activeCvUrl);
+
+        const response = await fetch(activeCvUrl, {
+          method: 'GET',
+          mode: 'cors',
+          credentials: 'omit',
+          headers: { 'Accept': 'application/pdf' }
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+
+        const blob = await response.blob();
+        objectUrl = URL.createObjectURL(blob);
+        console.log('✅ PDF fetched, size:', blob.size);
+        setPdfData(objectUrl);
+
+      } catch (err) {
+        console.error('❌ Error fetching PDF:', err);
+        setUseGoogleViewer(true);
+        setLoading(false);
       }
     };
-  }, [cvUrl]);
+
+    fetchPDF();
+
+    return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, [activeCvUrl, isPDF]);
 
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
@@ -382,227 +545,180 @@ const CVPreviewModal = ({ cvUrl, fileName, onClose, onDownload }) => {
     setError(null);
   };
 
-  const onDocumentLoadError = (error) => {
-    console.error('Error loading PDF:', error);
-    console.log('⚠️ PDF.js failed, falling back to iframe viewer');
+  const onDocumentLoadError = (err) => {
+    console.error('PDF.js load error:', err);
     setLoading(false);
-    setUseIframe(true); // Fallback to iframe
+    setUseGoogleViewer(true);
   };
 
   const handleZoomIn = () => {
-    setScale(prev => {
-      const newScale = Math.min(prev + 0.2, 3.0);
-      showZoomMessage();
-      return newScale;
-    });
+    setScale(prev => { const n = Math.min(prev + 0.2, 3.0); showZoomMsg(); return n; });
   };
-
   const handleZoomOut = () => {
-    setScale(prev => {
-      const newScale = Math.max(prev - 0.2, 0.5);
-      showZoomMessage();
-      return newScale;
-    });
+    setScale(prev => { const n = Math.max(prev - 0.2, 0.5); showZoomMsg(); return n; });
   };
-
-  const handlePrevPage = () => {
-    setPageNumber(prev => Math.max(prev - 1, 1));
-  };
-
-  const handleNextPage = () => {
-    setPageNumber(prev => Math.min(prev + 1, numPages || 1));
-  };
-
-  const showZoomMessage = () => {
+  const showZoomMsg = () => {
     setShowZoomIndicator(true);
     setTimeout(() => setShowZoomIndicator(false), 1000);
   };
 
-  const getZoomLabel = () => {
-    return `${Math.round(scale * 100)}%`;
-  };
+  const showPdfControls = isPDF && !useGoogleViewer;
 
-  // Check if file is PDF
-  const isPDF = fileName?.toLowerCase().endsWith('.pdf') || cvUrl?.includes('.pdf');
+  const renderContent = () => {
+    // Loading spinner
+    if (loading) {
+      return (
+        <LoadingMessage>
+          <div className="spinner" />
+          {isDOCX ? 'Đang đọc file Word...' : 'Đang tải CV...'}
+        </LoadingMessage>
+      );
+    }
+
+    // Error state
+    if (error) {
+      return (
+        <ErrorMessage>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
+          {error}
+          {onDownload && (
+            <div style={{ marginTop: '16px' }}>
+              <ControlButton onClick={onDownload} style={{ width: 'auto', padding: '0 20px', background: 'rgba(255,255,255,0.2)' }}>
+                <Download style={{ marginRight: '8px' }} />Tải xuống CV
+              </ControlButton>
+            </div>
+          )}
+        </ErrorMessage>
+      );
+    }
+
+    // DOCX → rendered HTML
+    if (isDOCX && docxHtml) {
+      return (
+        <PDFContainer style={{ maxHeight: '82vh', overflowY: 'auto' }}>
+          <div
+            style={{
+              width: '100%',
+              fontFamily: 'Georgia, serif',
+              fontSize: '14px',
+              lineHeight: '1.7',
+              color: '#1e293b',
+              padding: '8px 4px',
+            }}
+            dangerouslySetInnerHTML={{ __html: docxHtml }}
+          />
+        </PDFContainer>
+      );
+    }
+
+    // PDF native render
+    if (isPDF && !useGoogleViewer) {
+      return (
+        <PDFContainer>
+          {numPages > 1 && (
+            <PageNavigation>
+              <NavButton onClick={() => setPageNumber(p => Math.max(p - 1, 1))} disabled={pageNumber <= 1}>
+                <ChevronLeft />
+              </NavButton>
+              <PageInfo>Trang {pageNumber} / {numPages}</PageInfo>
+              <NavButton onClick={() => setPageNumber(p => Math.min(p + 1, numPages))} disabled={pageNumber >= numPages}>
+                <ChevronRight />
+              </NavButton>
+            </PageNavigation>
+          )}
+          <Document
+            file={pdfData || activeCvUrl}
+            onLoadSuccess={onDocumentLoadSuccess}
+            onLoadError={onDocumentLoadError}
+            loading={
+              <LoadingMessage>
+                <div className="spinner" />
+                Đang tải CV...
+              </LoadingMessage>
+            }
+            options={{
+              cMapUrl: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/cmaps/`,
+              cMapPacked: true,
+              withCredentials: false,
+              standardFontDataUrl: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/standard_fonts/`,
+              isEvalSupported: false
+            }}
+          >
+            <Page
+              pageNumber={pageNumber}
+              scale={scale}
+              renderTextLayer={false}
+              renderAnnotationLayer={false}
+            />
+          </Document>
+        </PDFContainer>
+      );
+    }
+
+    // PDF fallback (fetch lỗi) → thông báo tải xuống
+    if (useGoogleViewer) {
+      return (
+        <ErrorMessage>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>📄</div>
+          Không thể xem file PDF trong trình duyệt. URL có thể đã hết hạn.
+          {onDownload && (
+            <div style={{ marginTop: '16px' }}>
+              <ControlButton onClick={onDownload} style={{ width: 'auto', padding: '0 20px', background: 'rgba(255,255,255,0.2)' }}>
+                <Download style={{ marginRight: '8px' }} />Tải xuống CV
+              </ControlButton>
+            </div>
+          )}
+        </ErrorMessage>
+      );
+    }
+
+    // Unknown
+    return (
+      <ErrorMessage>
+        <div style={{ fontSize: '48px', marginBottom: '16px' }}>📄</div>
+        Không thể xem file này trong trình duyệt.
+        {onDownload && (
+          <div style={{ marginTop: '16px' }}>
+            <ControlButton onClick={onDownload} style={{ width: 'auto', padding: '0 20px', background: 'rgba(255,255,255,0.2)' }}>
+              <Download style={{ marginRight: '8px' }} />Tải xuống CV
+            </ControlButton>
+          </div>
+        )}
+      </ErrorMessage>
+    );
+  };
 
   return (
     <Overlay onClick={onClose}>
-      {/* Header hidden when using iframe */}
-      {!useIframe && (
-        <Header onClick={(e) => e.stopPropagation()}>
-          <Title>{fileName || 'CV.pdf'}</Title>
-          <Controls>
-            {isPDF && numPages > 1 && (
-              <>
-                <ControlButton onClick={handlePrevPage} disabled={pageNumber <= 1} title="Trang trước">
-                  <ChevronLeft />
-                </ControlButton>
-                <ControlButton onClick={handleNextPage} disabled={pageNumber >= numPages} title="Trang sau">
-                  <ChevronRight />
-                </ControlButton>
-              </>
-            )}
-            <ControlButton 
-              onClick={handleZoomOut} 
-              disabled={scale <= 0.5}
-              title="Thu nhỏ"
-            >
-              <ZoomOut />
-            </ControlButton>
-            <ControlButton 
-              onClick={handleZoomIn} 
-              disabled={scale >= 3.0}
-              title="Phóng to"
-            >
-              <ZoomIn />
-            </ControlButton>
-            {onDownload && (
-              <ControlButton onClick={onDownload} title="Tải xuống">
-                <Download />
+      <Header onClick={e => e.stopPropagation()}>
+        <Title>{fileName || 'CV'}</Title>
+        <Controls>
+          {showPdfControls && numPages > 1 && (
+            <>
+              <ControlButton onClick={() => setPageNumber(p => Math.max(p - 1, 1))} disabled={pageNumber <= 1} title="Trang trước">
+                <ChevronLeft />
               </ControlButton>
-            )}
-            <ControlButton onClick={onClose} title="Đóng">
-              <X />
-            </ControlButton>
-          </Controls>
-        </Header>
-      )}
-      
-      <Content onClick={(e) => e.stopPropagation()}>
-        {error ? (
-          <ErrorMessage>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
-            {error}
-            {onDownload && (
-              <div style={{ marginTop: '16px' }}>
-                <ControlButton 
-                  onClick={onDownload}
-                  style={{ 
-                    width: 'auto', 
-                    padding: '0 20px',
-                    background: 'rgba(255, 255, 255, 0.2)'
-                  }}
-                >
-                  <Download style={{ marginRight: '8px' }} />
-                  Tải xuống CV
-                </ControlButton>
-              </div>
-            )}
-          </ErrorMessage>
-        ) : useIframe && isPDF ? (
-          <>
-            {/* Floating close button for iframe mode */}
-            <div style={{
-              position: 'fixed',
-              top: '20px',
-              right: '20px',
-              zIndex: 10001
-            }}>
-              <ControlButton 
-                onClick={onClose} 
-                title="Đóng"
-                style={{
-                  background: 'rgba(0, 0, 0, 0.8)',
-                  backdropFilter: 'blur(10px)'
-                }}
-              >
-                <X />
+              <ControlButton onClick={() => setPageNumber(p => Math.min(p + 1, numPages))} disabled={pageNumber >= numPages} title="Trang sau">
+                <ChevronRight />
               </ControlButton>
-            </div>
-            
-            <PDFContainer style={{ 
-              width: '100vw', 
-              maxWidth: '100vw',
-              height: '100vh',
-              maxHeight: '100vh',
-              padding: '0',
-              margin: '0',
-              display: 'flex',
-              flexDirection: 'column',
-              borderRadius: '0',
-              boxShadow: 'none'
-            }}>
-              <iframe
-                src={pdfData || cvUrl}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  border: 'none',
-                  borderRadius: '0',
-                  backgroundColor: 'white'
-                }}
-                title={fileName || 'CV Preview'}
-              />
-            </PDFContainer>
-          </>
-        ) : isPDF ? (
-          <PDFContainer>
-            {numPages > 1 && (
-              <PageNavigation>
-                <NavButton onClick={handlePrevPage} disabled={pageNumber <= 1}>
-                  <ChevronLeft />
-                </NavButton>
-                <PageInfo>
-                  Trang {pageNumber} / {numPages}
-                </PageInfo>
-                <NavButton onClick={handleNextPage} disabled={pageNumber >= numPages}>
-                  <ChevronRight />
-                </NavButton>
-              </PageNavigation>
-            )}
-            
-            <Document
-              file={pdfData || cvUrl}
-              onLoadSuccess={onDocumentLoadSuccess}
-              onLoadError={onDocumentLoadError}
-              loading={
-                <LoadingMessage>
-                  <div className="spinner" />
-                  Đang tải CV...
-                </LoadingMessage>
-              }
-              options={{
-                cMapUrl: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/cmaps/`,
-                cMapPacked: true,
-                withCredentials: false,
-                standardFontDataUrl: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/standard_fonts/`,
-                disableWorker: false, // Try with worker first
-                isEvalSupported: false // Disable eval for security
-              }}
-            >
-              <Page 
-                pageNumber={pageNumber}
-                scale={scale}
-                renderTextLayer={false}
-                renderAnnotationLayer={false}
-              />
-            </Document>
-          </PDFContainer>
-        ) : (
-          <ErrorMessage>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📄</div>
-            File này không phải PDF. Vui lòng tải xuống để xem.
-            {onDownload && (
-              <div style={{ marginTop: '16px' }}>
-                <ControlButton 
-                  onClick={onDownload}
-                  style={{ 
-                    width: 'auto', 
-                    padding: '0 20px',
-                    background: 'rgba(255, 255, 255, 0.2)'
-                  }}
-                >
-                  <Download style={{ marginRight: '8px' }} />
-                  Tải xuống CV
-                </ControlButton>
-              </div>
-            )}
-          </ErrorMessage>
-        )}
+            </>
+          )}
+          {showPdfControls && (
+            <>
+              <ControlButton onClick={handleZoomOut} disabled={scale <= 0.5} title="Thu nhỏ"><ZoomOut /></ControlButton>
+              <ControlButton onClick={handleZoomIn} disabled={scale >= 3.0} title="Phóng to"><ZoomIn /></ControlButton>
+            </>
+          )}
+          {onDownload && (
+            <ControlButton onClick={onDownload} title="Tải xuống"><Download /></ControlButton>
+          )}
+          <ControlButton onClick={onClose} title="Đóng"><X /></ControlButton>
+        </Controls>
+      </Header>
 
-        <ZoomIndicator $show={showZoomIndicator}>
-          {getZoomLabel()}
-        </ZoomIndicator>
+      <Content onClick={e => e.stopPropagation()}>
+        {renderContent()}
+        <ZoomIndicator $show={showZoomIndicator}>{Math.round(scale * 100)}%</ZoomIndicator>
       </Content>
     </Overlay>
   );

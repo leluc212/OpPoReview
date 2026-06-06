@@ -19,6 +19,13 @@
         "arn:aws:dynamodb:ap-southeast-1:*:table/CompletedJobs",
         "arn:aws:dynamodb:ap-southeast-1:*:table/CompletedJobs/index/*"
       ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject"
+      ],
+      "Resource": "arn:aws:s3:::opporeview-cv-storage/*"
     }
   ]
 }

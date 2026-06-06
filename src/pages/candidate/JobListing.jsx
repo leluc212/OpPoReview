@@ -2344,13 +2344,15 @@ const JobListing = () => {
       console.log('📤 [Debug] Calling submitApplication with:', {
         jobId,
         cvUrl: finalCVUrl,
+        cvS3Key: selectedCVData.cvS3Key,
         cvFileName: selectedCVData.cvFileName || 'CV.pdf'
       });
 
       await applicationService.submitApplication(
         jobId,
         finalCVUrl,
-        selectedCVData.cvFileName || 'CV.pdf'
+        selectedCVData.cvFileName || 'CV.pdf',
+        selectedCVData.cvS3Key
       );
 
       try {

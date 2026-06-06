@@ -1904,8 +1904,28 @@ const CandidateDashboard = () => {
 
 
 
-  // Get profile completion from DynamoDB
-  const profileCompletion = candidateProfile?.profileCompletion || 0;
+  // Calculate profile completion from actual profile data (mirrors CandidateProfile.jsx logic)
+  const profileCompletion = (() => {
+    if (!candidateProfile) return 0;
+    let completion = 0;
+    if (candidateProfile.fullName?.trim()) completion += 8;
+    if (candidateProfile.email?.trim()) completion += 8;
+    if (candidateProfile.phone?.trim()) completion += 8;
+    if (candidateProfile.cccd?.trim()) completion += 8;
+    if (candidateProfile.dateOfBirth?.trim()) completion += 8;
+    if (candidateProfile.location?.trim()) completion += 8;
+    if (candidateProfile.title?.trim()) completion += 8;
+    if (candidateProfile.bio?.trim()) completion += 8;
+    if (candidateProfile.profileImage) completion += 10;
+    const hasSocialLinks = candidateProfile.socialLinks?.facebook?.trim() ||
+      candidateProfile.socialLinks?.instagram?.trim() ||
+      candidateProfile.socialLinks?.zalo?.trim() ||
+      candidateProfile.socialLinks?.website?.trim();
+    if (hasSocialLinks) completion += 6;
+    if (candidateProfile.skills && candidateProfile.skills.length >= 3) completion += 10;
+    if (candidateProfile.kycCompleted) completion += 10;
+    return Math.min(completion, 100);
+  })();
 
   const getGreeting = () => {
     const hour = currentTime.getHours(); if (language === 'en') {

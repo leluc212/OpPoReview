@@ -1319,9 +1319,10 @@ const StarRating = ({ rating }) => (
 );
 
 // Profile Detail Modal Component
-const ProfileDetailModal = React.memo(({ candidate, onClose, isLoading }) => {
+const ProfileDetailModal = React.memo(({ candidate, onClose, isLoading, onGetFreshCvUrl }) => {
   const { language } = useLanguage();
   const [showCVPreview, setShowCVPreview] = useState(false);
+  const [freshCvUrl, setFreshCvUrl] = useState(null);
 
   const initials = candidate.candidate
     .split(' ')
@@ -1345,7 +1346,16 @@ const ProfileDetailModal = React.memo(({ candidate, onClose, isLoading }) => {
 
   const handleCVDownload = () => {
     if (!hasCV) return;
-    window.open(candidate.cvUrl, '_blank');
+    window.open(freshCvUrl || candidate.cvUrl, '_blank');
+  };
+
+  const handleGetFreshUrl = async () => {
+    if (onGetFreshCvUrl) {
+      const url = await onGetFreshCvUrl(candidate);
+      if (url) setFreshCvUrl(url);
+      return url;
+    }
+    return null;
   };
 
   return (
@@ -1494,7 +1504,7 @@ const ProfileDetailModal = React.memo(({ candidate, onClose, isLoading }) => {
                     <CVDownloadButton
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={handleCVDownload}
+                      onClick={() => setShowCVPreview(true)}
                     >
                       <Eye />
                       {language === 'vi' ? 'Xem hồ sơ' : 'View CV'}
@@ -1504,10 +1514,11 @@ const ProfileDetailModal = React.memo(({ candidate, onClose, isLoading }) => {
 
                 {showCVPreview && (
                   <CVPreviewModal
-                    cvUrl={candidate.cvUrl}
+                    cvUrl={freshCvUrl || candidate.cvUrl}
                     fileName={candidate.cvFileName || 'CV.pdf'}
                     onClose={() => setShowCVPreview(false)}
                     onDownload={handleCVDownload}
+                    onGetFreshUrl={handleGetFreshUrl}
                   />
                 )}
               </>
@@ -2273,7 +2284,10 @@ const Applications = () => {
             experience: profile.experience || prev.experience,
             skills: profile.skills || prev.skills,
             bio: profile.bio || prev.bio,
-            profileImage: profile.profileImage || prev.profileImage
+            profileImage: profile.profileImage || prev.profileImage,
+            // Ưu tiên cvUrl từ application (đã refresh) thay vì profile (có thể hết hạn)
+            cvUrl: prev.cvUrl || profile.cvUrl,
+            cvFileName: prev.cvFileName || profile.cvFileName,
           }));
         }
       } catch (error) {
@@ -2287,6 +2301,24 @@ const Applications = () => {
   const handleCloseProfile = useCallback(() => {
     setSelectedCandidate(null);
     setIsFetchingProfile(false);
+  }, []);
+
+  // Re-fetch a fresh CV URL for a candidate by re-querying their application
+  const handleGetFreshCvUrl = useCallback(async (candidate) => {
+    try {
+      const jobId = candidate.jobId;
+      if (!jobId) return null;
+      const freshApps = await applicationService.getJobApplications(jobId);
+      const match = freshApps.find(a => a.applicationId === candidate.applicationId || a.candidateId === candidate.candidateId);
+      if (match?.cvUrl) {
+        // Also update the selectedCandidate so future opens use fresh URL
+        setSelectedCandidate(prev => prev ? { ...prev, cvUrl: match.cvUrl } : prev);
+        return match.cvUrl;
+      }
+    } catch (e) {
+      console.warn('Could not fetch fresh CV URL:', e);
+    }
+    return null;
   }, []);
 
   // Open delete confirmation modal
@@ -2706,6 +2738,7 @@ const Applications = () => {
             candidate={selectedCandidate}
             onClose={handleCloseProfile}
             isLoading={isFetchingProfile}
+            onGetFreshCvUrl={handleGetFreshCvUrl}
           />
         </Modal>
       )}

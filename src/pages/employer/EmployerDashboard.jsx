@@ -554,8 +554,9 @@ const EmployerDashboard = () => {
             experience: profile.experience || prev.experience,
             skills: profile.skills || prev.skills,
             bio: profile.bio || prev.bio,
-            cvUrl: profile.cvUrl || prev.cvUrl,
-            cvFileName: profile.cvFileName || prev.cvFileName,
+            // Ưu tiên cvUrl từ application (đã được refresh) thay vì profile (có thể hết hạn)
+            cvUrl: prev.cvUrl || profile.cvUrl,
+            cvFileName: prev.cvFileName || profile.cvFileName,
             profileImage: profile.profileImage || prev.profileImage,
             reviews: profile.reviews || prev.reviews,
           }));

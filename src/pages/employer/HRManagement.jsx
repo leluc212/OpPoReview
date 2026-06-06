@@ -4173,7 +4173,7 @@ const HRManagement = () => {
                                   whileHover={{ scale: 1.02 }}
                                   whileTap={{ scale: 0.98 }}
                                   onClick={() => {
-                                    setSelectedCV({ url: staff.cvUrl, filename: staff.cvFilename });
+                                    setSelectedCV({ url: staff.cvUrl, filename: staff.cvFilename, applicationId: staff.id, jobId: staff.jobId });
                                     setShowCVPreview(true);
                                   }}
                                 >
@@ -5803,6 +5803,20 @@ const HRManagement = () => {
             onClose={() => {
               setShowCVPreview(false);
               setSelectedCV(null);
+            }}
+            onGetFreshUrl={async () => {
+              try {
+                if (!selectedCV.jobId) return null;
+                const freshApps = await applicationService.getJobApplications(selectedCV.jobId);
+                const match = freshApps.find(a => a.applicationId === selectedCV.applicationId);
+                if (match?.cvUrl) {
+                  setSelectedCV(prev => prev ? { ...prev, url: match.cvUrl } : prev);
+                  return match.cvUrl;
+                }
+              } catch (e) {
+                console.warn('Could not refresh CV URL in HRManagement:', e);
+              }
+              return null;
             }}
             onDownload={async () => {
               try {

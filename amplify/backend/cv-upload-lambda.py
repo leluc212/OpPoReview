@@ -167,7 +167,7 @@ def upload_cv(body, headers):
             }
         )
         
-        # Generate presigned URL (valid for 7 days)
+        # Generate presigned URL (valid for 12 hours — safe with STS/Lambda role session tokens)
         cv_url = s3_client.generate_presigned_url(
             'get_object',
             Params={
@@ -175,7 +175,7 @@ def upload_cv(body, headers):
                 'Key': s3_key,
                 'ResponseContentDisposition': f'inline; filename="{file_name}"'
             },
-            ExpiresIn=604800  # 7 days
+            ExpiresIn=43200  # 12 hours
         )
         
         # Create new CV object
@@ -240,7 +240,7 @@ def get_cv_list(user_id, headers):
         for cv in cv_list:
             if cv.get('cvS3Key'):
                 try:
-                    # Generate new presigned URL
+                    # Generate new presigned URL (12 hours — within STS session limit)
                     new_url = s3_client.generate_presigned_url(
                         'get_object',
                         Params={
@@ -248,7 +248,7 @@ def get_cv_list(user_id, headers):
                             'Key': cv['cvS3Key'],
                             'ResponseContentDisposition': f'inline; filename="{cv.get("cvFileName", "cv.pdf")}"'
                         },
-                        ExpiresIn=604800  # 7 days
+                        ExpiresIn=43200  # 12 hours
                     )
                     
                     cv_copy = cv.copy()

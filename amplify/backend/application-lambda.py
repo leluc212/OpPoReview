@@ -177,6 +177,12 @@ def submit_application(event, candidate_id, candidate_email, create_response):
         
         now_iso = datetime.utcnow().isoformat() + 'Z'
         
+        # Extract and store S3 key for reliable URL refresh later
+        cv_s3_key = body.get('cvS3Key')
+        if not cv_s3_key and cv_url and 'amazonaws.com' in cv_url:
+            cv_s3_key = extract_s3_key_from_url(cv_url)
+            print(f"📎 Extracted cvS3Key from URL: {cv_s3_key}")
+
         application = {
             'applicationId': application_id,
             'jobId': job_id,
@@ -193,6 +199,9 @@ def submit_application(event, candidate_id, candidate_email, create_response):
             'appliedAt': now_iso,
             'updatedAt': now_iso
         }
+
+        if cv_s3_key:
+            application['cvS3Key'] = cv_s3_key
         
         applications_table.put_item(Item=application)
 
@@ -240,40 +249,60 @@ def submit_application(event, candidate_id, candidate_email, create_response):
         return create_response(500, {'error': str(e)})
 
 
+def extract_s3_key_from_url(cv_url):
+    """Extract S3 key from a presigned or regular S3 URL"""
+    try:
+        parsed = urlparse(cv_url)
+        path = unquote(parsed.path.lstrip('/'))
+        hostname = parsed.hostname or ''
+
+        if 's3' in hostname:
+            # Virtual-host style: bucket-name.s3.region.amazonaws.com/key
+            # Path is already the S3 key
+            return path
+        else:
+            # Path style: s3.region.amazonaws.com/bucket-name/key
+            path_parts = path.split('/', 1)
+            return path_parts[1] if len(path_parts) > 1 else path
+    except Exception:
+        return None
+
+
 def refresh_cv_urls(applications):
-    """Refresh presigned CV URLs in a list of applications"""
+    """Refresh presigned CV URLs in a list of applications.
+    
+    Uses cvS3Key if available (most reliable), otherwise parses cvUrl to extract the key.
+    This ensures URLs are always fresh regardless of when the application was submitted.
+    """
     for app in applications:
-        cv_url = app.get('cvUrl')
-        if cv_url:
-            try:
-                # Only refresh if it is an S3 URL
-                if 'amazonaws.com' in cv_url:
-                    parsed = urlparse(cv_url)
-                    path = unquote(parsed.path.lstrip('/'))
-                    
-                    # Determine S3 key
-                    hostname = parsed.hostname or ''
-                    if 's3' in hostname:
-                        # Virtual-host style: bucket-name.s3.region.amazonaws.com/key
-                        key = path
-                    else:
-                        # Path style: s3.region.amazonaws.com/bucket-name/key
-                        path_parts = path.split('/', 1)
-                        key = path_parts[1] if len(path_parts) > 1 else path
-                    
-                    # Generate fresh presigned URL (valid for 7 days)
-                    new_url = s3_client.generate_presigned_url(
-                        'get_object',
-                        Params={
-                            'Bucket': BUCKET_NAME,
-                            'Key': key,
-                            'ResponseContentDisposition': f'inline; filename="{app.get("cvFilename", "CV.pdf")}"'
-                        },
-                        ExpiresIn=604800  # 7 days
-                    )
-                    app['cvUrl'] = new_url
-            except Exception as e:
-                print(f"⚠️ Warning: Could not refresh CV URL for application {app.get('applicationId')}: {str(e)}")
+        try:
+            # Prefer explicit S3 key saved at submission time
+            s3_key = app.get('cvS3Key')
+
+            # Fall back to parsing the existing URL
+            if not s3_key:
+                cv_url = app.get('cvUrl', '')
+                if cv_url and 'amazonaws.com' in cv_url:
+                    s3_key = extract_s3_key_from_url(cv_url)
+
+            if not s3_key:
+                print(f"⚠️ No S3 key found for application {app.get('applicationId')} — skipping URL refresh")
+                continue
+
+            # Generate a fresh presigned URL (valid for 12 hours — safe with STS session tokens)
+            new_url = s3_client.generate_presigned_url(
+                'get_object',
+                Params={
+                    'Bucket': BUCKET_NAME,
+                    'Key': s3_key,
+                    'ResponseContentDisposition': f'inline; filename="{app.get("cvFilename", "CV.pdf")}"'
+                },
+                ExpiresIn=43200  # 12 hours — stays within STS session limit
+            )
+            app['cvUrl'] = new_url
+            print(f"✅ Refreshed CV URL for application {app.get('applicationId')}, key={s3_key}")
+        except Exception as e:
+            print(f"⚠️ Warning: Could not refresh CV URL for application {app.get('applicationId')}: {str(e)}")
     return applications
 
 

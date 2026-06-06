@@ -872,7 +872,7 @@ const Navbar = ({ showSearch = true }) => {
         if (j.employerName && !seen.has(j.employerName)) { companies.push({ label: j.employerName, type: 'company' }); seen.add(j.employerName); }
       });
       setAllJobTitles([...titles, ...companies]);
-    }).catch(() => {});
+    }).catch(() => { });
   }, [user]);
 
   // Generate suggestions when query changes
@@ -919,16 +919,16 @@ const Navbar = ({ showSearch = true }) => {
         console.log('⚠️ No user, skipping notification load');
         return;
       }
-      
+
       try {
         // CRITICAL FIX: Ensure we use UUID from Cognito, not email
         let userId;
-        
+
         if (effectiveUser.role === 'admin') {
           userId = 'admin';
         } else {
           userId = effectiveUser.userId || effectiveUser.id;
-          
+
           // If userId looks like an email, fetch the real UUID from Cognito
           if (!userId || userId.includes('@')) {
             console.warn('⚠️ [Navbar] userId is email, fetching UUID from Cognito...');
@@ -939,7 +939,7 @@ const Navbar = ({ showSearch = true }) => {
                 const uuidFromToken = session.tokens.idToken.payload.sub;
                 console.log('✅ [Navbar] Got UUID from Cognito:', uuidFromToken);
                 userId = uuidFromToken;
-                
+
                 // Update user object in localStorage
                 const updatedUser = { ...effectiveUser, userId: uuidFromToken };
                 localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -949,21 +949,21 @@ const Navbar = ({ showSearch = true }) => {
             }
           }
         }
-        
+
         if (!userId || !effectiveUser.role) {
           console.log('⚠️ [Navbar] Missing userId or role, skipping notification load');
           return;
         }
 
         console.log('🔔 Loading notifications for:', { userId, role: effectiveUser.role, userObject: effectiveUser });
-        
+
         const notifs = await getNotifications(userId, effectiveUser.role);
         console.log('📥 Received notifications:', notifs);
         console.log('📊 Notifications count:', notifs?.length || 0);
-        
+
         const count = await getUnreadCount(userId, effectiveUser.role);
         console.log('📬 Unread count:', count);
-        
+
         setRealNotifications(notifs || []);
         setUnreadCount(count || 0);
       } catch (error) {
@@ -973,17 +973,17 @@ const Navbar = ({ showSearch = true }) => {
     };
 
     loadNotifications();
-    
+
     // Poll every 10 seconds
     const interval = setInterval(loadNotifications, 10000);
-    
+
     // Listen for user login events
     const handleUserLogin = () => {
       console.log('🔐 [Navbar] User logged in - reloading notifications...');
       // Wait a bit for user state to be fully updated
       setTimeout(loadNotifications, 500);
     };
-    
+
     window.addEventListener('userLoggedIn', handleUserLogin);
 
     return () => {
@@ -1135,12 +1135,12 @@ const Navbar = ({ showSearch = true }) => {
                 (notif) => notif.data?.jobId === app.jobId
               );
 
-              const companyName = job 
-                ? (job.employerName || job.companyName) 
+              const companyName = job
+                ? (job.employerName || job.companyName)
                 : (matchingNotif?.data?.companyName || app.employerName || app.companyName || 'Công ty');
 
-              const jobTitle = job 
-                ? job.title 
+              const jobTitle = job
+                ? job.title
                 : (matchingNotif?.data?.jobTitle || app.jobTitle || 'Công việc');
 
               let logo = job?.companyLogo;
@@ -1323,10 +1323,10 @@ const Navbar = ({ showSearch = true }) => {
         deletedChats.push(applicationId);
         localStorage.setItem('deleted_chats', JSON.stringify(deletedChats));
       }
-      
+
       // Update local state immediately
       setCandidateChats(prev => prev.filter(chat => chat.applicationId !== applicationId));
-      
+
       // Close active chat if it was the one deleted
       if (activeChatApp && activeChatApp.applicationId === applicationId) {
         setActiveChatApp(null);
@@ -1433,408 +1433,408 @@ const Navbar = ({ showSearch = true }) => {
     <>
       <NavbarContainer>
         <NavLeft>
-        {showSearch && (
-          <SearchBar ref={searchBarRef}>
-            <Search onClick={handleSearchIconClick} style={{ cursor: 'pointer' }} />
-            <input
-              type="text"
-              placeholder={language === 'vi' ? 'Tìm việc, công ty...' : 'Search jobs, companies...'}
-              value={searchQuery}
-              onChange={(e) => { setSearchQuery(e.target.value); setShowSearchSuggestions(true); }}
-              onFocus={() => setShowSearchSuggestions(true)}
-              onKeyPress={handleSearch}
-            />
-            {showSearchSuggestions && searchSuggestions.length > 0 && (
-              <SearchSuggestionDropdown>
-                {!searchQuery.trim() && searchSuggestions.some(s => s.type === 'history') && (
-                  <SearchSuggestionHeader>{language === 'vi' ? 'Tìm kiếm gần đây' : 'Recent Searches'}</SearchSuggestionHeader>
-                )}
-                {searchQuery.trim() && (
-                  <SearchSuggestionHeader>{language === 'vi' ? 'Gợi ý' : 'Suggestions'}</SearchSuggestionHeader>
-                )}
-                {searchSuggestions.map((s, i) => (
-                  <SearchSuggestionItem
-                    key={i}
-                    onMouseDown={() => {
-                      setSearchQuery(s.label);
-                      setShowSearchSuggestions(false);
-                      const history = JSON.parse(localStorage.getItem('jobSearchHistory') || '[]');
-                      const updated = [s.label, ...history.filter(h => h !== s.label)].slice(0, 5);
-                      localStorage.setItem('jobSearchHistory', JSON.stringify(updated));
-                      navigate('/candidate/jobs', { state: { searchKeyword: s.label } });
-                    }}
-                  >
-                    {s.type === 'history' ? <History /> : s.type === 'company' ? <Building2 /> : <Search />}
-                    <span>{s.label}</span>
-                    {s.type === 'company' && <span className="sub">{language === 'vi' ? 'Công ty' : 'Company'}</span>}
-                  </SearchSuggestionItem>
-                ))}
-              </SearchSuggestionDropdown>
-            )}
-          </SearchBar>
-        )}
-      </NavLeft>
+          {showSearch && (
+            <SearchBar ref={searchBarRef}>
+              <Search onClick={handleSearchIconClick} style={{ cursor: 'pointer' }} />
+              <input
+                type="text"
+                placeholder={language === 'vi' ? 'Tìm việc, công ty...' : 'Search jobs, companies...'}
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setShowSearchSuggestions(true); }}
+                onFocus={() => setShowSearchSuggestions(true)}
+                onKeyPress={handleSearch}
+              />
+              {showSearchSuggestions && searchSuggestions.length > 0 && (
+                <SearchSuggestionDropdown>
+                  {!searchQuery.trim() && searchSuggestions.some(s => s.type === 'history') && (
+                    <SearchSuggestionHeader>{language === 'vi' ? 'Tìm kiếm gần đây' : 'Recent Searches'}</SearchSuggestionHeader>
+                  )}
+                  {searchQuery.trim() && (
+                    <SearchSuggestionHeader>{language === 'vi' ? 'Gợi ý' : 'Suggestions'}</SearchSuggestionHeader>
+                  )}
+                  {searchSuggestions.map((s, i) => (
+                    <SearchSuggestionItem
+                      key={i}
+                      onMouseDown={() => {
+                        setSearchQuery(s.label);
+                        setShowSearchSuggestions(false);
+                        const history = JSON.parse(localStorage.getItem('jobSearchHistory') || '[]');
+                        const updated = [s.label, ...history.filter(h => h !== s.label)].slice(0, 5);
+                        localStorage.setItem('jobSearchHistory', JSON.stringify(updated));
+                        navigate('/candidate/jobs', { state: { searchKeyword: s.label } });
+                      }}
+                    >
+                      {s.type === 'history' ? <History /> : s.type === 'company' ? <Building2 /> : <Search />}
+                      <span>{s.label}</span>
+                      {s.type === 'company' && <span className="sub">{language === 'vi' ? 'Công ty' : 'Company'}</span>}
+                    </SearchSuggestionItem>
+                  ))}
+                </SearchSuggestionDropdown>
+              )}
+            </SearchBar>
+          )}
+        </NavLeft>
 
-      <NavRight>
-        {user?.role === 'candidate' && (
-          <div style={{ position: 'relative' }} ref={chatRef}>
-            <IconButton onClick={() => setShowChatDropdown(!showChatDropdown)} title={language === 'vi' ? 'Trò chuyện' : 'Chat'}>
-              <MessageSquare />
-              {unreadChatCount > 0 && <Badge>{unreadChatCount}</Badge>}
+        <NavRight>
+          {user?.role === 'candidate' && (
+            <div style={{ position: 'relative' }} ref={chatRef}>
+              <IconButton onClick={() => setShowChatDropdown(!showChatDropdown)} title={language === 'vi' ? 'Trò chuyện' : 'Chat'}>
+                <MessageSquare />
+                {unreadChatCount > 0 && <Badge>{unreadChatCount}</Badge>}
+              </IconButton>
+
+              {showChatDropdown && (
+                <ChatDropdown>
+                  <ChatDropdownHeader>
+                    {language === 'vi' ? 'Trò chuyện' : 'Conversations'}
+                  </ChatDropdownHeader>
+                  <ChatDropdownList>
+                    {candidateChats.length > 0 ? (
+                      candidateChats.map((chat) => (
+                        <ChatDropdownItem
+                          key={chat.applicationId}
+                          onClick={() => {
+                            setActiveChatApp(chat);
+                            setShowChatDropdown(false);
+                          }}
+                        >
+                          <ChatDropdownAvatar>
+                            {chat.companyLogo ? (
+                              <img src={chat.companyLogo} alt="Logo" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                            ) : (
+                              (chat.employerName || chat.companyName || 'C').charAt(0)
+                            )}
+                          </ChatDropdownAvatar>
+                          <ChatDropdownInfo>
+                            <div className="name" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              {chat.employerName || chat.companyName || 'Công ty'}
+                              {chat.status === 'completed' && <span style={{ fontSize: '11px' }} title={language === 'vi' ? 'Công việc đã hoàn thành' : 'Job completed'}>🔒</span>}
+                            </div>
+                            <div className="job">{chat.jobTitle || chat.position || 'Công việc'}</div>
+                          </ChatDropdownInfo>
+                          <DeleteChatButton
+                            onClick={(e) => handleDeleteChat(chat.applicationId, e)}
+                            title={language === 'vi' ? 'Xóa cuộc trò chuyện' : 'Delete conversation'}
+                          >
+                            <Trash2 size={16} />
+                          </DeleteChatButton>
+                        </ChatDropdownItem>
+                      ))
+                    ) : (
+                      <EmptyChats>
+                        {language === 'vi'
+                          ? 'Chưa có cuộc trò chuyện nào. (Nhà tuyển dụng cần phê duyệt CV của bạn trước)'
+                          : 'No conversations yet. (Employer needs to approve your CV first)'}
+                      </EmptyChats>
+                    )}
+                  </ChatDropdownList>
+                </ChatDropdown>
+              )}
+            </div>
+          )}
+
+          <div style={{ position: 'relative' }} ref={notificationRef}>
+            <IconButton onClick={toggleNotifications}>
+              <Bell />
+              {unreadCount > 0 && <Badge>{unreadCount > 99 ? '99+' : unreadCount}</Badge>}
             </IconButton>
 
-            {showChatDropdown && (
-              <ChatDropdown>
-                <ChatDropdownHeader>
-                  {language === 'vi' ? 'Trò chuyện' : 'Conversations'}
-                </ChatDropdownHeader>
-                <ChatDropdownList>
-                  {candidateChats.length > 0 ? (
-                    candidateChats.map((chat) => (
-                      <ChatDropdownItem
-                        key={chat.applicationId}
-                        onClick={() => {
-                          setActiveChatApp(chat);
-                          setShowChatDropdown(false);
-                        }}
-                      >
-                        <ChatDropdownAvatar>
-                          {chat.companyLogo ? (
-                            <img src={chat.companyLogo} alt="Logo" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                          ) : (
-                            (chat.employerName || chat.companyName || 'C').charAt(0)
-                          )}
-                        </ChatDropdownAvatar>
-                        <ChatDropdownInfo>
-                          <div className="name" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            {chat.employerName || chat.companyName || 'Công ty'}
-                            {chat.status === 'completed' && <span style={{ fontSize: '11px' }} title={language === 'vi' ? 'Công việc đã hoàn thành' : 'Job completed'}>🔒</span>}
-                          </div>
-                          <div className="job">{chat.jobTitle || chat.position || 'Công việc'}</div>
-                        </ChatDropdownInfo>
-                        <DeleteChatButton 
-                          onClick={(e) => handleDeleteChat(chat.applicationId, e)}
-                          title={language === 'vi' ? 'Xóa cuộc trò chuyện' : 'Delete conversation'}
+            {showNotifications && (
+              <NotificationDropdown>
+                <NotificationHeader>
+                  <h3>{language === 'vi' ? 'Thông báo' : 'Notifications'}</h3>
+                  <button onClick={handleNotificationItemClick}>{language === 'vi' ? 'Xem tất cả' : 'View all'}</button>
+                </NotificationHeader>
+
+                <NotificationTabs>
+                  <NotificationTab
+                    $active={notificationTab === 'all'}
+                    onClick={() => setNotificationTab('all')}
+                  >
+                    {language === 'vi' ? 'Tất cả' : 'All'}
+                  </NotificationTab>
+                  <NotificationTab
+                    $active={notificationTab === 'unread'}
+                    onClick={() => setNotificationTab('unread')}
+                  >
+                    {language === 'vi' ? 'Chưa đọc' : 'Unread'}
+                  </NotificationTab>
+                </NotificationTabs>
+
+                <NotificationList>
+                  {filteredNotifications
+                    .filter(n => notificationTab === 'all' || !n.read)
+                    .map((notification) => {
+                      // Check if this is a real notification from service or static one
+                      const isRealNotification = !!notification.notificationId;
+
+                      // Get icon based on notification type or icon name
+                      let Icon = Bell;
+                      const type = notification.type;
+                      const iconName = notification.icon;
+
+                      if (type) {
+                        switch (type) {
+                          case 'package_purchase_request':
+                            Icon = Package;
+                            break;
+                          case 'package_approved':
+                            Icon = CheckCircle;
+                            break;
+                          case 'employers':
+                            Icon = Building2;
+                            break;
+                          case 'posts':
+                            Icon = AlertCircle;
+                            break;
+                          case 'payments':
+                          case 'candidate_withdrawal_request':
+                          case 'withdrawal_request':
+                            Icon = DollarSign;
+                            break;
+                          case 'urgent':
+                            Icon = AlertCircle;
+                            break;
+                          case 'success':
+                          case 'CV_ACCEPTED':
+                          case 'withdrawal_approved':
+                          case 'quick_job_activation_approved':
+                          case 'job_approved':
+                            Icon = CheckCircle;
+                            break;
+                          case 'system':
+                          case 'CV_REJECTED':
+                          case 'withdrawal_rejected':
+                          case 'quick_job_activation_rejected':
+                          case 'quick_job_activation_deactivated':
+                          case 'job_rejected':
+                            Icon = AlertCircle;
+                            break;
+                          case 'quick_job_activation_request':
+                            Icon = Zap;
+                            break;
+                          default:
+                            Icon = Bell;
+                        }
+                      } else if (iconName && typeof iconName === 'string') {
+                        switch (iconName.toLowerCase()) {
+                          case 'check-circle':
+                            Icon = CheckCircle;
+                            break;
+                          case 'alert-circle':
+                            Icon = AlertCircle;
+                            break;
+                          case 'bell':
+                            Icon = Bell;
+                            break;
+                          case 'dollar-sign':
+                            Icon = DollarSign;
+                            break;
+                          case 'briefcase':
+                            Icon = Briefcase;
+                            break;
+                          case 'package':
+                            Icon = Package;
+                            break;
+                          case 'zap':
+                            Icon = Zap;
+                            break;
+                          case 'x-circle':
+                            Icon = XCircle;
+                            break;
+                          case 'user-plus':
+                            Icon = UserPlus;
+                            break;
+                          case 'building':
+                          case 'building2':
+                            Icon = Building2;
+                            break;
+                          default:
+                            Icon = Bell;
+                        }
+                      } else if (iconName && typeof iconName !== 'string') {
+                        Icon = iconName;
+                      }
+
+                      return (
+                        <NotificationItem
+                          key={isRealNotification ? notification.notificationId : notification.id}
+                          $unread={isRealNotification ? !notification.read : notification.unread}
+                          onClick={async () => {
+                            if (isRealNotification) {
+                              try {
+                                await markAsRead(notification.notificationId);
+                                setRealNotifications(prev => prev.map(n =>
+                                  n.notificationId === notification.notificationId ? { ...n, read: true } : n
+                                ));
+                                if (notification.actionUrl) {
+                                  navigate(notification.actionUrl);
+                                }
+                              } catch (error) {
+                                console.error('Error marking notification as read:', error);
+                              }
+                            }
+                            handleNotificationItemClick();
+                          }}
                         >
-                          <Trash2 size={16} />
-                        </DeleteChatButton>
-                      </ChatDropdownItem>
-                    ))
-                  ) : (
-                    <EmptyChats>
-                      {language === 'vi' 
-                        ? 'Chưa có cuộc trò chuyện nào. (Nhà tuyển dụng cần phê duyệt CV của bạn trước)' 
-                        : 'No conversations yet. (Employer needs to approve your CV first)'}
-                    </EmptyChats>
-                  )}
-                </ChatDropdownList>
-              </ChatDropdown>
+                          <NotificationIcon $color={notification.color}>
+                            <Icon />
+                          </NotificationIcon>
+                          <NotificationContent>
+                            <div className="title">
+                              {isRealNotification
+                                ? (language === 'vi' ? notification.title : notification.titleEn)
+                                : notification.title}
+                            </div>
+                            <div className="message">
+                              {isRealNotification
+                                ? (language === 'vi' ? notification.message : notification.messageEn)
+                                : notification.message}
+                              {notification.jobTitle && (
+                                <span> — {notification.jobTitle}</span>
+                              )}
+                            </div>
+                            <div className="time">
+                              {isRealNotification
+                                ? <RelativeTime timestamp={notification.createdAt} language={language} />
+                                : notification.time}
+                            </div>
+                          </NotificationContent>
+                          {(isRealNotification ? !notification.read : notification.unread) && <NotificationDot />}
+                        </NotificationItem>
+                      );
+                    })}
+                </NotificationList>
+              </NotificationDropdown>
             )}
           </div>
-        )}
 
-        <div style={{ position: 'relative' }} ref={notificationRef}>
-          <IconButton onClick={toggleNotifications}>
-            <Bell />
-            {unreadCount > 0 && <Badge>{unreadCount > 99 ? '99+' : unreadCount}</Badge>}
+          <IconButton onClick={handleSettingsClick} title={language === 'vi' ? 'Cài đặt' : 'Settings'}>
+            <Settings />
           </IconButton>
 
-          {showNotifications && (
-            <NotificationDropdown>
-              <NotificationHeader>
-                <h3>{language === 'vi' ? 'Thông báo' : 'Notifications'}</h3>
-                <button onClick={handleNotificationItemClick}>{language === 'vi' ? 'Xem tất cả' : 'View all'}</button>
-              </NotificationHeader>
-
-              <NotificationTabs>
-                <NotificationTab
-                  $active={notificationTab === 'all'}
-                  onClick={() => setNotificationTab('all')}
-                >
-                  {language === 'vi' ? 'Tất cả' : 'All'}
-                </NotificationTab>
-                <NotificationTab
-                  $active={notificationTab === 'unread'}
-                  onClick={() => setNotificationTab('unread')}
-                >
-                  {language === 'vi' ? 'Chưa đọc' : 'Unread'}
-                </NotificationTab>
-              </NotificationTabs>
-
-              <NotificationList>
-                {filteredNotifications
-                  .filter(n => notificationTab === 'all' || !n.read)
-                  .map((notification) => {
-                    // Check if this is a real notification from service or static one
-                    const isRealNotification = !!notification.notificationId;
-                    
-                    // Get icon based on notification type or icon name
-                    let Icon = Bell;
-                    const type = notification.type;
-                    const iconName = notification.icon;
-
-                    if (type) {
-                      switch (type) {
-                        case 'package_purchase_request':
-                          Icon = Package;
-                          break;
-                        case 'package_approved':
-                          Icon = CheckCircle;
-                          break;
-                        case 'employers':
-                          Icon = Building2;
-                          break;
-                        case 'posts':
-                          Icon = AlertCircle;
-                          break;
-                        case 'payments':
-                        case 'candidate_withdrawal_request':
-                        case 'withdrawal_request':
-                          Icon = DollarSign;
-                          break;
-                        case 'urgent':
-                          Icon = AlertCircle;
-                          break;
-                        case 'success':
-                        case 'CV_ACCEPTED':
-                        case 'withdrawal_approved':
-                        case 'quick_job_activation_approved':
-                        case 'job_approved':
-                          Icon = CheckCircle;
-                          break;
-                        case 'system':
-                        case 'CV_REJECTED':
-                        case 'withdrawal_rejected':
-                        case 'quick_job_activation_rejected':
-                        case 'quick_job_activation_deactivated':
-                        case 'job_rejected':
-                          Icon = AlertCircle;
-                          break;
-                        case 'quick_job_activation_request':
-                          Icon = Zap;
-                          break;
-                        default:
-                          Icon = Bell;
-                      }
-                    } else if (iconName && typeof iconName === 'string') {
-                      switch (iconName.toLowerCase()) {
-                        case 'check-circle':
-                          Icon = CheckCircle;
-                          break;
-                        case 'alert-circle':
-                          Icon = AlertCircle;
-                          break;
-                        case 'bell':
-                          Icon = Bell;
-                          break;
-                        case 'dollar-sign':
-                          Icon = DollarSign;
-                          break;
-                        case 'briefcase':
-                          Icon = Briefcase;
-                          break;
-                        case 'package':
-                          Icon = Package;
-                          break;
-                        case 'zap':
-                          Icon = Zap;
-                          break;
-                        case 'x-circle':
-                          Icon = XCircle;
-                          break;
-                        case 'user-plus':
-                          Icon = UserPlus;
-                          break;
-                        case 'building':
-                        case 'building2':
-                          Icon = Building2;
-                          break;
-                        default:
-                          Icon = Bell;
-                      }
-                    } else if (iconName && typeof iconName !== 'string') {
-                      Icon = iconName;
-                    }
-                    
-                    return (
-                      <NotificationItem
-                        key={isRealNotification ? notification.notificationId : notification.id}
-                        $unread={isRealNotification ? !notification.read : notification.unread}
-                        onClick={async () => {
-                          if (isRealNotification) {
-                            try {
-                              await markAsRead(notification.notificationId);
-                              setRealNotifications(prev => prev.map(n => 
-                                n.notificationId === notification.notificationId ? { ...n, read: true } : n
-                              ));
-                              if (notification.actionUrl) {
-                                navigate(notification.actionUrl);
-                              }
-                            } catch (error) {
-                              console.error('Error marking notification as read:', error);
-                            }
-                          }
-                          handleNotificationItemClick();
-                        }}
-                      >
-                        <NotificationIcon $color={notification.color}>
-                          <Icon />
-                        </NotificationIcon>
-                        <NotificationContent>
-                          <div className="title">
-                            {isRealNotification 
-                              ? (language === 'vi' ? notification.title : notification.titleEn)
-                              : notification.title}
-                          </div>
-                          <div className="message">
-                            {isRealNotification
-                              ? (language === 'vi' ? notification.message : notification.messageEn)
-                              : notification.message}
-                            {notification.jobTitle && (
-                              <span> — {notification.jobTitle}</span>
-                            )}
-                          </div>
-                          <div className="time">
-                            {isRealNotification 
-                              ? <RelativeTime timestamp={notification.createdAt} language={language} />
-                              : notification.time}
-                          </div>
-                        </NotificationContent>
-                        {(isRealNotification ? !notification.read : notification.unread) && <NotificationDot />}
-                      </NotificationItem>
-                    );
-                  })}
-              </NotificationList>
-            </NotificationDropdown>
-          )}
-        </div>
-
-        <IconButton onClick={handleSettingsClick} title={language === 'vi' ? 'Cài đặt' : 'Settings'}>
-          <Settings />
-        </IconButton>
-
-        <UserMenu onClick={handleProfileClick}>
-          <Avatar>
-            {user?.role === 'employer' ? (
-              employerProfile?.companyLogo ? (
-                <img src={employerProfile.companyLogo} alt="Company Logo" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-              ) : (
-                <img src={companyLogo} alt="Logo" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-              )
-            ) : user?.role === 'candidate' && candidateProfile?.profileImage ? (
-              <img src={candidateProfile.profileImage} alt="Profile" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-            ) : (
-              (candidateProfile?.fullName?.charAt(0) || user?.name?.charAt(0) || 'U').toUpperCase()
-            )}
-          </Avatar>
-          <UserInfo>
-            <span>{user?.role === 'employer' ? (employerProfile?.companyName || (language === 'vi' ? 'Chưa cập nhật tên công ty' : 'Company name not updated')) : (candidateProfile?.fullName || user?.name || 'User')}</span>
-            <span>{getRoleTranslation(user?.role) || 'Role'}</span>
-          </UserInfo>
-        </UserMenu>
-
-        <IconButton onClick={() => navigate('/')} title={language === 'vi' ? 'Trở về trang chủ' : 'Return to Home'}>
-          <Home />
-        </IconButton>
-      </NavRight>
-    </NavbarContainer>
-
-    {activeChatApp && (
-      <FloatingChatWindow>
-        <FloatingChatHeader>
-          <div className="title-group">
-            <ChatDropdownAvatar style={{ width: '28px', height: '28px', fontSize: '12px' }}>
-              {activeChatApp.companyLogo ? (
-                <img src={activeChatApp.companyLogo} alt="Logo" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-              ) : (
-                (activeChatApp.employerName || activeChatApp.companyName || 'C').charAt(0)
-              )}
-            </ChatDropdownAvatar>
-            <div>
-              <h4>{activeChatApp.employerName || activeChatApp.companyName}</h4>
-              <p style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                {activeChatApp.status === 'completed' ? (
-                  <>
-                    <span className="status-dot" style={{ backgroundColor: '#64748b' }} />
-                    {language === 'vi' ? 'Đã hoàn thành' : 'Completed'}
-                  </>
+          <UserMenu onClick={handleProfileClick}>
+            <Avatar>
+              {user?.role === 'employer' ? (
+                employerProfile?.companyLogo ? (
+                  <img src={employerProfile.companyLogo} alt="Company Logo" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                 ) : (
-                  <>
-                    <span className="status-dot" style={{ backgroundColor: '#4ade80' }} />
-                    {language === 'vi' ? 'Đang hoạt động' : 'Active'}
-                  </>
+                  <img src={companyLogo} alt="Logo" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                )
+              ) : user?.role === 'candidate' && candidateProfile?.profileImage ? (
+                <img src={candidateProfile.profileImage} alt="Profile" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                (candidateProfile?.fullName?.charAt(0) || user?.name?.charAt(0) || 'U').toUpperCase()
+              )}
+            </Avatar>
+            <UserInfo>
+              <span>{user?.role === 'employer' ? (employerProfile?.companyName || (language === 'vi' ? 'Chưa cập nhật tên công ty' : 'Company name not updated')) : (candidateProfile?.fullName || user?.name || 'User')}</span>
+              <span>{getRoleTranslation(user?.role) || 'Role'}</span>
+            </UserInfo>
+          </UserMenu>
+
+          <IconButton onClick={() => navigate('/')} title={language === 'vi' ? 'Trở về trang chủ' : 'Return to Home'}>
+            <Home />
+          </IconButton>
+        </NavRight>
+      </NavbarContainer>
+
+      {activeChatApp && (
+        <FloatingChatWindow>
+          <FloatingChatHeader>
+            <div className="title-group">
+              <ChatDropdownAvatar style={{ width: '28px', height: '28px', fontSize: '12px' }}>
+                {activeChatApp.companyLogo ? (
+                  <img src={activeChatApp.companyLogo} alt="Logo" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                ) : (
+                  (activeChatApp.employerName || activeChatApp.companyName || 'C').charAt(0)
                 )}
-              </p>
+              </ChatDropdownAvatar>
+              <div>
+                <h4>{activeChatApp.employerName || activeChatApp.companyName}</h4>
+                <p style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  {activeChatApp.status === 'completed' ? (
+                    <>
+                      <span className="status-dot" style={{ backgroundColor: '#64748b' }} />
+                      {language === 'vi' ? 'Đã hoàn thành' : 'Completed'}
+                    </>
+                  ) : (
+                    <>
+                      <span className="status-dot" style={{ backgroundColor: '#4ade80' }} />
+                      {language === 'vi' ? 'Đang hoạt động' : 'Active'}
+                    </>
+                  )}
+                </p>
+              </div>
             </div>
-          </div>
-          <button className="close-btn" onClick={() => setActiveChatApp(null)}>
-            <XCircle size={18} />
-          </button>
-        </FloatingChatHeader>
-        <FloatingChatMessages>
-          {chatMessages.map((msg) => (
-            <FloatingChatMsg key={msg.id} $mine={msg.sender === 'them'}>
-              <div className="bubble">{msg.text}</div>
-              <span className="time">{msg.time}</span>
-            </FloatingChatMsg>
-          ))}
-          <div ref={messagesEndRef} />
-        </FloatingChatMessages>
-        {activeChatApp.status === 'completed' ? (
-          <div style={{
-            padding: '14px 16px',
-            textAlign: 'center',
-            background: '#f8fafc',
-            borderTop: '1px solid #e2e8f0',
-            color: '#64748b',
-            fontSize: '12px',
-            fontWeight: '600',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px'
-          }}>
-            🔒 {language === 'vi' ? 'Cuộc trò chuyện đã khóa (Công việc hoàn thành)' : 'Chat locked (Job completed)'}
-          </div>
-        ) : (
-          <FloatingChatInputRow>
-            <input
-              type="text"
-              placeholder={language === 'vi' ? 'Nhắn tin...' : 'Type a message...'}
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSendChatMessage()}
-            />
-            <button onClick={handleSendChatMessage}>
-              <Send size={16} />
+            <button className="close-btn" onClick={() => setActiveChatApp(null)}>
+              <XCircle size={18} />
             </button>
-          </FloatingChatInputRow>
-        )}
-      </FloatingChatWindow>
-    )}
-    {deleteConfirmAppId && (
-      <ModalBackdrop onClick={() => setDeleteConfirmAppId(null)}>
-        <ConfirmModal onClick={(e) => e.stopPropagation()}>
-          <div className="icon-wrapper">
-            <Trash2 />
-          </div>
-          <h3>{language === 'vi' ? 'Xóa cuộc trò chuyện' : 'Delete conversation'}</h3>
-          <p>
-            {language === 'vi'
-              ? 'Bạn có chắc chắn muốn xóa cuộc trò chuyện này không?'
-              : 'Are you sure you want to delete this conversation?'}
-          </p>
-          <ConfirmButtonGroup>
-            <button className="cancel-btn" onClick={() => setDeleteConfirmAppId(null)}>
-              {language === 'vi' ? 'Hủy' : 'Cancel'}
-            </button>
-            <button className="delete-btn" onClick={executeDeleteChat}>
-              {language === 'vi' ? 'Xóa' : 'Delete'}
-            </button>
-          </ConfirmButtonGroup>
-        </ConfirmModal>
-      </ModalBackdrop>
-    )}
+          </FloatingChatHeader>
+          <FloatingChatMessages>
+            {chatMessages.map((msg) => (
+              <FloatingChatMsg key={msg.id} $mine={msg.sender === 'them'}>
+                <div className="bubble">{msg.text}</div>
+                <span className="time">{msg.time}</span>
+              </FloatingChatMsg>
+            ))}
+            <div ref={messagesEndRef} />
+          </FloatingChatMessages>
+          {activeChatApp.status === 'completed' ? (
+            <div style={{
+              padding: '14px 16px',
+              textAlign: 'center',
+              background: '#f8fafc',
+              borderTop: '1px solid #e2e8f0',
+              color: '#64748b',
+              fontSize: '12px',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px'
+            }}>
+              🔒 {language === 'vi' ? 'Cuộc trò chuyện đã khóa (Công việc hoàn thành)' : 'Chat locked (Job completed)'}
+            </div>
+          ) : (
+            <FloatingChatInputRow>
+              <input
+                type="text"
+                placeholder={language === 'vi' ? 'Nhắn tin...' : 'Type a message...'}
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSendChatMessage()}
+              />
+              <button onClick={handleSendChatMessage}>
+                <Send size={16} />
+              </button>
+            </FloatingChatInputRow>
+          )}
+        </FloatingChatWindow>
+      )}
+      {deleteConfirmAppId && (
+        <ModalBackdrop onClick={() => setDeleteConfirmAppId(null)}>
+          <ConfirmModal onClick={(e) => e.stopPropagation()}>
+            <div className="icon-wrapper">
+              <Trash2 />
+            </div>
+            <h3>{language === 'vi' ? 'Xóa cuộc trò chuyện' : 'Delete conversation'}</h3>
+            <p>
+              {language === 'vi'
+                ? 'Bạn có chắc chắn muốn xóa cuộc trò chuyện này không?'
+                : 'Are you sure you want to delete this conversation?'}
+            </p>
+            <ConfirmButtonGroup>
+              <button className="cancel-btn" onClick={() => setDeleteConfirmAppId(null)}>
+                {language === 'vi' ? 'Hủy' : 'Cancel'}
+              </button>
+              <button className="delete-btn" onClick={executeDeleteChat}>
+                {language === 'vi' ? 'Xóa' : 'Delete'}
+              </button>
+            </ConfirmButtonGroup>
+          </ConfirmModal>
+        </ModalBackdrop>
+      )}
     </>
   );
 };

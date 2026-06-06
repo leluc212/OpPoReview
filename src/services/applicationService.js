@@ -44,11 +44,12 @@ function decodeJwtPayload(token) {
 /**
  * Submit a job application
  * @param {string} jobId - Job ID
- * @param {string} cvUrl - S3 URL of the CV
+ * @param {string} cvUrl - S3 presigned URL of the CV
  * @param {string} cvFilename - Original filename of the CV
+ * @param {string} [cvS3Key] - S3 key of the CV (used for reliable URL refresh)
  * @returns {Promise<Object>} Application data
  */
-export async function submitApplication(jobId, cvUrl, cvFilename) {
+export async function submitApplication(jobId, cvUrl, cvFilename, cvS3Key) {
   try {
     console.log('📤 Submitting application:', { jobId, cvUrl, cvFilename });
     
@@ -60,7 +61,8 @@ export async function submitApplication(jobId, cvUrl, cvFilename) {
       body: JSON.stringify({
         jobId,
         cvUrl,
-        cvFilename
+        cvFilename,
+        ...(cvS3Key && { cvS3Key })
       })
     });
     
