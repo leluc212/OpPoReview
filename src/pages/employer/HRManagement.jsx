@@ -1496,6 +1496,88 @@ const TermsCheckboxContainer = styled.div`
   }
 `;
 
+// ─── Inline Terms Box ─────────────────────────────────────
+const InlineTermsBox = styled.div`
+  background: ${props => props.theme.colors.bgLight};
+  border: 1.5px solid ${props => props.theme.colors.border};
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 24px;
+`;
+
+const InlineTermsHeader = styled.div`
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+  padding: 16px 22px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  font-size: 15px;
+  font-weight: 800;
+  svg { width: 18px; height: 18px; flex-shrink: 0; }
+`;
+
+const InlineTermsScrollArea = styled.div`
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 20px 22px;
+  font-size: 13px;
+  line-height: 1.75;
+  color: ${props => props.theme.colors.textLight};
+
+  h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: ${props => props.theme.colors.text};
+    margin: 14px 0 6px;
+  }
+  ul {
+    padding-left: 18px;
+    margin: 4px 0 10px;
+    li { margin-bottom: 3px; }
+  }
+  .highlight {
+    background: #eff6ff;
+    border-left: 3px solid #1e40af;
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    margin: 10px 0;
+    color: #1e40af;
+    font-weight: 500;
+    font-size: 13px;
+  }
+`;
+
+const InlineTermsFooter = styled.div`
+  padding: 14px 22px 18px;
+  border-top: 1px solid ${props => props.theme.colors.border};
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #1e40af;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  label {
+    font-size: 13.5px;
+    color: ${props => props.theme.colors.text};
+    line-height: 1.55;
+    cursor: pointer;
+    font-weight: 500;
+    a {
+      color: #1e40af;
+      font-weight: 700;
+      text-decoration: underline;
+      &:hover { color: #1e3a8a; }
+    }
+  }
+`;
+
 // ─── Delete Confirmation Modal ─────────────────────────────
 const DeleteModalOverlay = styled(motion.div)`
   position: fixed;
@@ -3062,6 +3144,7 @@ const HRManagement = () => {
     return localStorage.getItem('employer_wallet_connected') === 'true';
   });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [inlineAgreed, setInlineAgreed] = useState(false);
 
   // Reopen wallet modal when returning from terms page
   useEffect(() => {
@@ -3353,7 +3436,9 @@ const HRManagement = () => {
   const handleCreatePost = () => {
     const hasAgreed = localStorage.getItem('quick_job_wallet_terms_agreed') === 'true';
     if (!hasAgreed) {
-      setShowWalletModal(true);
+      // Scroll to terms section instead of showing modal
+      const el = document.getElementById('quick-job-inline-terms');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
       navigate('/employer/post-quick-job');
     }
@@ -3734,24 +3819,43 @@ const HRManagement = () => {
               </div>
             </PendingBanner>
           ) : (
-            <ActionBanner>
-              <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#1e293b', margin: '0 0 8px 0' }}>
-                {language === 'vi' ? 'Bắt đầu sử dụng Công việc tuyển gấp' : 'Start using Urgent Recruitment'}
-              </h3>
-              <p style={{ fontSize: '14px', color: '#64748b', margin: '0 0 24px 0', fontWeight: '500' }}>
-                {language === 'vi'
-                  ? 'Kích hoạt tính năng tuyển gấp ngay hôm nay để lấp đầy ca làm việc của bạn trong tích tắc.'
-                  : 'Activate the urgent recruitment feature today and fill your empty work shifts in no time.'}
-              </p>
-              <ActionButton
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                disabled={requestSending}
-                onClick={handleRequestActivation}
-              >
-                {language === 'vi' ? 'Gửi yêu cầu kích hoạt Công việc tuyển gấp' : 'Request Urgent Jobs Activation'}
-              </ActionButton>
-            </ActionBanner>
+            <>
+              <ActionBanner style={{ textAlign: 'center', padding: '28px 32px' }}>
+                <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#1e293b', margin: '0 0 8px 0' }}>
+                  {language === 'vi' ? 'Bắt đầu sử dụng Công việc tuyển gấp' : 'Start using Urgent Recruitment'}
+                </h3>
+                <p style={{ fontSize: '14px', color: '#64748b', margin: '0 0 16px 0', fontWeight: '500' }}>
+                  {language === 'vi'
+                    ? 'Kích hoạt tính năng tuyển gấp ngay hôm nay để lấp đầy ca làm việc của bạn trong tích tắc.'
+                    : 'Activate the urgent recruitment feature today and fill your empty work shifts in no time.'}
+                </p>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, justifyContent: 'center', marginBottom: 20, textAlign: 'left', maxWidth: 460, margin: '0 auto 20px' }}>
+                  <input
+                    type="checkbox"
+                    id="inline-terms-check"
+                    checked={inlineAgreed}
+                    onChange={e => setInlineAgreed(e.target.checked)}
+                    style={{ marginTop: 3, width: 16, height: 16, cursor: 'pointer', accentColor: '#1e40af', flexShrink: 0 }}
+                  />
+                  <label htmlFor="inline-terms-check" style={{ fontSize: '13.5px', color: '#475569', lineHeight: 1.55, cursor: 'pointer', fontWeight: 500 }}>
+                    {language === 'vi' ? 'Tôi đã đọc và đồng ý với ' : 'I have read and agree to the '}
+                    <a href="/terms-urgent-jobs" target="_blank" rel="noopener noreferrer" style={{ color: '#1e40af', fontWeight: 700, textDecoration: 'underline' }}>
+                      {language === 'vi' ? 'Điều khoản sử dụng Job Gấp & Ví ký quỹ' : 'Quick Job & Escrow Wallet Terms'}
+                    </a>
+                    {language === 'vi' ? ' của Ốp Pờ.' : ' of Ốp Pờ.'}
+                  </label>
+                </div>
+                <ActionButton
+                  whileHover={inlineAgreed ? { scale: 1.05 } : {}}
+                  whileTap={inlineAgreed ? { scale: 0.95 } : {}}
+                  disabled={requestSending || !inlineAgreed}
+                  onClick={inlineAgreed ? handleRequestActivation : undefined}
+                  style={!inlineAgreed ? { opacity: 0.5, cursor: 'not-allowed', filter: 'grayscale(0.3)' } : {}}
+                >
+                  {language === 'vi' ? 'Gửi yêu cầu kích hoạt Công việc tuyển gấp' : 'Request Urgent Jobs Activation'}
+                </ActionButton>
+              </ActionBanner>
+            </>
           )}
         </IntroWrapper>
         <AnimatePresence>
@@ -5838,80 +5942,7 @@ const HRManagement = () => {
         )}
       </PageContainer>
 
-      {/* ── Wallet Terms Modal (lần đầu dùng Job Gấp) ── */}
-      <AnimatePresence>
-        {showWalletModal && (
-          <WalletModalOverlay
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={closeWalletModal}
-          >
-            <WalletModalContainer
-              initial={{ scale: 0.88, opacity: 0, y: 24 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.88, opacity: 0, y: 24 }}
-              transition={{ type: 'spring', damping: 22, stiffness: 300 }}
-              onClick={e => e.stopPropagation()}
-            >
-              <WalletModalIcon>
-                <Wallet />
-              </WalletModalIcon>
-
-              <WalletModalTitle>
-                {language === 'vi' ? 'Xác nhận sử dụng Ví Job Gấp' : 'Confirm Quick Job Wallet Use'}
-              </WalletModalTitle>
-
-              <WalletModalMessage>
-                {language === 'vi'
-                  ? 'Tính năng Job Gấp sử dụng ví ký quỹ. Khi đăng ca, hệ thống sẽ tự động trừ phí từ số dư ví của bạn. Vui lòng đọc và đồng ý với điều khoản trước khi tiếp tục.'
-                  : 'The Quick Job feature uses an escrow wallet. When posting a shift, the system will automatically deduct fees from your wallet balance. Please read and agree to the terms before continuing.'}
-              </WalletModalMessage>
-
-              <TermsCheckboxContainer>
-                <input
-                  type="checkbox"
-                  id="wallet-terms-check"
-                  checked={agreedToTerms}
-                  onChange={e => setAgreedToTerms(e.target.checked)}
-                />
-                <label htmlFor="wallet-terms-check">
-                  {language === 'vi' ? 'Tôi đã đọc và đồng ý với ' : 'I have read and agree to the '}
-                  <a
-                    href="/terms-urgent-jobs"
-                    onClick={e => {
-                      e.preventDefault();
-                      closeWalletModal();
-                      navigate('/terms-urgent-jobs', { state: { returnToWallet: true } });
-                    }}
-                  >
-                    {language === 'vi' ? 'Điều khoản sử dụng Job Gấp & Ví ký quỹ' : 'Quick Job & Escrow Wallet Terms'}
-                  </a>
-                  {language === 'vi' ? ' của Ốp Pờ.' : ' of Ốp Pờ.'}
-                </label>
-              </TermsCheckboxContainer>
-
-              <WalletModalActions>
-                <WalletModalButton
-                  $variant="secondary"
-                  whileTap={{ scale: 0.97 }}
-                  onClick={closeWalletModal}
-                >
-                  {language === 'vi' ? 'Để sau' : 'Later'}
-                </WalletModalButton>
-                <WalletModalButton
-                  $variant="primary"
-                  whileTap={{ scale: 0.97 }}
-                  disabled={!agreedToTerms}
-                  onClick={agreedToTerms ? handleConnectWallet : undefined}
-                >
-                  {language === 'vi' ? 'Đồng ý & Tiếp tục' : 'Agree & Continue'}
-                </WalletModalButton>
-              </WalletModalActions>
-            </WalletModalContainer>
-          </WalletModalOverlay>
-        )}
-      </AnimatePresence>
+      {/* ── Wallet Terms Modal đã được chuyển thành inline terms trong trang intro ── */}
     </DashboardLayout>
   );
 };

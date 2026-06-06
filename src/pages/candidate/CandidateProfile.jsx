@@ -1543,19 +1543,41 @@ const CandidateProfile = () => {
     setIsEditing(false);
   };
   
-  const handleAddSkill = () => {
+  const handleAddSkill = async () => {
     if (newSkill.trim() && !skills.includes(newSkill.trim())) {
       const updatedSkills = [...skills, newSkill.trim()];
       setSkills(updatedSkills);
       localStorage.setItem('candidateSkills', JSON.stringify(updatedSkills));
       setNewSkill('');
+      // Auto-sync to DB
+      try {
+        const existingProfile = await candidateProfileService.getMyProfile();
+        if (existingProfile) {
+          await candidateProfileService.updateProfile({ ...existingProfile, skills: updatedSkills });
+        } else {
+          await candidateProfileService.createProfile({ skills: updatedSkills });
+        }
+        console.log('✅ Skills synced to DB');
+      } catch (err) {
+        console.warn('⚠️ Could not sync skills to DB:', err.message);
+      }
     }
   };
-  
-  const handleRemoveSkill = (skillToRemove) => {
+
+  const handleRemoveSkill = async (skillToRemove) => {
     const updatedSkills = skills.filter(skill => skill !== skillToRemove);
     setSkills(updatedSkills);
     localStorage.setItem('candidateSkills', JSON.stringify(updatedSkills));
+    // Auto-sync to DB
+    try {
+      const existingProfile = await candidateProfileService.getMyProfile();
+      if (existingProfile) {
+        await candidateProfileService.updateProfile({ ...existingProfile, skills: updatedSkills });
+      }
+      console.log('✅ Skills synced to DB');
+    } catch (err) {
+      console.warn('⚠️ Could not sync skills to DB:', err.message);
+    }
   };
   
   // Helper function to format file size
