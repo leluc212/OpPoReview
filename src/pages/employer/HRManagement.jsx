@@ -3434,14 +3434,9 @@ const HRManagement = () => {
   };
 
   const handleCreatePost = () => {
-    const hasAgreed = localStorage.getItem('quick_job_wallet_terms_agreed') === 'true';
-    if (!hasAgreed) {
-      // Scroll to terms section instead of showing modal
-      const el = document.getElementById('quick-job-inline-terms');
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    } else {
-      navigate('/employer/post-quick-job');
-    }
+    // Nếu đã approved thì navigate thẳng, không cần check terms
+    // Terms chỉ check ở trang intro (khi chưa approved)
+    navigate('/employer/post-quick-job');
   };
 
   const closeWalletModal = () => {
