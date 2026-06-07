@@ -205,6 +205,13 @@ def submit_application(event, candidate_id, candidate_email, create_response):
         
         applications_table.put_item(Item=application)
 
+        # Send email notification to Employer about the new application
+        try:
+            from email_service import send_new_application_email
+            send_new_application_email(application)
+        except Exception as email_err:
+            print(f"Error sending application notification email: {str(email_err)}")
+
         # Update job stats (applicants + responseRate) if this is a real job
         try:
             if job and job_type in ['standard', 'quick']:
@@ -384,6 +391,17 @@ def update_application_status(event, application_id, user_id, create_response):
             ExpressionAttributeNames=expr_attr_names,
             ExpressionAttributeValues=expr_attr_values
         )
+
+        # Send status email notification to candidate if status is accepted or rejected
+        try:
+            if new_status in ['accepted', 'rejected']:
+                # Get the full updated application item
+                app_item = applications_table.get_item(Key={'applicationId': application_id}).get('Item', {})
+                if app_item:
+                    from email_service import send_application_result_email
+                    send_application_result_email(app_item, new_status)
+        except Exception as email_err:
+            print(f"Error sending application status result email: {str(email_err)}")
 
         # Check if we are completing the job and save to a new table "CompletedJobs" if it exists
         try:

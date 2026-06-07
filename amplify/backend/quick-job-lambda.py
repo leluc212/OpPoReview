@@ -334,6 +334,12 @@ def create_quick_job(body_str, user_id, headers):
                 recommend_job_to_candidates(item, is_quick_job=True)
             except Exception as rec_err:
                 print(f"Recommendation alert error: {str(rec_err)}")
+        elif item.get('status') == 'pending':
+            try:
+                from email_service import send_admin_approval_email
+                send_admin_approval_email(item, is_quick_job=True)
+            except Exception as email_err:
+                print(f"Error sending admin email: {str(email_err)}")
         
         print(f"✅ Quick job created: {item['jobID']}")
         
@@ -571,12 +577,27 @@ def update_quick_job(body_str, job_id, user_id, claims, headers):
         
         response = table.update_item(**update_params)
         updated_item = response['Attributes']
-        if updated_item.get('status') == 'active' and existing_job.get('status') != 'active':
+        old_status = existing_job.get('status')
+        new_status = updated_item.get('status')
+        
+        if new_status == 'active' and old_status != 'active':
             try:
                 from job_recommender import recommend_job_to_candidates
                 recommend_job_to_candidates(updated_item, is_quick_job=True)
             except Exception as rec_err:
                 print(f"Recommendation alert error: {str(rec_err)}")
+            try:
+                from email_service import send_employer_approved_email
+                send_employer_approved_email(updated_item, is_quick_job=True)
+            except Exception as email_err:
+                print(f"Employer approval email error: {str(email_err)}")
+        elif new_status == 'pending' and old_status != 'pending':
+            try:
+                from email_service import send_admin_approval_email
+                send_admin_approval_email(updated_item, is_quick_job=True)
+            except Exception as email_err:
+                print(f"Admin approval email error: {str(email_err)}")
+                
         print(f"✅ Quick job updated: {job_id}")
         
         return {

@@ -113,6 +113,15 @@ def lambda_handler(event, context):
             for k, v in body.items():
                 if k not in item and k != 'status': item[k] = v
             table.put_item(Item=item)
+            
+            # Send email notification to Admin for approval
+            if item.get('status') == 'pending':
+                try:
+                    from email_service import send_admin_approval_email
+                    send_admin_approval_email(item, is_quick_job=False)
+                except Exception as email_err:
+                    print(f"Error sending admin email: {str(email_err)}")
+                    
             return {'statusCode': 201, 'headers': headers, 'body': json.dumps({'success': True, 'data': item}, default=decimal_default)}
 
         # E. Routes based on idJob (e.g. /jobs/JOB-123)
@@ -209,6 +218,12 @@ def create_job_post(event, user_id, headers):
                 recommend_job_to_candidates(item, is_quick_job=False)
             except Exception as rec_err:
                 print(f"Recommendation alert error: {str(rec_err)}")
+        elif item.get('status') == 'pending':
+            try:
+                from email_service import send_admin_approval_email
+                send_admin_approval_email(item, is_quick_job=False)
+            except Exception as email_err:
+                print(f"Error sending admin email: {str(email_err)}")
         
         print(f"✅ Job post created: {item['idJob']}")
         
@@ -429,12 +444,27 @@ def update_job_post(event, job_id, user_id, headers):
         response = table.update_item(**update_params)
         
         updated_item = response['Attributes']
-        if updated_item.get('status') == 'active' and existing_job.get('status') != 'active':
+        old_status = existing_job.get('status')
+        new_status = updated_item.get('status')
+        
+        if new_status == 'active' and old_status != 'active':
             try:
                 from job_recommender import recommend_job_to_candidates
                 recommend_job_to_candidates(updated_item, is_quick_job=False)
             except Exception as rec_err:
                 print(f"Recommendation alert error: {str(rec_err)}")
+            try:
+                from email_service import send_employer_approved_email
+                send_employer_approved_email(updated_item, is_quick_job=False)
+            except Exception as email_err:
+                print(f"Employer approval email error: {str(email_err)}")
+        elif new_status == 'pending' and old_status != 'pending':
+            try:
+                from email_service import send_admin_approval_email
+                send_admin_approval_email(updated_item, is_quick_job=False)
+            except Exception as email_err:
+                print(f"Admin approval email error: {str(email_err)}")
+                
         print(f"✅ Job post updated: {job_id}")
         
         return {
