@@ -2051,7 +2051,8 @@ const Applications = () => {
             // Filter out test records without identification (Name or Email)
             return app.fullName?.trim() || app.candidateName?.trim() || (app.candidateEmail && app.candidateEmail !== 'Unknown');
           })
-
+          // Sort newest first
+          .sort((a, b) => new Date(b.appliedAt || 0) - new Date(a.appliedAt || 0))
           .map(app => ({
             id: app.applicationId,
             applicationId: app.applicationId,
@@ -2061,6 +2062,7 @@ const Applications = () => {
             job: app.jobTitle || 'Unknown Position',
             jobId: app.jobId,
             applied: new Date(app.appliedAt).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US'),
+            appliedAt: app.appliedAt, // keep raw timestamp for date filtering
             status: app.status || 'pending',
             cvUrl: app.cvUrl,
             cvFileName: app.cvFilename || 'CV.pdf',
@@ -2196,14 +2198,33 @@ const Applications = () => {
   const filteredApplications = useMemo(() => {
     const applicationsToFilter = realApplications;
 
-    const toHours = (applied = '') => {
-      const s = applied.toLowerCase();
-      if (s.includes('phút') || s.includes('minute')) { const m = s.match(/(\d+)/); return m ? parseInt(m[1]) / 60 : 0; }
-      if (s.includes('giờ') || s.includes('hour')) { const m = s.match(/(\d+)/); return m ? parseInt(m[1]) : 0; }
-      if (s.includes('ngày') || s.includes('day')) { const m = s.match(/(\d+)/); return m ? parseInt(m[1]) * 24 : 24; }
-      if (s.includes('tuần') || s.includes('week')) { const m = s.match(/(\d+)/); return m ? parseInt(m[1]) * 24 * 7 : 24 * 7; }
-      if (s.includes('tháng') || s.includes('month')) { const m = s.match(/(\d+)/); return m ? parseInt(m[1]) * 24 * 30 : 24 * 30; }
-      return 0;
+    // Returns true if the application date falls within the selected time window.
+    // Uses app.appliedAt (raw ISO/timestamp from API) for accuracy.
+    const matchesTimeFilter = (app) => {
+      if (timeFilter === 'all') return true;
+      // Prefer raw appliedAt; fall back to formatted app.applied string
+      const raw = app.appliedAt || app.applied;
+      if (!raw) return false;
+      const appDate = new Date(raw);
+      if (isNaN(appDate.getTime())) return false;
+      const now = new Date();
+      if (timeFilter === 'today') {
+        return appDate.getFullYear() === now.getFullYear() &&
+          appDate.getMonth() === now.getMonth() &&
+          appDate.getDate() === now.getDate();
+      }
+      if (timeFilter === 'week') {
+        // ISO week: Monday → Sunday
+        const startOfWeek = new Date(now);
+        startOfWeek.setHours(0, 0, 0, 0);
+        startOfWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7)); // Monday
+        return appDate >= startOfWeek;
+      }
+      if (timeFilter === 'month') {
+        return appDate.getFullYear() === now.getFullYear() &&
+          appDate.getMonth() === now.getMonth();
+      }
+      return true;
     };
 
     return applicationsToFilter.filter(app => {
@@ -2213,12 +2234,7 @@ const Applications = () => {
         app.job.toLowerCase().includes(searchTerm.toLowerCase());
 
       // Time filter (single select)
-      const hours = toHours(app.applied || app.appliedAt);
-      const matchesTime =
-        timeFilter === 'all' ? true :
-          timeFilter === 'today' ? hours < 24 :
-            timeFilter === 'week' ? hours < 24 * 7 :
-              timeFilter === 'month' ? hours < 24 * 30 : true;
+      const matchesTime = matchesTimeFilter(app);
 
       // Status filter (single select)
       const matchesStatus =

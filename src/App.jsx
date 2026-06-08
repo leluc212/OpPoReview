@@ -46,9 +46,13 @@ import ChangePassword from './pages/candidate/ChangePassword';
 import DeleteAccount from './pages/candidate/DeleteAccount';
 import CandidateKYC from './pages/candidate/CandidateKYC';
 import QuickJobIntroPage from './pages/candidate/QuickJobIntroPage';
+import CandidateTermsPage from './pages/candidate/CandidateTermsPage';
+import CandidatePrivacyPage from './pages/candidate/CandidatePrivacyPage';
 
 // Employer Pages
 import EmployerDashboard from './pages/employer/EmployerDashboard';
+import EmployerTermsPage from './pages/employer/EmployerTermsPage';
+import EmployerPrivacyPage from './pages/employer/EmployerPrivacyPage';
 import PostJob from './pages/employer/PostJob';
 import PostQuickJob from './pages/employer/PostQuickJob';
 import CompanyVerification from './pages/employer/CompanyVerification';
@@ -258,11 +262,31 @@ function AppRoutes() {
           <QuickJobIntroPage />
         </ProtectedRoute>
       } />
+      <Route path="/candidate/policy/terms" element={
+        <ProtectedRoute allowedRoles={['candidate']}>
+          <CandidateTermsPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/candidate/policy/privacy" element={
+        <ProtectedRoute allowedRoles={['candidate']}>
+          <CandidatePrivacyPage />
+        </ProtectedRoute>
+      } />
       
       {/* Employer Routes */}
       <Route path="/employer/dashboard" element={
         <ProtectedRoute allowedRoles={['employer']}>
           <EmployerDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/employer/policy/terms" element={
+        <ProtectedRoute allowedRoles={['employer']}>
+          <EmployerTermsPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/employer/policy/privacy" element={
+        <ProtectedRoute allowedRoles={['employer']}>
+          <EmployerPrivacyPage />
         </ProtectedRoute>
       } />
       <Route path="/employer/post-job" element={

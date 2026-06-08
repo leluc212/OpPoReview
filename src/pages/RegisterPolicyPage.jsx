@@ -272,7 +272,7 @@ const RegisterPolicyPage = () => {
           <img src={s3Images.system.logo} alt="Ốp Pờ" style={{ height: 52, objectFit: 'contain' }} onError={e => { e.target.style.display = 'none'; }} />
         </Logo>
         <HeaderTitle>
-          {tab === 'privacy' 
+          {tab === 'privacy'
             ? (vi ? 'CHÍNH SÁCH 02: BẢO MẬT & DỮ LIỆU CÁ NHÂN' : 'POLICY 02: PRIVACY & PERSONAL DATA')
             : (vi ? 'CHÍNH SÁCH 09: VI PHẠM & XỬ LÝ TÀI KHOẢN' : 'POLICY 09: VIOLATION & ACCOUNT HANDLING')
           }
@@ -283,22 +283,151 @@ const RegisterPolicyPage = () => {
         </HeaderMeta>
 
         <TabRow>
+          <Tab $active={tab === 'general'} onClick={() => setTab('general')}>
+            <ListChecks size={13} />
+            {vi ? '01 · Chung' : '01 · General'}
+          </Tab>
           <Tab $active={tab === 'privacy'} onClick={() => setTab('privacy')}>
             <Shield size={13} />
-            {vi ? 'Chính Sách 02 · Bảo Mật' : 'Policy 02 · Privacy'}
+            {vi ? '02 · Bảo Mật' : '02 · Privacy'}
+          </Tab>
+          <Tab $active={tab === 'candidate'} onClick={() => setTab('candidate')}>
+            <Users size={13} />
+            {vi ? '03 · Ứng Viên' : '03 · Candidate'}
+          </Tab>
+          <Tab $active={tab === 'employer'} onClick={() => setTab('employer')}>
+            <Users size={13} />
+            {vi ? '04 · Nhà Tuyển Dụng' : '04 · Employer'}
+          </Tab>
+          <Tab $active={tab === 'fees'} onClick={() => setTab('fees')}>
+            <Scale size={13} />
+            {vi ? '05/06 · Phí & Hoa Hồng' : '05/06 · Fees & Comms'}
+          </Tab>
+          <Tab $active={tab === 'ads'} onClick={() => setTab('ads')}>
+            <Flag size={13} />
+            {vi ? '07 · Quảng Cáo' : '07 · Ads'}
+          </Tab>
+          <Tab $active={tab === 'cancellation'} onClick={() => setTab('cancellation')}>
+            <AlertTriangle size={13} />
+            {vi ? '08 · Hủy & Tranh Chấp' : '08 · Disputes'}
           </Tab>
           <Tab $active={tab === 'violation'} onClick={() => setTab('violation')}>
             <AlertOctagon size={13} />
-            {vi ? 'Chính Sách 09 · Vi Phạm' : 'Policy 09 · Violation'}
+            {vi ? '09 · Vi Phạm' : '09 · Violation'}
           </Tab>
         </TabRow>
       </Header>
 
       <Container>
-        
-        {/* ══════════════════════════════════
-            TAB 02 — BẢO MẬT & DỮ LIỆU
-        ══════════════════════════════════ */}
+
+        {/* 01 — ĐIỀU KHOẢN CHUNG */}
+        {tab === 'general' && (
+          <>
+            <Card $isDark={isDarkMode}>
+              <HighlightBox $isDark={isDarkMode}>
+                {vi
+                  ? 'Khi đăng ký và sử dụng Ốp Pờ, bạn đồng ý tuân thủ toàn bộ các điều khoản dưới đây. Vui lòng đọc kỹ trước khi bắt đầu nhé!'
+                  : 'By registering and using Ốp Pờ, you agree to comply with all the terms below. Please read carefully before starting!'}
+              </HighlightBox>
+            </Card>
+
+            <Card $isDark={isDarkMode}>
+              <SectionTitle $isDark={isDarkMode}>
+                <ListChecks size={19} />
+                {vi ? '1. Phạm vi áp dụng' : '1. Scope of Application'}
+              </SectionTitle>
+              <P $isDark={isDarkMode}>
+                {vi 
+                  ? 'Điều khoản này áp dụng cho tất cả người dùng truy cập và sử dụng nền tảng Ốp Pờ, bao gồm:' 
+                  : 'These terms apply to all users accessing and using the Ốp Pờ platform, including:'}
+              </P>
+              <UL $isDark={isDarkMode}>
+                <li>{vi ? 'Ứng viên tìm kiếm việc làm thời vụ trong ngành F&B.' : 'Candidates seeking seasonal F&B jobs.'}</li>
+                <li>{vi ? 'Nhà tuyển dụng đăng tin và tuyển nhân sự thời vụ.' : 'Employers posting jobs and hiring seasonal staff.'}</li>
+                <li>{vi ? 'Người dùng khách (chưa đăng ký) chỉ xem nội dung công khai.' : 'Guest users (unregistered) viewing public content only.'}</li>
+              </UL>
+            </Card>
+
+            <Card $isDark={isDarkMode}>
+              <SectionTitle $isDark={isDarkMode}>
+                <UserCheck size={19} />
+                {vi ? '2. Điều kiện sử dụng' : '2. Conditions of Use'}
+              </SectionTitle>
+              <SubTitle $isDark={isDarkMode}>{vi ? '2.1 Về độ tuổi' : '2.1 Age Requirements'}</SubTitle>
+              <UL $isDark={isDarkMode}>
+                <li>{vi ? 'Ứng viên: Từ đủ 18 tuổi trở lên.' : 'Candidates: 18 years and older.'}</li>
+                <li>{vi ? 'Nhà tuyển dụng: Phải đủ 18 tuổi trở lên hoặc là đại diện hợp pháp của tổ chức/doanh nghiệp.' : 'Employers: 18+ or legal representative.'}</li>
+              </UL>
+              <SubTitle $isDark={isDarkMode}>{vi ? '2.2 Về tài khoản' : '2.2 Account Rules'}</SubTitle>
+              <UL $isDark={isDarkMode}>
+                <li>{vi ? 'Mỗi cá nhân hoặc doanh nghiệp chỉ được tạo và duy trì một (01) tài khoản hoạt động.' : 'One active account per individual/business.'}</li>
+                <li>{vi ? 'Việc tạo nhiều tài khoản nhằm mục đích gian lận là hành vi vi phạm nghiêm trọng.' : 'Fraudulent multiple accounts are a serious violation.'}</li>
+                <li>{vi ? 'Thông tin đăng ký phải trung thực, đầy đủ và được cập nhật kịp thời.' : 'Info must be honest, complete, and updated.'}</li>
+              </UL>
+              <SubTitle $isDark={isDarkMode}>{vi ? '2.3 Về bảo mật tài khoản' : '2.3 Account Security'}</SubTitle>
+              <UL $isDark={isDarkMode}>
+                <li>{vi ? 'Người dùng có trách nhiệm bảo mật thông tin đăng nhập.' : 'Users are responsible for login security.'}</li>
+                <li>{vi ? 'Mọi hành động phát sinh từ tài khoản đều thuộc trách nhiệm của chủ tài khoản.' : 'Account holder is responsible for all account actions.'}</li>
+              </UL>
+            </Card>
+
+            <Card $isDark={isDarkMode}>
+              <SectionTitle $isDark={isDarkMode}>
+                <Scale size={19} />
+                {vi ? '3. Quyền & trách nhiệm của người dùng' : '3. User Rights & Responsibilities'}
+              </SectionTitle>
+              <SubTitle $isDark={isDarkMode}>{vi ? '3.1 Quyền của người dùng' : '3.1 User Rights'}</SubTitle>
+              <P $isDark={isDarkMode}>{vi ? 'Người dùng có quyền:' : 'Users have the right to:'}</P>
+              <UL $isDark={isDarkMode}>
+                <li>{vi ? 'Sử dụng đầy đủ tính năng của nền tảng theo đúng mục đích được thiết kế.' : 'Use all platform features as designed.'}</li>
+                <li>{vi ? 'Báo cáo nội dung vi phạm, hành vi gian lận hoặc người dùng có dấu hiệu lừa đảo.' : 'Report violating content, fraud, or suspicious users.'}</li>
+                <li>{vi ? 'Yêu cầu hỗ trợ, giải thích và khiếu nại khi không đồng ý với quyết định xử lý từ Ốp Pờ.' : 'Request support, clarification, and appeal decisions.'}</li>
+                <li>{vi ? 'Yêu cầu xóa tài khoản và toàn bộ dữ liệu cá nhân theo quy định bảo mật.' : 'Request deletion of account and personal data.'}</li>
+              </UL>
+              <SubTitle $isDark={isDarkMode}>{vi ? '3.2 Trách nhiệm và nghĩa vụ của người dùng' : '3.2 User Responsibilities'}</SubTitle>
+              <WarnBox $isDark={isDarkMode}>
+                <UL $isDark={isDarkMode} style={{ margin: 0, color: 'inherit' }}>
+                  <li>{vi ? 'Không sử dụng nền tảng cho mục đích bất hợp pháp, gian lận hoặc gây hại đến người dùng khác.' : 'No illegal, fraudulent, or harmful use.'}</li>
+                  <li>{vi ? 'Không đăng tải thông tin sai lệch, thông tin mang tính kỳ thị, phân biệt đối xử.' : 'No false or discriminatory information.'}</li>
+                  <li>{vi ? 'Không sao chép, phân phối hoặc khai thác dữ liệu vì mục đích thương mại khi chưa được đồng ý.' : 'No unauthorized commercial data exploitation.'}</li>
+                  <li>{vi ? 'Không can thiệp vào hệ thống kỹ thuật, cố tình làm chậm hoặc phá hoại hoạt động.' : 'No technical interference or disruption.'}</li>
+                </UL>
+              </WarnBox>
+            </Card>
+
+            <Card $isDark={isDarkMode}>
+              <SectionTitle $isDark={isDarkMode}>
+                < Shield size={19} />
+                {vi ? '4. Quyền của Ốp Pờ' : "4. Ốp Pờ's Rights"}
+              </SectionTitle>
+              <UL $isDark={isDarkMode}>
+                <li>{vi ? 'Điều chỉnh, bổ sung hoặc thay đổi điều khoản (thông báo trước ít nhất 03 ngày qua email hoặc app).' : 'Modify terms (at least 3 days notice via email/app).'}</li>
+                <li>{vi ? 'Từ chối duyệt, ẩn hoặc gỡ bỏ nội dung không đáp ứng tiêu chuẩn cộng đồng mà không cần báo trước.' : 'Refuse, hide, or remove non-standard content without notice.'}</li>
+                <li>{vi ? 'Tạm khóa hoặc xóa tài khoản vi phạm theo quy trình xử lý được nêu trong Chính sách Vi phạm.' : 'Temporarily lock or delete violating accounts per policy.'}</li>
+                <li>{vi ? 'Thu thập và sử dụng dữ liệu người dùng theo Chính sách Bảo mật đã công bố.' : 'Collect and use user data per published Privacy Policy.'}</li>
+              </UL>
+            </Card>
+
+            <Card $isDark={isDarkMode}>
+              <SectionTitle $isDark={isDarkMode}>
+                <AlertTriangle size={19} />
+                {vi ? '5. Giới hạn trách nhiệm' : '5. Limitation of Liability'}
+              </SectionTitle>
+              <P $isDark={isDarkMode}>
+                {vi 
+                  ? 'Ốp Pờ là nền tảng kết nối trung gian giữa ứng viên và nhà tuyển dụng. Chúng tôi KHÔNG chịu trách nhiệm pháp lý thay thế cho:' 
+                  : 'Ốp Pờ is a connecting platform. We are NOT legally responsible for:'}
+              </P>
+              <UL $isDark={isDarkMode}>
+                <li>{vi ? 'Thỏa thuận lao động, mức lương, điều kiện làm việc giữa hai bên.' : 'Labor agreements, wages, work conditions.'}</li>
+                <li>{vi ? 'Tranh chấp phát sinh ngoài phạm vi nền tảng hoặc sau khi kết thúc ca làm việc.' : 'Disputes outside the platform or after shifts.'}</li>
+                <li>{vi ? 'Thiệt hại do sự cố kỹ thuật, mất kết nối internet hoặc các trường hợp bất khả kháng.' : 'Damages from tech failures, internet issues, or force majeure.'}</li>
+              </UL>
+            </Card>
+          </>
+        )}
+
+        {/* 02 — BẢO MẬT & DỮ LIỆU */}
         {tab === 'privacy' && (
           <>
             <Card $isDark={isDarkMode}>
@@ -317,9 +446,9 @@ const RegisterPolicyPage = () => {
               <SubTitle $isDark={isDarkMode}>{vi ? '1.1 Thông tin cung cấp trực tiếp' : '1.1 Information provided directly'}</SubTitle>
               <UL $isDark={isDarkMode}>
                 <li>{vi ? 'Thông tin cá nhân cơ bản: họ tên, ngày sinh, giới tính, số điện thoại, địa chỉ email, CCCD.' : 'Basic info: full name, DOB, gender, phone, email, identity.'}</li>
-                <li>{vi ? 'Thông tin nghề nghiệp: kinh nghiệm, kỹ năng, lịch sử công việc, CV.' : 'Professional: experience, skills, history, CV.'}</li>
-                <li>{vi ? 'Thông tin doanh nghiệp (NTD): tên, địa chỉ, mã số thuế, GPKD, người đại diện.' : 'Business: name, address, tax ID, license, rep info.'}</li>
-                <li>{vi ? 'Nội dung trao đổi: tin nhắn, phản hồi, đánh giá.' : 'Communications: messages, feedback, ratings.'}</li>
+                <li>{vi ? 'Thông tin nghề nghiệp: kinh nghiệm, kỹ năng, lịch sử công việc, CV/hồ sơ cá nhân.' : 'Professional: experience, skills, history, CV.'}</li>
+                <li>{vi ? 'Thông tin doanh nghiệp (NTD): tên công ty, địa chỉ, mã số thuế, GPKD, thông tin đại diện pháp lý.' : 'Business: name, address, tax ID, license, rep info.'}</li>
+                <li>{vi ? 'Nội dung trao đổi: tin nhắn, phản hồi, đánh giá trên nền tảng.' : 'Communications: messages, feedback, ratings.'}</li>
               </UL>
               <SubTitle $isDark={isDarkMode}>{vi ? '1.2 Dữ liệu tự động thu thập' : '1.2 Automatically collected data'}</SubTitle>
               <UL $isDark={isDarkMode}>
@@ -345,15 +474,23 @@ const RegisterPolicyPage = () => {
                   <tbody>
                     <tr>
                       <td>{vi ? 'Kết nối việc làm' : 'Job matching'}</td>
-                      <td>{vi ? 'Kết nối ứng viên với NTD phù hợp dựa trên kỹ năng, kinh nghiệm, vị trí địa lý' : 'Matching based on skills and location'}</td>
+                      <td>{vi ? 'Kết nối ứng viên với nhà tuyển dụng phù hợp dựa trên kỹ năng, kinh nghiệm, vị trí địa lý' : 'Matching based on skills, experience, and location'}</td>
                     </tr>
                     <tr>
-                      <td>{vi ? 'Cải thiện sản phẩm' : 'Improvement'}</td>
-                      <td>{vi ? 'Phân tích hành vi để tối ưu tính năng và trải nghiệm nền tảng' : 'Optimize features and experience'}</td>
+                      <td>{vi ? 'Cải thiện sản phẩm' : 'Product Improvement'}</td>
+                      <td>{vi ? 'Phân tích hành vi người dùng để tối ưu tính năng và trải nghiệm nền tảng' : 'Analyze user behavior to optimize features and experience'}</td>
                     </tr>
                     <tr>
-                      <td>{vi ? 'Thông báo' : 'Notifications'}</td>
-                      <td>{vi ? 'Gửi tin việc làm mới, cập nhật ứng tuyển, nhắc lịch tìm việc' : 'Alerts and reminders'}</td>
+                      <td>{vi ? 'Thông báo & liên lạc' : 'Notifications & contact'}</td>
+                      <td>{vi ? 'Gửi thông báo việc làm mới, cập nhật ứng tuyển, nhắc lịch tìm việc' : 'Send job alerts, application updates, and reminders'}</td>
+                    </tr>
+                    <tr>
+                      <td>{vi ? 'Bảo mật hệ thống' : 'System security'}</td>
+                      <td>{vi ? 'Phát hiện và ngăn chặn hành vi gian lận, lạm dụng nền tảng' : 'Detect and prevent fraud and abuse'}</td>
+                    </tr>
+                    <tr>
+                      <td>{vi ? 'Tuân thủ pháp luật' : 'Legal Compliance'}</td>
+                      <td>{vi ? 'Lưu trữ thông tin theo yêu cầu của cơ quan nhà nước có thẩm quyền' : 'Store information as required by competent state authorities'}</td>
                     </tr>
                   </tbody>
                 </Table>
@@ -365,19 +502,174 @@ const RegisterPolicyPage = () => {
                 <Share2 size={19} />
                 {vi ? '3. Chia sẻ dữ liệu' : '3. Data Sharing'}
               </SectionTitle>
-              <P $isDark={isDarkMode}>{vi ? 'Ốp Pờ KHÔNG kinh doanh dữ liệu của bạn. Chia sẻ chỉ thực hiện khi:' : 'We do NOT sell data. Sharing only for:'}</P>
+              <P $isDark={isDarkMode}>{vi ? 'Ốp Pờ KHÔNG bán, trao đổi hoặc chia sẻ thông tin cá nhân của bạn vì mục đích thương mại. Chúng mình chỉ chia sẻ dữ liệu trong các trường hợp sau:' : 'Ốp Pờ does NOT sell or trade personal data for commercial purposes. We only share data in the following cases:'}</P>
               <UL $isDark={isDarkMode}>
-                <li>{vi ? 'Với nhà tuyển dụng: Khi ứng viên chủ động ứng tuyển.' : 'With employers: Upon application.'}</li>
-                <li>{vi ? 'Với đối tác kỹ thuật: Cloud, analytics đã cam kết bảo mật.' : 'Technical partners: Secure cloud/analytics.'}</li>
-                <li>{vi ? 'Pháp lý: Theo yêu cầu của cơ quan nhà nước có thẩm quyền.' : 'Legal: Regulatory requests.'}</li>
+                <li>{vi ? 'Với nhà tuyển dụng: Thông tin hồ sơ được chia sẻ khi bạn chủ động ứng tuyển.' : 'With employers: Shared upon active application.'}</li>
+                <li>{vi ? 'Với đối tác kỹ thuật: Các nhà cung cấp dịch vụ cloud, thanh toán, analytics được ràng buộc bởi hợp đồng bảo mật chặt chẽ.' : 'With technical partners: Cloud, payment, and analytics providers bound by strict confidentiality agreements.'}</li>
+                <li>{vi ? 'Theo yêu cầu pháp lý: Khi có yêu cầu từ cơ quan nhà nước có thẩm quyền theo quy định pháp luật Việt Nam.' : 'Legal: Regulatory requests under Vietnamese law.'}</li>
+              </UL>
+            </Card>
+
+            <Card $isDark={isDarkMode}>
+              <SectionTitle $isDark={isDarkMode}>
+                <UserCheck size={19} />
+                {vi ? '4. Quyền của người dùng với dữ liệu' : '4. User rights to data'}
+              </SectionTitle>
+              <UL $isDark={isDarkMode}>
+                <li>{vi ? 'Quyền truy cập: Bạn có thể xem toàn bộ dữ liệu cá nhân mà Ốp Pờ đang lưu trữ về bạn.' : 'Access: View all personal data Ốp Pờ stores about you.'}</li>
+                <li>{vi ? 'Quyền chỉnh sửa: Cập nhật hoặc sửa thông tin sai lệch trực tiếp trong phần Cài đặt tài khoản.' : 'Rectification: Update or fix info in Account Settings.'}</li>
+                <li>{vi ? 'Quyền xóa: Yêu cầu xóa tài khoản và toàn bộ dữ liệu. Chúng mình sẽ xử lý trong vòng 30 ngày.' : 'Erasure: Request account and data deletion within 30 days.'}</li>
+                <li>{vi ? 'Quyền từ chối: Hủy đăng ký nhận email marketing bất kỳ lúc nào bằng link Unsubscribe trong email.' : 'Object: Unsubscribe from marketing anytime via link.'}</li>
+                <li>{vi ? 'Quyền di chuyển dữ liệu: Yêu cầu xuất dữ liệu cá nhân dưới định dạng có thể đọc được.' : 'Data Portability: Request data export in a readable format.'}</li>
+              </UL>
+            </Card>
+
+            <Card $isDark={isDarkMode}>
+              <SectionTitle $isDark={isDarkMode}>
+                <Lock size={19} />
+                {vi ? '5. Cam kết bảo mật kỹ thuật' : '5. Technical security commitment'}
+              </SectionTitle>
+              <UL $isDark={isDarkMode}>
+                <li>{vi ? 'Toàn bộ dữ liệu được mã hóa (HTTPS/TLS) trong quá trình truyền tải và lưu trữ.' : 'All data encrypted (HTTPS/TLS) during transmission and storage.'}</li>
+                <li>{vi ? 'Hệ thống được kiểm tra bảo mật định kỳ và có cơ chế phát hiện xâm nhập tự động.' : 'Regular security audits and automated intrusion detection.'}</li>
+                <li>{vi ? 'Ốp Pờ KHÔNG lưu trữ thông tin thẻ tín dụng/ghi nợ mọi giao dịch được xử lý qua cổng thanh toán bên thứ ba đạt chuẩn PCI-DSS.' : 'Ốp Pờ does NOT store credit/debit card info; transactions processed via PCI-DSS compliant third-party gateways.'}</li>
+                <li>{vi ? 'Trong trường hợp xảy ra sự cố rò rỉ dữ liệu, Ốp Pờ cam kết thông báo đến người dùng bị ảnh hưởng trong vòng 72 giờ.' : 'Notification to affected users within 72 hours in case of data breach.'}</li>
               </UL>
             </Card>
           </>
         )}
 
-        {/* ══════════════════════════════════
-            TAB 09 — VI PHẠM & XỬ LÝ
-        ══════════════════════════════════ */}
+        {/* 03 — DÀNH CHO ỨNG VIÊN */}
+        {tab === 'candidate' && (
+          <>
+            <Card $isDark={isDarkMode}>
+              <SectionTitle $isDark={isDarkMode}>
+                <Users size={19} />
+                {vi ? '1. Đồ hồ sơ & Ứng tuyển' : '1. Profile & Application'}
+              </SectionTitle>
+              <UL $isDark={isDarkMode}>
+                <li>{vi ? 'Đăng ký tài khoản hoàn toàn MIỄN PHÍ.' : 'Registration is completely FREE.'}</li>
+                <li>{vi ? 'Mỗi cá nhân chỉ được một tài khoản duy nhất.' : 'Only one account per person.'}</li>
+                <li>{vi ? 'Hồ sơ phải trung thực, ảnh rõ mặt.' : 'Honest profile, clear photo.'}</li>
+              </UL>
+            </Card>
+            <Card $isDark={isDarkMode}>
+              <SectionTitle $isDark={isDarkMode}>
+                <CheckCircle size={19} />
+                {vi ? '2. Quyền lợi' : '2. Benefits'}
+              </SectionTitle>
+              <UL $isDark={isDarkMode}>
+                <li>{vi ? 'Xem đầy đủ lương, địa điểm, mô tả trước khi ứng tuyển.' : 'View full salary, location, description.'}</li>
+                <li>{vi ? 'Được Ốp Pờ hỗ trợ hòa giải tranh chấp lương.' : 'Mediation support for wage disputes.'}</li>
+              </UL>
+            </Card>
+          </>
+        )}
+
+        {/* 04 — DÀNH CHO NHÀ TUYỂN DỤNG */}
+        {tab === 'employer' && (
+          <>
+            <Card $isDark={isDarkMode}>
+              <SectionTitle $isDark={isDarkMode}>
+                <Users size={19} />
+                {vi ? '1. Đăng ký & Xét duyệt' : '1. registration & Approval'}
+              </SectionTitle>
+              <UL $isDark={isDarkMode}>
+                <li>{vi ? 'DN/Hộ kinh doanh khớp với giấy tờ pháp lý.' : 'Matching business legal docs.'}</li>
+                <li>{vi ? 'Hồ sơ được duyệt trong 24h làm việc.' : 'Approval within 24 business hours.'}</li>
+              </UL>
+            </Card>
+            <Card $isDark={isDarkMode}>
+              <SectionTitle $isDark={isDarkMode}>
+                <FileText size={19} />
+                {vi ? '2. Đăng tin tuyển dụng' : '2. Job Posting'}
+              </SectionTitle>
+              <UL $isDark={isDarkMode}>
+                <li>{vi ? 'Đăng tin thường Miễn phí không giới hạn.' : 'Unlimited free regular posts.'}</li>
+                <li>{vi ? 'Không đăng tin giả, yêu cầu nộp cọc/phí.' : 'No fake jobs or deposit requests.'}</li>
+              </UL>
+            </Card>
+          </>
+        )}
+
+        {/* 05/06 — PHÍ & HOA HỒNG */}
+        {tab === 'fees' && (
+          <>
+            <Card $isDark={isDarkMode}>
+              <SectionTitle $isDark={isDarkMode}>
+                <Scale size={19} />
+                {vi ? '1. Bảng phí dịch vụ' : '1. Service Fee Table'}
+              </SectionTitle>
+              <TableWrapper $isDark={isDarkMode}>
+                <Table $isDark={isDarkMode}>
+                  <thead>
+                    <tr>
+                      <th>{vi ? 'Dịch vụ' : 'Service'}</th>
+                      <th>{vi ? 'Mức phí' : 'Fee'}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>{vi ? 'Đăng ký tài khoản' : 'Account Registration'}</td><td>{vi ? 'Miễn phí' : 'Free'}</td></tr>
+                    <tr><td>{vi ? 'Đăng tin thông thường' : 'Regular Posting'}</td><td>{vi ? 'Miễn phí' : 'Free'}</td></tr>
+                    <tr><td>{vi ? 'Job Gấp (Hoa hồng)' : 'Urgent Job (Comms)'}</td><td>15%</td></tr>
+                  </tbody>
+                </Table>
+              </TableWrapper>
+            </Card>
+            <Card $isDark={isDarkMode}>
+              <SectionTitle $isDark={isDarkMode}>
+                <Lock size={19} />
+                {vi ? '2. Hoa hồng Job Gấp' : '2. Urgent Job commission'}
+              </SectionTitle>
+              <HighlightBox $isDark={isDarkMode}>
+                {vi ? 'Phí hoa hồng 15% được tính trên tổng lương ca và KHÔNG hoàn lại một khi đã đăng tin.' : '15% fee on total shift wages, non-refundable once posted.'}
+              </HighlightBox>
+            </Card>
+          </>
+        )}
+
+        {/* 07 — QUẢNG CÁO */}
+        {tab === 'ads' && (
+          <>
+            <Card $isDark={isDarkMode}>
+              <SectionTitle $isDark={isDarkMode}>
+                <Flag size={19} />
+                {vi ? 'Hình thức quảng cáo' : 'Ad Types'}
+              </SectionTitle>
+              <UL $isDark={isDarkMode}>
+                <li>{vi ? 'Tin Nổi Bật: Top danh sách top trang chủ.' : 'Featured: Top of list.'}</li>
+                <li>{vi ? 'Banner Trang Chủ: Tăng nhận diện thương hiệu.' : 'Home Banner: Brand awareness.'}</li>
+                <li>{vi ? 'Quảng cáo Target: Theo khu vực và kỹ năng.' : 'Targeted Ads: Area/Skills.'}</li>
+              </UL>
+            </Card>
+          </>
+        )}
+
+        {/* 08 — HỦY & TRANH CHẤP */}
+        {tab === 'cancellation' && (
+          <>
+            <Card $isDark={isDarkMode}>
+              <SectionTitle $isDark={isDarkMode}>
+                <AlertTriangle size={19} />
+                {vi ? '1. Chính sách hủy ca' : '1. Cancellation Policy'}
+              </SectionTitle>
+              <UL $isDark={isDarkMode}>
+                <li>{vi ? 'Ứng viên hủy sau 5h: Trừ điểm uy tín nặng.' : 'Cancel <5h: Severe penalty.'}</li>
+                <li>{vi ? 'NTD hủy Job Gấp: Chỉ hoàn 85% lương (giữ 15% hoa hồng).' : 'NTD cancel Urgent Job: Only 85% wage refund.'}</li>
+              </UL>
+            </Card>
+            <Card $isDark={isDarkMode}>
+              <SectionTitle $isDark={isDarkMode}>
+                <Scale size={19} />
+                {vi ? '2. Giải quyết tranh chấp' : '2. Dispute Resolution'}
+              </SectionTitle>
+              <P $isDark={isDarkMode}>{vi ? 'Báo cáo tranh chấp trực tiếp qua app kèm bằng chứng.' : 'Report disputes via app with evidence.'}</P>
+              <HighlightBox $isDark={isDarkMode}>{vi ? 'Ốp Pờ phản hồi và đề xuất hòa giải trong 4-24h.' : 'Response and mediation within 4-24h.'}</HighlightBox>
+            </Card>
+          </>
+        )}
+
+        {/* 09 — VI PHẠM & XỬ LÝ */}
         {tab === 'violation' && (
           <>
             <Card $isDark={isDarkMode}>
@@ -394,42 +686,42 @@ const RegisterPolicyPage = () => {
                 <AlertOctagon size={19} />
                 {vi ? '1. Phân loại vi phạm' : '1. Violation Classification'}
               </SectionTitle>
-              
+
               <LevelCard $isDark={isDarkMode} $color="#ef4444" $bg={isDarkMode ? 'rgba(239,68,68,0.12)' : '#fff1f2'}>
-                 <div className="lvl-title">
-                    <AlertOctagon size={18} />
-                    {vi ? 'Vi phạm Cấp độ 1 - Nghiêm trọng (Khóa vĩnh viễn)' : 'Level 1 - Critical (Permanent Ban)'}
-                 </div>
-                 <UL $isDark={isDarkMode} style={{margin: 0}}>
-                    <li>{vi ? 'Đăng tin giả, lừa đảo ứng viên; yêu cầu ứng viên nộp tiền cọc/phí dưới mọi hình thức.' : 'Fake jobs; requiring deposits/fees in any form.'}</li>
-                    <li>{vi ? 'Quấy rối, hành vi bạo lực hoặc đe dọa người dùng.' : 'Harassment, violence, or threats.'}</li>
-                    <li>{vi ? 'Tạo nhiều tài khoản giả để thao túng điểm uy tín/đánh giá.' : 'Fake accounts to manipulate reputation/ratings.'}</li>
-                    <li>{vi ? 'Nội dung vi phạm pháp luật: bạo lực, khiêu dâm, phân biệt đối xử.' : 'Illegal content: violence, porn, discrimination.'}</li>
-                 </UL>
+                <div className="lvl-title">
+                  <AlertOctagon size={18} />
+                  {vi ? 'Vi phạm Cấp độ 1 - Nghiêm trọng (Khóa vĩnh viễn)' : 'Level 1 - Critical (Permanent Ban)'}
+                </div>
+                <UL $isDark={isDarkMode} style={{ margin: 0 }}>
+                  <li>{vi ? 'Đăng tin giả, lừa đảo ứng viên; yêu cầu ứng viên nộp tiền cọc/phí dưới mọi hình thức.' : 'Fake jobs; requiring deposits/fees in any form.'}</li>
+                  <li>{vi ? 'Quấy rối, hành vi bạo lực hoặc đe dọa người dùng.' : 'Harassment, violence, or threats.'}</li>
+                  <li>{vi ? 'Tạo nhiều tài khoản giả để thao túng điểm uy tín/đánh giá.' : 'Fake accounts to manipulate reputation/ratings.'}</li>
+                  <li>{vi ? 'Nội dung vi phạm pháp luật: bạo lực, khiêu dâm, phân biệt đối xử.' : 'Illegal content: violence, porn, discrimination.'}</li>
+                </UL>
               </LevelCard>
 
               <LevelCard $isDark={isDarkMode} $color="#f59e0b" $bg={isDarkMode ? 'rgba(245,158,11,0.12)' : '#fffbeb'}>
-                 <div className="lvl-title">
-                    <AlertTriangle size={18} />
-                    {vi ? 'Vi phạm Cấp độ 2 - Trung bình (Tạm khóa 7 ngày)' : 'Level 2 - Medium (7-day Ban)'}
-                 </div>
-                 <UL $isDark={isDarkMode} style={{margin: 0}}>
-                    <li>{vi ? 'Thông tin tuyển dụng sai lệch (lương thực tế thấp hơn, địa chỉ sai...).' : 'Misleading info (lower pay, wrong address...).'}</li>
-                    <li>{vi ? 'Không phản hồi ứng viên sau khi match; hủy ca muộn nhiều lần.' : 'No response after match; frequent late cancellations.'}</li>
-                    <li>{vi ? 'Đánh giá sai sự thật với mục đích phá hoại.' : 'Malicious false ratings/reviews.'}</li>
-                 </UL>
+                <div className="lvl-title">
+                  <AlertTriangle size={18} />
+                  {vi ? 'Vi phạm Cấp độ 2 - Trung bình (Tạm khóa 7 ngày)' : 'Level 2 - Medium (7-day Ban)'}
+                </div>
+                <UL $isDark={isDarkMode} style={{ margin: 0 }}>
+                  <li>{vi ? 'Thông tin tuyển dụng sai lệch (lương thực tế thấp hơn, địa chỉ sai...).' : 'Misleading info (lower pay, wrong address...).'}</li>
+                  <li>{vi ? 'Không phản hồi ứng viên sau khi match; hủy ca muộn nhiều lần.' : 'No response after match; frequent late cancellations.'}</li>
+                  <li>{vi ? 'Đánh giá sai sự thật với mục đích phá hoại.' : 'Malicious false ratings/reviews.'}</li>
+                </UL>
               </LevelCard>
 
               <LevelCard $isDark={isDarkMode} $color="#10b981" $bg={isDarkMode ? 'rgba(16,185,129,0.12)' : '#f0fdf4'}>
-                 <div className="lvl-title">
-                    <Info size={18} />
-                    {vi ? 'Vi phạm Cấp độ 3 - Nhẹ (Nhắc nhở)' : 'Level 3 - Low (Reminder)'}
-                 </div>
-                 <UL $isDark={isDarkMode} style={{margin: 0}}>
-                    <li>{vi ? 'Hồ sơ thiếu thông tin; ảnh đại diện không đạt chuẩn.' : 'Incomplete profile; standard-less profile photo.'}</li>
-                    <li>{vi ? 'Nội dung tin tuyển dụng chưa đầy đủ; không cập nhật trạng thái tin.' : 'Incomplete job content; no status updates.'}</li>
-                    <li>{vi ? 'Hủy ca muộn lần đầu (chưa đến mức cảnh cáo).' : 'First-time late cancellation.'}</li>
-                 </UL>
+                <div className="lvl-title">
+                  <Info size={18} />
+                  {vi ? 'Vi phạm Cấp độ 3 - Nhẹ (Nhắc nhở)' : 'Level 3 - Low (Reminder)'}
+                </div>
+                <UL $isDark={isDarkMode} style={{ margin: 0 }}>
+                  <li>{vi ? 'Hồ sơ thiếu thông tin; ảnh đại diện không đạt chuẩn.' : 'Incomplete profile; standard-less profile photo.'}</li>
+                  <li>{vi ? 'Nội dung tin tuyển dụng chưa đầy đủ; không cập nhật trạng thái tin.' : 'Incomplete job content; no status updates.'}</li>
+                  <li>{vi ? 'Hủy ca muộn lần đầu (chưa đến mức cảnh cáo).' : 'First-time late cancellation.'}</li>
+                </UL>
               </LevelCard>
             </Card>
 
@@ -507,15 +799,15 @@ const RegisterPolicyPage = () => {
 
         <FooterBox $isDark={isDarkMode}>
           {vi
-             ? 'Tài liệu có hiệu lực kề từ ngày ban hành • Cập nhật tháng 6/2026'
-             : 'Document effective from issue date • Updated June 2026'}
+            ? 'Tài liệu có hiệu lực kề từ ngày ban hành • Cập nhật tháng 6/2026'
+            : 'Document effective from issue date • Updated June 2026'}
           <br />
           <Link to="/register">{vi ? 'Đăng ký ngay' : 'Register now'}</Link>
           {' · '}
           <Link to="/policy">{vi ? 'Điều khoản chung' : 'General Terms'}</Link>
-          
+
           <div className="slogan">
-             {vi ? 'ỐP PỜ - BẠN VỪA BỊ ĐUỔI & ĐÃ CÓ ỐP PỜ LO' : 'ỐP PỜ - JUST GOT FIRED? ỐP PỜ GOT YOU'}
+            {vi ? 'ỐP PỜ - BẠN VỪA BỊ ĐUỔI & ĐÃ CÓ ỐP PỜ LO' : 'ỐP PỜ - JUST GOT FIRED? ỐP PỜ GOT YOU'}
           </div>
         </FooterBox>
       </Container>

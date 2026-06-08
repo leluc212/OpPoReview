@@ -1,31 +1,8 @@
 import { fetchAuthSession } from 'aws-amplify/auth';
+import { getAuthHeaders } from './authHeaders.js';
 
 // HTTP API uses the $default stage, so the invoke URL must NOT include /prod.
 const API_BASE_URL = 'https://l1636ie205.execute-api.ap-southeast-1.amazonaws.com';
-
-/**
- * Get authenticated headers with JWT token
- */
-async function getAuthHeaders() {
-  try {
-    const session = await fetchAuthSession();
-    const idToken = session.tokens?.idToken;
-    if (!idToken) {
-      throw new Error('No authentication token available');
-    }
-    
-    let tokenString = idToken.toString();
-    tokenString = tokenString.trim().replace(/[\r\n\t]/g, '');
-    
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${tokenString}`
-    };
-  } catch (error) {
-    console.error('Error getting auth headers:', error);
-    throw error;
-  }
-}
 
 function decodeJwtPayload(token) {
   try {
@@ -106,7 +83,7 @@ export async function getMyCandidateApplications() {
     }
 
     if (!userId) {
-      throw new Error('User not authenticated');
+      return [];
     }
     
     // Try Vite proxy first in dev mode to avoid CORS
@@ -190,11 +167,19 @@ export async function getJobApplications(jobId) {
       return data.applications || [];
     } catch (error) {
       lastError = error;
-      // Don't retry on non-transient errors
-      if (!error.message.includes('503') && !error.message.includes('502') && !error.message.includes('unavailable')) {
-        throw error;
+      // Don't retry on auth errors or non-transient errors
+      if (
+        error.message?.includes('No authentication token') ||
+        (!error.message?.includes('503') && !error.message?.includes('502') && !error.message?.includes('unavailable'))
+      ) {
+        break; // exit retry loop
       }
     }
+  }
+
+  if (lastError?.message?.includes('No authentication token')) {
+    // Session not ready yet on page load — silent fail, no console error
+    return [];
   }
 
   console.error('❌ Error getting job applications after retries:', lastError);

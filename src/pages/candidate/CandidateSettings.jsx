@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -7,17 +7,19 @@ import UnderDevelopmentModal from '../../components/UnderDevelopmentModal';
 
 import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useToast } from '../../hooks/useToast';
 import { Button } from '../../components/FormElements';
-import { 
-  Bell, 
-  Mail, 
-  MessageSquare, 
-  Globe, 
-  Moon, 
-  Sun, 
-  Lock, 
-  Shield, 
-  FileText, 
+import candidateProfileService from '../../services/candidateProfileService';
+import {
+  Bell,
+  Mail,
+  MessageSquare,
+  Globe,
+  Moon,
+  Sun,
+  Lock,
+  Shield,
+  FileText,
   Trash2,
   Settings as SettingsIcon,
   Eye,
@@ -493,426 +495,473 @@ function CandidateSettings() {
     profile: true,
     suggestions: false
   });
-  
+
   const [privacy, setPrivacy] = useState({
     showProfile: true,
     showEmail: false,
     showPhone: false
   });
-  
+
+  const [isLoading, setIsLoading] = useState(true);
+  const toast = useToast();
+
   const navigate = useNavigate();
   const [isDevModalOpen, setIsDevModalOpen] = useState(false);
 
-  const handleNotificationToggle = (key) => {
-    setNotifications(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
+  // Fetch profile on mount to load settings
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        setIsLoading(true);
+        const profile = await candidateProfileService.getMyProfile();
+
+        if (profile) {
+          if (profile.notificationSettings) {
+            setNotifications(prev => ({
+              ...prev,
+              ...profile.notificationSettings
+            }));
+          }
+
+          if (profile.privacySettings) {
+            setPrivacy(prev => ({
+              ...prev,
+              ...profile.privacySettings
+            }));
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching settings:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSettings();
+  }, []);
+
+  const handleNotificationToggle = async (key) => {
+    const newValue = !notifications[key];
+    const updatedNotifications = {
+      ...notifications,
+      [key]: newValue
+    };
+
+    // Optimistic update
+    setNotifications(updatedNotifications);
+
+    try {
+      await candidateProfileService.updateProfile({
+        notificationSettings: updatedNotifications
+      });
+      toast.success(t.common?.saveSuccess || 'Đã lưu cài đặt thông báo');
+    } catch (error) {
+      console.error('Error saving notification settings:', error);
+      // Revert on error
+      setNotifications(notifications);
+      toast.error(t.common?.saveError || 'Không thể lưu cài đặt');
+    }
   };
-  
-  const handlePrivacyToggle = (key) => {
-    setPrivacy(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
+
+  const handlePrivacyToggle = async (key) => {
+    const newValue = !privacy[key];
+    const updatedPrivacy = {
+      ...privacy,
+      [key]: newValue
+    };
+
+    // Optimistic update
+    setPrivacy(updatedPrivacy);
+
+    try {
+      await candidateProfileService.updateProfile({
+        privacySettings: updatedPrivacy
+      });
+      toast.success(t.common?.saveSuccess || 'Đã lưu cài đặt quyền riêng tư');
+    } catch (error) {
+      console.error('Error saving privacy settings:', error);
+      // Revert on error
+      setPrivacy(privacy);
+      toast.error(t.common?.saveError || 'Không thể lưu cài đặt');
+    }
   };
-  
+
 
 
   return (
     <>
-    <DashboardLayout role="candidate" showSearch={false} key={language}>
-      <SettingsContainer>
-        <PageHeader
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="header-content">
-            <h1><SettingsIcon />{t.settings.title}</h1>
-            <p>{t.settings.subtitle}</p>
-          </div>
-        </PageHeader>
+      <DashboardLayout role="candidate" showSearch={false} key={language}>
+        <SettingsContainer>
+          <PageHeader
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="header-content">
+              <h1><SettingsIcon />{t.settings.title}</h1>
+              <p>{t.settings.subtitle}</p>
+              {isLoading && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  style={{ marginTop: 12, fontSize: 14, fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: 8 }}
+                >
+                  <div style={{ width: 12, height: 12, borderRadius: '50%', border: '2px solid white', borderTopColor: 'transparent', animation: 'spin 1s linear infinite' }} />
+                  Đang tải cài đặt...
+                </motion.div>
+              )}
+              <style>{`
+              @keyframes spin {
+                to { transform: rotate(360deg); }
+              }
+            `}</style>
+            </div>
+          </PageHeader>
 
-        <ContentGrid>
-          <MainContent>
-            {/* Account Settings */}
-            <Card
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-            >
-              <div className="card-header">
-                <h2><User />{t.settings.accountSettings}</h2>
-              </div>
-              
-              <SettingItem
-                $color="#1e40af"
-                whileHover={{ scale: 1.01 }}
-                transition={{ duration: 0.2 }}
+          <ContentGrid>
+            <MainContent>
+              {/* Account Settings */}
+              <Card
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
               >
-                <div className="setting-left">
-                  <div className="icon-wrapper">
-                    <Globe />
-                  </div>
-                  <div className="setting-info">
-                    <h3>{t.settings.language}</h3>
-                    <p>{t.settings.languageDescription}</p>
-                  </div>
+                <div className="card-header">
+                  <h2><User />{t.settings.accountSettings}</h2>
                 </div>
-                <LanguageOptions>
-                  <LanguageButton 
-                    $active={language === 'vi'} 
-                    onClick={() => changeLanguage('vi')}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {language === 'vi' && <Check />}
-                    {t.settings.vietnamese}
-                  </LanguageButton>
-                  <LanguageButton 
-                    $active={language === 'en'} 
-                    onClick={() => changeLanguage('en')}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {language === 'en' && <Check />}
-                    {t.settings.english}
-                  </LanguageButton>
-                </LanguageOptions>
-              </SettingItem>
-              
-              <SettingItem
-                $color="#F59E0B"
-                whileHover={{ scale: 1.01 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="setting-left">
-                  <div className="icon-wrapper">
-                    {isDarkMode ? <Moon /> : <Sun />}
-                  </div>
-                  <div className="setting-info">
-                    <h3>{t.settings.darkMode}</h3>
-                    <p>{t.settings.darkModeDesc}</p>
-                  </div>
-                </div>
-                <Toggle>
-                  <input 
-                    type="checkbox" 
-                    checked={isDarkMode}
-                    onChange={() => setIsDevModalOpen(true)}
-                  />
-                  <span></span>
-                </Toggle>
-              </SettingItem>
-            </Card>
 
-            {/* Account & Password */}
-            <Card
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              <div className="card-header">
-                <h2><Lock />{t.settings.security}</h2>
-              </div>
-              
-              <SettingItem
-                $color="#1e40af"
-                whileHover={{ scale: 1.01 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => navigate('/candidate/change-password')}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="setting-left">
-                  <div className="icon-wrapper">
-                    <Key />
+                <SettingItem
+                  $color="#1e40af"
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="setting-left">
+                    <div className="icon-wrapper">
+                      <Globe />
+                    </div>
+                    <div className="setting-info">
+                      <h3>{t.settings.language}</h3>
+                      <p>{t.settings.languageDescription}</p>
+                    </div>
                   </div>
-                  <div className="setting-info">
-                    <h3>{t.security.changePassword}</h3>
-                    <p>{t.security.changePasswordDesc}</p>
-                  </div>
-                </div>
-                <ChevronRight />
-              </SettingItem>
-              
-              <SettingItem
-                $color="#EF4444"
-                whileHover={{ scale: 1.01 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => navigate('/candidate/delete-account')}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="setting-left">
-                  <div className="icon-wrapper">
-                    <Trash2 />
-                  </div>
-                  <div className="setting-info">
-                    <h3>{t.security.deleteAccount}</h3>
-                    <p>{t.security.deleteAccountDesc}</p>
-                  </div>
-                </div>
-                <ChevronRight />
-              </SettingItem>
-            </Card>
+                  <LanguageOptions>
+                    <LanguageButton
+                      $active={language === 'vi'}
+                      onClick={() => changeLanguage('vi')}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      {language === 'vi' && <Check />}
+                      {t.settings.vietnamese}
+                    </LanguageButton>
+                    <LanguageButton
+                      $active={language === 'en'}
+                      onClick={() => changeLanguage('en')}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      {language === 'en' && <Check />}
+                      {t.settings.english}
+                    </LanguageButton>
+                  </LanguageOptions>
+                </SettingItem>
 
-            {/* Notifications */}
-            <Card
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <div className="card-header">
-                <h2><Bell />{t.settings.notifications}</h2>
-              </div>
-              
-              <SettingItem
-                $color="#10B981"
-                whileHover={{ scale: 1.01 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="setting-left">
-                  <div className="icon-wrapper">
-                    <Mail />
+                <SettingItem
+                  $color="#F59E0B"
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="setting-left">
+                    <div className="icon-wrapper">
+                      {isDarkMode ? <Moon /> : <Sun />}
+                    </div>
+                    <div className="setting-info">
+                      <h3>{t.settings.darkMode}</h3>
+                      <p>{t.settings.darkModeDesc}</p>
+                    </div>
                   </div>
-                  <div className="setting-info">
-                    <h3>{t.settings.emailNotifications}</h3>
-                    <p>{t.settings.emailNotificationsDesc}</p>
-                  </div>
-                </div>
-                <Toggle>
-                  <input 
-                    type="checkbox" 
-                    checked={notifications.email}
-                    onChange={() => handleNotificationToggle('email')}
-                  />
-                  <span></span>
-                </Toggle>
-              </SettingItem>
-              
-              <SettingItem
-                $color="#1e40af"
-                whileHover={{ scale: 1.01 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="setting-left">
-                  <div className="icon-wrapper">
-                    <Bell />
-                  </div>
-                  <div className="setting-info">
-                    <h3>{t.settings.applicationUpdates}</h3>
-                    <p>{t.settings.applicationUpdatesDesc}</p>
-                  </div>
-                </div>
-                <Toggle>
-                  <input 
-                    type="checkbox" 
-                    checked={notifications.profile}
-                    onChange={() => handleNotificationToggle('profile')}
-                  />
-                  <span></span>
-                </Toggle>
-              </SettingItem>
-              
-              <SettingItem
-                $color="#F59E0B"
-                whileHover={{ scale: 1.01 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="setting-left">
-                  <div className="icon-wrapper">
-                    <MessageSquare />
-                  </div>
-                  <div className="setting-info">
-                    <h3>{t.settings.newMatches}</h3>
-                    <p>{t.settings.newMatchesDesc}</p>
-                  </div>
-                </div>
-                <Toggle>
-                  <input 
-                    type="checkbox" 
-                    checked={notifications.suggestions}
-                    onChange={() => handleNotificationToggle('suggestions')}
-                  />
-                  <span></span>
-                </Toggle>
-              </SettingItem>
-            </Card>
+                  <Toggle>
+                    <input
+                      type="checkbox"
+                      checked={isDarkMode}
+                      onChange={() => setIsDevModalOpen(true)}
+                    />
+                    <span></span>
+                  </Toggle>
+                </SettingItem>
+              </Card>
 
-            {/* Privacy */}
-            <Card
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              <div className="card-header">
-                <h2><Shield />{t.settings.privacy}</h2>
-              </div>
-              
-              <SettingItem
-                $color="#10B981"
-                whileHover={{ scale: 1.01 }}
-                transition={{ duration: 0.2 }}
+              {/* Account & Password */}
+              <Card
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
               >
-                <div className="setting-left">
-                  <div className="icon-wrapper">
-                    {privacy.showProfile ? <Eye /> : <EyeOff />}
-                  </div>
-                  <div className="setting-info">
-                    <h3>{t.settings.profileVisibility}</h3>
-                    <p>{t.settings.profileVisibilityDesc}</p>
-                  </div>
+                <div className="card-header">
+                  <h2><Lock />{t.settings.security}</h2>
                 </div>
-                <Toggle>
-                  <input 
-                    type="checkbox" 
-                    checked={privacy.showProfile}
-                    onChange={() => handlePrivacyToggle('showProfile')}
-                  />
-                  <span></span>
-                </Toggle>
-              </SettingItem>
-              
-              <SettingItem
-                $color="#1e40af"
-                whileHover={{ scale: 1.01 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="setting-left">
-                  <div className="icon-wrapper">
-                    <Mail />
-                  </div>
-                  <div className="setting-info">
-                    <h3>{t.settings.showEmail}</h3>
-                    <p>{t.settings.showEmailDesc}</p>
-                  </div>
-                </div>
-                <Toggle>
-                  <input 
-                    type="checkbox" 
-                    checked={privacy.showEmail}
-                    onChange={() => handlePrivacyToggle('showEmail')}
-                  />
-                  <span></span>
-                </Toggle>
-              </SettingItem>
-              
-              <SettingItem
-                $color="#F59E0B"
-                whileHover={{ scale: 1.01 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="setting-left">
-                  <div className="icon-wrapper">
-                    <Phone />
-                  </div>
-                  <div className="setting-info">
-                    <h3>{t.settings.showPhone}</h3>
-                    <p>{t.settings.showPhoneDesc}</p>
-                  </div>
-                </div>
-                <Toggle>
-                  <input 
-                    type="checkbox" 
-                    checked={privacy.showPhone}
-                    onChange={() => handlePrivacyToggle('showPhone')}
-                  />
-                  <span></span>
-                </Toggle>
-              </SettingItem>
-            </Card>
 
-            {/* Policies */}
-            <Card
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-            >
-              <div className="card-header">
-                <h2><FileText />{t.settings.policyTerms}</h2>
-              </div>
-              
-              <PolicyItem
-                $color="#1e40af"
-                whileHover={{ scale: 1.01 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => setIsDevModalOpen(true)}
-              >
-                <div className="policy-left">
-                  <div className="icon">
-                    <FileText />
+                <SettingItem
+                  $color="#1e40af"
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={() => navigate('/candidate/change-password')}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="setting-left">
+                    <div className="icon-wrapper">
+                      <Key />
+                    </div>
+                    <div className="setting-info">
+                      <h3>{t.security.changePassword}</h3>
+                      <p>{t.security.changePasswordDesc}</p>
+                    </div>
                   </div>
-                  <div className="policy-info">
-                    <h3>{t.legalPrivacy.terms}</h3>
-                    <p>{t.legalPrivacy.termsDesc}</p>
-                  </div>
-                </div>
-                <ChevronRight />
-              </PolicyItem>
-              
-              <PolicyItem
-                $color="#10B981"
-                whileHover={{ scale: 1.01 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => setIsDevModalOpen(true)}
-              >
-                <div className="policy-left">
-                  <div className="icon">
-                    <Shield />
-                  </div>
-                  <div className="policy-info">
-                    <h3>{t.legalPrivacy.privacy}</h3>
-                    <p>{t.legalPrivacy.privacyDesc}</p>
-                  </div>
-                </div>
-                <ChevronRight />
-              </PolicyItem>
-              
-              <PolicyItem
-                $color="#F59E0B"
-                whileHover={{ scale: 1.01 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => setIsDevModalOpen(true)}
-              >
-                <div className="policy-left">
-                  <div className="icon">
-                    <FileText />
-                  </div>
-                  <div className="policy-info">
-                    <h3>{t.legalPrivacy.cookies}</h3>
-                    <p>{t.legalPrivacy.cookiesDesc}</p>
-                  </div>
-                </div>
-                <ChevronRight />
-              </PolicyItem>
-              
-              <PolicyItem
-                $color="#1e40af"
-                whileHover={{ scale: 1.01 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => setIsDevModalOpen(true)}
-              >
-                <div className="policy-left">
-                  <div className="icon">
-                    <Download />
-                  </div>
-                  <div className="policy-info">
-                    <h3>{t.legalPrivacy.dataExport}</h3>
-                    <p>{t.legalPrivacy.dataExportDesc}</p>
-                  </div>
-                </div>
-                <ChevronRight />
-              </PolicyItem>
-            </Card>
-          </MainContent>
+                  <ChevronRight />
+                </SettingItem>
 
-          <Sidebar>
-            {/* Sidebar hidden */}
-          </Sidebar>
-        </ContentGrid>
-      </SettingsContainer>
+                <SettingItem
+                  $color="#EF4444"
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={() => navigate('/candidate/delete-account')}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="setting-left">
+                    <div className="icon-wrapper">
+                      <Trash2 />
+                    </div>
+                    <div className="setting-info">
+                      <h3>{t.security.deleteAccount}</h3>
+                      <p>{t.security.deleteAccountDesc}</p>
+                    </div>
+                  </div>
+                  <ChevronRight />
+                </SettingItem>
+              </Card>
 
-    </DashboardLayout>
+              {/* Notifications */}
+              <Card
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+              >
+                <div className="card-header">
+                  <h2><Bell />{t.settings.notifications}</h2>
+                </div>
+
+                <SettingItem
+                  $color="#10B981"
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="setting-left">
+                    <div className="icon-wrapper">
+                      <Mail />
+                    </div>
+                    <div className="setting-info">
+                      <h3>{t.settings.emailNotifications}</h3>
+                      <p>{t.settings.emailNotificationsDesc}</p>
+                    </div>
+                  </div>
+                  <Toggle>
+                    <input
+                      type="checkbox"
+                      checked={notifications.email}
+                      onChange={() => handleNotificationToggle('email')}
+                    />
+                    <span></span>
+                  </Toggle>
+                </SettingItem>
+
+                <SettingItem
+                  $color="#1e40af"
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="setting-left">
+                    <div className="icon-wrapper">
+                      <Bell />
+                    </div>
+                    <div className="setting-info">
+                      <h3>{t.settings.applicationUpdates}</h3>
+                      <p>{t.settings.applicationUpdatesDesc}</p>
+                    </div>
+                  </div>
+                  <Toggle>
+                    <input
+                      type="checkbox"
+                      checked={notifications.profile}
+                      onChange={() => handleNotificationToggle('profile')}
+                    />
+                    <span></span>
+                  </Toggle>
+                </SettingItem>
+
+                <SettingItem
+                  $color="#F59E0B"
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="setting-left">
+                    <div className="icon-wrapper">
+                      <MessageSquare />
+                    </div>
+                    <div className="setting-info">
+                      <h3>{t.settings.newMatches}</h3>
+                      <p>{t.settings.newMatchesDesc}</p>
+                    </div>
+                  </div>
+                  <Toggle>
+                    <input
+                      type="checkbox"
+                      checked={notifications.suggestions}
+                      onChange={() => handleNotificationToggle('suggestions')}
+                    />
+                    <span></span>
+                  </Toggle>
+                </SettingItem>
+              </Card>
+
+              {/* Privacy */}
+              <Card
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                <div className="card-header">
+                  <h2><Shield />{t.settings.privacy}</h2>
+                </div>
+
+                <SettingItem
+                  $color="#10B981"
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="setting-left">
+                    <div className="icon-wrapper">
+                      {privacy.showProfile ? <Eye /> : <EyeOff />}
+                    </div>
+                    <div className="setting-info">
+                      <h3>{t.settings.profileVisibility}</h3>
+                      <p>{t.settings.profileVisibilityDesc}</p>
+                    </div>
+                  </div>
+                  <Toggle>
+                    <input
+                      type="checkbox"
+                      checked={privacy.showProfile}
+                      onChange={() => handlePrivacyToggle('showProfile')}
+                    />
+                    <span></span>
+                  </Toggle>
+                </SettingItem>
+
+                <SettingItem
+                  $color="#1e40af"
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="setting-left">
+                    <div className="icon-wrapper">
+                      <Mail />
+                    </div>
+                    <div className="setting-info">
+                      <h3>{t.settings.showEmail}</h3>
+                      <p>{t.settings.showEmailDesc}</p>
+                    </div>
+                  </div>
+                  <Toggle>
+                    <input
+                      type="checkbox"
+                      checked={privacy.showEmail}
+                      onChange={() => handlePrivacyToggle('showEmail')}
+                    />
+                    <span></span>
+                  </Toggle>
+                </SettingItem>
+
+                <SettingItem
+                  $color="#F59E0B"
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="setting-left">
+                    <div className="icon-wrapper">
+                      <Phone />
+                    </div>
+                    <div className="setting-info">
+                      <h3>{t.settings.showPhone}</h3>
+                      <p>{t.settings.showPhoneDesc}</p>
+                    </div>
+                  </div>
+                  <Toggle>
+                    <input
+                      type="checkbox"
+                      checked={privacy.showPhone}
+                      onChange={() => handlePrivacyToggle('showPhone')}
+                    />
+                    <span></span>
+                  </Toggle>
+                </SettingItem>
+              </Card>
+
+              {/* Policies */}
+              <Card
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+              >
+                <div className="card-header">
+                  <h2><FileText />{t.settings.policyTerms}</h2>
+                </div>
+
+                <PolicyItem
+                  $color="#1e40af"
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={() => navigate('/candidate/policy/terms')}
+                >
+                  <div className="policy-left">
+                    <div className="icon">
+                      <FileText />
+                    </div>
+                    <div className="policy-info">
+                      <h3>{t.legalPrivacy.terms}</h3>
+                      <p>{t.legalPrivacy.termsDesc}</p>
+                    </div>
+                  </div>
+                  <ChevronRight />
+                </PolicyItem>
+
+                <PolicyItem
+                  $color="#10B981"
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={() => navigate('/candidate/policy/privacy')}
+                >
+                  <div className="policy-left">
+                    <div className="icon">
+                      <Shield />
+                    </div>
+                    <div className="policy-info">
+                      <h3>{t.legalPrivacy.privacy}</h3>
+                      <p>{t.legalPrivacy.privacyDesc}</p>
+                    </div>
+                  </div>
+                  <ChevronRight />
+                </PolicyItem>
+
+              </Card>
+            </MainContent>
+
+            <Sidebar>
+              {/* Sidebar hidden */}
+            </Sidebar>
+          </ContentGrid>
+        </SettingsContainer>
+
+      </DashboardLayout>
 
       <UnderDevelopmentModal
         isOpen={isDevModalOpen}

@@ -1,13 +1,10 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useLanguage } from '../context/LanguageContext';
-import { useTheme } from '../context/ThemeContext';
-import { s3Images } from '../utils/s3Images';
-import {
-  ArrowLeft, FileText, Users, AlertTriangle,
-  Scale, HelpCircle, Shield, CheckCircle
-} from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTheme } from '../../context/ThemeContext';
+import { s3Images } from '../../utils/s3Images';
+import { ArrowLeft, Users, Shield, Scale, CheckCircle, FileText, AlertTriangle } from 'lucide-react';
 
 const Wrapper = styled.div`
   min-height: 100vh;
@@ -53,12 +50,6 @@ const HeaderTitle = styled.h1`
   color: #fff;
   margin-bottom: 8px;
   letter-spacing: -0.3px;
-`;
-
-const HeaderSub = styled.p`
-  font-size: 0.88rem;
-  color: rgba(255,255,255,0.75);
-  margin-bottom: 12px;
 `;
 
 const HeaderMeta = styled.div`
@@ -171,7 +162,7 @@ const FooterBox = styled.div`
   a { color: #1a62ff; text-decoration: none; font-weight: 600; }
 `;
 
-const PolicyPage = () => {
+const CandidateTermsPage = () => {
   const { language } = useLanguage();
   const { isDarkMode } = useTheme();
   const navigate = useNavigate();
@@ -180,9 +171,9 @@ const PolicyPage = () => {
   return (
     <Wrapper $isDark={isDarkMode}>
       <Header>
-        <BackBtn onClick={() => navigate(-1)}>
+        <BackBtn onClick={() => navigate('/candidate/settings')}>
           <ArrowLeft size={16} />
-          {vi ? 'Quay lại' : 'Back'}
+          {vi ? 'Quay lại cài đặt' : 'Back to settings'}
         </BackBtn>
         <Logo>
           <img src={s3Images.system.logo} alt="Ốp Pờ" style={{ height: 52, objectFit: 'contain' }} onError={e => { e.target.style.display = 'none'; }} />
@@ -190,11 +181,6 @@ const PolicyPage = () => {
         <HeaderTitle>
           {vi ? 'CHÍNH SÁCH 01: ĐIỀU KHOẢN SỬ DỤNG CHUNG' : 'POLICY 01: GENERAL TERMS OF USE'}
         </HeaderTitle>
-        <HeaderSub>
-          {vi
-            ? 'Áp dụng cho: Tất cả người dùng (Ứng viên & Nhà tuyển dụng)'
-            : 'Applies to: All users (Candidates & Employers)'}
-        </HeaderSub>
         <HeaderMeta>
           <MetaTag>{vi ? 'Nền tảng: Web & App' : 'Platform: Web & App'}</MetaTag>
           <MetaTag>{vi ? 'Hiệu lực: Ngay khi đăng ký' : 'Effective: Upon registration'}</MetaTag>
@@ -316,15 +302,13 @@ const PolicyPage = () => {
         </Card>
 
         <FooterBox $isDark={isDarkMode}>
-          <Link to="/login">{vi ? 'Đăng nhập' : 'Login'}</Link>
-          {' · '}
-          <Link to="/register">{vi ? 'Đăng ký' : 'Register'}</Link>
-          {' · '}
-          <Link to="/policyregister">{vi ? 'Chính sách bảo mật' : 'Privacy Policy'}</Link>
+          {vi
+            ? 'Nếu có thắc mắc, vui lòng liên hệ hỗ trợ Ốp Pờ qua email hoặc chat trực tiếp trên app.'
+            : 'If you have any questions, please contact Ốp Pờ support via email or in-app chat.'}
         </FooterBox>
       </Container>
     </Wrapper>
   );
 };
 
-export default PolicyPage;
+export default CandidateTermsPage;

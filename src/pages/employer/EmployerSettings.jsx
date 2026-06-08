@@ -1,15 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import UnderDevelopmentModal from '../../components/UnderDevelopmentModal';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
-import { Settings as SettingsIcon, Bell, FileText, Globe, Shield } from 'lucide-react';
+import { useToast } from '../../hooks/useToast';
+import employerProfileService from '../../services/employerProfileService';
+import { Settings as SettingsIcon, Bell, FileText, Globe, Shield, Loader2 } from 'lucide-react';
 
 // ─── Page wrapper ────────────────────────────────────────────
 const PageContainer = styled(motion.div)`
   width: 100%;
+
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
 `;
 
 // ─── Header (đồng nhất với Applications) ─────────────────────
@@ -296,7 +308,55 @@ const EmployerSettings = () => {
     messages: true,
     system: false
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const toast = useToast();
+  const navigate = useNavigate();
   const [isDevModalOpen, setIsDevModalOpen] = useState(false);
+
+  // Fetch settings on mount
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        setIsLoading(true);
+        const profile = await employerProfileService.getMyProfile();
+        if (profile && profile.notificationSettings) {
+          setNotifications(prev => ({
+            ...prev,
+            ...profile.notificationSettings
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching employer settings:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSettings();
+  }, []);
+
+  const handleNotificationToggle = async (key) => {
+    const newValue = !notifications[key];
+    const updatedNotifications = {
+      ...notifications,
+      [key]: newValue
+    };
+
+    // Optimistic update
+    setNotifications(updatedNotifications);
+
+    try {
+      await employerProfileService.updateProfile({
+        notificationSettings: updatedNotifications
+      });
+      toast.success(language === 'vi' ? 'Đã lưu cài đặt thông báo' : 'Notification settings saved');
+    } catch (error) {
+      console.error('Error saving notification settings:', error);
+      // Revert on error
+      setNotifications(notifications);
+      toast.error(language === 'vi' ? 'Không thể lưu cài đặt' : 'Failed to save settings');
+    }
+  };
 
   return (
     <>
@@ -313,6 +373,16 @@ const EmployerSettings = () => {
             <PageTitleText>
               <h1>{t.settings.title}</h1>
               <p>{t.settings.subtitle}</p>
+              {isLoading && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  style={{ marginTop: 8, fontSize: 13, color: '#1e40af', display: 'flex', alignItems: 'center', gap: 6, fontWeight: 600 }}
+                >
+                  <Loader2 size={14} className="animate-spin" />
+                  {language === 'vi' ? 'Đang tải cài đặt...' : 'Loading settings...'}
+                </motion.div>
+              )}
             </PageTitleText>
           </PageTitleGroup>
         </PageHeader>
@@ -400,7 +470,8 @@ const EmployerSettings = () => {
                   <input
                     type="checkbox"
                     checked={notifications[item.key]}
-                    onChange={e => setNotifications({ ...notifications, [item.key]: e.target.checked })}
+                    onChange={() => handleNotificationToggle(item.key)}
+                    disabled={isLoading}
                   />
                   <span />
                 </Toggle>
@@ -423,10 +494,10 @@ const EmployerSettings = () => {
             </SectionHeader>
 
             <PolicyButtons>
-              <PolicyBtn whileTap={{ scale: 0.97 }} onClick={() => setIsDevModalOpen(true)}>
+              <PolicyBtn whileTap={{ scale: 0.97 }} onClick={() => navigate('/employer/policy/terms')}>
                 <FileText />{t.legalPrivacy.terms}
               </PolicyBtn>
-              <PolicyBtn whileTap={{ scale: 0.97 }} onClick={() => setIsDevModalOpen(true)}>
+              <PolicyBtn whileTap={{ scale: 0.97 }} onClick={() => navigate('/employer/policy/privacy')}>
                 <Shield />{t.legalPrivacy.privacy}
               </PolicyBtn>
             </PolicyButtons>

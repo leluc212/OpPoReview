@@ -2,6 +2,7 @@
 // This service handles all API calls related to employer profile operations
 
 import { fetchAuthSession } from 'aws-amplify/auth';
+import { getIdToken } from './authHeaders.js';
 
 // API base URL - use Vite proxy in dev to avoid CORS, direct URL in production
 const API_BASE_URL = import.meta.env.DEV
@@ -9,38 +10,17 @@ const API_BASE_URL = import.meta.env.DEV
   : (import.meta.env.VITE_EMPLOYER_API_URL || 'https://dlidp35x33.execute-api.ap-southeast-1.amazonaws.com/prod');
 
 /**
- * Get authentication token from Amplify Cognito
+ * Get authentication token — delegates to shared authHeaders utility which
+ * handles the Amplify session → localStorage fallback automatically.
  */
 const getAuthToken = async () => {
-  try {
-    const session = await fetchAuthSession();
-    
-    if (!session || !session.tokens) {
-      console.warn('⚠️ No session or tokens available');
-      return null;
-    }
-    
-    const idToken = session.tokens.idToken;
-    if (!idToken) {
-      console.warn('⚠️ No ID token in session');
-      return null;
-    }
-    
-    // Get the token string - it could be a string or an object with toString()
-    let tokenString = typeof idToken === 'string' ? idToken : idToken.toString();
-    
-    // CRITICAL: Clean token - remove any whitespace, newlines, or special characters
-    tokenString = tokenString.trim().replace(/[\r\n\t]/g, '');
-    
-    console.log('✅ Auth token obtained from Cognito');
-    console.log('Token preview:', tokenString.substring(0, 50) + '...');
-    console.log('Token length:', tokenString.length);
-    
-    return tokenString;
-  } catch (error) {
-    console.error('❌ Error getting auth token from Cognito:', error);
-    return null;
+  const token = await getIdToken();
+  if (token) {
+    console.log('✅ Auth token obtained');
+    console.log('Token preview:', token.substring(0, 50) + '...');
+    console.log('Token length:', token.length);
   }
+  return token;
 };
 
 /**
