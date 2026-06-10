@@ -319,13 +319,47 @@ export const AuthProvider = ({ children }) => {
         const idPayload = decodePayload(tokens.id_token || '');
         const accessPayload = decodePayload(tokens.access_token || '');
 
+        const userGroups = accessPayload?.['cognito:groups'] || [];
+        const roleFromGroups = userGroups.includes('Admin')
+          ? 'admin'
+          : userGroups.includes('Employer')
+            ? 'employer'
+            : userGroups.includes('Candidate')
+              ? 'candidate'
+              : null;
+
+        // Determine final role
+        let finalRole = roleFromGroups;
+        const googleRoleMap = JSON.parse(localStorage.getItem('googleRoleMapping') || '{}');
+        const pendingRole = localStorage.getItem('pendingGoogleRole');
+        const isSocialUser = Boolean(idPayload.identities);
+
+        if (!finalRole && isSocialUser) {
+          if (googleRoleMap[idPayload.email]) {
+            finalRole = googleRoleMap[idPayload.email];
+            console.log('🔒 [AuthContext-PKCE] Locked to role:', finalRole);
+          } else if (pendingRole && ['candidate', 'employer'].includes(pendingRole)) {
+            finalRole = pendingRole;
+            googleRoleMap[idPayload.email] = pendingRole;
+            localStorage.setItem('googleRoleMapping', JSON.stringify(googleRoleMap));
+            console.log('📋 [AuthContext-PKCE] Locking NEW Google account to:', finalRole);
+          }
+          localStorage.removeItem('pendingGoogleRole');
+        }
+
         const userData = {
           username: idPayload['cognito:username'] || idPayload.email?.split('@')[0] || idPayload.sub,
           userId: idPayload.sub,
           email: idPayload.email,
-          role: (accessPayload && accessPayload['cognito:groups'] && accessPayload['cognito:groups'][0]) ? (accessPayload['cognito:groups'][0].toLowerCase()) : null,
+          role: finalRole,
           approved: true
         };
+
+        if (isSocialUser && !roleFromGroups && !finalRole) {
+          localStorage.setItem('needsGoogleRoleSetup', '1');
+        } else {
+          localStorage.removeItem('needsGoogleRoleSetup');
+        }
 
         console.log('✅ [AuthContext] PKCE login succeeded, user:', userData.email, 'role:', userData.role);
         // Persist basic user and tokens for UI

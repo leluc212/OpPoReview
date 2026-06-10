@@ -329,6 +329,51 @@ export const createCandidateCvRejectedNotification = async (payload) => {
 };
 
 /**
+ * Create notification when a new chat message is sent
+ * @param {object} payload - { recipientId, recipientRole, senderId, senderName, messageText, applicationId, jobTitle }
+ */
+export const createChatMessageNotification = async (payload) => {
+  const {
+    recipientId,
+    recipientRole,
+    senderId,
+    senderName,
+    messageText,
+    applicationId,
+    jobTitle
+  } = payload;
+
+  if (!recipientId || !recipientRole) {
+    console.error('❌ recipientId and recipientRole are required for chat notification');
+    return null;
+  }
+
+  const notification = {
+    type: 'chat_message',
+    title: recipientRole === 'employer' ? 'Tin nhắn mới từ ứng viên' : 'Tin nhắn mới từ nhà tuyển dụng',
+    titleEn: recipientRole === 'employer' ? 'New message from candidate' : 'New message from employer',
+    message: `${senderName}: ${messageText.substring(0, 50)}${messageText.length > 50 ? '...' : ''}`,
+    messageEn: `${senderName}: ${messageText.substring(0, 50)}${messageText.length > 50 ? '...' : ''}`,
+    recipientId,
+    recipientRole,
+    senderId,
+    senderName,
+    data: {
+      applicationId,
+      jobTitle,
+      messageText: messageText.substring(0, 100)
+    },
+    icon: 'message-square',
+    color: '#3b82f6',
+    actionUrl: recipientRole === 'employer' ? '/employer/quick-jobs' : '/candidate/jobs',
+    actionText: 'Xem tin nhắn',
+    actionTextEn: 'View message'
+  };
+
+  return await saveNotification(notification);
+};
+
+/**
  * Create notification when admin approves a job post (employer notification)
  * @param {string} employerId
  * @param {object} job - job data (title, companyName, jobId)
@@ -1040,6 +1085,7 @@ export default {
   createCandidateCvRejectedNotification,
   createJobApprovedNotification,
   createJobRejectedNotification,
+  createChatMessageNotification,
   createQuickJobActivationRequestNotification,
   createQuickJobActivationApprovedNotification,
   createQuickJobActivationRejectedNotification,

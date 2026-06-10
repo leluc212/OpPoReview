@@ -34,11 +34,16 @@ import EmployerProfileView from './pages/candidate/EmployerProfileView';
 import EmployerDirectory from './pages/candidate/EmployerDirectory';
 import PublicJobListing from './pages/candidate/PublicJobListing';
 import AboutPage from './pages/auth/AboutPage';
-import PolicyPage from './pages/PolicyPage';
+import TermsOfServicePage from './pages/TermsOfServicePage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TransactionTermsPage from './pages/TransactionTermsPage';
+import ContactPage from './pages/ContactPage';
 import RegisterPolicyPage from './pages/RegisterPolicyPage';
 import CandidatePolicyPage from './pages/CandidatePolicyPage';
 import EmployerPolicyPage from './pages/EmployerPolicyPage';
 import CVTemplates from './pages/auth/CVTemplates';
+import MobileAppPage from './pages/MobileAppPage';
+import AIRecommendationsPage from './pages/AIRecommendationsPage';
 import Wallet from './pages/candidate/Wallet';
 import Availability from './pages/candidate/Availability';
 import CandidatePosts from './pages/candidate/CandidatePosts';
@@ -94,6 +99,11 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   }
 
   if (allowedRoles && !allowedRoles.includes(user?.role)) {
+    // If user has NO role yet, redirect to Google role setup
+    if (!user?.role) {
+      return <Navigate to="/auth/google-role-setup" replace />;
+    }
+
     const dashboardPath = `/${user?.role === 'admin' ? 'admin' : user?.role === 'employer' ? 'employer' : 'candidate'}/dashboard`;
     return (
       <div style={{
@@ -164,6 +174,8 @@ function AppRoutes() {
       {/* Public Routes */}
       <Route path="/" element={<GuestRoute><LandingPage /></GuestRoute>} />
       <Route path="/download" element={<DownloadApp />} />
+      <Route path="/app" element={<MobileAppPage />} />
+      <Route path="/ai-jobs" element={<AIRecommendationsPage />} />
       <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
       <Route path="/forgot-password" element={<GuestRoute><ForgotPassword /></GuestRoute>} />
       <Route path="/register" element={<GuestRoute><RegisterRoleSelection /></GuestRoute>} />
@@ -181,7 +193,11 @@ function AppRoutes() {
       <Route path="/companies/:employerId" element={<LandingPage><EmployerProfileView /></LandingPage>} />
       <Route path="/jobs" element={<LandingPage><PublicJobListing /></LandingPage>} />
       <Route path="/about" element={<LandingPage><AboutPage /></LandingPage>} />
-      <Route path="/policy" element={<PolicyPage />} />
+      <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+      <Route path="/terms-of-transaction" element={<TransactionTermsPage />} />
+      <Route path="/contact" element={<ContactPage />} />
+      <Route path="/policy" element={<TermsOfServicePage />} />
       <Route path="/policyregister" element={<RegisterPolicyPage />} />
       <Route path="/policy/candidate" element={<CandidatePolicyPage />} />
       <Route path="/policy/employer" element={<EmployerPolicyPage />} />

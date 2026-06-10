@@ -64,6 +64,8 @@ class CandidateProfileService {
   constructor() {
     console.log('📝 CandidateProfileService initialized (API mode)');
     console.log('🔗 API URL:', API_BASE_URL);
+    this.myProfilePromise = null;
+    this.createProfilePromise = null;
   }
 
   /**
@@ -111,7 +113,6 @@ class CandidateProfileService {
 
       // Handle 404 as a special case
       if (response.status === 404) {
-        console.warn(`⚠️ API 404 at ${baseUrl}${endpoint}. Please check if the route or stage is correct.`);
         const errorData = await response.json().catch(() => ({ message: 'Not found' }));
         throw new Error(errorData.message || `404 Not Found: ${baseUrl}${endpoint}`);
       }
@@ -137,40 +138,75 @@ class CandidateProfileService {
    * Get current user's profile
    */
   async getMyProfile() {
-    try {
-      const session = await fetchAuthSession();
-      const userId = session.tokens?.idToken?.payload?.sub;
-      
-      console.log('🔍 Getting profile for userId:', userId);
-      
-      if (!userId) {
-        throw new Error('User not authenticated');
-      }
+    // If a request is already in flight, return that promise to avoid redundant calls
+    if (this.myProfilePromise) {
+      console.log('⏳ Profile request already in flight, reusing promise...');
+      return this.myProfilePromise;
+    }
 
+    this.myProfilePromise = (async () => {
       try {
-        const result = await this.makeRequest(`/profile/${userId}`);
-        if (result.success && result.data) {
-          console.log('✅ Profile loaded from DynamoDB:', result.data);
-          return result.data;
+        const session = await fetchAuthSession();
+        const userId = session.tokens?.idToken?.payload?.sub;
+        
+        console.log('🔍 Getting profile for userId:', userId);
+        
+        if (!userId) {
+          throw new Error('User not authenticated');
         }
-        return null;
-      } catch (firstError) {
-        throw firstError;
+
+        try {
+          const result = await this.makeRequest(`/profile/${userId}`, { suppress404Warning: true });
+          if (result.success && result.data) {
+            console.log('✅ Profile loaded from DynamoDB:', result.data);
+            return result.data;
+          }
+          return null;
+        } catch (firstError) {
+          throw firstError;
+        }
+      } catch (error) {
+        console.error('❌ Error fetching profile:', error);
+        
+        // Return null if profile doesn't exist yet (404 or "not found" message)
+        const msg = (error.message || '').toLowerCase();
+        if (msg.includes('not found') || 
+            msg.includes('404') ||
+            msg.includes('no profile exists') ||
+            msg.includes('does not exist') ||
+            msg.includes('item not found')) {
+          console.log('ℹ️ No profile found in DynamoDB - new user');
+          return null;
+        }
+        
+        throw error;
+      } finally {
+        // Clear the promise after a short delay so subsequent calls can fetch fresh data if needed,
+        // but simultaneous calls are still deduplicated.
+        setTimeout(() => {
+          this.myProfilePromise = null;
+        }, 5000);
       }
+    })();
+
+    return this.myProfilePromise;
+  }
+
+  /**
+   * Get or create profile for current user
+   */
+  async getOrCreateProfile(userData = {}) {
+    try {
+      const profile = await this.getMyProfile();
+      if (profile) return profile;
+
+      console.log('🌱 No profile found, auto-creating for new user...');
+      return await this.createProfile({
+        fullName: userData.name || userData.fullName || '',
+        email: userData.email || '',
+      });
     } catch (error) {
-      console.error('❌ Error fetching profile:', error);
-      
-      // Return null if profile doesn't exist yet (404 or "not found" message)
-      const msg = (error.message || '').toLowerCase();
-      if (msg.includes('not found') || 
-          msg.includes('404') ||
-          msg.includes('no profile exists') ||
-          msg.includes('does not exist') ||
-          msg.includes('item not found')) {
-        console.log('ℹ️ No profile found in DynamoDB - new user');
-        return null;
-      }
-      
+      console.error('❌ Error in getOrCreateProfile:', error);
       throw error;
     }
   }
@@ -183,10 +219,10 @@ class CandidateProfileService {
       const result = await this.makeRequest(`/profile/${userId}`);
       return result.success ? result.data : null;
     } catch (error) {
-      console.error('Error fetching profile:', error);
       if (error.message.includes('not found') || error.message.includes('404')) {
         return null;
       }
+      console.error('Error fetching profile:', error);
       throw error;
     }
   }
@@ -199,10 +235,10 @@ class CandidateProfileService {
       const result = await this.makeRequest(`/profile/email/${encodeURIComponent(email)}`);
       return result.success ? result.data : null;
     } catch (error) {
-      console.error('Error fetching profile by email:', error);
       if (error.message.includes('not found') || error.message.includes('404')) {
         return null;
       }
+      console.error('Error fetching profile by email:', error);
       throw error;
     }
   }
@@ -211,46 +247,60 @@ class CandidateProfileService {
    * Create new profile for current user
    */
   async createProfile(profileData) {
-    try {
-      // Get verified email from Cognito
-      const session = await fetchAuthSession();
-      const userId = session.tokens?.idToken?.payload?.sub;
-      const cognitoEmail = session.tokens?.idToken?.payload?.email;
-      
-      console.log('📝 Creating profile for userId:', userId);
-      console.log('📧 Using Cognito email:', cognitoEmail);
-      
-      if (!cognitoEmail) {
-        throw new Error('Cannot get verified email from Cognito');
-      }
-      
-      if (!userId) {
-        throw new Error('User not authenticated');
-      }
-
-      // Force use Cognito email
-      const payload = {
-        ...profileData,
-        userId: userId, // Explicitly include userId in payload
-        email: cognitoEmail, // Always use Cognito verified email
-        profileCompletion: this.calculateCompletion(profileData)
-      };
-
-      const result = await this.makeRequest('/profile', {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
-      
-      if (result.success && result.data) {
-        console.log('✅ Profile created in DynamoDB:', result.data);
-        return result.data;
-      }
-
-      throw new Error('Failed to create profile');
-    } catch (error) {
-      console.error('❌ Error creating profile:', error);
-      throw error;
+    if (this.createProfilePromise) {
+      console.log('⏳ Profile creation already in flight, reusing promise...');
+      return this.createProfilePromise;
     }
+
+    this.createProfilePromise = (async () => {
+      try {
+        // Get verified email from Cognito
+        const session = await fetchAuthSession();
+        const userId = session.tokens?.idToken?.payload?.sub;
+        const cognitoEmail = session.tokens?.idToken?.payload?.email;
+        
+        console.log('📝 Creating profile for userId:', userId);
+        console.log('📧 Using Cognito email:', cognitoEmail);
+        
+        if (!cognitoEmail) {
+          throw new Error('Cannot get verified email from Cognito');
+        }
+        
+        if (!userId) {
+          throw new Error('User not authenticated');
+        }
+
+        // Force use Cognito email
+        const payload = {
+          ...profileData,
+          userId: userId, // Explicitly include userId in payload
+          email: cognitoEmail, // Always use Cognito verified email
+          profileCompletion: this.calculateCompletion(profileData)
+        };
+
+        const result = await this.makeRequest('/profile', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        
+        if (result.success && result.data) {
+          console.log('✅ Profile created in DynamoDB:', result.data);
+          return result.data;
+        }
+
+        throw new Error('Failed to create profile');
+      } catch (error) {
+        console.error('❌ Error creating profile:', error);
+        throw error;
+      } finally {
+        // Clear promise after completion
+        setTimeout(() => {
+          this.createProfilePromise = null;
+        }, 10000);
+      }
+    })();
+
+    return this.createProfilePromise;
   }
 
   /**

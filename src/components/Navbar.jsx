@@ -7,7 +7,7 @@ import { useLanguage } from '../context/LanguageContext';
 import candidateProfileService from '../services/candidateProfileService';
 import employerProfileService from '../services/employerProfileService';
 import jobPostService from '../services/jobPostService';
-import { getNotifications, getUnreadCount, markAsRead, markAllAsRead } from '../services/notificationService';
+import { getNotifications, getUnreadCount, markAsRead, markAllAsRead, createChatMessageNotification } from '../services/notificationService';
 import RelativeTime from './RelativeTime';
 import { s3Images } from '../utils/s3Images';
 
@@ -851,6 +851,7 @@ const Navbar = ({ showSearch = true }) => {
   // Candidate Chat state
   const [showChatDropdown, setShowChatDropdown] = useState(false);
   const [candidateChats, setCandidateChats] = useState([]);
+  const [employerChats, setEmployerChats] = useState([]);
   const [activeChatApp, setActiveChatApp] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
@@ -902,6 +903,14 @@ const Navbar = ({ showSearch = true }) => {
   // Get notifications from service
   const [realNotifications, setRealNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [acknowledgedChatCountBell, setAcknowledgedChatCountBell] = useState(0);
+  const [acknowledgedChatCountMessage, setAcknowledgedChatCountMessage] = useState(0);
+
+  // Reset acknowledged counts when a new message actually arrives (unread count changes)
+  useEffect(() => {
+    setAcknowledgedChatCountBell(0);
+    setAcknowledgedChatCountMessage(0);
+  }, [unreadChatCount]);
 
   useEffect(() => {
     const loadNotifications = async () => {
@@ -974,8 +983,12 @@ const Navbar = ({ showSearch = true }) => {
 
     loadNotifications();
 
-    // Poll every 10 seconds
-    const interval = setInterval(loadNotifications, 10000);
+    // Poll every 3 seconds, but only if visible
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        loadNotifications();
+      }
+    }, 3000);
 
     // Listen for user login events
     const handleUserLogin = () => {
@@ -985,10 +998,14 @@ const Navbar = ({ showSearch = true }) => {
     };
 
     window.addEventListener('userLoggedIn', handleUserLogin);
+    window.addEventListener('visibilitychange', loadNotifications);
+    window.addEventListener('focus', loadNotifications);
 
     return () => {
       clearInterval(interval);
       window.removeEventListener('userLoggedIn', handleUserLogin);
+      window.removeEventListener('visibilitychange', loadNotifications);
+      window.removeEventListener('focus', loadNotifications);
     };
   }, [user]);
 
@@ -1009,16 +1026,8 @@ const Navbar = ({ showSearch = true }) => {
     const fetchCandidateProfile = async () => {
       if (user?.role === 'candidate') {
         try {
-          const profile = await candidateProfileService.getMyProfile();
-          if (!profile) {
-            const created = await candidateProfileService.createProfile({
-              fullName: user?.name || '',
-              email: user?.email || '',
-            }).catch(() => null);
-            setCandidateProfile(created);
-          } else {
-            setCandidateProfile(profile);
-          }
+          const profile = await candidateProfileService.getOrCreateProfile(user);
+          setCandidateProfile(profile);
         } catch (error) {
           console.error('Error fetching candidate profile:', error);
         }
@@ -1181,12 +1190,24 @@ const Navbar = ({ showSearch = true }) => {
         )).filter(Boolean);
         setCandidateChats(enrichedChats);
 
-        // Tính unread từ DB data trực tiếp
+        // Tính unread từ DB data + local storage data
         let unreadTotal = 0;
         enrichedChats.forEach(app => {
-          const msgs = app.chatMessages;
-          if (msgs && Array.isArray(msgs) && msgs.length > 0) {
-            const lastMsg = msgs[msgs.length - 1];
+          let messages = app.chatMessages || [];
+          
+          // Check local storage for potentially newer messages
+          const savedMessages = localStorage.getItem(`chat_${app.applicationId}`);
+          if (savedMessages) {
+            try {
+              const localMsgs = JSON.parse(savedMessages);
+              if (localMsgs.length > messages.length) {
+                messages = localMsgs;
+              }
+            } catch (e) {}
+          }
+
+          if (messages.length > 0) {
+            const lastMsg = messages[messages.length - 1];
             if (lastMsg && lastMsg.sender === 'me') {
               const lastReadId = localStorage.getItem(`chat_read_${app.applicationId}`);
               if (lastReadId !== String(lastMsg.id)) {
@@ -1202,8 +1223,94 @@ const Navbar = ({ showSearch = true }) => {
     };
 
     loadCandidateChats();
-    const interval = setInterval(loadCandidateChats, 10000); // refresh every 10s
-    return () => clearInterval(interval);
+    const intervalId = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        loadCandidateChats();
+      }
+    }, 3000);
+
+    const handleFocus = () => loadCandidateChats();
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('visibilitychange', handleFocus);
+
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('visibilitychange', handleFocus);
+    };
+  }, [user, realNotifications]);
+
+  // --- NEW: Load Employer Chats & Count ---
+  useEffect(() => {
+    if (user?.role !== 'employer') {
+      setUnreadChatCount(0);
+      return;
+    }
+
+    const loadEmployerChats = async () => {
+      try {
+        const { default: quickJobService } = await import('../services/quickJobService');
+        const { default: applicationService } = await import('../services/applicationService');
+
+        const jobs = await quickJobService.getMyQuickJobs().catch(() => []);
+        let unreadTotal = 0;
+        const allChats = [];
+
+        for (const job of jobs) {
+          const apps = await applicationService.getJobApplications(job.idJob || job.id).catch(() => []);
+          apps.forEach(app => {
+            if (app.status === 'accepted' || app.status === 'completed') {
+              allChats.push({
+                ...app,
+                jobTitle: job.title || app.jobTitle
+              });
+              
+              let messages = app.chatMessages || [];
+              const savedMessages = localStorage.getItem(`chat_${app.applicationId}`);
+              if (savedMessages) {
+                try {
+                  const localMsgs = JSON.parse(savedMessages);
+                  if (localMsgs.length > messages.length) messages = localMsgs;
+                } catch (e) {}
+              }
+
+              if (messages.length > 0) {
+                const lastMsg = messages[messages.length - 1];
+                if (lastMsg && lastMsg.sender === 'them') {
+                  const lastReadId = localStorage.getItem(`chat_read_employer_${app.applicationId}`);
+                  if (lastReadId !== String(lastMsg.id)) {
+                    unreadTotal++;
+                  }
+                }
+              }
+            }
+          });
+        }
+        
+        console.log(`[Navbar] Employer unread chats: ${unreadTotal}, Total active chats: ${allChats.length}`);
+        setUnreadChatCount(unreadTotal);
+        setEmployerChats(allChats);
+      } catch (error) {
+        console.error('Error loading employer chats for navbar:', error);
+      }
+    };
+
+    loadEmployerChats();
+    const intervalId = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        loadEmployerChats();
+      }
+    }, 3000);
+
+    const handleFocus = () => loadEmployerChats();
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('visibilitychange', handleFocus);
+
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('visibilitychange', handleFocus);
+    };
   }, [user, realNotifications]);
 
   // Load chat messages when activeChatApp changes
@@ -1305,7 +1412,21 @@ const Navbar = ({ showSearch = true }) => {
         activeChatApp.applicationId,
         activeChatApp.status,
         { chatMessages: updated }
-      ).catch(err => console.error('Failed to sync candidate message to DB:', err));
+      ).then(() => {
+      // Send notification to employer
+      if (activeChatApp?.employerId) {
+        const senderName = user?.name || user?.email || 'Ứng viên';
+        createChatMessageNotification({
+          recipientId: activeChatApp.employerId,
+          recipientRole: 'employer',
+          senderId: user?.userId || user?.id || 'candidate',
+          senderName: senderName,
+          messageText: newMessage.text,
+          applicationId: activeChatApp.applicationId,
+          jobTitle: activeChatApp.jobTitle
+        }).catch(err => console.error('Failed to send employer message notification:', err));
+      }
+    }).catch(err => console.error('Failed to sync candidate message to DB:', err));
     });
   };
 
@@ -1352,7 +1473,21 @@ const Navbar = ({ showSearch = true }) => {
 
   const toggleNotifications = (e) => {
     e.stopPropagation();
-    setShowNotifications(!showNotifications);
+    const nextState = !showNotifications;
+    setShowNotifications(nextState);
+    
+    // When opening notifications, mark as read immediately to clear the badge
+    if (nextState) {
+      setUnreadCount(0);
+      setAcknowledgedChatCountBell(unreadChatCount); // "Dismiss" current chat count only from bell
+      try {
+        const effectiveUser = user || JSON.parse(localStorage.getItem('user') || '{}');
+        const userId = effectiveUser.role === 'admin' ? 'admin' : (effectiveUser.userId || effectiveUser.id || effectiveUser.email);
+        if (userId) {
+          markAllAsRead(userId, effectiveUser.role).catch(() => {});
+        }
+      } catch (err) {}
+    }
   };
 
   const handleNotificationItemClick = async () => {
@@ -1476,11 +1611,20 @@ const Navbar = ({ showSearch = true }) => {
         </NavLeft>
 
         <NavRight>
-          {user?.role === 'candidate' && (
+           {user?.role === 'candidate' && (
             <div style={{ position: 'relative' }} ref={chatRef}>
-              <IconButton onClick={() => setShowChatDropdown(!showChatDropdown)} title={language === 'vi' ? 'Trò chuyện' : 'Chat'}>
+              <IconButton 
+                onClick={() => {
+                  const nextDropdownState = !showChatDropdown;
+                  setShowChatDropdown(nextDropdownState);
+                  if (nextDropdownState) {
+                    setAcknowledgedChatCountMessage(unreadChatCount); // Clear message badge only
+                  }
+                }}
+                title={language === 'vi' ? 'Trò chuyện' : 'Chat'}
+              >
                 <MessageSquare />
-                {unreadChatCount > 0 && <Badge>{unreadChatCount}</Badge>}
+                {(unreadChatCount - acknowledgedChatCountMessage) > 0 && <Badge>{unreadChatCount - acknowledgedChatCountMessage}</Badge>}
               </IconButton>
 
               {showChatDropdown && (
@@ -1489,43 +1633,108 @@ const Navbar = ({ showSearch = true }) => {
                     {language === 'vi' ? 'Trò chuyện' : 'Conversations'}
                   </ChatDropdownHeader>
                   <ChatDropdownList>
-                    {candidateChats.length > 0 ? (
-                      candidateChats.map((chat) => (
-                        <ChatDropdownItem
-                          key={chat.applicationId}
-                          onClick={() => {
-                            setActiveChatApp(chat);
-                            setShowChatDropdown(false);
-                          }}
-                        >
-                          <ChatDropdownAvatar>
-                            {chat.companyLogo ? (
-                              <img src={chat.companyLogo} alt="Logo" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                            ) : (
-                              (chat.employerName || chat.companyName || 'C').charAt(0)
-                            )}
-                          </ChatDropdownAvatar>
-                          <ChatDropdownInfo>
-                            <div className="name" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              {chat.employerName || chat.companyName || 'Công ty'}
-                              {chat.status === 'completed' && <span style={{ fontSize: '11px' }} title={language === 'vi' ? 'Công việc đã hoàn thành' : 'Job completed'}>🔒</span>}
-                            </div>
-                            <div className="job">{chat.jobTitle || chat.position || 'Công việc'}</div>
-                          </ChatDropdownInfo>
-                          <DeleteChatButton
-                            onClick={(e) => handleDeleteChat(chat.applicationId, e)}
-                            title={language === 'vi' ? 'Xóa cuộc trò chuyện' : 'Delete conversation'}
+                    {user?.role === 'candidate' ? (
+                      candidateChats.length > 0 ? (
+                        candidateChats.map((chat) => (
+                          <ChatDropdownItem
+                            key={chat.applicationId}
+                            onClick={() => {
+                              setActiveChatApp(chat);
+                              setShowChatDropdown(false);
+                              // Mark as read immediately
+                              const msgs = chat.chatMessages || [];
+                              if (msgs.length > 0) {
+                                const lastMsg = msgs[msgs.length - 1];
+                                const lastReadId = localStorage.getItem(`chat_read_${chat.applicationId}`);
+                                if (lastReadId !== String(lastMsg.id)) {
+                                  localStorage.setItem(`chat_read_${chat.applicationId}`, String(lastMsg.id));
+                                  setUnreadChatCount(prev => Math.max(0, prev - 1));
+                                }
+                              }
+                            }}
                           >
-                            <Trash2 size={16} />
-                          </DeleteChatButton>
-                        </ChatDropdownItem>
-                      ))
+                            <ChatDropdownAvatar>
+                              {chat.companyLogo ? (
+                                <img src={chat.companyLogo} alt="Logo" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                              ) : (
+                                (chat.employerName || chat.companyName || 'C').charAt(0)
+                              )}
+                            </ChatDropdownAvatar>
+                            <ChatDropdownInfo>
+                              <div className="name" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                {chat.employerName || chat.companyName || 'Công ty'}
+                                {chat.status === 'completed' && <span style={{ fontSize: '11px' }} title={language === 'vi' ? 'Công việc đã hoàn thành' : 'Job completed'}>🔒</span>}
+                              </div>
+                              <div className="job">{chat.jobTitle || chat.position || 'Công việc'}</div>
+                            </ChatDropdownInfo>
+                            {(() => {
+                              const msgs = chat.chatMessages || [];
+                              if (msgs.length > 0) {
+                                const lastMsg = msgs[msgs.length - 1];
+                                if (lastMsg && lastMsg.sender !== 'candidate') {
+                                  const lastReadId = localStorage.getItem(`chat_read_${chat.applicationId}`);
+                                  if (lastReadId !== String(lastMsg.id)) {
+                                    return <NotificationDot style={{ marginTop: 0 }} />;
+                                  }
+                                }
+                              }
+                              return null;
+                            })()}
+                            <DeleteChatButton
+                              onClick={(e) => handleDeleteChat(chat.applicationId, e)}
+                              title={language === 'vi' ? 'Xóa cuộc trò chuyện' : 'Delete conversation'}
+                            >
+                              <Trash2 size={16} />
+                            </DeleteChatButton>
+                          </ChatDropdownItem>
+                        ))
+                      ) : (
+                        <EmptyChats>
+                          {language === 'vi'
+                            ? 'Chưa có cuộc trò chuyện nào. (Nhà tuyển dụng cần phê duyệt CV của bạn trước)'
+                            : 'No conversations yet. (Employer needs to approve your CV first)'}
+                        </EmptyChats>
+                      )
                     ) : (
-                      <EmptyChats>
-                        {language === 'vi'
-                          ? 'Chưa có cuộc trò chuyện nào. (Nhà tuyển dụng cần phê duyệt CV của bạn trước)'
-                          : 'No conversations yet. (Employer needs to approve your CV first)'}
-                      </EmptyChats>
+                      employerChats.length > 0 ? (
+                        employerChats.map((chat) => (
+                          <ChatDropdownItem
+                            key={chat.applicationId}
+                            onClick={() => {
+                              navigate('/employer/quick-jobs', { state: { activeApplicationId: chat.applicationId, activeSection: 'hr' } });
+                              setShowChatDropdown(false);
+                              
+                              // Mark as read immediately
+                              const msgs = chat.chatMessages || [];
+                              if (msgs.length > 0) {
+                                const lastMsg = msgs[msgs.length - 1];
+                                const lastReadId = localStorage.getItem(`chat_read_employer_${chat.applicationId}`);
+                                if (lastReadId !== String(lastMsg.id)) {
+                                  localStorage.setItem(`chat_read_employer_${chat.applicationId}`, String(lastMsg.id));
+                                  setUnreadChatCount(prev => Math.max(0, prev - 1));
+                                }
+                              }
+                            }}
+                          >
+                            <ChatDropdownAvatar>
+                              {(chat.candidateName || 'U').charAt(0)}
+                            </ChatDropdownAvatar>
+                            <ChatDropdownInfo>
+                              <div className="name" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                {chat.candidateName || 'Ứng viên'}
+                                {chat.status === 'completed' && <span style={{ fontSize: '11px' }} title={language === 'vi' ? 'Công việc đã hoàn thành' : 'Job completed'}>🔒</span>}
+                              </div>
+                              <div className="job">{chat.jobTitle || 'Công việc'}</div>
+                            </ChatDropdownInfo>
+                          </ChatDropdownItem>
+                        ))
+                      ) : (
+                        <EmptyChats>
+                          {language === 'vi'
+                            ? 'Chưa có cuộc trò chuyện nào.'
+                            : 'No conversations yet.'}
+                        </EmptyChats>
+                      )
                     )}
                   </ChatDropdownList>
                 </ChatDropdown>
@@ -1536,7 +1745,13 @@ const Navbar = ({ showSearch = true }) => {
           <div style={{ position: 'relative' }} ref={notificationRef}>
             <IconButton onClick={toggleNotifications}>
               <Bell />
-              {unreadCount > 0 && <Badge>{unreadCount > 99 ? '99+' : unreadCount}</Badge>}
+              {(unreadCount + Math.max(0, unreadChatCount - acknowledgedChatCountBell)) > 0 && (
+                <Badge>
+                  {(unreadCount + Math.max(0, unreadChatCount - acknowledgedChatCountBell)) > 99 
+                    ? '99+' 
+                    : (unreadCount + Math.max(0, unreadChatCount - acknowledgedChatCountBell))}
+                </Badge>
+              )}
             </IconButton>
 
             {showNotifications && (
@@ -1613,6 +1828,9 @@ const Navbar = ({ showSearch = true }) => {
                           case 'quick_job_activation_request':
                             Icon = Zap;
                             break;
+                          case 'chat_message':
+                            Icon = MessageSquare;
+                            break;
                           default:
                             Icon = Bell;
                         }
@@ -1632,6 +1850,9 @@ const Navbar = ({ showSearch = true }) => {
                             break;
                           case 'briefcase':
                             Icon = Briefcase;
+                            break;
+                          case 'message-square':
+                            Icon = MessageSquare;
                             break;
                           case 'package':
                             Icon = Package;

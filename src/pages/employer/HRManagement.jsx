@@ -12,7 +12,7 @@ import ConfirmModal from '../../components/ConfirmModal';
 import quickJobService from '../../services/quickJobService';
 import employerProfileService from '../../services/employerProfileService';
 import applicationService from '../../services/applicationService';
-import { createCandidateCvAcceptedNotification, createCandidateCvRejectedNotification, createQuickJobActivationRequestNotification } from '../../services/notificationService';
+import { createCandidateCvAcceptedNotification, createCandidateCvRejectedNotification, createQuickJobActivationRequestNotification, createChatMessageNotification } from '../../services/notificationService';
 import DynamicTranslate from '../../components/DynamicTranslate';
 
 // Helper: tính số giờ từ chuỗi shift "HH:MM - HH:MM"
@@ -2671,11 +2671,23 @@ const HRManagement = () => {
   };
 
 
-  // Auto-switch to HR/applications tab when coming from notifications
+  // Auto-switch to HR/applications tab when coming from notifications or Navbar chat
   useEffect(() => {
-    if (location.state?.fromNotifications) {
+    if (location.state?.fromNotifications || location.state?.activeSection === 'hr') {
       setActiveSection('hr');
-      setStaffTabFilter(location.state?.staffTab || 'pending_confirm');
+      
+      if (location.state?.staffTab) {
+        setStaffTabFilter(location.state.staffTab);
+      } else if (location.state?.fromNotifications) {
+        setStaffTabFilter('pending_confirm');
+      }
+      
+      // Handle automatic chat opening
+      if (location.state?.activeApplicationId) {
+        handleOpenChat(location.state.activeApplicationId);
+      }
+
+      // Clear state to prevent reopening on refresh
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [location.state, navigate, location.pathname]);
@@ -2944,7 +2956,9 @@ const HRManagement = () => {
           lastMessage: lastMessageText,
           time: lastMessageTime || new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
           unread: unread,
-          isCompleted: app.status === 'completed'
+          isCompleted: app.status === 'completed',
+          candidateId: app.candidateId,
+          jobId: app.jobId
         };
       });
   }, [realApplications, language]);
@@ -3090,6 +3104,24 @@ const HRManagement = () => {
           ? 'pending_confirmation'
           : (app.changeRequest ? 'pending_change' : 'active');
 
+        // Calculate unread count for this application
+        let unreadCount = 0;
+        const savedMessages = localStorage.getItem(`chat_${app.applicationId}`);
+        if (savedMessages) {
+          try {
+            const msgs = JSON.parse(savedMessages);
+            const lastMsg = msgs[msgs.length - 1];
+            if (lastMsg && lastMsg.sender === 'them') { // sent by candidate
+              const lastReadId = localStorage.getItem(`chat_read_employer_${app.applicationId}`);
+              if (lastReadId !== String(lastMsg.id)) {
+                unreadCount = 1;
+              }
+            }
+          } catch (e) {
+            console.error('Error parsing chat messages for unread count:', e);
+          }
+        }
+
         return {
           id: app.applicationId,
           applicationId: app.applicationId,
@@ -3112,7 +3144,8 @@ const HRManagement = () => {
           candidateId: app.candidateId,
           candidateEmail: app.candidateEmail,
           jobId: app.jobId,
-          changeRequest: app.changeRequest || null
+          changeRequest: app.changeRequest || null,
+          unreadCount: unreadCount
         };
       });
   }, [realApplications, language]);
@@ -3268,6 +3301,17 @@ const HRManagement = () => {
 
   const handleOpenChat = (chatId) => {
     setActiveChatId(chatId);
+    
+    // Mark as read immediately when opening
+    const chatApp = realApplications.find(a => a.applicationId === chatId);
+    if (chatApp && chatApp.chatMessages && chatApp.chatMessages.length > 0) {
+      const lastMsg = chatApp.chatMessages[chatApp.chatMessages.length - 1];
+      if (lastMsg) {
+        localStorage.setItem(`chat_read_employer_${chatId}`, String(lastMsg.id));
+        // Force re-calculation of staffFromApplications by updating realApplications
+        setRealApplications(prev => [...prev]);
+      }
+    }
   };
 
   const handleCloseChat = () => {
@@ -3297,7 +3341,21 @@ const HRManagement = () => {
       activeChatId, 
       activeChat?.isCompleted ? 'completed' : 'accepted', 
       { chatMessages: updated }
-    ).catch(err => console.error('Failed to sync employer message to DB:', err));
+    ).then(() => {
+      // Send notification to candidate
+      if (activeChat?.candidateId) {
+        const senderName = user?.companyName || user?.company || user?.name || 'Nhà tuyển dụng';
+        createChatMessageNotification({
+          recipientId: activeChat.candidateId,
+          recipientRole: 'candidate',
+          senderId: user?.userId || user?.id || 'employer',
+          senderName: senderName,
+          messageText: newMessage.text,
+          applicationId: activeChatId,
+          jobTitle: activeChat.position
+        }).catch(err => console.error('Failed to send candidate message notification:', err));
+      }
+    }).catch(err => console.error('Failed to sync employer message to DB:', err));
   };
 
   const handleDeleteMessage = (messageId) => {
@@ -4237,8 +4295,30 @@ const HRManagement = () => {
                                 onClick={() => {
                                   handleChatWithStaff(staff);
                                 }}
+                                style={{ position: 'relative' }}
                               >
                                 <MessageSquare />{language === 'vi' ? 'Nhắn tin' : 'Chat'}
+                                {staff.unreadCount > 0 && (
+                                  <span style={{
+                                    position: 'absolute',
+                                    top: '-6px',
+                                    right: '-6px',
+                                    background: '#EF4444',
+                                    color: 'white',
+                                    borderRadius: '50%',
+                                    width: '20px',
+                                    height: '20px',
+                                    fontSize: '11px',
+                                    fontWeight: '700',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    border: '2px solid white',
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                  }}>
+                                    1
+                                  </span>
+                                )}
                               </StaffButton>
                               {staff.status === 'active' && (
                                 <StaffButton

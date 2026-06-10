@@ -2897,6 +2897,20 @@ const LandingPage = ({ children }) => {
       navigate('/login?redirect=/candidate/profile&role=candidate');
     }
   };
+
+  // Employer actions require login as employer
+  const handleEmployerAction = (e) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      navigate('/login?redirect=/employer/dashboard&role=employer');
+    } else if (user?.role === 'employer') {
+      // Redirect to a relevant employer page, e.g., applications or dashboard
+      navigate('/employer/dashboard');
+    } else {
+      // candidate or admin - redirect to employer login
+      navigate('/login?redirect=/employer/dashboard&role=employer');
+    }
+  };
   const [searchTerm, setSearchTerm] = useState('');
   const [location, setLocation] = useState('');
   const [titleText, setTitleText] = useState('');
@@ -3189,1132 +3203,1133 @@ const LandingPage = ({ children }) => {
       {children ? (
         <div style={{ paddingTop: '56px' }}>{children}</div>
       ) : (
-      <ScrollContainer ref={scrollContainerRef}>
-        <HeroSection
-          ref={heroRef}
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, ease: "easeOut" }}
-        >
-          <AnimatedBackground $isDark={isDarkMode}>
-            {/* Aurora ambient light layer */}
-            <AuroraLayer />
+        <ScrollContainer ref={scrollContainerRef}>
+          <HeroSection
+            ref={heroRef}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+          >
+            <AnimatedBackground $isDark={isDarkMode}>
+              {/* Aurora ambient light layer */}
+              <AuroraLayer />
 
-            {/* Grid pattern */}
-            <GridPattern />
+              {/* Grid pattern */}
+              <GridPattern />
 
-            {/* Noise texture for premium feel */}
-            <NoiseTexture />
+              {/* Noise texture for premium feel */}
+              <NoiseTexture />
 
-            {/* Central gradient glow behind hero text */}
-            <GradientGlow
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-            />
+              {/* Central gradient glow behind hero text */}
+              <GradientGlow
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 1.5, ease: "easeOut" }}
+              />
 
-            {/* Large gradient blobs - static for performance */}
-            <GradientBlob
-              rounded
-              opacity={0.25}
-              blur={100}
-              style={{
-                width: '600px',
-                height: '600px',
-                top: '5%',
-                left: '-5%',
-                background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(30, 64, 175, 0.2))',
-              }}
-            />
-
-            <GradientBlob
-              rounded
-              opacity={0.2}
-              blur={120}
-              style={{
-                width: '700px',
-                height: '700px',
-                top: '40%',
-                right: '-10%',
-                background: 'linear-gradient(135deg, rgba(30, 64, 175, 0.25), rgba(30, 64, 175, 0.15))',
-              }}
-            />
-
-            <GradientBlob
-              rounded
-              opacity={0.18}
-              blur={90}
-              style={{
-                width: '500px',
-                height: '500px',
-                bottom: '5%',
-                left: '25%',
-                background: 'linear-gradient(135deg, rgba(147, 197, 253, 0.3), rgba(96, 165, 250, 0.2))',
-              }}
-            />
-
-            {/* Smaller accent blobs */}
-            <GradientBlob
-              rounded
-              opacity={0.22}
-              blur={70}
-              float
-              style={{
-                width: '350px',
-                height: '350px',
-                top: '15%',
-                right: '20%',
-                background: 'radial-gradient(circle, rgba(30, 64, 175, 0.3), rgba(30, 64, 175, 0.15))',
-              }}
-            />
-
-            <GradientBlob
-              rounded
-              opacity={0.2}
-              blur={80}
-              float
-              style={{
-                width: '400px',
-                height: '400px',
-                bottom: '15%',
-                right: '35%',
-                background: 'radial-gradient(circle, rgba(96, 165, 250, 0.28), rgba(30, 64, 175, 0.12))',
-              }}
-            />
-
-            {/* Floating particles */}
-            {particleConfigs.map((particle, index) => (
-              <Particle
-                key={`particle-${index}`}
+              {/* Large gradient blobs - static for performance */}
+              <GradientBlob
+                rounded
+                opacity={0.25}
+                blur={100}
                 style={{
-                  top: particle.top,
-                  left: particle.left,
-                }}
-                animate={{
-                  y: [0, -20, 0],
-                  x: [0, 15, 0],
-                  opacity: [0.3, 0.8, 0.4],
-                  scale: [1, 1.4, 1],
-                }}
-                transition={{
-                  duration: particle.duration,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
-                  delay: particle.delay,
+                  width: '600px',
+                  height: '600px',
+                  top: '5%',
+                  left: '-5%',
+                  background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(30, 64, 175, 0.2))',
                 }}
               />
-            ))}
 
-            {/* Corner Patterns */}
-            <TopLeftPattern
-              animate={{
-                opacity: [0.1, 0.2, 0.1],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
+              <GradientBlob
+                rounded
+                opacity={0.2}
+                blur={120}
+                style={{
+                  width: '700px',
+                  height: '700px',
+                  top: '40%',
+                  right: '-10%',
+                  background: 'linear-gradient(135deg, rgba(30, 64, 175, 0.25), rgba(30, 64, 175, 0.15))',
+                }}
+              />
 
-            <BottomRightPattern
-              animate={{
-                opacity: [0.1, 0.2, 0.1],
-              }}
-              transition={{
-                duration: 5,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 1,
-              }}
-            />
+              <GradientBlob
+                rounded
+                opacity={0.18}
+                blur={90}
+                style={{
+                  width: '500px',
+                  height: '500px',
+                  bottom: '5%',
+                  left: '25%',
+                  background: 'linear-gradient(135deg, rgba(147, 197, 253, 0.3), rgba(96, 165, 250, 0.2))',
+                }}
+              />
 
-            {/* Decorative Wave Patterns */}
-            <WavePattern
-              style={{ bottom: 0, left: 0 }}
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 0.4, y: 0 }}
-              transition={{ duration: 2, ease: "easeOut" }}
-            >
-              <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
-                <path
-                  fill="rgba(147, 197, 253, 0.1)"
-                  d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-                ></path>
-              </svg>
-            </WavePattern>
+              {/* Smaller accent blobs */}
+              <GradientBlob
+                rounded
+                opacity={0.22}
+                blur={70}
+                float
+                style={{
+                  width: '350px',
+                  height: '350px',
+                  top: '15%',
+                  right: '20%',
+                  background: 'radial-gradient(circle, rgba(30, 64, 175, 0.3), rgba(30, 64, 175, 0.15))',
+                }}
+              />
 
-            <WavePattern
-              style={{ top: 0, right: 0 }}
-              initial={{ opacity: 0, y: -50 }}
-              animate={{ opacity: 0.3, y: 0 }}
-              transition={{ duration: 2, delay: 0.3, ease: "easeOut" }}
-            >
-              <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
-                <path
-                  fill="rgba(96, 165, 250, 0.1)"
-                  d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,218.7C672,235,768,245,864,229.3C960,213,1056,171,1152,165.3C1248,160,1344,192,1392,208L1440,224L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"
-                ></path>
-              </svg>
-            </WavePattern>
+              <GradientBlob
+                rounded
+                opacity={0.2}
+                blur={80}
+                float
+                style={{
+                  width: '400px',
+                  height: '400px',
+                  bottom: '15%',
+                  right: '35%',
+                  background: 'radial-gradient(circle, rgba(96, 165, 250, 0.28), rgba(30, 64, 175, 0.12))',
+                }}
+              />
 
-            {/* Floating Icons - CSS animation for performance */}
-            <FloatingIcon style={{ top: '15%', left: '8%', animation: 'floatY 4s ease-in-out infinite' }}>
-              <Clock />
-            </FloatingIcon>
-            <FloatingIcon style={{ top: '25%', right: '12%', animation: 'floatY 5s ease-in-out infinite 0.5s' }}>
-              <Mail />
-            </FloatingIcon>
-            <FloatingIcon style={{ bottom: '30%', left: '10%', animation: 'floatY 4.5s ease-in-out infinite 1s' }}>
-              <Send />
-            </FloatingIcon>
-            <FloatingIcon style={{ bottom: '20%', right: '15%', animation: 'floatY 5.5s ease-in-out infinite 1.5s' }}>
-              <Award />
-            </FloatingIcon>
-            <FloatingIcon style={{ top: '40%', right: '8%', animation: 'floatY 4.8s ease-in-out infinite 0.8s' }}>
-              <Zap />
-            </FloatingIcon>
-            <FloatingIcon style={{ top: '60%', left: '12%', animation: 'floatY 5.2s ease-in-out infinite 1.2s' }}>
-              <Target />
-            </FloatingIcon>
-
-            {/* Geometric Shapes - static for performance */}
-            <GeometricShape
-              style={{
-                top: '20%', left: '5%',
-                width: '60px', height: '60px',
-                borderRadius: '12px', transform: 'rotate(15deg)',
-              }}
-            />
-            <GeometricShape
-              style={{
-                bottom: '25%', right: '8%',
-                width: '80px', height: '80px', borderRadius: '50%',
-              }}
-            />
-            <GeometricShape
-              style={{
-                top: '35%', right: '18%',
-                width: '50px', height: '50px', transform: 'rotate(45deg)',
-              }}
-            />
-
-            {/* Mini Squares - static */}
-            <MiniSquare style={{ top: '28%', left: '22%' }} />
-            <MiniSquare style={{ top: '48%', right: '25%' }} />
-            <MiniSquare style={{ bottom: '32%', left: '20%' }} />
-            <MiniSquare style={{ top: '65%', right: '30%' }} />
-
-            {/* Dotted Circles - static */}
-            <DottedCircle style={{ top: '12%', right: '20%' }} />
-            <DottedCircle style={{ bottom: '15%', left: '18%' }} />
-
-            {/* Connection Lines */}
-            <ConnectionLine
-              style={{
-                top: '18%',
-                left: '10%',
-                width: '150px',
-                transform: 'rotate(-15deg)',
-              }}
-              animate={{
-                opacity: [0.3, 0.6, 0.3],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-
-            <ConnectionLine
-              style={{
-                top: '45%',
-                right: '12%',
-                width: '120px',
-                transform: 'rotate(25deg)',
-              }}
-              animate={{
-                opacity: [0.2, 0.5, 0.2],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 1,
-              }}
-            />
-
-            <ConnectionLine
-              style={{
-                bottom: '28%',
-                left: '15%',
-                width: '180px',
-                transform: 'rotate(10deg)',
-              }}
-              animate={{
-                opacity: [0.25, 0.55, 0.25],
-              }}
-              transition={{
-                duration: 3.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.5,
-              }}
-            />
-
-            {/* Small Floating Dots - CSS animation */}
-            <SmallFloatingDot style={{ top: '22%', left: '25%', animation: 'floatY 3s ease-in-out infinite' }} />
-            <SmallFloatingDot style={{ top: '55%', right: '22%', animation: 'floatY 4s ease-in-out infinite 1s' }} />
-            <SmallFloatingDot style={{ bottom: '35%', left: '28%', animation: 'floatY 3.5s ease-in-out infinite 0.7s' }} />
-            <SmallFloatingDot style={{ top: '38%', left: '18%', animation: 'floatY 4.5s ease-in-out infinite 1.5s' }} />
-            <SmallFloatingDot style={{ bottom: '40%', right: '18%', animation: 'floatY 3.8s ease-in-out infinite 0.3s' }} />
-
-            {/* Circuit Patterns - static opacity */}
-            <CircuitPattern style={{ top: '30%', left: '15%' }} />
-            <CircuitPattern style={{ bottom: '35%', right: '25%' }} />
-
-            {/* Glassmorphism overlay */}
-            <GlassmorphismLayer />
-          </AnimatedBackground>
-
-          <HeroContent>
-            <HeroTitle
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              {titleText}
-              {showCursor && titleText.length < fullTitle.length && <span style={{ opacity: 0.7 }}>|</span>}
-            </HeroTitle>
-
-            <HeroSubtitle
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              {subtitleText}
-              {showCursor && subtitleText.length > 0 && subtitleText.length < fullSubtitle.length && <span style={{ opacity: 0.7 }}>|</span>}
-            </HeroSubtitle>
-
-            <SearchContainer
-              $isDark={isDarkMode}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              <SearchInput $isDark={isDarkMode} $wide>
-                <Search />
-                <input
-                  type="text"
-                  placeholder={language === 'vi' ? 'Vị trí công việc hoặc công ty' : 'Job title or company'}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && navigate('/jobs', { state: { searchKeyword: searchTerm, searchLocation: location } })}
+              {/* Floating particles */}
+              {particleConfigs.map((particle, index) => (
+                <Particle
+                  key={`particle-${index}`}
+                  style={{
+                    top: particle.top,
+                    left: particle.left,
+                  }}
+                  animate={{
+                    y: [0, -20, 0],
+                    x: [0, 15, 0],
+                    opacity: [0.3, 0.8, 0.4],
+                    scale: [1, 1.4, 1],
+                  }}
+                  transition={{
+                    duration: particle.duration,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                    delay: particle.delay,
+                  }}
                 />
-              </SearchInput>
-
-              <SearchInput $isDark={isDarkMode}>
-                <MapPin />
-                <input
-                  type="text"
-                  placeholder={language === 'vi' ? 'Địa điểm' : 'Location'}
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && navigate('/jobs', { state: { searchKeyword: searchTerm, searchLocation: location } })}
-                />
-              </SearchInput>
-
-              <Button $variant="primary" onClick={() => navigate('/jobs', {
-                state: { searchKeyword: searchTerm, searchLocation: location }
-              })}>
-                {language === 'vi' ? 'Tìm việc' : 'Search Jobs'}
-              </Button>
-            </SearchContainer>
-
-            <BannerContainer>
-              <StatsCard
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-              >
-                <StatsHeader>
-                  <Calendar />
-                  {language === 'vi' ? `Thị trường làm việc hôm nay ${new Date().toLocaleDateString('vi-VN')}` : `Today's Job Market ${new Date().toLocaleDateString('en-US')}`}
-                </StatsHeader>
-
-                <StatsRow>
-                  <StatItem
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: 0.8 }}
-                  >
-                    <StatLabel>{language === 'vi' ? 'Việc làm đang tuyển' : 'Active Jobs'}</StatLabel>
-                    <StatValue>
-                      100,000
-                      <TrendingUp />
-                    </StatValue>
-                  </StatItem>
-
-                  <StatItem
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: 1 }}
-                  >
-                    <StatLabel>{language === 'vi' ? 'Việc làm gấp hôm nay' : 'Urgent Jobs Today'}</StatLabel>
-                    <StatValue>
-                      50
-                      <TrendingUp />
-                    </StatValue>
-                  </StatItem>
-                </StatsRow>
-
-                <StatsRow>
-                  <StatItem
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: 1.2 }}
-                  >
-                    <StatLabel>{language === 'vi' ? 'Số lượng ứng viên' : 'Candidates'}</StatLabel>
-                    <StatValue>
-                      2,345
-                      <Users />
-                    </StatValue>
-                  </StatItem>
-
-                  <StatItem
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: 1.4 }}
-                  >
-                    <StatLabel>{language === 'vi' ? 'Số lượng nhà tuyển dụng' : 'Employers'}</StatLabel>
-                    <StatValue>
-                      42
-                      <Building2 />
-                    </StatValue>
-                  </StatItem>
-                </StatsRow>
-              </StatsCard>
-
-              <BannerWrapper
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-              >
-                <SecondaryBanner
-                  src={s3Images.poster.phache}
-                  alt="Phache"
-                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ duration: 0.7, delay: 0.7 }}
-                />
-                <MainBanner
-                  src={s3Images.poster.default}
-                  alt="Poster"
-                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ duration: 0.7, delay: 0.9 }}
-                />
-              </BannerWrapper>
-            </BannerContainer>
-          </HeroContent>
-        </HeroSection>
-
-        {/* ─── Tính năng nổi bật ─── */}
-        <FeaturesSection
-          $isDark={isDarkMode}
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-        >
-          <FeaturesSectionInner>
-            <FeaturesSectionTag $isDark={isDarkMode}>
-              <Sparkles size={13} />
-              {language === 'vi' ? 'Tính năng nổi bật' : 'Key Features'}
-            </FeaturesSectionTag>
-            <FeaturesSectionTitle $isDark={isDarkMode}>
-              {language === 'vi' ? 'Mọi thứ bạn cần để tuyển dụng & tìm việc' : 'Everything You Need to Hire & Get Hired'}
-            </FeaturesSectionTitle>
-            <FeaturesSectionSub $isDark={isDarkMode}>
-              {language === 'vi'
-                ? 'OpPo cung cấp đầy đủ công cụ hiện đại giúp ứng viên và nhà tuyển dụng kết nối nhanh chóng, hiệu quả.'
-                : 'OpPo provides all the modern tools to help candidates and employers connect quickly and effectively.'}
-            </FeaturesSectionSub>
-            <FeaturesGrid>
-              {[
-                {
-                  icon: <Search size={24} />,
-                  bg: 'linear-gradient(135deg, #eff6ff, #dbeafe)',
-                  color: '#1a62ff',
-                  title: language === 'vi' ? 'Tìm việc thông minh' : 'Smart Job Search',
-                  desc: language === 'vi' ? 'Tìm kiếm việc làm theo vị trí, địa điểm, mức lương. Kết quả chính xác, cập nhật liên tục.' : 'Search jobs by position, location, salary. Accurate results, continuously updated.',
-                  to: '/jobs'
-                },
-                {
-                  icon: <Zap size={24} />,
-                  bg: 'linear-gradient(135deg, #fef9c3, #fef08a)',
-                  color: '#ca8a04',
-                  title: language === 'vi' ? 'Tuyển gấp 24h' : 'Urgent Hiring 24h',
-                  desc: language === 'vi' ? 'Đăng tin tuyển gấp, nhận CV ứng viên ngay lập tức. Lấp đầy vị trí trống trong vòng 24 giờ.' : 'Post urgent jobs, receive CVs instantly. Fill vacancies within 24 hours.',
-                  to: '/register/employer'
-                },
-                {
-                  icon: <FileText size={24} />,
-                  bg: 'linear-gradient(135deg, #f0fdf4, #dcfce7)',
-                  color: '#16a34a',
-                  title: language === 'vi' ? 'Tạo CV chuyên nghiệp' : 'Professional CV Builder',
-                  desc: language === 'vi' ? 'Tạo CV đẹp, chuyên nghiệp với nhiều mẫu thiết kế. Hỗ trợ AI tạo nội dung tự động.' : 'Create beautiful, professional CVs with multiple design templates. AI-powered content generation.',
-                  to: '/candidate/cv-templates'
-                },
-                {
-                  icon: <Building2 size={24} />,
-                  bg: 'linear-gradient(135deg, #fdf4ff, #ede9fe)',
-                  color: '#7c3aed',
-                  title: language === 'vi' ? 'Hồ sơ công ty' : 'Company Profiles',
-                  desc: language === 'vi' ? 'Khám phá hồ sơ nhà tuyển dụng uy tín. Xem văn hóa công ty, phúc lợi trước khi ứng tuyển.' : 'Explore trusted employer profiles. View company culture and benefits before applying.',
-                  to: '/companies'
-                },
-                {
-                  icon: <Shield size={24} />,
-                  bg: 'linear-gradient(135deg, #fff7ed, #fed7aa)',
-                  color: '#ea580c',
-                  title: language === 'vi' ? 'Xác thực doanh nghiệp' : 'Business Verification',
-                  desc: language === 'vi' ? 'Mọi nhà tuyển dụng đều được xác thực giấy phép kinh doanh. Đảm bảo an toàn cho ứng viên.' : 'All employers are verified with business licenses. Ensuring safety for candidates.',
-                  to: '/companies'
-                },
-                {
-                  icon: <Users size={24} />,
-                  bg: 'linear-gradient(135deg, #fdf2f8, #fce7f3)',
-                  color: '#db2777',
-                  title: language === 'vi' ? 'Quản lý ứng tuyển' : 'Application Management',
-                  desc: language === 'vi' ? 'Theo dõi trạng thái ứng tuyển, nhận thông báo phản hồi từ nhà tuyển dụng theo thời gian thực.' : 'Track application status, receive real-time feedback notifications from employers.',
-                  to: '/register/candidate'
-                },
-              ].map((f, i) => (
-                <FeatureCard
-                  key={i}
-                  $isDark={isDarkMode}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: i * 0.08 }}
-                >
-                  <FeatureIconBox $bg={f.bg} $color={f.color}>
-                    {f.icon}
-                  </FeatureIconBox>
-                  <FeatureCardTitle $isDark={isDarkMode}>{f.title}</FeatureCardTitle>
-                  <FeatureCardDesc $isDark={isDarkMode}>{f.desc}</FeatureCardDesc>
-                </FeatureCard>
               ))}
-            </FeaturesGrid>
-          </FeaturesSectionInner>
-        </FeaturesSection>
 
-        {/* ─── Giới thiệu về công ty ─── */}
-        <AboutInlineSection
-          $isDark={isDarkMode}
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-        >
-          <AboutInlineInner>
-            <AboutInlineGrid>
-              <AboutInlineLeft>
-                <AboutInlineBadge>
-                  <Heart size={12} />
-                  {language === 'vi' ? 'Giới thiệu về công ty' : 'About OpPo'}
-                </AboutInlineBadge>
-                <AboutInlineTitle
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.1 }}
+              {/* Corner Patterns */}
+              <TopLeftPattern
+                animate={{
+                  opacity: [0.1, 0.2, 0.1],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+
+              <BottomRightPattern
+                animate={{
+                  opacity: [0.1, 0.2, 0.1],
+                }}
+                transition={{
+                  duration: 5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 1,
+                }}
+              />
+
+              {/* Decorative Wave Patterns */}
+              <WavePattern
+                style={{ bottom: 0, left: 0 }}
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 0.4, y: 0 }}
+                transition={{ duration: 2, ease: "easeOut" }}
+              >
+                <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
+                  <path
+                    fill="rgba(147, 197, 253, 0.1)"
+                    d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+                  ></path>
+                </svg>
+              </WavePattern>
+
+              <WavePattern
+                style={{ top: 0, right: 0 }}
+                initial={{ opacity: 0, y: -50 }}
+                animate={{ opacity: 0.3, y: 0 }}
+                transition={{ duration: 2, delay: 0.3, ease: "easeOut" }}
+              >
+                <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
+                  <path
+                    fill="rgba(96, 165, 250, 0.1)"
+                    d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,218.7C672,235,768,245,864,229.3C960,213,1056,171,1152,165.3C1248,160,1344,192,1392,208L1440,224L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"
+                  ></path>
+                </svg>
+              </WavePattern>
+
+              {/* Floating Icons - CSS animation for performance */}
+              <FloatingIcon style={{ top: '15%', left: '8%', animation: 'floatY 4s ease-in-out infinite' }}>
+                <Clock />
+              </FloatingIcon>
+              <FloatingIcon style={{ top: '25%', right: '12%', animation: 'floatY 5s ease-in-out infinite 0.5s' }}>
+                <Mail />
+              </FloatingIcon>
+              <FloatingIcon style={{ bottom: '30%', left: '10%', animation: 'floatY 4.5s ease-in-out infinite 1s' }}>
+                <Send />
+              </FloatingIcon>
+              <FloatingIcon style={{ bottom: '20%', right: '15%', animation: 'floatY 5.5s ease-in-out infinite 1.5s' }}>
+                <Award />
+              </FloatingIcon>
+              <FloatingIcon style={{ top: '40%', right: '8%', animation: 'floatY 4.8s ease-in-out infinite 0.8s' }}>
+                <Zap />
+              </FloatingIcon>
+              <FloatingIcon style={{ top: '60%', left: '12%', animation: 'floatY 5.2s ease-in-out infinite 1.2s' }}>
+                <Target />
+              </FloatingIcon>
+
+              {/* Geometric Shapes - static for performance */}
+              <GeometricShape
+                style={{
+                  top: '20%', left: '5%',
+                  width: '60px', height: '60px',
+                  borderRadius: '12px', transform: 'rotate(15deg)',
+                }}
+              />
+              <GeometricShape
+                style={{
+                  bottom: '25%', right: '8%',
+                  width: '80px', height: '80px', borderRadius: '50%',
+                }}
+              />
+              <GeometricShape
+                style={{
+                  top: '35%', right: '18%',
+                  width: '50px', height: '50px', transform: 'rotate(45deg)',
+                }}
+              />
+
+              {/* Mini Squares - static */}
+              <MiniSquare style={{ top: '28%', left: '22%' }} />
+              <MiniSquare style={{ top: '48%', right: '25%' }} />
+              <MiniSquare style={{ bottom: '32%', left: '20%' }} />
+              <MiniSquare style={{ top: '65%', right: '30%' }} />
+
+              {/* Dotted Circles - static */}
+              <DottedCircle style={{ top: '12%', right: '20%' }} />
+              <DottedCircle style={{ bottom: '15%', left: '18%' }} />
+
+              {/* Connection Lines */}
+              <ConnectionLine
+                style={{
+                  top: '18%',
+                  left: '10%',
+                  width: '150px',
+                  transform: 'rotate(-15deg)',
+                }}
+                animate={{
+                  opacity: [0.3, 0.6, 0.3],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+
+              <ConnectionLine
+                style={{
+                  top: '45%',
+                  right: '12%',
+                  width: '120px',
+                  transform: 'rotate(25deg)',
+                }}
+                animate={{
+                  opacity: [0.2, 0.5, 0.2],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 1,
+                }}
+              />
+
+              <ConnectionLine
+                style={{
+                  bottom: '28%',
+                  left: '15%',
+                  width: '180px',
+                  transform: 'rotate(10deg)',
+                }}
+                animate={{
+                  opacity: [0.25, 0.55, 0.25],
+                }}
+                transition={{
+                  duration: 3.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 0.5,
+                }}
+              />
+
+              {/* Small Floating Dots - CSS animation */}
+              <SmallFloatingDot style={{ top: '22%', left: '25%', animation: 'floatY 3s ease-in-out infinite' }} />
+              <SmallFloatingDot style={{ top: '55%', right: '22%', animation: 'floatY 4s ease-in-out infinite 1s' }} />
+              <SmallFloatingDot style={{ bottom: '35%', left: '28%', animation: 'floatY 3.5s ease-in-out infinite 0.7s' }} />
+              <SmallFloatingDot style={{ top: '38%', left: '18%', animation: 'floatY 4.5s ease-in-out infinite 1.5s' }} />
+              <SmallFloatingDot style={{ bottom: '40%', right: '18%', animation: 'floatY 3.8s ease-in-out infinite 0.3s' }} />
+
+              {/* Circuit Patterns - static opacity */}
+              <CircuitPattern style={{ top: '30%', left: '15%' }} />
+              <CircuitPattern style={{ bottom: '35%', right: '25%' }} />
+
+              {/* Glassmorphism overlay */}
+              <GlassmorphismLayer />
+            </AnimatedBackground>
+
+            <HeroContent>
+              <HeroTitle
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                {titleText}
+                {showCursor && titleText.length < fullTitle.length && <span style={{ opacity: 0.7 }}>|</span>}
+              </HeroTitle>
+
+              <HeroSubtitle
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                {subtitleText}
+                {showCursor && subtitleText.length > 0 && subtitleText.length < fullSubtitle.length && <span style={{ opacity: 0.7 }}>|</span>}
+              </HeroSubtitle>
+
+              <SearchContainer
+                $isDark={isDarkMode}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                <SearchInput $isDark={isDarkMode} $wide>
+                  <Search />
+                  <input
+                    type="text"
+                    placeholder={language === 'vi' ? 'Vị trí công việc hoặc công ty' : 'Job title or company'}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && navigate('/jobs', { state: { searchKeyword: searchTerm, searchLocation: location } })}
+                  />
+                </SearchInput>
+
+                <SearchInput $isDark={isDarkMode}>
+                  <MapPin />
+                  <input
+                    type="text"
+                    placeholder={language === 'vi' ? 'Địa điểm' : 'Location'}
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && navigate('/jobs', { state: { searchKeyword: searchTerm, searchLocation: location } })}
+                  />
+                </SearchInput>
+
+                <Button $variant="primary" onClick={() => navigate('/jobs', {
+                  state: { searchKeyword: searchTerm, searchLocation: location }
+                })}>
+                  {language === 'vi' ? 'Tìm việc' : 'Search Jobs'}
+                </Button>
+              </SearchContainer>
+
+              <BannerContainer>
+                <StatsCard
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.5 }}
                 >
-                  {language === 'vi'
-                    ? <>Nền tảng tìm kiếm nhân sự <span>F&B</span></>
-                    : <>OpPo — <span>F&B</span> Staffing Platform</>}
-                </AboutInlineTitle>
-                <AboutInlineDesc
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
+                  <StatsHeader>
+                    <Calendar />
+                    {language === 'vi' ? `Thị trường làm việc hôm nay ${new Date().toLocaleDateString('vi-VN')}` : `Today's Job Market ${new Date().toLocaleDateString('en-US')}`}
+                  </StatsHeader>
+
+                  <StatsRow>
+                    <StatItem
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: 0.8 }}
+                    >
+                      <StatLabel>{language === 'vi' ? 'Việc làm đang tuyển' : 'Active Jobs'}</StatLabel>
+                      <StatValue>
+                        100,000
+                        <TrendingUp />
+                      </StatValue>
+                    </StatItem>
+
+                    <StatItem
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: 1 }}
+                    >
+                      <StatLabel>{language === 'vi' ? 'Việc làm gấp hôm nay' : 'Urgent Jobs Today'}</StatLabel>
+                      <StatValue>
+                        50
+                        <TrendingUp />
+                      </StatValue>
+                    </StatItem>
+                  </StatsRow>
+
+                  <StatsRow>
+                    <StatItem
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: 1.2 }}
+                    >
+                      <StatLabel>{language === 'vi' ? 'Số lượng ứng viên' : 'Candidates'}</StatLabel>
+                      <StatValue>
+                        2,345
+                        <Users />
+                      </StatValue>
+                    </StatItem>
+
+                    <StatItem
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: 1.4 }}
+                    >
+                      <StatLabel>{language === 'vi' ? 'Số lượng nhà tuyển dụng' : 'Employers'}</StatLabel>
+                      <StatValue>
+                        42
+                        <Building2 />
+                      </StatValue>
+                    </StatItem>
+                  </StatsRow>
+                </StatsCard>
+
+                <BannerWrapper
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.5 }}
                 >
-                  {language === 'vi'
-                    ? 'Ốp Pờ hỗ trợ các chủ doanh nghiệp F&B tiêu chuẩn hóa hoạt động kinh doanh bằng cách giải quyết tình trạng biến động nhân sự và rủi ro tuyển dụng. Nền tảng kết nối doanh nghiệp với đội ngũ nhân sự bán thời gian đã được xác thực và có kỹ năng.'
-                    : 'OpPo helps F&B business owners standardize operations by solving staff turnover and hiring risks. The platform connects businesses with verified, skilled part-time staff.'}
-                </AboutInlineDesc>
-                <AboutInlineStats>
-                  <AboutInlineStat>
-                    <span className="n">70%</span>
-                    <span className="l">{language === 'vi' ? 'Rút ngắn tuyển dụng' : 'Faster Hiring'}</span>
-                  </AboutInlineStat>
-                  <AboutInlineStat>
-                    <span className="n">99%</span>
-                    <span className="l">{language === 'vi' ? 'Giảm rủi ro bảo mật' : 'Security Risk Reduced'}</span>
-                  </AboutInlineStat>
-                </AboutInlineStats>
-              </AboutInlineLeft>
+                  <SecondaryBanner
+                    src={s3Images.poster.phache}
+                    alt="Phache"
+                    initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.7, delay: 0.7 }}
+                  />
+                  <MainBanner
+                    src={s3Images.poster.default}
+                    alt="Poster"
+                    initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.7, delay: 0.9 }}
+                  />
+                </BannerWrapper>
+              </BannerContainer>
+            </HeroContent>
+          </HeroSection>
 
-              <AboutInlineRight>
-                <AboutVMCard
-                  initial={{ opacity: 0, x: 30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.1 }}
-                >
-                  <AboutVMLabel>{language === 'vi' ? 'Tầm nhìn' : 'Vision'}</AboutVMLabel>
-                  <AboutVMTitle>
-                    {language === 'vi'
-                      ? 'Nền tảng hàng đầu kết nối nhân sự F&B đã xác thực tại Việt Nam'
-                      : 'Leading platform connecting verified F&B staff in Vietnam'}
-                  </AboutVMTitle>
-                  <AboutVMDesc>
-                    {language === 'vi'
-                      ? 'Trở thành nền tảng hàng đầu dành cho việc cung cấp và kết nối nhân sự F&B đã được xác thực tại Việt Nam.'
-                      : 'Become the leading platform for providing and connecting verified F&B staff in Vietnam.'}
-                  </AboutVMDesc>
-                </AboutVMCard>
-
-                <AboutVMCard
-                  initial={{ opacity: 0, x: 30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                  <AboutVMLabel>{language === 'vi' ? 'Sứ mệnh' : 'Mission'}</AboutVMLabel>
-                  <AboutVMTitle>
-                    {language === 'vi'
-                      ? 'Xây dựng thị trường lao động "sạch" — minh bạch & an toàn'
-                      : 'Build a "clean" labor market — transparent & safe'}
-                  </AboutVMTitle>
-                  <AboutVMDesc>
-                    {language === 'vi'
-                      ? 'Loại bỏ các rủi ro trong tuyển dụng và xây dựng một thị trường lao động "sạch" — nơi công việc ít rủi ro, minh bạch, an toàn và tôn trọng người lao động.'
-                      : 'Eliminate hiring risks and build a "clean" labor market — where work is low-risk, transparent, safe, and respects workers.'}
-                  </AboutVMDesc>
-                </AboutVMCard>
-
-                <AboutVMCard
-                  initial={{ opacity: 0, x: 30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                  style={{ background: 'rgba(147,197,253,0.1)', borderColor: 'rgba(147,197,253,0.25)' }}
-                >
-                  <div style={{ display: 'flex', gap: 24 }}>
-                    {[
-                      { n: '70%', l: language === 'vi' ? 'Rút ngắn tuyển dụng' : 'Faster Hiring' },
-                      { n: '99%', l: language === 'vi' ? 'Giảm rủi ro' : 'Risk Reduced' },
-                    ].map((s, i) => (
-                      <div key={i} style={{ textAlign: 'center', flex: 1 }}>
-                        <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#93c5fd' }}>{s.n}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.65)', marginTop: 2 }}>{s.l}</div>
-                      </div>
-                    ))}
-                  </div>
-                </AboutVMCard>
-              </AboutInlineRight>
-            </AboutInlineGrid>
-          </AboutInlineInner>
-        </AboutInlineSection>
-
-        <CompanyBannerSection
-          $isDark={isDarkMode}
-          ref={companyRef}
-          initial={{ opacity: 0, y: 100, scale: 0.95 }}
-          whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
-        >
-          <CompanyBannerContent>
-            <CompanyBannerTitle
-              $isDark={isDarkMode}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.5 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-            >
-              {language === 'vi' ? (
-                <>Những ứng viên mà nhà tuyển dụng<br />đang tìm kiếm –{' '}</>
-              ) : (
-                <>The candidates employers<br />are looking for –{' '}</>
-              )}
-              <span style={{
-                background: 'linear-gradient(90deg, #0284c7, #1d4ed8)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}>{language === 'vi' ? 'có thể chính là bạn.' : 'could be you.'}</span>
-            </CompanyBannerTitle>
-
-            <LogoCarouselWrapper $isDark={isDarkMode}>
-              <LogoCarousel>
-                {[...companyLogos, ...companyLogos].map((company, index) => (
-                  <BannerCompanyLogo $isDark={isDarkMode} key={`${company.name}-${index}`}>
-                    <img
-                      src={company.logo}
-                      alt={company.name}
-                      style={{ display: 'block' }}
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                        e.target.nextSibling.style.display = 'inline-block';
-                      }}
-                    />
-                    <span style={{
-                      fontSize: '20px',
-                      fontWeight: '800',
-                      color: isDarkMode ? '#f1f5f9' : '#0c4a6e',
-                      whiteSpace: 'nowrap',
-                      display: 'none',
-                      letterSpacing: '0.5px'
-                    }}>
-                      {company.name}
-                    </span>
-                  </BannerCompanyLogo>
+          {/* ─── Tính năng nổi bật ─── */}
+          <FeaturesSection
+            $isDark={isDarkMode}
+            initial={{ opacity: 0, y: 60 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+          >
+            <FeaturesSectionInner>
+              <FeaturesSectionTag $isDark={isDarkMode}>
+                <Sparkles size={13} />
+                {language === 'vi' ? 'Tính năng nổi bật' : 'Key Features'}
+              </FeaturesSectionTag>
+              <FeaturesSectionTitle $isDark={isDarkMode}>
+                {language === 'vi' ? 'Mọi thứ bạn cần để tuyển dụng & tìm việc' : 'Everything You Need to Hire & Get Hired'}
+              </FeaturesSectionTitle>
+              <FeaturesSectionSub $isDark={isDarkMode}>
+                {language === 'vi'
+                  ? 'OpPo cung cấp đầy đủ công cụ hiện đại giúp ứng viên và nhà tuyển dụng kết nối nhanh chóng, hiệu quả.'
+                  : 'OpPo provides all the modern tools to help candidates and employers connect quickly and effectively.'}
+              </FeaturesSectionSub>
+              <FeaturesGrid>
+                {[
+                  {
+                    icon: <Search size={24} />,
+                    bg: 'linear-gradient(135deg, #eff6ff, #dbeafe)',
+                    color: '#1a62ff',
+                    title: language === 'vi' ? 'Tìm việc thông minh' : 'Smart Job Search',
+                    desc: language === 'vi' ? 'Tìm kiếm việc làm theo vị trí, địa điểm, mức lương. Kết quả chính xác, cập nhật liên tục.' : 'Search jobs by position, location, salary. Accurate results, continuously updated.',
+                    to: '/jobs'
+                  },
+                  {
+                    icon: <Zap size={24} />,
+                    bg: 'linear-gradient(135deg, #fef9c3, #fef08a)',
+                    color: '#ca8a04',
+                    title: language === 'vi' ? 'Tuyển gấp 24h' : 'Urgent Hiring 24h',
+                    desc: language === 'vi' ? 'Đăng tin tuyển gấp, nhận CV ứng viên ngay lập tức. Lấp đầy vị trí trống trong vòng 24 giờ.' : 'Post urgent jobs, receive CVs instantly. Fill vacancies within 24 hours.',
+                    to: '/register/employer'
+                  },
+                  {
+                    icon: <FileText size={24} />,
+                    bg: 'linear-gradient(135deg, #f0fdf4, #dcfce7)',
+                    color: '#16a34a',
+                    title: language === 'vi' ? 'Tạo CV chuyên nghiệp' : 'Professional CV Builder',
+                    desc: language === 'vi' ? 'Tạo CV đẹp, chuyên nghiệp với nhiều mẫu thiết kế. Hỗ trợ AI tạo nội dung tự động.' : 'Create beautiful, professional CVs with multiple design templates. AI-powered content generation.',
+                    to: '/candidate/cv-templates'
+                  },
+                  {
+                    icon: <Building2 size={24} />,
+                    bg: 'linear-gradient(135deg, #fdf4ff, #ede9fe)',
+                    color: '#7c3aed',
+                    title: language === 'vi' ? 'Hồ sơ công ty' : 'Company Profiles',
+                    desc: language === 'vi' ? 'Khám phá hồ sơ nhà tuyển dụng uy tín. Xem văn hóa công ty, phúc lợi trước khi ứng tuyển.' : 'Explore trusted employer profiles. View company culture and benefits before applying.',
+                    to: '/companies'
+                  },
+                  {
+                    icon: <Shield size={24} />,
+                    bg: 'linear-gradient(135deg, #fff7ed, #fed7aa)',
+                    color: '#ea580c',
+                    title: language === 'vi' ? 'Xác thực doanh nghiệp' : 'Business Verification',
+                    desc: language === 'vi' ? 'Mọi nhà tuyển dụng đều được xác thực giấy phép kinh doanh. Đảm bảo an toàn cho ứng viên.' : 'All employers are verified with business licenses. Ensuring safety for candidates.',
+                    to: '/companies'
+                  },
+                  {
+                    icon: <Users size={24} />,
+                    bg: 'linear-gradient(135deg, #fdf2f8, #fce7f3)',
+                    color: '#db2777',
+                    title: language === 'vi' ? 'Quản lý ứng tuyển' : 'Application Management',
+                    desc: language === 'vi' ? 'Theo dõi trạng thái ứng tuyển, nhận thông báo phản hồi từ nhà tuyển dụng theo thời gian thực.' : 'Track application status, receive real-time feedback notifications from employers.',
+                    to: '/register/candidate'
+                  },
+                ].map((f, i) => (
+                  <FeatureCard
+                    key={i}
+                    $isDark={isDarkMode}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: i * 0.08 }}
+                  >
+                    <FeatureIconBox $bg={f.bg} $color={f.color}>
+                      {f.icon}
+                    </FeatureIconBox>
+                    <FeatureCardTitle $isDark={isDarkMode}>{f.title}</FeatureCardTitle>
+                    <FeatureCardDesc $isDark={isDarkMode}>{f.desc}</FeatureCardDesc>
+                  </FeatureCard>
                 ))}
-              </LogoCarousel>
-            </LogoCarouselWrapper>
-          </CompanyBannerContent>
-        </CompanyBannerSection>
+              </FeaturesGrid>
+            </FeaturesSectionInner>
+          </FeaturesSection>
 
-        <TechBannerSection
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-        >
-          <TechBannerContent>
-            <TechBannerImage
-              src={s3Images.poster.lemoments}
-              alt="Le Moments Technology"
+          {/* ─── Giới thiệu về công ty ─── */}
+          <AboutInlineSection
+            $isDark={isDarkMode}
+            initial={{ opacity: 0, y: 60 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+          >
+            <AboutInlineInner>
+              <AboutInlineGrid>
+                <AboutInlineLeft>
+                  <AboutInlineBadge>
+                    <Heart size={12} />
+                    {language === 'vi' ? 'Giới thiệu về công ty' : 'About OpPo'}
+                  </AboutInlineBadge>
+                  <AboutInlineTitle
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.1 }}
+                  >
+                    {language === 'vi'
+                      ? <>Nền tảng tìm kiếm nhân sự <span>F&B</span></>
+                      : <>OpPo — <span>F&B</span> Staffing Platform</>}
+                  </AboutInlineTitle>
+                  <AboutInlineDesc
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                  >
+                    {language === 'vi'
+                      ? 'Ốp Pờ hỗ trợ các chủ doanh nghiệp F&B tiêu chuẩn hóa hoạt động kinh doanh bằng cách giải quyết tình trạng biến động nhân sự và rủi ro tuyển dụng. Nền tảng kết nối doanh nghiệp với đội ngũ nhân sự bán thời gian đã được xác thực và có kỹ năng.'
+                      : 'OpPo helps F&B business owners standardize operations by solving staff turnover and hiring risks. The platform connects businesses with verified, skilled part-time staff.'}
+                  </AboutInlineDesc>
+                  <AboutInlineStats>
+                    <AboutInlineStat>
+                      <span className="n">70%</span>
+                      <span className="l">{language === 'vi' ? 'Rút ngắn tuyển dụng' : 'Faster Hiring'}</span>
+                    </AboutInlineStat>
+                    <AboutInlineStat>
+                      <span className="n">99%</span>
+                      <span className="l">{language === 'vi' ? 'Giảm rủi ro bảo mật' : 'Security Risk Reduced'}</span>
+                    </AboutInlineStat>
+                  </AboutInlineStats>
+                </AboutInlineLeft>
+
+                <AboutInlineRight>
+                  <AboutVMCard
+                    initial={{ opacity: 0, x: 30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.1 }}
+                  >
+                    <AboutVMLabel>{language === 'vi' ? 'Tầm nhìn' : 'Vision'}</AboutVMLabel>
+                    <AboutVMTitle>
+                      {language === 'vi'
+                        ? 'Nền tảng hàng đầu kết nối nhân sự F&B đã xác thực tại Việt Nam'
+                        : 'Leading platform connecting verified F&B staff in Vietnam'}
+                    </AboutVMTitle>
+                    <AboutVMDesc>
+                      {language === 'vi'
+                        ? 'Trở thành nền tảng hàng đầu dành cho việc cung cấp và kết nối nhân sự F&B đã được xác thực tại Việt Nam.'
+                        : 'Become the leading platform for providing and connecting verified F&B staff in Vietnam.'}
+                    </AboutVMDesc>
+                  </AboutVMCard>
+
+                  <AboutVMCard
+                    initial={{ opacity: 0, x: 30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                  >
+                    <AboutVMLabel>{language === 'vi' ? 'Sứ mệnh' : 'Mission'}</AboutVMLabel>
+                    <AboutVMTitle>
+                      {language === 'vi'
+                        ? 'Xây dựng thị trường lao động "sạch" — minh bạch & an toàn'
+                        : 'Build a "clean" labor market — transparent & safe'}
+                    </AboutVMTitle>
+                    <AboutVMDesc>
+                      {language === 'vi'
+                        ? 'Loại bỏ các rủi ro trong tuyển dụng và xây dựng một thị trường lao động "sạch" — nơi công việc ít rủi ro, minh bạch, an toàn và tôn trọng người lao động.'
+                        : 'Eliminate hiring risks and build a "clean" labor market — where work is low-risk, transparent, safe, and respects workers.'}
+                    </AboutVMDesc>
+                  </AboutVMCard>
+
+                  <AboutVMCard
+                    initial={{ opacity: 0, x: 30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                    style={{ background: 'rgba(147,197,253,0.1)', borderColor: 'rgba(147,197,253,0.25)' }}
+                  >
+                    <div style={{ display: 'flex', gap: 24 }}>
+                      {[
+                        { n: '70%', l: language === 'vi' ? 'Rút ngắn tuyển dụng' : 'Faster Hiring' },
+                        { n: '99%', l: language === 'vi' ? 'Giảm rủi ro' : 'Risk Reduced' },
+                      ].map((s, i) => (
+                        <div key={i} style={{ textAlign: 'center', flex: 1 }}>
+                          <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#93c5fd' }}>{s.n}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.65)', marginTop: 2 }}>{s.l}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </AboutVMCard>
+                </AboutInlineRight>
+              </AboutInlineGrid>
+            </AboutInlineInner>
+          </AboutInlineSection>
+
+          <CompanyBannerSection
+            $isDark={isDarkMode}
+            ref={companyRef}
+            initial={{ opacity: 0, y: 100, scale: 0.95 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
+          >
+            <CompanyBannerContent>
+              <CompanyBannerTitle
+                $isDark={isDarkMode}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.5 }}
+                transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+              >
+                {language === 'vi' ? (
+                  <>Những ứng viên mà nhà tuyển dụng<br />đang tìm kiếm –{' '}</>
+                ) : (
+                  <>The candidates employers<br />are looking for –{' '}</>
+                )}
+                <span style={{
+                  background: 'linear-gradient(90deg, #0284c7, #1d4ed8)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}>{language === 'vi' ? 'có thể chính là bạn.' : 'could be you.'}</span>
+              </CompanyBannerTitle>
+
+              <LogoCarouselWrapper $isDark={isDarkMode}>
+                <LogoCarousel>
+                  {[...companyLogos, ...companyLogos].map((company, index) => (
+                    <BannerCompanyLogo $isDark={isDarkMode} key={`${company.name}-${index}`}>
+                      <img
+                        src={company.logo}
+                        alt={company.name}
+                        style={{ display: 'block' }}
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'inline-block';
+                        }}
+                      />
+                      <span style={{
+                        fontSize: '20px',
+                        fontWeight: '800',
+                        color: isDarkMode ? '#f1f5f9' : '#0c4a6e',
+                        whiteSpace: 'nowrap',
+                        display: 'none',
+                        letterSpacing: '0.5px'
+                      }}>
+                        {company.name}
+                      </span>
+                    </BannerCompanyLogo>
+                  ))}
+                </LogoCarousel>
+              </LogoCarouselWrapper>
+            </CompanyBannerContent>
+          </CompanyBannerSection>
+
+          <TechBannerSection
+            initial={{ opacity: 0, y: 60 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+          >
+            <TechBannerContent>
+              <TechBannerImage
+                src={s3Images.poster.lemoments}
+                alt="Le Moments Technology"
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              />
+            </TechBannerContent>
+          </TechBannerSection>
+
+          <CTASection>
+            <CTACard
+              $isDark={isDarkMode}
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            />
-          </TechBannerContent>
-        </TechBannerSection>
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <CTATitle $isDark={isDarkMode}>{language === 'vi' ? 'Sẵn Sàng Tuyển Ứng viên Hàng Đầu?' : 'Ready to Hire Top Talent?'}</CTATitle>
+              <CTAText $isDark={isDarkMode}>
+                {language === 'vi' ? 'Đăng công việc và kết nối với ứng viên chất lượng ngay hôm nay' : 'Post your jobs and connect with qualified candidates today'}
+              </CTAText>
+              <Button
+                as={Link}
+                to="/register/employer"
+                $variant="secondary"
+                $size="large"
+                style={{
+                  background: 'white',
+                  color: '#1e40af',
+                  position: 'relative',
+                  zIndex: 2,
+                  fontWeight: 700,
+                  boxShadow: '0 8px 32px rgba(255, 255, 255, 0.2)'
+                }}
+              >
+                {language === 'vi' ? 'Bắt Đầu Miễn Phí' : 'Get Started - It\'s Free'}
+                <ArrowRight />
+              </Button>
+            </CTACard>
+          </CTASection>
 
-        <CTASection>
-          <CTACard
+          <DownloadAppSection
+            ref={downloadRef}
+            initial={{ opacity: 0, y: 100, scale: 0.95 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
+          >
+            <DownloadAppContainer>
+              <DownloadAppLeft>
+                <DownloadAppTitle
+                  $isDark={isDarkMode}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.8 }}
+                  transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                >
+                  {language === 'vi' ? 'Tải ứng dụng' : 'Download the App'}
+                </DownloadAppTitle>
+
+                <DownloadAppSubtitle
+                  $isDark={isDarkMode}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.8 }}
+                  transition={{ duration: 0.8, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                >
+                  {language === 'vi' ? 'để trải nghiệm các dịch vụ của chúng tôi' : 'to experience our services'}
+                </DownloadAppSubtitle>
+
+                <DownloadOptions>
+                  <QRCodeSection>
+                    <QRCode $isDark={isDarkMode}>
+                      <svg viewBox="0 0 100 100" fill="none">
+                        <rect width="100" height="100" fill="white" />
+                        <rect x="10" y="10" width="15" height="15" fill="black" />
+                        <rect x="30" y="10" width="5" height="5" fill="black" />
+                        <rect x="40" y="10" width="5" height="5" fill="black" />
+                        <rect x="50" y="10" width="5" height="5" fill="black" />
+                        <rect x="60" y="10" width="5" height="5" fill="black" />
+                        <rect x="75" y="10" width="15" height="15" fill="black" />
+                        <rect x="10" y="30" width="5" height="5" fill="black" />
+                        <rect x="20" y="30" width="5" height="5" fill="black" />
+                        <rect x="30" y="30" width="10" height="10" fill="black" />
+                        <rect x="45" y="30" width="5" height="5" fill="black" />
+                        <rect x="55" y="30" width="10" height="10" fill="black" />
+                        <rect x="70" y="30" width="5" height="5" fill="black" />
+                        <rect x="85" y="30" width="5" height="5" fill="black" />
+                        <rect x="10" y="40" width="5" height="5" fill="black" />
+                        <rect x="20" y="40" width="5" height="5" fill="black" />
+                        <rect x="75" y="40" width="5" height="5" fill="black" />
+                        <rect x="85" y="40" width="5" height="5" fill="black" />
+                        <rect x="10" y="50" width="5" height="5" fill="black" />
+                        <rect x="20" y="50" width="5" height="5" fill="black" />
+                        <rect x="35" y="50" width="5" height="5" fill="black" />
+                        <rect x="45" y="50" width="10" height="10" fill="black" />
+                        <rect x="60" y="50" width="5" height="5" fill="black" />
+                        <rect x="75" y="50" width="5" height="5" fill="black" />
+                        <rect x="85" y="50" width="5" height="5" fill="black" />
+                        <rect x="30" y="60" width="5" height="5" fill="black" />
+                        <rect x="40" y="60" width="5" height="5" fill="black" />
+                        <rect x="60" y="60" width="10" height="10" fill="black" />
+                        <rect x="10" y="75" width="15" height="15" fill="black" />
+                        <rect x="30" y="75" width="5" height="5" fill="black" />
+                        <rect x="40" y="75" width="5" height="5" fill="black" />
+                        <rect x="50" y="75" width="5" height="5" fill="black" />
+                        <rect x="60" y="75" width="5" height="5" fill="black" />
+                        <rect x="75" y="75" width="15" height="15" fill="black" />
+                      </svg>
+                    </QRCode>
+                    <QRText $isDark={isDarkMode}>{language === 'vi' ? 'Quét mã QR' : 'Scan QR Code'}</QRText>
+
+                    <DownloadAppStats>
+                      <DownloadAppStatItem>
+                        <DownloadAppStatValue>
+                          <DownloadAppStatStars>
+                            <Star fill="#FFB800" strokeWidth={0} size={20} />
+                            <Star fill="#FFB800" strokeWidth={0} size={20} />
+                            <Star fill="#FFB800" strokeWidth={0} size={20} />
+                            <Star fill="#FFB800" strokeWidth={0} size={20} />
+                            <Star fill="#FFB800" strokeWidth={0} size={20} />
+                          </DownloadAppStatStars>
+                        </DownloadAppStatValue>
+                        <DownloadAppStatLabel $isDark={isDarkMode}>{language === 'vi' ? 'Đánh giá ứng dụng' : 'App Rating'}</DownloadAppStatLabel>
+                      </DownloadAppStatItem>
+                    </DownloadAppStats>
+                  </QRCodeSection>
+
+                  <StoreButtons>
+                    <StoreButton href="https://play.google.com" target="_blank">
+                      <img
+                        src={s3Images.system.chplay}
+                        alt="Google Play"
+                        style={{
+                          width: '120px',
+                          height: 'auto',
+                          objectFit: 'contain'
+                        }}
+                      />
+                    </StoreButton>
+                  </StoreButtons>
+                </DownloadOptions>
+              </DownloadAppLeft>
+
+              <DownloadAppRight
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+              >
+                <PhoneMockup>
+                  <PhoneScreen>
+                    <AppPreview>
+                      <AppSearchBar>
+                        {phoneSearchText}
+                        {phoneSearchText.length < phoneSearchFullText.length && <span style={{ animation: 'blink 1s infinite' }}>|</span>}
+                      </AppSearchBar>
+                      {showPhoneApp && (
+                        <motion.div
+                          style={{
+                            background: 'white',
+                            borderRadius: '12px',
+                            padding: '14px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '12px',
+                            marginTop: '12px',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)'
+                          }}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5 }}
+                        >
+                          {/* Top Section: Logo + Info */}
+                          <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+                            {/* Logo */}
+                            <motion.div
+                              style={{
+                                width: '56px',
+                                height: '56px',
+                                background: 'linear-gradient(135deg, #ffffff 0%, #ded4d46a 100%)',
+                                borderRadius: '12px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                overflow: 'hidden',
+                                padding: '6px',
+                                flexShrink: 0
+                              }}
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={{ duration: 0.4, delay: 0.2 }}
+                            >
+                              <img
+                                src={s3Images.system.logo}
+                                alt="Ốp Pờ"
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  objectFit: 'contain'
+                                }}
+                              />
+                            </motion.div>
+
+                            {/* App Info */}
+                            <motion.div
+                              style={{
+                                flex: 1,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '2px',
+                                minWidth: 0
+                              }}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ duration: 0.4, delay: 0.3 }}
+                            >
+                              <div style={{
+                                fontSize: '14px',
+                                fontWeight: '700',
+                                color: '#1f2937',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                              }}>
+                                Ốp Pờ
+                              </div>
+                              <div style={{
+                                fontSize: '11px',
+                                color: '#6b7280',
+                                fontWeight: '500',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                              }}>
+                                {language === 'vi' ? 'Ứng dụng tuyển dụng' : 'Recruitment App'}
+                              </div>
+                              <div style={{
+                                fontSize: '10px',
+                                color: '#9ca3af',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                              }}>
+                                {language === 'vi' ? 'Đã tải xuống - Giáo dục' : 'Downloaded - Education'}
+                              </div>
+                              {/* Star Rating */}
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '2px',
+                                marginTop: '2px'
+                              }}>
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <Star
+                                    key={star}
+                                    fill="#FFB800"
+                                    strokeWidth={0}
+                                    size={10}
+                                    style={{ color: '#FFB800' }}
+                                  />
+                                ))}
+                              </div>
+                            </motion.div>
+                          </div>
+
+                          {/* Download Button / Loading Spinner */}
+                          <div style={{ display: 'flex', justifyContent: 'center' }}>
+                            {!isDownloading ? (
+                              <motion.div
+                                style={{
+                                  padding: '8px 32px',
+                                  background: '#1e40af',
+                                  color: 'white',
+                                  borderRadius: '20px',
+                                  fontSize: '13px',
+                                  fontWeight: '700',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.5 }}
+                              >
+                                {language === 'vi' ? 'Tải về' : 'Download'}
+                              </motion.div>
+                            ) : (
+                              <motion.div
+                                style={{
+                                  width: '24px',
+                                  height: '24px',
+                                  position: 'relative'
+                                }}
+                              >
+                                <svg
+                                  width="24"
+                                  height="24"
+                                  viewBox="0 0 24 24"
+                                  style={{ transform: 'rotate(90deg) scaleX(-1)' }}
+                                >
+                                  {/* Background circle */}
+                                  <circle
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    fill="none"
+                                    stroke="#e5e7eb"
+                                    strokeWidth="2"
+                                  />
+                                  {/* Progress circle */}
+                                  <motion.circle
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    fill="none"
+                                    stroke="#1e40af"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    initial={{ pathLength: 0 }}
+                                    animate={{ pathLength: 1 }}
+                                    transition={{
+                                      duration: 5,
+                                      ease: "linear",
+                                      repeat: Infinity
+                                    }}
+                                  />
+                                </svg>
+                              </motion.div>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AppPreview>
+                  </PhoneScreen>
+                </PhoneMockup>
+              </DownloadAppRight>
+            </DownloadAppContainer>
+          </DownloadAppSection>
+
+          <Footer
             $isDark={isDarkMode}
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <CTATitle $isDark={isDarkMode}>{language === 'vi' ? 'Sẵn Sàng Tuyển Ứng viên Hàng Đầu?' : 'Ready to Hire Top Talent?'}</CTATitle>
-            <CTAText $isDark={isDarkMode}>
-              {language === 'vi' ? 'Đăng công việc và kết nối với ứng viên chất lượng ngay hôm nay' : 'Post your jobs and connect with qualified candidates today'}
-            </CTAText>
-            <Button
-              as={Link}
-              to="/register/employer"
-              $variant="secondary"
-              $size="large"
-              style={{
-                background: 'white',
-                color: '#1e40af',
-                position: 'relative',
-                zIndex: 2,
-                fontWeight: 700,
-                boxShadow: '0 8px 32px rgba(255, 255, 255, 0.2)'
-              }}
-            >
-              {language === 'vi' ? 'Bắt Đầu Miễn Phí' : 'Get Started - It\'s Free'}
-              <ArrowRight />
-            </Button>
-          </CTACard>
-        </CTASection>
-
-        <DownloadAppSection
-          ref={downloadRef}
-          initial={{ opacity: 0, y: 100, scale: 0.95 }}
-          whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
-        >
-          <DownloadAppContainer>
-            <DownloadAppLeft>
-              <DownloadAppTitle
-                $isDark={isDarkMode}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.8 }}
-                transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-              >
-                {language === 'vi' ? 'Tải ứng dụng' : 'Download the App'}
-              </DownloadAppTitle>
-
-              <DownloadAppSubtitle
-                $isDark={isDarkMode}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.8 }}
-                transition={{ duration: 0.8, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-              >
-                {language === 'vi' ? 'để trải nghiệm các dịch vụ của chúng tôi' : 'to experience our services'}
-              </DownloadAppSubtitle>
-
-              <DownloadOptions>
-                <QRCodeSection>
-                  <QRCode $isDark={isDarkMode}>
-                    <svg viewBox="0 0 100 100" fill="none">
-                      <rect width="100" height="100" fill="white" />
-                      <rect x="10" y="10" width="15" height="15" fill="black" />
-                      <rect x="30" y="10" width="5" height="5" fill="black" />
-                      <rect x="40" y="10" width="5" height="5" fill="black" />
-                      <rect x="50" y="10" width="5" height="5" fill="black" />
-                      <rect x="60" y="10" width="5" height="5" fill="black" />
-                      <rect x="75" y="10" width="15" height="15" fill="black" />
-                      <rect x="10" y="30" width="5" height="5" fill="black" />
-                      <rect x="20" y="30" width="5" height="5" fill="black" />
-                      <rect x="30" y="30" width="10" height="10" fill="black" />
-                      <rect x="45" y="30" width="5" height="5" fill="black" />
-                      <rect x="55" y="30" width="10" height="10" fill="black" />
-                      <rect x="70" y="30" width="5" height="5" fill="black" />
-                      <rect x="85" y="30" width="5" height="5" fill="black" />
-                      <rect x="10" y="40" width="5" height="5" fill="black" />
-                      <rect x="20" y="40" width="5" height="5" fill="black" />
-                      <rect x="75" y="40" width="5" height="5" fill="black" />
-                      <rect x="85" y="40" width="5" height="5" fill="black" />
-                      <rect x="10" y="50" width="5" height="5" fill="black" />
-                      <rect x="20" y="50" width="5" height="5" fill="black" />
-                      <rect x="35" y="50" width="5" height="5" fill="black" />
-                      <rect x="45" y="50" width="10" height="10" fill="black" />
-                      <rect x="60" y="50" width="5" height="5" fill="black" />
-                      <rect x="75" y="50" width="5" height="5" fill="black" />
-                      <rect x="85" y="50" width="5" height="5" fill="black" />
-                      <rect x="30" y="60" width="5" height="5" fill="black" />
-                      <rect x="40" y="60" width="5" height="5" fill="black" />
-                      <rect x="60" y="60" width="10" height="10" fill="black" />
-                      <rect x="10" y="75" width="15" height="15" fill="black" />
-                      <rect x="30" y="75" width="5" height="5" fill="black" />
-                      <rect x="40" y="75" width="5" height="5" fill="black" />
-                      <rect x="50" y="75" width="5" height="5" fill="black" />
-                      <rect x="60" y="75" width="5" height="5" fill="black" />
-                      <rect x="75" y="75" width="15" height="15" fill="black" />
-                    </svg>
-                  </QRCode>
-                  <QRText $isDark={isDarkMode}>{language === 'vi' ? 'Quét mã QR' : 'Scan QR Code'}</QRText>
-
-                  <DownloadAppStats>
-                    <DownloadAppStatItem>
-                      <DownloadAppStatValue>
-                        <DownloadAppStatStars>
-                          <Star fill="#FFB800" strokeWidth={0} size={20} />
-                          <Star fill="#FFB800" strokeWidth={0} size={20} />
-                          <Star fill="#FFB800" strokeWidth={0} size={20} />
-                          <Star fill="#FFB800" strokeWidth={0} size={20} />
-                          <Star fill="#FFB800" strokeWidth={0} size={20} />
-                        </DownloadAppStatStars>
-                      </DownloadAppStatValue>
-                      <DownloadAppStatLabel $isDark={isDarkMode}>{language === 'vi' ? 'Đánh giá ứng dụng' : 'App Rating'}</DownloadAppStatLabel>
-                    </DownloadAppStatItem>
-                  </DownloadAppStats>
-                </QRCodeSection>
-
-                <StoreButtons>
-                  <StoreButton href="https://play.google.com" target="_blank">
-                    <img
-                      src={s3Images.system.chplay}
-                      alt="Google Play"
-                      style={{
-                        width: '120px',
-                        height: 'auto',
-                        objectFit: 'contain'
-                      }}
-                    />
-                  </StoreButton>
-                </StoreButtons>
-              </DownloadOptions>
-            </DownloadAppLeft>
-
-            <DownloadAppRight
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-            >
-              <PhoneMockup>
-                <PhoneScreen>
-                  <AppPreview>
-                    <AppSearchBar>
-                      {phoneSearchText}
-                      {phoneSearchText.length < phoneSearchFullText.length && <span style={{ animation: 'blink 1s infinite' }}>|</span>}
-                    </AppSearchBar>
-                    {showPhoneApp && (
-                      <motion.div
-                        style={{
-                          background: 'white',
-                          borderRadius: '12px',
-                          padding: '14px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '12px',
-                          marginTop: '12px',
-                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)'
-                        }}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        {/* Top Section: Logo + Info */}
-                        <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-                          {/* Logo */}
-                          <motion.div
-                            style={{
-                              width: '56px',
-                              height: '56px',
-                              background: 'linear-gradient(135deg, #ffffff 0%, #ded4d46a 100%)',
-                              borderRadius: '12px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              overflow: 'hidden',
-                              padding: '6px',
-                              flexShrink: 0
-                            }}
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ duration: 0.4, delay: 0.2 }}
-                          >
-                            <img
-                              src={s3Images.system.logo}
-                              alt="Ốp Pờ"
-                              style={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'contain'
-                              }}
-                            />
-                          </motion.div>
-
-                          {/* App Info */}
-                          <motion.div
-                            style={{
-                              flex: 1,
-                              display: 'flex',
-                              flexDirection: 'column',
-                              gap: '2px',
-                              minWidth: 0
-                            }}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.4, delay: 0.3 }}
-                          >
-                            <div style={{
-                              fontSize: '14px',
-                              fontWeight: '700',
-                              color: '#1f2937',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis'
-                            }}>
-                              Ốp Pờ
-                            </div>
-                            <div style={{
-                              fontSize: '11px',
-                              color: '#6b7280',
-                              fontWeight: '500',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis'
-                            }}>
-                              {language === 'vi' ? 'Ứng dụng tuyển dụng' : 'Recruitment App'}
-                            </div>
-                            <div style={{
-                              fontSize: '10px',
-                              color: '#9ca3af',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis'
-                            }}>
-                              {language === 'vi' ? 'Đã tải xuống - Giáo dục' : 'Downloaded - Education'}
-                            </div>
-                            {/* Star Rating */}
-                            <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '2px',
-                              marginTop: '2px'
-                            }}>
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <Star
-                                  key={star}
-                                  fill="#FFB800"
-                                  strokeWidth={0}
-                                  size={10}
-                                  style={{ color: '#FFB800' }}
-                                />
-                              ))}
-                            </div>
-                          </motion.div>
-                        </div>
-
-                        {/* Download Button / Loading Spinner */}
-                        <div style={{ display: 'flex', justifyContent: 'center' }}>
-                          {!isDownloading ? (
-                            <motion.div
-                              style={{
-                                padding: '8px 32px',
-                                background: '#1e40af',
-                                color: 'white',
-                                borderRadius: '20px',
-                                fontSize: '13px',
-                                fontWeight: '700',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                              }}
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              transition={{ delay: 0.5 }}
-                            >
-                              {language === 'vi' ? 'Tải về' : 'Download'}
-                            </motion.div>
-                          ) : (
-                            <motion.div
-                              style={{
-                                width: '24px',
-                                height: '24px',
-                                position: 'relative'
-                              }}
-                            >
-                              <svg
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                style={{ transform: 'rotate(90deg) scaleX(-1)' }}
-                              >
-                                {/* Background circle */}
-                                <circle
-                                  cx="12"
-                                  cy="12"
-                                  r="10"
-                                  fill="none"
-                                  stroke="#e5e7eb"
-                                  strokeWidth="2"
-                                />
-                                {/* Progress circle */}
-                                <motion.circle
-                                  cx="12"
-                                  cy="12"
-                                  r="10"
-                                  fill="none"
-                                  stroke="#1e40af"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  initial={{ pathLength: 0 }}
-                                  animate={{ pathLength: 1 }}
-                                  transition={{
-                                    duration: 5,
-                                    ease: "linear",
-                                    repeat: Infinity
-                                  }}
-                                />
-                              </svg>
-                            </motion.div>
-                          )}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AppPreview>
-                </PhoneScreen>
-              </PhoneMockup>
-            </DownloadAppRight>
-          </DownloadAppContainer>
-        </DownloadAppSection>
-
-        <Footer
-          $isDark={isDarkMode}
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <FooterMain>
-            <FooterLeft $isDark={isDarkMode}>
-              <div className="logo-area">
-                <Link to="/" className="logo-link">
-                  <img src={s3Images.system.logo} alt="Ốp Pờ Logo" />
-                </Link>
-                <p>{language === 'vi' ? 'Bạn vừa bị đuổi - Đã có Ốp Pờ lo' : 'Just got fired? Ốp Pờ has you covered'}</p>
-                <div style={{ marginTop: '12px', display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#10b981', border: '1px solid #10b981', padding: '4px 8px', borderRadius: '4px' }}>{language === 'vi' ? '✓ Được bảo vệ' : '✓ Protected'}</span>
-                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#6366f1', border: '1px solid #6366f1', padding: '4px 8px', borderRadius: '4px' }}>Google For Startups</span>
+            <FooterMain>
+              <FooterLeft $isDark={isDarkMode}>
+                <div className="logo-area">
+                  <Link to="/" className="logo-link">
+                    <img src={s3Images.system.logo} alt="Ốp Pờ Logo" />
+                  </Link>
+                  <p>{language === 'vi' ? 'Bạn vừa bị đuổi - Đã có Ốp Pờ lo' : 'Just got fired? Ốp Pờ has you covered'}</p>
+                  <div style={{ marginTop: '12px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#10b981', border: '1px solid #10b981', padding: '4px 8px', borderRadius: '4px' }}>{language === 'vi' ? '✓ Được bảo vệ' : '✓ Protected'}</span>
+                    <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#6366f1', border: '1px solid #6366f1', padding: '4px 8px', borderRadius: '4px' }}>Google For Startups</span>
+                  </div>
                 </div>
-              </div>
-              <div className="contact-info">
-                <h4>{language === 'vi' ? 'Liên hệ' : 'Contact'}</h4>
-                <p>{language === 'vi' ? 'Hotline hệ thống:' : 'System Hotline:'} <strong>0379 784 509</strong></p>
-                <p>{language === 'vi' ? 'Hỗ trợ khách hàng:' : 'Customer Support:'} <strong>0563 518 922</strong></p>
-                <p>Email: oppohiringplatform@gmail.com</p>
-              </div>
+                <div className="contact-info">
+                  <h4>{language === 'vi' ? 'Liên hệ' : 'Contact'}</h4>
+                  <p>{language === 'vi' ? 'Hotline hệ thống:' : 'System Hotline:'} <strong>0379 784 509</strong></p>
+                  <p>{language === 'vi' ? 'Hỗ trợ khách hàng:' : 'Customer Support:'} <strong>0563 518 922</strong></p>
+                  <p>Email: oppohiringplatform@gmail.com</p>
+                  <p>TikTok: <strong>OpPo</strong></p>
+                  <p>Fanpage: <strong><a href="https://facebook.com/oppo.nentangtuyendung/" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>facebook.com/oppo.nentangtuyendung/</a></strong></p>
+                </div>
 
-            </FooterLeft>
+              </FooterLeft>
 
-            <FooterLinksWrap>
-              <FooterLinkCol $isDark={isDarkMode}>
-                <h4>{language === 'vi' ? 'Về Ốp Pờ' : 'About Ốp Pờ'}</h4>
-                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>{language === 'vi' ? 'Giới thiệu' : 'About Us'}</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>{language === 'vi' ? 'Góc báo chí' : 'Press'}</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>{language === 'vi' ? 'Tuyển dụng' : 'Careers'}</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>{language === 'vi' ? 'Liên hệ' : 'Contact'}</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>{language === 'vi' ? 'Hỏi đáp' : 'FAQ'}</a>
-                <Link to="/policy">{language === 'vi' ? 'Chính sách bảo mật' : 'Privacy Policy'}</Link>
-                <Link to="/policy">{language === 'vi' ? 'Điều khoản dịch vụ' : 'Terms of Service'}</Link>
-              </FooterLinkCol>
+              <FooterLinksWrap>
+                <FooterLinkCol $isDark={isDarkMode}>
+                  <h4>{language === 'vi' ? 'Về Ốp Pờ' : 'About Ốp Pờ'}</h4>
+                  <Link to="/about" target="_blank" rel="noopener noreferrer">{language === 'vi' ? 'Giới thiệu' : 'About Us'}</Link>
+                  <a href="#" onClick={handleCVAction} target="_blank" rel="noopener noreferrer">{language === 'vi' ? 'Góc báo chí' : 'Press'}</a>
+                  <Link to="/contact" target="_blank" rel="noopener noreferrer">{language === 'vi' ? 'Liên hệ' : 'Contact'}</Link>
+                  <a href="#" onClick={handleCVAction} target="_blank" rel="noopener noreferrer">{language === 'vi' ? 'Hỏi đáp' : 'FAQ'}</a>
+                  <Link to="/privacy-policy" target="_blank" rel="noopener noreferrer">{language === 'vi' ? 'Chính sách bảo mật' : 'Privacy Policy'}</Link>
+                  <Link to="/terms-of-service" target="_blank" rel="noopener noreferrer">{language === 'vi' ? 'Điều khoản dịch vụ' : 'Terms of Service'}</Link>
+                </FooterLinkCol>
 
-              <FooterLinkCol $isDark={isDarkMode}>
-                <h4>{language === 'vi' ? 'Hồ sơ và CV' : 'Profile & CV'}</h4>
-                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>{language === 'vi' ? 'Quản lý CV của bạn' : 'Manage Your CV'}</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>{language === 'vi' ? 'Hướng dẫn viết CV' : 'CV Writing Guide'}</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>{language === 'vi' ? 'Review CV' : 'CV Review'}</a>
-                <h4 style={{ marginTop: '24px' }}>{language === 'vi' ? 'Khám phá' : 'Explore'}</h4>
-                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>{language === 'vi' ? 'Ứng dụng di động Ốp Pờ' : 'Ốp Pờ Mobile App'}</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>{language === 'vi' ? 'AI đề xuất công việc phù hợp' : 'AI Job Recommendations'}</a>
-              </FooterLinkCol>
+                <FooterLinkCol $isDark={isDarkMode}>
+                  <h4>{language === 'vi' ? 'Hồ sơ và CV' : 'Profile & CV'}</h4>
+                  <a href="#" onClick={handleCVAction} target="_blank" rel="noopener noreferrer">{language === 'vi' ? 'Quản lý CV của bạn' : 'Manage Your CV'}</a>
+                  <a href="#" onClick={handleCVAction} target="_blank" rel="noopener noreferrer">{language === 'vi' ? 'Hướng dẫn viết CV' : 'CV Writing Guide'}</a>
+                  <a href="#" onClick={handleEmployerAction} target="_blank" rel="noopener noreferrer">{language === 'vi' ? 'Review CV' : 'CV Review'}</a>
+                  <h4 style={{ marginTop: '24px' }}>{language === 'vi' ? 'Khám phá' : 'Explore'}</h4>
+                  <Link to="/app" target="_blank" rel="noopener noreferrer">{language === 'vi' ? 'Ứng dụng di động Ốp Pờ' : 'Ốp Pờ Mobile App'}</Link>
+                  <Link to="/ai-jobs" target="_blank" rel="noopener noreferrer">{language === 'vi' ? 'AI đề xuất công việc phù hợp' : 'AI Job Recommendations'}</Link>
+                </FooterLinkCol>
 
-              <FooterLinkCol $isDark={isDarkMode}>
-                <h4>{language === 'vi' ? 'Tìm việc nhanh - uy tín' : 'Find Jobs Fast'}</h4>
-                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>{language === 'vi' ? 'Việc làm tốt nhất' : 'Best Jobs'}</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>{language === 'vi' ? 'Việc làm lương cao' : 'High Salary Jobs'}</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>{language === 'vi' ? 'Việc làm quản lý' : 'Management Jobs'}</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>{language === 'vi' ? 'Việc làm bán thời gian' : 'Part-time Jobs'}</a>
-              </FooterLinkCol>
+                <FooterLinkCol $isDark={isDarkMode}>
+                  <h4>{language === 'vi' ? 'Tìm việc nhanh - uy tín' : 'Find Jobs Fast'}</h4>
+                  <a href="#" onClick={handleCVAction} target="_blank" rel="noopener noreferrer">{language === 'vi' ? 'Việc làm tốt nhất' : 'Best Jobs'}</a>
+                  <a href="#" onClick={handleCVAction} target="_blank" rel="noopener noreferrer">{language === 'vi' ? 'Việc làm lương cao' : 'High Salary Jobs'}</a>
+                  <a href="#" onClick={handleCVAction} target="_blank" rel="noopener noreferrer">{language === 'vi' ? 'Việc làm quản lý' : 'Management Jobs'}</a>
+                  <a href="#" onClick={handleCVAction} target="_blank" rel="noopener noreferrer">{language === 'vi' ? 'Việc làm bán thời gian' : 'Part-time Jobs'}</a>
+                </FooterLinkCol>
 
-              <FooterLinkCol $isDark={isDarkMode}>
-                <h4>{language === 'vi' ? 'Quy tắc chung' : 'General Rules'}</h4>
-                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>{language === 'vi' ? 'Điều kiện giao dịch chung' : 'General Terms'}</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); setIsDevModalOpen(true); }}>{language === 'vi' ? 'Giá dịch vụ & Cách thanh toán' : 'Pricing & Payment'}</a>
-              </FooterLinkCol>
-            </FooterLinksWrap>
-          </FooterMain>
+                <FooterLinkCol $isDark={isDarkMode}>
+                  <h4>{language === 'vi' ? 'Quy tắc chung' : 'General Rules'}</h4>
+                  <Link to="/terms-of-transaction" target="_blank" rel="noopener noreferrer">{language === 'vi' ? 'Điều kiện giao dịch chung' : 'General Terms'}</Link>
+                  <Link to="/privacy-policy" target="_blank" rel="noopener noreferrer">{language === 'vi' ? 'Chính sách bảo mật' : 'Privacy Policy'}</Link>
+                  <Link to="/terms-of-service" target="_blank" rel="noopener noreferrer">{language === 'vi' ? 'Điều khoản dịch vụ' : 'Terms of Service'}</Link>
+                </FooterLinkCol>
+              </FooterLinksWrap>
+            </FooterMain>
 
-          <FooterBottom $isDark={isDarkMode}>
-            <CompanyDetails $isDark={isDarkMode}>
-              <h3>{language === 'vi' ? 'Công ty Cổ phần Ốp Pờ Việt Nam' : 'Ốp Pờ Vietnam JSC'}</h3>
-              <p><span>📄</span> {language === 'vi' ? 'Giấy phép đăng ký kinh doanh số: 0123456789 cấp ngày 21/02/2026, thay đổi lần thứ 1 ngày 03/03/2026 tại Sở Tài chính Thành phố Hồ Chí Minh' : 'Business Registration No: 0123456789 issued 21/02/2026, amended 03/03/2026 at Ho Chi Minh City Department of Finance'}</p>
-              <p><span>📄</span> {language === 'vi' ? 'Giấy phép hoạt động dịch vụ việc làm số: 123456789/GP-LĐTBXH' : 'Employment Service License No: 123456789/GP-LDTBXH'}</p>
-              <p><span>📍</span> {language === 'vi' ? 'Trụ sở chính: Đại học FPT, Khu Công nghệ cao, Quận 9, TP Thủ Đức, TP HCM' : 'Headquarters: FPT University, Hi-Tech Park, District 9, Thu Duc City, HCMC'}</p>
+            <FooterBottom $isDark={isDarkMode}>
+              <CompanyDetails $isDark={isDarkMode}>
+                <h3>{language === 'vi' ? 'Công ty Cổ phần Ốp Pờ Việt Nam' : 'Ốp Pờ Vietnam JSC'}</h3>
 
-            </CompanyDetails>
+                <p><span>📍</span> {language === 'vi' ? 'Trụ sở chính: Đại học FPT, Khu Công nghệ cao, Quận 9, TP Thủ Đức, TP HCM' : 'Headquarters: FPT University, Hi-Tech Park, District 9, Thu Duc City, HCMC'}</p>
 
-            <QrCodeArea>
-              <img src="/images/qrcode.png" alt="QR Code" onError={(e) => { e.target.src = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://oppocareer.com&format=png&margin=10' }} />
-              <p>https://oppocareer.com</p>
-            </QrCodeArea>
-          </FooterBottom>
+              </CompanyDetails>
 
-          <Copyright $isDark={isDarkMode}>
-            © {new Date().getFullYear()} Ốp Pờ Vietnam JSC. {language === 'vi' ? 'Toàn bộ quyền được bảo lưu.' : 'All rights reserved.'}
-          </Copyright>
-        </Footer>
-      </ScrollContainer>
+              <QrCodeArea>
+                <img src="/images/qrcode.png" alt="QR Code" onError={(e) => { e.target.src = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://oppocareer.com&format=png&margin=10' }} />
+                <p>https://oppocareer.com</p>
+              </QrCodeArea>
+            </FooterBottom>
+
+            <Copyright $isDark={isDarkMode}>
+              © {new Date().getFullYear()} Ốp Pờ Vietnam JSC. {language === 'vi' ? 'Toàn bộ quyền được bảo lưu.' : 'All rights reserved.'}
+            </Copyright>
+          </Footer>
+        </ScrollContainer>
       )}
 
       <UnderDevelopmentModal
