@@ -638,15 +638,24 @@ const EmployersManagement = () => {
       console.log('📥 Loading personnel change requests...');
       const allApps = await applicationService.getAllApplications();
       const pendingChanges = (allApps || []).filter(app => {
-        if (app.status !== 'pending_change') return false;
+        // Accept both explicit pending_change status AND accepted-with-changeRequest (server fallback)
+        const hasPendingChangeStatus = app.status === 'pending_change';
+        const hasChangeRequestData = !!(app.changeRequest || app.change_request ||
+          app.extraFields?.changeRequest || app.extraFields?.change_request);
+        const isAcceptedWithCR = app.status === 'accepted' && hasChangeRequestData;
 
-        // Detect changeRequestStatus under multiple possible keys
-        const crStatus = app.changeRequestStatus || app.change_request_status || app.change_request_status || app.change_request || (app.changeRequest && app.changeRequest.status) || (app.extraFields && (app.extraFields.changeRequestStatus || app.extraFields.change_request_status));
+        // Also include recently finalized ones (approved/rejected within last 7 days) for history
+        const crStatus = app.changeRequestStatus || app.change_request_status ||
+          (app.changeRequest && app.changeRequest.status) ||
+          (app.change_request && app.change_request.status) ||
+          (app.extraFields && (app.extraFields.changeRequestStatus || app.extraFields.change_request_status));
+        const isFinalized = crStatus && ['approved', 'rejected'].includes(String(crStatus).toLowerCase());
+        const isCancelled = crStatus && String(crStatus).toLowerCase() === 'cancelled';
 
-        if (crStatus && ['approved', 'rejected', 'cancelled'].includes(String(crStatus).toLowerCase())) {
-          // Server already finalized this change request — skip it
-          return false;
-        }
+        if (isCancelled) return false;
+        if (!hasPendingChangeStatus && !isAcceptedWithCR && !isFinalized) return false;
+        // For finalized ones, only show if they had changeRequest data
+        if (isFinalized && !hasChangeRequestData) return false;
 
         return true;
       });
@@ -725,7 +734,8 @@ const EmployersManagement = () => {
           ...app,
           companyName: app.companyName || emp?.companyName || 'N/A',
           companyLogo: app.companyLogo || emp?.companyLogo || '',
-          changeRequest: finalCR
+          changeRequest: finalCR,
+          changeRequestStatus: app.changeRequestStatus || app.change_request_status || ''
         };
       });
 
@@ -937,7 +947,7 @@ const EmployersManagement = () => {
   }, [employers]);
 
   const pendingChangeCount = useMemo(() => {
-    return changeRequests.length;
+    return changeRequests.filter(r => !r.changeRequestStatus || r.changeRequestStatus === 'pending').length;
   }, [changeRequests]);
 
   const filteredEmployers = useMemo(() => {
@@ -1407,9 +1417,16 @@ const EmployersManagement = () => {
                             <div style={{ fontSize: '13px' }}>{cr.requestedAt || 'N/A'}</div>
                           </td>
                           <td>
-                            <StatusBadge $status='pending'>
-                              <Clock size={12} />
-                              {language === 'vi' ? 'Chờ duyệt' : 'Pending'}
+                            <StatusBadge $status={
+                              req.changeRequestStatus === 'approved' ? 'approved' :
+                              req.changeRequestStatus === 'rejected' ? 'rejected' : 'pending'
+                            }>
+                              {req.changeRequestStatus === 'approved' && <CheckCircle size={12} />}
+                              {req.changeRequestStatus === 'rejected' && <XCircle size={12} />}
+                              {(!req.changeRequestStatus || req.changeRequestStatus === 'pending') && <Clock size={12} />}
+                              {req.changeRequestStatus === 'approved' && (language === 'vi' ? 'Đã duyệt' : 'Approved')}
+                              {req.changeRequestStatus === 'rejected' && (language === 'vi' ? 'Từ chối' : 'Rejected')}
+                              {(!req.changeRequestStatus || req.changeRequestStatus === 'pending') && (language === 'vi' ? 'Chờ duyệt' : 'Pending')}
                             </StatusBadge>
                           </td>
                           <td>
@@ -1420,12 +1437,16 @@ const EmployersManagement = () => {
                               >
                                 <Eye size={16} />
                               </IconButton>
-                              <ApproveButton onClick={() => handleApproveChange(req.applicationId)}>
-                                <CheckCircle size={16} />
-                              </ApproveButton>
-                              <RejectButton onClick={() => handleRejectChange(req.applicationId)}>
-                                <XCircle size={16} />
-                              </RejectButton>
+                              {(!req.changeRequestStatus || req.changeRequestStatus === 'pending') && (
+                                <>
+                                  <ApproveButton onClick={() => handleApproveChange(req.applicationId)}>
+                                    <CheckCircle size={16} />
+                                  </ApproveButton>
+                                  <RejectButton onClick={() => handleRejectChange(req.applicationId)}>
+                                    <XCircle size={16} />
+                                  </RejectButton>
+                                </>
+                              )}
                             </ActionButtons>
                           </td>
                         </tr>

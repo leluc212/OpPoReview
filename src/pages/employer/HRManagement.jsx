@@ -2817,6 +2817,16 @@ const HRManagement = () => {
   // Load applications from Quick Jobs
   const [realApplications, setRealApplications] = useState([]);
   const [loadingApplications, setLoadingApplications] = useState(false);
+  const [changeRequestStatusOverrides, setChangeRequestStatusOverrides] = useState({});
+  const changeRequestStatusOverridesRef = useRef({});
+
+  const setChangeRequestStatusOverridesSync = (updater) => {
+    setChangeRequestStatusOverrides(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      changeRequestStatusOverridesRef.current = next;
+      return next;
+    });
+  };
 
   // Load jobs from DynamoDB on mount
   useEffect(() => {
@@ -2915,7 +2925,7 @@ const HRManagement = () => {
     };
   }, []);
 
-  const loadApplicationsFromQuickJobs = async () => {
+  const loadApplicationsFromQuickJobs = async (statusOverrides = changeRequestStatusOverrides) => {
     try {
       setLoadingApplications(true);
       console.log('📥 Loading applications from Quick Jobs...');
@@ -2929,7 +2939,6 @@ const HRManagement = () => {
         try {
           const jobApplications = await applicationService.getJobApplications(job.idJob);
 
-          // Add job info to each application
           const applicationsWithJobInfo = jobApplications.map(app => ({
             ...app,
             jobTitle: job.title,
@@ -2947,36 +2956,57 @@ const HRManagement = () => {
         }
       }
 
-      // Merge with local markers for robust behavior while backend is eventually consistent.
       const mergedApplications = allApplications.map(app => {
-        const isCancelledLocally = localStorage.getItem(`cr_cancelled_${app.applicationId}`) === '1';
-        const serverCR = app.changeRequest || app.change_request || null;
-        const serverCRStatus = app.changeRequestStatus || app.change_request_status;
+        const overrideEntry = statusOverrides[String(app.applicationId)];
+        const overrideStatus = typeof overrideEntry === 'string' ? overrideEntry : overrideEntry?.status;
+        const overrideChangeReq = typeof overrideEntry === 'object' ? overrideEntry?.changeRequest : null;
 
-        if (isCancelledLocally || serverCRStatus === 'cancelled') {
-          localStorage.removeItem(`cr_${app.applicationId}`);
+        const serverChangeRequestStatus = String(
+          app.changeRequestStatus ||
+          app.change_request_status ||
+          app.changeRequest?.status ||
+          app.change_request?.status ||
+          app.extraFields?.changeRequestStatus ||
+          app.extraFields?.change_request_status ||
+          ''
+        ).toLowerCase();
+        const isFinalizedChangeRequest = ['approved', 'rejected', 'cancelled'].includes(serverChangeRequestStatus);
+
+        if (overrideStatus === 'pending_change' && overrideChangeReq) {
+          return {
+            ...app,
+            status: 'pending_change',
+            changeRequest: overrideChangeReq,
+            change_request: overrideChangeReq,
+          };
+        }
+
+        if (overrideStatus && ['approved', 'rejected', 'cancelled'].includes(String(overrideStatus).toLowerCase())) {
           return {
             ...app,
             status: 'accepted',
             changeRequest: null,
             change_request: null,
-            changeRequestStatus: 'cancelled',
-            change_request_status: 'cancelled'
+            changeRequestStatus: overrideStatus,
+            change_request_status: overrideStatus,
           };
         }
 
-        const savedCR = localStorage.getItem(`cr_${app.applicationId}`);
-        if (savedCR && !serverCR) {
-          try {
-            return { ...app, changeRequest: JSON.parse(savedCR) };
-          } catch (e) {
-            console.error('Error parsing saved change request:', e);
-          }
+        if (isFinalizedChangeRequest) {
+          return {
+            ...app,
+            status: 'accepted',
+            changeRequest: null,
+            change_request: null,
+            changeRequestStatus: serverChangeRequestStatus,
+            change_request_status: serverChangeRequestStatus,
+          };
         }
+
         return app;
       });
 
-      console.log('✅ Loaded and merged applications:', mergedApplications);
+      console.log('✅ Loaded applications from DB:', mergedApplications);
       setRealApplications(mergedApplications);
     } catch (error) {
       console.error('❌ Error loading applications:', error);
@@ -3034,7 +3064,7 @@ const HRManagement = () => {
           jobId: app.jobId
         };
       });
-  }, [realApplications, language]);
+  }, [realApplications, language, changeRequestStatusOverrides]);
 
   const [activeChatId, setActiveChatId] = useState(null);
   const [currentMessages, setCurrentMessages] = useState([]);
@@ -3054,7 +3084,7 @@ const HRManagement = () => {
 
     const intervalId = setInterval(() => {
       console.log('🔄 Polling latest applications for chat sync...');
-      loadApplicationsFromQuickJobs();
+      loadApplicationsFromQuickJobs(changeRequestStatusOverridesRef.current);
     }, 10000); // refresh applications every 10s
 
     return () => clearInterval(intervalId);
@@ -3172,17 +3202,18 @@ const HRManagement = () => {
           }
         }
 
-        const isCancelledLocally = localStorage.getItem(`cr_cancelled_${app.applicationId}`) === '1';
-        const changeRequestStatus = app.changeRequestStatus || app.change_request_status;
         const effectiveChangeRequest = app.changeRequest || app.change_request || null;
-        const hasPendingChangeRequest = Boolean(effectiveChangeRequest) && !isCancelledLocally && changeRequestStatus !== 'cancelled';
+        const changeRequestStatus = app.changeRequestStatus || app.change_request_status || app.changeRequest?.status || app.change_request?.status || app.extraFields?.changeRequestStatus || app.extraFields?.change_request_status;
+        const normalizedChangeRequestStatus = String(changeRequestStatus || '').toLowerCase();
+        const isFinalizedChangeRequest = ['approved', 'rejected', 'cancelled'].includes(normalizedChangeRequestStatus);
+        const hasPendingChangeRequest = Boolean(effectiveChangeRequest) && !isFinalizedChangeRequest;
 
-        // Map status: pending -> pending_confirmation, pending_change only when request is still active.
+        // Map status: pending -> pending_confirmation, pending_change only when the change request is still active.
         const mappedStatus = app.status === 'pending'
           ? 'pending_confirmation'
-          : ((app.status === 'pending_change' && !isCancelledLocally && changeRequestStatus !== 'cancelled') || hasPendingChangeRequest
+          : (app.status === 'pending_change' || hasPendingChangeRequest)
             ? 'pending_change'
-            : 'active');
+            : 'active';
 
         // Calculate unread count for this application
         let unreadCount = 0;
@@ -3553,21 +3584,21 @@ const HRManagement = () => {
           ? { ...s, status: 'active', changeRequest: null }
           : s
       ));
+      setStaffTabFilter('working');
       setSuccessToastMessage(language === 'vi' ? 'Đã hủy yêu cầu thành công' : 'Request cancelled successfully');
       setShowSuccessToast(true);
-      setStaffTabFilter('working');
       setTimeout(() => setShowSuccessToast(false), 3000);
-      // Refresh from DB to ensure UI reflects server state
-      try {
-        await loadApplicationsFromQuickJobs();
-      } catch (e) {
-        console.warn('Could not reload applications after local cancel:', e);
-      }
+      loadApplicationsFromQuickJobs().catch(() => {});
       return;
     }
 
     try {
       setIsProcessingChange(true);
+      const nextOverrides = {
+        ...changeRequestStatusOverridesRef.current,
+        [String(appId)]: 'cancelled'
+      };
+      setChangeRequestStatusOverridesSync(nextOverrides);
 
       // Update server: status back to 'accepted' and clear changeRequest
       await applicationService.updateApplicationStatus(appId, 'accepted', {
@@ -3575,41 +3606,26 @@ const HRManagement = () => {
         changeRequestStatus: 'cancelled'
       });
 
-      // Persist local cancellation so polling data does not flip back to pending_change.
-      localStorage.setItem(`cr_cancelled_${appId}`, '1');
-      localStorage.removeItem(`cr_${appId}`);
-
-      // Update local state
+      // Update local state immediately so UI responds instantly
       setRealApplications(prev => prev.map(app =>
         String(app.applicationId) === String(appId)
-          ? {
-            ...app,
-            status: 'accepted',
-            change_request: null,
-            changeRequest: null,
-            changeRequestStatus: 'cancelled',
-            change_request_status: 'cancelled'
-          }
+          ? { ...app, status: 'accepted', changeRequest: null, change_request: null, changeRequestStatus: 'cancelled' }
           : app
       ));
-
-      // Keep mock list in sync in case IDs overlap with local/demo rows.
       setHrStaff(prev => prev.map(s =>
-        String(s.id) === String(appId)
-          ? { ...s, status: 'active', changeRequest: null }
-          : s
+        String(s.id) === String(appId) ? { ...s, status: 'active', changeRequest: null } : s
       ));
-      // Refresh DB-backed applications to reflect canonical state
-      try {
-        await loadApplicationsFromQuickJobs();
-      } catch (e) {
-        console.warn('Error reloading applications after cancellation:', e);
-      }
 
+      // Switch tab immediately — don't wait for DB reload
+      setStaffTabFilter('working');
       setSuccessToastMessage(language === 'vi' ? 'Đã hủy yêu cầu thành công' : 'Request cancelled successfully');
       setShowSuccessToast(true);
-      setStaffTabFilter('working');
       setTimeout(() => setShowSuccessToast(false), 3000);
+
+      // Reload from DB in background to sync
+      loadApplicationsFromQuickJobs(nextOverrides).catch(e =>
+        console.warn('Error reloading applications after cancellation:', e)
+      );
     } catch (err) {
       console.error('Error cancelling change request:', err);
       setErrorNotificationMessage(language === 'vi' ? 'Lỗi khi hủy yêu cầu' : 'Error cancelling request');
@@ -5404,23 +5420,25 @@ const HRManagement = () => {
                         sentToAdmin: true
                       };
 
-                      // Save to localStorage for robust persistence despite polling
-                      localStorage.setItem(`cr_${changeRequestStaff.applicationId}`, JSON.stringify(changeReq));
-                      localStorage.removeItem(`cr_cancelled_${changeRequestStaff.applicationId}`);
+                      // Switch tab immediately so the user sees the new request without waiting for sync.
+                      setStaffTabFilter('pending_change');
 
-                      // Sync to server for persistence across reloads/polling
+                      // Store override so polls don't overwrite pending_change state
+                      setChangeRequestStatusOverridesSync(prev => ({
+                        ...prev,
+                        [String(changeRequestStaff.applicationId)]: {
+                          status: 'pending_change',
+                          changeRequest: changeReq
+                        }
+                      }));
+
+                      // Sync to server
                       applicationService.updateApplicationStatus(
                         changeRequestStaff.applicationId,
                         'pending_change',
-                        { changeRequest: changeReq, change_request: changeReq, extraFields: { changeRequest: changeReq } }
+                        { changeRequest: changeReq, changeRequestStatus: 'pending' }
                       ).catch(err => {
-                        console.warn('⚠️ Server might not support pending_change status, falling back to original status:', err);
-                        // Fallback: update status but keep changeRequest in extraFields
-                        applicationService.updateApplicationStatus(
-                          changeRequestStaff.applicationId,
-                          changeRequestStaff.status === 'pending_confirmation' ? 'pending' : 'accepted',
-                          { changeRequest: changeReq, change_request: changeReq, extraFields: { changeRequest: changeReq } }
-                        ).catch(e => console.error('❌ Failed to sync change request even with fallback:', e));
+                        console.error('❌ Failed to sync change request to DB:', err);
                       });
 
                       setRealApplications(prev => prev.map(app =>
@@ -5436,7 +5454,10 @@ const HRManagement = () => {
                       setChangeRequestStaff(null);
                       setChangeRequestReason('');
                       setChangeRequestType('');
-                      setShowChangeRequestSuccess(true);
+                      // Show toast instead of blocking modal
+                      setSuccessToastMessage(language === 'vi' ? 'Yêu cầu thay đổi đã được gửi!' : 'Change request submitted!');
+                      setShowSuccessToast(true);
+                      setTimeout(() => setShowSuccessToast(false), 3000);
                     }}
                     style={{
                       width: '100%',

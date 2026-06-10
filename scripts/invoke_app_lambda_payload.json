@@ -1,0 +1,13 @@
+{
+  "httpMethod": "PUT",
+  "path": "/applications/APP-20260610-3BD1233F/status",
+  "body": "{\"status\":\"accepted\",\"changeRequestStatus\":\"approved\"}",
+  "requestContext": {
+    "authorizer": {
+      "claims": {
+        "sub": "admin-test",
+        "email": "admin@local"
+      }
+    }
+  }
+}

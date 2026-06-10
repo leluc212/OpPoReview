@@ -374,8 +374,7 @@ def update_application_status(event, application_id, user_id, create_response):
             'candidateRating',
             'candidateConfirmed',
             'candidateConfirmedAt',
-            'chatMessages',
-            'acceptedAt'
+            'chatMessages'
         ]
 
         for field in optional_fields:
@@ -392,15 +391,6 @@ def update_application_status(event, application_id, user_id, create_response):
         elif 'extraFields' in body and isinstance(body.get('extraFields'), dict):
             change_req_raw = body['extraFields'].get('changeRequest') or body['extraFields'].get('change_request')
 
-        # Support changeRequestStatus under multiple keys
-        change_req_status = None
-        if 'changeRequestStatus' in body:
-            change_req_status = body.get('changeRequestStatus')
-        elif 'change_request_status' in body:
-            change_req_status = body.get('change_request_status')
-        elif 'extraFields' in body and isinstance(body.get('extraFields'), dict):
-            change_req_status = body['extraFields'].get('changeRequestStatus') or body['extraFields'].get('change_request_status')
-
         # If change request is a JSON string, parse it
         if isinstance(change_req_raw, str):
             try:
@@ -409,28 +399,12 @@ def update_application_status(event, application_id, user_id, create_response):
                 # leave as string if can't parse
                 pass
 
-        # If a changeRequestStatus was provided, persist it
-        if change_req_status is not None:
-            update_expr += ', changeRequestStatus = :changeRequestStatus'
-            expr_attr_values[':changeRequestStatus'] = change_req_status
-
-        # Decide whether to persist or remove the changeRequest payload
-        # Keep changeRequestStatus so finalized requests can still be tracked.
-        remove_change_request = False
         if change_req_raw is not None:
             update_expr += ', changeRequest = :changeRequest'
             expr_attr_values[':changeRequest'] = change_req_raw
-        elif isinstance(change_req_status, str) and change_req_status.lower() in ['approved', 'rejected', 'cancelled']:
-            remove_change_request = True
-
-        print(f"DEBUG: change_req_raw present={change_req_raw is not None}, change_req_status={change_req_status}, remove_change_request={remove_change_request}")
+        
         print(f"DEBUG: updating item with expression: {update_expr}")
         print(f"DEBUG: values: {expr_attr_values}")
-
-        # DynamoDB requires SET and REMOVE as separate clauses in the same expression.
-        # Only remove the payload; the status stays in the item.
-        if remove_change_request:
-            update_expr = update_expr + ' REMOVE changeRequest'
 
         applications_table.update_item(
             Key={'applicationId': application_id},
