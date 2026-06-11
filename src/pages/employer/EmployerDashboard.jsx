@@ -17,6 +17,7 @@ import jobPostService from '../../services/jobPostService';
 import quickJobService from '../../services/quickJobService';
 import applicationService, { getJobApplications } from '../../services/applicationService';
 import candidateProfileService from '../../services/candidateProfileService';
+import experienceService from '../../services/experienceService';
 import { getNotifications } from '../../services/notificationService';
 import { formatRelativeTime } from '../../hooks/useRelativeTime';
 import DynamicTranslate from '../../components/DynamicTranslate';
@@ -543,11 +544,12 @@ const EmployerDashboard = () => {
       setPreviewLoading(true);
       try {
         console.log('🔍 Fetching full profile and applications for candidate:', app.candidateId);
-        const [profile, candidateApps, standardJobs, quickJobs] = await Promise.all([
+        const [profile, candidateApps, standardJobs, quickJobs, approvedExperiences] = await Promise.all([
           candidateProfileService.getProfile(app.candidateId),
           applicationService.getCandidateApplications(app.candidateId).catch(() => []),
           jobPostService.getAllActiveJobs().catch(() => []),
-          quickJobService.getAllActiveQuickJobs().catch(() => [])
+          quickJobService.getAllActiveQuickJobs().catch(() => []),
+          experienceService.getCandidateApprovedExperiences(app.candidateId).catch(() => [])
         ]);
         
         const allJobs = [...standardJobs, ...quickJobs];
@@ -603,6 +605,24 @@ const EmployerDashboard = () => {
             };
           });
 
+        const experienceSummary = profile?.experience?.trim()
+          ? profile.experience
+          : approvedExperiences.length > 0
+            ? approvedExperiences
+                .slice(0, 3)
+                .map(exp => {
+                  const role = exp.jobTitle || 'Kinh nghiệm';
+                  const company = exp.companyName ? ` tại ${exp.companyName}` : '';
+                  const period = exp.isCurrent
+                    ? ' (Hiện tại)'
+                    : (exp.startMonth && exp.startYear)
+                      ? ` (${exp.startMonth}/${exp.startYear}${exp.endMonth && exp.endYear ? ` - ${exp.endMonth}/${exp.endYear}` : ''})`
+                      : '';
+                  return `${role}${company}${period}`;
+                })
+                .join('; ')
+            : prev.experience;
+
         if (profile) {
           setPreviewCandidate(prev => ({
             ...prev,
@@ -612,7 +632,7 @@ const EmployerDashboard = () => {
             phone: profile.phone || prev.phone,
             location: profile.location || prev.location,
             education: profile.education || prev.education,
-            experience: profile.experience || prev.experience,
+            experience: experienceSummary,
             skills: profile.skills || prev.skills,
             bio: profile.bio || prev.bio,
             // Ưu tiên cvUrl từ application (đã được refresh) thay vì profile (có thể hết hạn)

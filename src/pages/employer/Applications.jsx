@@ -14,6 +14,7 @@ import jobPostService from '../../services/jobPostService';
 import quickJobService from '../../services/quickJobService';
 import applicationService from '../../services/applicationService';
 import candidateProfileService from '../../services/candidateProfileService';
+import experienceService from '../../services/experienceService';
 import cvAiService from '../../services/cvAiService';
 import CVPreviewModal from '../../components/CVPreviewModal';
 import DynamicTranslate from '../../components/DynamicTranslate';
@@ -2537,11 +2538,12 @@ const Applications = () => {
       setIsFetchingProfile(true);
       try {
         console.log('🔍 Fetching full profile and applications for candidate:', app.candidateId);
-        const [profile, candidateApps, standardJobs, quickJobs] = await Promise.all([
+        const [profile, candidateApps, standardJobs, quickJobs, approvedExperiences] = await Promise.all([
           candidateProfileService.getProfile(app.candidateId),
           applicationService.getCandidateApplications(app.candidateId).catch(() => []),
           jobPostService.getAllActiveJobs().catch(() => []),
-          quickJobService.getAllActiveQuickJobs().catch(() => [])
+          quickJobService.getAllActiveQuickJobs().catch(() => []),
+          experienceService.getCandidateApprovedExperiences(app.candidateId).catch(() => [])
         ]);
 
         const allJobs = [...standardJobs, ...quickJobs];
@@ -2597,6 +2599,24 @@ const Applications = () => {
             };
           });
 
+        const experienceSummary = profile?.experience?.trim()
+          ? profile.experience
+          : approvedExperiences.length > 0
+            ? approvedExperiences
+                .slice(0, 3)
+                .map(exp => {
+                  const role = exp.jobTitle || 'Kinh nghiệm';
+                  const company = exp.companyName ? ` tại ${exp.companyName}` : '';
+                  const period = exp.isCurrent
+                    ? ' (Hiện tại)'
+                    : (exp.startMonth && exp.startYear)
+                      ? ` (${exp.startMonth}/${exp.startYear}${exp.endMonth && exp.endYear ? ` - ${exp.endMonth}/${exp.endYear}` : ''})`
+                      : '';
+                  return `${role}${company}${period}`;
+                })
+                .join('; ')
+            : prev.experience;
+
         if (profile) {
           console.log('✅ Full profile loaded:', profile);
           // Merge profile info into selectedCandidate
@@ -2608,7 +2628,7 @@ const Applications = () => {
             phone: profile.phone || prev.phone,
             location: profile.location || prev.location,
             education: profile.education || prev.education,
-            experience: profile.experience || prev.experience,
+            experience: experienceSummary,
             skills: profile.skills || prev.skills,
             bio: profile.bio || prev.bio,
             profileImage: profile.profileImage || prev.profileImage,

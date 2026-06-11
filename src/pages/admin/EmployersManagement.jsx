@@ -556,7 +556,6 @@ const EmployersManagement = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [changeRequests, setChangeRequests] = useState([]);
   const [selectedChangeRequest, setSelectedChangeRequest] = useState(null);
-  const [showRawChangePayload, setShowRawChangePayload] = useState(false);
   const [isProcessingChange, setIsProcessingChange] = useState(false);
 
   const loadWithdrawRequests = async () => {
@@ -1805,25 +1804,7 @@ const EmployersManagement = () => {
                     {selectedChangeRequest.changeRequest?.reason || (language === 'vi' ? 'Không có nội dung lý do' : 'No detailed reason provided')}
                   </div>
 
-                  {/* Debug: show raw payload to help identify missing fields */}
-                  <div style={{ marginTop: '8px', textAlign: 'right' }}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        console.log('Selected change request:', selectedChangeRequest);
-                        setShowRawChangePayload(prev => !prev);
-                      }}
-                      style={{ background: 'transparent', border: 'none', color: '#3B82F6', cursor: 'pointer', fontWeight: 600 }}
-                    >
-                      {showRawChangePayload ? (language === 'vi' ? 'Ẩn payload' : 'Hide payload') : (language === 'vi' ? 'Hiện payload thô' : 'Show raw payload')}
-                    </button>
-                  </div>
-
-                  {showRawChangePayload && (
-                    <pre style={{ maxHeight: '220px', overflow: 'auto', background: '#0F172A', color: '#E6EEF8', padding: '12px', borderRadius: '8px', marginTop: '12px', fontSize: '12px' }}>
-                      {JSON.stringify(selectedChangeRequest.changeRequest, null, 2)}
-                    </pre>
-                  )}
+                  {/* Raw payload display removed per request */}
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
