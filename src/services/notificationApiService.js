@@ -14,7 +14,8 @@ export const getNotifications = async (userId, role) => {
       throw new Error('Failed to fetch notifications');
     }
     const data = await response.json();
-    return data;
+    const list = data || [];
+    return list.filter(n => n.type !== 'chat_message');
   } catch (error) {
     console.error('Error fetching notifications:', error);
     return [];

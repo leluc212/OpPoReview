@@ -697,7 +697,7 @@ const CandidatesManagement = () => {
 
   const loadWithdrawRequests = () => {
     const dbRequests = [];
-    
+
     // 1. Gather from candidates list (database)
     if (Array.isArray(candidates)) {
       candidates.forEach(candidate => {
@@ -872,7 +872,7 @@ const CandidatesManagement = () => {
       const profile = await candidateProfileService.getProfile(candidateId);
       if (profile) {
         const existingWithdrawals = profile.withdrawals || [];
-        const updatedWithdrawals = existingWithdrawals.map(w => 
+        const updatedWithdrawals = existingWithdrawals.map(w =>
           w.id === requestId ? { ...w, status: 'approved' } : w
         );
         await candidateProfileService.adminUpdateCandidateProfile(candidateId, {
@@ -884,8 +884,8 @@ const CandidatesManagement = () => {
       const updated = stored.map(req => req.id === requestId ? { ...req, status: 'approved' } : req);
       localStorage.setItem('admin_withdraw_requests', JSON.stringify(updated));
 
-      setWithdrawRequests(prev => 
-        prev.map(req => 
+      setWithdrawRequests(prev =>
+        prev.map(req =>
           req.id === requestId ? { ...req, status: 'approved' } : req
         )
       );
@@ -913,7 +913,7 @@ const CandidatesManagement = () => {
       const profile = await candidateProfileService.getProfile(candidateId);
       if (profile) {
         const existingWithdrawals = profile.withdrawals || [];
-        const updatedWithdrawals = existingWithdrawals.map(w => 
+        const updatedWithdrawals = existingWithdrawals.map(w =>
           w.id === requestId ? { ...w, status: 'rejected' } : w
         );
         await candidateProfileService.adminUpdateCandidateProfile(candidateId, {
@@ -925,8 +925,8 @@ const CandidatesManagement = () => {
       const updated = stored.map(req => req.id === requestId ? { ...req, status: 'rejected' } : req);
       localStorage.setItem('admin_withdraw_requests', JSON.stringify(updated));
 
-      setWithdrawRequests(prev => 
-        prev.map(req => 
+      setWithdrawRequests(prev =>
+        prev.map(req =>
           req.id === requestId ? { ...req, status: 'rejected' } : req
         )
       );
@@ -1040,7 +1040,7 @@ const CandidatesManagement = () => {
   useEffect(() => {
     loadData();
     // Load pending experience count for badge
-    getAllExperiences('PENDING').then(data => setPendingExpCount(data.length)).catch(() => {});
+    getAllExperiences('PENDING').then(data => setPendingExpCount(data.length)).catch(() => { });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -1080,7 +1080,7 @@ const CandidatesManagement = () => {
   });
 
   const filteredWithdrawRequests = withdrawRequests.filter(req => {
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       req.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       req.bankName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       req.accountNumber.includes(searchTerm);
@@ -1266,14 +1266,14 @@ const CandidatesManagement = () => {
         </StatsGrid>
 
         <TabsContainer>
-          <Tab 
+          <Tab
             $active={activeTab === 'candidates'}
             onClick={() => setActiveTab('candidates')}
           >
             <Users size={18} style={{ marginRight: '8px' }} />
             {language === 'vi' ? 'Danh sách ứng viên' : 'Candidates List'}
           </Tab>
-          <Tab 
+          <Tab
             $active={activeTab === 'withdrawals'}
             onClick={() => setActiveTab('withdrawals')}
           >
@@ -1542,327 +1542,327 @@ const CandidatesManagement = () => {
         )}
 
         {activeTab !== 'experiences' && (
-        <FilterSection>
-          <SearchBox>            <Search />
-            <input
-              type="text"
-              placeholder={language === 'vi' ? 'Tìm kiếm theo tên hoặc email...' : 'Search by name or email...'}
-              value={searchTerm}
-              onChange={handleSearchChange}
-            />
-          </SearchBox>
-          <ReloadButton onClick={handleRefresh} disabled={loading || verifLoading}>
-            <RefreshCw size={18} className={(loading || verifLoading) ? 'spinning' : ''} />
-            {(loading || verifLoading)
-              ? (language === 'vi' ? 'Đang tải...' : 'Loading...')
-              : (language === 'vi' ? 'Làm mới' : 'Refresh')
-            }
-          </ReloadButton>
-        </FilterSection>
+          <FilterSection>
+            <SearchBox>            <Search />
+              <input
+                type="text"
+                placeholder={language === 'vi' ? 'Tìm kiếm theo tên hoặc email...' : 'Search by name or email...'}
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+            </SearchBox>
+            <ReloadButton onClick={handleRefresh} disabled={loading || verifLoading}>
+              <RefreshCw size={18} className={(loading || verifLoading) ? 'spinning' : ''} />
+              {(loading || verifLoading)
+                ? (language === 'vi' ? 'Đang tải...' : 'Loading...')
+                : (language === 'vi' ? 'Làm mới' : 'Refresh')
+              }
+            </ReloadButton>
+          </FilterSection>
         )}
 
         {activeTab === 'experiences' ? (
           <ExperienceManagement embedded />
         ) : (
-        <TableWrapper>
-          {activeTab === 'candidates' ? (
-            <Table>
-              <thead>
-                <tr>
-                  <th style={{ width: '60px', textAlign: 'center' }}>{language === 'vi' ? 'STT' : 'No.'}</th>
-                  <th>{language === 'vi' ? 'Tên ứng viên' : 'Candidate Name'}</th>
-                  <th>{language === 'vi' ? 'Email' : 'Email'}</th>
-                  <th>{language === 'vi' ? 'Số điện thoại' : 'Phone Number'}</th>
-                  <th>{language === 'vi' ? 'Xác nhận 4 bước eKYC' : 'eKYC 4 Steps Verification'}</th>
-                  <th>{language === 'vi' ? 'Ngày tham gia' : 'Join Date'}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentCandidates.map((candidate, index) => (
-                  <tr
-                    key={candidate.id}
-                    onClick={() => navigate(`/admin/candidates/${candidate.id}`)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <td style={{ textAlign: 'center', fontWeight: 600, color: '#6b7280' }}>
-                      {startIndex + index + 1}
-                    </td>
-                    <td style={{ fontWeight: 600 }}>{candidate.name}</td>
-                    <td>{candidate.email}</td>
-                    <td style={{ color: '#64748b' }}>
-                      {candidate.phone}
-                    </td>
-                    <td>
-                      <VerificationBadge $verified={candidate.ekycVerified}>
-                        {candidate.ekycVerified ? <CheckSquare /> : <XSquare />}
-                        {candidate.ekycVerified
-                          ? (language === 'vi' ? 'Đã xác thực' : 'Verified')
-                          : (language === 'vi' ? 'Chưa xác thực' : 'Not Verified')
-                        }
-                      </VerificationBadge>
-                    </td>
-                    <td>
-                      <DateText>
-                        <Calendar size={14} />
-                        {candidate.joined}
-                      </DateText>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          ) : activeTab === 'withdrawals' ? (
-            <Table>
-              <thead>
-                <tr>
-                  <th>{language === 'vi' ? 'Ứng viên' : 'Candidate'}</th>
-                  <th>{language === 'vi' ? 'Số tiền rút' : 'Withdraw Amount'}</th>
-                  <th>{language === 'vi' ? 'Thông tin thụ hưởng' : 'Beneficiary Details'}</th>
-                  <th>{language === 'vi' ? 'Ngày yêu cầu' : 'Requested Date'}</th>
-                  <th>{language === 'vi' ? 'Trạng thái' : 'Status'}</th>
-                  <th>{language === 'vi' ? 'Thao tác' : 'Actions'}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentWithdrawRequests.map((req, index) => (
-                  <tr key={req.id}>
-                    <td>
-                      <div style={{ fontWeight: 600 }}>{req.companyName}</div>
-                      <div style={{ fontSize: '12px', color: '#64748b' }}>ID: {req.employerId}</div>
-                    </td>
-                    <td>
-                      <span style={{ fontWeight: 800, color: '#b45309', fontSize: '15px' }}>
-                        -{req.amount.toLocaleString('vi-VN')} VND
-                      </span>
-                    </td>
-                    <td>
-                      <div style={{ fontSize: '13px', lineHeight: '1.5' }}>
-                        <div><strong>NH:</strong> {req.bankName}</div>
-                        <div><strong>STK:</strong> {req.accountNumber}</div>
-                        <div style={{ textTransform: 'uppercase', color: '#64748B', fontWeight: 600 }}>
-                          <strong>Tên:</strong> {req.accountName}
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Calendar size={12} />
-                        {new Date(req.createdAt).toLocaleDateString('vi-VN')}
-                      </div>
-                    </td>
-                    <td>
-                      <StatusBadge $status={req.status}>
-                        {req.status === 'approved' && <CheckSquare size={12} />}
-                        {req.status === 'pending' && <Clock size={12} />}
-                        {req.status === 'rejected' && <XCircle size={12} />}
-                        {getApprovalStatusText(req.status)}
-                      </StatusBadge>
-                    </td>
-                    <td>
-                      {req.status === 'pending' ? (
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <ApproveButton onClick={() => handleApproveWithdrawal(req.id)}>
-                            <CheckCircle size={16} />
-                            {language === 'vi' ? 'Duyệt' : 'Approve'}
-                          </ApproveButton>
-                          <RejectButton onClick={() => handleRejectWithdrawal(req.id)}>
-                            <XCircle size={16} />
-                            {language === 'vi' ? 'Từ chối' : 'Reject'}
-                          </RejectButton>
-                        </div>
-                      ) : (
-                        <span style={{ color: '#94a3b8', fontSize: '13px', fontStyle: 'italic' }}>
-                          {language === 'vi' ? 'Đã xử lý' : 'Processed'}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-                {currentWithdrawRequests.length === 0 && (
+          <TableWrapper>
+            {activeTab === 'candidates' ? (
+              <Table>
+                <thead>
                   <tr>
-                    <td colSpan="6" style={{ textAlign: 'center', padding: '32px', color: '#64748B' }}>
-                      {language === 'vi' ? 'Không tìm thấy yêu cầu rút tiền nào' : 'No withdrawal requests found'}
-                    </td>
+                    <th style={{ width: '60px', textAlign: 'center' }}>{language === 'vi' ? 'STT' : 'No.'}</th>
+                    <th>{language === 'vi' ? 'Tên ứng viên' : 'Candidate Name'}</th>
+                    <th>{language === 'vi' ? 'Email' : 'Email'}</th>
+                    <th>{language === 'vi' ? 'Số điện thoại' : 'Phone Number'}</th>
+                    <th>{language === 'vi' ? 'Xác nhận 4 bước eKYC' : 'eKYC 4 Steps Verification'}</th>
+                    <th>{language === 'vi' ? 'Ngày tham gia' : 'Join Date'}</th>
                   </tr>
-                )}
-              </tbody>
-            </Table>
-          ) : (
-            /* ── Tab: Duyệt Tuyển Gấp ── */
-            <Table>
-              <thead>
-                <tr>
-                  <th>{language === 'vi' ? 'Ứng viên' : 'Candidate'}</th>
-                  <th>{language === 'vi' ? 'Liên hệ' : 'Contact'}</th>
-                  <th>{language === 'vi' ? 'eKYC' : 'eKYC'}</th>
-                  <th>{language === 'vi' ? 'Hồ sơ' : 'Profile'}</th>
-                  <th>{language === 'vi' ? 'Trạng thái' : 'Status'}</th>
-                  <th>{language === 'vi' ? 'Thao tác' : 'Actions'}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {verifLoading ? (
-                  <tr><td colSpan="6" style={{ textAlign: 'center', padding: '32px', color: '#64748b' }}>
-                    {language === 'vi' ? 'Đang tải...' : 'Loading...'}
-                  </td></tr>
-                ) : verifications.length === 0 ? (
-                  <tr><td colSpan="6" style={{ textAlign: 'center', padding: '32px', color: '#64748b' }}>
-                    {language === 'vi' ? 'Không có yêu cầu xác minh nào' : 'No verification requests found'}
-                  </td></tr>
-                ) : verifications
+                </thead>
+                <tbody>
+                  {currentCandidates.map((candidate, index) => (
+                    <tr
+                      key={candidate.id}
+                      onClick={() => navigate(`/admin/candidates/${candidate.id}`)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <td style={{ textAlign: 'center', fontWeight: 600, color: '#6b7280' }}>
+                        {startIndex + index + 1}
+                      </td>
+                      <td style={{ fontWeight: 600 }}>{candidate.name}</td>
+                      <td>{candidate.email}</td>
+                      <td style={{ color: '#64748b' }}>
+                        {candidate.phone}
+                      </td>
+                      <td>
+                        <VerificationBadge $verified={candidate.ekycVerified}>
+                          {candidate.ekycVerified ? <CheckSquare /> : <XSquare />}
+                          {candidate.ekycVerified
+                            ? (language === 'vi' ? 'Đã xác thực' : 'Verified')
+                            : (language === 'vi' ? 'Chưa xác thực' : 'Not Verified')
+                          }
+                        </VerificationBadge>
+                      </td>
+                      <td>
+                        <DateText>
+                          <Calendar size={14} />
+                          {candidate.joined}
+                        </DateText>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            ) : activeTab === 'withdrawals' ? (
+              <Table>
+                <thead>
+                  <tr>
+                    <th>{language === 'vi' ? 'Ứng viên' : 'Candidate'}</th>
+                    <th>{language === 'vi' ? 'Số tiền rút' : 'Withdraw Amount'}</th>
+                    <th>{language === 'vi' ? 'Thông tin thụ hưởng' : 'Beneficiary Details'}</th>
+                    <th>{language === 'vi' ? 'Ngày yêu cầu' : 'Requested Date'}</th>
+                    <th>{language === 'vi' ? 'Trạng thái' : 'Status'}</th>
+                    <th>{language === 'vi' ? 'Thao tác' : 'Actions'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentWithdrawRequests.map((req, index) => (
+                    <tr key={req.id}>
+                      <td>
+                        <div style={{ fontWeight: 600 }}>{req.companyName}</div>
+                        <div style={{ fontSize: '12px', color: '#64748b' }}>ID: {req.employerId}</div>
+                      </td>
+                      <td>
+                        <span style={{ fontWeight: 800, color: '#b45309', fontSize: '15px' }}>
+                          -{req.amount.toLocaleString('vi-VN')} VND
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{ fontSize: '13px', lineHeight: '1.5' }}>
+                          <div><strong>NH:</strong> {req.bankName}</div>
+                          <div><strong>STK:</strong> {req.accountNumber}</div>
+                          <div style={{ textTransform: 'uppercase', color: '#64748B', fontWeight: 600 }}>
+                            <strong>Tên:</strong> {req.accountName}
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <Calendar size={12} />
+                          {new Date(req.createdAt).toLocaleDateString('vi-VN')}
+                        </div>
+                      </td>
+                      <td>
+                        <StatusBadge $status={req.status}>
+                          {req.status === 'approved' && <CheckSquare size={12} />}
+                          {req.status === 'pending' && <Clock size={12} />}
+                          {req.status === 'rejected' && <XCircle size={12} />}
+                          {getApprovalStatusText(req.status)}
+                        </StatusBadge>
+                      </td>
+                      <td>
+                        {req.status === 'pending' ? (
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <ApproveButton onClick={() => handleApproveWithdrawal(req.id)}>
+                              <CheckCircle size={16} />
+                              {language === 'vi' ? 'Duyệt' : 'Approve'}
+                            </ApproveButton>
+                            <RejectButton onClick={() => handleRejectWithdrawal(req.id)}>
+                              <XCircle size={16} />
+                              {language === 'vi' ? 'Từ chối' : 'Reject'}
+                            </RejectButton>
+                          </div>
+                        ) : (
+                          <span style={{ color: '#94a3b8', fontSize: '13px', fontStyle: 'italic' }}>
+                            {language === 'vi' ? 'Đã xử lý' : 'Processed'}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                  {currentWithdrawRequests.length === 0 && (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: 'center', padding: '32px', color: '#64748B' }}>
+                        {language === 'vi' ? 'Không tìm thấy yêu cầu rút tiền nào' : 'No withdrawal requests found'}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+            ) : (
+              /* ── Tab: Duyệt Tuyển Gấp ── */
+              <Table>
+                <thead>
+                  <tr>
+                    <th>{language === 'vi' ? 'Ứng viên' : 'Candidate'}</th>
+                    <th>{language === 'vi' ? 'Liên hệ' : 'Contact'}</th>
+                    <th>{language === 'vi' ? 'eKYC' : 'eKYC'}</th>
+                    <th>{language === 'vi' ? 'Hồ sơ' : 'Profile'}</th>
+                    <th>{language === 'vi' ? 'Trạng thái' : 'Status'}</th>
+                    <th>{language === 'vi' ? 'Thao tác' : 'Actions'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {verifLoading ? (
+                    <tr><td colSpan="6" style={{ textAlign: 'center', padding: '32px', color: '#64748b' }}>
+                      {language === 'vi' ? 'Đang tải...' : 'Loading...'}
+                    </td></tr>
+                  ) : verifications.length === 0 ? (
+                    <tr><td colSpan="6" style={{ textAlign: 'center', padding: '32px', color: '#64748b' }}>
+                      {language === 'vi' ? 'Không có yêu cầu xác minh nào' : 'No verification requests found'}
+                    </td></tr>
+                  ) : verifications
                     .filter(v => !searchTerm || v.name.toLowerCase().includes(searchTerm.toLowerCase()) || v.email.toLowerCase().includes(searchTerm.toLowerCase()))
                     .map((v, index) => {
                       const colorScheme = getColorScheme(index);
                       const initials = getCandidateInitials(v.name);
                       return (
-                  <tr key={v.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/admin/candidates/${v.id}`)}>
-                    <td>
-                      <CandidateInfo>
-                        <CandidateAvatar $bgColor={colorScheme.bg} $color={colorScheme.color}>
-                          {v.avatar ? <img src={v.avatar} alt={v.name} /> : initials}
-                        </CandidateAvatar>
-                        <CandidateDetails>
-                          <CandidateName>{v.name}</CandidateName>
-                          <CandidateMeta>ID: {v.id?.slice(0, 16)}...</CandidateMeta>
-                        </CandidateDetails>
-                      </CandidateInfo>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '13px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#64748B' }}>
-                          <Mail size={12} />
-                          {v.email}
-                        </div>
-                        {v.phone && v.phone !== 'N/A' && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#64748B' }}>
-                            <Phone size={12} />
-                            {v.phone}
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      <VerificationBadge $verified={v.kycDone}>
-                        {v.kycDone ? <CheckSquare /> : <XSquare />}
-                        {v.kycDone ? (language === 'vi' ? 'Đã xác thực' : 'Verified') : (language === 'vi' ? 'Chưa' : 'No')}
-                      </VerificationBadge>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 60, height: 6, background: '#e5e7eb', borderRadius: 3, overflow: 'hidden' }}>
-                          <div style={{ height: '100%', width: `${v.profileCompletion}%`, background: v.profileCompletion >= 60 ? '#10b981' : '#f59e0b', borderRadius: 3 }} />
-                        </div>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: v.profileCompletion >= 60 ? '#10b981' : '#f59e0b' }}>{v.profileCompletion}%</span>
-                      </div>
-                    </td>
-                    <td>
-                      <StatusBadge $status={v.verificationStatus === 'SUBMITTED' ? 'pending' : v.verificationStatus === 'APPROVED' ? 'approved' : 'rejected'}>
-                        {v.verificationStatus === 'SUBMITTED' && <Clock size={12} />}
-                        {v.verificationStatus === 'APPROVED' && <CheckCircle size={12} />}
-                        {v.verificationStatus === 'REJECTED' && <XCircle size={12} />}
-                        {v.verificationStatus === 'SUBMITTED' && (language === 'vi' ? 'Chờ duyệt' : 'Pending')}
-                        {v.verificationStatus === 'APPROVED' && (language === 'vi' ? 'Đã duyệt' : 'Approved')}
-                        {v.verificationStatus === 'REJECTED' && (language === 'vi' ? 'Từ chối' : 'Rejected')}
-                      </StatusBadge>
-                    </td>
-                    <td onClick={e => e.stopPropagation()}>
-                      <ActionButtons>
-                        {v.verificationStatus === 'SUBMITTED' && (
-                          <>
-                            <ApproveButton onClick={() => handleApproveVerif(v.id)}>
-                              <CheckCircle size={16} />
-                              {language === 'vi' ? 'Duyệt' : 'Approve'}
-                            </ApproveButton>
-                            <RejectButton onClick={() => handleRejectVerif(v.id)}>
-                              <XCircle size={16} />
-                              {language === 'vi' ? 'Từ chối' : 'Reject'}
-                            </RejectButton>
-                          </>
-                        )}
-                        {v.verificationStatus === 'APPROVED' && (
-                          <RejectButton onClick={() => handleDeactivateVerif(v.id)}>
-                            <XCircle size={16} />
-                            {language === 'vi' ? 'Hủy kích hoạt' : 'Deactivate'}
-                          </RejectButton>
-                        )}
-                        <IconButton
-                          title={language === 'vi' ? 'Xem chi tiết' : 'View details'}
-                          onClick={() => navigate(`/admin/candidates/${v.id}`)}
-                        >
-                          <Eye size={16} />
-                        </IconButton>
-                      </ActionButtons>
-                    </td>
-                  </tr>
+                        <tr key={v.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/admin/candidates/${v.id}`)}>
+                          <td>
+                            <CandidateInfo>
+                              <CandidateAvatar $bgColor={colorScheme.bg} $color={colorScheme.color}>
+                                {v.avatar ? <img src={v.avatar} alt={v.name} /> : initials}
+                              </CandidateAvatar>
+                              <CandidateDetails>
+                                <CandidateName>{v.name}</CandidateName>
+                                <CandidateMeta>ID: {v.id?.slice(0, 16)}...</CandidateMeta>
+                              </CandidateDetails>
+                            </CandidateInfo>
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '13px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#64748B' }}>
+                                <Mail size={12} />
+                                {v.email}
+                              </div>
+                              {v.phone && v.phone !== 'N/A' && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#64748B' }}>
+                                  <Phone size={12} />
+                                  {v.phone}
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                          <td>
+                            <VerificationBadge $verified={v.kycDone}>
+                              {v.kycDone ? <CheckSquare /> : <XSquare />}
+                              {v.kycDone ? (language === 'vi' ? 'Đã xác thực' : 'Verified') : (language === 'vi' ? 'Chưa' : 'No')}
+                            </VerificationBadge>
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <div style={{ width: 60, height: 6, background: '#e5e7eb', borderRadius: 3, overflow: 'hidden' }}>
+                                <div style={{ height: '100%', width: `${v.profileCompletion}%`, background: v.profileCompletion >= 60 ? '#10b981' : '#f59e0b', borderRadius: 3 }} />
+                              </div>
+                              <span style={{ fontSize: 12, fontWeight: 700, color: v.profileCompletion >= 60 ? '#10b981' : '#f59e0b' }}>{v.profileCompletion}%</span>
+                            </div>
+                          </td>
+                          <td>
+                            <StatusBadge $status={v.verificationStatus === 'SUBMITTED' ? 'pending' : v.verificationStatus === 'APPROVED' ? 'approved' : 'rejected'}>
+                              {v.verificationStatus === 'SUBMITTED' && <Clock size={12} />}
+                              {v.verificationStatus === 'APPROVED' && <CheckCircle size={12} />}
+                              {v.verificationStatus === 'REJECTED' && <XCircle size={12} />}
+                              {v.verificationStatus === 'SUBMITTED' && (language === 'vi' ? 'Chờ duyệt' : 'Pending')}
+                              {v.verificationStatus === 'APPROVED' && (language === 'vi' ? 'Đã duyệt' : 'Approved')}
+                              {v.verificationStatus === 'REJECTED' && (language === 'vi' ? 'Từ chối' : 'Rejected')}
+                            </StatusBadge>
+                          </td>
+                          <td onClick={e => e.stopPropagation()}>
+                            <ActionButtons>
+                              {v.verificationStatus === 'SUBMITTED' && (
+                                <>
+                                  <ApproveButton onClick={() => handleApproveVerif(v.id)}>
+                                    <CheckCircle size={16} />
+                                    {language === 'vi' ? 'Duyệt' : 'Approve'}
+                                  </ApproveButton>
+                                  <RejectButton onClick={() => handleRejectVerif(v.id)}>
+                                    <XCircle size={16} />
+                                    {language === 'vi' ? 'Từ chối' : 'Reject'}
+                                  </RejectButton>
+                                </>
+                              )}
+                              {v.verificationStatus === 'APPROVED' && (
+                                <RejectButton onClick={() => handleDeactivateVerif(v.id)}>
+                                  <XCircle size={16} />
+                                  {language === 'vi' ? 'Hủy kích hoạt' : 'Deactivate'}
+                                </RejectButton>
+                              )}
+                              <IconButton
+                                title={language === 'vi' ? 'Xem chi tiết' : 'View details'}
+                                onClick={() => navigate(`/admin/candidates/${v.id}`)}
+                              >
+                                <Eye size={16} />
+                              </IconButton>
+                            </ActionButtons>
+                          </td>
+                        </tr>
                       );
                     })}
-              </tbody>
-            </Table>
-          )}
-        </TableWrapper>
+                </tbody>
+              </Table>
+            )}
+          </TableWrapper>
         )}
 
         {activeTab !== 'experiences' && (
-        <PaginationContainer>
-          <PaginationInfo>
-            {language === 'vi'
-              ? `Đang xem ${startIndex + 1}-${Math.min(endIndex, activeTab === 'withdrawals' ? filteredWithdrawRequests.length : activeTab === 'verifications' ? verifications.length : filteredCandidates.length)} trên ${activeTab === 'withdrawals' ? filteredWithdrawRequests.length : activeTab === 'verifications' ? verifications.length : filteredCandidates.length} kết quả`
-              : `Showing ${startIndex + 1}-${Math.min(endIndex, activeTab === 'withdrawals' ? filteredWithdrawRequests.length : activeTab === 'verifications' ? verifications.length : filteredCandidates.length)} of ${activeTab === 'withdrawals' ? filteredWithdrawRequests.length : activeTab === 'verifications' ? verifications.length : filteredCandidates.length} results`
-            }
-          </PaginationInfo>
+          <PaginationContainer>
+            <PaginationInfo>
+              {language === 'vi'
+                ? `Đang xem ${startIndex + 1}-${Math.min(endIndex, activeTab === 'withdrawals' ? filteredWithdrawRequests.length : activeTab === 'verifications' ? verifications.length : filteredCandidates.length)} trên ${activeTab === 'withdrawals' ? filteredWithdrawRequests.length : activeTab === 'verifications' ? verifications.length : filteredCandidates.length} kết quả`
+                : `Showing ${startIndex + 1}-${Math.min(endIndex, activeTab === 'withdrawals' ? filteredWithdrawRequests.length : activeTab === 'verifications' ? verifications.length : filteredCandidates.length)} of ${activeTab === 'withdrawals' ? filteredWithdrawRequests.length : activeTab === 'verifications' ? verifications.length : filteredCandidates.length} results`
+              }
+            </PaginationInfo>
 
-          <PaginationButtons>
-            <PageButton
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-            >
-              {language === 'vi' ? '← Trước' : '← Previous'}
-            </PageButton>
+            <PaginationButtons>
+              <PageButton
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+              >
+                {language === 'vi' ? '← Trước' : '← Previous'}
+              </PageButton>
 
-            {/* First page */}
-            {currentPage > 3 && (
-              <>
-                <PageButton onClick={() => setCurrentPage(1)}>1</PageButton>
-                <PageEllipsis>...</PageEllipsis>
-              </>
-            )}
+              {/* First page */}
+              {currentPage > 3 && (
+                <>
+                  <PageButton onClick={() => setCurrentPage(1)}>1</PageButton>
+                  <PageEllipsis>...</PageEllipsis>
+                </>
+              )}
 
-            {/* Page numbers around current page */}
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter(page => {
-                return page === currentPage ||
-                  page === currentPage - 1 ||
-                  page === currentPage + 1 ||
-                  (page === 1 && currentPage <= 2) ||
-                  (page === totalPages && currentPage >= totalPages - 1);
-              })
-              .map(page => (
-                <PageButton
-                  key={page}
-                  $active={page === currentPage}
-                  onClick={() => setCurrentPage(page)}
-                >
-                  {page}
-                </PageButton>
-              ))
-            }
+              {/* Page numbers around current page */}
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(page => {
+                  return page === currentPage ||
+                    page === currentPage - 1 ||
+                    page === currentPage + 1 ||
+                    (page === 1 && currentPage <= 2) ||
+                    (page === totalPages && currentPage >= totalPages - 1);
+                })
+                .map(page => (
+                  <PageButton
+                    key={page}
+                    $active={page === currentPage}
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </PageButton>
+                ))
+              }
 
-            {/* Last page */}
-            {currentPage < totalPages - 2 && (
-              <>
-                <PageEllipsis>...</PageEllipsis>
-                <PageButton onClick={() => setCurrentPage(totalPages)}>{totalPages}</PageButton>
-              </>
-            )}
+              {/* Last page */}
+              {currentPage < totalPages - 2 && (
+                <>
+                  <PageEllipsis>...</PageEllipsis>
+                  <PageButton onClick={() => setCurrentPage(totalPages)}>{totalPages}</PageButton>
+                </>
+              )}
 
-            <PageButton
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-            >
-              {language === 'vi' ? 'Sau →' : 'Next →'}
-            </PageButton>
-          </PaginationButtons>
-        </PaginationContainer>
+              <PageButton
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+              >
+                {language === 'vi' ? 'Sau →' : 'Next →'}
+              </PageButton>
+            </PaginationButtons>
+          </PaginationContainer>
         )}
       </PageContainer>
     </DashboardLayout>

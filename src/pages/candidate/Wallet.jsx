@@ -735,15 +735,15 @@ const Wallet = () => {
   const loadWalletData = async () => {
     try {
       setIsLoading(true);
-      
+
       const [profile, apps, realJobs] = await Promise.all([
         candidateProfileService.getMyProfile().catch(() => null),
         applicationService.getMyCandidateApplications().catch(() => []),
         quickJobService.getAllQuickJobs().catch(() => [])
       ]);
-      
+
       setCandidateProfile(profile);
-      
+
       // Calculate dynamic income transactions from completed applications in database
       const incomeTransactions = apps
         .filter(app => app.status === 'completed')
@@ -753,7 +753,7 @@ const Wallet = () => {
           const candidateAmount = Math.round(totalAmount * 0.85);
           const companyName = job?.companyName || job?.employerName || 'Nhà tuyển dụng';
           const jobTitle = job?.title || 'Công việc tuyển gấp';
-          
+
           return {
             id: `income-${app.applicationId || app.id}`,
             type: 'income',
@@ -777,7 +777,7 @@ const Wallet = () => {
         const currentStatus = (w.status && w.status !== 'pending')
           ? w.status
           : (adminReq && adminReq.status ? adminReq.status : (w.status || 'pending'));
-        
+
         // Add the main withdrawal transaction (expense)
         withdrawalTransactions.push({
           id: w.id || `withdraw-${w.date}`,
@@ -795,8 +795,8 @@ const Wallet = () => {
             id: `refund-${w.id || w.date}`,
             type: 'income',
             title: language === 'vi' ? 'Hoàn tiền rút chi tiêu' : 'Refund of withdrawal',
-            description: language === 'vi' 
-              ? `Hoàn trả giao dịch rút tiền bị từ chối` 
+            description: language === 'vi'
+              ? `Hoàn trả giao dịch rút tiền bị từ chối`
               : `Refund for rejected withdrawal request`,
             amount: Math.abs(Number(w.amount || 0)), // Positive refund amount
             date: w.date,
@@ -808,9 +808,9 @@ const Wallet = () => {
       // Merge and sort
       const mergedTx = [...incomeTransactions, ...withdrawalTransactions];
       mergedTx.sort((a, b) => new Date(b.date) - new Date(a.date));
-      
+
       setTransactions(mergedTx);
-      
+
       // Sums calculation - correctly compute available balance by only counting approved/pending withdrawals
       const sumIncome = incomeTransactions.reduce((sum, tx) => sum + tx.amount, 0);
       const sumWithdrawn = savedWithdrawals
@@ -822,14 +822,14 @@ const Wallet = () => {
           return currentStatus !== 'rejected';
         })
         .reduce((sum, w) => sum + Math.abs(Number(w.amount || 0)), 0);
-      
+
       const currentBalance = sumIncome - sumWithdrawn;
-      
+
       setBalance(currentBalance);
       setTotalIncome(sumIncome);
       setTotalWithdrawn(sumWithdrawn);
       setTransactionCount(mergedTx.length);
-      
+
     } catch (err) {
       console.error('Error loading wallet data:', err);
     } finally {
@@ -847,16 +847,16 @@ const Wallet = () => {
       alert(language === 'vi' ? 'Thông tin rút tiền không hợp lệ!' : 'Invalid withdrawal details!');
       return;
     }
-    
+
     try {
       setWithdrawLoading(true);
-      
+
       const newWithdrawal = {
         id: `WITHDRAW-${Date.now()}`,
         type: 'expense',
         title: language === 'vi' ? 'Rút tiền về ngân hàng' : 'Withdraw to bank',
-        description: language === 'vi' 
-          ? `Chuyển về tài khoản ${withdrawBankName} - ${withdrawAccountNumber}` 
+        description: language === 'vi'
+          ? `Chuyển về tài khoản ${withdrawBankName} - ${withdrawAccountNumber}`
           : `Transfer to ${withdrawBankName} - ${withdrawAccountNumber}`,
         amount: -amountNum,
         date: new Date().toISOString(),
@@ -869,7 +869,7 @@ const Wallet = () => {
       // 1. Save to candidate profile in DynamoDB database
       const existingWithdrawals = candidateProfile?.withdrawals || [];
       const updatedWithdrawals = [newWithdrawal, ...existingWithdrawals];
-      
+
       await candidateProfileService.updateProfile({
         withdrawals: updatedWithdrawals
       });
@@ -888,7 +888,7 @@ const Wallet = () => {
         createdAt: new Date().toISOString(),
         isCandidate: true // Flag to distinguish candidate from employer in Admin Panel
       };
-      
+
       const adminRequests = JSON.parse(localStorage.getItem('admin_withdraw_requests') || '[]');
       adminRequests.unshift(newAdminRequest);
       localStorage.setItem('admin_withdraw_requests', JSON.stringify(adminRequests));
@@ -909,10 +909,10 @@ const Wallet = () => {
       }
 
       setWithdrawSuccess(true);
-      
+
       // Reload wallet data
       await loadWalletData();
-      
+
       setTimeout(() => {
         setShowWithdrawModal(false);
         setWithdrawSuccess(false);
@@ -922,7 +922,7 @@ const Wallet = () => {
         setWithdrawAccountNumber('');
         setWithdrawAccountName('');
       }, 2000);
-      
+
     } catch (err) {
       console.error('Error processing candidate withdrawal:', err);
       alert(language === 'vi' ? 'Yêu cầu rút tiền thất bại!' : 'Withdrawal request failed!');
@@ -934,22 +934,22 @@ const Wallet = () => {
   const handleExportTransactions = () => {
     try {
       // 1. Define CSV headers
-      const headers = language === 'vi' 
+      const headers = language === 'vi'
         ? ['Mã giao dịch', 'Loại giao dịch', 'Tiêu đề', 'Chi tiết', 'Số tiền (VND)', 'Ngày giao dịch', 'Trạng thái']
         : ['Transaction ID', 'Type', 'Title', 'Description', 'Amount (VND)', 'Date', 'Status'];
-        
+
       // 2. Format row data
       const rows = transactions.map(tx => {
-        const txType = tx.type === 'income' 
+        const txType = tx.type === 'income'
           ? (language === 'vi' ? 'Thu nhập' : 'Income')
           : (language === 'vi' ? 'Rút tiền / Chi tiêu' : 'Withdrawal / Expense');
-          
-        const txStatus = tx.status 
+
+        const txStatus = tx.status
           ? (tx.status === 'approved' ? (language === 'vi' ? 'Đã duyệt' : 'Approved')
-             : tx.status === 'rejected' ? (language === 'vi' ? 'Từ chối' : 'Rejected')
-             : (language === 'vi' ? 'Đang xử lý' : 'Pending'))
+            : tx.status === 'rejected' ? (language === 'vi' ? 'Từ chối' : 'Rejected')
+              : (language === 'vi' ? 'Đang xử lý' : 'Pending'))
           : (language === 'vi' ? 'Thành công' : 'Success');
-          
+
         return [
           tx.id,
           txType,
@@ -960,11 +960,11 @@ const Wallet = () => {
           txStatus
         ];
       });
-      
+
       // 3. Construct CSV Content (with UTF-8 BOM for Excel to display Vietnamese characters correctly)
       const csvContent = "\uFEFF" // UTF-8 BOM
         + [headers.join(','), ...rows.map(e => e.map(val => `"${val}"`).join(','))].join('\n');
-        
+
       // 4. Create blob and download link
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
@@ -1006,7 +1006,7 @@ const Wallet = () => {
     if (filterType !== 'all' && t.type !== filterType) {
       return false;
     }
-    
+
     // Filter by date (compare local YYYY-MM-DD date representation)
     if (filterDate) {
       const d = new Date(t.date);
@@ -1018,7 +1018,7 @@ const Wallet = () => {
         return false;
       }
     }
-    
+
     return true;
   });
 
@@ -1197,10 +1197,10 @@ const Wallet = () => {
                                     background: transaction.status === 'approved' ? '#D1FAE5' : (transaction.status === 'rejected' ? '#FEE2E2' : '#FEF3C7'),
                                     color: transaction.status === 'approved' ? '#059669' : (transaction.status === 'rejected' ? '#DC2626' : '#D97706'),
                                   }}>
-                                    {transaction.status === 'approved' 
-                                      ? (language === 'vi' ? 'Đã duyệt' : 'Approved') 
-                                      : (transaction.status === 'rejected' 
-                                        ? (language === 'vi' ? 'Từ chối' : 'Rejected') 
+                                    {transaction.status === 'approved'
+                                      ? (language === 'vi' ? 'Đã duyệt' : 'Approved')
+                                      : (transaction.status === 'rejected'
+                                        ? (language === 'vi' ? 'Từ chối' : 'Rejected')
                                         : (language === 'vi' ? 'Đang chờ' : 'Pending'))}
                                   </span>
                                 )}
@@ -1243,7 +1243,7 @@ const Wallet = () => {
               <h3>{language === 'vi' ? 'Yêu cầu Rút tiền' : 'Withdraw Funds'}</h3>
               <button onClick={() => !withdrawLoading && setShowWithdrawModal(false)}>&times;</button>
             </ModalHeader>
-            
+
             {withdrawSuccess ? (
               <div style={{ textAlign: 'center', padding: '24px 0' }}>
                 <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#D1FAE5', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: '#059669' }}>
@@ -1268,7 +1268,7 @@ const Wallet = () => {
                     disabled={withdrawLoading}
                   />
                 </FormGroup>
-                
+
                 <FormGroup>
                   <Label>{language === 'vi' ? 'Số Tài Khoản' : 'Account Number'}</Label>
                   <Input
@@ -1279,7 +1279,7 @@ const Wallet = () => {
                     disabled={withdrawLoading}
                   />
                 </FormGroup>
-                
+
                 <FormGroup>
                   <Label>{language === 'vi' ? 'Tên Tài Khoản (viết hoa không dấu)' : 'Account Name (uppercase, no accent)'}</Label>
                   <Input
@@ -1290,7 +1290,7 @@ const Wallet = () => {
                     disabled={withdrawLoading}
                   />
                 </FormGroup>
-                
+
                 <FormGroup>
                   <Label>{language === 'vi' ? 'Số Tiền Rút (VND)' : 'Withdraw Amount (VND)'}</Label>
                   <Input
@@ -1307,7 +1307,7 @@ const Wallet = () => {
                     <ErrorMsg>{language === 'vi' ? 'Số dư không đủ!' : 'Insufficient balance!'}</ErrorMsg>
                   )}
                 </FormGroup>
-                
+
                 <Button
                   $variant="primary"
                   style={{ width: '100%', marginTop: '8px' }}

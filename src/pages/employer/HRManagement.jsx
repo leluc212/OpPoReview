@@ -3403,7 +3403,7 @@ const HRManagement = () => {
     }
 
     return realApplications
-      .filter(app => app.status === 'accepted' || app.status === 'completed')
+      .filter(app => app.status === 'accepted' || app.status === 'completed_pending_candidate')
       .map(app => {
         let unread = 0;
         let lastMessageText = language === 'vi' ? 'Bắt đầu trò chuyện...' : 'Start conversation...';
@@ -3474,7 +3474,11 @@ const HRManagement = () => {
   useEffect(() => {
     if (!realApplications || !Array.isArray(realApplications)) return;
     realApplications.forEach(app => {
-      if (app.chatMessages && Array.isArray(app.chatMessages) && app.chatMessages.length > 0) {
+      if (app.status === 'completed') {
+        localStorage.removeItem(`chat_${app.applicationId}`);
+        localStorage.removeItem(`chat_read_employer_${app.applicationId}`);
+        localStorage.removeItem(`chat_read_${app.applicationId}`);
+      } else if (app.chatMessages && Array.isArray(app.chatMessages) && app.chatMessages.length > 0) {
         const savedMessagesStr = localStorage.getItem(`chat_${app.applicationId}`);
         const dbStr = JSON.stringify(app.chatMessages);
         if (savedMessagesStr !== dbStr) {
@@ -3711,7 +3715,10 @@ const HRManagement = () => {
         }
       } else {
         const chat = chatConversations && chatConversations.find(c => c.id === activeChatId);
-        if (chat) {
+        if (chat?.isCompleted) {
+          currentMsgs = [];
+          setCurrentMessages(currentMsgs);
+        } else if (chat) {
           // Add initial greeting message
           const companyName = user?.role === 'employer' ? (language === 'vi' ? 'Katinat Quận Cam' : 'Katinat District Cam') : (user?.name || 'Company');
           const greetingMessage = {
@@ -3759,6 +3766,8 @@ const HRManagement = () => {
         } catch (e) {
           console.error(e);
         }
+      } else {
+        setCurrentMessages([]);
       }
     };
 
@@ -3836,7 +3845,8 @@ const HRManagement = () => {
       activeChat?.isCompleted ? 'completed' : 'accepted',
       { chatMessages: updated }
     ).then(() => {
-      // Send notification to candidate
+      // Send notification to candidate (DISABLED)
+      /*
       if (activeChat?.candidateId) {
         const senderName = user?.companyName || user?.company || user?.name || 'Nhà tuyển dụng';
         createChatMessageNotification({
@@ -3849,6 +3859,7 @@ const HRManagement = () => {
           jobTitle: activeChat.position
         }).catch(err => console.error('Failed to send candidate message notification:', err));
       }
+      */
     }).catch(err => console.error('Failed to sync employer message to DB:', err));
   };
 

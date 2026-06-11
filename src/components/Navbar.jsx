@@ -1092,8 +1092,8 @@ const Navbar = ({ showSearch = true }) => {
         const { default: applicationService } = await import('../services/applicationService');
         const apps = await applicationService.getMyCandidateApplications();
         console.log('📥 [Navbar Chat] Raw applications:', apps);
-        // Filter applications where status is 'accepted' or 'completed'
-        const validChats = (apps || []).filter(app => app.status === 'accepted' || app.status === 'completed');
+        // Filter applications where status is 'accepted' or 'completed_pending_candidate' (exclude 'completed')
+        const validChats = (apps || []).filter(app => app.status === 'accepted' || app.status === 'completed_pending_candidate');
 
         // Filter out locally deleted chats
         const deletedChatIds = JSON.parse(localStorage.getItem('deleted_chats') || '[]');
@@ -1189,6 +1189,12 @@ const Navbar = ({ showSearch = true }) => {
         // Tính unread từ DB data + local storage data
         let unreadTotal = 0;
         enrichedChats.forEach(app => {
+          if (app.status === 'completed') {
+            localStorage.removeItem(`chat_${app.applicationId}`);
+            localStorage.removeItem(`chat_read_${app.applicationId}`);
+            localStorage.removeItem(`chat_read_employer_${app.applicationId}`);
+          }
+          
           let messages = app.chatMessages || [];
           
           // Check local storage for potentially newer messages
@@ -1258,7 +1264,13 @@ const Navbar = ({ showSearch = true }) => {
         for (const job of jobs) {
           const apps = await applicationService.getJobApplications(job.idJob || job.id).catch(() => []);
           apps.forEach(app => {
-            if (app.status === 'accepted' || app.status === 'completed') {
+            if (app.status === 'completed') {
+              localStorage.removeItem(`chat_${app.applicationId}`);
+              localStorage.removeItem(`chat_read_${app.applicationId}`);
+              localStorage.removeItem(`chat_read_employer_${app.applicationId}`);
+            }
+
+            if (app.status === 'accepted' || app.status === 'completed_pending_candidate') {
               allChats.push({
                 ...app,
                 jobTitle: job.title || app.jobTitle
@@ -1315,6 +1327,12 @@ const Navbar = ({ showSearch = true }) => {
   // Load chat messages when activeChatApp changes
   useEffect(() => {
     if (activeChatApp) {
+      // If the chat is already completed, do NOT initialize greeting messages
+      if (activeChatApp.status === 'completed') {
+        setChatMessages([]);
+        return;
+      }
+
       // Ưu tiên dùng dữ liệu từ DB (chatMessages đã được load cùng với application)
       const dbMessages = activeChatApp.chatMessages;
       if (dbMessages && Array.isArray(dbMessages) && dbMessages.length > 0) {
@@ -1370,6 +1388,8 @@ const Navbar = ({ showSearch = true }) => {
             }
             return prev;
           });
+        } else {
+          setChatMessages([]);
         }
       } catch (e) {
         // silent
@@ -1412,20 +1432,22 @@ const Navbar = ({ showSearch = true }) => {
         activeChatApp.status,
         { chatMessages: updated }
       ).then(() => {
-      // Send notification to employer
-      if (activeChatApp?.employerId) {
-        const senderName = user?.name || user?.email || 'Ứng viên';
-        createChatMessageNotification({
-          recipientId: activeChatApp.employerId,
-          recipientRole: 'employer',
-          senderId: user?.userId || user?.id || 'candidate',
-          senderName: senderName,
-          messageText: newMessage.text,
-          applicationId: activeChatApp.applicationId,
-          jobTitle: activeChatApp.jobTitle
-        }).catch(err => console.error('Failed to send employer message notification:', err));
-      }
-    }).catch(err => console.error('Failed to sync candidate message to DB:', err));
+        // Send notification to employer (DISABLED)
+        /*
+        if (activeChatApp?.employerId) {
+          const senderName = user?.name || user?.email || 'Ứng viên';
+          createChatMessageNotification({
+            recipientId: activeChatApp.employerId,
+            recipientRole: 'employer',
+            senderId: user?.userId || user?.id || 'candidate',
+            senderName: senderName,
+            messageText: newMessage.text,
+            applicationId: activeChatApp.applicationId,
+            jobTitle: activeChatApp.jobTitle
+          }).catch(err => console.error('Failed to send employer message notification:', err));
+        }
+        */
+      }).catch(err => console.error('Failed to sync candidate message to DB:', err));
     });
   };
 

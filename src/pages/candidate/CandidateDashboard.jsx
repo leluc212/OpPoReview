@@ -1869,8 +1869,14 @@ const CandidateDashboard = () => {
       const appId = currentJob.applicationId;
       await applicationService.updateApplicationStatus(appId, 'completed', {
         candidateConfirmed: true,
-        candidateConfirmedAt: new Date().toISOString()
+        candidateConfirmedAt: new Date().toISOString(),
+        chatMessages: []
       });
+
+      // Clear chat messages locally
+      localStorage.removeItem(`chat_${appId}`);
+      localStorage.removeItem(`chat_read_${appId}`);
+      localStorage.removeItem(`chat_read_employer_${appId}`);
 
       // Perform Escrow Release
       releaseEscrowFunds(currentJob);
