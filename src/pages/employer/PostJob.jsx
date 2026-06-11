@@ -4,11 +4,12 @@ import styled, { keyframes } from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import Modal from '../../components/Modal';
 import { Button, Input, TextArea, Select, FormGroup, Label } from '../../components/FormElements';
-import { Save, ArrowLeft, AlertCircle, Briefcase, Clock, FileText, CheckSquare, ClipboardList, Gift } from 'lucide-react';
+import { Save, ArrowLeft, AlertCircle, Briefcase, Clock, FileText, CheckSquare, ClipboardList, Gift, Sparkles, Loader2 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import jobPostService from '../../services/jobPostService';
 import employerProfileService from '../../services/employerProfileService';
 import { fetchAuthSession } from 'aws-amplify/auth';
+import cvAiService from '../../services/cvAiService';
 
 // Keyframe animations
 const fadeIn = keyframes`
@@ -249,6 +250,51 @@ const SalaryInputWrapper = styled.div`
   }
 `;
 
+const spin = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+`;
+
+const SpinningLoader = styled(Loader2)`
+  animation: ${spin} 1s linear infinite;
+`;
+
+const AiButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+  margin-bottom: 12px;
+  
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+  }
+  
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
 const VerificationWarning = styled.div`
   background: #FEF3C7;
   border: 2px solid #FCD34D;
@@ -370,6 +416,7 @@ const PostJob = () => {
 
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState('');
+  const [loadingAi, setLoadingAi] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -459,6 +506,41 @@ const PostJob = () => {
 
       return updated;
     });
+  };
+
+  const handleGenerateJdWithAi = async () => {
+    if (!formData.title.trim()) return;
+    
+    setLoadingAi(true);
+    try {
+      const result = await cvAiService.suggestJd({
+        title: formData.title,
+        location: formData.location,
+        jobType: formData.jobType,
+        workDays: formData.workDays,
+        workHours: formData.workHours,
+        salary: formData.salary,
+        tags: formData.tags,
+        language: language
+      });
+      
+      if (result) {
+        setFormData(prev => ({
+          ...prev,
+          description: result.description || prev.description,
+          responsibilities: result.responsibilities || prev.responsibilities,
+          requirements: result.requirements || prev.requirements,
+          benefits: result.benefits || prev.benefits
+        }));
+      }
+    } catch (error) {
+      console.error('Error generating JD with AI:', error);
+      alert(error.message || (language === 'vi' 
+        ? 'Không thể tạo JD tự động. Vui lòng thử lại.' 
+        : 'Failed to generate JD. Please try again.'));
+    } finally {
+      setLoadingAi(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -749,10 +831,32 @@ const PostJob = () => {
             </FormRow>
 
             <FormGroup style={{ marginTop: '8px' }}>
-              <SectionLabel>
-                <FileText />
-                <span>{language === 'vi' ? 'Mô tả công việc *' : 'Job Description *'}</span>
-              </SectionLabel>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <SectionLabel style={{ marginBottom: 0 }}>
+                  <FileText />
+                  <span>{language === 'vi' ? 'Mô tả công việc *' : 'Job Description *'}</span>
+                </SectionLabel>
+                {formData.title && (
+                  <AiButton
+                    type="button"
+                    onClick={handleGenerateJdWithAi}
+                    disabled={loadingAi}
+                    style={{ marginBottom: 0 }}
+                  >
+                    {loadingAi ? (
+                      <>
+                        <SpinningLoader size={14} />
+                        {language === 'vi' ? 'Đang tạo JD...' : 'Generating JD...'}
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles size={14} />
+                        {language === 'vi' ? 'Tạo nhanh JD với AI' : 'Quickly generate JD with AI'}
+                      </>
+                    )}
+                  </AiButton>
+                )}
+              </div>
               <TextArea name="description" placeholder={language === 'vi' ? 'Mô tả vị trí công việc...' : 'Describe the position...'} value={formData.description} onChange={handleChange} required />
             </FormGroup>
 

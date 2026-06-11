@@ -107,6 +107,38 @@ RECOMMENDATION_SCHEMA = {
 }
 
 
+SUGGEST_JD_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "description": {"type": "string"},
+        "responsibilities": {"type": "string"},
+        "requirements": {"type": "string"},
+        "benefits": {"type": "string"},
+    },
+    "required": ["description", "responsibilities", "requirements", "benefits"],
+}
+
+
+RECOMMEND_JOBS_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "recommendations": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "jobId": {"type": "string"},
+                    "matchScore": {"type": "integer"},
+                    "matchReason": {"type": "string"},
+                },
+                "required": ["jobId", "matchScore", "matchReason"],
+            },
+        }
+    },
+    "required": ["recommendations"],
+}
+
+
 class RequestError(Exception):
     def __init__(self, status_code, code, message):
         super().__init__(message)
@@ -338,6 +370,27 @@ def validate_generate_payload(body):
 
     return {
         "profile": cleaned_profile,
+        "language": language,
+    }
+
+
+def _validate_suggest_jd_payload(body):
+    title = _clean_text(body.get("title"), 300)
+    if not title:
+        raise RequestError(400, "JOB_TITLE_REQUIRED", "Job title is required.")
+
+    language = body.get("language", "vi")
+    if language not in {"vi", "en"}:
+        language = "vi"
+
+    return {
+        "title": title,
+        "location": _clean_text(body.get("location"), 300),
+        "jobType": _clean_text(body.get("jobType"), 100),
+        "workDays": _clean_text(body.get("workDays"), 200),
+        "workHours": _clean_text(body.get("workHours"), 200),
+        "salary": _clean_text(body.get("salary"), 100),
+        "tags": _clean_text(body.get("tags"), 500),
         "language": language,
     }
 
@@ -745,6 +798,191 @@ def call_gemini_recommend(validated, candidates, urlopen=urllib.request.urlopen)
         raise ProviderError("AI_INVALID_RESPONSE", "The AI returned invalid JSON.", True)
 
 
+def _suggest_jd_system_prompt(language):
+    output_language = "Vietnamese" if language == "vi" else "English"
+    return f"""
+You are an expert HR Specialist and Technical Writer. Return all prose in {output_language}.
+Given the job title and other basic details, generate a comprehensive and highly professional Job Description (JD) tailored for the role.
+Provide details for:
+- Mô tả công việc (description): Clear overview of the role, daily work, context.
+- Trách nhiệm (responsibilities): Bulleted list of key tasks and responsibilities. Use newline character '\\n' between bullets, but do not use markdown characters like '*' or '-' in the bullet text itself.
+- Yêu cầu (requirements): Bulleted list of qualifications, experience level, skills required. Use newline character '\\n' between bullets.
+- Quyền lợi (benefits): Bulleted list of benefits, perks, salary context, working environment. Use newline character '\\n' between bullets.
+Ensure the tone is professional, attractive to candidates, and realistic for the given job title, location, type, and characteristics.
+Return the result strictly conforming to the requested JSON schema.
+""".strip()
+
+
+def _gemini_suggest_jd_payload(validated):
+    user_payload = {
+        "title": validated["title"],
+        "location": validated["location"] or None,
+        "jobType": validated["jobType"] or None,
+        "workDays": validated["workDays"] or None,
+        "workHours": validated["workHours"] or None,
+        "salary": validated["salary"] or None,
+        "tags": validated["tags"] or None,
+    }
+    return {
+        "systemInstruction": {
+            "parts": [{"text": _suggest_jd_system_prompt(validated["language"])}]
+        },
+        "contents": [{
+            "role": "user",
+            "parts": [{
+                "text": "Generate a professional job description (description, responsibilities, requirements, benefits) for this job detail:\n"
+                + json.dumps(user_payload, ensure_ascii=False)
+            }],
+        }],
+        "generationConfig": {
+            "temperature": 0.7,
+            "maxOutputTokens": 2000,
+            "responseMimeType": "application/json",
+            "responseSchema": SUGGEST_JD_SCHEMA,
+        },
+    }
+
+
+def call_gemini_suggest_jd(validated, urlopen=None):
+    if urlopen is None:
+        urlopen = urllib.request.urlopen
+    api_key = os.environ.get("GEMINI_API_KEY", "").strip()
+    if not api_key:
+        raise ProviderError("AI_NOT_CONFIGURED", "GEMINI_API_KEY is not configured.")
+    model = os.environ.get("GEMINI_MODEL", DEFAULT_MODEL)
+    request = urllib.request.Request(
+        f"{GEMINI_API_BASE_URL}/{model}:generateContent",
+        data=json.dumps(_gemini_suggest_jd_payload(validated), ensure_ascii=False).encode("utf-8"),
+        headers={
+            "x-goog-api-key": api_key,
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    timeout = min(max(int(os.environ.get("GEMINI_TIMEOUT_SECONDS", "24")), 5), 28)
+    try:
+        with urlopen(request, timeout=timeout) as response:
+            provider_response = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as error:
+        status = error.code
+        provider_message = ""
+        try:
+            error_body = json.loads(error.read().decode("utf-8"))
+            provider_message = str((error_body.get("error") or {}).get("message") or "")
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            pass
+        print(f"DEBUG_GEMINI_ERROR - status: {status}, message: {provider_message}")
+        if status in {400, 401, 403} and "api key" in provider_message.lower():
+            raise ProviderError(
+                "AI_CREDENTIAL_INVALID",
+                "The Gemini API key is invalid.",
+            )
+        retryable = status == 429 or status >= 500
+        code = "AI_RATE_LIMITED" if status == 429 else "AI_PROVIDER_ERROR"
+        raise ProviderError(code, "The AI provider is temporarily unavailable.", retryable)
+    except (urllib.error.URLError, TimeoutError):
+        raise ProviderError("AI_TIMEOUT", "The AI provider did not respond in time.", True)
+    except json.JSONDecodeError:
+        raise ProviderError("AI_INVALID_RESPONSE", "The AI returned an invalid response.", True)
+    try:
+        return json.loads(_extract_gemini_text(provider_response))
+    except json.JSONDecodeError:
+        raise ProviderError("AI_INVALID_RESPONSE", "The AI returned invalid JSON.", True)
+
+
+def _recommend_jobs_system_prompt(language):
+    output_language = "Vietnamese" if language == "vi" else "English"
+    return f"""
+You are an expert recruitment matching system. Return all prose in {output_language}.
+Given a candidate's profile and a list of active job openings, determine the suitability of each job for the candidate.
+For each matching job (where matchScore >= 50):
+1. Rate the match score as an integer from 0 to 100 based on how well the candidate's title, bio, skills, location, and experience match the job requirements, description, location, and type.
+2. Provide a brief, professional explanation (matchReason) in {output_language} summarizing why it's a good fit. Keep it concise (1-2 sentences).
+Return a JSON object containing a list of recommendations, sorted by matchScore in descending order. Return maximum 5 recommendations.
+If no jobs match, return an empty list. Do not invent any details.
+""".strip()
+
+
+def _gemini_recommend_jobs_payload(candidate_profile, jobs):
+    user_payload = {
+        "candidate": {
+            "title": candidate_profile.get("title", ""),
+            "bio": candidate_profile.get("bio", ""),
+            "skills": candidate_profile.get("skills", []),
+            "location": candidate_profile.get("location", ""),
+            "experience": candidate_profile.get("experience", ""),
+            "education": candidate_profile.get("education", ""),
+        },
+        "jobs": jobs
+    }
+    language = candidate_profile.get("language", "vi")
+    return {
+        "systemInstruction": {
+            "parts": [{"text": _recommend_jobs_system_prompt(language)}]
+        },
+        "contents": [{
+            "role": "user",
+            "parts": [{
+                "text": "Recommend jobs for this candidate profile:\n"
+                + json.dumps(user_payload, ensure_ascii=False)
+            }],
+        }],
+        "generationConfig": {
+            "temperature": 0.2,
+            "maxOutputTokens": 2000,
+            "responseMimeType": "application/json",
+            "responseSchema": RECOMMEND_JOBS_SCHEMA,
+        },
+    }
+
+
+def call_gemini_recommend_jobs(candidate_profile, jobs, urlopen=None):
+    if urlopen is None:
+        urlopen = urllib.request.urlopen
+    api_key = os.environ.get("GEMINI_API_KEY", "").strip()
+    if not api_key:
+        raise ProviderError("AI_NOT_CONFIGURED", "GEMINI_API_KEY is not configured.")
+    model = os.environ.get("GEMINI_MODEL", DEFAULT_MODEL)
+    request = urllib.request.Request(
+        f"{GEMINI_API_BASE_URL}/{model}:generateContent",
+        data=json.dumps(_gemini_recommend_jobs_payload(candidate_profile, jobs), ensure_ascii=False).encode("utf-8"),
+        headers={
+            "x-goog-api-key": api_key,
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    timeout = min(max(int(os.environ.get("GEMINI_TIMEOUT_SECONDS", "24")), 5), 28)
+    try:
+        with urlopen(request, timeout=timeout) as response:
+            provider_response = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as error:
+        status = error.code
+        provider_message = ""
+        try:
+            error_body = json.loads(error.read().decode("utf-8"))
+            provider_message = str((error_body.get("error") or {}).get("message") or "")
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            pass
+        print(f"DEBUG_GEMINI_ERROR - status: {status}, message: {provider_message}")
+        if status in {400, 401, 403} and "api key" in provider_message.lower():
+            raise ProviderError(
+                "AI_CREDENTIAL_INVALID",
+                "The Gemini API key is invalid.",
+            )
+        retryable = status == 429 or status >= 500
+        code = "AI_RATE_LIMITED" if status == 429 else "AI_PROVIDER_ERROR"
+        raise ProviderError(code, "The AI provider is temporarily unavailable.", retryable)
+    except (urllib.error.URLError, TimeoutError):
+        raise ProviderError("AI_TIMEOUT", "The AI provider did not respond in time.", True)
+    except json.JSONDecodeError:
+        raise ProviderError("AI_INVALID_RESPONSE", "The AI returned an invalid response.", True)
+    try:
+        return json.loads(_extract_gemini_text(provider_response))
+    except json.JSONDecodeError:
+        raise ProviderError("AI_INVALID_RESPONSE", "The AI returned invalid JSON.", True)
+
+
 def lambda_handler(event, context):
     request_id = getattr(context, "aws_request_id", None) or str(uuid.uuid4())
     method, path = _method_and_path(event)
@@ -753,13 +991,145 @@ def lambda_handler(event, context):
         return _response(event, 200, {"ok": True})
     if method == "GET" and path == "/health":
         return _response(event, 200, {"status": "ok", "provider": "gemini"})
-    if method != "POST" or path not in {"/cv/analyze", "/cv/generate", "/cv/recommend-candidates"}:
+    if method != "POST" or path not in {"/cv/analyze", "/cv/generate", "/cv/recommend-candidates", "/job/suggest-jd", "/candidate/recommend-jobs"}:
         return _response(event, 404, {
             "error": {"code": "NOT_FOUND", "message": "Route not found."},
             "request_id": request_id,
         })
 
     try:
+        if path == "/candidate/recommend-jobs":
+            claims = _candidate_claims(event)
+            user_id = claims.get("sub")
+            
+            import boto3
+            dynamodb = boto3.resource("dynamodb", region_name="ap-southeast-1")
+            
+            # Fetch Candidate Profile
+            cand_table = dynamodb.Table("CandidateProfiles")
+            cand_resp = cand_table.get_item(Key={"userId": user_id})
+            candidate_profile = cand_resp.get("Item")
+            if not candidate_profile:
+                raise RequestError(404, "PROFILE_NOT_FOUND", "Candidate profile not found.")
+                
+            # Verify KYC status
+            kyc_completed = candidate_profile.get("kycCompleted")
+            kyc_status = candidate_profile.get("kycStatus")
+            ekyc_status = candidate_profile.get("ekycStatus")
+            
+            is_kyc_verified = (
+                kyc_completed is True
+                or kyc_status == "VERIFIED"
+                or str(ekyc_status).lower() == "verified"
+            )
+            if not is_kyc_verified:
+                raise RequestError(400, "KYC_REQUIRED", "Candidate must complete KYC verification to get AI recommendations.")
+                
+            # Scan active Standard jobs
+            std_table = dynamodb.Table("PostStandardJob")
+            response_std = std_table.scan(
+                FilterExpression="#s = :status",
+                ExpressionAttributeNames={"#s": "status"},
+                ExpressionAttributeValues={":status": "active"}
+            )
+            std_jobs = response_std.get("Items", [])
+            
+            jobs_to_rank = []
+            for j in std_jobs:
+                jobs_to_rank.append({
+                    "id": j.get("idJob") or j.get("id"),
+                    "title": j.get("title", ""),
+                    "description": j.get("description", ""),
+                    "requirements": j.get("requirements", ""),
+                    "responsibilities": j.get("responsibilities", ""),
+                    "benefits": j.get("benefits", ""),
+                    "location": j.get("location", ""),
+                    "jobType": j.get("jobType", "part-time"),
+                    "salary": j.get("salary", ""),
+                    "createdAt": j.get("createdAt", ""),
+                    "isQuick": False
+                })
+                
+            # If quick/urgent jobs is approved, fetch active Quick jobs
+            verification_status = candidate_profile.get("verificationStatus")
+            if verification_status == "APPROVED":
+                qk_table = dynamodb.Table("PostQuickJob")
+                response_qk = qk_table.scan(
+                    FilterExpression="#s = :status",
+                    ExpressionAttributeNames={"#s": "status"},
+                    ExpressionAttributeValues={":status": "active"}
+                )
+                qk_jobs = response_qk.get("Items", [])
+                for j in qk_jobs:
+                    total_salary = j.get("totalSalary")
+                    total_hours = j.get("totalHours")
+                    hourly_rate = j.get("hourlyRate")
+                    salary_str = ""
+                    try:
+                        if total_salary:
+                            income = int(float(total_salary) * 0.85)
+                            salary_str = f"{income} VNĐ"
+                        else:
+                            income_rate = int(float(hourly_rate) * 0.85)
+                            salary_str = f"{income_rate} VNĐ/h"
+                    except Exception:
+                        salary_str = "Thỏa thuận"
+
+                    jobs_to_rank.append({
+                        "id": j.get("jobID") or j.get("id"),
+                        "title": j.get("title", ""),
+                        "description": j.get("description", ""),
+                        "requirements": j.get("requirements", ""),
+                        "responsibilities": j.get("responsibilities", ""),
+                        "benefits": j.get("benefits", ""),
+                        "location": j.get("location", ""),
+                        "jobType": "quick",
+                        "salary": salary_str,
+                        "createdAt": j.get("createdAt", ""),
+                        "isQuick": True
+                    })
+                    
+            if not jobs_to_rank:
+                return _response(event, 200, {"recommendations": []})
+                
+            # Sort by createdAt descending and take latest 30
+            jobs_to_rank.sort(key=lambda x: x.get("createdAt", ""), reverse=True)
+            jobs_to_rank = jobs_to_rank[:30]
+            
+            # Request language preference
+            body_data = _parse_body(event) if event.get("body") else {}
+            language = body_data.get("language", "vi")
+            if language not in {"vi", "en"}:
+                language = "vi"
+            candidate_profile["language"] = language
+            
+            started = time.monotonic()
+            ai_result = call_gemini_recommend_jobs(candidate_profile, jobs_to_rank)
+            processing_ms = round((time.monotonic() - started) * 1_000)
+            print(json.dumps({
+                "event": "recommend_jobs_completed",
+                "request_id": request_id,
+                "user_id": user_id,
+                "jobs_count": len(jobs_to_rank),
+                "processing_ms": processing_ms,
+            }))
+            return _response(event, 200, ai_result)
+
+        if path == "/job/suggest-jd":
+            claims = _employer_claims(event)
+            body_data = _parse_body(event)
+            validated = _validate_suggest_jd_payload(body_data)
+            started = time.monotonic()
+            ai_result = call_gemini_suggest_jd(validated)
+            processing_ms = round((time.monotonic() - started) * 1_000)
+            print(json.dumps({
+                "event": "suggest_jd_completed",
+                "request_id": request_id,
+                "user_id": claims.get("sub"),
+                "processing_ms": processing_ms,
+            }))
+            return _response(event, 200, ai_result)
+
         if path == "/cv/recommend-candidates":
             claims = _employer_claims(event)
             body_data = _parse_body(event)
