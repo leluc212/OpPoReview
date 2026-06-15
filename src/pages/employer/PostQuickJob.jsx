@@ -244,6 +244,22 @@ const FormActions = styled.div`
   border-top: 2px solid ${props => props.theme.colors.border};
 `;
 
+const SalaryInputWrap = styled.div`
+  position: relative;
+
+  .salary-unit {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e40af;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+`;
+
 const TotalSalaryBox = styled.div`
   background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
   border: 2px solid #1e40af;
@@ -1265,7 +1281,7 @@ const PostQuickJob = () => {
       jobTypePartTime: 'Bán thời gian',
       jobTypeFullTime: 'Toàn thời gian',
       jobTypePlaceholder: 'Chọn loại hình',
-      hourlyRate: 'Lương (VND)',
+      hourlyRate: 'Lương/h',
       hourlyRatePlaceholder: '',
       hourlyRateMin: 'Phải lớn hơn hoặc bằng 29.500 VNĐ',
       workDate: 'Ngày làm',
@@ -1407,17 +1423,6 @@ const PostQuickJob = () => {
           </InfoBox>
 
           <form onSubmit={handleSubmit}>
-            <FormGroup>
-              <Label required>{t.jobTitle}</Label>
-              <Input
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                placeholder={t.jobTitlePlaceholder}
-                required
-              />
-            </FormGroup>
-
             <FormRow $columns="1fr 1fr">
               <FormGroup>
                 <Label required>{t.location}</Label>
@@ -1431,38 +1436,31 @@ const PostQuickJob = () => {
                 />
               </FormGroup>
 
-              <FormGroup>
-                <Label required>{t.jobType}</Label>
-                <Select
-                  name="jobType"
-                  value={formData.jobType}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">{t.jobTypePlaceholder}</option>
-                  <option value="part-time">{t.jobTypePartTime}</option>
-                  <option value="full-time">{t.jobTypeFullTime}</option>
-                </Select>
-              </FormGroup>
             </FormRow>
 
             <FormRow $columns="1fr 1fr">
               <FormGroup>
                 <Label required>{t.hourlyRate}</Label>
-                <Input
-                  name="hourlyRate"
-                  type="number"
-                  min="0"
-                  step="any"
-                  value={formData.hourlyRate}
-                  onChange={handleChange}
-                  placeholder={t.hourlyRatePlaceholder}
-                  required
-                  style={{
-                    borderColor: salaryError ? '#EF4444' : '',
-                    background: salaryError ? '#FEE2E2' : ''
-                  }}
-                />
+                <SalaryInputWrap>
+                  <Input
+                    name="hourlyRate"
+                    type="number"
+                    min="0"
+                    step="any"
+                    value={formData.hourlyRate}
+                    onChange={handleChange}
+                    placeholder={t.hourlyRatePlaceholder}
+                    required
+                    style={{
+                      borderColor: salaryError ? '#EF4444' : '',
+                      background: salaryError ? '#FEE2E2' : '',
+                      paddingRight: '74px'
+                    }}
+                  />
+                  <span className="salary-unit">
+                    {language === 'vi' ? 'Lương/h' : 'Lương/h'}
+                  </span>
+                </SalaryInputWrap>
                 {salaryError ? (
                   <small style={{ color: '#DC2626', fontSize: '12px', marginTop: '4px', display: 'block', fontWeight: '600' }}>
                     ⚠️ {language === 'vi' ? 'Lương phải lớn hơn hoặc bằng 29.500 VNĐ' : 'Salary must be >= 29,500 VND'}
@@ -1635,7 +1633,7 @@ const PostQuickJob = () => {
                   fontSize: '12px',
                   color: '#1e40af'
                 }}>
-                  <span>{language === 'vi' ? 'Lương/giờ:' : 'Hourly rate:'}</span>
+                  <span>{language === 'vi' ? 'Lương/h:' : 'Hourly rate:'}</span>
                   <span style={{ fontWeight: '600' }}>{paymentInfo.hourlyRate.toLocaleString('vi-VN')} VNĐ</span>
                 </div>
               </div>

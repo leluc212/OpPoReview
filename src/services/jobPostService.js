@@ -171,7 +171,6 @@ class JobPostService {
         salary: jobData.salary || null,
         tags: jobData.tags || '',
         description: jobData.description,
-        responsibilities: jobData.responsibilities || '',
         requirements: jobData.requirements || '',
         benefits: jobData.benefits || '',
         // New posts should require admin moderation; set to 'pending' by default

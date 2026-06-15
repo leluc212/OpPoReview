@@ -550,6 +550,8 @@ const EmployersManagement = () => {
 
   const [employers, setEmployers] = useState([]);
   const [withdrawRequests, setWithdrawRequests] = useState([]);
+  const [withdrawStatusFilter, setWithdrawStatusFilter] = useState('all'); // 'all' | 'pending' | 'approved' | 'rejected'
+  const [withdrawWeekFilter, setWithdrawWeekFilter] = useState(false); // true = chỉ tuần này
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -1054,9 +1056,21 @@ const EmployersManagement = () => {
         req.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         req.bankName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         req.accountNumber.includes(searchTerm);
-      return matchesSearch;
+
+      const matchesStatus = withdrawStatusFilter === 'all' || req.status === withdrawStatusFilter;
+
+      const matchesWeek = !withdrawWeekFilter || (() => {
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+        const reqDate = new Date(req.createdAt);
+        return reqDate >= startOfWeek;
+      })();
+
+      return matchesSearch && matchesStatus && matchesWeek;
     });
-  }, [withdrawRequests, searchTerm]);
+  }, [withdrawRequests, searchTerm, withdrawStatusFilter, withdrawWeekFilter]);
 
   const filteredChangeRequests = useMemo(() => {
     return changeRequests.filter(req => {
@@ -1216,6 +1230,50 @@ const EmployersManagement = () => {
                   searchPlaceholder={language === 'vi' ? 'Tìm kiếm công ty, email, ngành...' : 'Search company, email, industry...'}
                 />
               </FilterWrapper>
+              {activeTab === 'withdrawals' && (
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  {[
+                    { value: 'all',      labelVi: 'Tất cả',   labelEn: 'All'      },
+                    { value: 'pending',  labelVi: 'Chờ duyệt',labelEn: 'Pending'  },
+                    { value: 'approved', labelVi: 'Đồng ý',   labelEn: 'Approved' },
+                    { value: 'rejected', labelVi: 'Từ chối',  labelEn: 'Rejected' },
+                  ].map(opt => (
+                    <button
+                      key={opt.value}
+                      onClick={() => { setWithdrawStatusFilter(opt.value); setCurrentPage(1); }}
+                      style={{
+                        padding: '7px 14px',
+                        borderRadius: '8px',
+                        border: `2px solid ${withdrawStatusFilter === opt.value ? '#667eea' : '#e2e8f0'}`,
+                        background: withdrawStatusFilter === opt.value ? '#667eea' : 'white',
+                        color: withdrawStatusFilter === opt.value ? 'white' : '#475569',
+                        fontWeight: 600,
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      {language === 'vi' ? opt.labelVi : opt.labelEn}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => { setWithdrawWeekFilter(prev => !prev); setCurrentPage(1); }}
+                    style={{
+                      padding: '7px 14px',
+                      borderRadius: '8px',
+                      border: `2px solid ${withdrawWeekFilter ? '#f59e0b' : '#e2e8f0'}`,
+                      background: withdrawWeekFilter ? '#f59e0b' : 'white',
+                      color: withdrawWeekFilter ? 'white' : '#475569',
+                      fontWeight: 600,
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                     {language === 'vi' ? 'Tuần này' : 'This Week'}
+                  </button>
+                </div>
+              )}
               <RefreshButton onClick={handleRefresh} disabled={refreshing} $loading={refreshing}>
                 <RefreshCw size={18} />
                 {refreshing

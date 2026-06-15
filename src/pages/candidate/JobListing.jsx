@@ -18,6 +18,7 @@ import jobPostService from '../../services/jobPostService';
 import quickJobService from '../../services/quickJobService';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { s3Images } from '../../utils/s3Images';
+import { getActiveBanners } from '../../services/bannerService';
 
 // Animations
 const fadeIn = `
@@ -1700,9 +1701,8 @@ const JobListing = () => {
     if (tab === 'shift') return 'shift';
     if (tab === 'saved') return 'standard';
     if (tab === 'standard') return 'standard';
-    
-    const saved = localStorage.getItem('candidate_job_listing_category');
-    return saved !== null ? saved : 'standard';
+
+    return 'standard';
   }); // 'standard' or 'shift'
   const [candidateProfile, setCandidateProfile] = useState(null);
   const [dynamoDBJobs, setDynamoDBJobs] = useState([]);
@@ -1828,6 +1828,10 @@ const JobListing = () => {
               views: parseInt(job.views) || 0,
               description: String(job.description || ''),
               requirements: String(job.requirements || ''),
+              startTime: String(job.startTime || ''),
+              endTime: String(job.endTime || ''),
+              hourlyRate: Math.round(hourlyRate * 0.85),
+              totalHours: totalHours,
               workHours: job.startTime && job.endTime ? `${job.startTime} - ${job.endTime}` : '',
               workDate: job.workDate || '',
               status: String(job.status || 'active'),
@@ -1895,8 +1899,7 @@ const JobListing = () => {
     if (tab === 'saved') return true;
     if (tab === 'standard' || tab === 'shift') return false;
 
-    const saved = localStorage.getItem('candidate_job_listing_saved_only');
-    return saved !== null ? JSON.parse(saved) : false;
+    return false;
   });
 
   // Job search status states
@@ -1917,12 +1920,20 @@ const JobListing = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastSubmitTime, setLastSubmitTime] = useState(null);
   const [highlightedJobId, setHighlightedJobId] = useState(null);
-
-  const banners = [
+  const [banners, setBanners] = useState([
     { src: s3Images.banner.seoul, alt: "Seoul Vua Mì Cay" },
     { src: s3Images.banner.unnamed1, alt: "Banner" },
     { src: s3Images.banner.unnamed, alt: "Banner" }
-  ];
+  ]);
+
+  // Load active banners from admin (max 5)
+  useEffect(() => {
+    getActiveBanners().then(activeBanners => {
+      if (activeBanners && activeBanners.length > 0) {
+        setBanners(activeBanners.map(b => ({ src: b.imageUrl, alt: b.title || 'Banner', linkUrl: b.linkUrl })));
+      }
+    }).catch(() => {/* fallback to default banners */});
+  }, []);
 
   useEffect(() => {
     const bannerInterval = setInterval(() => {
@@ -1978,10 +1989,9 @@ const JobListing = () => {
         localStorage.setItem('candidate_job_listing_saved_only', JSON.stringify(false));
       }
     } else {
-      // If no URL parameter, make sure URL reflects current state
-      const currentTab = showSavedJobsOnly ? 'saved' : jobCategory;
+      // If no URL parameter, default to standard tab on first entry
       const searchParams = new URLSearchParams(window.location.search);
-      searchParams.set('tab', currentTab);
+      searchParams.set('tab', 'standard');
       navigate({ search: searchParams.toString() }, { replace: true });
     }
   }, [location.search, jobCategory, showSavedJobsOnly, navigate]);
@@ -2473,9 +2483,39 @@ const JobListing = () => {
   };
 
   // Helper functions for filtering
-  const getSalaryValue = (salaryStr) => {
-    const match = salaryStr.match(/(\d+)/);
-    return match ? parseInt(match[0]) : 0;
+  const getShiftBucket = (job) => {
+    const parseHour = (value) => {
+      const match = String(value || '').match(/(\d{1,2})/);
+      return match ? parseInt(match[1], 10) : null;
+    };
+
+    const startHour = parseHour(job?.startTime || String(job?.workHours || '').split('-')[0]);
+    const haystack = `${job?.workHours || ''} ${job?.title || ''}`.toLowerCase();
+
+    if (startHour !== null) {
+      if (startHour >= 6 && startHour < 14) return 'sáng';
+      if (startHour >= 14 && startHour < 22) return 'chiều';
+      return 'đêm';
+    }
+
+    if (haystack.includes('sáng')) return 'sáng';
+    if (haystack.includes('chiều')) return 'chiều';
+    if (haystack.includes('đêm') || haystack.includes('tối')) return 'đêm';
+    return '';
+  };
+
+  const getSalaryValue = (jobOrSalary) => {
+    const job = typeof jobOrSalary === 'object' && jobOrSalary !== null ? jobOrSalary : null;
+
+    if (job && Number(job.hourlyRate) > 0) {
+      return Number(job.hourlyRate) / 1000;
+    }
+
+    const salaryText = job ? (job.salary || '') : String(jobOrSalary || '');
+    const numeric = parseInt(String(salaryText).replace(/[^\d]/g, ''), 10);
+    if (!numeric) return 0;
+
+    return numeric >= 1000 ? numeric / 1000 : numeric;
   };
 
   // Dynamic counts for filter options
@@ -2501,19 +2541,19 @@ const JobListing = () => {
     return {
       fulltime: count(j => (j.type || '').toLowerCase().includes('full-time') || (j.type || '').toLowerCase().includes('toàn thời gian')),
       parttime: count(j => (j.type || '').toLowerCase().includes('part-time') || (j.type || '').toLowerCase().includes('bán thời gian')),
-      morning: count(j => (j.type || '').toLowerCase().includes('sáng')),
-      afternoon: count(j => (j.type || '').toLowerCase().includes('chiều')),
-      night: count(j => (j.type || '').toLowerCase().includes('đêm')),
+      morning: count(j => getShiftBucket(j) === 'sáng'),
+      afternoon: count(j => getShiftBucket(j) === 'chiều'),
+      night: count(j => getShiftBucket(j) === 'đêm'),
       hourly: count(j => (j.salary || '').toLowerCase().includes('giờ') || (j.salary || '').toLowerCase().includes('/h')),
-      under25k: count(j => { const v = getSalaryValue(j.salary); return v > 0 && v < 25; }),
-      '25to30k': count(j => { const v = getSalaryValue(j.salary); return v >= 25 && v < 30; }),
-      '30to35k': count(j => { const v = getSalaryValue(j.salary); return v >= 30 && v <= 35; }),
-      over35k: count(j => getSalaryValue(j.salary) > 35),
+      under25k: count(j => { const v = getSalaryValue(j); return v > 0 && v < 25; }),
+      '25to30k': count(j => { const v = getSalaryValue(j); return v >= 25 && v < 30; }),
+      '30to35k': count(j => { const v = getSalaryValue(j); return v >= 30 && v <= 35; }),
+      over35k: count(j => getSalaryValue(j) > 35),
     };
   }, [allJobs, jobCategory, searchKeyword, selectedLocation]);
 
-  const isInSalaryRange = (salary, range) => {
-    const value = getSalaryValue(salary);
+  const isInSalaryRange = (job, range) => {
+    const value = getSalaryValue(job);
     switch (range) {
       case 'under-25k': return value > 0 && value < 25;
       case '25k-30k': return value >= 25 && value < 30;
@@ -2604,8 +2644,16 @@ const JobListing = () => {
     // Filter by job type
     if (selectedJobTypes.length > 0) {
       result = result.filter(job => {
+        if (jobCategory === 'shift') {
+          const shiftTypes = selectedJobTypes.filter(type => ['sáng', 'chiều', 'đêm'].includes(type));
+          if (shiftTypes.length === 0) return true;
+          return shiftTypes.includes(getShiftBucket(job));
+        }
+
+        const standardTypes = selectedJobTypes.filter(type => type === 'full-time' || type === 'part-time');
+        if (standardTypes.length === 0) return true;
         const t = (job.type || '').toLowerCase();
-        return selectedJobTypes.some(type => {
+        return standardTypes.some(type => {
           if (type === 'full-time') return t.includes('full-time') || t.includes('toàn thời gian');
           if (type === 'part-time') return t.includes('part-time') || t.includes('bán thời gian');
           return t.includes(type.toLowerCase());
@@ -2616,7 +2664,7 @@ const JobListing = () => {
     // Filter by salary range
     if (selectedSalaryRanges.length > 0) {
       result = result.filter(job =>
-        selectedSalaryRanges.some(range => isInSalaryRange(job.salary, range))
+        selectedSalaryRanges.some(range => isInSalaryRange(job, range))
       );
     }
 
@@ -2636,7 +2684,9 @@ const JobListing = () => {
     result = [...result].sort((a, b) => {
       switch (sortBy) {
         case 'salary':
-          return getSalaryValue(b.salary) - getSalaryValue(a.salary);
+          return getSalaryValue(b) - getSalaryValue(a);
+        case 'salary_low':
+          return getSalaryValue(a) - getSalaryValue(b);
         case 'views':
           return b.views - a.views;
         case 'newest':
@@ -3028,13 +3078,6 @@ const JobListing = () => {
                   exit={{ height: 0 }}
                 >
                   <FilterOption>
-                    <input type="checkbox" id="under-25k"
-                      checked={selectedSalaryRanges.includes('under-25k')}
-                      onChange={() => toggleSalaryRange('under-25k')} />
-                    <span>{language === 'vi' ? 'Dưới 25.000đ/giờ' : 'Under 25k/hr'}</span>
-                    <small>{filterCounts.under25k}</small>
-                  </FilterOption>
-                  <FilterOption>
                     <input type="checkbox" id="25k-30k"
                       checked={selectedSalaryRanges.includes('25k-30k')}
                       onChange={() => toggleSalaryRange('25k-30k')} />
@@ -3101,7 +3144,7 @@ const JobListing = () => {
                 <SortSelect value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
                   <option value="newest">{language === 'vi' ? 'Mới nhất' : 'Newest'}</option>
                   <option value="salary">{language === 'vi' ? 'Lương cao nhất' : 'Highest Salary'}</option>
-                  <option value="relevant">{language === 'vi' ? 'Phù hợp nhất' : 'Most Relevant'}</option>
+                  <option value="salary_low">{language === 'vi' ? 'Lương thấp nhất' : 'Lowest Salary'}</option>
                 </SortSelect>
 
                 <ViewToggle>
@@ -3127,6 +3170,11 @@ const JobListing = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.22 }}
               whileHover={{ y: -2 }}
+              onClick={() => {
+                const link = banners[currentBannerIndex]?.linkUrl;
+                if (link) window.open(link, '_blank', 'noopener,noreferrer');
+              }}
+              style={{ cursor: banners[currentBannerIndex]?.linkUrl ? 'pointer' : 'default' }}
             >
               <BoostTag>🔥Hot deal</BoostTag>
               <motion.img

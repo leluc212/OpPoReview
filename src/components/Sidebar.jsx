@@ -24,7 +24,8 @@ import {
   User,
   Bookmark,
   Building2,
-  Clock
+  Clock,
+  Image
 } from 'lucide-react';
 
 const SidebarContainer = styled.aside`
@@ -372,9 +373,9 @@ const Sidebar = ({ role, onHoverChange }) => {
       sessionStorage.setItem('sidebarScrollPos', navRef.current.scrollTop.toString());
     }
     
-    // special case for applications section
+    // special case for standard jobs section
     if (link.to === '/employer/standard-jobs') {
-      navigate(link.to, { state: { section: 'applications' } });
+      navigate(link.to, { state: { section: 'posts' } });
     } else {
       navigate(link.to);
     }
@@ -426,6 +427,7 @@ const Sidebar = ({ role, onHoverChange }) => {
     ]},
     { section: t.sidebar.platform || 'Management', items: [
       { to: '/admin/posts', icon: FileText, label: language === 'vi' ? 'Quản lý bài đăng' : 'Posts Management' },
+      { to: '/admin/banners', icon: Image, label: language === 'vi' ? 'Quản lý Banner' : 'Banner Management' },
       { to: '/admin/packages', icon: Package, label: t.sidebar.packages },
       { to: '/admin/reports', icon: BarChart3, label: t.sidebar.reports },
     ]},

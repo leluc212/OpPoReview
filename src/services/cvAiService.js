@@ -160,7 +160,6 @@ export const recommendCandidates = async ({
           title: jobData.title || '',
           description: jobData.description || '',
           requirements: jobData.requirements || '',
-          responsibilities: jobData.responsibilities || '',
           benefits: jobData.benefits || '',
         },
         language,

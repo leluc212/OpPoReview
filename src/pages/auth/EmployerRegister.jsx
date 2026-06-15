@@ -623,30 +623,41 @@ const FieldErr = styled.p`
   font-weight: 500;
 `;
 
-/* ── Password strength ── */
+/* ── Password checklist ── */
 const PwStrengthWrap = styled.div`
-  margin: -6px 0 10px;
-`;
-
-const PwBars = styled.div`
+  margin: -4px 0 12px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #f8faff 0%, #f1f5f9 100%);
+  border: 1.5px solid #e2eaf8;
+  border-radius: 12px;
   display: flex;
+  flex-direction: column;
   gap: 5px;
-  margin-bottom: 4px;
 `;
 
-const PwBar = styled.div`
-  flex: 1;
-  height: 3px;
-  border-radius: 999px;
-  background: ${p => p.$on ? p.$color : '#e8edf2'};
-  transition: background 0.4s ease;
+const PwCheckItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: ${p => p.$ok ? '#16a34a' : '#94a3b8'};
+  transition: color 0.2s;
 `;
 
-const PwLabel = styled.div`
-  font-size: 11px;
-  font-weight: 700;
-  color: ${p => p.$color};
-  text-align: right;
+const PwCheckDot = styled.div`
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: ${p => p.$ok ? '#dcfce7' : '#f1f5f9'};
+  border: 1.5px solid ${p => p.$ok ? '#16a34a' : '#e2e8f0'};
+  transition: all 0.2s;
+  font-size: 9px;
+  color: ${p => p.$ok ? '#16a34a' : '#cbd5e1'};
 `;
 
 /* ── Checkbox ── */
@@ -1209,19 +1220,25 @@ const EmployerRegister = () => {
                 <FInput id="password" name="password"
                   type={showPw ? 'text' : 'password'}
                   label="Mật khẩu *" value={form.password}
-                  onChange={handleChange} error={errors.password}
+                  onChange={handleChange}
                   iconL={<IconLock />}
                   iconR={showPw ? <IconEyeOff /> : <IconEye />}
                   onToggle={() => setShowPw(p => !p)} />
 
-                {form.password && pw && !errors.password && (
+                {form.password && (
                   <PwStrengthWrap>
-                    <PwBars>
-                      {[1, 2, 3, 4].map(i => (
-                        <PwBar key={i} $on={pw.score >= i} $color={pw.color} />
-                      ))}
-                    </PwBars>
-                    <PwLabel $color={pw.color}>{pw.label}</PwLabel>
+                    {[
+                      { ok: form.password.length >= 8,             label: 'Ít nhất 8 ký tự' },
+                      { ok: /[A-Z]/.test(form.password),           label: 'Ít nhất 1 chữ hoa (A–Z)' },
+                      { ok: /[a-z]/.test(form.password),           label: 'Ít nhất 1 chữ thường (a–z)' },
+                      { ok: /[0-9]/.test(form.password),           label: 'Ít nhất 1 chữ số (0–9)' },
+                      { ok: /[^a-zA-Z0-9]/.test(form.password),   label: 'Ít nhất 1 ký tự đặc biệt (!@#$%...)' },
+                    ].map((rule, i) => (
+                      <PwCheckItem key={i} $ok={rule.ok}>
+                        <PwCheckDot $ok={rule.ok}>{rule.ok ? '✓' : '✕'}</PwCheckDot>
+                        {rule.label}
+                      </PwCheckItem>
+                    ))}
                   </PwStrengthWrap>
                 )}
 

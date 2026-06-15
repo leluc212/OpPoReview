@@ -15,6 +15,7 @@ import jobPostService from '../../services/jobPostService';
 import quickJobService from '../../services/quickJobService';
 import applicationService from '../../services/applicationService';
 import { s3Images } from '../../utils/s3Images';
+import { getActiveBanners } from '../../services/bannerService';
 import {
   Briefcase,
   FileText,
@@ -1173,12 +1174,20 @@ const CandidateDashboard = () => {
   const [currentJob, setCurrentJob] = useState(null);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [successfulMatchesCount, setSuccessfulMatchesCount] = useState(0);
-
-  const banners = [
+  const [banners, setBanners] = useState([
     { src: s3Images.banner.seoul, alt: "Seoul Vua Mì Cay" },
     { src: s3Images.banner.unnamed1, alt: "Banner" },
     { src: s3Images.banner.unnamed, alt: "Banner" }
-  ];
+  ]);
+
+  // Load active banners from admin (max 5)
+  useEffect(() => {
+    getActiveBanners().then(activeBanners => {
+      if (activeBanners && activeBanners.length > 0) {
+        setBanners(activeBanners.map(b => ({ src: b.imageUrl, alt: b.title || 'Banner', linkUrl: b.linkUrl })));
+      }
+    }).catch(() => {/* fallback to default banners */});
+  }, []);
 
   useEffect(() => {
     const bannerInterval = setInterval(() => {
@@ -2378,6 +2387,11 @@ const CandidateDashboard = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.22 }}
                 whileHover={{ y: -2 }}
+                onClick={() => {
+                  const link = banners[currentBannerIndex]?.linkUrl;
+                  if (link) window.open(link, '_blank', 'noopener,noreferrer');
+                }}
+                style={{ cursor: banners[currentBannerIndex]?.linkUrl ? 'pointer' : 'default' }}
               >
                 <BoostTag>{language === 'vi' ? '🔥Đề xuất' : '🔥Featured'}</BoostTag>
                 <div style={{ position: 'relative', width: '100%', lineHeight: 0 }}>

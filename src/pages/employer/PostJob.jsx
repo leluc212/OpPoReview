@@ -4,7 +4,7 @@ import styled, { keyframes } from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
 import Modal from '../../components/Modal';
 import { Button, Input, TextArea, Select, FormGroup, Label } from '../../components/FormElements';
-import { Save, ArrowLeft, AlertCircle, Briefcase, Clock, FileText, CheckSquare, ClipboardList, Gift } from 'lucide-react';
+import { Save, ArrowLeft, AlertCircle, Briefcase, Clock, FileText, CheckSquare, ClipboardList, Gift, Plus, Trash2 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import jobPostService from '../../services/jobPostService';
 import employerProfileService from '../../services/employerProfileService';
@@ -216,6 +216,51 @@ const FormRow = styled.div`
   }
 `;
 
+const WorkHoursRow = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 12px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+  }
+`;
+
+const WorkHoursActionButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid ${props => props.$danger ? '#fecaca' : '#bfdbfe'};
+  background: ${props => props.$danger ? '#fff1f2' : '#eff6ff'};
+  color: ${props => props.$danger ? '#dc2626' : '#1e40af'};
+  font-size: 13px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(30, 64, 175, 0.12);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+`;
+
 const FormActions = styled.div`
   display: flex;
   gap: 12px;
@@ -368,8 +413,29 @@ const PostJob = () => {
   const editingJob = location.state?.job; // Get job data if editing
   const isEditing = !!editingJob;
 
+  const createWorkHourSlot = (isNew = true) => ({ startTime: '', endTime: '', isNew });
+  const parseWorkHours = (workHours) => {
+    const normalized = String(workHours || '')
+      .split(/\s*(?:\||,|\n)\s*/)
+      .map(part => part.trim())
+      .filter(Boolean)
+      .map(part => {
+        const [startTime = '', endTime = ''] = part.split('-').map(t => t.trim());
+        return startTime && endTime ? { startTime, endTime, isNew: false } : null;
+      })
+      .filter(Boolean)
+      .slice(0, 5);
+
+    return normalized.length > 0 ? normalized : [createWorkHourSlot(false)];
+  };
+  const serializeWorkHours = (slots) => slots
+    .filter(slot => slot.startTime && slot.endTime)
+    .map(slot => `${slot.startTime} - ${slot.endTime}`)
+    .join(' | ');
+
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState('');
+  const [workHoursList, setWorkHoursList] = useState([createWorkHourSlot(false)]);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -377,12 +443,9 @@ const PostJob = () => {
     jobType: '',
     workDays: '',
     workHours: '',
-    startTime: '', // Thêm startTime
-    endTime: '', // Thêm endTime
     salary: '',
     tags: '',
     description: '',
-    responsibilities: '',
     requirements: '',
     benefits: ''
   });
@@ -409,55 +472,55 @@ const PostJob = () => {
   // Pre-fill form if editing
   useEffect(() => {
     if (editingJob) {
-      // Parse workHours if it exists (format: "HH:MM - HH:MM")
-      let startTime = '';
-      let endTime = '';
-      if (editingJob.workHours) {
-        const parts = editingJob.workHours.split('-').map(t => t.trim());
-        if (parts.length === 2) {
-          startTime = parts[0];
-          endTime = parts[1];
-        }
-      }
-
+      const parsedWorkHours = parseWorkHours(editingJob.workHours || `${editingJob.startTime || ''} - ${editingJob.endTime || ''}`);
+      setWorkHoursList(parsedWorkHours);
       setFormData({
         title: editingJob.title || '',
         location: editingJob.location || '',
         jobType: editingJob.jobType || '',
         workDays: editingJob.workDays || '',
-        workHours: editingJob.workHours || '',
-        startTime: startTime,
-        endTime: endTime,
+        workHours: editingJob.workHours || serializeWorkHours(parsedWorkHours),
         salary: editingJob.salary || '',
         tags: editingJob.tags || '',
         description: editingJob.description || '',
-        responsibilities: editingJob.responsibilities || '',
         requirements: editingJob.requirements || '',
         benefits: editingJob.benefits || ''
       });
     }
   }, [editingJob]);
 
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      workHours: serializeWorkHours(workHoursList)
+    }));
+  }, [workHoursList]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     // Update formData
-    setFormData(prev => {
-      const updated = { ...prev, [name]: value };
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
-      // Auto-combine startTime and endTime into workHours
-      if (name === 'startTime' || name === 'endTime') {
-        const start = name === 'startTime' ? value : prev.startTime;
-        const end = name === 'endTime' ? value : prev.endTime;
+  const handleWorkHourChange = (index, field, value) => {
+    setWorkHoursList(prev => prev.map((slot, slotIndex) => (
+      slotIndex === index ? { ...slot, [field]: value } : slot
+    )));
+  };
 
-        if (start && end) {
-          updated.workHours = `${start} - ${end}`;
-        } else {
-          updated.workHours = '';
-        }
-      }
+  const addWorkHour = () => {
+    setWorkHoursList(prev => {
+      if (prev.length >= 5) return prev;
+      return [...prev, createWorkHourSlot()];
+    });
+  };
 
-      return updated;
+  const removeWorkHour = (index) => {
+    setWorkHoursList(prev => {
+      if (prev.length === 1) return prev;
+      const next = prev.filter((_, slotIndex) => slotIndex !== index);
+      return next.length > 0 ? next : [createWorkHourSlot()];
     });
   };
 
@@ -681,12 +744,12 @@ const PostJob = () => {
               </FormGroup>
 
               <FormGroup>
-                <Label>{language === 'vi' ? 'Ngày làm *' : 'Work Date *'}</Label>
+                <Label>{language === 'vi' ? 'Thời hạn nộp hồ sơ *' : 'Application Deadline *'}</Label>
                 <Input
                   name="workDays"
                   type="date"
                   min={new Date().toISOString().split('T')[0]}
-                  placeholder={language === 'vi' ? 'Chọn ngày' : 'Select date'}
+                  placeholder={language === 'vi' ? 'Chọn thời hạn' : 'Select deadline'}
                   value={formData.workDays}
                   onChange={handleChange}
                   required
@@ -695,28 +758,50 @@ const PostJob = () => {
 
               <FormGroup>
                 <Label>{language === 'vi' ? 'Khung giờ làm việc *' : 'Working Hours *'}</Label>
-                <FormRow $columns="1fr 1fr" style={{ marginBottom: 0 }}>
-                  <div>
-                    <Label style={{ fontSize: '13px', marginBottom: '8px' }}>{language === 'vi' ? 'Từ' : 'From'}</Label>
-                    <Input
-                      name="startTime"
-                      type="time"
-                      value={formData.startTime}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label style={{ fontSize: '13px', marginBottom: '8px' }}>{language === 'vi' ? 'Đến' : 'To'}</Label>
-                    <Input
-                      name="endTime"
-                      type="time"
-                      value={formData.endTime}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                </FormRow>
+                <div style={{ marginTop: '4px' }}>
+                  {workHoursList.map((slot, index) => (
+                    <WorkHoursRow key={index}>
+                      <div>
+                        <Label style={{ fontSize: '13px', marginBottom: '8px' }}>{language === 'vi' ? 'Từ' : 'From'}</Label>
+                        <Input
+                          type="time"
+                          value={slot.startTime}
+                          onChange={(e) => handleWorkHourChange(index, 'startTime', e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label style={{ fontSize: '13px', marginBottom: '8px' }}>{language === 'vi' ? 'Đến' : 'To'}</Label>
+                        <Input
+                          type="time"
+                          value={slot.endTime}
+                          onChange={(e) => handleWorkHourChange(index, 'endTime', e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <WorkHoursActionButton
+                          type="button"
+                          onClick={addWorkHour}
+                          disabled={workHoursList.length >= 5}
+                          title={language === 'vi' ? 'Thêm khung giờ' : 'Add time slot'}
+                        >
+                          <Plus />
+                        </WorkHoursActionButton>
+                        {slot.isNew && (
+                          <WorkHoursActionButton
+                            type="button"
+                            $danger
+                            onClick={() => removeWorkHour(index)}
+                            title={language === 'vi' ? 'Xóa khung giờ' : 'Remove time slot'}
+                          >
+                            <Trash2 />
+                          </WorkHoursActionButton>
+                        )}
+                      </div>
+                    </WorkHoursRow>
+                  ))}
+                </div>
               </FormGroup>
 
               <FormGroup>
@@ -756,13 +841,7 @@ const PostJob = () => {
               <TextArea name="description" placeholder={language === 'vi' ? 'Mô tả vị trí công việc...' : 'Describe the position...'} value={formData.description} onChange={handleChange} required />
             </FormGroup>
 
-            <FormGroup>
-              <SectionLabel>
-                <CheckSquare />
-                <span>{language === 'vi' ? 'Trách nhiệm' : 'Responsibilities'}</span>
-              </SectionLabel>
-              <TextArea name="responsibilities" placeholder={language === 'vi' ? 'Liệt kê các trách nhiệm chính...' : 'List key responsibilities...'} value={formData.responsibilities} onChange={handleChange} />
-            </FormGroup>
+
 
             <FormGroup>
               <SectionLabel>

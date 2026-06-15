@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import styled, { keyframes, css } from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -980,9 +980,9 @@ const LoginPage = () => {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.25 }}
                 >
-                  {/* Error Alert */}
+                  {/* Error Alert — gộp cả lỗi validation lẫn lỗi submit */}
                   <AnimatePresence>
-                    {errors.submit && (
+                    {(errors.submit || errors.email || errors.password) && (
                       <ErrorAlert
                         initial={{ opacity: 0, y: -10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -991,8 +991,15 @@ const LoginPage = () => {
                       >
                         <ErrorIcon>!</ErrorIcon>
                         <ErrorContent>
-                          <div className="title">{errors.submitTitle || (language === 'vi' ? 'Đăng nhập thất bại' : 'Login failed')}</div>
-                          <div className="message">{errors.submit}</div>
+                          <div className="title">
+                            {errors.submitTitle || (language === 'vi' ? 'Vui lòng kiểm tra lại' : 'Please check again')}
+                          </div>
+                          <div className="message">
+                            {[errors.email, errors.password, errors.submit]
+                              .filter(Boolean)
+                              .map((msg, i) => <div key={i}>{msg}</div>)
+                            }
+                          </div>
                         </ErrorContent>
                       </ErrorAlert>
                     )}
@@ -1002,7 +1009,6 @@ const LoginPage = () => {
                     id="email" name="email" type="email"
                     label={`${t.login.email} *`}
                     value={form.email} onChange={onChange}
-                    error={errors.email}
                     iconL={<IcoMail />}
                     accent={rc.color}
                   />
@@ -1012,7 +1018,6 @@ const LoginPage = () => {
                     type={showPw ? 'text' : 'password'}
                     label={`${t.login.password} *`}
                     value={form.password} onChange={onChange}
-                    error={errors.password}
                     iconL={<IcoLock />}
                     iconR={showPw ? <IcoEyeOff /> : <IcoEye />}
                     onToggle={() => setShowPw(p => !p)}

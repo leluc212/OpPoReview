@@ -164,17 +164,9 @@ const IllustrationContainer = styled.div`
 
 const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 16px;
   margin-bottom: 32px;
-  
-  @media (max-width: 1400px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
 `;
 
 const ContentGrid = styled.div`
@@ -923,15 +915,6 @@ const EmployerDashboard = () => {
             color="#F59E0B"
             positive
             onClick={() => navigate('/employer/standard-jobs', { state: { section: 'applications' } })}
-          />
-          <StatsCard
-            title={language === 'vi' ? 'Tổng lượt tiếp cận' : 'Total Views'}
-            value={isLoadingStats ? "..." : dashboardStats.totalViews.toString()}
-            change=""
-            changeText={language === 'vi' ? 'so với tuần trước' : 'vs last week'}
-            icon={Eye}
-            color="#10B981"
-            positive
           />
           <StatsCard
             title={language === 'vi' ? 'Tổng tin tuyển dụng gấp' : 'Quick Job Posts'}

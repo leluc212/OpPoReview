@@ -87,6 +87,7 @@ import AdminSupport from './pages/admin/AdminSupport';
 import AdminNotifications from './pages/admin/AdminNotifications';
 import AdminProfile from './pages/admin/AdminProfile';
 import AdminManagement from './pages/admin/AdminManagement';
+import BannersManagement from './pages/admin/BannersManagement';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -442,6 +443,11 @@ function AppRoutes() {
       <Route path="/admin/management" element={
         <ProtectedRoute allowedRoles={['admin']}>
           <AdminManagement />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/banners" element={
+        <ProtectedRoute allowedRoles={['admin']}>
+          <BannersManagement />
         </ProtectedRoute>
       } />
       {/* Catch-all: redirect mọi URL không khớp về trang chủ */}

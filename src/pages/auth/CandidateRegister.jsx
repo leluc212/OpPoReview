@@ -541,18 +541,42 @@ const FErr = styled.p`
   font-weight: 500;
 `;
 
-/* ─ Password strength ─ */
-const PwWrap = styled.div` margin: -5px 0 11px; `;
-const PwBars = styled.div` display: flex; gap: 4px; margin-bottom: 3px; `;
-const PwSeg = styled.div`
-  flex: 1; height: 3px; border-radius: 999px;
-  background: ${p => p.$on ? p.$c : '#eaeff4'};
-  transition: background 0.35s;
+/* ─ Password requirements checklist ─ */
+const PwChecklist = styled.div`
+  margin: -4px 0 12px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #f8faff 0%, #f1f5f9 100%);
+  border: 1.5px solid #e2eaf8;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 `;
-const PwLbl = styled.div`
-  font-size: 11px; font-weight: 700;
-  color: ${p => p.$c}; text-align: right;
+const PwCheckItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: ${p => p.$ok ? '#16a34a' : '#94a3b8'};
+  transition: color 0.2s;
 `;
+const PwCheckDot = styled.div`
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: ${p => p.$ok ? '#dcfce7' : '#f1f5f9'};
+  border: 1.5px solid ${p => p.$ok ? '#16a34a' : '#e2e8f0'};
+  transition: all 0.2s;
+  font-size: 9px;
+  color: ${p => p.$ok ? '#16a34a' : '#cbd5e1'};
+`;
+
+
 
 /* ─ Checkbox ─ */
 const ChkRow = styled.label`
@@ -1020,18 +1044,26 @@ const CandidateRegister = () => {
 
             <FloatInput id="password" name="password"
               type={showPw ? 'text' : 'password'} label="Mật khẩu *"
-              value={form.password} onChange={onChange} error={errors.password}
+              value={form.password} onChange={onChange}
               iconL={<IcoLock />}
               iconR={showPw ? <IcoEyeOff /> : <IcoEye />}
               onToggle={() => setShowPw(p => !p)} />
 
-            {form.password && pw && !errors.password && (
-              <PwWrap>
-                <PwBars>
-                  {[1, 2, 3, 4].map(i => <PwSeg key={i} $on={pw.n >= i} $c={pw.color} />)}
-                </PwBars>
-                <PwLbl $c={pw.color}>{pw.label}</PwLbl>
-              </PwWrap>
+            {form.password && (
+              <PwChecklist>
+                {[
+                  { ok: form.password.length >= 8,              label: 'Ít nhất 8 ký tự' },
+                  { ok: /[A-Z]/.test(form.password),            label: 'Ít nhất 1 chữ hoa (A–Z)' },
+                  { ok: /[a-z]/.test(form.password),            label: 'Ít nhất 1 chữ thường (a–z)' },
+                  { ok: /[0-9]/.test(form.password),            label: 'Ít nhất 1 chữ số (0–9)' },
+                  { ok: /[^a-zA-Z0-9]/.test(form.password),    label: 'Ít nhất 1 ký tự đặc biệt (!@#$%...)' },
+                ].map((rule, i) => (
+                  <PwCheckItem key={i} $ok={rule.ok}>
+                    <PwCheckDot $ok={rule.ok}>{rule.ok ? '✓' : '✕'}</PwCheckDot>
+                    {rule.label}
+                  </PwCheckItem>
+                ))}
+              </PwChecklist>
             )}
 
             <FloatInput id="confirmPassword" name="confirmPassword"

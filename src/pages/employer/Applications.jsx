@@ -2126,8 +2126,7 @@ const Applications = () => {
     if (location.state?.section) {
       return location.state.section;
     }
-    const saved = sessionStorage.getItem('employer_applications_active_section');
-    return saved !== null ? saved : 'posts';
+    return 'posts';
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilters, setStatusFilters] = useState([]);
