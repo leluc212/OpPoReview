@@ -210,6 +210,133 @@ class HandlerTests(unittest.TestCase):
         self.assertEqual(len(body["recommendations"]), 1)
         self.assertEqual(body["recommendations"][0]["matchScore"], 85)
 
+    @patch("handler._fetch_verified_candidates", return_value=[])
+    def test_recommend_passes_is_quick_job_to_fetch_candidates(self, mock_fetch):
+        response = handler.lambda_handler(
+            event(path="/cv/recommend-candidates", method="POST", groups=["Employer"], body={"job": {"title": "Cashier"}, "isQuickJob": True}),
+            None
+        )
+        self.assertEqual(response["statusCode"], 200)
+        mock_fetch.assert_called_once_with(is_quick_job=True)
+
+    def test_suggest_jd_rejects_candidate(self):
+        response = handler.lambda_handler(
+            event(path="/job/suggest-jd", method="POST", groups=["Candidate"], body={"title": "Cashier"}),
+            None
+        )
+        self.assertEqual(response["statusCode"], 403)
+
+    def test_suggest_jd_rejects_missing_title(self):
+        response = handler.lambda_handler(
+            event(path="/job/suggest-jd", method="POST", groups=["Employer"], body={}),
+            None
+        )
+        self.assertEqual(response["statusCode"], 400)
+
+    @patch("urllib.request.urlopen")
+    def test_returns_suggested_jd(self, mock_urlopen):
+        mock_response = mock_urlopen.return_value.__enter__.return_value
+        mock_response.read.return_value = json.dumps({
+            "candidates": [{
+                "content": {
+                    "parts": [{"text": json.dumps({
+                        "description": "Pha chế các loại đồ uống.",
+                        "responsibilities": "Chuẩn bị nguyên liệu.\nPha chế nước uống.",
+                        "requirements": "Chăm chỉ, trung thực.\nCó kinh nghiệm pha chế.",
+                        "benefits": "Lương thưởng hấp dẫn.\nMôi trường năng động.",
+                    })}]
+                }
+            }]
+        }).encode("utf-8")
+        
+        with patch.dict(os.environ, {"GEMINI_API_KEY": "dummy_key"}, clear=False):
+            response = handler.lambda_handler(
+                event(path="/job/suggest-jd", method="POST", groups=["Employer"], body={"title": "Pha chế"}),
+                None
+            )
+        self.assertEqual(response["statusCode"], 200)
+        body = json.loads(response["body"])
+        self.assertEqual(body["description"], "Pha chế các loại đồ uống.")
+        self.assertEqual(body["responsibilities"], "Chuẩn bị nguyên liệu.\nPha chế nước uống.")
+
+    def test_recommend_jobs_rejects_employer(self):
+        response = handler.lambda_handler(
+            event(path="/candidate/recommend-jobs", method="POST", groups=["Employer"], body={}),
+            None
+        )
+        self.assertEqual(response["statusCode"], 403)
+
+    @patch("boto3.resource")
+    def test_recommend_jobs_requires_kyc(self, mock_boto3):
+        mock_table = mock_boto3.return_value.Table.return_value
+        mock_table.get_item.return_value = {"Item": {
+            "userId": "candidate-123",
+            "kycCompleted": False
+        }}
+        
+        response = handler.lambda_handler(
+            event(path="/candidate/recommend-jobs", method="POST", groups=["Candidate"], body={}),
+            None
+        )
+        self.assertEqual(response["statusCode"], 400)
+        body = json.loads(response["body"])
+        self.assertEqual(body["error"]["code"], "KYC_REQUIRED")
+
+    @patch("boto3.resource")
+    @patch("urllib.request.urlopen")
+    def test_returns_recommended_jobs(self, mock_urlopen, mock_boto3):
+        class MockTable:
+            def __init__(self, name):
+                self.name = name
+            def get_item(self, Key):
+                return {"Item": {
+                    "userId": "candidate-123",
+                    "kycCompleted": True,
+                    "verificationStatus": "APPROVED"
+                }}
+            def scan(self, *args, **kwargs):
+                if self.name == "PostStandardJob":
+                    return {"Items": [{
+                        "idJob": "job-std-1",
+                        "title": "Standard Job",
+                        "status": "active",
+                        "createdAt": "2026-06-11T00:00:00Z"
+                    }]}
+                elif self.name == "PostQuickJob":
+                    return {"Items": [{
+                        "jobID": "job-qk-1",
+                        "title": "Quick Job",
+                        "status": "active",
+                        "createdAt": "2026-06-11T00:00:00Z"
+                    }]}
+                return {"Items": []}
+                
+        mock_boto3.return_value.Table.side_effect = lambda name: MockTable(name)
+
+        mock_response = mock_urlopen.return_value.__enter__.return_value
+        mock_response.read.return_value = json.dumps({
+            "candidates": [{
+                "content": {
+                    "parts": [{"text": json.dumps({
+                        "recommendations": [
+                            {"jobId": "job-std-1", "matchScore": 90, "matchReason": "Good match"},
+                            {"jobId": "job-qk-1", "matchScore": 85, "matchReason": "Urgent match"}
+                        ]
+                    })}]
+                }
+            }]
+        }).encode("utf-8")
+
+        with patch.dict(os.environ, {"GEMINI_API_KEY": "dummy_key"}, clear=False):
+            response = handler.lambda_handler(
+                event(path="/candidate/recommend-jobs", method="POST", groups=["Candidate"], body={}),
+                None
+            )
+        self.assertEqual(response["statusCode"], 200)
+        body = json.loads(response["body"])
+        self.assertEqual(len(body["recommendations"]), 2)
+        self.assertEqual(body["recommendations"][0]["jobId"], "job-std-1")
+
 
 if __name__ == "__main__":
     unittest.main()

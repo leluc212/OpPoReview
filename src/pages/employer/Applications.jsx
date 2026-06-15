@@ -2162,11 +2162,6 @@ const Applications = () => {
     return localStorage.getItem('employer_wallet_connected') === 'true';
   });
 
-  // Persist active section to sessionStorage on change
-  useEffect(() => {
-    sessionStorage.setItem('employer_applications_active_section', activeSection);
-  }, [activeSection]);
-
   // Load job posts from DynamoDB
   useEffect(() => {
     const loadJobPosts = async () => {
@@ -2614,7 +2609,7 @@ const Applications = () => {
                   return `${role}${company}${period}`;
                 })
                 .join('; ')
-            : prev.experience;
+            : app.experience;
 
         if (profile) {
           console.log('✅ Full profile loaded:', profile);

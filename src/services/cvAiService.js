@@ -144,6 +144,7 @@ export const generateCV = async ({
 
 export const recommendCandidates = async ({
   jobData,
+  isQuickJob = false,
   language = 'vi',
 }) => {
   const headers = await getAuthHeaders();
@@ -162,6 +163,7 @@ export const recommendCandidates = async ({
           requirements: jobData.requirements || '',
           benefits: jobData.benefits || '',
         },
+        isQuickJob,
         language,
       }),
     });
@@ -188,4 +190,92 @@ export const recommendCandidates = async ({
   }
 };
 
-export default { analyzeCV, generateCV, recommendCandidates };
+export const suggestJd = async ({
+  title,
+  location = '',
+  jobType = '',
+  workDays = '',
+  workHours = '',
+  salary = '',
+  tags = '',
+  language = 'vi',
+}) => {
+  const headers = await getAuthHeaders();
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 35_000);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/job/suggest-jd`, {
+      method: 'POST',
+      headers,
+      signal: controller.signal,
+      body: JSON.stringify({
+        title,
+        location,
+        jobType,
+        workDays,
+        workHours,
+        salary,
+        tags,
+        language,
+      }),
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(errorMessage(response.status, payload?.error?.code, language));
+    }
+    return payload;
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error(language === 'vi'
+        ? 'Yêu cầu đề xuất JD đã hết thời gian chờ. Vui lòng thử lại.'
+        : 'The JD suggestion request timed out. Please try again.');
+    }
+    if (error instanceof TypeError) {
+      throw new Error(language === 'vi'
+        ? 'Không thể kết nối tới dịch vụ đề xuất JD.'
+        : 'Could not connect to the JD suggestion service.');
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
+  }
+};
+
+export const recommendJobsForCandidate = async ({ language = 'vi' } = {}) => {
+  const headers = await getAuthHeaders();
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 35_000);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/candidate/recommend-jobs`, {
+      method: 'POST',
+      headers,
+      signal: controller.signal,
+      body: JSON.stringify({ language }),
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(errorMessage(response.status, payload?.error?.code, language));
+    }
+    return payload?.recommendations || [];
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error(language === 'vi'
+        ? 'Yêu cầu gợi ý việc làm đã hết thời gian chờ. Vui lòng thử lại.'
+        : 'The job recommendation request timed out. Please try again.');
+    }
+    if (error instanceof TypeError) {
+      throw new Error(language === 'vi'
+        ? 'Không thể kết nối tới dịch vụ gợi ý việc làm.'
+        : 'Could not connect to the job recommendation service.');
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
+  }
+};
+
+export default { analyzeCV, generateCV, recommendCandidates, suggestJd, recommendJobsForCandidate };

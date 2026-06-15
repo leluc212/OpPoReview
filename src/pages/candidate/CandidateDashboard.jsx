@@ -40,12 +40,15 @@ import {
   StarIcon,
   Send,
   ChevronDown,
+  ChevronUp,
   Phone,
   MoreVertical,
   AlertCircle,
-  DollarSign
+  DollarSign,
+  Shield
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
+import cvAiService from '../../services/cvAiService';
 
 
 
@@ -600,6 +603,134 @@ const RecommendedJobCard = styled(motion.div)`
     border-color: ${props => props.theme.colors.primary};
     transform: translateY(-4px);
     box-shadow: ${props => props.theme.shadows.lg};
+  }
+`;
+
+const JobTypeBadge = styled.span`
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  width: fit-content;
+  
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+`;
+
+const AiMatchSection = styled.div`
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed ${props => props.theme.colors.border};
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+`;
+
+const AiMatchBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+  color: #4338ca;
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 6px;
+  align-self: flex-start;
+  
+  svg {
+    width: 13px !important;
+    height: 13px !important;
+    color: #4f46e5;
+  }
+`;
+
+const AiMatchReason = styled.p`
+  font-size: 12.5px;
+  color: #475569;
+  line-height: 1.5;
+  font-style: italic;
+  margin: 0;
+  
+  &::before {
+    content: '"';
+  }
+  &::after {
+    content: '"';
+  }
+`;
+
+const KycPromptCard = styled.div`
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 2px solid #bfdbfe;
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  max-width: 500px;
+  margin: 20px auto;
+  box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  
+  .icon-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(30, 64, 175, 0.1);
+    color: #2563eb;
+    
+    svg {
+      width: 30px !important;
+      height: 30px !important;
+    }
+  }
+  
+  h3 {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1e3a8a;
+    margin: 0;
+  }
+  
+  p {
+    font-size: 14px;
+    color: #1e40af;
+    line-height: 1.6;
+    margin: 0;
+  }
+  
+  button {
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px 24px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25);
+    
+    &:hover {
+      background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(30, 64, 175, 0.35);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
   }
 `;
 
@@ -1173,6 +1304,7 @@ const CandidateDashboard = () => {
   const [allActiveJobs, setAllActiveJobs] = useState([]);
   const [currentJob, setCurrentJob] = useState(null);
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [isApplicationsExpanded, setIsApplicationsExpanded] = useState(false);
   const [successfulMatchesCount, setSuccessfulMatchesCount] = useState(0);
   const [banners, setBanners] = useState([
     { src: s3Images.banner.seoul, alt: "Seoul Vua Mì Cay" },
@@ -1217,7 +1349,7 @@ const CandidateDashboard = () => {
   const fetchData = useCallback(async (showLoading = true) => {
     try {
       if (showLoading) setIsLoadingData(true);
-      
+
       // Fetch all active jobs (Standard + Quick)
       const [standardJobs, quickJobs] = await Promise.all([
         jobPostService.getAllActiveJobs().catch(() => []),
@@ -1227,43 +1359,70 @@ const CandidateDashboard = () => {
       // Merge and transform for recommendations
       const allJobs = [...standardJobs, ...quickJobs];
       setAllActiveJobs(allJobs);
-      
-      // For recommendations
-      const recommended = [...allJobs].sort((a, b) => 
-        new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
-      ).slice(0, 5);
-      
-      setRealRecommendedJobs(recommended.map(job => {
-        const isQuick = job.jobType === 'quick' || !!(job.jobID && !job.idJob) || !!job.totalSalary;
-        const totalSalary = Number(job.totalSalary || 0);
-        const hourlyRate = Number(job.hourlyRate || 0);
-        const totalHours = Number(job.totalHours || 0);
-        const candidateIncome = Math.round(totalSalary * 0.85);
-        const jobSalary = isQuick
-          ? (candidateIncome > 0
-              ? `${candidateIncome.toLocaleString('vi-VN')} VNĐ/${totalHours}h`
-              : `${Math.round(hourlyRate * 0.85).toLocaleString('vi-VN')} VNĐ/giờ`)
-          : formatSalary(job.salary || job.totalSalary);
 
-        return {
-          id: job.idJob || job.jobID || job.id,
-          title: job.title || 'Untitled',
-          company: job.employerName || job.companyName || (language === 'vi' ? 'Công ty' : 'Company'),
-          location: job.location || '',
-          type: isQuick ? (language === 'vi' ? 'Việc làm ngắn hạn' : 'Quick Job') : (job.jobType === 'full-time' ? 'Toàn thời gian' : 'Bán thời gian'),
-          salary: jobSalary,
-          postedAt: formatRelativeTime(job.createdAt),
-          tags: typeof job.tags === 'string' ? job.tags.split(',').map(t => t.trim()) : (job.tags || []),
-          isQuick
-        };
-      }));
+      // Fetch profile if not loaded to check KYC status
+      let profile = candidateProfile;
+      if (!profile) {
+        profile = await candidateProfileService.getOrCreateProfile(user).catch(() => null);
+        if (profile) setCandidateProfile(profile);
+      }
+
+      const isKycVerified = !!(profile && (
+        profile.kycCompleted ||
+        profile.kycStatus === 'VERIFIED' ||
+        profile.ekycStatus === 'verified' ||
+        profile.ekycStatus === 'VERIFIED'
+      ));
+
+      let recommended = [];
+      if (isKycVerified) {
+        try {
+          const aiRecommendations = await cvAiService.recommendJobsForCandidate({ language }).catch(() => []);
+
+          if (aiRecommendations && aiRecommendations.length > 0) {
+            aiRecommendations.forEach(rec => {
+              const matchedJob = allJobs.find(job => (job.idJob || job.jobID || job.id) === rec.jobId);
+              if (matchedJob) {
+                const isQuick = matchedJob.jobType === 'quick' || !!(matchedJob.jobID && !matchedJob.idJob) || !!matchedJob.totalSalary;
+                const totalSalary = Number(matchedJob.totalSalary || 0);
+                const hourlyRate = Number(matchedJob.hourlyRate || 0);
+                const totalHours = Number(matchedJob.totalHours || 0);
+                const candidateIncome = Math.round(totalSalary * 0.85);
+                const jobSalary = isQuick
+                  ? (candidateIncome > 0
+                    ? `${candidateIncome.toLocaleString('vi-VN')} VNĐ/${totalHours}h`
+                    : `${Math.round(hourlyRate * 0.85).toLocaleString('vi-VN')} VNĐ/giờ`)
+                  : formatSalary(matchedJob.salary || matchedJob.totalSalary);
+
+                recommended.push({
+                  id: matchedJob.idJob || matchedJob.jobID || matchedJob.id,
+                  title: matchedJob.title || 'Untitled',
+                  company: matchedJob.employerName || matchedJob.companyName || (language === 'vi' ? 'Công ty' : 'Company'),
+                  location: matchedJob.location || '',
+                  type: isQuick ? (language === 'vi' ? 'Việc làm ngắn hạn' : 'Quick Job') : (matchedJob.jobType === 'full-time' ? 'Toàn thời gian' : 'Bán thời gian'),
+                  salary: jobSalary,
+                  postedAt: formatRelativeTime(matchedJob.createdAt),
+                  tags: typeof matchedJob.tags === 'string' ? matchedJob.tags.split(',').map(t => t.trim()) : (matchedJob.tags || []),
+                  isQuick,
+                  matchScore: rec.matchScore,
+                  matchReason: rec.matchReason
+                });
+              }
+            });
+          }
+        } catch (aiErr) {
+          console.error('Error fetching AI job recommendations:', aiErr);
+        }
+      }
+
+      setRealRecommendedJobs(recommended);
 
       // Fetch user's applications
       const apps = await applicationService.getMyCandidateApplications();
-      
+
       // Find IDs of jobs not in our active lists
       const missingJobIds = [...new Set(apps.map(app => app.jobId).filter(id => id && !allJobs.find(j => (j.idJob || j.id || j.jobID) === id)))];
-      
+
       // Fetch missing jobs individually to ensure "real data" even for inactive jobs
       let additionalJobs = [];
       if (missingJobIds.length > 0) {
@@ -1282,12 +1441,12 @@ const CandidateDashboard = () => {
       }
 
       const finalAllJobs = [...allJobs, ...additionalJobs];
-      
+
       const mappedApps = apps
         .sort((a, b) => new Date(b.appliedAt || b.createdAt || 0) - new Date(a.appliedAt || a.createdAt || 0))
         .map(app => {
           const job = finalAllJobs.find(j => (j.idJob || j.id || j.jobID) === app.jobId);
-          
+
           return {
             id: app.applicationId || app.id,
             jobId: app.jobId,
@@ -1301,23 +1460,23 @@ const CandidateDashboard = () => {
         })
         // Only show applications where we have a valid, resolved job record
         // and avoid "Unknown" placeholders
-        .filter(app => 
-          app.id && 
-          app.isValid && 
-          app.title !== '---' && 
+        .filter(app =>
+          app.id &&
+          app.isValid &&
+          app.title !== '---' &&
           app.company !== '---' &&
           !app.title.includes('Unknown') &&
           !app.company.includes('Unknown') &&
           !app.company.includes('không xác định')
         )
         .slice(0, 20);
-        
+
       setRealApplications(mappedApps);
 
       // Find current job (latest accepted or completed_pending_candidate application)
       const acceptedApp = apps
-        .filter(app => 
-          app.status === 'accepted' || 
+        .filter(app =>
+          app.status === 'accepted' ||
           app.status === 'completed_pending_candidate' ||
           (app.status === 'completed' && !app.candidateRating)
         )
@@ -1325,14 +1484,14 @@ const CandidateDashboard = () => {
 
       if (acceptedApp) {
         const job = finalAllJobs.find(j => (j.idJob || j.id || j.jobID) === acceptedApp.jobId);
-        
+
         const companyVal = job ? (job.employerName || job.companyName) : null;
-        const isJobValid = job && 
-                          job.title && 
-                          !job.title.includes('Unknown') && 
-                          companyVal && 
-                          !companyVal.includes('Unknown') &&
-                          !companyVal.includes('không xác định');
+        const isJobValid = job &&
+          job.title &&
+          !job.title.includes('Unknown') &&
+          companyVal &&
+          !companyVal.includes('Unknown') &&
+          !companyVal.includes('không xác định');
 
         if (isJobValid) {
           const isQuick = job.jobType === 'quick' || !!job.totalSalary;
@@ -1342,8 +1501,8 @@ const CandidateDashboard = () => {
           const candidateIncome = Math.round(totalSalary * 0.85);
           const jobSalary = isQuick
             ? (candidateIncome > 0
-                ? `${candidateIncome.toLocaleString('vi-VN')} VNĐ/${totalHours}h`
-                : `${Math.round(hourlyRate * 0.85).toLocaleString('vi-VN')} VNĐ/giờ`)
+              ? `${candidateIncome.toLocaleString('vi-VN')} VNĐ/${totalHours}h`
+              : `${Math.round(hourlyRate * 0.85).toLocaleString('vi-VN')} VNĐ/giờ`)
             : formatSalary(job.salary || job.totalSalary);
 
           setCurrentJob({
@@ -1373,26 +1532,26 @@ const CandidateDashboard = () => {
       const nowObj = new Date();
       const currentYear = nowObj.getFullYear();
       const currentMonth = nowObj.getMonth();
-      
+
       const monthlyMatches = apps.filter(app => {
         // Must be accepted or completed status
-        const isAccepted = app.status === 'accepted' || 
-                           app.status === 'completed' || 
-                           app.status === 'completed_pending_candidate';
+        const isAccepted = app.status === 'accepted' ||
+          app.status === 'completed' ||
+          app.status === 'completed_pending_candidate';
         if (!isAccepted) return false;
-        
+
         // Must be urgent job
         const job = finalAllJobs.find(j => (j.idJob || j.id || j.jobID) === app.jobId);
         const isUrgent = job?.isUrgent || app.jobType === 'quick' || !!job?.jobID || false;
         if (!isUrgent) return false;
-        
+
         // Must be in current month
         const appDateStr = app.updatedAt || app.appliedAt || app.createdAt;
         if (!appDateStr) return false;
         const appDate = new Date(appDateStr);
         return appDate.getFullYear() === currentYear && appDate.getMonth() === currentMonth;
       });
-      
+
       setSuccessfulMatchesCount(monthlyMatches.length);
 
     } catch (error) {
@@ -1404,19 +1563,19 @@ const CandidateDashboard = () => {
 
   useEffect(() => {
     fetchData();
-    
+
     // Implement real-time feel with periodic refresh (every 30 seconds)
     const interval = setInterval(() => {
       fetchData(false); // Background refresh
     }, 30000);
-    
+
     return () => clearInterval(interval);
   }, [fetchData]);
 
   // Helper: Format salary
   const formatSalary = (salary) => {
     if (!salary) return language === 'vi' ? 'Thỏa thuận' : 'Negotiable';
-    
+
     // If it's a number string (e.g., "24" or "25.000")
     if (typeof salary === 'string') {
       const cleanSalary = salary.replace(/[^\d.]/g, '');
@@ -1428,12 +1587,12 @@ const CandidateDashboard = () => {
       }
       return salary; // Return as is if it's already non-numeric string like "6 triệu"
     }
-    
+
     if (typeof salary === 'number') {
       const finalNum = salary < 1000 ? salary * 1000 : salary;
       return `${finalNum.toLocaleString('vi-VN')} VNĐ/h`;
     }
-    
+
     return salary;
   };
 
@@ -1442,24 +1601,24 @@ const CandidateDashboard = () => {
     if (!dateStr) return '---';
     const date = new Date(dateStr);
     const now = new Date();
-    
+
     // Calculate difference in seconds
     let diffInSeconds = Math.floor((now - date) / 1000);
-    
+
     // Handle small clock drifts (if diff is negative, treat as "just now")
     if (diffInSeconds < 0) diffInSeconds = 0;
-    
+
     if (diffInSeconds < 60) return language === 'vi' ? 'Vừa xong' : 'Just now';
-    
+
     const diffInMinutes = Math.floor(diffInSeconds / 60);
     if (diffInMinutes < 60) return `${diffInMinutes} ${language === 'vi' ? 'phút trước' : 'minutes ago'}`;
-    
+
     const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) return `${diffInHours} ${language === 'vi' ? 'giờ trước' : 'hours ago'}`;
-    
+
     const diffInDays = Math.floor(diffInHours / 24);
     if (diffInDays < 30) return `${diffInDays} ${language === 'vi' ? 'ngày trước' : 'days ago'}`;
-    
+
     return date.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US');
   };
 
@@ -1480,17 +1639,17 @@ const CandidateDashboard = () => {
       const jobTitle = job.title || 'Công việc tuyển gấp';
       const companyName = job.company || 'Nhà tuyển dụng';
       const totalAmount = Number(job.rawSalary) || 0;
-      
+
       if (totalAmount <= 0) {
         console.warn('Escrow release: totalAmount is 0, skipping release');
         return;
       }
-      
+
       const candidateAmount = Math.round(totalAmount * 0.85);
       const adminAmount = totalAmount - candidateAmount; // Exactly 15%
-      
+
       console.log(`💰 Releasing escrow for job ${jobId}. Total: ${totalAmount}, Candidate: ${candidateAmount}, Admin: ${adminAmount}`);
-      
+
       // 1. Update escrow_jobs status
       const savedJobs = JSON.parse(localStorage.getItem('escrow_jobs') || '[]');
       let foundJobInEscrow = false;
@@ -1506,7 +1665,7 @@ const CandidateDashboard = () => {
         }
         return j;
       });
-      
+
       if (!foundJobInEscrow) {
         // If not found in escrow_jobs (e.g. demo data), prepend a new one
         updatedJobs.unshift({
@@ -1523,7 +1682,7 @@ const CandidateDashboard = () => {
         });
       }
       localStorage.setItem('escrow_jobs', JSON.stringify(updatedJobs));
-      
+
       // 2. Add to escrow_transactions
       const savedTx = JSON.parse(localStorage.getItem('escrow_transactions') || '[]');
       const newTxId = 2000 + savedTx.length + 1; // Unique transaction ID
@@ -1539,7 +1698,7 @@ const CandidateDashboard = () => {
       };
       savedTx.unshift(escrowTxObj);
       localStorage.setItem('escrow_transactions', JSON.stringify(savedTx));
-      
+
       // 3. Update candidate_wallet
       const candidateWallet = JSON.parse(localStorage.getItem('candidate_wallet') || 'null');
       const currentCandidateBalance = candidateWallet ? candidateWallet.balance : 15750000;
@@ -1585,7 +1744,7 @@ const CandidateDashboard = () => {
           date: '2026-02-01'
         }
       ];
-      
+
       const newCandidateTxId = currentCandidateTx.length + 1;
       const candidateTxObj = {
         id: newCandidateTxId,
@@ -1595,13 +1754,13 @@ const CandidateDashboard = () => {
         amount: candidateAmount,
         date: new Date().toISOString().split('T')[0]
       };
-      
+
       const newCandidateWallet = {
         balance: currentCandidateBalance + candidateAmount,
         transactions: [candidateTxObj, ...currentCandidateTx]
       };
       localStorage.setItem('candidate_wallet', JSON.stringify(newCandidateWallet));
-      
+
       // 4. Update admin_wallet
       const adminWallet = JSON.parse(localStorage.getItem('admin_wallet') || 'null');
       const currentAdminBalance = adminWallet ? adminWallet.balance : 2458750000;
@@ -1687,7 +1846,7 @@ const CandidateDashboard = () => {
           status: 'completed'
         }
       ];
-      
+
       const newAdminTxId = currentAdminTx.length + 1;
       const now = new Date();
       const adminTxObj = {
@@ -1700,13 +1859,13 @@ const CandidateDashboard = () => {
         time: now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
         status: 'completed'
       };
-      
+
       const newAdminWallet = {
         balance: currentAdminBalance + adminAmount,
         transactions: [adminTxObj, ...currentAdminTx]
       };
       localStorage.setItem('admin_wallet', JSON.stringify(newAdminWallet));
-      
+
     } catch (err) {
       console.error('Error executing escrow release:', err);
     }
@@ -1719,9 +1878,15 @@ const CandidateDashboard = () => {
       const appId = currentJob.applicationId;
       await applicationService.updateApplicationStatus(appId, 'completed', {
         candidateConfirmed: true,
-        candidateConfirmedAt: new Date().toISOString()
+        candidateConfirmedAt: new Date().toISOString(),
+        chatMessages: []
       });
-      
+
+      // Clear chat messages locally
+      localStorage.removeItem(`chat_${appId}`);
+      localStorage.removeItem(`chat_read_${appId}`);
+      localStorage.removeItem(`chat_read_employer_${appId}`);
+
       // Perform Escrow Release
       releaseEscrowFunds(currentJob);
 
@@ -1927,6 +2092,13 @@ const CandidateDashboard = () => {
     return Math.min(completion, 100);
   })();
 
+  const isKycVerified = !!(candidateProfile && (
+    candidateProfile.kycCompleted ||
+    candidateProfile.kycStatus === 'VERIFIED' ||
+    candidateProfile.ekycStatus === 'verified' ||
+    candidateProfile.ekycStatus === 'VERIFIED'
+  ));
+
   const getGreeting = () => {
     const hour = currentTime.getHours(); if (language === 'en') {
       if (hour < 12) return 'Good morning';
@@ -1939,16 +2111,16 @@ const CandidateDashboard = () => {
 
   return (
     <>
-    <DashboardLayout role="candidate" key={language}>
-      {!isLoadingProfile && (
-        <ProfileSetupPrompt 
-          role="candidate" 
-          userId={user?.email} 
-          profileName={candidateProfile?.fullName}
-          profilePhone={candidateProfile?.phone}
-        />
-      )}
-      <DashboardContainer>
+      <DashboardLayout role="candidate" key={language}>
+        {!isLoadingProfile && (
+          <ProfileSetupPrompt
+            role="candidate"
+            userId={user?.email}
+            profileName={candidateProfile?.fullName}
+            profilePhone={candidateProfile?.phone}
+          />
+        )}
+        <DashboardContainer>
           {/* Welcome Banner */}
           <WelcomeBanner
             initial={{ opacity: 0, y: -20 }}
@@ -2156,7 +2328,7 @@ const CandidateDashboard = () => {
                             <Star style={{ fill: '#3b82f6', color: '#3b82f6', width: '18px', height: '18px' }} />
                             {language === 'vi' ? 'Đánh giá từ Nhà tuyển dụng' : 'Employer\'s Review'}
                           </h4>
-                          
+
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 16px', marginBottom: '14px' }}>
                             {/* Overall */}
                             <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '8px', borderBottom: '1px dashed #BFDBFE' }}>
@@ -2167,7 +2339,7 @@ const CandidateDashboard = () => {
                                 ))}
                               </span>
                             </div>
-                            
+
                             {/* Categories */}
                             {[
                               { key: 'attitude', label: language === 'vi' ? 'Thái độ làm việc' : 'Work Attitude' },
@@ -2185,7 +2357,7 @@ const CandidateDashboard = () => {
                               </div>
                             ))}
                           </div>
-                          
+
                           {currentJob.employerRating.comment && (
                             <div style={{ background: '#F8FAFC', borderRadius: '8px', padding: '10px 12px', borderLeft: '3px solid #3B82F6', fontSize: '13px', color: '#334155', fontStyle: 'italic' }}>
                               "{currentJob.employerRating.comment}"
@@ -2439,11 +2611,117 @@ const CandidateDashboard = () => {
                 </BannerDots>
               </BoostBannerWrap>
 
-              {/* Recent Applications - compact */}
+              {/* Recommended Jobs - Full Width */}
               <Section
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.25 }}
+              >
+                <SectionHeader>
+                  <h2>
+                    <Target />
+                    {language === 'vi' ? 'Việc làm phù hợp với bạn' : 'AI Job Recommendations'}
+                  </h2>
+                  <Link to="/candidate/jobs">
+                    {language === 'vi' ? 'Xem tất cả' : 'View all'}
+                    <ArrowUpRight />
+                  </Link>
+                </SectionHeader>
+
+                <JobsGrid style={{ display: 'block' }}>
+                  {isLoadingData ? (
+                    <div style={{ textAlign: 'center', padding: '20px', color: '#6B7280' }}>
+                      {language === 'vi' ? 'Đang tìm việc làm phù hợp...' : 'Finding suitable jobs...'}
+                    </div>
+                  ) : !isKycVerified ? (
+                    <KycPromptCard>
+                      <div className="icon-wrapper">
+                        <Shield />
+                      </div>
+                      <h3>{language === 'vi' ? 'Yêu cầu hoàn thành KYC' : 'KYC Verification Required'}</h3>
+                      <p>
+                        {language === 'vi'
+                          ? 'Vui lòng hoàn thành xác thực danh tính (eKYC) để mở khóa tính năng đề xuất công việc bằng trí tuệ nhân tạo (AI) phù hợp nhất với bạn.'
+                          : 'Please complete identity verification (eKYC) to unlock AI-powered job recommendations tailored for you.'}
+                      </p>
+                      <button onClick={() => navigate('/candidate/profile')}>
+                        {language === 'vi' ? 'Xác thực ngay' : 'Verify Now'}
+                      </button>
+                    </KycPromptCard>
+                  ) : realRecommendedJobs.length > 0 ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                      {realRecommendedJobs.map((job, index) => (
+                        <RecommendedJobCard
+                          key={job.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.4 + index * 0.1 }}
+                          whileHover={{ scale: 1.02 }}
+                          onClick={() => navigate({ pathname: '/candidate/jobs', search: `?tab=${job.isQuick ? 'shift' : 'standard'}` }, { state: { selectedJobId: job.id } })}
+                        >
+                          <JobHeader>
+                            <CompanyLogo>
+                              {job.company.charAt(0)}
+                            </CompanyLogo>
+                            <JobInfo>
+                              {job.isQuick && (
+                                <JobTypeBadge>
+                                  {language === 'vi' ? 'Tuyển gấp' : 'Urgent'}
+                                </JobTypeBadge>
+                              )}
+                              <h4><DynamicTranslate text={job.title} showIndicator={false} /></h4>
+                              <p><DynamicTranslate text={job.company} showIndicator={false} /></p>
+                            </JobInfo>
+                          </JobHeader>
+                          <JobDetails>
+                            <span>
+                              <MapPin />
+                              <DynamicTranslate text={job.location} showIndicator={false} />
+                            </span>
+                            <span>
+                              <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập trung bình:' : 'Income:'}</span>
+                              {translateSalary(job.salary)}
+                            </span>
+                            <span>
+                              <Clock />
+                              {translatePostedAt(job.postedAt)}
+                            </span>
+                          </JobDetails>
+                          {job.tags && job.tags.filter(tag => tag && tag.trim() !== '').length > 0 && (
+                            <JobTags>
+                              {job.tags
+                                .filter(tag => tag && tag.trim() !== '')
+                                .map((tag, idx) => (
+                                  <DynamicTranslate key={idx} text={tag} showIndicator={false} />
+                                ))}
+                            </JobTags>
+                          )}
+                          {job.matchScore !== undefined && (
+                            <AiMatchSection>
+                              <AiMatchBadge>
+                                <span>Phù hợp {job.matchScore}%</span>
+                              </AiMatchBadge>
+                              {job.matchReason && (
+                                <AiMatchReason>{job.matchReason}</AiMatchReason>
+                              )}
+                            </AiMatchSection>
+                          )}
+                        </RecommendedJobCard>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ textAlign: 'center', padding: '40px 20px', color: '#6B7280', fontSize: '14px', border: '1px dashed #E5E7EB', borderRadius: '12px' }}>
+                      {language === 'vi' ? 'Chưa có việc làm phù hợp.' : 'No suitable jobs yet.'}
+                    </div>
+                  )}
+                </JobsGrid>
+              </Section>
+
+              {/* Recent Applications - compact */}
+              <Section
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
               >
                 <SectionHeader>
                   <h2>
@@ -2457,120 +2735,76 @@ const CandidateDashboard = () => {
                     {language === 'vi' ? 'Đang tải dữ liệu...' : 'Loading data...'}
                   </div>
                 ) : realApplications.length > 0 ? (
-                  <RecentList>
-                    {realApplications.map((app, index) => (
-                      <ApplicationCard
-                        key={app.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 + index * 0.08 }}
-                        whileHover={{ scale: 1.01 }}
-                        onClick={() => navigate({
-                          pathname: '/candidate/jobs',
-                          search: `?tab=${app.urgent ? 'shift' : 'standard'}`
-                        }, { state: { selectedJobId: app.jobId } })}
-                      >
-                        <ApplicationHeader>
-                          <ApplicationInfo>
-                            <h4><DynamicTranslate text={app.title} showIndicator={false} /></h4>
-                            <p><DynamicTranslate text={app.company} showIndicator={false} /></p>
-                          </ApplicationInfo>
-                          <StatusBadge status={app.status} />
-                        </ApplicationHeader>
-                        <ApplicationMeta>
-                          <span>
-                            <Clock />
-                            {translatePostedAt(app.appliedDate)}
-                          </span>
-                          <span>
-                            <Eye />
-                            {language === 'vi' ? 'Xem chi tiết' : 'View details'}
-                          </span>
-                        </ApplicationMeta>
-                      </ApplicationCard>
-                    ))}
-                  </RecentList>
+                  <>
+                    <RecentList>
+                      {realApplications.slice(0, isApplicationsExpanded ? 20 : 2).map((app, index) => (
+                        <ApplicationCard
+                          key={app.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 + index * 0.08 }}
+                          whileHover={{ scale: 1.01 }}
+                          onClick={() => navigate({
+                            pathname: '/candidate/jobs',
+                            search: `?tab=${app.urgent ? 'shift' : 'standard'}`
+                          }, { state: { selectedJobId: app.jobId } })}
+                        >
+                          <ApplicationHeader>
+                            <ApplicationInfo>
+                              <h4><DynamicTranslate text={app.title} showIndicator={false} /></h4>
+                              <p><DynamicTranslate text={app.company} showIndicator={false} /></p>
+                            </ApplicationInfo>
+                            <StatusBadge status={app.status} />
+                          </ApplicationHeader>
+                          <ApplicationMeta>
+                            <span>
+                              <Clock />
+                              {translatePostedAt(app.appliedDate)}
+                            </span>
+                            <span>
+                              <Eye />
+                              {language === 'vi' ? 'Xem chi tiết' : 'View details'}
+                            </span>
+                          </ApplicationMeta>
+                        </ApplicationCard>
+                      ))}
+                    </RecentList>
+                    {realApplications.length > 2 && (
+                      <div style={{ textAlign: 'center', marginTop: '12px' }}>
+                        <button
+                          onClick={() => setIsApplicationsExpanded(!isApplicationsExpanded)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#4F46E5',
+                            fontWeight: '600',
+                            fontSize: '13.5px',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                          }}
+                        >
+                          {isApplicationsExpanded ? (
+                            <>
+                              {language === 'vi' ? 'Thu gọn' : 'Show less'}
+                              <ChevronUp size={16} />
+                            </>
+                          ) : (
+                            <>
+                              {language === 'vi' ? 'Xem thêm' : 'Show more'}
+                              <ChevronDown size={16} />
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <div style={{ textAlign: 'center', padding: '40px 20px', color: '#6B7280', fontSize: '14px', border: '1px dashed #E5E7EB', borderRadius: '12px' }}>
                     {language === 'vi' ? 'Chưa có đơn ứng tuyển nào.' : 'No applications yet.'}
                   </div>
                 )}
-              </Section>
-
-              {/* Stats Overview moved to TopInfoRow */}
-
-              {/* Recommended Jobs - Full Width */}
-              <Section
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-              >
-                <SectionHeader>
-                  <h2>
-                    <Target />
-                    {language === 'vi' ? 'Việc Làm Phù Hợp Với Bạn' : 'Recommended Jobs'}
-                  </h2>
-                  <Link to="/candidate/jobs">
-                    {language === 'vi' ? 'Xem tất cả' : 'View all'}
-                    <ArrowUpRight />
-                  </Link>
-                </SectionHeader>
-
-                <JobsGrid>
-                  {isLoadingData ? (
-                    <div style={{ textAlign: 'center', padding: '20px', color: '#6B7280' }}>
-                      {language === 'vi' ? 'Đang tìm việc làm phù hợp...' : 'Finding suitable jobs...'}
-                    </div>
-                  ) : realRecommendedJobs.length > 0 ? (
-                    realRecommendedJobs.map((job, index) => (
-                      <RecommendedJobCard
-                        key={job.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 + index * 0.1 }}
-                        whileHover={{ scale: 1.02 }}
-                        onClick={() => navigate({ pathname: '/candidate/jobs', search: `?tab=${job.isQuick ? 'shift' : 'standard'}` }, { state: { selectedJobId: job.id } })}
-                      >
-                        <JobHeader>
-                          <CompanyLogo>
-                            {job.company.charAt(0)}
-                          </CompanyLogo>
-                          <JobInfo>
-                            <h4><DynamicTranslate text={job.title} showIndicator={false} /></h4>
-                            <p><DynamicTranslate text={job.company} showIndicator={false} /></p>
-                          </JobInfo>
-                        </JobHeader>
-                        <JobDetails>
-                          <span>
-                            <MapPin />
-                            <DynamicTranslate text={job.location} showIndicator={false} />
-                          </span>
-                          <span>
-                            <span style={{ fontWeight: '500' }}>{language === 'vi' ? 'Thu nhập trung bình:' : 'Income:'}</span>
-                            {translateSalary(job.salary)}
-                          </span>
-                          <span>
-                            <Clock />
-                            {translatePostedAt(job.postedAt)}
-                          </span>
-                        </JobDetails>
-                        {job.tags && job.tags.filter(tag => tag && tag.trim() !== '').length > 0 && (
-                          <JobTags>
-                            {job.tags
-                              .filter(tag => tag && tag.trim() !== '')
-                              .map((tag, idx) => (
-                                <DynamicTranslate key={idx} text={tag} showIndicator={false} />
-                              ))}
-                          </JobTags>
-                        )}
-                      </RecommendedJobCard>
-                    ))
-                  ) : (
-                    <div style={{ textAlign: 'center', padding: '40px 20px', color: '#6B7280', fontSize: '14px', border: '1px dashed #E5E7EB', borderRadius: '12px' }}>
-                      {language === 'vi' ? 'Chưa có việc làm phù hợp.' : 'No suitable jobs yet.'}
-                    </div>
-                  )}
-                </JobsGrid>
               </Section>
             </div>
 

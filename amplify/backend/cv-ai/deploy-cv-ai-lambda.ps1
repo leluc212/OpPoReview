@@ -171,6 +171,10 @@ Ensure-Route "POST /cv/generate" $true
 Ensure-Route "OPTIONS /cv/generate" $false
 Ensure-Route "POST /cv/recommend-candidates" $true
 Ensure-Route "OPTIONS /cv/recommend-candidates" $false
+Ensure-Route "POST /job/suggest-jd" $true
+Ensure-Route "OPTIONS /job/suggest-jd" $false
+Ensure-Route "POST /candidate/recommend-jobs" $true
+Ensure-Route "OPTIONS /candidate/recommend-jobs" $false
 Ensure-Route "GET /health" $false
 
 $PreviousErrorActionPreference = $ErrorActionPreference
