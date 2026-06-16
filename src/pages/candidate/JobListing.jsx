@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -463,6 +463,210 @@ const ApplyModalWrap = styled.div`
       }
 
       &:active { transform: translateY(0); }
+    }
+  }
+`;
+
+const AiScreeningModalHeader = styled.div`
+  background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 50%, #7c3aed 100%);
+  padding: 24px;
+  color: white;
+  border-radius: 16px 16px 0 0;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+
+  .sparkles-container {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #e9d5ff;
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 800;
+    margin: 0 0 4px 0;
+    color: white;
+  }
+
+  p {
+    font-size: 13px;
+    color: #f3e8ff;
+    margin: 0;
+    font-weight: 500;
+  }
+`;
+
+const AiScreeningContent = styled.div`
+  padding: 24px;
+  text-align: center;
+  max-height: 500px;
+  overflow-y: auto;
+  font-family: inherit;
+`;
+
+const ScoreCircleWrap = styled.div`
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin: 20px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .score-label {
+    text-align: center;
+    h4 {
+      font-size: 36px;
+      font-weight: 800;
+      margin: 0;
+      color: ${props => props.$color};
+    }
+    span {
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+  }
+`;
+
+const ResultBadge = styled.div`
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: ${props => props.$bgColor};
+  color: ${props => props.$color};
+  border: 1.5px solid ${props => props.$color};
+  margin-bottom: 24px;
+`;
+
+const DetailCard = styled.div`
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: left;
+  margin-bottom: 16px;
+
+  h4 {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    svg {
+      color: ${props => props.$iconColor || '#7c3aed'};
+    }
+  }
+
+  p {
+    font-size: 13.5px;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 13.5px;
+    color: #475569;
+    line-height: 1.6;
+  }
+`;
+
+const ChatArea = styled.div`
+  height: 320px;
+  overflow-y: auto;
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+`;
+
+const ChatBubble = styled.div`
+  max-width: 75%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  align-self: ${props => props.$isMe ? 'flex-end' : 'flex-start'};
+  background: ${props => props.$isMe ? 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)' : '#e2e8f0'};
+  color: ${props => props.$isMe ? 'white' : '#1e293b'};
+  border-bottom-right-radius: ${props => props.$isMe ? '2px' : '12px'};
+  border-bottom-left-radius: ${props => props.$isMe ? '12px' : '2px'};
+  animation: slideIn 0.2s ease-out;
+
+  .time {
+    display: block;
+    font-size: 10px;
+    color: ${props => props.$isMe ? 'rgba(255,255,255,0.7)' : '#64748b'};
+    margin-top: 4px;
+    text-align: right;
+  }
+`;
+
+const ChatInputBar = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 12px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+
+    &:focus {
+      border-color: #7c3aed;
+    }
+  }
+
+  button {
+    padding: 12px 18px;
+    background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14.5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: opacity 0.2s;
+
+    &:hover {
+      opacity: 0.95;
+    }
+    
+    &:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
     }
   }
 `;
@@ -1044,7 +1248,27 @@ const JobCardWrapper = styled(motion.div)`
   `}
 `;
 
-
+const AiBadge = styled.span`
+  background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+  color: #6d28d9;
+  border: 1px solid #c084fc;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 6px rgba(109, 40, 217, 0.1);
+  margin-left: 6px;
+  flex-shrink: 0;
+  
+  svg {
+    width: 12px;
+    height: 12px;
+    color: #7c3aed;
+  }
+`;
 
 const JobCardHeader = styled.div`
   display: flex;
@@ -1710,6 +1934,236 @@ const JobListing = () => {
   const [isLoadingDynamoJobs, setIsLoadingDynamoJobs] = useState(true);
   const [isReloading, setIsReloading] = useState(false);
 
+  // AI Screening & Interview states
+  const [pendingApplication, setPendingApplication] = useState(null);
+  const [showAiScreeningModal, setShowAiScreeningModal] = useState(false);
+  const [aiScreeningJob, setAiScreeningJob] = useState(null);
+  const [aiScreeningCvName, setAiScreeningCvName] = useState('');
+  const [aiScreeningStep, setAiScreeningStep] = useState('screening'); // 'screening' | 'interview'
+  const [aiScreeningLoading, setAiScreeningLoading] = useState(false);
+  const [aiScreeningScore, setAiScreeningScore] = useState(0);
+  const [aiScreeningResult, setAiScreeningResult] = useState('review'); // 'pass' | 'review' | 'fail'
+  const [aiScreeningStrengths, setAiScreeningStrengths] = useState([]);
+  const [aiScreeningWeaknesses, setAiScreeningWeaknesses] = useState([]);
+  const [aiScreeningReason, setAiScreeningReason] = useState('');
+  const [aiScreeningError, setAiScreeningError] = useState('');
+
+  // Interview states
+  const [interviewSessionId, setInterviewSessionId] = useState(null);
+  const [interviewMessages, setInterviewMessages] = useState([]);
+  const [interviewSending, setInterviewSending] = useState(false);
+  const [interviewFinished, setInterviewFinished] = useState(false);
+  const [interviewReport, setInterviewReport] = useState(null);
+  const [interviewInputText, setInterviewInputText] = useState('');
+
+  const chatEndRef = useRef(null);
+
+  useEffect(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [interviewMessages]);
+
+  const getResultInfo = () => {
+    switch (aiScreeningResult.toLowerCase()) {
+      case 'pass':
+        return {
+          color: '#10b981',
+          bgColor: '#d1fae5',
+          text: language === 'vi' ? 'Đạt yêu cầu' : 'Qualified'
+        };
+      case 'fail':
+        return {
+          color: '#ef4444',
+          bgColor: '#fee2e2',
+          text: language === 'vi' ? 'Chưa phù hợp' : 'Unsuitable'
+        };
+      case 'review':
+      default:
+        return {
+          color: '#f59e0b',
+          bgColor: '#fef3c7',
+          text: language === 'vi' ? 'Cần xem xét thêm' : 'Under Review'
+        };
+    }
+  };
+
+  const { color: resultColor, bgColor: resultBgColor, text: resultText } = getResultInfo();
+
+  const getCvText = (job) => {
+    return `
+Họ tên: ${candidateProfile?.fullName || 'Ứng viên'}
+Vị trí mong muốn: ${job?.title || ''}
+Kinh nghiệm làm việc: ${candidateProfile?.experience || 'Đã có kinh nghiệm làm việc ở vị trí tương đương.'}
+Học vấn: ${candidateProfile?.education || 'Chưa cập nhật'}
+Kỹ năng: ${candidateProfile?.skills && candidateProfile.skills.length > 0 ? candidateProfile.skills.join(', ') : 'Nhanh nhẹn, chăm chỉ, có trách nhiệm'}
+Giới thiệu bản thân: ${candidateProfile?.bio || 'Chưa cập nhật'}
+`.trim();
+  };
+
+  const runAiScreening = async (job, cvFileName, cvUrl = null) => {
+    setAiScreeningLoading(true);
+    setAiScreeningError('');
+    setAiScreeningScore(0);
+    setAiScreeningResult('review');
+    setAiScreeningStrengths([]);
+    setAiScreeningWeaknesses([]);
+    setAiScreeningReason('');
+
+    try {
+      const cvText = getCvText(job);
+
+      const jdText = `
+Tiêu đề công việc: ${job.title}
+Mô tả công việc: ${job.description}
+Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
+Nhiệm vụ: ${job.responsibilities || "Hoàn thành các công việc được giao."}
+`;
+
+      const response = await fetch("http://localhost:8000/api/v1/cv/screen", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          job_description: jdText,
+          cv_text: cvText,
+          cv_url: cvUrl
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setAiScreeningScore(data.score || 0);
+      setAiScreeningResult(data.result || 'review');
+      setAiScreeningStrengths(data.strengths || []);
+      setAiScreeningWeaknesses(data.weaknesses || []);
+      setAiScreeningReason(data.reason || '');
+    } catch (e) {
+      console.error("Error in AI screening:", e);
+      setAiScreeningError(
+        language === 'vi' 
+          ? "Không thể kết nối đến máy chủ AI. Vui lòng đảm bảo Backend FastAPI đang chạy tại cổng 8000."
+          : "Could not connect to the AI server. Please make sure the FastAPI Backend is running on port 8000."
+      );
+    } finally {
+      setAiScreeningLoading(false);
+    }
+  };
+
+  const startInterviewSession = async (job, cvUrl = null) => {
+    setAiScreeningLoading(true);
+    setAiScreeningError('');
+    setInterviewFinished(false);
+    setInterviewReport(null);
+    setInterviewMessages([]);
+    setInterviewSessionId(null);
+
+    try {
+      const cvText = getCvText(job);
+
+      const jdText = `
+Tiêu đề công việc: ${job.title}
+Mô tả công việc: ${job.description}
+Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
+`;
+
+      const response = await fetch("http://localhost:8000/api/v1/interview/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          job_title: job.title,
+          job_description: jdText,
+          cv_text: cvText,
+          cv_url: cvUrl,
+          custom_questions: job.customQuestions || []
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setInterviewSessionId(data.session_id);
+      setInterviewMessages([{
+        text: data.question || "Chào bạn, hãy bắt đầu buổi phỏng vấn.",
+        isMe: false,
+        time: new Date().toLocaleTimeString(language === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit' })
+      }]);
+    } catch (e) {
+      console.error("Error starting AI interview:", e);
+      setAiScreeningError(
+        language === 'vi'
+          ? "Không thể kết nối đến máy chủ AI. Vui lòng đảm bảo Backend FastAPI đang chạy tại cổng 8000."
+          : "Could not connect to the AI server. Please make sure the FastAPI Backend is running on port 8000."
+      );
+    } finally {
+      setAiScreeningLoading(false);
+    }
+  };
+
+  const handleSendInterviewAnswer = async () => {
+    const text = interviewInputText.trim();
+    if (!text || interviewSending || !interviewSessionId) return;
+
+    setInterviewInputText('');
+    setInterviewSending(true);
+    
+    const timeStr = new Date().toLocaleTimeString(language === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+    setInterviewMessages(prev => [...prev, { text, isMe: true, time: timeStr }]);
+
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/interview/respond", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: interviewSessionId,
+          answer: text
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const nextTimeStr = new Date().toLocaleTimeString(language === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+      const finished = data.finished || false;
+
+      if (finished) {
+        setInterviewFinished(true);
+        setInterviewReport(data.report);
+        submitDeferredApplication(data.report);
+        setInterviewMessages(prev => [...prev, {
+          text: language === 'vi'
+            ? "Cảm ơn bạn đã tham gia buổi phỏng vấn. Hệ thống đang tổng hợp kết quả của bạn..."
+            : "Thank you for participating in the interview. The system is compiling your results...",
+          isMe: false,
+          time: nextTimeStr
+        }]);
+      } else {
+        setInterviewMessages(prev => [...prev, {
+          text: data.question || "",
+          isMe: false,
+          time: nextTimeStr
+        }]);
+      }
+    } catch (e) {
+      console.error("Error sending AI interview answer:", e);
+      setInterviewMessages(prev => [...prev, {
+        text: language === 'vi'
+          ? "⚠️ Lỗi: Không thể gửi câu trả lời đến AI. Vui lòng thử lại."
+          : "⚠️ Error: Could not send your answer to the AI. Please try again.",
+        isMe: false,
+        time: timeStr
+      }]);
+    } finally {
+      setInterviewSending(false);
+    }
+  };
+
   // Load jobs from DynamoDB
   const loadDynamoDBJobs = async () => {
     try {
@@ -1754,6 +2208,8 @@ const JobListing = () => {
               workHours: String(job.workHours || ''),
               workDays: String(job.workDays || ''),
               status: String(job.status || 'active'),
+              isAiScreeningEnabled: !!job.isAiScreeningEnabled,
+              customQuestions: job.customQuestions || [],
               isFromDynamoDB: true // Flag to identify DynamoDB jobs
             };
           } catch (err) {
@@ -2276,6 +2732,66 @@ const JobListing = () => {
     }
   };
 
+  // Function to submit application after AI interview is complete
+  const submitDeferredApplication = async (report) => {
+    if (!pendingApplication) return;
+
+    try {
+      const isPassed = report?.recommend_to_employer || (report?.total_score >= 70);
+      if (!isPassed) {
+        console.log('❌ [Deferred] Interview failed, skipping application submission');
+        return;
+      }
+
+      const { jobId, finalCVUrl, cvFileName, cvS3Key, jobData } = pendingApplication;
+      
+      console.log('📤 [Deferred] Submitting application:', { jobId, cvFileName });
+
+      const applicationService = await import('../../services/applicationService');
+      await applicationService.submitApplication(
+        jobId,
+        finalCVUrl,
+        cvFileName,
+        cvS3Key,
+        {
+          aiScreeningScore: aiScreeningScore,
+          aiScreeningResult: aiScreeningResult,
+          aiScreeningReason: aiScreeningReason,
+          aiInterviewScore: report?.total_score || 0,
+          aiInterviewReport: report || {}
+        }
+      );
+
+      try {
+        const { createEmployerApplicationNotification } = await import('../../services/notificationService');
+        const session = await fetchAuthSession();
+        const candidateId = session.tokens?.idToken?.payload?.sub;
+        const candidateEmail = session.tokens?.idToken?.payload?.email;
+        const candidateName = candidateProfile?.fullName || candidateEmail || 'Ứng viên';
+        const employerId = jobData?.employerId;
+
+        if (employerId) {
+          await createEmployerApplicationNotification({
+            employerId,
+            candidateId,
+            candidateName,
+            jobTitle: jobData?.title,
+            companyName: jobData?.company,
+            jobId,
+            isQuickJob: jobData?.isQuickJob
+          });
+        }
+      } catch (notificationError) {
+        console.error('❌ [JobListing] Failed to create application notification:', notificationError);
+      }
+
+      setLastSubmitTime(Date.now());
+      console.log('✅ [Deferred] Application submitted successfully');
+    } catch (error) {
+      console.error('❌ [Deferred] Failed to submit application:', error);
+    }
+  };
+
   // Function to actually submit the application with selected CV
   const submitApplicationWithCV = async () => {
     if (!selectedCV) {
@@ -2351,53 +2867,81 @@ const JobListing = () => {
          return;
       }
 
-      console.log('📤 [Debug] Calling submitApplication with:', {
-        jobId,
-        cvUrl: finalCVUrl,
-        cvS3Key: selectedCVData.cvS3Key,
-        cvFileName: selectedCVData.cvFileName || 'CV.pdf'
-      });
+      // Check if AI screening is enabled!
+      if (jobData?.isAiScreeningEnabled) {
+        // Defer application submission
+        setPendingApplication({
+          jobId,
+          finalCVUrl,
+          cvFileName: selectedCVData.cvFileName || 'CV.pdf',
+          cvS3Key: selectedCVData.cvS3Key,
+          jobData
+        });
 
-      await applicationService.submitApplication(
-        jobId,
-        finalCVUrl,
-        selectedCVData.cvFileName || 'CV.pdf',
-        selectedCVData.cvS3Key
-      );
+        // Close CV selection modal
+        setShowCVSelectionModal(false);
 
-      try {
-        const { createEmployerApplicationNotification } = await import('../../services/notificationService');
-        const session = await fetchAuthSession();
-        const candidateId = session.tokens?.idToken?.payload?.sub;
-        const candidateEmail = session.tokens?.idToken?.payload?.email;
-        const candidateName = candidateProfile?.fullName || candidateEmail || 'Ứng viên';
-        const employerId = jobData?.employerId;
+        // Transition to AI screening modal
+        setAiScreeningJob(jobData);
+        setAiScreeningCvName(selectedCVData.cvFileName || 'CV.pdf');
+        setAiScreeningStep('screening');
+        setShowAiScreeningModal(true);
+        
+        // Start the screening API call
+        runAiScreening(jobData, selectedCVData.cvFileName || 'CV.pdf', finalCVUrl);
+        
+        // Close the apply modal to transition to screening
+        setApplyModal(null);
+      } else {
+        // Normal immediate submission flow
+        console.log('📤 [Debug] Calling submitApplication with:', {
+          jobId,
+          cvUrl: finalCVUrl,
+          cvS3Key: selectedCVData.cvS3Key,
+          cvFileName: selectedCVData.cvFileName || 'CV.pdf'
+        });
 
-        if (employerId) {
-          await createEmployerApplicationNotification({
-            employerId,
-            candidateId,
-            candidateName,
-            jobTitle: jobData?.title,
-            companyName: jobData?.company,
-            jobId,
-            isQuickJob: jobData?.isQuickJob
-          });
-        } else {
-          console.warn('⚠️ [JobListing] Missing employerId, skipping application notification');
+        await applicationService.submitApplication(
+          jobId,
+          finalCVUrl,
+          selectedCVData.cvFileName || 'CV.pdf',
+          selectedCVData.cvS3Key
+        );
+
+        try {
+          const { createEmployerApplicationNotification } = await import('../../services/notificationService');
+          const session = await fetchAuthSession();
+          const candidateId = session.tokens?.idToken?.payload?.sub;
+          const candidateEmail = session.tokens?.idToken?.payload?.email;
+          const candidateName = candidateProfile?.fullName || candidateEmail || 'Ứng viên';
+          const employerId = jobData?.employerId;
+
+          if (employerId) {
+            await createEmployerApplicationNotification({
+              employerId,
+              candidateId,
+              candidateName,
+              jobTitle: jobData?.title,
+              companyName: jobData?.company,
+              jobId,
+              isQuickJob: jobData?.isQuickJob
+            });
+          } else {
+            console.warn('⚠️ [JobListing] Missing employerId, skipping application notification');
+          }
+        } catch (notificationError) {
+          console.error('❌ [JobListing] Failed to create application notification:', notificationError);
         }
-      } catch (notificationError) {
-        console.error('❌ [JobListing] Failed to create application notification:', notificationError);
+
+        // Update last submit time
+        setLastSubmitTime(now);
+
+        // Close both modals
+        setShowCVSelectionModal(false);
+        setApplyModal(null);
+        setApplySuccess(true);
+        setTimeout(() => setApplySuccess(false), 3000);
       }
-
-      // Update last submit time
-      setLastSubmitTime(now);
-
-      // Close both modals
-      setShowCVSelectionModal(false);
-      setApplyModal(null);
-      setApplySuccess(true);
-      setTimeout(() => setApplySuccess(false), 3000);
     } catch (error) {
       console.error('Error applying for job:', error);
 
@@ -3407,6 +3951,32 @@ const JobListing = () => {
               </div>
             </div>
 
+            {applyModal.job.isAiScreeningEnabled && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 14px',
+                background: '#f5f3ff',
+                border: '1px dashed #7c3aed',
+                borderRadius: '12px',
+                color: '#6d28d9',
+                fontSize: '13px',
+                fontWeight: '600',
+                textAlign: 'left',
+                width: '100%',
+                boxSizing: 'border-box',
+                marginBottom: '12px'
+              }}>
+                <Sparkles size={16} style={{ flexShrink: 0 }} />
+                <span>
+                  {language === 'vi' 
+                    ? 'Lưu ý: Công việc này yêu cầu Phỏng vấn chọn lọc qua AI ngay sau khi gửi CV.'
+                    : 'Note: This job requires an AI screening interview immediately after sending CV.'}
+                </span>
+              </div>
+            )}
+
             <div className="apply-buttons" style={{ display: 'flex', gap: '10px' }}>
               <button className="btn-cancel" onClick={() => setApplyModal(null)}>
                 {language === 'vi' ? 'Hủy' : 'Cancel'}
@@ -3486,6 +4056,32 @@ const JobListing = () => {
                 </span>
               </div>
             </div>
+
+            {detailModal.job.isAiScreeningEnabled && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 14px',
+                background: '#f5f3ff',
+                border: '1px dashed #7c3aed',
+                borderRadius: '12px',
+                color: '#6d28d9',
+                fontSize: '13px',
+                fontWeight: '600',
+                textAlign: 'left',
+                width: '100%',
+                boxSizing: 'border-box',
+                marginBottom: '15px'
+              }}>
+                <Sparkles size={16} style={{ flexShrink: 0 }} />
+                <span>
+                  {language === 'vi' 
+                    ? 'Lưu ý: Công việc này yêu cầu Phỏng vấn chọn lọc qua AI ngay sau khi gửi CV.'
+                    : 'Note: This job requires an AI screening interview immediately after sending CV.'}
+                </span>
+              </div>
+            )}
 
             <div className="apply-buttons">
               <button className="btn-cancel" onClick={() => setDetailModal(null)}>
@@ -3571,8 +4167,34 @@ const JobListing = () => {
                       })()}
                     </div>
                   )}
-              </div>
             </div>
+          </div>
+
+            {jobDescriptionModal.job.isAiScreeningEnabled && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 14px',
+                background: '#f5f3ff',
+                border: '1px dashed #7c3aed',
+                borderRadius: '12px',
+                color: '#6d28d9',
+                fontSize: '13px',
+                fontWeight: '600',
+                textAlign: 'left',
+                width: '100%',
+                boxSizing: 'border-box',
+                marginTop: '16px'
+              }}>
+                <Sparkles size={16} style={{ flexShrink: 0 }} />
+                <span>
+                  {language === 'vi' 
+                    ? 'Lưu ý: Công việc này yêu cầu Phỏng vấn chọn lọc qua AI ngay sau khi gửi CV.'
+                    : 'Note: This job requires an AI screening interview immediately after sending CV.'}
+                </span>
+              </div>
+            )}
 
             <div className="apply-buttons" style={{ marginTop: '16px' }}>
               <button className="btn-cancel" onClick={() => setJobDescriptionModal(null)} style={{ width: '100%' }}>
@@ -3664,6 +4286,338 @@ const JobListing = () => {
               }
             </button>
           </div>
+        </ApplyModalWrap>
+      </Modal>
+
+      {/* AI Screening & Interview Modal */}
+      <Modal
+        isOpen={showAiScreeningModal}
+        onClose={() => {
+          if (!aiScreeningLoading && (!interviewSending || interviewFinished)) {
+            setShowAiScreeningModal(false);
+            if (!interviewFinished) {
+              setPendingApplication(null);
+            }
+          }
+        }}
+        title=""
+      >
+        <ApplyModalWrap onClick={e => e.stopPropagation()} style={{ padding: 0, overflow: 'hidden', maxWidth: '600px', width: '100%' }}>
+          <AiScreeningModalHeader>
+            <div className="sparkles-container">
+              <Sparkles size={24} />
+            </div>
+            <h2>
+              {aiScreeningStep === 'screening' 
+                ? (language === 'vi' ? 'Chọn lọc Hồ sơ bằng AI' : 'AI CV Screening')
+                : (language === 'vi' ? 'Phỏng vấn AI Interviewer' : 'AI Live Interview')}
+            </h2>
+            <p>
+              {aiScreeningJob?.title} - {aiScreeningJob?.company}
+            </p>
+          </AiScreeningModalHeader>
+
+          <AiScreeningContent>
+            {aiScreeningStep === 'screening' ? (
+              aiScreeningLoading ? (
+                <div style={{ padding: '40px 0' }}>
+                  <div className="apply-emoji" style={{ fontSize: '48px', animation: 'spin 2s linear infinite' }}>⏳</div>
+                  <h3 style={{ fontSize: '18px', fontWeight: '700', marginTop: '16px', color: '#1e293b' }}>
+                    {language === 'vi' ? 'AI đang đối chiếu hồ sơ...' : 'AI is screening your profile...'}
+                  </h3>
+                  <p style={{ fontSize: '14px', color: '#64748b', marginTop: '8px' }}>
+                    {language === 'vi' 
+                      ? `Đang phân tích CV "${aiScreeningCvName}" dựa trên JD tuyển dụng`
+                      : `Analyzing CV "${aiScreeningCvName}" against the job requirements`}
+                  </p>
+                </div>
+              ) : aiScreeningError ? (
+                <div style={{ padding: '30px 0' }}>
+                  <div style={{ fontSize: '48px', color: '#ef4444', marginBottom: '16px' }}>⚠️</div>
+                  <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#ef4444' }}>
+                    {language === 'vi' ? 'Không thể kết nối AI' : 'AI Connection Error'}
+                  </h3>
+                  <p style={{ fontSize: '14px', color: '#ef4444', marginTop: '8px', lineHeight: '1.5' }}>
+                    {aiScreeningError}
+                  </p>
+                  <button 
+                    onClick={() => runAiScreening(aiScreeningJob, aiScreeningCvName, pendingApplication?.finalCVUrl)}
+                    style={{
+                      marginTop: '20px',
+                      padding: '10px 24px',
+                      background: '#7c3aed',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {language === 'vi' ? 'Thử lại' : 'Retry'}
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <ScoreCircleWrap $color={resultColor}>
+                    <svg
+                      height={140}
+                      width={140}
+                      style={{ transform: 'rotate(-90deg)', position: 'absolute' }}
+                    >
+                      <circle
+                        stroke="#e2e8f0"
+                        fill="transparent"
+                        strokeWidth={10}
+                        r={50}
+                        cx={70}
+                        cy={70}
+                      />
+                      <circle
+                        stroke={resultColor}
+                        fill="transparent"
+                        strokeWidth={10}
+                        strokeDasharray={(50 * 2 * Math.PI) + ' ' + (50 * 2 * Math.PI)}
+                        style={{
+                          strokeDashoffset: (50 * 2 * Math.PI) - (aiScreeningScore / 100) * (50 * 2 * Math.PI),
+                          transition: 'stroke-dashoffset 1s ease-in-out'
+                        }}
+                        r={50}
+                        cx={70}
+                        cy={70}
+                      />
+                    </svg>
+                    <div className="score-label">
+                      <h4>{aiScreeningScore}</h4>
+                      <span>/100 {language === 'vi' ? 'Điểm' : 'Score'}</span>
+                    </div>
+                  </ScoreCircleWrap>
+
+                  <ResultBadge $bgColor={resultBgColor} $color={resultColor}>
+                    {resultText}
+                  </ResultBadge>
+
+                  <DetailCard $iconColor="#7c3aed">
+                    <h4><Sparkles size={18} /> {language === 'vi' ? 'Đánh giá chi tiết của AI:' : 'Detailed AI Feedback:'}</h4>
+                    <p>{aiScreeningReason}</p>
+                  </DetailCard>
+
+                  {aiScreeningStrengths.length > 0 && (
+                    <DetailCard $iconColor="#10b981">
+                      <h4><CheckCircle size={18} /> {language === 'vi' ? 'Điểm mạnh nổi bật:' : 'Key Strengths:'}</h4>
+                      <ul>
+                        {aiScreeningStrengths.map((s, idx) => <li key={idx}>{s}</li>)}
+                      </ul>
+                    </DetailCard>
+                  )}
+
+                  {aiScreeningWeaknesses.length > 0 && (
+                    <DetailCard $iconColor="#f59e0b">
+                      <h4><AlertCircle size={18} /> {language === 'vi' ? 'Điểm cần cải thiện:' : 'Areas to Improve:'}</h4>
+                      <ul>
+                        {aiScreeningWeaknesses.map((w, idx) => <li key={idx}>{w}</li>)}
+                      </ul>
+                    </DetailCard>
+                  )}
+
+                  <div style={{ marginTop: '24px', display: 'flex', gap: '12px' }}>
+                    <button 
+                      onClick={() => {
+                        setShowAiScreeningModal(false);
+                        setPendingApplication(null);
+                      }}
+                      style={{
+                        flex: 1,
+                        padding: '14px 20px',
+                        background: '#f1f5f9',
+                        color: '#475569',
+                        border: 'none',
+                        borderRadius: '12px',
+                        fontWeight: '600',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {language === 'vi' ? 'Đóng và Quay lại' : 'Close and Back'}
+                    </button>
+                    
+                    {aiScreeningResult.toLowerCase() !== 'fail' && (
+                      <button 
+                        onClick={() => {
+                          setAiScreeningStep('interview');
+                          startInterviewSession(aiScreeningJob, pendingApplication?.finalCVUrl);
+                        }}
+                        style={{
+                          flex: 1.5,
+                          padding: '14px 20px',
+                          background: 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '12px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          boxShadow: '0 4px 14px rgba(124, 58, 237, 0.3)'
+                        }}
+                      >
+                        {language === 'vi' ? 'Bắt đầu Vòng 2: Phỏng vấn AI' : 'Start Round 2: AI Interview'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )
+            ) : (
+              aiScreeningLoading ? (
+                <div style={{ padding: '40px 0' }}>
+                  <div className="apply-emoji" style={{ fontSize: '48px', animation: 'spin 2s linear infinite' }}>⏳</div>
+                  <h3 style={{ fontSize: '18px', fontWeight: '700', marginTop: '16px', color: '#1e293b' }}>
+                    {language === 'vi' ? 'Đang kết nối phòng phỏng vấn...' : 'Connecting to interview room...'}
+                  </h3>
+                </div>
+              ) : aiScreeningError ? (
+                <div style={{ padding: '30px 0' }}>
+                  <div style={{ fontSize: '48px', color: '#ef4444', marginBottom: '16px' }}>⚠️</div>
+                  <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#ef4444' }}>
+                    {language === 'vi' ? 'Lỗi kết nối phòng phỏng vấn' : 'Connection Error'}
+                  </h3>
+                  <p style={{ fontSize: '14px', color: '#ef4444', marginTop: '8px', lineHeight: '1.5' }}>
+                    {aiScreeningError}
+                  </p>
+                  <button 
+                    onClick={() => startInterviewSession(aiScreeningJob, pendingApplication?.finalCVUrl)}
+                    style={{
+                      marginTop: '20px',
+                      padding: '10px 24px',
+                      background: '#7c3aed',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {language === 'vi' ? 'Kết nối lại' : 'Reconnect'}
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <ChatArea>
+                    {interviewMessages.map((m, idx) => (
+                      <ChatBubble key={idx} $isMe={m.isMe}>
+                        {m.text}
+                        <span className="time">{m.time}</span>
+                      </ChatBubble>
+                    ))}
+                    {interviewSending && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#e2e8f0', color: '#475569', padding: '10px 14px', borderRadius: '12px', fontSize: '13.5px', alignSelf: 'flex-start', borderBottomLeftRadius: '2px', fontStyle: 'italic' }}>
+                        <div style={{ width: '8px', height: '8px', background: '#64748b', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                        {language === 'vi' ? 'AI đang suy nghĩ...' : 'AI is typing...'}
+                      </div>
+                    )}
+                    <div ref={chatEndRef} />
+                  </ChatArea>
+
+                  {!interviewFinished ? (
+                    <ChatInputBar>
+                      <input 
+                        type="text" 
+                        placeholder={language === 'vi' ? 'Nhập câu trả lời của bạn...' : 'Type your answer...'}
+                        value={interviewInputText}
+                        onChange={e => setInterviewInputText(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') handleSendInterviewAnswer(); }}
+                        disabled={interviewSending}
+                      />
+                      <button 
+                        onClick={handleSendInterviewAnswer}
+                        disabled={interviewSending || !interviewInputText.trim()}
+                      >
+                        {language === 'vi' ? 'Gửi' : 'Send'}
+                      </button>
+                    </ChatInputBar>
+                  ) : (
+                    interviewReport && (
+                      <div style={{ animation: 'slideIn 0.3s ease-out', marginTop: '16px', borderTop: '2px solid #e2e8f0', paddingTop: '20px', textAlign: 'left' }}>
+                        <h3 style={{ fontSize: '18px', fontWeight: '800', textAlign: 'center', color: '#1e293b', marginBottom: '20px' }}>
+                          {language === 'vi' ? 'Báo cáo Kết quả Phỏng vấn' : 'Interview Evaluation Report'}
+                        </h3>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center', marginBottom: '20px', background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                          <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '32px', fontWeight: '800', color: interviewReport.total_score >= 70 ? '#10b981' : '#ef4444' }}>
+                              {interviewReport.total_score}
+                            </div>
+                            <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600' }}>
+                              {language === 'vi' ? 'ĐIỂM PHỎNG VẤN' : 'INTERVIEW SCORE'}
+                            </div>
+                          </div>
+                          
+                          <div style={{ width: '1px', height: '40px', background: '#cbd5e1' }} />
+                          
+                          <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '24px', fontWeight: '800', color: interviewReport.recommend_to_employer ? '#10b981' : '#ef4444' }}>
+                              {interviewReport.recommend_to_employer 
+                                ? (language === 'vi' ? 'ĐẠT YÊU CẦU' : 'PASSED')
+                                : (language === 'vi' ? 'CHƯA PHÙ HỢP' : 'HOLD')}
+                            </div>
+                            <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600' }}>
+                              {language === 'vi' ? 'KẾT QUẢ CUỐI CÙNG' : 'FINAL RESULT'}
+                            </div>
+                          </div>
+                        </div>
+
+                        <DetailCard $iconColor="#7c3aed">
+                          <h4><Sparkles size={18} /> {language === 'vi' ? 'Nhận xét tổng quan của AI:' : 'AI Overview Summary:'}</h4>
+                          <p>{interviewReport.reason}</p>
+                        </DetailCard>
+
+                        {interviewReport.strengths && interviewReport.strengths.length > 0 && (
+                          <DetailCard $iconColor="#10b981">
+                            <h4><CheckCircle size={18} /> {language === 'vi' ? 'Điểm mạnh chính:' : 'Key Strengths:'}</h4>
+                            <ul>
+                              {interviewReport.strengths.map((s, idx) => <li key={idx}>{s}</li>)}
+                            </ul>
+                          </DetailCard>
+                        )}
+
+                        {interviewReport.weaknesses && interviewReport.weaknesses.length > 0 && (
+                          <DetailCard $iconColor="#f59e0b">
+                            <h4><AlertCircle size={18} /> {language === 'vi' ? 'Điểm cần cải thiện:' : 'Areas to Improve:'}</h4>
+                            <ul>
+                              {interviewReport.weaknesses.map((w, idx) => <li key={idx}>{w}</li>)}
+                            </ul>
+                          </DetailCard>
+                        )}
+
+                        <button 
+                          onClick={() => {
+                            setShowAiScreeningModal(false);
+                            const isPassed = interviewReport?.recommend_to_employer || (interviewReport?.total_score >= 70);
+                            if (isPassed) {
+                              setApplySuccess(true);
+                              setTimeout(() => setApplySuccess(false), 3000);
+                            }
+                            setPendingApplication(null);
+                          }}
+                          style={{
+                            width: '100%',
+                            marginTop: '20px',
+                            padding: '14px',
+                            background: 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '12px',
+                            fontWeight: '700',
+                            fontSize: '15px',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 12px rgba(124, 58, 237, 0.25)'
+                          }}
+                        >
+                          {language === 'vi' ? 'Hoàn tất và Quay lại' : 'Finish and Back'}
+                        </button>
+                      </div>
+                    )
+                  )}
+                </div>
+              )
+            )}
+          </AiScreeningContent>
         </ApplyModalWrap>
       </Modal>
 
@@ -3829,6 +4783,12 @@ const JobCardComponent = ({ job, saved, onSave, onClick, onApply, delay = 0, sho
         <JobInfo>
           <JobTitle>
             <DynamicTranslate text={job.title} showIndicator={false} />
+            {job.isAiScreeningEnabled && (
+              <AiBadge title={language === 'vi' ? 'Công việc này yêu cầu phỏng vấn chọn lọc qua AI' : 'This job requires an AI screening interview'}>
+                <Sparkles />
+                {language === 'vi' ? 'Phỏng vấn AI' : 'AI Interview'}
+              </AiBadge>
+            )}
           </JobTitle>
           <CompanyName>
             <Building2 />
