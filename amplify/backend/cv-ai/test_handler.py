@@ -337,6 +337,54 @@ class HandlerTests(unittest.TestCase):
         self.assertEqual(len(body["recommendations"]), 2)
         self.assertEqual(body["recommendations"][0]["jobId"], "job-std-1")
 
+    @patch("handler.call_gemini_cv_screen", return_value={"score": 85, "result": "pass", "strengths": ["test"], "weaknesses": [], "reason": "fit"})
+    def test_cv_screen_endpoint(self, mock_cv_screen):
+        response = handler.lambda_handler(
+            event(path="/api/v1/cv/screen", method="POST", body={"job_description": "JD", "cv_text": "CV"}),
+            None
+        )
+        self.assertEqual(response["statusCode"], 200)
+        body = json.loads(response["body"])
+        self.assertEqual(body["score"], 85)
+
+    @patch("handler.call_gemini_interview_start", return_value="Hello, welcome to the interview.")
+    @patch("handler.save_active_session")
+    def test_interview_start_endpoint(self, mock_save, mock_start):
+        response = handler.lambda_handler(
+            event(path="/api/v1/interview/start", method="POST", body={"job_title": "Title", "job_description": "JD", "cv_text": "CV"}),
+            None
+        )
+        self.assertEqual(response["statusCode"], 200)
+        body = json.loads(response["body"])
+        self.assertEqual(body["question"], "Hello, welcome to the interview.")
+        self.assertTrue(body["session_id"].startswith("sess_"))
+        mock_save.assert_called_once()
+
+    @patch("handler.get_active_session", return_value={
+        "session_id": "sess_123",
+        "job_title": "Title",
+        "job_description": "JD",
+        "cv_text": "CV",
+        "custom_questions": [],
+        "current_question_index": 1,
+        "max_questions": 3,
+        "messages": [],
+        "turns": ["Turn1", "Turn2", "Turn3"],
+        "answers": []
+    })
+    @patch("handler.call_gemini_interview_respond", return_value="Great. Next question.")
+    @patch("handler.save_active_session")
+    def test_interview_respond_endpoint(self, mock_save, mock_respond, mock_get):
+        response = handler.lambda_handler(
+            event(path="/api/v1/interview/respond", method="POST", body={"session_id": "sess_123", "answer": "Answer 1"}),
+            None
+        )
+        self.assertEqual(response["statusCode"], 200)
+        body = json.loads(response["body"])
+        self.assertEqual(body["question"], "Great. Next question.")
+        self.assertFalse(body["finished"])
+        mock_save.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()
