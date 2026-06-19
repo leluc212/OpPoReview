@@ -1186,37 +1186,122 @@ def _cv_screening_system_prompt():
     return """
 Bạn là một AI chuyên viên tuyển dụng cao cấp.
 
-CHÚ Ý QUAN TRỌNG VỀ PHÂN LOẠI TÀI LIỆU:
-Trước tiên, hãy kiểm tra kỹ xem nội dung tài liệu được cung cấp dưới đây có thực sự là một bản CV / Resume / Hồ sơ ứng tuyển hợp lệ hay không. 
-Nếu nội dung tài liệu KHÔNG PHẢI là một bản CV/Resume (ví dụ: là đề bài tập lab, bài giải lab, slide bài học, bài báo cáo kỹ thuật, tài liệu cấu hình thiết bị/phần mềm, hóa đơn, sách, truyện, hoặc văn bản ngẫu nhiên khác không chứa thông tin cá nhân/hồ sơ xin việc của một ứng viên cụ thể), bạn bắt buộc phải trả về kết quả như sau:
-- `score`: 0
-- `result`: "fail"
-- `strengths`: []
-- `weaknesses`: ["Tài liệu tải lên không phải là một CV/Resume hợp lệ (phát hiện tài liệu kỹ thuật, bài lab, bài tập, slide hoặc văn bản không liên quan)."]
-- `reason`: "Tài liệu được tải lên không chứa thông tin về CV/Hồ sơ ứng viên hợp lệ để đánh giá tuyển dụng."
+CHÚ Ý QUAN TRỌNG VỀ PHÂN LOẠI VÀ THẨM ĐỊNH TÀI LIỆU (BẮT BUỘC KIỂM TRA ĐẦU TIÊN):
+Tài liệu của ứng viên gửi lên bắt buộc phải là một bản CV (Resume / Hồ sơ ứng tuyển) hợp lệ của một cá nhân cụ thể.
+Một bản CV/Resume hợp lệ BẮT BUỘC phải thỏa mãn đồng thời các điều kiện sau:
+1. Có thông tin định danh cá nhân tối thiểu (ví dụ: Họ tên và một trong các thông tin liên hệ như Email, Số điện thoại, Địa chỉ, Link LinkedIn/GitHub).
+2. Có cấu trúc thể hiện quá trình làm việc, học tập hoặc bộ kỹ năng của một cá nhân (bao gồm các phần như Kinh nghiệm làm việc, Học vấn, Kỹ năng, Mục tiêu nghề nghiệp, Dự án cá nhân).
 
-Nếu tài liệu đúng là một bản CV/Resume, hãy đánh giá CV của ứng viên so với bản mô tả công việc (JD) của nhà tuyển dụng dưới đây.
-Hãy đánh giá và chấm điểm dựa trên các tiêu chí sau nếu tài liệu là CV hợp lệ:
+Các tài liệu sau đây được coi là KHÔNG HỢP LỆ (KHÔNG PHẢI CV):
+- Đề bài tập, bài giải lab, slide bài giảng, giáo trình, bài báo cáo học thuật.
+- Hướng dẫn kỹ thuật, tài liệu cấu hình (config), mã nguồn (source code), log file, thông báo lỗi.
+- Hóa đơn, chứng từ, tài liệu sản phẩm, bài viết tin tức, tiểu thuyết, truyện, hoặc văn bản ngẫu nhiên.
+- Bản mô tả công việc (JD) của chính công ty hoặc tài liệu không chứa thông tin của một người xin việc cụ thể.
+
+NẾU TÀI LIỆU KHÔNG PHẢI LÀ CV/RESUME HỢP LỆ, BẠN BẮT BUỘC PHẢI TRẢ VỀ:
+{
+  "score": 0,
+  "result": "fail",
+  "strengths": [],
+  "weaknesses": ["Tài liệu tải lên không phải là một CV/Resume hợp lệ (phát hiện tài liệu kỹ thuật, bài lab, bài tập, slide hoặc văn bản không liên quan)."],
+  "reason": "Tài liệu được tải lên không chứa thông tin về CV/Hồ sơ ứng viên hợp lệ để đánh giá tuyển dụng."
+}
+TUYỆT ĐỐI không được đánh giá các từ khóa kỹ thuật hay kỹ năng trong các văn bản không phải CV này để chấm điểm hoặc cho kết quả "pass". An toàn và chính xác trong việc phân loại tài liệu là ưu tiên số một.
+
+Nếu tài liệu đúng là một bản CV/Resume hợp lệ, hãy tiến hành đánh giá CV đó so với bản mô tả công việc (JD) bên dưới theo các tiêu chí:
 1. Kỹ năng bắt buộc (Must-have skills)
 2. Kinh nghiệm làm việc liên quan
 3. Dự án thực tế đã thực hiện
 4. Học vấn và chứng chỉ chuyên ngành
 5. Mức độ phù hợp tổng thể
+
 Return a JSON object matching the requested schema.
 """.strip()
 
 
-def _gemini_cv_screen_payload(job_description, cv_text):
+def _download_and_extract_cv(cv_url):
+    """
+    Downloads cv_url and attempts to parse it.
+    Returns a dict with either:
+      - {"type": "pdf", "bytes": pdf_bytes}
+      - {"type": "text", "text": docx_text}
+      - None (if download/parse fails or format is unsupported)
+    """
+    if not cv_url or not (cv_url.startswith("http://") or cv_url.startswith("https://")):
+        return None
+    try:
+        import urllib.request
+        import zipfile
+        import xml.etree.ElementTree as ET
+        import io
+        
+        req = urllib.request.Request(cv_url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=10) as conn:
+            content_bytes = conn.read()
+            
+        if not content_bytes:
+            return None
+            
+        url_lower = cv_url.lower()
+        if content_bytes.startswith(b"%PDF") or ".pdf" in url_lower:
+            return {"type": "pdf", "bytes": content_bytes}
+            
+        if content_bytes.startswith(b"PK\x03\x04") or ".docx" in url_lower:
+            try:
+                with zipfile.ZipFile(io.BytesIO(content_bytes)) as z:
+                    xml_content = z.read("word/document.xml")
+                root = ET.fromstring(xml_content)
+                texts = []
+                for elem in root.iter():
+                    if elem.tag.endswith("}t") or elem.tag.endswith("t"):
+                        if elem.text:
+                            texts.append(elem.text)
+                docx_text = " ".join(texts)
+                return {"type": "text", "text": docx_text}
+            except Exception as e:
+                print(f"Error extracting DOCX text: {e}")
+                return None
+        return None
+    except Exception as e:
+        print(f"Error downloading or parsing CV file from {cv_url}: {e}")
+        return None
+
+
+def _gemini_cv_screen_payload(job_description, cv_text, extracted_file=None):
+    if extracted_file and extracted_file["type"] == "pdf":
+        import base64
+        pdf_base64 = base64.b64encode(extracted_file["bytes"]).decode("utf-8")
+        contents = [{
+            "role": "user",
+            "parts": [
+                {
+                    "inlineData": {
+                        "mimeType": "application/pdf",
+                        "data": pdf_base64
+                    }
+                },
+                {
+                    "text": f"Yêu cầu công việc (JD):\n{job_description}\n\nNội dung tài liệu của ứng viên nằm trong file PDF đính kèm ở trên. Hãy kiểm tra xem đây có phải là CV/Resume hợp lệ không, và nếu có thì đánh giá so với JD."
+                }
+            ],
+        }]
+    else:
+        text_to_eval = cv_text
+        if extracted_file and extracted_file["type"] == "text":
+            text_to_eval = extracted_file["text"]
+            
+        contents = [{
+            "role": "user",
+            "parts": [{
+                "text": f"Yêu cầu công việc (JD):\n{job_description}\n\nNội dung tài liệu của ứng viên:\n{text_to_eval}"
+            }],
+        }]
+
     return {
         "systemInstruction": {
             "parts": [{"text": _cv_screening_system_prompt()}]
         },
-        "contents": [{
-            "role": "user",
-            "parts": [{
-                "text": f"Yêu cầu công việc (JD):\n{job_description}\n\nNội dung CV của ứng viên:\n{cv_text}"
-            }],
-        }],
+        "contents": contents,
         "generationConfig": {
             "temperature": 0.2,
             "maxOutputTokens": 2000,
@@ -1226,14 +1311,18 @@ def _gemini_cv_screen_payload(job_description, cv_text):
     }
 
 
-def call_gemini_cv_screen(job_description, cv_text):
+def call_gemini_cv_screen(job_description, cv_text, cv_url=None):
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not api_key:
         raise ProviderError("AI_NOT_CONFIGURED", "GEMINI_API_KEY is not configured.")
     model = os.environ.get("GEMINI_MODEL", DEFAULT_MODEL)
+    
+    extracted_file = _download_and_extract_cv(cv_url) if cv_url else None
+    payload = _gemini_cv_screen_payload(job_description, cv_text, extracted_file)
+    
     request = urllib.request.Request(
         f"{GEMINI_API_BASE_URL}/{model}:generateContent",
-        data=json.dumps(_gemini_cv_screen_payload(job_description, cv_text), ensure_ascii=False).encode("utf-8"),
+        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
         headers={
             "x-goog-api-key": api_key,
             "Content-Type": "application/json",
@@ -1758,7 +1847,8 @@ def lambda_handler(event, context):
             body = _parse_body(event)
             job_description = body.get("job_description", "")
             cv_text = body.get("cv_text", "")
-            ai_result = call_gemini_cv_screen(job_description, cv_text)
+            cv_url = body.get("cv_url", "")
+            ai_result = call_gemini_cv_screen(job_description, cv_text, cv_url)
             return _response(event, 200, ai_result)
 
         elif path == "/api/v1/interview/start":
