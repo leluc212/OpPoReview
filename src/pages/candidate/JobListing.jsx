@@ -2328,21 +2328,21 @@ const JobListing = () => {
     setIsListening(false);
     setIsSpeaking(false);
 
-    // Ban for 3 days
-    const banDuration = 3 * 24 * 60 * 60 * 1000; // 3 days in ms
-    localStorage.setItem('ai_interview_ban_until', String(Date.now() + banDuration));
+    // Ban for 3 days (Disabled for testing)
+    // const banDuration = 3 * 24 * 60 * 60 * 1000; // 3 days in ms
+    // localStorage.setItem('ai_interview_ban_until', String(Date.now() + banDuration));
 
     // Close modals
     setShowAiScreeningModal(false);
     setShowTabWarningOverlay(false);
     setPendingApplication(null);
 
-    // Show ban error modal
+    // Show ban error modal (updated message to show ban is disabled)
     setErrorModal({
       show: true,
       message: language === 'vi'
-        ? 'Bạn đã bị huỷ phỏng vấn và khoá tính năng 3 ngày do chuyển tab/thoát màn hình lần thứ 2!'
-        : 'Your interview has been cancelled and you are banned for 3 days due to tab switching!'
+        ? 'Bạn đã bị huỷ phỏng vấn do chuyển tab/thoát màn hình lần thứ 2! (Tính năng khóa 3 ngày đã được tắt để dễ test)'
+        : 'Your interview has been cancelled due to tab switching! (3-day ban disabled for testing)'
     });
   };
 
@@ -3481,7 +3481,8 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
 
       // Check if AI screening is enabled!
       if (jobData?.isAiScreeningEnabled) {
-        // Check if banned
+        // Check if banned (Disabled for testing)
+        /*
         const banUntil = localStorage.getItem('ai_interview_ban_until');
         if (banUntil && Date.now() < Number(banUntil)) {
           const banDate = new Date(Number(banUntil)).toLocaleString(language === 'vi' ? 'vi-VN' : 'en-US');
@@ -3494,6 +3495,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
           });
           return;
         }
+        */
 
         // Defer application submission
         setPendingApplication({
@@ -5091,6 +5093,8 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                     {aiScreeningResult.toLowerCase() !== 'fail' && (
                       <button 
                         onClick={() => {
+                          // Check if banned (Disabled for testing)
+                          /*
                           const banUntil = localStorage.getItem('ai_interview_ban_until');
                           if (banUntil && Date.now() < Number(banUntil)) {
                             const banDate = new Date(Number(banUntil)).toLocaleString(language === 'vi' ? 'vi-VN' : 'en-US');
@@ -5102,6 +5106,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                             });
                             return;
                           }
+                          */
                           setRulesAccepted(false); // Reset checkbox when opening rules
                           setShowAiRulesModal(true);
                         }}
@@ -5389,7 +5394,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
               <span style={{ color: '#ef4444' }}>⚠️</span>
               <div>
                 <strong>{language === 'vi' ? 'Cấm chuyển Tab (Tab Switching)' : 'Tab Switch Restriction'}:</strong>{' '}
-                {language === 'vi' ? 'Chuyển tab hoặc rời khỏi trang lần 1 sẽ bị cảnh cáo. Chuyển tab lần 2 sẽ ngưng phỏng vấn ngay lập tức và khóa tài khoản phỏng vấn AI trong 3 ngày.' : 'Switching tabs or minimizing the browser once will trigger a warning. The 2nd time will cancel the interview immediately and ban you for 3 days.'}
+                {language === 'vi' ? 'Chuyển tab hoặc rời khỏi trang lần 1 sẽ bị cảnh cáo. Chuyển tab lần 2 sẽ ngưng phỏng vấn ngay lập tức (đã bỏ tính năng khóa 3 ngày để dễ test).' : 'Switching tabs or minimizing the browser once will trigger a warning. The 2nd time will cancel the interview immediately (3-day ban disabled for testing).'}
               </div>
             </div>
             <div style={{ marginBottom: '12px', display: 'flex', gap: '8px' }}>
