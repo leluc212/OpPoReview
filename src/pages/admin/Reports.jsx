@@ -663,6 +663,7 @@ const Reports = () => {
   const [feedbackStatusFilter, setFeedbackStatusFilter] = useState('all');
   const [selectedFeedback, setSelectedFeedback] = useState(null);
   const [lightboxImage, setLightboxImage] = useState(null);
+  const [subscriptionDetailModal, setSubscriptionDetailModal] = useState(null); // { packageName, status, statusLabel }
 
   const loadFeedbacks = async () => {
     try {
@@ -743,6 +744,25 @@ const Reports = () => {
         ? '🚧 Chức năng xuất Excel đang được phát triển\n\n📊 Dữ liệu sẽ được xuất:\n- Thống kê dịch vụ\n- Lịch sử mua gói\n- Trạng thái các gói\n- Báo cáo doanh thu'
         : '🚧 Excel export feature is under development\n\n📊 Dữ liệu sẽ được xuất:\n- Thống kê dịch vụ\n- Lịch sử mua gói\n- Trạng thái các gói\n- Báo cáo doanh thu'
     );
+  };
+
+  // Get subscriptions filtered by package name and status
+  const getSubscriptionsByStatus = (packageName, status) => {
+    const subs = reportData.subscriptions || [];
+    return subs.filter(s => {
+      const matchPkg = s.packageName === packageName;
+      if (status === 'pending') return matchPkg && s.status === 'pending';
+      if (status === 'active') return matchPkg && s.status === 'active';
+      if (status === 'expired') return matchPkg && (s.status === 'expired' || s.status === 'expiring');
+      return false;
+    });
+  };
+
+  const handleStatusCellClick = (packageName, status, statusLabel) => {
+    const companies = getSubscriptionsByStatus(packageName, status);
+    if (companies.length > 0) {
+      setSubscriptionDetailModal({ packageName, status, statusLabel, companies });
+    }
   };
 
   // Process data for statistics
@@ -1037,7 +1057,7 @@ const Reports = () => {
                       <TableHeaderCell $align="center">{language === 'vi' ? 'Thời hạn' : 'Duration'}</TableHeaderCell>
                       <TableHeaderCell $align="center">{language === 'vi' ? 'Đã bán' : 'Sold'}</TableHeaderCell>
                       <TableHeaderCell $align="center">{language === 'vi' ? 'Chưa kích hoạt' : 'Inactive'}</TableHeaderCell>
-                      <TableHeaderCell $align="center">{language === 'vi' ? 'Đã kích hoạt' : 'Active'}</TableHeaderCell>
+                      <TableHeaderCell $align="center">{language === 'vi' ? 'Đang kích hoạt' : 'Active'}</TableHeaderCell>
                       <TableHeaderCell $align="center">{language === 'vi' ? 'Hết thời hạn' : 'Expired'}</TableHeaderCell>
                     </TableHeaderRow>
                   </thead>
@@ -1054,9 +1074,27 @@ const Reports = () => {
                         <TableCell $align="center" style={{ color: '#6b7280', fontSize: '13px' }}>VNĐ</TableCell>
                         <TableCell $align="center">{String(service.duration || '').replace(/[\u00A0\u200B\uFEFF]/g, ' ').trim()}</TableCell>
                         <TableCell $align="center" style={{ fontWeight: 700 }}>{service.totalCount}</TableCell>
-                        <TableCell $align="center">{service.pendingCount > 0 ? service.pendingCount : '—'}</TableCell>
-                        <TableCell $align="center">{service.activeCount > 0 ? service.activeCount : '—'}</TableCell>
-                        <TableCell $align="center">{service.expiredCount > 0 ? service.expiredCount : '—'}</TableCell>
+                        <TableCell 
+                          $align="center" 
+                          style={{ cursor: service.pendingCount > 0 ? 'pointer' : 'default', color: service.pendingCount > 0 ? '#f59e0b' : undefined }}
+                          onClick={() => service.pendingCount > 0 && handleStatusCellClick(service.name, 'pending', language === 'vi' ? 'Chưa kích hoạt' : 'Inactive')}
+                        >
+                          {service.pendingCount > 0 ? <span style={{ textDecoration: 'underline' }}>{service.pendingCount}</span> : '—'}
+                        </TableCell>
+                        <TableCell 
+                          $align="center" 
+                          style={{ cursor: service.activeCount > 0 ? 'pointer' : 'default', color: service.activeCount > 0 ? '#10b981' : undefined }}
+                          onClick={() => service.activeCount > 0 && handleStatusCellClick(service.name, 'active', language === 'vi' ? 'Đang kích hoạt' : 'Active')}
+                        >
+                          {service.activeCount > 0 ? <span style={{ textDecoration: 'underline' }}>{service.activeCount}</span> : '—'}
+                        </TableCell>
+                        <TableCell 
+                          $align="center" 
+                          style={{ cursor: service.expiredCount > 0 ? 'pointer' : 'default', color: service.expiredCount > 0 ? '#ef4444' : undefined }}
+                          onClick={() => service.expiredCount > 0 && handleStatusCellClick(service.name, 'expired', language === 'vi' ? 'Hết thời hạn' : 'Expired')}
+                        >
+                          {service.expiredCount > 0 ? <span style={{ textDecoration: 'underline' }}>{service.expiredCount}</span> : '—'}
+                        </TableCell>
                       </TableRow>
                     )) : (
                       <tr>
@@ -1086,7 +1124,7 @@ const Reports = () => {
                       <TableHeaderCell $align="center">{language === 'vi' ? 'Thời hạn' : 'Duration'}</TableHeaderCell>
                       <TableHeaderCell $align="center">{language === 'vi' ? 'Đã bán' : 'Sold'}</TableHeaderCell>
                       <TableHeaderCell $align="center">{language === 'vi' ? 'Chưa kích hoạt' : 'Inactive'}</TableHeaderCell>
-                      <TableHeaderCell $align="center">{language === 'vi' ? 'Đã kích hoạt' : 'Active'}</TableHeaderCell>
+                      <TableHeaderCell $align="center">{language === 'vi' ? 'Đang kích hoạt' : 'Active'}</TableHeaderCell>
                       <TableHeaderCell $align="center">{language === 'vi' ? 'Hết thời hạn' : 'Expired'}</TableHeaderCell>
                     </TableHeaderRow>
                   </thead>
@@ -1103,9 +1141,27 @@ const Reports = () => {
                         <TableCell $align="center" style={{ color: '#6b7280', fontSize: '13px' }}>VNĐ</TableCell>
                         <TableCell $align="center">{String(service.duration || '').replace(/[\u00A0\u200B\uFEFF]/g, ' ').trim()}</TableCell>
                         <TableCell $align="center" style={{ fontWeight: 700 }}>{service.totalCount}</TableCell>
-                        <TableCell $align="center">{service.pendingCount > 0 ? service.pendingCount : '—'}</TableCell>
-                        <TableCell $align="center">{service.activeCount > 0 ? service.activeCount : '—'}</TableCell>
-                        <TableCell $align="center">{service.expiredCount > 0 ? service.expiredCount : '—'}</TableCell>
+                        <TableCell 
+                          $align="center" 
+                          style={{ cursor: service.pendingCount > 0 ? 'pointer' : 'default', color: service.pendingCount > 0 ? '#f59e0b' : undefined }}
+                          onClick={() => service.pendingCount > 0 && handleStatusCellClick(service.name, 'pending', language === 'vi' ? 'Chưa kích hoạt' : 'Inactive')}
+                        >
+                          {service.pendingCount > 0 ? <span style={{ textDecoration: 'underline' }}>{service.pendingCount}</span> : '—'}
+                        </TableCell>
+                        <TableCell 
+                          $align="center" 
+                          style={{ cursor: service.activeCount > 0 ? 'pointer' : 'default', color: service.activeCount > 0 ? '#10b981' : undefined }}
+                          onClick={() => service.activeCount > 0 && handleStatusCellClick(service.name, 'active', language === 'vi' ? 'Đang kích hoạt' : 'Active')}
+                        >
+                          {service.activeCount > 0 ? <span style={{ textDecoration: 'underline' }}>{service.activeCount}</span> : '—'}
+                        </TableCell>
+                        <TableCell 
+                          $align="center" 
+                          style={{ cursor: service.expiredCount > 0 ? 'pointer' : 'default', color: service.expiredCount > 0 ? '#ef4444' : undefined }}
+                          onClick={() => service.expiredCount > 0 && handleStatusCellClick(service.name, 'expired', language === 'vi' ? 'Hết thời hạn' : 'Expired')}
+                        >
+                          {service.expiredCount > 0 ? <span style={{ textDecoration: 'underline' }}>{service.expiredCount}</span> : '—'}
+                        </TableCell>
                       </TableRow>
                     )) : (
                       <tr>
@@ -1396,7 +1452,7 @@ const Reports = () => {
                         <TableCell $align="center">
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
                             {purchase.status === 'pending' && <span style={{ background: '#fef3c7', color: '#92400e', borderRadius: '12px', padding: '2px 10px', fontSize: '12px', fontWeight: 600 }}>{language === 'vi' ? 'Chưa kích hoạt' : 'Inactive'}</span>}
-                            {purchase.status === 'active' && <span style={{ background: '#d1fae5', color: '#065f46', borderRadius: '12px', padding: '2px 10px', fontSize: '12px', fontWeight: 600 }}>{language === 'vi' ? 'Đã kích hoạt' : 'Active'}</span>}
+                            {purchase.status === 'active' && <span style={{ background: '#d1fae5', color: '#065f46', borderRadius: '12px', padding: '2px 10px', fontSize: '12px', fontWeight: 600 }}>{language === 'vi' ? 'Đang kích hoạt' : 'Active'}</span>}
                             {(purchase.status === 'expired' || purchase.status === 'expiring') && <span style={{ background: '#fee2e2', color: '#991b1b', borderRadius: '12px', padding: '2px 10px', fontSize: '12px', fontWeight: 600 }}>{language === 'vi' ? 'Hết thời hạn' : 'Expired'}</span>}
                           </div>
                         </TableCell>
@@ -1445,7 +1501,7 @@ const Reports = () => {
                         <TableCell $align="center">
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
                             {purchase.status === 'pending' && <span style={{ background: '#fef3c7', color: '#92400e', borderRadius: '12px', padding: '2px 10px', fontSize: '12px', fontWeight: 600 }}>{language === 'vi' ? 'Chưa kích hoạt' : 'Inactive'}</span>}
-                            {purchase.status === 'active' && <span style={{ background: '#d1fae5', color: '#065f46', borderRadius: '12px', padding: '2px 10px', fontSize: '12px', fontWeight: 600 }}>{language === 'vi' ? 'Đã kích hoạt' : 'Active'}</span>}
+                            {purchase.status === 'active' && <span style={{ background: '#d1fae5', color: '#065f46', borderRadius: '12px', padding: '2px 10px', fontSize: '12px', fontWeight: 600 }}>{language === 'vi' ? 'Đang kích hoạt' : 'Active'}</span>}
                             {(purchase.status === 'expired' || purchase.status === 'expiring') && <span style={{ background: '#fee2e2', color: '#991b1b', borderRadius: '12px', padding: '2px 10px', fontSize: '12px', fontWeight: 600 }}>{language === 'vi' ? 'Hết thời hạn' : 'Expired'}</span>}
                           </div>
                         </TableCell>
@@ -1492,7 +1548,7 @@ const Reports = () => {
                         <TableCell $align="center">
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
                             {pkg.status === 'pending' && <span style={{ background: '#fef3c7', color: '#92400e', borderRadius: '12px', padding: '2px 10px', fontSize: '12px', fontWeight: 600 }}>{language === 'vi' ? 'Chưa kích hoạt' : 'Inactive'}</span>}
-                            {pkg.status === 'active' && <span style={{ background: '#d1fae5', color: '#065f46', borderRadius: '12px', padding: '2px 10px', fontSize: '12px', fontWeight: 600 }}>{language === 'vi' ? 'Đã kích hoạt' : 'Active'}</span>}
+                            {pkg.status === 'active' && <span style={{ background: '#d1fae5', color: '#065f46', borderRadius: '12px', padding: '2px 10px', fontSize: '12px', fontWeight: 600 }}>{language === 'vi' ? 'Đang kích hoạt' : 'Active'}</span>}
                             {(pkg.status === 'expired' || pkg.status === 'expiring') && <span style={{ background: '#fee2e2', color: '#991b1b', borderRadius: '12px', padding: '2px 10px', fontSize: '12px', fontWeight: 600 }}>{language === 'vi' ? 'Hết thời hạn' : 'Expired'}</span>}
                           </div>
                         </TableCell>
@@ -1535,7 +1591,7 @@ const Reports = () => {
                         <TableCell $align="center">
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
                             {pkg.status === 'pending' && <span style={{ background: '#fef3c7', color: '#92400e', borderRadius: '12px', padding: '2px 10px', fontSize: '12px', fontWeight: 600 }}>{language === 'vi' ? 'Chưa kích hoạt' : 'Inactive'}</span>}
-                            {pkg.status === 'active' && <span style={{ background: '#d1fae5', color: '#065f46', borderRadius: '12px', padding: '2px 10px', fontSize: '12px', fontWeight: 600 }}>{language === 'vi' ? 'Đã kích hoạt' : 'Active'}</span>}
+                            {pkg.status === 'active' && <span style={{ background: '#d1fae5', color: '#065f46', borderRadius: '12px', padding: '2px 10px', fontSize: '12px', fontWeight: 600 }}>{language === 'vi' ? 'Đang kích hoạt' : 'Active'}</span>}
                             {(pkg.status === 'expired' || pkg.status === 'expiring') && <span style={{ background: '#fee2e2', color: '#991b1b', borderRadius: '12px', padding: '2px 10px', fontSize: '12px', fontWeight: 600 }}>{language === 'vi' ? 'Hết thời hạn' : 'Expired'}</span>}
                           </div>
                         </TableCell>
@@ -1867,6 +1923,112 @@ const Reports = () => {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Subscription Status Detail Modal */}
+      {subscriptionDetailModal && (
+        <div
+          onClick={() => setSubscriptionDetailModal(null)}
+          style={{
+            position: 'fixed', inset: 0,
+            background: 'rgba(15,23,42,0.5)',
+            backdropFilter: 'blur(6px)',
+            zIndex: 9999,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '20px'
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: 'white',
+              borderRadius: '16px',
+              width: '100%',
+              maxWidth: '600px',
+              maxHeight: '80vh',
+              overflowY: 'auto',
+              boxShadow: '0 25px 50px rgba(0,0,0,0.2)',
+            }}
+          >
+            {/* Header */}
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '20px 24px',
+              borderBottom: '1px solid #f1f5f9',
+            }}>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '16px', color: '#0f172a' }}>
+                  {subscriptionDetailModal.packageName}
+                </div>
+                <div style={{ fontSize: '13px', color: '#64748b', marginTop: '2px' }}>
+                  {language === 'vi' ? 'Trạng thái' : 'Status'}: <span style={{ 
+                    fontWeight: 600, 
+                    color: subscriptionDetailModal.status === 'active' ? '#10b981' : subscriptionDetailModal.status === 'pending' ? '#f59e0b' : '#ef4444' 
+                  }}>{subscriptionDetailModal.statusLabel}</span>
+                  {' '}({subscriptionDetailModal.companies.length} {language === 'vi' ? 'công ty' : 'companies'})
+                </div>
+              </div>
+              <button
+                onClick={() => setSubscriptionDetailModal(null)}
+                style={{
+                  background: '#f8fafc', border: '1px solid #e2e8f0',
+                  borderRadius: '50%', width: '32px', height: '32px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer', color: '#64748b', transition: 'all 0.2s'
+                }}
+              >
+                <XIcon size={16} />
+              </button>
+            </div>
+
+            {/* Company List */}
+            <div style={{ padding: '16px 24px' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid #e2e8f0' }}>
+                    <th style={{ padding: '10px 8px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                      {language === 'vi' ? 'STT' : 'No.'}
+                    </th>
+                    <th style={{ padding: '10px 8px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                      {language === 'vi' ? 'Công ty' : 'Company'}
+                    </th>
+                    <th style={{ padding: '10px 8px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                      {language === 'vi' ? 'Ngày mua' : 'Purchase Date'}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subscriptionDetailModal.companies.map((sub, idx) => (
+                    <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <td style={{ padding: '12px 8px', fontSize: '14px', color: '#6b7280' }}>
+                        {idx + 1}
+                      </td>
+                      <td style={{ padding: '12px 8px', fontSize: '14px', fontWeight: 600, color: '#1e293b' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{
+                            width: '32px', height: '32px', borderRadius: '50%',
+                            background: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontWeight: 700, fontSize: '13px', color: '#1e40af', flexShrink: 0
+                          }}>
+                            {(sub.companyName || 'C')[0].toUpperCase()}
+                          </div>
+                          {sub.companyName || sub.employerEmail || (language === 'vi' ? 'Không rõ' : 'Unknown')}
+                        </div>
+                      </td>
+                      <td style={{ padding: '12px 8px', fontSize: '13px', color: '#64748b' }}>
+                        {sub.purchaseDateTime || sub.createdAt 
+                          ? parseDateTime(sub.purchaseDateTime || sub.createdAt).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', {
+                              day: '2-digit', month: '2-digit', year: 'numeric'
+                            })
+                          : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

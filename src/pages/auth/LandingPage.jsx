@@ -2867,15 +2867,15 @@ const particleConfigs = [
 ];
 
 const companyLogos = [
-  { name: 'TRUNG NGUYÊN', logo: s3Images.system.trungnguyen },
-  { name: 'KATINAT', logo: s3Images.system.katinat },
-  { name: 'BAMOS COFFEE', logo: s3Images.system.bamos },
-  { name: 'STARBUCK', logo: s3Images.system.starbuck },
-  { name: 'PHUC LONG', logo: s3Images.system.phuclong },
-  { name: 'THE COFFEE HOUSE', logo: s3Images.system.coffeehouse },
-  { name: 'HỒNG TRÀ NGÔ GIA', logo: s3Images.system.ngogia },
-  { name: 'SUNCHA', logo: s3Images.system.suncha },
-  { name: 'HIGHLANDS', logo: s3Images.system.highlands },
+  { name: 'ỐP PỜ', logo: s3Images.system.logo },
+  { name: 'ỐP PỜ', logo: s3Images.system.logo },
+  { name: 'ỐP PỜ', logo: s3Images.system.logo },
+  { name: 'ỐP PỜ', logo: s3Images.system.logo },
+  { name: 'ỐP PỜ', logo: s3Images.system.logo },
+  { name: 'ỐP PỜ', logo: s3Images.system.logo },
+  { name: 'ỐP PỜ', logo: s3Images.system.logo },
+  { name: 'ỐP PỜ', logo: s3Images.system.logo },
+  { name: 'ỐP PỜ', logo: s3Images.system.logo },
 ];
 
 const LandingPage = ({ children }) => {

@@ -33,19 +33,25 @@ export const getAllNotifications = async () => {
 /**
  * Get notifications for a specific user
  * @param {string} userId - User ID
- * @param {string} role - 'admin' or 'employer'
+ * @param {string} role - 'admin', 'employer', or 'candidate'
  */
 export const getNotifications = async (userId, role) => {
   if (!API_ENDPOINT) {
     throw new Error('Notifications API endpoint is not configured');
   }
 
+  console.log('🔔 [notificationService] getNotifications called with userId:', userId, 'role:', role);
+  console.log('🔔 [notificationService] URL:', `${API_ENDPOINT}/notifications/user/${userId}?role=${role}`);
+
   try {
-    const response = await fetch(`${API_ENDPOINT}/notifications?recipientId=${userId}&recipientRole=${role}`);
+    // Use /notifications/user/{userId}?role=... endpoint which uses GSI query (faster & paginated)
+    const response = await fetch(`${API_ENDPOINT}/notifications/user/${userId}?role=${role}`);
+    console.log('🔔 [notificationService] Response status:', response.status);
     if (!response.ok) {
       throw new Error('Failed to fetch notifications');
     }
     const data = await response.json();
+    console.log('🔔 [notificationService] Data received:', data?.length, 'items');
     const list = data || [];
     return list.filter(n => n.type !== 'chat_message');
   } catch (error) {
@@ -773,6 +779,89 @@ export const createCandidateVerificationRequestNotification = async (candidateId
 };
 
 /**
+ * Create notification when candidate's CV passes AI screening round 1
+ * @param {object} payload - { candidateId, jobTitle, companyName, jobId, score }
+ */
+export const createCandidateAiScreeningPassedNotification = async (payload) => {
+  const { candidateId, jobTitle, companyName, jobId, score } = payload;
+
+  if (!candidateId) {
+    console.error('❌ candidateId is required for AI screening notification');
+    return null;
+  }
+
+  const safeJobTitle = jobTitle || 'công việc';
+  const safeCompanyName = companyName || 'Nhà tuyển dụng';
+
+  const notification = {
+    type: 'success',
+    title: 'CV của bạn đã được duyệt vòng 1',
+    titleEn: 'Your CV passed Round 1 screening',
+    message: `CV của bạn cho vị trí ${safeJobTitle} tại ${safeCompanyName} đã được duyệt. Tiếp tục hoàn thành phỏng vấn với AI để hoàn tất ứng tuyển.`,
+    messageEn: `Your CV for the ${safeJobTitle} position at ${safeCompanyName} has been approved. Complete the AI interview to finalize your application.`,
+    recipientId: candidateId,
+    recipientRole: 'candidate',
+    senderId: 'system',
+    senderName: 'Hệ thống AI',
+    data: {
+      jobId: jobId || null,
+      jobTitle: safeJobTitle,
+      companyName: safeCompanyName,
+      score: score || null,
+      stage: 'round1_passed'
+    },
+    icon: 'check-circle',
+    color: '#10b981',
+    actionUrl: '/candidate/jobs',
+    actionText: 'Xem việc làm',
+    actionTextEn: 'View jobs'
+  };
+
+  return await saveNotification(notification);
+};
+
+/**
+ * Create notification when candidate's application is submitted successfully
+ * @param {object} payload - { candidateId, jobTitle, companyName, jobId, isQuickJob }
+ */
+export const createCandidateApplicationSubmittedNotification = async (payload) => {
+  const { candidateId, jobTitle, companyName, jobId, isQuickJob } = payload;
+
+  if (!candidateId) {
+    console.error('❌ candidateId is required for application submitted notification');
+    return null;
+  }
+
+  const safeJobTitle = jobTitle || 'công việc';
+  const safeCompanyName = companyName || 'Nhà tuyển dụng';
+
+  const notification = {
+    type: 'system',
+    title: 'Ứng tuyển thành công',
+    titleEn: 'Application submitted successfully',
+    message: `Bạn đã ứng tuyển thành công vào vị trí ${safeJobTitle} tại ${safeCompanyName}. Nhà tuyển dụng sẽ xem xét hồ sơ của bạn sớm nhất có thể.`,
+    messageEn: `You have successfully applied for the ${safeJobTitle} position at ${safeCompanyName}. The employer will review your profile as soon as possible.`,
+    recipientId: candidateId,
+    recipientRole: 'candidate',
+    senderId: 'system',
+    senderName: 'Ốp Pờ',
+    data: {
+      jobId: jobId || null,
+      jobTitle: safeJobTitle,
+      companyName: safeCompanyName,
+      isQuickJob: !!isQuickJob
+    },
+    icon: 'briefcase',
+    color: '#3b82f6',
+    actionUrl: isQuickJob ? '/candidate/jobs?tab=shift' : '/candidate/jobs?tab=standard',
+    actionText: 'Xem việc đã ứng tuyển',
+    actionTextEn: 'View applied jobs'
+  };
+
+  return await saveNotification(notification);
+};
+
+/**
  * Notify candidate when admin approves, rejects, or deactivates their quick job verification
  * @param {string} candidateId - Cognito userId của ứng viên
  * @param {string} candidateName - Tên ứng viên
@@ -1297,6 +1386,8 @@ export default {
   createCandidateQuickJobVerifNotification,
   createCandidateWithdrawalRequestNotification,
   createCandidateWithdrawalStatusNotification,
+  createCandidateAiScreeningPassedNotification,
+  createCandidateApplicationSubmittedNotification,
   createChangeRequestApprovedNotification,
   createChangeRequestRejectedNotification,
   markAsRead,
