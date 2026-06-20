@@ -449,6 +449,8 @@ function CandidateNotifications() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState('all');
 
+  console.log('🔔🔔🔔 CandidateNotifications RENDER - user:', user?.userId, user?.role);
+
   const getIconForType = (type) => {
     switch (type) {
       case 'success':
@@ -487,6 +489,7 @@ function CandidateNotifications() {
     if (!user) return;
 
     let userId = user.userId || user.id || user.email;
+    console.log('🔔 [CandidateNotifications] user:', user.userId, user.id, user.email, 'role:', user.role);
     if (!userId || userId.includes('@')) {
       try {
         const { fetchAuthSession } = await import('aws-amplify/auth');
@@ -499,10 +502,15 @@ function CandidateNotifications() {
       }
     }
 
+    console.log('🔔 [CandidateNotifications] Final userId:', userId);
     if (!userId) return;
 
     try {
       const notifs = await getNotifications(userId, 'candidate');
+      console.log('🔔 [CandidateNotifications] API returned:', notifs?.length, 'notifications');
+      if (notifs && notifs.length > 0) {
+        console.log('🔔 [CandidateNotifications] First notification:', JSON.stringify(notifs[0]).substring(0, 200));
+      }
       const mapped = (notifs || []).map(notif => ({
         id: notif.notificationId,
         type: notif.type || 'system',

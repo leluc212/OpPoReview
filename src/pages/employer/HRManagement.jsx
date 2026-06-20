@@ -3194,6 +3194,7 @@ const HRManagement = () => {
 
   // Load quick jobs from DynamoDB
   const [quickJobPosts, setQuickJobPosts] = useState([]);
+  const [allQuickJobs, setAllQuickJobs] = useState([]); // All jobs including closed (for HR section)
   const [loadingJobs, setLoadingJobs] = useState(true);
 
   // Load applications from Quick Jobs
@@ -3217,10 +3218,10 @@ const HRManagement = () => {
 
   // Load applications when switching to HR section
   useEffect(() => {
-    if (activeSection === 'hr' && quickJobPosts.length > 0) {
+    if (activeSection === 'hr' && allQuickJobs.length > 0) {
       loadApplicationsFromQuickJobs();
     }
-  }, [activeSection, quickJobPosts]);
+  }, [activeSection, allQuickJobs]);
 
   const loadQuickJobsFromDynamoDB = async () => {
     try {
@@ -3280,7 +3281,41 @@ const HRManagement = () => {
         updatedAt: job.updatedAt
       }));
 
-      setQuickJobPosts(formattedJobs);
+      // Auto-close expired quick jobs (workDate + endTime has passed)
+      const now = new Date();
+      const nowDateStr = now.toLocaleDateString('en-CA'); // YYYY-MM-DD format
+      const nowTimeStr = now.toTimeString().slice(0, 5); // HH:MM format
+
+      const expiredJobs = formattedJobs.filter(job => {
+        if (job.status !== 'active' || !job.workDate) return false;
+        const endTime = job.endTime || '23:59';
+        // Expired if: workDate < today, OR workDate == today and endTime has passed
+        return job.workDate < nowDateStr || (job.workDate === nowDateStr && endTime <= nowTimeStr);
+      });
+
+      if (expiredJobs.length > 0) {
+        console.log(`⏰ Auto-closing ${expiredJobs.length} expired quick job(s)...`);
+        for (const job of expiredJobs) {
+          try {
+            await quickJobService.updateJobStatus(job.idJob, 'closed');
+            console.log(`✅ Auto-closed expired quick job: ${job.idJob} (${job.title})`);
+          } catch (err) {
+            console.error(`❌ Failed to auto-close quick job ${job.idJob}:`, err);
+          }
+        }
+      }
+
+      // Hide closed jobs from the post management list
+      const visibleJobs = formattedJobs.filter(job => {
+        if (job.status === 'closed') return false;
+        // Also hide jobs we just detected as expired
+        if (expiredJobs.some(ej => ej.idJob === job.idJob)) return false;
+        return true;
+      });
+
+      // Keep all jobs (including closed) for HR section to load applications
+      setAllQuickJobs(formattedJobs);
+      setQuickJobPosts(visibleJobs);
     } catch (error) {
       console.error('❌ Error loading quick jobs:', error);
       setQuickJobPosts([]);
@@ -3314,12 +3349,20 @@ const HRManagement = () => {
 
       // applicationService is statically imported at the top of this file
 
-      // Load applications for each quick job
+      // Load applications for ALL quick jobs (including closed ones for HR management)
       const allApplications = [];
+      const now = new Date();
+      const nowDateStr = now.toLocaleDateString('en-CA'); // YYYY-MM-DD
+      const nowTimeStr = now.toTimeString().slice(0, 5); // HH:MM
 
-      for (const job of quickJobPosts) {
+      for (const job of allQuickJobs) {
         try {
           const jobApplications = await applicationService.getJobApplications(job.idJob);
+
+          // Check if this job has expired
+          const endTime = job.endTime || '23:59';
+          const workDate = job.workDate || '';
+          const jobExpired = workDate && (workDate < nowDateStr || (workDate === nowDateStr && endTime <= nowTimeStr));
 
           const applicationsWithJobInfo = jobApplications.map(app => ({
             ...app,
@@ -3327,14 +3370,33 @@ const HRManagement = () => {
             jobLocation: job.location,
             jobSalary: job.salary,
             jobShift: job.shift,
-            jobWorkDate: job.deadline,
+            jobWorkDate: job.workDate,
             companyName: job.companyName,
-            jobType: 'quick'
+            jobType: 'quick',
+            _jobExpired: jobExpired
           }));
 
           allApplications.push(...applicationsWithJobInfo);
         } catch (error) {
           console.error(`Error loading applications for job ${job.idJob}:`, error);
+        }
+      }
+
+      // Auto-complete expired applications that are still active/accepted
+      const expiredActiveApps = allApplications.filter(app =>
+        app._jobExpired && (app.status === 'accepted' || app.status === 'pending')
+      );
+
+      if (expiredActiveApps.length > 0) {
+        console.log(`⏰ Auto-completing ${expiredActiveApps.length} expired application(s)...`);
+        for (const app of expiredActiveApps) {
+          try {
+            await applicationService.updateApplicationStatus(app.applicationId, 'completed');
+            app.status = 'completed';
+            console.log(`✅ Auto-completed expired application: ${app.applicationId}`);
+          } catch (err) {
+            console.error(`❌ Failed to auto-complete application ${app.applicationId}:`, err);
+          }
         }
       }
 
@@ -3462,7 +3524,7 @@ const HRManagement = () => {
 
   // Poll applications periodically when in 'hr' section to get new chat messages
   useEffect(() => {
-    if (activeSection !== 'hr' || quickJobPosts.length === 0) return;
+    if (activeSection !== 'hr' || allQuickJobs.length === 0) return;
 
     const intervalId = setInterval(() => {
       console.log('🔄 Polling latest applications for chat sync...');
@@ -3470,7 +3532,7 @@ const HRManagement = () => {
     }, 10000); // refresh applications every 10s
 
     return () => clearInterval(intervalId);
-  }, [activeSection, quickJobPosts]);
+  }, [activeSection, allQuickJobs]);
 
   // Sync DB chat messages to localStorage on realApplications update
   useEffect(() => {
@@ -3523,8 +3585,42 @@ const HRManagement = () => {
 
   // Convert applications to staff format for display
   const staffFromApplications = useMemo(() => {
+    // Get current time for additional expired guard
+    const now = new Date();
+    const nowDateStr = now.toLocaleDateString('en-CA'); // YYYY-MM-DD
+    const nowTimeStr = now.toTimeString().slice(0, 5); // HH:MM
+
     return realApplications
       .filter(app => app.status === 'pending' || app.status === 'accepted' || app.status === 'pending_change') // Show pending, accepted and pending_change
+      .filter(app => {
+        // Guard: hide applications whose job has already expired
+        let workDate = app.jobWorkDate || '';
+        if (!workDate) return true; // No date info, keep showing
+
+        // Normalize workDate to YYYY-MM-DD if it's in DD/MM/YYYY or MM/DD/YYYY format
+        if (workDate.includes('/')) {
+          const parts = workDate.split('/');
+          if (parts.length === 3) {
+            // Assume DD/MM/YYYY (Vietnamese format)
+            const [d, m, y] = parts;
+            if (y && y.length === 4) {
+              workDate = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+            }
+          }
+        }
+
+        // Extract endTime from shift (e.g. "07:00 - 11:30")
+        let endTime = '23:59';
+        if (app.jobShift && app.jobShift.includes('-')) {
+          const parts = app.jobShift.split('-').map(t => t.trim());
+          if (parts[1]) endTime = parts[1];
+        }
+        // Expired if workDate < today, OR workDate == today and endTime passed
+        if (workDate < nowDateStr || (workDate === nowDateStr && endTime <= nowTimeStr)) {
+          return false;
+        }
+        return true;
+      })
       .map(app => {
         // Calculate totalPaid from jobSalary
         let totalPaid = 0;

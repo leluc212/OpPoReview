@@ -423,6 +423,33 @@ def get_employer_quick_jobs(employer_id, headers):
         )
         
         items = [item for item in response.get('Items', []) if item.get('status') != 'deleted']
+        
+        # Auto-close expired quick jobs (workDate + endTime has passed)
+        now = datetime.utcnow()
+        from datetime import timedelta
+        now_vn = now + timedelta(hours=7)
+        now_date_str = now_vn.strftime('%Y-%m-%d')
+        now_time_str = now_vn.strftime('%H:%M')
+        
+        for item in items:
+            if item.get('status') != 'active':
+                continue
+            work_date = item.get('workDate', '')
+            end_time = item.get('endTime', '23:59')
+            if work_date:
+                if work_date < now_date_str or (work_date == now_date_str and end_time <= now_time_str):
+                    try:
+                        table.update_item(
+                            Key={'jobID': item['jobID']},
+                            UpdateExpression='SET #status = :s, updatedAt = :u',
+                            ExpressionAttributeNames={'#status': 'status'},
+                            ExpressionAttributeValues={':s': 'closed', ':u': datetime.utcnow().isoformat() + 'Z'}
+                        )
+                        item['status'] = 'closed'
+                        print(f"⏰ Auto-closed expired quick job: {item['jobID']}")
+                    except Exception as e:
+                        print(f"Error auto-closing quick job {item['jobID']}: {str(e)}")
+        
         print(f"✅ Found {len(items)} quick jobs for employer {employer_id}")
         
         return {
@@ -461,14 +488,48 @@ def get_active_quick_jobs(headers):
         )
         
         items = response.get('Items', [])
-        print(f"✅ Found {len(items)} active quick jobs")
+        
+        # Filter out expired quick jobs (workDate + endTime has passed)
+        now = datetime.utcnow()
+        # Adjust to Vietnam timezone (UTC+7)
+        from datetime import timedelta
+        now_vn = now + timedelta(hours=7)
+        now_date_str = now_vn.strftime('%Y-%m-%d')
+        now_time_str = now_vn.strftime('%H:%M')
+        
+        active_items = []
+        expired_ids = []
+        for item in items:
+            work_date = item.get('workDate', '')
+            end_time = item.get('endTime', '23:59')
+            if work_date:
+                # Job expired if: workDate < today, OR workDate == today and endTime has passed
+                if work_date < now_date_str or (work_date == now_date_str and end_time <= now_time_str):
+                    expired_ids.append(item['jobID'])
+                    continue
+            active_items.append(item)
+        
+        # Auto-close expired jobs in DB
+        for job_id in expired_ids:
+            try:
+                table.update_item(
+                    Key={'jobID': job_id},
+                    UpdateExpression='SET #status = :s, updatedAt = :u',
+                    ExpressionAttributeNames={'#status': 'status'},
+                    ExpressionAttributeValues={':s': 'closed', ':u': datetime.utcnow().isoformat() + 'Z'}
+                )
+                print(f"⏰ Auto-closed expired quick job: {job_id}")
+            except Exception as e:
+                print(f"Error auto-closing quick job {job_id}: {str(e)}")
+        
+        print(f"✅ Found {len(active_items)} active quick jobs ({len(expired_ids)} auto-closed)")
         
         return {
             'statusCode': 200,
             'headers': headers,
             'body': json.dumps({
                 'success': True,
-                'data': items
+                'data': active_items
             }, default=decimal_default)
         }
     

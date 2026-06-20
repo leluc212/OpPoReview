@@ -2313,7 +2313,40 @@ const Applications = () => {
         }));
 
         console.log('📦 Transformed jobs:', transformedJobs);
-        setJobPosts(transformedJobs);
+
+        // Auto-close expired jobs that are still active
+        const today = new Date();
+        const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+        const expiredActiveJobs = transformedJobs.filter(job => {
+          if (job.status !== 'active' || !job.workDays) return false;
+          const workDate = new Date(job.workDays);
+          const workDateOnly = new Date(workDate.getFullYear(), workDate.getMonth(), workDate.getDate());
+          // Close jobs only when workDays is strictly before today
+          return workDateOnly < todayOnly;
+        });
+
+        if (expiredActiveJobs.length > 0) {
+          console.log(`⏰ Auto-closing ${expiredActiveJobs.length} expired job(s)...`);
+          for (const job of expiredActiveJobs) {
+            try {
+              await jobPostService.updateJobStatus(job.idJob, 'closed');
+              console.log(`✅ Auto-closed expired job: ${job.idJob} (${job.title})`);
+            } catch (err) {
+              console.error(`❌ Failed to auto-close job ${job.idJob}:`, err);
+            }
+          }
+          // Update local state to reflect closed status
+          const updatedJobs = transformedJobs.map(job => {
+            if (expiredActiveJobs.some(ej => ej.idJob === job.idJob)) {
+              return { ...job, status: 'closed' };
+            }
+            return job;
+          });
+          setJobPosts(updatedJobs);
+        } else {
+          setJobPosts(transformedJobs);
+        }
       } catch (error) {
         console.error('❌ Error loading job posts:', error);
         setJobPosts([]);
@@ -2908,6 +2941,8 @@ const Applications = () => {
     };
 
     return jobPosts.filter(post => {
+      // Hide closed/expired jobs from the list
+      if (post.status === 'closed') return false;
       if (postSearchTerm) {
         const term = postSearchTerm.toLowerCase();
         if (!post.title?.toLowerCase().includes(term) && !post.location?.toLowerCase().includes(term)) return false;

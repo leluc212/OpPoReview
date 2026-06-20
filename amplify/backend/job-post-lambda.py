@@ -87,14 +87,52 @@ def lambda_handler(event, context):
         elif http_method == 'GET' and normalized_path == '/jobs/active':
             response = table.scan(FilterExpression='#s = :s', ExpressionAttributeNames={'#s': 'status'}, ExpressionAttributeValues={':s': 'active'})
             items = response.get('Items', [])
-            items.sort(key=lambda x: x.get('createdAt', ''), reverse=True)
-            return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'success': True, 'data': items}, default=decimal_default)}
+            # Filter out expired jobs (workDays strictly before today)
+            today_str = datetime.utcnow().strftime('%Y-%m-%d')
+            active_items = []
+            expired_ids = []
+            for item in items:
+                work_days = item.get('workDays', '')
+                if work_days and work_days < today_str:
+                    expired_ids.append(item['idJob'])
+                else:
+                    active_items.append(item)
+            # Auto-close expired jobs in DB
+            for job_id in expired_ids:
+                try:
+                    table.update_item(
+                        Key={'idJob': job_id},
+                        UpdateExpression='SET #s = :s, updatedAt = :u',
+                        ExpressionAttributeNames={'#s': 'status'},
+                        ExpressionAttributeValues={':s': 'closed', ':u': datetime.utcnow().isoformat() + 'Z'}
+                    )
+                    print(f"⏰ Auto-closed expired job: {job_id}")
+                except Exception as e:
+                    print(f"Error auto-closing job {job_id}: {str(e)}")
+            active_items.sort(key=lambda x: x.get('createdAt', ''), reverse=True)
+            return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'success': True, 'data': active_items}, default=decimal_default)}
 
         # C. GET /jobs/employer/{employerId}
         elif http_method == 'GET' and '/employer/' in normalized_path:
             emp_id = path_parameters.get('employerId') or (path_segments[-1] if path_segments else None)
             response = table.query(IndexName='EmployerIndex', KeyConditionExpression='employerId = :e', ExpressionAttributeValues={':e': emp_id})
             items = [item for item in response.get('Items', []) if item.get('status') != 'deleted']
+            # Auto-close expired jobs that are still active
+            today_str = datetime.utcnow().strftime('%Y-%m-%d')
+            for item in items:
+                work_days = item.get('workDays', '')
+                if item.get('status') == 'active' and work_days and work_days < today_str:
+                    try:
+                        table.update_item(
+                            Key={'idJob': item['idJob']},
+                            UpdateExpression='SET #s = :s, updatedAt = :u',
+                            ExpressionAttributeNames={'#s': 'status'},
+                            ExpressionAttributeValues={':s': 'closed', ':u': datetime.utcnow().isoformat() + 'Z'}
+                        )
+                        item['status'] = 'closed'
+                        print(f"⏰ Auto-closed expired job: {item['idJob']}")
+                    except Exception as e:
+                        print(f"Error auto-closing job {item['idJob']}: {str(e)}")
             return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'success': True, 'data': items}, default=decimal_default)}
 
         # D. POST /jobs (Create)

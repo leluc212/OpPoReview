@@ -2525,6 +2525,27 @@ Nhiệm vụ: ${job.responsibilities || "Hoàn thành các công việc được
       setAiScreeningWeaknesses(data.weaknesses || []);
       setAiScreeningReason(data.reason || '');
       setIsAiMockMode(false);
+
+      // Send notification to candidate if CV passed round 1
+      if ((data.result || 'review') === 'pass') {
+        try {
+          const { createCandidateAiScreeningPassedNotification } = await import('../../services/notificationService');
+          const { fetchAuthSession } = await import('aws-amplify/auth');
+          const session = await fetchAuthSession();
+          const candidateId = session.tokens?.idToken?.payload?.sub;
+          if (candidateId) {
+            await createCandidateAiScreeningPassedNotification({
+              candidateId,
+              jobTitle: job.title,
+              companyName: job.company,
+              jobId: job.idJob || job.jobID || job.id,
+              score: data.score
+            });
+          }
+        } catch (notifErr) {
+          console.error('Failed to send AI screening notification:', notifErr);
+        }
+      }
     } catch (e) {
       console.warn("Connection to FastAPI AI server failed. Falling back to frontend mock AI screening.", e);
       
@@ -3436,7 +3457,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
       );
 
       try {
-        const { createEmployerApplicationNotification } = await import('../../services/notificationService');
+        const { createEmployerApplicationNotification, createCandidateApplicationSubmittedNotification } = await import('../../services/notificationService');
         const session = await fetchAuthSession();
         const candidateId = session.tokens?.idToken?.payload?.sub;
         const candidateEmail = session.tokens?.idToken?.payload?.email;
@@ -3448,6 +3469,17 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
             employerId,
             candidateId,
             candidateName,
+            jobTitle: jobData?.title,
+            companyName: jobData?.company,
+            jobId,
+            isQuickJob: jobData?.isQuickJob
+          });
+        }
+
+        // Notify candidate about successful application
+        if (candidateId) {
+          await createCandidateApplicationSubmittedNotification({
+            candidateId,
             jobTitle: jobData?.title,
             companyName: jobData?.company,
             jobId,
@@ -3598,7 +3630,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
         );
 
         try {
-          const { createEmployerApplicationNotification } = await import('../../services/notificationService');
+          const { createEmployerApplicationNotification, createCandidateApplicationSubmittedNotification } = await import('../../services/notificationService');
           const session = await fetchAuthSession();
           const candidateId = session.tokens?.idToken?.payload?.sub;
           const candidateEmail = session.tokens?.idToken?.payload?.email;
@@ -3617,6 +3649,17 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
             });
           } else {
             console.warn('⚠️ [JobListing] Missing employerId, skipping application notification');
+          }
+
+          // Notify candidate about successful application
+          if (candidateId) {
+            await createCandidateApplicationSubmittedNotification({
+              candidateId,
+              jobTitle: jobData?.title,
+              companyName: jobData?.company,
+              jobId,
+              isQuickJob: jobData?.isQuickJob
+            });
           }
         } catch (notificationError) {
           console.error('❌ [JobListing] Failed to create application notification:', notificationError);

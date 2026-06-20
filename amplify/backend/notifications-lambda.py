@@ -89,16 +89,28 @@ def lambda_handler(event, context):
             query_params = event.get('queryStringParameters') or {}
             role = query_params.get('role', 'employer')
             
-            response = table.query(
-                IndexName='RecipientIndex',
-                KeyConditionExpression='recipientId = :uid AND recipientRole = :role',
-                ExpressionAttributeValues={
-                    ':uid': user_id,
-                    ':role': role
-                }
-            )
+            # Paginated query to get ALL results
+            items = []
+            last_evaluated_key = None
             
-            items = response.get('Items', [])
+            while True:
+                query_kwargs = {
+                    'IndexName': 'RecipientIndex',
+                    'KeyConditionExpression': 'recipientId = :uid AND recipientRole = :role',
+                    'ExpressionAttributeValues': {
+                        ':uid': user_id,
+                        ':role': role
+                    }
+                }
+                if last_evaluated_key:
+                    query_kwargs['ExclusiveStartKey'] = last_evaluated_key
+                
+                response = table.query(**query_kwargs)
+                items.extend(response.get('Items', []))
+                
+                last_evaluated_key = response.get('LastEvaluatedKey')
+                if not last_evaluated_key:
+                    break
             
             # Filter out deleted notifications
             items = [item for item in items if not item.get('deleted', False)]
@@ -208,7 +220,7 @@ def lambda_handler(event, context):
                     'message': body.get('message'),
                     'messageEn': body.get('messageEn', body.get('message')),
                     'recipientId': body.get('recipientId'),
-                    'recipientRole': body.get('recipientRole'),
+                    'recipientRole': body.get('recipientRole', '').lower(),
                     'senderId': body.get('senderId', 'system'),
                     'senderName': body.get('senderName', 'System'),
                     'data': body.get('data', {}),
