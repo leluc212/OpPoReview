@@ -717,6 +717,12 @@ def _summarize_candidate(cand):
     title = cand.get("title") or ""
     bio = cand.get("bio") or ""
     skills = cand.get("skills") or []
+    # DynamoDB String Sets come back as Python sets, which are not JSON
+    # serializable — normalize to a list.
+    if isinstance(skills, (set, frozenset)):
+        skills = list(skills)
+    elif not isinstance(skills, list):
+        skills = [skills]
     experience = cand.get("experience") or ""
     education = cand.get("education") or ""
     return {
@@ -783,7 +789,7 @@ def _gemini_recommend_payload(validated, candidates):
             "role": "user",
             "parts": [{
                 "text": "Recommend candidates for this job:\n"
-                + json.dumps(user_payload, ensure_ascii=False)
+                + json.dumps(user_payload, ensure_ascii=False, default=str)
             }],
         }],
         "generationConfig": {
@@ -802,7 +808,7 @@ def call_gemini_recommend(validated, candidates, urlopen=urllib.request.urlopen)
     model = os.environ.get("GEMINI_MODEL", DEFAULT_MODEL)
     request = urllib.request.Request(
         f"{GEMINI_API_BASE_URL}/{model}:generateContent",
-        data=json.dumps(_gemini_recommend_payload(validated, candidates), ensure_ascii=False).encode("utf-8"),
+        data=json.dumps(_gemini_recommend_payload(validated, candidates), ensure_ascii=False, default=str).encode("utf-8"),
         headers={
             "x-goog-api-key": api_key,
             "Content-Type": "application/json",
@@ -2000,8 +2006,6 @@ TUYỆT ĐỐI KHÔNG chuyển sang câu hỏi tiếp theo và không hỏi ch�
                 "report": None
             })
         elif path == "/api/v1/interview/audio-upload-url":
-            import time
-            from datetime import datetime
             body = _parse_body(event)
             session_id = body.get("session_id")
             content_type = body.get("content_type", "audio/webm")
@@ -2128,11 +2132,16 @@ TUYỆT ĐỐI KHÔNG chuyển sang câu hỏi tiếp theo và không hỏi ch�
             "error": {"code": error.code, "message": error.message},
             "request_id": request_id,
         })
-    except Exception:
+    except Exception as unexpected_error:
+        import traceback
         print(json.dumps({
             "event": "cv_analysis_unexpected_error",
             "request_id": request_id,
+            "path": path,
+            "error_type": type(unexpected_error).__name__,
+            "error_message": str(unexpected_error),
         }))
+        print("TRACEBACK:\n" + traceback.format_exc())
         return _response(event, 500, {
             "error": {
                 "code": "INTERNAL_ERROR",

@@ -3928,6 +3928,33 @@ const Applications = () => {
                         : (language === 'vi' ? 'Tháng này' : 'This month')}
                 </button>
               ))}
+
+              {/* Divider between time and status filters */}
+              <div style={{ width: '1px', height: '24px', background: '#e2e8f0', margin: '0 2px' }} />
+
+              {/* Status filters — toggle: click an active one to clear back to all */}
+              {[
+                { key: 'approved', label: language === 'vi' ? 'Đã duyệt' : 'Approved', active: '#059669', activeBg: '#ECFDF5', activeBorder: '#34D399' },
+                { key: 'rejected', label: language === 'vi' ? 'Đã từ chối' : 'Rejected', active: '#DC2626', activeBg: '#FEF2F2', activeBorder: '#F87171' }
+              ].map(s => {
+                const isActive = statusFilter === s.key;
+                return (
+                  <button
+                    key={s.key}
+                    onClick={() => setStatusFilter(isActive ? 'all' : s.key)}
+                    style={{
+                      padding: '7px 14px', borderRadius: '8px', fontSize: '13px', fontWeight: '600',
+                      border: '1.5px solid',
+                      borderColor: isActive ? s.activeBorder : '#e2e8f0',
+                      background: isActive ? s.activeBg : '#f8fafc',
+                      color: isActive ? s.active : '#64748b',
+                      cursor: 'pointer', transition: 'all 0.15s'
+                    }}
+                  >
+                    {s.label}
+                  </button>
+                );
+              })}
             </div>
 
             {(isLoadingApplications || isLoadingJobs) ? (
