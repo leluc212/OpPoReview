@@ -116,6 +116,17 @@ def submit_application(event, candidate_id, candidate_email, create_response):
         if not job_id or not cv_url:
             return create_response(400, {'error': 'Missing required fields: jobId, cvUrl'})
         
+        # ─── AI Round 1 Screening Gate ────────────────────────────────────────
+        # If the CV was screened by AI and explicitly FAILED Round 1, do not create
+        # the application — the CV must not be sent to the employer. Applications
+        # without an AI screening result (normal flow) or with pass/review proceed.
+        if str(body.get('aiScreeningResult', '')).strip().lower() == 'fail':
+            return create_response(403, {
+                'error': 'CV chưa vượt qua vòng sàng lọc AI (Vòng 1) nên không thể gửi đến nhà tuyển dụng.',
+                'code': 'AI_SCREENING_FAILED'
+            })
+        # ──────────────────────────────────────────────────────────────────────
+        
         # ─── eKYC Verification Gate ───────────────────────────────────────────
         try:
             candidate_table = dynamodb.Table('CandidateProfiles')

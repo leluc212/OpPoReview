@@ -1618,7 +1618,7 @@ def lambda_handler(event, context):
         "/cv/analyze", "/cv/generate", "/cv/recommend-candidates", 
         "/job/suggest-jd", "/candidate/recommend-jobs",
         "/api/v1/cv/screen", "/api/v1/interview/start", "/api/v1/interview/respond",
-        "/api/v1/interview/upload-audio"
+        "/api/v1/interview/upload-audio", "/api/v1/interview/audio-upload-url"
     }:
         return _response(event, 404, {
             "error": {"code": "NOT_FOUND", "message": "Route not found."},
@@ -1999,6 +1999,59 @@ TUYỆT ĐỐI KHÔNG chuyển sang câu hỏi tiếp theo và không hỏi ch�
                 "finished": False,
                 "report": None
             })
+        elif path == "/api/v1/interview/audio-upload-url":
+            import time
+            from datetime import datetime
+            body = _parse_body(event)
+            session_id = body.get("session_id")
+            content_type = body.get("content_type", "audio/webm")
+
+            user_id = claims.get("sub")
+            if not user_id:
+                raise RequestError(401, "UNAUTHORIZED", "User not logged in.")
+            if not session_id:
+                raise RequestError(400, "MISSING_FIELDS", "Missing session_id.")
+
+            import boto3
+            s3_client = boto3.client("s3", region_name="ap-southeast-1")
+
+            timestamp = int(time.time())
+            s3_key = f"interviews/{user_id}/{session_id}_{timestamp}.webm"
+            bucket_name = "opporeview-cv-storage"
+
+            try:
+                # Presigned PUT URL — browser uploads the audio directly to S3,
+                # bypassing the API Gateway/Lambda payload size limit.
+                upload_url = s3_client.generate_presigned_url(
+                    'put_object',
+                    Params={
+                        'Bucket': bucket_name,
+                        'Key': s3_key,
+                        'ContentType': content_type
+                    },
+                    ExpiresIn=3600
+                )
+                # Presigned GET URL for immediate playback / storage.
+                download_url = s3_client.generate_presigned_url(
+                    'get_object',
+                    Params={
+                        'Bucket': bucket_name,
+                        'Key': s3_key,
+                        'ResponseContentDisposition': 'inline; filename="interview_audio.webm"'
+                    },
+                    ExpiresIn=43200
+                )
+                return _response(event, 200, {
+                    "upload_url": upload_url,
+                    "url": download_url,
+                    "s3_key": s3_key,
+                    "content_type": content_type,
+                    "message": "Presigned URL generated successfully."
+                })
+            except Exception as s3_err:
+                print(f"Error generating presigned audio URL: {str(s3_err)}")
+                raise RequestError(500, "PRESIGN_FAILED", f"Failed to generate presigned URL: {str(s3_err)}")
+
         elif path == "/api/v1/interview/upload-audio":
             import base64
             from datetime import datetime
