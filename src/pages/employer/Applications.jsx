@@ -1844,8 +1844,8 @@ const ProfileDetailModal = React.memo(({ candidate, onClose, isLoading, onApprov
     ? (candidate.reviews.reduce((s, r) => s + r.rating, 0) / candidate.reviews.length)
     : null;
 
-  // Use a default sample interview audio if candidate doesn't have one
-  const audioUrl = candidate.aiInterviewAudio || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+  // Only use the candidate's real interview audio; no sample/placeholder.
+  const audioUrl = candidate.aiInterviewAudio || '';
 
   return (
     <>
@@ -2184,7 +2184,7 @@ const ProfileDetailModal = React.memo(({ candidate, onClose, isLoading, onApprov
                       )}
 
                       {/* Audio Interview Recording */}
-                      <InterviewAudioPlayer audioUrl={audioUrl} />
+                      {audioUrl && <InterviewAudioPlayer audioUrl={audioUrl} />}
                     </ProfileSection>
                   ) : (
                     <div style={{ textAlign: 'center', padding: '40px', background: '#F8FAFC', border: '1.5px dashed #CBD5E1', borderRadius: '16px', color: '#64748b' }}>
@@ -3052,27 +3052,8 @@ const Applications = () => {
                 'Thời gian làm việc ở các công ty trước tương đối ngắn.',
                 'Thiếu chứng chỉ ngoại ngữ liên quan.'
               ] : [])),
-              aiInterviewScore: app.aiInterviewScore !== undefined ? app.aiInterviewScore : (isPass ? 85 : isReview ? 68 : null),
-              aiInterviewReport: app.aiInterviewReport || (isPass ? {
-                strengths: [
-                  'Hiểu sâu sắc các kiến thức chuyên môn cốt lõi và kiến trúc dự án.',
-                  'Khả năng tư duy logic và giải quyết vấn đề thực tế xuất sắc.',
-                  'Kinh nghiệm thực hành tốt qua các dự án lớn trong CV.'
-                ],
-                weaknesses: [
-                  'Kỹ năng tiếng Anh giao tiếp cần thực hành thêm.',
-                  'Chưa có nhiều kinh nghiệm tối ưu hóa hiệu năng hệ thống ở mức sâu.'
-                ]
-              } : isReview ? {
-                strengths: [
-                  'Thái độ học hỏi và cầu tiến tốt, phản ứng nhanh.',
-                  'Có kiến thức nền tảng cơ bản về cơ sở dữ liệu và thuật toán.'
-                ],
-                weaknesses: [
-                  'Kinh nghiệm thực tiễn tương đối mỏng.',
-                  'Trả lời phỏng vấn còn thiếu tự tin ở một số câu hỏi tình huống.'
-                ]
-              } : null),
+              aiInterviewScore: (app.aiInterviewScore !== undefined && app.aiInterviewScore !== null) ? app.aiInterviewScore : null,
+              aiInterviewReport: app.aiInterviewReport || null,
               aiInterviewAudio: app.aiInterviewAudio || '',
               aiInterviewAudioKey: app.aiInterviewAudioKey || ''
             };
@@ -3947,6 +3928,33 @@ const Applications = () => {
                         : (language === 'vi' ? 'Tháng này' : 'This month')}
                 </button>
               ))}
+
+              {/* Divider between time and status filters */}
+              <div style={{ width: '1px', height: '24px', background: '#e2e8f0', margin: '0 2px' }} />
+
+              {/* Status filters — toggle: click an active one to clear back to all */}
+              {[
+                { key: 'approved', label: language === 'vi' ? 'Đã duyệt' : 'Approved', active: '#059669', activeBg: '#ECFDF5', activeBorder: '#34D399' },
+                { key: 'rejected', label: language === 'vi' ? 'Đã từ chối' : 'Rejected', active: '#DC2626', activeBg: '#FEF2F2', activeBorder: '#F87171' }
+              ].map(s => {
+                const isActive = statusFilter === s.key;
+                return (
+                  <button
+                    key={s.key}
+                    onClick={() => setStatusFilter(isActive ? 'all' : s.key)}
+                    style={{
+                      padding: '7px 14px', borderRadius: '8px', fontSize: '13px', fontWeight: '600',
+                      border: '1.5px solid',
+                      borderColor: isActive ? s.activeBorder : '#e2e8f0',
+                      background: isActive ? s.activeBg : '#f8fafc',
+                      color: isActive ? s.active : '#64748b',
+                      cursor: 'pointer', transition: 'all 0.15s'
+                    }}
+                  >
+                    {s.label}
+                  </button>
+                );
+              })}
             </div>
 
             {(isLoadingApplications || isLoadingJobs) ? (
@@ -4089,7 +4097,7 @@ const Applications = () => {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
                   <Briefcase size={16} />
-                  <span>{selectedJobView.type}</span>
+                  <span>{language === 'vi' ? 'Bán thời gian' : 'Part-time'}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px' }}>
                   <Calendar size={16} />

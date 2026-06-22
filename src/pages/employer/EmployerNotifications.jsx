@@ -829,15 +829,21 @@ const EmployerNotifications = () => {
   };
 
   const handleMarkAllAsRead = async () => {
+    const unreadIds = notifications.filter(n => !n.read).map(n => n.id).filter(Boolean);
+
+    // Optimistic update — reflect the read state in the UI immediately.
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
 
-    const unreadIds = notifications.filter(n => !n.read).map(n => n.id).filter(Boolean);
     if (unreadIds.length === 0) {
       return;
     }
 
+    // Persist to DB. We intentionally do NOT reload from the API afterwards:
+    // the list endpoint queries a GSI that is eventually consistent and can
+    // briefly return stale (unread) data right after the update, which would
+    // revert the UI back to "unread". The optimistic state already matches
+    // what gets persisted.
     await Promise.allSettled(unreadIds.map(id => markAsRead(id)));
-    await loadNotifications();
   };
 
   const handleDelete = async (notification, index) => {

@@ -2497,17 +2497,11 @@ const JobListing = () => {
 
   const uploadInterviewAudio = async (audioBlob) => {
     try {
-      console.log('🎙️ Uploading interview audio to backend...');
-      
-      const reader = new FileReader();
-      const base64DataPromise = new Promise((resolve) => {
-        reader.onloadend = () => resolve(reader.result);
-      });
-      reader.readAsDataURL(audioBlob);
-      const base64Data = await base64DataPromise;
-      
+      console.log('🎙️ Requesting presigned URL for interview audio...');
+
       const headers = await getAuthHeaders();
-      const response = await fetch(`${CV_AI_API_BASE_URL}/api/v1/interview/upload-audio`, {
+      // 1. Ask the backend for a presigned PUT URL (small JSON request).
+      const presignResp = await fetch(`${CV_AI_API_BASE_URL}/api/v1/interview/audio-upload-url`, {
         method: 'POST',
         headers: {
           ...headers,
@@ -2515,18 +2509,34 @@ const JobListing = () => {
         },
         body: JSON.stringify({
           session_id: interviewSessionId || 'sess_mock',
-          audio_data: base64Data,
-          file_name: `interview_${interviewSessionId || 'mock'}.webm`
+          content_type: 'audio/webm'
         })
       });
-      
-      if (!response.ok) {
-        throw new Error(`Audio upload server error: ${response.status}`);
+
+      if (!presignResp.ok) {
+        throw new Error(`Presign server error: ${presignResp.status}`);
       }
-      
-      const result = await response.json();
-      console.log('✅ Audio uploaded successfully:', result);
-      return result;
+
+      const presign = await presignResp.json();
+      if (!presign.upload_url || !presign.s3_key) {
+        throw new Error('Invalid presign response');
+      }
+
+      // 2. Upload the audio directly to S3 using the presigned PUT URL.
+      //    This bypasses the API Gateway/Lambda payload size limit, so long
+      //    interviews upload reliably. No auth headers here — the URL is signed.
+      const putResp = await fetch(presign.upload_url, {
+        method: 'PUT',
+        headers: { 'Content-Type': presign.content_type || 'audio/webm' },
+        body: audioBlob
+      });
+
+      if (!putResp.ok) {
+        throw new Error(`S3 upload error: ${putResp.status}`);
+      }
+
+      console.log('✅ Audio uploaded directly to S3:', presign.s3_key);
+      return { url: presign.url, s3_key: presign.s3_key };
     } catch (err) {
       console.error('❌ Error uploading audio:', err);
       return null;
@@ -2544,9 +2554,9 @@ const JobListing = () => {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       audioChunksRef.current = [];
       
-      let options = { mimeType: 'audio/webm' };
+      let options = { mimeType: 'audio/webm', audioBitsPerSecond: 32000 };
       if (!MediaRecorder.isTypeSupported('audio/webm')) {
-        options = { mimeType: 'audio/ogg' };
+        options = { mimeType: 'audio/ogg', audioBitsPerSecond: 32000 };
       }
       
       const mediaRecorder = new MediaRecorder(stream, options);
@@ -2746,6 +2756,15 @@ Nhiệm vụ: ${job.responsibilities || "Hoàn thành các công việc được
       setAiScreeningWeaknesses(finalWeaknesses);
       setAiScreeningReason(finalReason);
       setIsAiMockMode(true);
+    }
+
+    // Submit the application only if the candidate PASSED Round 1 (AI CV screening).
+    // If the AI marks the CV as 'fail', do NOT create the application or notify the
+    // employer — the CV must not be sent.
+    if (finalResult === 'fail') {
+      console.log('🚫 CV failed AI Round 1 screening — application not submitted, employer not notified.');
+      setAiScreeningLoading(false);
+      return;
     }
 
     // Submit the application immediately in pending status
@@ -3207,7 +3226,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
               endTime: String(job.endTime || ''),
               hourlyRate: Math.round(hourlyRate * 0.85),
               totalHours: totalHours,
-              workHours: job.startTime && job.endTime ? `${job.startTime} - ${job.endTime}` : '',
+              workHours: job.workHours || (job.startTime && job.endTime ? `${job.startTime} - ${job.endTime}` : ''),
               workDate: job.workDate || '',
               status: String(job.status || 'active'),
               isQuickJob: true, // Flag to identify quick jobs
@@ -5856,8 +5875,8 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                           <div style={{ width: '1px', height: '40px', background: '#cbd5e1' }} />
                           
                           <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '24px', fontWeight: '800', color: interviewReport.recommend_to_employer ? '#10b981' : '#ef4444' }}>
-                              {interviewReport.recommend_to_employer 
+                            <div style={{ fontSize: '24px', fontWeight: '800', color: (interviewReport.recommend_to_employer || interviewReport.total_score >= 60) ? '#10b981' : '#ef4444' }}>
+                              {(interviewReport.recommend_to_employer || interviewReport.total_score >= 60)
                                 ? (language === 'vi' ? 'ĐẠT YÊU CẦU' : 'PASSED')
                                 : (language === 'vi' ? 'CHƯA PHÙ HỢP' : 'HOLD')}
                             </div>
@@ -5934,6 +5953,20 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                           </DetailCard>
                         )}
 
+                        {(interviewReport.recommend_to_employer || interviewReport.total_score >= 60) ? (
+                          <div style={{ marginTop: '18px', padding: '14px 16px', background: '#ecfdf5', border: '1.5px solid #6ee7b7', borderRadius: '12px', color: '#065f46', fontSize: '13.5px', fontWeight: '600', lineHeight: '1.5', textAlign: 'center' }}>
+                            {language === 'vi'
+                              ? '🎉 Chúc mừng! Bạn đã vượt qua vòng phỏng vấn. Hồ sơ của bạn đã được gửi đến nhà tuyển dụng. Vui lòng chờ nhà tuyển dụng phản hồi.'
+                              : '🎉 Congratulations! You passed the interview. Your application has been sent to the employer. Please wait for the employer to respond.'}
+                          </div>
+                        ) : (
+                          <div style={{ marginTop: '18px', padding: '14px 16px', background: '#fef2f2', border: '1.5px solid #fecaca', borderRadius: '12px', color: '#991b1b', fontSize: '13.5px', fontWeight: '600', lineHeight: '1.5', textAlign: 'center' }}>
+                            {language === 'vi'
+                              ? 'Rất tiếc, kết quả phỏng vấn chưa đạt yêu cầu nên hồ sơ chưa được gửi đến nhà tuyển dụng.'
+                              : 'Unfortunately, your interview result did not meet the requirement, so your application was not sent to the employer.'}
+                          </div>
+                        )}
+
                         <button 
                           onClick={() => {
                             exitFullscreenMode();
@@ -5947,7 +5980,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                           }}
                           style={{
                             width: '100%',
-                            marginTop: '20px',
+                            marginTop: '16px',
                             padding: '14px',
                             background: 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)',
                             color: 'white',
