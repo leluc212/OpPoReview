@@ -223,9 +223,32 @@ const NotificationBell = ({ userId, role }) => {
     
     if (notification.actionUrl) {
       let url = notification.actionUrl;
+
+      // Parse data field if it's a JSON string (DynamoDB may return it as string)
+      const notifData = typeof notification.data === 'string'
+        ? (() => { try { return JSON.parse(notification.data); } catch { return {}; } })()
+        : (notification.data || {});
+
+      // Handle CV-approved notification (type: 'success') — redirect to AI interview
+      // Also catches old notifications that still have '/candidate/dashboard' or '/candidate/jobs' as actionUrl
+      const isCvApproved = (notification.type === 'success' || notification.type === 'CV_ACCEPTED') && notifData?.jobId;
+      const isDashboardUrl = url === '/candidate/dashboard' || url === '/candidate/jobs';
+      
+      if (isCvApproved || (isDashboardUrl && notification.type === 'success')) {
+        navigate('/candidate/jobs?tab=standard', {
+          state: { selectedJobId: notifData.jobId, openInterview: true }
+        });
+        return;
+      }
+
+      // Normalize /candidate/jobs → add ?tab param (standard catch-all)
       if (url === '/candidate/jobs') {
-        const isQuickJobRelated = ['success', 'CV_ACCEPTED', 'quick_job_activation_approved'].includes(notification.type);
-        url = isQuickJobRelated ? '/candidate/jobs?tab=shift' : '/candidate/jobs?tab=standard';
+        url = '/candidate/jobs?tab=standard';
+        const jobId = notifData?.jobId;
+        if (jobId) {
+          navigate(url, { state: { selectedJobId: jobId, openInterview: true } });
+          return;
+        }
       }
       navigate(url);
     }

@@ -797,13 +797,13 @@ const VoiceAvatarCircle = styled.div`
     height: 100%;
     border-radius: 50%;
     border: 2px solid ${props => props.$isSpeaking
-      ? 'rgba(124, 58, 237, 0.5)'
-      : props.$isListening
-        ? 'rgba(239, 68, 68, 0.5)'
-        : 'transparent'};
+    ? 'rgba(124, 58, 237, 0.5)'
+    : props.$isListening
+      ? 'rgba(239, 68, 68, 0.5)'
+      : 'transparent'};
     animation: ${props => (props.$isSpeaking || props.$isListening)
-      ? css`${voicePulseRing} 2s ease-out infinite`
-      : 'none'};
+    ? css`${voicePulseRing} 2s ease-out infinite`
+    : 'none'};
   }
 
   &::after {
@@ -862,8 +862,8 @@ const VoiceMicMainButton = styled.button`
     border-radius: 50%;
     border: none;
     background: ${props => props.$isListening
-      ? 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)'
-      : 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)'};
+    ? 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)'
+    : 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)'};
     color: white;
     cursor: pointer;
     display: flex;
@@ -871,15 +871,15 @@ const VoiceMicMainButton = styled.button`
     justify-content: center;
     transition: all 0.3s ease;
     box-shadow: ${props => props.$isListening
-      ? '0 8px 30px rgba(239, 68, 68, 0.4)'
-      : '0 8px 30px rgba(124, 58, 237, 0.3)'};
+    ? '0 8px 30px rgba(239, 68, 68, 0.4)'
+    : '0 8px 30px rgba(124, 58, 237, 0.3)'};
     animation: ${props => props.$isListening ? css`${pulse} 1.5s infinite ease-in-out` : 'none'};
 
     &:hover:not(:disabled) {
       transform: scale(1.08);
       box-shadow: ${props => props.$isListening
-        ? '0 12px 40px rgba(239, 68, 68, 0.5)'
-        : '0 12px 40px rgba(124, 58, 237, 0.4)'};
+    ? '0 12px 40px rgba(239, 68, 68, 0.5)'
+    : '0 12px 40px rgba(124, 58, 237, 0.4)'};
     }
 
     &:disabled {
@@ -1897,10 +1897,10 @@ const formatPostedDate = (isoDate, language) => {
 
     // Calculate difference in milliseconds
     let diffMs = now - date;
-    
+
     // Handle small clock drifts
     if (diffMs < 0) diffMs = 0;
-    
+
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffHours / 24);
@@ -2040,8 +2040,8 @@ const translateJobTitle = (titleStr, language) => {
     'Nhân viên Thu Ngân Highlands': 'Highlands Cashier',
   };
 
-  return titleMap[cleanTitle] || 
-    Object.entries(titleMap).find(([k]) => k.toLowerCase() === cleanTitle.toLowerCase())?.[1] || 
+  return titleMap[cleanTitle] ||
+    Object.entries(titleMap).find(([k]) => k.toLowerCase() === cleanTitle.toLowerCase())?.[1] ||
     cleanTitle;
 };
 
@@ -2241,13 +2241,13 @@ const JobListing = () => {
   const speakVietnamese = useCallback((text) => {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
-    
+
     // Clean text from emojis
     const cleanText = text.replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]/g, '').trim();
-    
+
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = 'vi-VN';
-    
+
     const voices = window.speechSynthesis.getVoices();
     const viVoice = voices.find(v => v.lang.includes('vi-VN') || v.lang === 'vi');
     if (viVoice) {
@@ -2257,7 +2257,7 @@ const JobListing = () => {
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
-    
+
     // Wrap speak in setTimeout to work around Chrome SpeechSynthesis bugs after cancel()
     setTimeout(() => {
       window.speechSynthesis.speak(utterance);
@@ -2274,8 +2274,8 @@ const JobListing = () => {
   const startListening = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert(language === 'vi' 
-        ? 'Trình duyệt của bạn không hỗ trợ nhận diện giọng nói. Vui lòng dùng Google Chrome, Safari hoặc Microsoft Edge.' 
+      alert(language === 'vi'
+        ? 'Trình duyệt của bạn không hỗ trợ nhận diện giọng nói. Vui lòng dùng Google Chrome, Safari hoặc Microsoft Edge.'
         : 'Your browser does not support speech recognition. Please use Google Chrome, Safari, or Microsoft Edge.');
       return;
     }
@@ -2422,8 +2422,8 @@ const JobListing = () => {
 
     const handlePreventCopyPaste = (e) => {
       e.preventDefault();
-      alert(language === 'vi' 
-        ? '⚠️ Tính năng sao chép/dán bị vô hiệu hóa trong lúc phỏng vấn!' 
+      alert(language === 'vi'
+        ? '⚠️ Tính năng sao chép/dán bị vô hiệu hóa trong lúc phỏng vấn!'
         : '⚠️ Copy and paste is disabled during the interview!');
     };
 
@@ -2549,24 +2549,24 @@ const JobListing = () => {
         console.warn('⚠️ getUserMedia not supported in this browser');
         return;
       }
-      
+
       console.log('🎙️ Requesting microphone stream...');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       audioChunksRef.current = [];
-      
+
       let options = { mimeType: 'audio/webm', audioBitsPerSecond: 32000 };
       if (!MediaRecorder.isTypeSupported('audio/webm')) {
         options = { mimeType: 'audio/ogg', audioBitsPerSecond: 32000 };
       }
-      
+
       const mediaRecorder = new MediaRecorder(stream, options);
-      
+
       mediaRecorder.ondataavailable = (event) => {
         if (event.data && event.data.size > 0) {
           audioChunksRef.current.push(event.data);
         }
       };
-      
+
       mediaRecorderRef.current = mediaRecorder;
       mediaRecorder.start(1000);
       console.log('🎙️ Continuous interview audio recording started');
@@ -2580,22 +2580,22 @@ const JobListing = () => {
       return new Promise((resolve) => {
         mediaRecorderRef.current.onstop = async () => {
           console.log('🎙️ Stopped recording audio');
-          
+
           try {
             mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
           } catch (e) {
             console.error('Error stopping tracks:', e);
           }
-          
+
           if (audioChunksRef.current.length === 0) {
             console.warn('⚠️ No audio chunks recorded');
             resolve(null);
             return;
           }
-          
+
           const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
           console.log('🎙️ Interview audio blob created, size:', audioBlob.size);
-          
+
           try {
             const uploadResult = await uploadInterviewAudio(audioBlob);
             resolve(uploadResult);
@@ -2604,7 +2604,7 @@ const JobListing = () => {
             resolve(null);
           }
         };
-        
+
         mediaRecorderRef.current.stop();
       });
     }
@@ -2730,13 +2730,13 @@ Nhiệm vụ: ${job.responsibilities || "Hoàn thành các công việc được
       }
     } catch (e) {
       console.warn("Connection to FastAPI AI server failed. Falling back to frontend mock AI screening.", e);
-      
+
       // Simulate network delay for realistic experience
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       finalScore = Math.floor(Math.random() * 20) + 75; // Score between 75 and 94
       finalResult = 'pass';
-      
+
       const isVi = language === 'vi';
       finalStrengths = [
         isVi ? `Có kỹ năng phù hợp với vị trí ${job.title}` : `Possesses suitable skills for the ${job.title} role`,
@@ -2746,7 +2746,7 @@ Nhiệm vụ: ${job.responsibilities || "Hoàn thành các công việc được
       finalWeaknesses = [
         isVi ? "Cần thích nghi thêm với quy trình vận hành nội bộ" : "Needs to adapt to internal operating procedures"
       ];
-      finalReason = isVi 
+      finalReason = isVi
         ? `Hồ sơ rất ấn tượng. Ứng viên có đầy đủ kiến thức nền tảng và các kỹ năng cần thiết cho công việc ${job.title} tại ${job.company}. Đề xuất tiến hành phỏng vấn trực tiếp.`
         : `Very impressive profile. The candidate has the necessary foundation and skills for the ${job.title} position at ${job.company}. Recommended to proceed to live interview.`;
 
@@ -2789,7 +2789,7 @@ Nhiệm vụ: ${job.responsibilities || "Hoàn thành các công việc được
       if (submittedApp) {
         const appData = submittedApp.application || submittedApp;
         const appId = submittedApp.applicationId || appData.applicationId;
-        
+
         // Add to candidateApplications state
         setCandidateApplications(prev => [...prev, appData]);
         // Update the pendingApplication's applicationId
@@ -2880,14 +2880,14 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
       startAudioRecording();
     } catch (e) {
       console.warn("Connection to FastAPI AI server failed. Falling back to frontend mock AI interview.", e);
-      
+
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       setInterviewSessionId("mock-session-id");
       const initialQuestion = language === 'vi'
         ? `Chào bạn, tôi là AI Interviewer. Cảm ơn bạn đã ứng tuyển vào vị trí ${job.title}. Bạn có thể tự giới thiệu ngắn gọn về bản thân và kinh nghiệm làm việc liên quan được không?`
         : `Hello, I'm the AI Interviewer. Thank you for applying for the ${job.title} role. Could you briefly introduce yourself and share your relevant work experience?`;
-      
+
       setInterviewMessages([{
         text: initialQuestion,
         isMe: false,
@@ -2917,8 +2917,8 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
   };
 
   const handleSendInterviewAnswer = async (textOverride = '') => {
-    const text = (typeof textOverride === 'string' && textOverride.trim()) 
-      ? textOverride.trim() 
+    const text = (typeof textOverride === 'string' && textOverride.trim())
+      ? textOverride.trim()
       : interviewInputText.trim();
     if (!text || interviewSending || !interviewSessionId) return;
 
@@ -2934,7 +2934,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
 
     setInterviewInputText('');
     setInterviewSending(true);
-    
+
     const timeStr = new Date().toLocaleTimeString(language === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit' });
     setInterviewMessages(prev => [...prev, { text, isMe: true, time: timeStr }]);
 
@@ -2942,14 +2942,14 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
       if (interviewSessionId === "mock-session-id") {
         await new Promise(resolve => setTimeout(resolve, 1500));
         const nextTimeStr = new Date().toLocaleTimeString(language === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit' });
-        
+
         const isVi = language === 'vi';
-        
+
         if (interviewQuestionCount === 1) {
           const nextQuestion = isVi
             ? "Cảm ơn bạn. Bạn có thể chia sẻ thêm về cách bạn giải quyết một tình huống khách hàng phàn nàn hoặc gặp khó khăn khi làm việc nhóm không?"
             : "Thank you. Could you share how you handle a customer complaint or a difficult situation when working in a team?";
-          
+
           setInterviewMessages(prev => [...prev, {
             text: nextQuestion,
             isMe: false,
@@ -2961,7 +2961,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
           const nextQuestion = isVi
             ? "Tuyệt vời. Cuối cùng, bạn có mong muốn gì về mức lương hoặc chế độ đãi ngộ, và bạn có thể bắt đầu đi làm từ khi nào?"
             : "Great. Lastly, what are your expectations regarding salary or benefits, and when would you be available to start?";
-          
+
           setInterviewMessages(prev => [...prev, {
             text: nextQuestion,
             isMe: false,
@@ -2991,7 +2991,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
               isVi ? "Cần làm quen với môi trường mới" : "Needs to adapt to a new environment"
             ]
           };
-          
+
           setInterviewReport(report);
           let audioUploadResult = null;
           if (interviewSessionId !== "mock-session-id") {
@@ -3002,7 +3002,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
             }
           }
           submitDeferredApplication(report, audioUploadResult);
-          
+
           const endingText = isVi
             ? "Cảm ơn bạn đã tham gia buổi phỏng vấn. Hệ thống đang tổng hợp kết quả của bạn..."
             : "Thank you for participating in the interview. The system is compiling your results...";
@@ -3107,9 +3107,9 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
             // Use coordinates from job if available, otherwise use default HCM location
             const lat = job.latitude || job.lat || 10.7769;
             const lng = job.longitude || job.lng || 106.7009;
-            
+
             console.log(`📍 DynamoDB Job: ${job.title} at ${job.location} - Coords: ${lat}, ${lng}`);
-            
+
             return {
               id: `dynamo-${job.idJob}`,
               idJob: job.idJob,
@@ -3197,7 +3197,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
             // Use coordinates from job if available, otherwise use default HCM location
             const lat = job.latitude || job.lat || 10.7769;
             const lng = job.longitude || job.lng || 106.7009;
-            
+
             console.log(`📍 Quick Job: ${job.title} at ${job.location} - Coords: ${lat}, ${lng}`);
 
             return {
@@ -3328,7 +3328,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
       if (activeBanners && activeBanners.length > 0) {
         setBanners(activeBanners.map(b => ({ src: b.imageUrl, alt: b.title || 'Banner', linkUrl: b.linkUrl })));
       }
-    }).catch(() => {/* fallback to default banners */});
+    }).catch(() => {/* fallback to default banners */ });
   }, [candidateProfile?.location]);
 
   useEffect(() => {
@@ -3390,7 +3390,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
       searchParams.set('tab', 'standard');
       navigate({ search: searchParams.toString() }, { replace: true });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.search]);
 
   // Load saved jobs from candidate profile instead of localStorage
@@ -3440,10 +3440,10 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
       console.log('🎯 Dashboard selectedJobId:', jobId);
 
       const job = allJobs.find(j =>
-        j.id === jobId ||
-        j.idJob === jobId ||
-        j.id === `dynamo-${jobId}` ||
-        j.id === `quick-${jobId}`
+        String(j.id) === String(jobId) ||
+        String(j.idJob) === String(jobId) ||
+        String(j.id) === `dynamo-${jobId}` ||
+        String(j.id) === `quick-${jobId}`
       );
 
       if (job) {
@@ -3476,7 +3476,10 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
       }
 
       // Clear state so re-visiting doesn't re-open the modal
-      window.history.replaceState({ ...location.state, selectedJobId: undefined }, document.title);
+      // BUT ONLY if we are NOT also trying to open the interview modal (which will clear it itself)
+      if (!location.state?.openInterview) {
+        window.history.replaceState({ ...location.state, selectedJobId: undefined }, document.title);
+      }
     }
   }, [allJobs, location.state, showSavedJobsOnly]);
 
@@ -3564,24 +3567,24 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
     try {
       console.log(`💾 Syncing saved job state to database for: ${jobId}`);
       await candidateProfileService.toggleSavedJob(jobId);
-      
+
       // Optionally update the whole profile state to stay in sync
       const updatedProfile = await candidateProfileService.getMyProfile();
       if (updatedProfile) setCandidateProfile(updatedProfile);
     } catch (error) {
       console.error('❌ Failed to sync saved job to database:', error);
-      
+
       // Rollback local state on error
       setSavedJobs(prev =>
         isAlreadySaved
           ? [...prev, jobId]
           : prev.filter(id => id !== jobId)
       );
-      
+
       setErrorModal({
         show: true,
-        message: language === 'vi' 
-          ? 'Không thể lưu công việc. Vui lòng đảm bảo bạn đã tạo hồ sơ cá nhân.' 
+        message: language === 'vi'
+          ? 'Không thể lưu công việc. Vui lòng đảm bảo bạn đã tạo hồ sơ cá nhân.'
           : 'Could not save job. Please ensure you have created a profile.'
       });
     }
@@ -3638,7 +3641,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
 
     const jobId = job.idJob || job.id;
     const isStandardJob = !job.isQuickJob && job.category !== 'shift';
-    
+
     if (isStandardJob) {
       const existingApp = candidateApplications.find(app => app.jobId === jobId);
 
@@ -3646,8 +3649,8 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
         if (existingApp.status === 'pending') {
           setErrorModal({
             show: true,
-            message: language === 'vi' 
-              ? 'Bạn đã ứng tuyển công việc này. CV của bạn đang chờ Nhà tuyển dụng duyệt vòng 1.' 
+            message: language === 'vi'
+              ? 'Bạn đã ứng tuyển công việc này. CV của bạn đang chờ Nhà tuyển dụng duyệt vòng 1.'
               : 'You have already applied. Your CV is pending employer review.'
           });
           return;
@@ -3684,28 +3687,28 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
           const score = (existingApp.aiScreeningScore !== undefined && existingApp.aiScreeningScore !== null && Number(existingApp.aiScreeningScore) !== 0)
             ? Number(existingApp.aiScreeningScore)
             : defaultScore;
-          
+
           const result = existingApp.aiScreeningResult || 'pass';
-          
+
           const reason = existingApp.aiScreeningReason || (
-            isVi 
+            isVi
               ? `Hồ sơ rất ấn tượng. Ứng viên có đầy đủ kiến thức nền tảng và các kỹ năng cần thiết cho công việc ${job.title} tại ${job.company}. Đề xuất tiến hành phỏng vấn trực tiếp.`
               : `Very impressive profile. The candidate has the necessary foundation and skills for the ${job.title} position at ${job.company}. Recommended to proceed to live interview.`
           );
-          
+
           const strengths = (existingApp.aiScreeningStrengths && existingApp.aiScreeningStrengths.length > 0)
             ? existingApp.aiScreeningStrengths
             : [
-                isVi ? `Có kỹ năng phù hợp với vị trí ${job.title}` : `Possesses suitable skills for the ${job.title} role`,
-                isVi ? "Kinh nghiệm làm việc thực tế tốt" : "Good hands-on working experience",
-                isVi ? "Thái độ tích cực, sẵn sàng làm việc" : "Positive attitude and ready to work"
-              ];
-              
+              isVi ? `Có kỹ năng phù hợp với vị trí ${job.title}` : `Possesses suitable skills for the ${job.title} role`,
+              isVi ? "Kinh nghiệm làm việc thực tế tốt" : "Good hands-on working experience",
+              isVi ? "Thái độ tích cực, sẵn sàng làm việc" : "Positive attitude and ready to work"
+            ];
+
           const weaknesses = (existingApp.aiScreeningWeaknesses && existingApp.aiScreeningWeaknesses.length > 0)
             ? existingApp.aiScreeningWeaknesses
             : [
-                isVi ? "Cần thích nghi thêm với quy trình vận hành nội bộ" : "Needs to adapt to internal operating procedures"
-              ];
+              isVi ? "Cần thích nghi thêm với quy trình vận hành nội bộ" : "Needs to adapt to internal operating procedures"
+            ];
 
           setAiScreeningJob(job);
           setAiScreeningCvName(existingApp.cvFilename || 'CV.pdf');
@@ -3723,6 +3726,43 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
 
     setApplyModal({ job });
   };
+
+  // Auto-open AI interview modal when coming from a CV-approved notification
+  useEffect(() => {
+    if (
+      allJobs.length > 0 &&
+      candidateApplications.length > 0 &&
+      location.state?.openInterview &&
+      location.state?.selectedJobId
+    ) {
+      const jobId = location.state.selectedJobId;
+      const job = allJobs.find(j =>
+        String(j.id) === String(jobId) ||
+        String(j.idJob) === String(jobId) ||
+        String(j.id) === `dynamo-${jobId}` ||
+        String(j.id) === `quick-${jobId}`
+      );
+
+      if (job) {
+        // Robust application search with type conversion
+        const existingApp = candidateApplications.find(app => String(app.jobId) === String(jobId));
+
+        // Only auto-open if approved and hasn't done interview yet
+        if (existingApp && (existingApp.status === 'approved' || existingApp.status === 'accepted') && !existingApp.aiInterviewAudio && !existingApp.aiInterviewAudioKey) {
+          console.log('🎙️ Auto-opening AI interview modal from notification');
+
+          // Clear the state first to prevent re-opening
+          window.history.replaceState({}, document.title);
+
+          // Trigger interview modal after brief delay so page is ready
+          setTimeout(() => {
+            handleApplyJob(job);
+          }, 800);
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allJobs, candidateApplications, location.state]);
 
   const confirmApply = async () => {
     // Check if already submitting
@@ -3811,7 +3851,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
       }
 
       const { jobId, finalCVUrl, cvFileName, cvS3Key, jobData } = pendingApplication;
-      
+
       console.log('📤 [Deferred] Submitting application:', { jobId, cvFileName });
 
       const extraFields = {
@@ -3832,10 +3872,10 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
 
       if (pendingApplication.applicationId) {
         await applicationService.updateApplicationStatus(pendingApplication.applicationId, 'approved', extraFields);
-        
-        setCandidateApplications(prev => prev.map(app => 
+
+        setCandidateApplications(prev => prev.map(app =>
           (app.applicationId === pendingApplication.applicationId || app.id === pendingApplication.applicationId)
-            ? { ...app, ...extraFields } 
+            ? { ...app, ...extraFields }
             : app
         ));
         console.log('✅ Application status updated successfully in DB:', pendingApplication.applicationId);
@@ -3971,13 +4011,13 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
       const finalCVUrl = selectedCVData.cvUrl || selectedCVData.cvS3Key;
 
       if (!selectedCVData || !finalCVUrl) {
-         console.error('❌ [Debug] CV URL and S3 Key both missing!', selectedCVData);
-         setIsSubmitting(false);
-         setErrorModal({
-           show: true,
-           message: language === 'vi' ? 'Dữ liệu CV không hợp lệ. Vui lòng chọn lại CV.' : 'Invalid CV data. Please select your CV again.'
-         });
-         return;
+        console.error('❌ [Debug] CV URL and S3 Key both missing!', selectedCVData);
+        setIsSubmitting(false);
+        setErrorModal({
+          show: true,
+          message: language === 'vi' ? 'Dữ liệu CV không hợp lệ. Vui lòng chọn lại CV.' : 'Invalid CV data. Please select your CV again.'
+        });
+        return;
       }
 
       // Check if AI screening is enabled!
@@ -4015,10 +4055,10 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
         setAiScreeningCvName(selectedCVData.cvFileName || 'CV.pdf');
         setAiScreeningStep('screening');
         setShowAiScreeningModal(true);
-        
+
         // Start the screening API call
         runAiScreening(jobData, selectedCVData.cvFileName || 'CV.pdf', finalCVUrl, selectedCVData.cvS3Key);
-        
+
         // Close the apply modal to transition to screening
         setApplyModal(null);
       } else {
@@ -4089,20 +4129,20 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
       let errorMessage;
 
       // Consolidated error detection logic
-      const isAlreadyApplied = error.errorCode === 'ALREADY_APPLIED' || 
-                               error.statusCode === 409 || 
-                               error.message.toLowerCase().includes('already applied') || 
-                               error.message.includes('đã ứng tuyển') ||
-                               error.message.includes('409');
+      const isAlreadyApplied = error.errorCode === 'ALREADY_APPLIED' ||
+        error.statusCode === 409 ||
+        error.message.toLowerCase().includes('already applied') ||
+        error.message.includes('đã ứng tuyển') ||
+        error.message.includes('409');
 
-      const isRateLimited = error.errorCode === 'RATE_LIMITED' || 
-                            error.statusCode === 429 || 
-                            error.message.includes('RATE_LIMITED') ||
-                            error.message.includes('429');
-      
-      const isNoCV = error.statusCode === 404 || 
-                     error.message.includes('No profile found') || 
-                     error.message.includes('404');
+      const isRateLimited = error.errorCode === 'RATE_LIMITED' ||
+        error.statusCode === 429 ||
+        error.message.includes('RATE_LIMITED') ||
+        error.message.includes('429');
+
+      const isNoCV = error.statusCode === 404 ||
+        error.message.includes('No profile found') ||
+        error.message.includes('404');
 
       const isJobDeleted = error.errorCode === 'JOB_DELETED' || error.statusCode === 410;
       const isJobExpired = error.errorCode === 'JOB_EXPIRED';
@@ -4119,7 +4159,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
         // Fallback for demo jobs or generic errors
         const jobId = applyModal?.job?.idJob || applyModal?.job?.id;
         const isDemo = !applyModal?.job?.idJob || jobId?.toString().startsWith('mock') || jobId?.toString().startsWith('demo');
-        
+
         if (isDemo) {
           errorMessage = language === 'vi' ? 'Không thể gửi, đây chỉ là công việc mẫu. Xin thông cảm ạ!' : 'Cannot submit, this is a demo job. Sorry!';
         } else {
@@ -4259,11 +4299,11 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
     const jobsWithCoords = allJobs
       .filter(job => job.category === jobCategory)
       .filter(job => job.lat && job.lng); // Only include jobs with coordinates
-    
+
     console.log(`📍 Jobs with coordinates in ${jobCategory}:`, jobsWithCoords.length);
     console.log(`📍 User location:`, userLocation);
     console.log(`📍 Nearby radius: ${nearbyRadius}km`);
-    
+
     const nearby = jobsWithCoords
       .map(job => ({
         ...job,
@@ -4271,9 +4311,9 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
       }))
       .filter(job => job.distance <= nearbyRadius)
       .sort((a, b) => a.distance - b.distance);
-    
+
     console.log(`📍 Found ${nearby.length} jobs within ${nearbyRadius}km`);
-    
+
     return nearby;
   }, [userLocation, jobCategory, nearbyRadius, allJobs]);
 
@@ -4508,7 +4548,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                           <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                             </svg>
                           </div>
                           <div>
@@ -4939,7 +4979,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                       </p>
                       <p style={{ fontSize: '15px', color: '#6b7280', marginBottom: '20px' }}>
                         {language === 'vi'
-                          ? !isAvailable 
+                          ? !isAvailable
                             ? 'Vui lòng bật trạng thái làm việc ở phía trên, sau đó nhấn "Tìm việc gần tôi" để tìm các công việc tuyển gấp trong bán kính 3km'
                             : 'Vui lòng nhấn nút "Tìm việc gần tôi" ở phía trên để tìm các công việc tuyển gấp trong bán kính 3km'
                           : !isAvailable
@@ -5115,7 +5155,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
               }}>
                 <Sparkles size={16} style={{ flexShrink: 0 }} />
                 <span>
-                  {language === 'vi' 
+                  {language === 'vi'
                     ? 'Lưu ý: Công việc này yêu cầu Phỏng vấn chọn lọc qua AI ngay sau khi gửi CV.'
                     : 'Note: This job requires an AI screening interview immediately after sending CV.'}
                 </span>
@@ -5221,7 +5261,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
               }}>
                 <Sparkles size={16} style={{ flexShrink: 0 }} />
                 <span>
-                  {language === 'vi' 
+                  {language === 'vi'
                     ? 'Lưu ý: Công việc này yêu cầu Phỏng vấn chọn lọc qua AI ngay sau khi gửi CV.'
                     : 'Note: This job requires an AI screening interview immediately after sending CV.'}
                 </span>
@@ -5324,8 +5364,8 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                       })()}
                     </div>
                   )}
+              </div>
             </div>
-          </div>
 
             {jobDescriptionModal.job.isAiScreeningEnabled && (
               <div style={{
@@ -5346,7 +5386,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
               }}>
                 <Sparkles size={16} style={{ flexShrink: 0 }} />
                 <span>
-                  {language === 'vi' 
+                  {language === 'vi'
                     ? 'Lưu ý: Công việc này yêu cầu Phỏng vấn chọn lọc qua AI ngay sau khi gửi CV.'
                     : 'Note: This job requires an AI screening interview immediately after sending CV.'}
                 </span>
@@ -5470,7 +5510,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
               <Sparkles size={24} />
             </div>
             <h2>
-              {aiScreeningStep === 'screening' 
+              {aiScreeningStep === 'screening'
                 ? (language === 'vi' ? 'Chọn lọc Hồ sơ bằng AI' : 'AI CV Screening')
                 : (language === 'vi' ? 'Phỏng vấn AI Interviewer' : 'AI Live Interview')}
             </h2>
@@ -5483,7 +5523,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
             {aiScreeningStep === 'screening' ? (
               aiScreeningLoading ? (
                 <div style={{ padding: '48px 20px' }}>
-                  <div style={{ 
+                  <div style={{
                     width: '64px', height: '64px', margin: '0 auto 20px',
                     background: 'linear-gradient(135deg, #ede9fe, #ddd6fe)',
                     borderRadius: '18px',
@@ -5495,7 +5535,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                     {language === 'vi' ? 'AI đang đối chiếu hồ sơ...' : 'AI is screening your profile...'}
                   </h3>
                   <p style={{ fontSize: '13.5px', color: '#64748b', marginTop: '8px', lineHeight: '1.6' }}>
-                    {language === 'vi' 
+                    {language === 'vi'
                       ? `Đang phân tích CV "${aiScreeningCvName}" dựa trên JD tuyển dụng`
                       : `Analyzing CV "${aiScreeningCvName}" against the job requirements`}
                   </p>
@@ -5509,7 +5549,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                   <p style={{ fontSize: '14px', color: '#ef4444', marginTop: '8px', lineHeight: '1.5' }}>
                     {aiScreeningError}
                   </p>
-                  <button 
+                  <button
                     onClick={() => runAiScreening(aiScreeningJob, aiScreeningCvName, pendingApplication?.finalCVUrl)}
                     style={{
                       marginTop: '20px',
@@ -5589,7 +5629,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                     </DetailCard>
                   )}
 
-                  <div style={{ 
+                  <div style={{
                     marginTop: '20px',
                     padding: '16px 0 4px',
                     borderTop: '1.5px solid #ede9fe',
@@ -5597,7 +5637,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                     gap: '10px',
                     alignItems: 'center'
                   }}>
-                    <button 
+                    <button
                       onClick={() => {
                         setShowAiScreeningModal(false);
                         setPendingApplication(null);
@@ -5619,9 +5659,9 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                     >
                       {language === 'vi' ? 'Đóng và Quay lại' : 'Close and Back'}
                     </button>
-                    
+
                     {aiScreeningResult.toLowerCase() !== 'fail' && getJobApplicationStatus(aiScreeningJob?.idJob || aiScreeningJob?.id) === 'approved' ? (
-                      <button 
+                      <button
                         onClick={() => {
                           // Check if banned (Disabled for testing)
                           /*
@@ -5676,8 +5716,8 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                           border: '1.5px solid #fde68a',
                           boxSizing: 'border-box'
                         }}>
-                          {language === 'vi' 
-                            ? 'CV đã gửi. Chờ Nhà tuyển dụng duyệt vòng 1 để Phỏng vấn AI.' 
+                          {language === 'vi'
+                            ? 'CV đã gửi. Chờ Nhà tuyển dụng duyệt vòng 1 để Phỏng vấn AI.'
                             : 'CV submitted. Waiting for employer review to interview.'}
                         </div>
                       )
@@ -5702,7 +5742,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                   <p style={{ fontSize: '14px', color: '#ef4444', marginTop: '8px', lineHeight: '1.5' }}>
                     {aiScreeningError}
                   </p>
-                  <button 
+                  <button
                     onClick={() => startInterviewSession(aiScreeningJob, pendingApplication?.finalCVUrl)}
                     style={{
                       marginTop: '20px',
@@ -5722,8 +5762,8 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                 <div>
                   <VoiceInterviewArea>
                     <VoiceQuestionCounter>
-                      {language === 'vi' 
-                        ? `Câu hỏi ${interviewQuestionCount}` 
+                      {language === 'vi'
+                        ? `Câu hỏi ${interviewQuestionCount}`
                         : `Question ${interviewQuestionCount}`}
                     </VoiceQuestionCounter>
 
@@ -5823,8 +5863,8 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                           onClick={toggleListening}
                           $isListening={isListening}
                           disabled={interviewSending || isSpeaking}
-                          title={isListening 
-                            ? (language === 'vi' ? 'Đang thu âm - Bấm để dừng' : 'Recording - Click to stop') 
+                          title={isListening
+                            ? (language === 'vi' ? 'Đang thu âm - Bấm để dừng' : 'Recording - Click to stop')
                             : (language === 'vi' ? 'Bấm để nói câu trả lời' : 'Press to speak your answer')}
                         >
                           {isListening ? <MicOff size={28} /> : <Mic size={28} />}
@@ -5877,9 +5917,9 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                               {language === 'vi' ? 'ĐIỂM TRUNG BÌNH' : 'AVERAGE SCORE'}
                             </div>
                           </div>
-                          
+
                           <div style={{ width: '1px', height: '40px', background: '#cbd5e1' }} />
-                          
+
                           <div style={{ textAlign: 'center' }}>
                             <div style={{ fontSize: '24px', fontWeight: '800', color: (interviewReport.recommend_to_employer || interviewReport.total_score >= 60) ? '#10b981' : '#ef4444' }}>
                               {(interviewReport.recommend_to_employer || interviewReport.total_score >= 60)
@@ -5907,7 +5947,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                               {interviewReport.past_experience_score || 0}<span style={{ fontSize: '13px', fontWeight: '500', color: '#94a3b8' }}>/100</span>
                             </div>
                           </div>
-                          
+
                           <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
                             <div style={{ fontSize: '11px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>
                               {language === 'vi' ? '🛠️ Xử lý Tình huống' : '🛠️ Situation Handling'}
@@ -5973,7 +6013,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                           </div>
                         )}
 
-                        <button 
+                        <button
                           onClick={() => {
                             exitFullscreenMode();
                             setShowAiScreeningModal(false);
@@ -6192,7 +6232,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
               onClick={async () => {
                 if (!rulesAccepted || !micPermissionGranted) return;
                 setShowAiRulesModal(false);
-                
+
                 // Request fullscreen mode
                 try {
                   const elem = document.documentElement;
@@ -6206,7 +6246,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                 } catch (fsErr) {
                   console.warn('Fullscreen request failed:', fsErr);
                 }
-                
+
                 setAiScreeningStep('interview');
                 startInterviewSession(aiScreeningJob, pendingApplication?.finalCVUrl);
               }}
@@ -6232,7 +6272,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
       {/* Tab Warning Modal */}
       <Modal
         isOpen={showTabWarningOverlay}
-        onClose={() => {}}
+        onClose={() => { }}
         title=""
       >
         <ApplyModalWrap onClick={e => e.stopPropagation()} style={{ border: '2px solid #ef4444' }}>

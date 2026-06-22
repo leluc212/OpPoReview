@@ -798,31 +798,57 @@ const EmployerNotifications = () => {
   };
 
   // Navigate to the correct page from inside the modal
+  // Strategy: use jobId prefix as the ground truth (QJOB- = quick job, JOB- = standard job)
+  // since these IDs are system-generated and directly tied to which DB table the job lives in.
   const handleGoToApplications = (notification) => {
     setSelectedNotification(null);
-    if (notification.actionUrl) {
-      // Use actionUrl stored in the notification as the source of truth
-      if (notification.type === 'application') {
-        navigate(notification.actionUrl, {
-          state: {
-            fromNotifications: true,
-            jobId: notification?.data?.jobId || notification?.data?.idJob || null,
-            staffTab: notification.isQuickJob ? 'pending_confirm' : undefined
-          }
-        });
-      } else {
-        navigate(notification.actionUrl);
-      }
-    } else if (notification.type === 'application') {
-      // Fallback for old notifications without actionUrl
-      const targetPath = notification.isQuickJob ? '/employer/quick-jobs' : '/employer/standard-jobs';
+    const jobId = notification?.data?.jobId || notification?.data?.idJob || null;
+
+    // Determine job type from jobId prefix — most reliable indicator
+    const isQuickJob = jobId
+      ? String(jobId).startsWith('QJOB-')
+      : null; // null = unknown (no jobId)
+
+    if (notification.type === 'application') {
+      const targetPath = isQuickJob ? '/employer/quick-jobs' : '/employer/standard-jobs';
       navigate(targetPath, {
         state: {
           fromNotifications: true,
-          jobId: notification?.data?.jobId || notification?.data?.idJob || null,
-          staffTab: notification.isQuickJob ? 'pending_confirm' : undefined
+          jobId,
+          section: 'applications',
+          staffTab: isQuickJob ? 'pending_confirm' : undefined
         }
       });
+    } else if (notification.type === 'job_approved' || notification.type === 'job_rejected') {
+      // If we have a jobId, trust the prefix. Otherwise fall back to actionUrl.
+      let targetPath;
+      if (isQuickJob !== null) {
+        targetPath = isQuickJob ? '/employer/quick-jobs' : '/employer/standard-jobs';
+      } else {
+        // No jobId: last resort — check actionUrl
+        targetPath = notification.actionUrl?.includes('quick-jobs')
+          ? '/employer/quick-jobs'
+          : '/employer/standard-jobs';
+      }
+      navigate(targetPath, {
+        state: {
+          fromNotifications: true,
+          jobId,
+          section: 'posts'
+        }
+      });
+    } else if (notification.type === 'ai_interview_complete') {
+      // AI interview notifications relate to a candidate — go to applications tab
+      const targetPath = (isQuickJob === true) ? '/employer/quick-jobs' : '/employer/standard-jobs';
+      navigate(targetPath, {
+        state: {
+          fromNotifications: true,
+          jobId,
+          section: 'applications'
+        }
+      });
+    } else if (notification.actionUrl) {
+      navigate(notification.actionUrl);
     } else {
       navigate('/employer/dashboard');
     }

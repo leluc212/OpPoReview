@@ -516,7 +516,8 @@ function CandidateNotifications() {
         type: notif.type || 'system',
         icon: getIconForType(notif.type),
         color: notif.color || getColorForType(notif.type),
-        isQuickJob: notif.data?.isQuickJob ?? true,
+        // Robust data parsing during mapping
+        ...(notif.data ? (typeof notif.data === 'string' ? (() => { try { const d = JSON.parse(notif.data); return { data: d, isQuickJob: d.isQuickJob ?? true }; } catch { return { data: {}, isQuickJob: true }; } })() : { data: notif.data, isQuickJob: notif.data.isQuickJob ?? true }) : { data: {}, isQuickJob: true }),
         title: language === 'vi' ? notif.title : (notif.titleEn || notif.title),
         message: language === 'vi' ? notif.message : (notif.messageEn || notif.message),
         createdAt: notif.createdAt,
@@ -603,11 +604,35 @@ function CandidateNotifications() {
     await handleMarkAsRead(notif.id);
     if (notif.actionUrl) {
       let url = notif.actionUrl;
-      // Normalize bare /candidate/jobs → add ?tab param based on notification type
-      // so the URL doesn't visibly jump after landing on the page.
-      if (url === '/candidate/jobs') {
-        const isQuickJobRelated = ['success', 'CV_ACCEPTED', 'quick_job_activation_approved'].includes(notif.type);
-        url = isQuickJobRelated ? '/candidate/jobs?tab=shift' : '/candidate/jobs?tab=standard';
+
+      // Parse data field if it's a JSON string (DynamoDB may return it as string)
+      const notifData = typeof notif.data === 'string'
+        ? (() => { try { return JSON.parse(notif.data); } catch { return {}; } })()
+        : (notif.data || {});
+
+      // Handle CV-approved notification (type: 'success') — redirect to AI interview
+      // Also catches old notifications that still have '/candidate/dashboard' or '/candidate/jobs' as actionUrl
+      const isCvApproved = (notif.type === 'success' || notif.type === 'CV_ACCEPTED') && notifData?.jobId;
+      const isDashboardUrl = url === '/candidate/dashboard' || url === '/candidate/jobs';
+
+      const isQuickJobFromContent = notif.title?.includes('Tuyển Gấp') || notif.message?.includes('tuyển gấp') || notif.titleEn?.includes('Quick Job');
+      const isQuickJob = notifData?.isQuickJob || isQuickJobFromContent;
+
+      if (isCvApproved || (isDashboardUrl && notif.type === 'success')) {
+        const tab = isQuickJob ? 'shift' : 'standard';
+        navigate(`/candidate/jobs?tab=${tab}`, {
+          state: { selectedJobId: notifData.jobId, openInterview: true }
+        });
+        return;
+      }
+
+      // Normalize /candidate/jobs → add ?tab param (standard catch-all)
+      if (url === '/candidate/jobs' || url === '/candidate/jobs/') {
+        const tab = isQuickJob ? 'shift' : 'standard';
+        navigate(`/candidate/jobs?tab=${tab}`, {
+          state: { selectedJobId: notifData?.jobId }
+        });
+        return;
       }
       navigate(url);
     }

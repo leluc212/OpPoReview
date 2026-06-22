@@ -1509,7 +1509,7 @@ const Navbar = ({ showSearch = true }) => {
     }
   };
 
-  const handleNotificationItemClick = async () => {
+  const handleNotificationItemClick = async (notification = null) => {
     setShowNotifications(false);
 
     // Mark all as read and reset badge immediately, then re-fetch from DB
@@ -1520,15 +1520,20 @@ const Navbar = ({ showSearch = true }) => {
         // Optimistic update
         setUnreadCount(0);
         setRealNotifications(prev => prev.map(n => ({ ...n, read: true })));
-        // Persist to DB
-        await markAllAsRead(userId, effectiveUser.role);
+        
+        if (notification && notification.notificationId) {
+          await markAsRead(notification.notificationId);
+        } else {
+          await markAllAsRead(userId, effectiveUser.role);
+        }
+
         // Re-fetch from DB to confirm
         const freshNotifs = await getNotifications(userId, effectiveUser.role);
         setRealNotifications(freshNotifs || []);
         setUnreadCount((freshNotifs || []).filter(n => !n.read).length);
       }
     } catch (err) {
-      console.error('Error marking all as read on view all:', err);
+      console.error('Error marking as read:', err);
     }
 
     if (user?.role === 'candidate') {
@@ -1899,20 +1904,7 @@ const Navbar = ({ showSearch = true }) => {
                           $unread={isRealNotification ? !notification.read : notification.unread}
                           onClick={async () => {
                             if (isRealNotification) {
-                              // Mark this single notification as read
-                              try {
-                                await markAsRead(notification.notificationId);
-                                setRealNotifications(prev => prev.map(n =>
-                                  n.notificationId === notification.notificationId ? { ...n, read: true } : n
-                                ));
-                              } catch (error) {
-                                console.error('Error marking notification as read:', error);
-                              }
-                              setShowNotifications(false);
-                              // Always navigate to the notifications page
-                              if (user?.role === 'candidate') navigate('/candidate/notifications');
-                              else if (user?.role === 'employer') navigate('/employer/notifications');
-                              else if (user?.role === 'admin') navigate('/admin/notifications');
+                              handleNotificationItemClick(notification);
                               return;
                             }
                             handleNotificationItemClick();

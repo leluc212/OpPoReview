@@ -2757,6 +2757,9 @@ const Applications = () => {
     }
     return 'posts';
   });
+  // Highlight a specific job/application coming from a notification
+  const [highlightJobId, setHighlightJobId] = useState(() => location.state?.jobId || null);
+  const highlightTimerRef = React.useRef(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilters, setStatusFilters] = useState([]);
   const [timeFilter, setTimeFilter] = useState('all');
@@ -3148,6 +3151,25 @@ const Applications = () => {
     initCVs();
   }, []);
 
+  // Scroll-to and highlight the target job post or application when coming from a notification
+  useEffect(() => {
+    if (!highlightJobId) return;
+    // Wait a tick for the section to render before scrolling
+    const timer = setTimeout(() => {
+      const el = document.getElementById(`notif-target-${highlightJobId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('notif-highlight');
+        if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+        highlightTimerRef.current = setTimeout(() => {
+          el.classList.remove('notif-highlight');
+          setHighlightJobId(null);
+        }, 3000);
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [highlightJobId, activeSection, realApplications, jobPosts]);
+
   // Auto-open profile modal if candidateId is passed via navigation state
   useEffect(() => {
     if (location.state?.candidateId) {
@@ -3167,22 +3189,16 @@ const Applications = () => {
         // Clear the state after opening to prevent re-opening on refresh
         navigate(location.pathname, { replace: true, state: {} });
       } else {
-        // For notification fallback - if no specific candidate ID, just show applications tab
+        // For notification fallback - switch to specified section or default to applications
         if (location.state?.fromNotifications) {
-          setActiveSection('applications');
+          setActiveSection(location.state.section || 'applications');
           navigate(location.pathname, { replace: true, state: {} });
         }
       }
     } else if (location.state?.fromNotifications) {
-      // Just switch the tab if coming from notifications without specific candidate
-      setActiveSection('applications');
+      // Respect the section passed via state — if none, default to 'applications'
+      setActiveSection(location.state.section || 'applications');
       navigate(location.pathname, { replace: true, state: {} });
-    } else {
-      // By default it starts on posts, which might be what they wanted but let's handle if it comes from notification and we want applications to be default
-      if (location.state?.fromNotifications) {
-        setActiveSection('applications');
-        navigate(location.pathname, { replace: true, state: {} });
-      }
     }
   }, [location.state, applications, realApplications, navigate, location.pathname]);
 
@@ -3802,6 +3818,7 @@ const Applications = () => {
                   {filteredJobPosts.map((post, index) => (
                     <JobPostCard
                       key={post.id}
+                      id={`notif-target-${post.id}`}
                       $status={post.status}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -3991,18 +4008,26 @@ const Applications = () => {
             ) : (
               <CardGrid>
                 <AnimatePresence>
-                  {filteredApplications.map((app, index) => (
-                    <ApplicationRow
-                      key={app.id}
-                      app={app}
-                      onViewProfile={handleViewProfile}
-                      onCompleteJob={handleCompleteJob}
-                      onMarkCandidate={handleMarkCandidate}
-                      onApprove={handleApproveApplication}
-                      onReject={handleRejectApplication}
-                      index={index}
-                    />
-                  ))}
+                  {filteredApplications.map((app, index) => {
+                    const isFirstMatch = highlightJobId && app.jobId === highlightJobId &&
+                      filteredApplications.findIndex(a => a.jobId === highlightJobId) === index;
+                    return (
+                      <div
+                        key={app.id}
+                        id={isFirstMatch ? `notif-target-${highlightJobId}` : undefined}
+                      >
+                        <ApplicationRow
+                          app={app}
+                          onViewProfile={handleViewProfile}
+                          onCompleteJob={handleCompleteJob}
+                          onMarkCandidate={handleMarkCandidate}
+                          onApprove={handleApproveApplication}
+                          onReject={handleRejectApplication}
+                          index={index}
+                        />
+                      </div>
+                    );
+                  })}
                 </AnimatePresence>
               </CardGrid>
             )}

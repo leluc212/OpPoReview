@@ -427,7 +427,7 @@ export const createCandidateCvApprovedNotification = async (payload) => {
     },
     icon: 'check-circle',
     color: '#10b981',
-    actionUrl: '/candidate/dashboard',
+    actionUrl: '/candidate/jobs',
     actionText: 'Phỏng vấn với AI ngay',
     actionTextEn: 'Start AI Interview'
   };
@@ -541,6 +541,10 @@ export const createJobApprovedNotification = async (employerId, job) => {
     throw error;
   }
 
+  // Determine if it's a quick job. 
+  // We prioritize jobSource if available ('standard' vs 'urgent').
+  const isQuickJob = job.jobSource === 'urgent' || (job.jobSource !== 'standard' && (job.isQuickJob === true || job.jobType === 'urgent'));
+
   const notification = {
     type: 'job_approved',
     title: 'Bài đăng đã được phê duyệt',
@@ -554,11 +558,12 @@ export const createJobApprovedNotification = async (employerId, job) => {
     data: {
       jobId: job.id || job.jobID || job.idJob || null,
       title: job.title || '',
-      companyName: job.companyName || job.employer || ''
+      companyName: job.companyName || job.employer || '',
+      isQuickJob
     },
     icon: 'check-circle',
     color: '#10b981',
-    actionUrl: '/employer/quick-jobs',
+    actionUrl: isQuickJob ? '/employer/quick-jobs' : '/employer/standard-jobs',
     actionText: 'Xem bài',
     actionTextEn: 'View post'
   };
@@ -578,6 +583,8 @@ export const createJobRejectedNotification = async (employerId, job) => {
     throw error;
   }
 
+  const isQuickJob = job.jobSource === 'urgent' || (job.jobSource !== 'standard' && (job.isQuickJob === true || job.jobType === 'urgent'));
+
   const notification = {
     type: 'job_rejected',
     title: 'Bài đăng đã bị từ chối',
@@ -591,13 +598,14 @@ export const createJobRejectedNotification = async (employerId, job) => {
     data: {
       jobId: job.id || job.jobID || job.idJob || null,
       title: job.title || '',
-      companyName: job.companyName || job.employer || ''
+      companyName: job.companyName || job.employer || '',
+      isQuickJob
     },
-    icon: 'alert-circle',
+    icon: 'x-circle',
     color: '#ef4444',
-    actionUrl: '/employer/quick-jobs',
-    actionText: 'Xem bài',
-    actionTextEn: 'View post'
+    actionUrl: isQuickJob ? '/employer/quick-jobs' : '/employer/standard-jobs',
+    actionText: 'Xem chi tiết',
+    actionTextEn: 'View details'
   };
 
   return await saveNotification(notification);
@@ -922,7 +930,7 @@ export const createCandidateQuickJobVerifNotification = async (candidateId, cand
     recipientRole: 'candidate',
     senderId: 'admin',
     senderName: 'Admin Ốp Pờ',
-    data: { status, candidateId, candidateName: safeName },
+    data: { status, candidateId, candidateName: safeName, isQuickJob: true },
     icon,
     color,
     actionUrl,

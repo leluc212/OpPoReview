@@ -75,6 +75,20 @@ export const GlobalStyles = createGlobalStyle`
   ::-webkit-scrollbar-thumb:hover {
     background: ${props => props.theme.colors.textLight};
   }
+
+  /* Notification target highlight animation */
+  @keyframes notif-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(30, 64, 175, 0.5), 0 0 0 0 rgba(30, 64, 175, 0.3); border-color: #1e40af; }
+    40%  { box-shadow: 0 0 0 8px rgba(30, 64, 175, 0.15), 0 0 24px 4px rgba(30, 64, 175, 0.2); border-color: #3b82f6; }
+    100% { box-shadow: 0 0 0 0 rgba(30, 64, 175, 0); border-color: #93c5fd; }
+  }
+  .notif-highlight {
+    animation: notif-pulse 1s ease-in-out 3 !important;
+    border-color: #1e40af !important;
+    border-radius: 16px;
+    position: relative;
+    z-index: 1;
+  }
 `;
 
 export const theme = {

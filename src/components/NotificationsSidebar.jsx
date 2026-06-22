@@ -269,12 +269,39 @@ const NotificationsSidebar = () => {
         await loadNotifications();
       }
       
-      // Navigate to action URL, normalizing bare /candidate/jobs to include tab param
+      // Navigate to action URL
       if (notification.actionUrl) {
         let url = notification.actionUrl;
-        if (url === '/candidate/jobs') {
-          const isQuickJobRelated = ['success', 'CV_ACCEPTED', 'quick_job_activation_approved'].includes(notification.type);
-          url = isQuickJobRelated ? '/candidate/jobs?tab=shift' : '/candidate/jobs?tab=standard';
+
+        // Parse data field if it's a JSON string (DynamoDB may return it as string)
+        const notifData = typeof notification.data === 'string'
+          ? (() => { try { return JSON.parse(notification.data); } catch { return {}; } })()
+          : (notification.data || {});
+
+        // Handle CV-approved notification (type: 'success') — redirect to AI interview
+        // Also catches old notifications that still have '/candidate/dashboard' or '/candidate/jobs' as actionUrl
+        const isCvApproved = (notification.type === 'success' || notification.type === 'CV_ACCEPTED') && notifData?.jobId;
+        const isDashboardUrl = url === '/candidate/dashboard' || url === '/candidate/jobs';
+        
+        const isQuickJobFromContent = (language === 'vi' ? notification.title : notification.titleEn)?.includes(language === 'vi' ? 'Tuyển Gấp' : 'Quick Job') || 
+                                     (language === 'vi' ? notification.message : notification.messageEn)?.includes(language === 'vi' ? 'tuyển gấp' : 'quick job');
+        const isQuickJob = notifData?.isQuickJob || isQuickJobFromContent;
+
+        if (isCvApproved || (isDashboardUrl && notification.type === 'success')) {
+          const tab = isQuickJob ? 'shift' : 'standard';
+          navigate(`/candidate/jobs?tab=${tab}`, {
+            state: { selectedJobId: notifData.jobId, openInterview: true }
+          });
+          return;
+        }
+
+        // Normalize /candidate/jobs → add ?tab param (standard catch-all)
+        if (url === '/candidate/jobs' || url === '/candidate/jobs/') {
+          const tab = isQuickJob ? 'shift' : 'standard';
+          navigate(`/candidate/jobs?tab=${tab}`, {
+            state: { selectedJobId: notifData?.jobId }
+          });
+          return;
         }
         navigate(url);
       }
