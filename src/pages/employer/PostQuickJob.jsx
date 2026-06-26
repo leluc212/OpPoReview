@@ -13,6 +13,8 @@ import employerProfileService from '../../services/employerProfileService';
 import { useAuth } from '../../context/AuthContext';
 import { getWallet, createWalletTransaction } from '../../services/packageCatalogService';
 import cvAiService from '../../services/cvAiService';
+import { useToast } from '../../hooks/useToast';
+import Toast from '../../components/Toast';
 
 
 // Keyframe animations
@@ -896,6 +898,7 @@ const DepPollingStatus = styled.div`
 const PostQuickJob = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const toast = useToast();
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState('success');
   const [salaryBoxActive, setSalaryBoxActive] = useState(false);
@@ -1143,7 +1146,7 @@ const PostQuickJob = () => {
 
         setFieldWarnings(warnings);
 
-        alert(language === 'vi'
+        toast.success(language === 'vi'
           ? 'AI đã tự động phân bổ và điền thông tin vào biểu mẫu thành công!'
           : 'AI has successfully extracted and filled the form!');
 
@@ -1151,7 +1154,7 @@ const PostQuickJob = () => {
       }
     } catch (error) {
       console.error('Error parsing JD:', error);
-      alert(error.message || (language === 'vi' ? 'Có lỗi xảy ra khi phân tích JD.' : 'Error parsing JD.'));
+      toast.error(error.message || (language === 'vi' ? 'Có lỗi xảy ra khi phân tích JD.' : 'Error parsing JD.'));
     } finally {
       setParsingJd(false);
     }
@@ -1161,11 +1164,11 @@ const PostQuickJob = () => {
     const file = e.target.files[0];
     if (!file) return;
     if (file.type !== 'application/pdf') {
-      alert(language === 'vi' ? 'Vui lòng chọn file PDF!' : 'Please select a PDF file!');
+      toast.warning(language === 'vi' ? 'Vui lòng chọn file PDF!' : 'Please select a PDF file!');
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      alert(language === 'vi' ? 'Dung lượng file không được vượt quá 2MB!' : 'File size must not exceed 2MB!');
+      toast.warning(language === 'vi' ? 'Dung lượng file không được vượt quá 2MB!' : 'File size must not exceed 2MB!');
       return;
     }
 
@@ -2451,6 +2454,7 @@ const PostQuickJob = () => {
           </DepModalOverlay>
         )}
       </AnimatePresence>
+      <Toast toasts={toast.toasts} removeToast={toast.removeToast} />
     </DashboardLayout>
   );
 };

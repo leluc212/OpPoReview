@@ -5,6 +5,33 @@ import urllib.error
 import boto3
 from botocore.exceptions import ClientError
 
+_SECRETS_CACHE = {}
+
+def get_secret(secret_name, key_name=None):
+    """
+    Retrieves a secret from AWS Secrets Manager with in-memory caching.
+    """
+    global _SECRETS_CACHE
+    if secret_name in _SECRETS_CACHE:
+        secret_val = _SECRETS_CACHE[secret_name]
+    else:
+        try:
+            client = boto3.client('secretsmanager', region_name='ap-southeast-1')
+            response = client.get_secret_value(SecretId=secret_name)
+            secret_string = response.get('SecretString', '')
+            try:
+                secret_val = json.loads(secret_string)
+            except json.JSONDecodeError:
+                secret_val = secret_string
+            _SECRETS_CACHE[secret_name] = secret_val
+        except Exception as e:
+            print(f"[SecretsManager] Error loading secret {secret_name}: {e}")
+            return None
+            
+    if key_name and isinstance(secret_val, dict):
+        return secret_val.get(key_name)
+    return secret_val
+
 def send_email(to_email, subject, html_content, text_content=None, from_email=None, provider=None):
     """
     Sends an email using either Resend or AWS SES based on the EMAIL_PROVIDER environment variable.
@@ -23,9 +50,11 @@ def send_email(to_email, subject, html_content, text_content=None, from_email=No
         return send_via_resend(sender, to_email, subject, html_content, text_content)
 
 def send_via_resend(sender, to_email, subject, html_content, text_content=None):
-    api_key = os.environ.get('RESEND_API_KEY')
+    api_key = os.environ.get('RESEND_API_KEY', '').strip()
     if not api_key:
-        print(" [EmailService] Error: RESEND_API_KEY environment variable is not set.")
+        api_key = (get_secret('opporeview/resend', 'RESEND_API_KEY') or '').strip()
+    if not api_key:
+        print(" [EmailService] Error: RESEND_API_KEY is not configured.")
         return {'success': False, 'message': 'RESEND_API_KEY is not set.'}
         
     url = "https://api.resend.com/emails"

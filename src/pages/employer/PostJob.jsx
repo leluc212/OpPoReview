@@ -10,6 +10,8 @@ import jobPostService from '../../services/jobPostService';
 import employerProfileService from '../../services/employerProfileService';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import cvAiService from '../../services/cvAiService';
+import { useToast } from '../../hooks/useToast';
+import Toast from '../../components/Toast';
 
 // Days of week options for work-hour slots. `key` is the stable token persisted
 // into the workHours string; vi/en are the display labels.
@@ -593,6 +595,7 @@ const PostJob = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
+  const toast = useToast();
   const editingJob = location.state?.job; // Get job data if editing
   const isEditing = !!editingJob;
 
@@ -762,7 +765,7 @@ const PostJob = () => {
 
         setFieldWarnings(result.warnings || []);
 
-        alert(language === 'vi'
+        toast.success(language === 'vi'
           ? 'AI đã tự động phân bổ và điền thông tin vào biểu mẫu thành công!'
           : 'AI has successfully extracted and filled the form!');
 
@@ -770,7 +773,7 @@ const PostJob = () => {
       }
     } catch (error) {
       console.error('Error parsing JD:', error);
-      alert(error.message || (language === 'vi' ? 'Có lỗi xảy ra khi phân tích JD.' : 'Error parsing JD.'));
+      toast.error(error.message || (language === 'vi' ? 'Có lỗi xảy ra khi phân tích JD.' : 'Error parsing JD.'));
     } finally {
       setParsingJd(false);
     }
@@ -780,11 +783,11 @@ const PostJob = () => {
     const file = e.target.files[0];
     if (!file) return;
     if (file.type !== 'application/pdf') {
-      alert(language === 'vi' ? 'Vui lòng chọn file PDF!' : 'Please select a PDF file!');
+      toast.warning(language === 'vi' ? 'Vui lòng chọn file PDF!' : 'Please select a PDF file!');
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      alert(language === 'vi' ? 'Dung lượng file không được vượt quá 2MB!' : 'File size must not exceed 2MB!');
+      toast.warning(language === 'vi' ? 'Dung lượng file không được vượt quá 2MB!' : 'File size must not exceed 2MB!');
       return;
     }
 
@@ -882,7 +885,7 @@ const PostJob = () => {
       }
     } catch (error) {
       console.error('Error generating JD with AI:', error);
-      alert(error.message || (language === 'vi'
+      toast.error(error.message || (language === 'vi'
         ? 'Không thể tạo JD tự động. Vui lòng thử lại.'
         : 'Failed to generate JD. Please try again.'));
     } finally {
@@ -895,7 +898,7 @@ const PostJob = () => {
 
     // Require salary
     if (!String(formData.salary).trim()) {
-      alert(language === 'vi'
+      toast.warning(language === 'vi'
         ? 'Vui lòng nhập mức lương.'
         : 'Please enter the salary.');
       return;
@@ -905,7 +908,7 @@ const PostJob = () => {
     if (formData.workDays) {
       const today = new Date().toISOString().split('T')[0];
       if (formData.workDays < today) {
-        alert(language === 'vi'
+        toast.warning(language === 'vi'
           ? 'Ngày làm việc không được ở trong quá khứ.'
           : 'Work date cannot be in the past.');
         return;
@@ -1043,7 +1046,7 @@ const PostJob = () => {
       navigate('/employer/standard-jobs');
     } catch (error) {
       console.error('❌ Error saving job post:', error);
-      alert(language === 'vi'
+      toast.error(language === 'vi'
         ? 'Có lỗi xảy ra khi lưu tin tuyển dụng. Vui lòng thử lại.'
         : 'Error saving job post. Please try again.');
     }
@@ -1712,6 +1715,7 @@ const PostJob = () => {
           </div>
         </VerificationModalContent>
       </Modal>
+      <Toast toasts={toast.toasts} removeToast={toast.removeToast} />
     </DashboardLayout>
   );
 };

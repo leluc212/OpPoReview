@@ -234,10 +234,41 @@ class ProviderError(Exception):
         self.retryable = retryable
 
 
+_SECRETS_CACHE = {}
+
+def get_secret(secret_name, key_name=None):
+    """
+    Retrieves a secret from AWS Secrets Manager with in-memory caching.
+    """
+    global _SECRETS_CACHE
+    if secret_name in _SECRETS_CACHE:
+        secret_val = _SECRETS_CACHE[secret_name]
+    else:
+        try:
+            import boto3
+            client = boto3.client('secretsmanager', region_name='ap-southeast-1')
+            response = client.get_secret_value(SecretId=secret_name)
+            secret_string = response.get('SecretString', '')
+            try:
+                secret_val = json.loads(secret_string)
+            except json.JSONDecodeError:
+                secret_val = secret_string
+            _SECRETS_CACHE[secret_name] = secret_val
+        except Exception as e:
+            print(f"[SecretsManager] Error loading secret {secret_name}: {e}")
+            return None
+            
+    if key_name and isinstance(secret_val, dict):
+        return secret_val.get(key_name)
+    return secret_val
+
+
 def _call_gemini_with_fallback(payload, urlopen=None):
     if urlopen is None:
         urlopen = urllib.request.urlopen
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
+    if not api_key:
+        api_key = (get_secret("opporeview/gemini", "GEMINI_API_KEY") or "").strip()
     if not api_key:
         raise ProviderError("AI_NOT_CONFIGURED", "GEMINI_API_KEY is not configured.")
     
@@ -765,6 +796,7 @@ def analyze(validated, request_id):
             if not error.retryable or attempt == attempts - 1:
                 break
             time.sleep(0.25 * (attempt + 1))
+    # pyrefly: ignore [bad-raise]
     raise last_error
 
 
