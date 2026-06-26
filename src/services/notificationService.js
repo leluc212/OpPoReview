@@ -803,10 +803,10 @@ export const createCandidateAiScreeningPassedNotification = async (payload) => {
 
   const notification = {
     type: 'success',
-    title: 'CV của bạn đã được duyệt vòng 1',
-    titleEn: 'Your CV passed Round 1 screening',
-    message: `CV của bạn cho vị trí ${safeJobTitle} tại ${safeCompanyName} đã được duyệt. Tiếp tục hoàn thành phỏng vấn với AI để hoàn tất ứng tuyển.`,
-    messageEn: `Your CV for the ${safeJobTitle} position at ${safeCompanyName} has been approved. Complete the AI interview to finalize your application.`,
+    title: 'Hồ sơ ứng tuyển đã qua sàng lọc AI',
+    titleEn: 'Your CV passed AI screening',
+    message: `CV của bạn cho vị trí ${safeJobTitle} tại ${safeCompanyName} đã vượt qua vòng sàng lọc sơ bộ của AI và đang chờ Nhà tuyển dụng xem xét duyệt vòng 1.`,
+    messageEn: `Your CV for the ${safeJobTitle} position at ${safeCompanyName} has passed the AI screening and is pending employer review for Round 1.`,
     recipientId: candidateId,
     recipientRole: 'candidate',
     senderId: 'system',

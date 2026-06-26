@@ -20,8 +20,8 @@ const BANK_ID = process.env.VIETQR_BANK_ID || 'MB';
 const ACCOUNT_NO = process.env.VIETQR_ACCOUNT_NO || '0123456789';
 const ACCOUNT_NAME = process.env.VIETQR_ACCOUNT_NAME || 'CONG%20TY%20OP%20PO';
 
-// SePay webhook secret
-const SEPAY_SECRET = process.env.SEPAY_WEBHOOK_SECRET || '';
+// SePay webhook secret (can also be retrieved from AWS Secrets Manager 'opporeview/sepay')
+// const SEPAY_SECRET = process.env.SEPAY_WEBHOOK_SECRET || '';
 
 const client = new DynamoDBClient({ region: REGION });
 const db = DynamoDBDocumentClient.from(client, {
@@ -29,6 +29,7 @@ const db = DynamoDBDocumentClient.from(client, {
 });
 
 /** @param {number} ms */
+// @ts-ignore
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /**
@@ -74,10 +75,44 @@ const res = (status, body) => ({
   body: JSON.stringify(body),
 });
 
+let secretsCache = {};
+
+/**
+ * @param {string} secretName
+ * @param {string} keyName
+ */
+async function getSecret(secretName, keyName) {
+  // @ts-ignore
+  if (secretsCache[secretName]) {
+    // @ts-ignore
+    const val = secretsCache[secretName];
+    return keyName && typeof val === 'object' ? val[keyName] : val;
+  }
+  try {
+    // @ts-ignore
+    const { SecretsManagerClient, GetSecretValueCommand } = require('@aws-sdk/client-secrets-manager');
+    const client = new SecretsManagerClient({ region: process.env.AWS_REGION || 'ap-southeast-1' });
+    const response = await client.send(new GetSecretValueCommand({ SecretId: secretName }));
+    let secretVal = response.SecretString;
+    try {
+      secretVal = JSON.parse(secretVal);
+    } catch (err) {
+      // not JSON
+    }
+    // @ts-ignore
+    secretsCache[secretName] = secretVal;
+    return keyName && typeof secretVal === 'object' ? secretVal[keyName] : secretVal;
+  } catch (err) {
+    // @ts-ignore
+    console.error(`[SecretsManager] Error loading secret ${secretName}:`, err.message);
+    return null;
+  }
+}
+
 // ─────────────────────────────────────────────
 // HANDLER
 // ─────────────────────────────────────────────
-exports.handler = async (event) => {
+exports.handler = async (/** @type {{ httpMethod: any; requestContext: { http: { method: any; }; }; path: any; rawPath: any; }} */ event) => {
   const method = (event.httpMethod || event.requestContext?.http?.method || 'GET').toUpperCase();
   const rawPath = event.path || event.rawPath || '/';
 
@@ -91,6 +126,7 @@ exports.handler = async (event) => {
   try {
     // POST /payments — create payment intent
     if (method === 'POST' && path === '/payments') {
+      // @ts-ignore
       return await createPayment(event);
     }
 
@@ -102,12 +138,14 @@ exports.handler = async (event) => {
 
     // POST /payment/webhook — SePay webhook
     if (method === 'POST' && (path === '/payment/webhook' || path === '/payments/webhook')) {
+      // @ts-ignore
       return await handleWebhook(event);
     }
 
     return res(404, { error: `Route not found: ${method} ${path}` });
   } catch (err) {
     console.error('Unhandled error:', err);
+    // @ts-ignore
     return res(500, { error: err.message || 'Internal server error' });
   }
 };
@@ -115,6 +153,9 @@ exports.handler = async (event) => {
 // ─────────────────────────────────────────────
 // CREATE PAYMENT
 // ─────────────────────────────────────────────
+/**
+ * @param {{ body: any; }} event
+ */
 async function createPayment(event) {
   const body = JSON.parse(event.body || '{}');
   const { userId, packageId, amount, packageName, duration } = body;
@@ -176,6 +217,9 @@ async function createPayment(event) {
 // ─────────────────────────────────────────────
 // GET PAYMENT STATUS (for polling)
 // ─────────────────────────────────────────────
+/**
+ * @param {any} paymentId
+ */
 async function getPayment(paymentId) {
   if (!paymentId) return res(400, { error: 'Missing paymentId' });
 
@@ -196,13 +240,17 @@ async function getPayment(paymentId) {
 // ─────────────────────────────────────────────
 // WEBHOOK — SePay
 // ─────────────────────────────────────────────
+/**
+ * @param {{ headers: { [x: string]: any; }; body: any; }} event
+ */
 async function handleWebhook(event) {
   // Verify SePay API Key header
-  if (SEPAY_SECRET) {
+  const sepaySecret = process.env.SEPAY_WEBHOOK_SECRET || await getSecret('opporeview/sepay', 'SEPAY_WEBHOOK_SECRET') || '';
+  if (sepaySecret) {
     const authHeader = event.headers?.['Authorization'] || event.headers?.['authorization'] || '';
     // SePay sends: Authorization: Apikey YOUR_KEY
     const incoming = authHeader.replace(/^Apikey\s+/i, '').trim();
-    if (incoming !== SEPAY_SECRET) {
+    if (incoming !== sepaySecret) {
       console.warn('⚠️ Invalid SePay API Key');
       return res(401, { error: 'Unauthorized' });
     }
@@ -281,6 +329,9 @@ async function handleWebhook(event) {
 // ─────────────────────────────────────────────
 // ACTIVATE PACKAGE
 // ─────────────────────────────────────────────
+/**
+ * @param {Record<string, any>} payment
+ */
 async function activatePackage(payment) {
   const { userId, packageId, packageName, duration, amount, paymentId } = payment;
   const now = new Date().toISOString();
@@ -327,6 +378,7 @@ async function activatePackage(payment) {
       },
     }));
   } catch (err) {
+    // @ts-ignore
     console.warn('⚠️ Could not update EmployerProfiles:', err.message);
   }
 }

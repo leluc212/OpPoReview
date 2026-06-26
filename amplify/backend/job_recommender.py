@@ -513,15 +513,21 @@ RECOMMENDATION_SCHEMA = {
     "required": ["recommendations"],
 }
 
+_GEMINI_CREDENTIALS_CACHE = None
+
 def get_gemini_credentials():
+    global _GEMINI_CREDENTIALS_CACHE
     import os
     import json
     import boto3
     # Try Env variables first
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
-    model = os.environ.get("GEMINI_MODEL", "gemini-3.1-flash-lite").strip()
+    model = os.environ.get("GEMINI_MODEL", "").strip()
     if api_key:
-        return api_key, model
+        return api_key, (model or "gemini-3.1-flash-lite")
+    
+    if _GEMINI_CREDENTIALS_CACHE is not None:
+        return _GEMINI_CREDENTIALS_CACHE
     
     # Fallback to AWS Secrets Manager
     try:
@@ -531,6 +537,7 @@ def get_gemini_credentials():
         key = secret_json.get('GEMINI_API_KEY', '').strip()
         mdl = secret_json.get('GEMINI_MODEL', 'gemini-3.1-flash-lite').strip()
         if key:
+            _GEMINI_CREDENTIALS_CACHE = (key, mdl)
             return key, mdl
     except Exception as e:
         safe_print(f"[Gemini Credentials] Failed to retrieve secret from Secrets Manager: {e}")
