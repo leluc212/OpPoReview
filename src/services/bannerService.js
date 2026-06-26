@@ -269,6 +269,10 @@ export const getActiveBanners = async (candidateLocation = '') => {
   return all
     .filter(b => b.isActive)
     .filter(b => {
+      // Check expiration
+      if (b.expiredAt && new Date(b.expiredAt).getTime() < Date.now()) {
+        return false;
+      }
       // If no targetRegions set (empty or missing), show to everyone
       if (!b.targetRegions || b.targetRegions.length === 0) return true;
       // If candidate has no location, only show banners without region targeting

@@ -645,70 +645,7 @@ const SectionLabel = styled.div`
   }
 `;
 
-// ─── Vietnam Regions for targeting ────────────────────────────────────────────
 
-const VIETNAM_REGIONS = [
-  'Hồ Chí Minh', 'Hà Nội', 'Đà Nẵng', 'Cần Thơ', 'Hải Phòng',
-  'Bình Dương', 'Đồng Nai', 'Long An', 'Bà Rịa - Vũng Tàu',
-  'Khánh Hòa', 'Thừa Thiên Huế', 'Quảng Nam', 'Lâm Đồng',
-  'Bắc Ninh', 'Hưng Yên', 'Thanh Hóa', 'Nghệ An', 'Quảng Ninh',
-  'Thái Nguyên', 'An Giang', 'Kiên Giang', 'Đắk Lắk', 'Gia Lai',
-  'Tiền Giang', 'Bến Tre', 'Vĩnh Long', 'Tây Ninh', 'Bình Thuận',
-  'Phú Thọ', 'Hà Tĩnh', 'Nam Định', 'Ninh Bình', 'Lào Cai',
-];
-
-// ─── Region Picker Styled Components ─────────────────────────────────────────
-
-const RegionPickerWrap = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`;
-
-const RegionAllNote = styled.div`
-  font-size: 12px;
-  color: ${p => p.theme.colors.textLight};
-  font-style: italic;
-`;
-
-const RegionChipsWrap = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  max-height: 150px;
-  overflow-y: auto;
-  padding: 4px 0;
-`;
-
-const RegionChip = styled.button`
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  border: 1.5px solid ${p => p.$selected ? p.theme.colors.primary : p.theme.colors.border};
-  background: ${p => p.$selected ? `${p.theme.colors.primary}15` : 'transparent'};
-  color: ${p => p.$selected ? p.theme.colors.primary : p.theme.colors.textLight};
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-
-  &:hover {
-    border-color: ${p => p.theme.colors.primary};
-    color: ${p => p.theme.colors.primary};
-  }
-`;
-
-const SelectedRegionsBadge = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  color: ${p => p.theme.colors.primary};
-  font-weight: 600;
-  margin-top: 2px;
-
-  svg { width: 12px; height: 12px; }
-`;
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -726,6 +663,7 @@ const BannersManagement = () => {
   // Form state
   const [title, setTitle]         = useState('');
   const [linkUrl, setLinkUrl]     = useState('');
+  const [displayTime, setDisplayTime] = useState('');
   const [targetRegions, setTargetRegions] = useState([]); // [] = all regions
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
@@ -770,6 +708,7 @@ const BannersManagement = () => {
     setEditTarget(null);
     setTitle('');
     setLinkUrl('');
+    setDisplayTime('');
     setTargetRegions([]);
     setImageFile(null);
     setImagePreview('');
@@ -780,6 +719,7 @@ const BannersManagement = () => {
     setEditTarget(banner);
     setTitle(banner.title || '');
     setLinkUrl(banner.linkUrl || '');
+    setDisplayTime(banner.displayTime || '');
     setTargetRegions(banner.targetRegions || []);
     setImageFile(null);
     setImagePreview(banner.imageUrl || '');
@@ -793,6 +733,7 @@ const BannersManagement = () => {
     setImagePreview('');
     setTitle('');
     setLinkUrl('');
+    setDisplayTime('');
     setTargetRegions([]);
   };
 
@@ -843,12 +784,22 @@ const BannersManagement = () => {
         setUploading(false);
       }
 
+      let expiredAt = null;
+      if (displayTime) {
+        const hours = displayTime === '24h' ? 24 : displayTime === '5d' ? 120 : displayTime === '7d' ? 168 : null;
+        if (hours) {
+          expiredAt = new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
+        }
+      }
+
       const payload = {
         title: title.trim(),
         linkUrl: linkUrl.trim(),
         imageUrl,
         targetRegions,
-        order: editTarget?.order || banners.length + 1
+        order: editTarget?.order || banners.length + 1,
+        displayTime: displayTime || null,
+        expiredAt: expiredAt || null
       };
 
       if (editTarget) {
@@ -1126,51 +1077,39 @@ const BannersManagement = () => {
                   />
                 </FormGroup>
 
-                {/* Target Regions */}
+                {/* Display Time */}
                 <FormGroup>
-                  <label>
-                    <MapPin size={13} style={{ display: 'inline', marginRight: 4 }} />
-                    {vi ? 'Khu vực hiển thị (không chọn = toàn quốc)' : 'Target regions (none = nationwide)'}
-                  </label>
-                  <RegionPickerWrap>
-                    {targetRegions.length === 0 && (
-                      <RegionAllNote>
-                        {vi ? '🌍 Banner sẽ hiển thị cho tất cả khu vực' : '🌍 Banner will show for all regions'}
-                      </RegionAllNote>
-                    )}
-                    {targetRegions.length > 0 && (
-                      <SelectedRegionsBadge>
-                        <MapPin />
-                        {targetRegions.length} {vi ? 'khu vực được chọn' : 'regions selected'}
-                        {' · '}
-                        <span
-                          style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                          onClick={() => setTargetRegions([])}
-                        >
-                          {vi ? 'Xóa tất cả' : 'Clear all'}
-                        </span>
-                      </SelectedRegionsBadge>
-                    )}
-                    <RegionChipsWrap>
-                      {VIETNAM_REGIONS.map(region => (
-                        <RegionChip
-                          key={region}
-                          type="button"
-                          $selected={targetRegions.includes(region)}
-                          onClick={() => {
-                            setTargetRegions(prev =>
-                              prev.includes(region)
-                                ? prev.filter(r => r !== region)
-                                : [...prev, region]
-                            );
-                          }}
-                        >
-                          {region}
-                        </RegionChip>
-                      ))}
-                    </RegionChipsWrap>
-                  </RegionPickerWrap>
+                  <label>{vi ? 'Thời gian hiển thị (tùy chọn)' : 'Display duration (optional)'}</label>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
+                    {[
+                      { id: '24h', label: '24 giờ' },
+                      { id: '5d', label: '5 ngày' },
+                      { id: '7d', label: '7 ngày' }
+                    ].map(opt => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setDisplayTime(displayTime === opt.id ? '' : opt.id)}
+                        style={{
+                          padding: '6px 14px',
+                          borderRadius: '20px',
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          border: '1.5px solid',
+                          borderColor: displayTime === opt.id ? '#10b981' : '#e5e7eb',
+                          background: displayTime === opt.id ? '#f0fdf4' : 'transparent',
+                          color: displayTime === opt.id ? '#10b981' : '#6b7280',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s',
+                        }}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
                 </FormGroup>
+
+
               </ModalBody>
 
               <ModalFooter>
@@ -1276,15 +1215,7 @@ const BannerCardItem = ({ banner, onToggle, onEdit, onDelete, fmtDate, isAtCap, 
         </BannerMeta>
       )}
 
-      {banner.targetRegions && banner.targetRegions.length > 0 && (
-        <BannerMeta>
-          <MapPin />
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {banner.targetRegions.slice(0, 3).join(', ')}
-            {banner.targetRegions.length > 3 && ` +${banner.targetRegions.length - 3}`}
-          </span>
-        </BannerMeta>
-      )}
+
 
       <BannerFooter>
         <ToggleButton
