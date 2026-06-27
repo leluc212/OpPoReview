@@ -337,11 +337,15 @@ const JobCard = ({ job, onClick, onSave, saved = false }) => {
       <CardHeader>
         <div style={{ display: 'flex', flex: 1 }}>
           <CompanyLogo
-            $hasImage={false}
+            $hasImage={!!job.companyLogo}
             whileHover={{ rotate: -10, scale: 1.1 }}
             transition={{ duration: 0.3 }}
           >
-            {job.company ? job.company.charAt(0).toUpperCase() : '?'}
+            {job.companyLogo ? (
+              <img src={job.companyLogo} alt={job.company} />
+            ) : (
+              job.company ? job.company.charAt(0).toUpperCase() : '?'
+            )}
           </CompanyLogo>
           <CardContent>
             <JobTitle>{translateJobTitle(job.title, language)}</JobTitle>

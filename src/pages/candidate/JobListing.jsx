@@ -24,6 +24,7 @@ import { getActiveBanners } from '../../services/bannerService';
 import { getAuthHeaders } from '../../services/authHeaders';
 import { requestInterviewMedia } from '../../services/interviewMediaService';
 import * as applicationService from '../../services/applicationService';
+import adminEmployerService from '../../services/adminEmployerService';
 
 const CV_AI_API_BASE_URL =
   (import.meta.env.VITE_CV_AI_API_URL || '/api-cv-ai').replace(/\/$/, '');
@@ -2226,6 +2227,22 @@ const JobListing = () => {
   const [quickJobs, setQuickJobs] = useState([]);
   const [isLoadingDynamoJobs, setIsLoadingDynamoJobs] = useState(true);
   const [isReloading, setIsReloading] = useState(false);
+  const [employerLogos, setEmployerLogos] = useState({});
+
+  useEffect(() => {
+    let cancelled = false;
+    adminEmployerService.getAllEmployers()
+      .then(employers => {
+        if (cancelled) return;
+        const logos = employers.reduce((acc, emp) => {
+          if (emp.userId && emp.companyLogo) acc[emp.userId] = emp.companyLogo;
+          return acc;
+        }, {});
+        setEmployerLogos(logos);
+      })
+      .catch(err => console.error('Error fetching employer logos:', err));
+    return () => { cancelled = true; };
+  }, []);
 
   // AI Screening & Interview states
   const [pendingApplication, setPendingApplication] = useState(null);
@@ -3204,6 +3221,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
               workHours: String(job.workHours || ''),
               workDays: String(job.workDays || ''),
               status: String(job.status || 'active'),
+              companyLogo: employerLogos[job.employerId] || null,
               isAiScreeningEnabled: !!job.isAiScreeningEnabled,
               customQuestions: job.customQuestions || [],
               isFromDynamoDB: true // Flag to identify DynamoDB jobs
@@ -3224,6 +3242,14 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
       setIsLoadingDynamoJobs(false);
     }
   };
+
+  // Whenever employerLogos updates, we must also update the logo on jobs
+  useEffect(() => {
+    if (Object.keys(employerLogos).length > 0) {
+      setDynamoDBJobs(prev => prev.map(job => ({ ...job, companyLogo: employerLogos[job.employerId] || job.companyLogo })));
+      setQuickJobs(prev => prev.map(job => ({ ...job, companyLogo: employerLogos[job.employerId] || job.companyLogo })));
+    }
+  }, [employerLogos]);
 
   // Load quick jobs from PostQuickJob table
   const loadQuickJobs = async () => {
@@ -3292,6 +3318,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
               totalHours: totalHours,
               workHours: job.workHours || (job.startTime && job.endTime ? `${job.startTime} - ${job.endTime}` : ''),
               workDate: job.workDate || '',
+              companyLogo: employerLogos[job.employerId] || null,
               status: String(job.status || 'active'),
               isQuickJob: true, // Flag to identify quick jobs
               urgent: true, // Mark as urgent to show red badge
@@ -6620,7 +6647,15 @@ const JobCardComponent = ({ job, saved, onSave, onClick, onApply, delay = 0, sho
     >
       <JobCardHeader>
         <CompanyLogo>
-          {getCompanyInitial(job.company)}
+          {job.companyLogo ? (
+            <img 
+              src={job.companyLogo} 
+              alt={job.company} 
+              style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} 
+            />
+          ) : (
+            getCompanyInitial(job.company)
+          )}
         </CompanyLogo>
         <JobInfo>
           <JobTitle>

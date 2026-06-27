@@ -438,7 +438,7 @@ const EmployerProfileView = () => {
                 {jobs.map(job => (
                   <JobCard 
                     key={job.id} 
-                    job={{...job, company: employer.name}} 
+                    job={{...job, company: employer.name, companyLogo: employer.companyLogo}} 
                   />
                 ))}
               </JobsGrid>

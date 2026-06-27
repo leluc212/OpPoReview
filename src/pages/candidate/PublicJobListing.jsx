@@ -13,6 +13,7 @@ import {
   Zap, Filter, ChevronRight, ChevronDown, X, DollarSign,
   Calendar, Users, Globe, FileText, LogIn, Bookmark, Sparkles
 } from 'lucide-react';
+import adminEmployerService from '../../services/adminEmployerService';
 
 const fadeUp = keyframes`
   from { opacity: 0; transform: translateY(16px); }
@@ -544,6 +545,7 @@ const PublicJobListing = () => {
   const [keyword, setKeyword] = useState(initKeyword);
   const [loc, setLoc] = useState(initLocation);
   const [jobs, setJobs] = useState([]);
+  const [employerLogos, setEmployerLogos] = useState({});
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState(null);
   const [activeTab, setActiveTab] = useState(() => {
@@ -621,10 +623,18 @@ const PublicJobListing = () => {
   useEffect(() => {
     Promise.all([
       jobPostService.getAllActiveJobs().catch(() => []),
-      quickJobService.getAllActiveQuickJobs ? quickJobService.getAllActiveQuickJobs().catch(() => []) : Promise.resolve([])
-    ]).then(([standard, urgent]) => {
-      const s = (Array.isArray(standard) ? standard : []).map(j => ({ ...j, _type: 'standard' }));
-      const u = (Array.isArray(urgent) ? urgent : []).map(j => ({ ...j, _type: 'urgent' }));
+      quickJobService.getAllActiveQuickJobs ? quickJobService.getAllActiveQuickJobs().catch(() => []) : Promise.resolve([]),
+      adminEmployerService.getAllEmployers().catch(() => [])
+    ]).then(([standard, urgent, employers]) => {
+      // Create a map of employer IDs to their logos
+      const logoMap = (Array.isArray(employers) ? employers : []).reduce((acc, emp) => {
+        if (emp.userId && emp.companyLogo) acc[emp.userId] = emp.companyLogo;
+        return acc;
+      }, {});
+      setEmployerLogos(logoMap);
+
+      const s = (Array.isArray(standard) ? standard : []).map(j => ({ ...j, _type: 'standard', companyLogo: logoMap[j.employerId] || null }));
+      const u = (Array.isArray(urgent) ? urgent : []).map(j => ({ ...j, _type: 'urgent', companyLogo: logoMap[j.employerId] || null }));
       setJobs([...s, ...u].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)));
     }).finally(() => setLoading(false));
   }, []);
@@ -951,10 +961,10 @@ const PublicJobListing = () => {
                   style={{ animationDelay: `${Math.min(i * 0.04, 0.3)}s` }}
                   onClick={() => setSelectedJob(job)}
                 >
-                  <LogoBox>
+                  <LogoBox style={{ fontSize: '20px', fontWeight: 'bold', color: '#1a62ff' }}>
                     {job.companyLogo
-                      ? <img src={job.companyLogo} alt={job.companyName} />
-                      : <Building2 size={22} color="#1a62ff" />
+                      ? <img src={job.companyLogo} alt={job.companyName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : (job.companyName || job.employerName || 'C').charAt(0).toUpperCase()
                     }
                   </LogoBox>
                   <JobInfo>
