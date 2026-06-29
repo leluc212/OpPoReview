@@ -4,7 +4,7 @@ import math
 import json
 import boto3
 from botocore.exceptions import ClientError
-from email_service import send_email
+from email_service import send_noreply_email
 
 def safe_print(msg):
     try:
@@ -373,7 +373,7 @@ def send_recommendation_email(candidate, job, reasons, is_quick_job=False):
     """
     
     safe_print(f"[Recommender] Dispatching email to {email}")
-    res = send_email(email, subject, html_content)
+    res = send_noreply_email(email, subject, html_content)
     return res.get('success', False)
 
 def send_recommendations_email(candidate, jobs_list):
@@ -522,7 +522,7 @@ def send_recommendations_email(candidate, jobs_list):
     """
     
     safe_print(f"[Recommender] Dispatching multi-job email to {email}")
-    res = send_email(email, subject, html_content)
+    res = send_noreply_email(email, subject, html_content)
     return res.get('success', False)
 
 def recommend_job_to_candidates(job_item, is_quick_job=False):
