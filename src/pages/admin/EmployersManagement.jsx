@@ -746,28 +746,65 @@ const EmployersManagement = () => {
     try {
       setIsProcessingChange(true);
 
-      await applicationService.updateApplicationStatus(appId, 'accepted', {
-        changeRequestStatus: 'approved',
-        adminNotes: 'Approved by Admin'
-      });
+      const result = await applicationService.approveChangeRequest(appId);
 
       // Optimistically update status locally
       setChangeRequests(prev => prev.map(r => r.applicationId === appId ? { ...r, changeRequestStatus: 'approved' } : r));
       setSelectedChangeRequest(null);
 
-      // Trigger notification to employer
+      // Thông báo 3 bên
       const reqItem = changeRequests.find(r => r.applicationId === appId);
       if (reqItem) {
+        const cr = reqItem.changeRequest || {};
+        const finalAmountNum = parseInt(result?.finalAmount || '0');
+        const approvedTime = result?.approvedTimeDisplay || '--:--';
+        const jobTitle = result?.jobTitle || reqItem.jobTitle || '';
+        const jobLocation = result?.jobLocation || reqItem.jobLocation || '';
+        const originalEndTime = result?.originalEndTime || cr.originalEndTime || '--:--';
+
+        // Thông báo employer
         try {
           await createChangeRequestApprovedNotification({
             employerId: reqItem.employerId,
             companyName: reqItem.companyName,
             candidateName: reqItem.candidateName,
-            changeRequestType: reqItem.changeRequest?.typeLabel || reqItem.changeRequest?.type || '',
+            changeRequestType: 'Thay thế nhân viên',
             applicationId: appId
           });
         } catch (notifErr) {
-          console.warn('Failed to send change request approval notification:', notifErr.message);
+          console.warn('Failed to send employer approval notification:', notifErr.message);
+        }
+
+        // Thông báo worker cũ
+        const oldWorkerId = result?.oldWorkerId || reqItem.candidateId;
+        if (oldWorkerId) {
+          try {
+            const { createWorkerReplacedNotification } = await import('../../services/notificationService');
+            await createWorkerReplacedNotification({
+              workerId: oldWorkerId,
+              finalAmount: finalAmountNum,
+              endTimeDisplay: approvedTime,
+              jobTitle
+            });
+          } catch (notifErr) {
+            console.warn('Failed to send old worker notification:', notifErr.message);
+          }
+        }
+
+        // Thông báo worker mới
+        const newWorkerId = result?.newWorkerId || cr.newWorkerId;
+        if (newWorkerId) {
+          try {
+            const { createNewWorkerAssignedNotification } = await import('../../services/notificationService');
+            await createNewWorkerAssignedNotification({
+              workerId: newWorkerId,
+              jobTitle,
+              jobLocation,
+              originalEndTime
+            });
+          } catch (notifErr) {
+            console.warn('Failed to send new worker notification:', notifErr.message);
+          }
         }
       }
 
@@ -777,7 +814,7 @@ const EmployersManagement = () => {
         console.warn('Could not reload change requests after approve:', e.message);
       }
 
-      alert(language === 'vi' ? 'Đã duyệt yêu cầu thay đổi thành công' : 'Change request approved successfully');
+      alert(language === 'vi' ? 'Đã duyệt — worker mới đã được gán ca làm việc' : 'Approved — new worker has been assigned to the shift');
     } catch (err) {
       console.error('Error approving change request:', err);
       alert(language === 'vi' ? 'Lỗi khi duyệt yêu cầu' : 'Error approving request');
@@ -787,18 +824,22 @@ const EmployersManagement = () => {
   };
 
   const handleRejectChange = async (appId) => {
+    const confirmed = window.confirm(
+      language === 'vi'
+        ? 'Từ chối yêu cầu thay đổi? Worker hiện tại sẽ tiếp tục làm việc.'
+        : 'Reject change request? The current worker will continue the shift.'
+    );
+    if (!confirmed) return;
+
     try {
       setIsProcessingChange(true);
-      await applicationService.updateApplicationStatus(appId, 'accepted', {
-        changeRequestStatus: 'rejected',
-        adminNotes: 'Rejected by Admin'
-      });
+      await applicationService.rejectChangeRequest(appId);
 
       // Optimistically update status locally
       setChangeRequests(prev => prev.map(r => r.applicationId === appId ? { ...r, changeRequestStatus: 'rejected' } : r));
       setSelectedChangeRequest(null);
 
-      // Trigger notification to employer
+      // Thông báo employer
       const reqItem = changeRequests.find(r => r.applicationId === appId);
       if (reqItem) {
         try {
@@ -806,12 +847,11 @@ const EmployersManagement = () => {
             employerId: reqItem.employerId,
             companyName: reqItem.companyName,
             candidateName: reqItem.candidateName,
-            changeRequestType: reqItem.changeRequest?.typeLabel || reqItem.changeRequest?.type || '',
-            applicationId: appId,
-            reason: 'Admin rejected the request'
+            changeRequestType: 'Thay thế nhân viên',
+            applicationId: appId
           });
         } catch (notifErr) {
-          console.warn('Failed to send change request rejection notification:', notifErr.message);
+          console.warn('Failed to send rejection notification:', notifErr.message);
         }
       }
 
@@ -821,7 +861,7 @@ const EmployersManagement = () => {
         console.warn('Could not reload change requests after reject:', e.message);
       }
 
-      alert(language === 'vi' ? 'Đã từ chối yêu cầu thay đổi' : 'Change request rejected');
+      alert(language === 'vi' ? 'Đã từ chối — worker hiện tại tiếp tục ca làm việc' : 'Rejected — current worker continues the shift');
     } catch (err) {
       console.error('Error rejecting change request:', err);
       alert(language === 'vi' ? 'Lỗi khi từ chối yêu cầu' : 'Error rejecting request');
@@ -1955,30 +1995,51 @@ const EmployersManagement = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div>
                   <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>
-                    {language === 'vi' ? 'Nhà tuyển dụng' : 'Employer'}
+                    Nhà tuyển dụng
                   </div>
                   <div style={{ fontSize: '14px', fontWeight: 700 }}>{selectedChangeRequest.companyName}</div>
                 </div>
                 <div>
                   <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>
-                    {language === 'vi' ? 'Ứng viên' : 'Candidate'}
+                    Worker cũ (đang làm)
                   </div>
-                  <div style={{ fontSize: '14px', fontWeight: 700 }}>{selectedChangeRequest.candidateName}</div>
+                  <div style={{ fontSize: '14px', fontWeight: 700, color: '#EF4444' }}>{selectedChangeRequest.candidateName}</div>
                 </div>
+                {selectedChangeRequest.changeRequest?.newWorkerName && (
+                  <div>
+                    <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>
+                      Worker mới (đề xuất)
+                    </div>
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#10B981' }}>{selectedChangeRequest.changeRequest.newWorkerName}</div>
+                  </div>
+                )}
+                {selectedChangeRequest._jobStartTime && (
+                  <div>
+                    <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>
+                      Giờ bắt đầu ca
+                    </div>
+                    <div style={{ fontSize: '14px', fontWeight: 700 }}>
+                      {selectedChangeRequest._jobStartTime} – {selectedChangeRequest._jobEndTime || '--:--'}
+                    </div>
+                  </div>
+                )}
+                {selectedChangeRequest._jobTitle && (
+                  <div>
+                    <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>
+                      Vị trí / Địa điểm
+                    </div>
+                    <div style={{ fontSize: '14px', fontWeight: 700 }}>{selectedChangeRequest._jobTitle}</div>
+                    {selectedChangeRequest._jobLocation && (
+                      <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>{selectedChangeRequest._jobLocation}</div>
+                    )}
+                  </div>
+                )}
                 <div>
                   <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>
-                    {language === 'vi' ? 'Loại yêu cầu' : 'Request Type'}
+                    Gửi lúc
                   </div>
                   <div style={{ fontSize: '14px', fontWeight: 700, color: '#F97316' }}>
-                    {selectedChangeRequest.changeRequest?.typeLabel}
-                  </div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>
-                    {language === 'vi' ? 'Mức độ' : 'Urgency'}
-                  </div>
-                  <div style={{ fontSize: '14px', fontWeight: 700, color: selectedChangeRequest.changeRequest?.urgency === 'urgent' ? '#EF4444' : '#10B981' }}>
-                    {selectedChangeRequest.changeRequest?.urgency === 'urgent' ? (language === 'vi' ? 'Khẩn cấp' : 'Urgent') : (language === 'vi' ? 'Bình thường' : 'Normal')}
+                    {selectedChangeRequest.changeRequest?.requestedAt || '--'}
                   </div>
                 </div>
               </div>
@@ -1987,13 +2048,17 @@ const EmployersManagement = () => {
             <div style={{ marginBottom: '24px' }}>
               <div style={{ fontSize: '13px', fontWeight: 700, color: '#475569', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <FileText size={14} />
-                {language === 'vi' ? 'Nội dung chi tiết/Lý do:' : 'Detailed content/Reason:'}
+                Lý do:
               </div>
-                  <div style={{ background: '#FAFAFA', border: '1.5px solid #F1F5F9', borderRadius: '12px', padding: '16px', fontSize: '14px', lineHeight: '1.6', color: '#1E293B', whiteSpace: 'pre-wrap' }}>
-                    {selectedChangeRequest.changeRequest?.reason || (language === 'vi' ? 'Không có nội dung lý do' : 'No detailed reason provided')}
-                  </div>
+              <div style={{ background: '#FAFAFA', border: '1.5px solid #F1F5F9', borderRadius: '12px', padding: '16px', fontSize: '14px', lineHeight: '1.6', color: '#1E293B', whiteSpace: 'pre-wrap' }}>
+                {selectedChangeRequest.changeRequest?.reason || 'Không có nội dung lý do'}
+              </div>
+            </div>
 
-                  {/* Raw payload display removed per request */}
+            {/* Cảnh báo cho admin */}
+            <div style={{ background: '#FFF7ED', border: '1.5px solid #FFEDD5', borderRadius: '12px', padding: '14px 16px', marginBottom: '20px', fontSize: '13px', color: '#92400E', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+              <AlertCircle size={16} color="#F97316" style={{ flexShrink: 0, marginTop: '1px' }} />
+              <span>Nếu <strong>Duyệt</strong>: worker cũ kết thúc ca ngay lập tức, tiền công tính đến lúc này. Worker mới bắt đầu ca ngay.</span>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -2002,13 +2067,13 @@ const EmployersManagement = () => {
                 style={{ background: '#ef4444' }}
                 disabled={isProcessingChange}
               >
-                {isProcessingChange ? '...' : (language === 'vi' ? 'Từ chối' : 'Reject')}
+                {isProcessingChange ? '...' : 'Từ chối'}
               </ModalButton>
               <ModalButton
                 onClick={() => handleApproveChange(selectedChangeRequest.applicationId)}
                 disabled={isProcessingChange}
               >
-                {isProcessingChange ? '...' : (language === 'vi' ? 'Duyệt yêu cầu' : 'Approve')}
+                {isProcessingChange ? 'Đang xử lý...' : 'Duyệt'}
               </ModalButton>
             </div>
 
