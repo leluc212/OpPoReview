@@ -23,7 +23,11 @@ import {
   Award,
   Briefcase,
   FileText,
-  Trash2
+  Trash2,
+  Lock,
+  Unlock,
+  Star,
+  Package
 } from 'lucide-react';
 import adminEmployerService from '../../services/adminEmployerService';
 import applicationService from '../../services/applicationService';
@@ -520,6 +524,95 @@ const SubTabButton = styled.button`
   }
 `;
 
+const FormCard = styled.div`
+  background: ${props => props.theme.colors.bgLight || 'white'};
+  border: 1px solid ${props => props.theme.colors.border || '#E2E8F0'};
+  border-radius: ${props => props.theme.borderRadius.lg || '12px'};
+  padding: 32px;
+  max-width: 600px;
+  margin: 0 auto 24px;
+  box-shadow: ${props => props.theme.shadows.sm || '0 4px 6px rgba(0,0,0,0.05)'};
+`;
+
+const FormGroup = styled.div`
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const FormLabel = styled.label`
+  font-size: 14.5px;
+  font-weight: 700;
+  color: ${props => props.theme.colors.text || '#1E293B'};
+`;
+
+const FormSelect = styled.select`
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid ${props => props.theme.colors.border || '#CBD5E1'};
+  background: white;
+  font-size: 14.5px;
+  color: ${props => props.theme.colors.text || '#1E293B'};
+  outline: none;
+  transition: all 0.2s;
+  
+  &:focus {
+    border-color: ${props => props.theme.colors.primary};
+    box-shadow: 0 0 0 3px ${props => props.theme.colors.primary}20;
+  }
+`;
+
+const SubmitButton = styled.button`
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background: ${props => props.theme.colors.primary};
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px ${props => props.theme.colors.primary}30;
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+const PackageBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: ${props => props.theme.borderRadius.full};
+  font-size: 13px;
+  font-weight: 600;
+  background: ${props => props.$color}20;
+  color: ${props => props.$color};
+  
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
+const DateText = styled.span`
+  color: ${props => props.theme.colors.text};
+  font-size: 14px;
+  display: block;
+`;
+
 const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
@@ -627,7 +720,7 @@ const EmployersManagement = () => {
       setMainTab('all_employers');
     } else if (activeTab === 'change_requests') {
       setMainTab('change_requests');
-    } else if (activeTab === 'quick_jobs') {
+    } else if (['quick_jobs', 'grant_package'].includes(activeTab)) {
       setMainTab('features');
     }
   }, [activeTab]);
@@ -635,6 +728,401 @@ const EmployersManagement = () => {
   const itemsPerPage = 20;
 
   const [employers, setEmployers] = useState([]);
+  const [packages, setPackages] = useState([]);
+  const [loadingPackages, setLoadingPackages] = useState(false);
+  const [selectedEmployerId, setSelectedEmployerId] = useState('');
+  const [selectedPackageId, setSelectedPackageId] = useState('');
+  const [selectedDuration, setSelectedDuration] = useState('');
+  const [granting, setGranting] = useState(false);
+
+  useEffect(() => {
+    if (activeTab === 'grant_package' && packages.length === 0) {
+      const loadPackages = async () => {
+        setLoadingPackages(true);
+        try {
+          const { getPackageCatalog } = await import('../../services/packageCatalogService');
+          const catalog = await getPackageCatalog();
+          setPackages(catalog);
+        } catch (err) {
+          console.error('Error loading packages:', err);
+        } finally {
+          setLoadingPackages(false);
+        }
+      };
+      loadPackages();
+    }
+  }, [activeTab, packages.length]);
+
+  const selectedPackage = useMemo(() => {
+    return packages.find(p => p.packageId === selectedPackageId);
+  }, [packages, selectedPackageId]);
+
+  // Reset duration when package changes
+  useEffect(() => {
+    setSelectedDuration('');
+  }, [selectedPackageId]);
+
+  const handleGrantPackage = async (e) => {
+    e.preventDefault();
+    if (!selectedEmployerId || !selectedPackageId || !selectedDuration) {
+      alert(language === 'vi' ? 'Vui lòng điền đầy đủ thông tin' : 'Please fill out all fields');
+      return;
+    }
+
+    setGranting(true);
+    try {
+      const API_ENDPOINT = import.meta.env.VITE_PACKAGE_SUBSCRIPTIONS_API || 'https://u28w4m6yb7.execute-api.ap-southeast-1.amazonaws.com/prod';
+      
+      const targetEmp = employers.find(e => e.id === selectedEmployerId);
+      const companyName = targetEmp?.companyName || 'Nhà tuyển dụng';
+
+      const purchaseData = {
+        employerId: selectedEmployerId,
+        companyName: companyName,
+        packageName: selectedPackage.packageName,
+        duration: selectedDuration,
+        paymentMethod: 'admin_granted'
+      };
+
+      console.log('📤 Admin granting package - Creating subscription:', purchaseData);
+
+      const response = await fetch(`${API_ENDPOINT}/subscriptions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8'
+        },
+        body: JSON.stringify(purchaseData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create subscription');
+      }
+
+      const result = await response.json();
+      const subscriptionId = result.data?.subscriptionId || result.subscriptionId;
+
+      console.log('✅ Subscription created. Now activating:', subscriptionId);
+
+      const approveResponse = await fetch(`${API_ENDPOINT}/subscriptions/${subscriptionId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          status: 'active',
+          approvalStatus: 'approved'
+        })
+      });
+
+      if (!approveResponse.ok) {
+        throw new Error('Failed to activate subscription');
+      }
+
+      const updatedSubscription = await approveResponse.json();
+      const finalExpiryDate = updatedSubscription.expiryDate || updatedSubscription.data?.expiryDate;
+
+      // Create notification for employer
+      try {
+        const { createPackageApprovedNotification } = await import('../../services/notificationService');
+        await createPackageApprovedNotification({
+          subscriptionId,
+          packageName: selectedPackage.packageName,
+          duration: selectedDuration,
+          expiryDate: finalExpiryDate
+        }, selectedEmployerId);
+      } catch (notifyErr) {
+        console.error('❌ Error sending notification:', notifyErr);
+      }
+
+      alert(language === 'vi' ? 'Cấp gói dịch vụ thành công!' : 'Package granted successfully!');
+      setSelectedEmployerId('');
+      setSelectedPackageId('');
+      setSelectedDuration('');
+      await loadPurchases();
+    } catch (err) {
+      console.error('Error granting package:', err);
+      alert(language === 'vi' ? `Lỗi khi cấp gói: ${err.message}` : `Error granting package: ${err.message}`);
+    } finally {
+      setGranting(false);
+    }
+  };
+
+  const [purchases, setPurchases] = useState([]);
+  const [loadingPurchases, setLoadingPurchases] = useState(false);
+  const [purchasesError, setPurchasesError] = useState(null);
+
+  const [purchaseSearchTerm, setPurchaseSearchTerm] = useState('');
+  const [purchaseFilters, setPurchaseFilters] = useState([]);
+  const [purchaseCurrentPage, setPurchaseCurrentPage] = useState(1);
+  const [packageTab, setPackageTab] = useState('pending');
+  const [showPurchaseSuccessModal, setShowPurchaseSuccessModal] = useState(false);
+  const [approvedPurchaseInfo, setApprovedPurchaseInfo] = useState(null);
+  const [showPurchaseLockConfirm, setShowPurchaseLockConfirm] = useState(false);
+  const [purchaseLockTarget, setPurchaseLockTarget] = useState(null);
+
+  const loadPurchases = async () => {
+    try {
+      setLoadingPurchases(true);
+      const API_ENDPOINT = import.meta.env.VITE_PACKAGE_SUBSCRIPTIONS_API || 'https://u28w4m6yb7.execute-api.ap-southeast-1.amazonaws.com/prod';
+      const response = await fetch(`${API_ENDPOINT}/subscriptions`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch subscriptions');
+      }
+      
+      const data = await response.json();
+      
+      const transformedData = data.map(item => ({
+        id: item.subscriptionId,
+        employer: item.companyName,
+        package: item.packageName,
+        purchaseDate: item.purchaseDate,
+        purchaseDateTime: item.purchaseDateTime,
+        expiryDate: item.expiryDate,
+        expiryDateTime: item.expiryDateTime,
+        status: item.status,
+        price: typeof item.price === 'number' ? item.price : parseFloat(item.price),
+        duration: item.duration,
+        approvalStatus: item.approvalStatus
+      }));
+      
+      setPurchases(transformedData);
+      setPurchasesError(null);
+    } catch (err) {
+      console.error('Error loading subscriptions:', err);
+      setPurchasesError(err.message);
+    } finally {
+      setLoadingPurchases(false);
+    }
+  };
+
+  const purchaseFilterOptions = [
+    { value: 'Quick Boost', label: 'Quick Boost' },
+    { value: 'Hot Search', label: 'Hot Search' },
+    { value: 'Spotlight Banner', label: 'Spotlight Banner' },
+    { value: 'Top Spotlight', label: 'Top Spotlight' },
+    { value: 'active', label: language === 'vi' ? 'Đang hoạt động' : 'Active' },
+    { value: 'locked', label: language === 'vi' ? 'Bị khóa' : 'Locked' },
+    { value: 'expiring', label: language === 'vi' ? 'Sắp hết hạn' : 'Expiring' },
+    { value: 'expired', label: language === 'vi' ? 'Đã hết hạn' : 'Expired' },
+  ];
+
+  const packageIcons = {
+    'Quick Boost': Zap,
+    'Hot Search': TrendingUp,
+    'Spotlight Banner': Star,
+    'Top Spotlight': Package
+  };
+
+  const packageColors = {
+    'Quick Boost': '#3b82f6',
+    'Hot Search': '#f59e0b',
+    'Spotlight Banner': '#8b5cf6',
+    'Top Spotlight': '#ef4444'
+  };
+
+  const filteredPurchases = useMemo(() => {
+    return purchases.filter(purchase => {
+      const matchesTab = packageTab === 'pending'
+        ? (purchase.approvalStatus === 'pending' || purchase.status === 'pending')
+        : (purchase.status === 'active' || purchase.status === 'expiring' || purchase.status === 'expired' || purchase.status === 'locked');
+      
+      const matchesSearch = purchaseSearchTerm === '' ||
+        purchase.employer.toLowerCase().includes(purchaseSearchTerm.toLowerCase()) ||
+        purchase.package.toLowerCase().includes(purchaseSearchTerm.toLowerCase());
+      
+      const matchesFilters = purchaseFilters.length === 0 ||
+        purchaseFilters.includes(purchase.package) ||
+        purchaseFilters.includes(purchase.status);
+      
+      return matchesTab && matchesSearch && matchesFilters;
+    });
+  }, [purchases, purchaseSearchTerm, purchaseFilters, packageTab]);
+
+  const purchaseItemsPerPage = 10;
+  const purchaseTotalPages = Math.ceil(filteredPurchases.length / purchaseItemsPerPage);
+  const purchaseStartIndex = (purchaseCurrentPage - 1) * purchaseItemsPerPage;
+  const purchaseEndIndex = purchaseStartIndex + purchaseItemsPerPage;
+  const currentPurchases = filteredPurchases.slice(purchaseStartIndex, purchaseEndIndex);
+
+  useMemo(() => {
+    setPurchaseCurrentPage(1);
+  }, [purchaseSearchTerm, purchaseFilters]);
+
+  const handlePurchaseFilterToggle = (filterValue) => {
+    setPurchaseFilters(prev =>
+      prev.includes(filterValue)
+        ? prev.filter(f => f !== filterValue)
+        : [...prev, filterValue]
+    );
+  };
+
+  const handleApprovePurchase = async (purchaseId) => {
+    try {
+      console.log('🔄 Approving purchase:', purchaseId);
+      
+      const API_ENDPOINT = import.meta.env.VITE_PACKAGE_SUBSCRIPTIONS_API || 'https://u28w4m6yb7.execute-api.ap-southeast-1.amazonaws.com/prod';
+      
+      const responseSub = await fetch(`${API_ENDPOINT}/subscriptions/${purchaseId}`);
+      if (!responseSub.ok) {
+        throw new Error('Failed to fetch subscription details');
+      }
+      const subscriptionData = await responseSub.json();
+      
+      let employerId = subscriptionData.employerId 
+        || subscriptionData.data?.employerId
+        || subscriptionData.userId
+        || subscriptionData.data?.userId;
+      
+      if (!employerId) {
+        throw new Error('Cannot find employerId in subscription data');
+      }
+      
+      const response = await fetch(`${API_ENDPOINT}/subscriptions/${purchaseId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          status: 'active',
+          approvalStatus: 'approved'
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to approve subscription');
+      }
+      
+      const updatedSubscription = await response.json();
+      const purchase = purchases.find(p => p.id === purchaseId);
+      
+      if (!purchase) {
+        throw new Error('Purchase not found in local state');
+      }
+      
+      const finalExpiryDate = updatedSubscription.expiryDate || updatedSubscription.data?.expiryDate;
+      const finalExpiryDateTime = updatedSubscription.expiryDateTime || updatedSubscription.data?.expiryDateTime;
+
+      try {
+        const { createPackageApprovedNotification } = await import('../../services/notificationService');
+        await createPackageApprovedNotification({
+          subscriptionId: purchaseId,
+          packageName: purchase.package,
+          duration: purchase.duration,
+          expiryDate: finalExpiryDate
+        }, employerId);
+      } catch (notifyErr) {
+        console.error('❌ Error sending notification:', notifyErr);
+      }
+      
+      setApprovedPurchaseInfo({
+        employer: purchase.employer,
+        package: purchase.package,
+        duration: purchase.duration,
+        expiryDate: finalExpiryDate,
+        expiryDateTime: finalExpiryDateTime
+      });
+      setShowPurchaseSuccessModal(true);
+      
+      setPurchases(prev => prev.map(p => 
+        p.id === purchaseId 
+          ? {
+              ...p,
+              status: updatedSubscription.status || updatedSubscription.data?.status || 'active',
+              approvalStatus: updatedSubscription.approvalStatus || updatedSubscription.data?.approvalStatus || 'approved',
+              purchaseDate: updatedSubscription.purchaseDate || updatedSubscription.data?.purchaseDate || p.purchaseDate,
+              purchaseDateTime: updatedSubscription.purchaseDateTime || updatedSubscription.data?.purchaseDateTime || p.purchaseDateTime,
+              expiryDate: finalExpiryDate || p.expiryDate,
+              expiryDateTime: finalExpiryDateTime || p.expiryDateTime
+            }
+          : p
+      ));
+      
+    } catch (error) {
+      console.error('❌ Error approving subscription:', error);
+      alert('Có lỗi xảy ra: ' + error.message);
+    }
+  };
+
+  const handleLockPurchase = async (purchaseId) => {
+    try {
+      const API_ENDPOINT = import.meta.env.VITE_PACKAGE_SUBSCRIPTIONS_API || 'https://u28w4m6yb7.execute-api.ap-southeast-1.amazonaws.com/prod';
+      const response = await fetch(`${API_ENDPOINT}/subscriptions/${purchaseId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: 'locked' })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to lock subscription');
+      }
+
+      const updatedSubscription = await response.json();
+
+      setPurchases(prev => prev.map(p =>
+        p.id === purchaseId
+          ? {
+              ...p,
+              status: updatedSubscription.status || updatedSubscription.data?.status || 'locked'
+            }
+          : p
+      ));
+    } catch (error) {
+      console.error('❌ Error locking subscription:', error);
+      alert('Có lỗi xảy ra: ' + error.message);
+    }
+  };
+
+  const handleUnlockPurchase = async (purchaseId) => {
+    try {
+      const API_ENDPOINT = import.meta.env.VITE_PACKAGE_SUBSCRIPTIONS_API || 'https://u28w4m6yb7.execute-api.ap-southeast-1.amazonaws.com/prod';
+      const response = await fetch(`${API_ENDPOINT}/subscriptions/${purchaseId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: 'active' })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to unlock subscription');
+      }
+
+      const updatedSubscription = await response.json();
+
+      setPurchases(prev => prev.map(p =>
+        p.id === purchaseId
+          ? {
+              ...p,
+              status: updatedSubscription.status || updatedSubscription.data?.status || 'active'
+            }
+          : p
+      ));
+    } catch (error) {
+      console.error('❌ Error unlocking subscription:', error);
+      alert('Có lỗi xảy ra: ' + error.message);
+    }
+  };
+
+  const openPurchaseLockConfirm = (purchase) => {
+    setPurchaseLockTarget(purchase);
+    setShowPurchaseLockConfirm(true);
+  };
+
+  const formatDateTime = (value) => {
+    if (!value) return '';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return parsed.toLocaleString('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -963,6 +1451,7 @@ const EmployersManagement = () => {
   useEffect(() => {
     loadEmployers();
     loadChangeRequests();
+    loadPurchases();
   }, []);
 
   // Reload data when tabs change
@@ -975,14 +1464,22 @@ const EmployersManagement = () => {
   // Refresh data
   const handleRefresh = async () => {
     setRefreshing(true);
-    await loadEmployers();
-    await loadChangeRequests();
+    await Promise.all([
+      loadEmployers(),
+      loadChangeRequests(),
+      loadPurchases()
+    ]);
+    setRefreshing(false);
   };
 
   const getStatusText = (status) => {
     if (status === 'approved') return language === 'vi' ? 'Đã duyệt' : 'Approved';
     if (status === 'rejected') return language === 'vi' ? 'Từ chối' : 'Rejected';
     if (status === 'pending') return language === 'vi' ? 'Chờ duyệt' : 'Pending';
+    if (status === 'active') return language === 'vi' ? 'Đang hoạt động' : 'Active';
+    if (status === 'locked') return language === 'vi' ? 'Bị khóa' : 'Locked';
+    if (status === 'expiring') return language === 'vi' ? 'Sắp hết hạn' : 'Expiring';
+    if (status === 'expired') return language === 'vi' ? 'Đã hết hạn' : 'Expired';
     return status;
   };
 
@@ -1307,28 +1804,333 @@ const EmployersManagement = () => {
               </SubTabsContainer>
             )}
 
-            <FilterSection>
-              <FilterWrapper>
-                <TableFilter
-                  searchValue={searchTerm}
-                  onSearchChange={setSearchTerm}
-                  filterOptions={filterOptions}
-                  activeFilters={filters}
-                  onFilterToggle={handleFilterToggle}
-                  searchPlaceholder={language === 'vi' ? 'Tìm kiếm công ty, email, ngành...' : 'Search company, email, industry...'}
-                />
-              </FilterWrapper>
-              <RefreshButton onClick={handleRefresh} disabled={refreshing} $loading={refreshing}>
-                <RefreshCw size={18} />
-                {refreshing
-                  ? (language === 'vi' ? 'Đang tải...' : 'Loading...')
-                  : (language === 'vi' ? 'Làm mới' : 'Refresh')
-                }
-              </RefreshButton>
-            </FilterSection>
+            {mainTab === 'features' && (
+              <SubTabsContainer>
+                <SubTabButton
+                  $active={activeTab === 'quick_jobs'}
+                  onClick={() => setActiveTab('quick_jobs')}
+                >
+                  <Zap size={16} style={{ marginRight: '6px' }} />
+                  {language === 'vi' ? 'Chức năng tuyển gấp' : 'Urgent Recruiting'}
+                  {pendingQuickJobCount > 0 && (
+                    <TabBadge style={{ padding: '1px 5px', fontSize: '10px', height: '15px', minWidth: '15px' }}>
+                      {pendingQuickJobCount}
+                    </TabBadge>
+                  )}
+                </SubTabButton>
+                <SubTabButton
+                  $active={activeTab === 'grant_package'}
+                  onClick={() => setActiveTab('grant_package')}
+                >
+                  <Award size={16} style={{ marginRight: '6px' }} />
+                  {language === 'vi' ? 'Cấp gói dịch vụ' : 'Grant Service Package'}
+                </SubTabButton>
+              </SubTabsContainer>
+            )}
 
-            <TableWrapper>
-              {activeTab === 'quick_jobs' ? (
+            {activeTab !== 'grant_package' && (
+              <FilterSection>
+                <FilterWrapper>
+                  <TableFilter
+                    searchValue={searchTerm}
+                    onSearchChange={setSearchTerm}
+                    filterOptions={filterOptions}
+                    activeFilters={filters}
+                    onFilterToggle={handleFilterToggle}
+                    searchPlaceholder={language === 'vi' ? 'Tìm kiếm công ty, email, ngành...' : 'Search company, email, industry...'}
+                  />
+                </FilterWrapper>
+                <RefreshButton onClick={handleRefresh} disabled={refreshing} $loading={refreshing}>
+                  <RefreshCw size={18} />
+                  {refreshing
+                    ? (language === 'vi' ? 'Đang tải...' : 'Loading...')
+                    : (language === 'vi' ? 'Làm mới' : 'Refresh')
+                  }
+                </RefreshButton>
+              </FilterSection>
+            )}
+
+            {activeTab === 'grant_package' ? (
+              <>
+                <FormCard>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px', borderBottom: '1px solid #E2E8F0', paddingBottom: '12px' }}>
+                    <Award size={24} color="#3b82f6" />
+                    <h2 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>
+                      {language === 'vi' ? 'Cấp Gói Dịch Vụ Cho Nhà Tuyển Dụng' : 'Grant Service Package to Employer'}
+                    </h2>
+                  </div>
+                  
+                  {loadingPackages ? (
+                    <div style={{ padding: '20px 0', textAlign: 'center', color: '#64748B' }}>
+                      {language === 'vi' ? 'Đang tải thông tin gói...' : 'Loading packages...'}
+                    </div>
+                  ) : (
+                    <form onSubmit={handleGrantPackage}>
+                      <FormGroup>
+                        <FormLabel>{language === 'vi' ? 'Chọn Nhà tuyển dụng' : 'Select Employer'}</FormLabel>
+                        <FormSelect
+                          value={selectedEmployerId}
+                          onChange={(e) => setSelectedEmployerId(e.target.value)}
+                          required
+                        >
+                          <option value="">-- {language === 'vi' ? 'Chọn Nhà tuyển dụng' : 'Select Employer'} --</option>
+                          {employers
+                            .filter(emp => emp.companyName && emp.companyName !== 'N/A')
+                            .sort((a, b) => a.companyName.localeCompare(b.companyName))
+                            .map(emp => (
+                              <option key={emp.id} value={emp.id}>
+                                {emp.companyName} ({emp.email})
+                              </option>
+                            ))
+                          }
+                        </FormSelect>
+                      </FormGroup>
+
+                      <FormGroup>
+                        <FormLabel>{language === 'vi' ? 'Chọn Gói dịch vụ' : 'Select Package'}</FormLabel>
+                        <FormSelect
+                          value={selectedPackageId}
+                          onChange={(e) => setSelectedPackageId(e.target.value)}
+                          required
+                        >
+                          <option value="">-- {language === 'vi' ? 'Chọn Gói dịch vụ' : 'Select Package'} --</option>
+                          {packages.map(pkg => (
+                            <option key={pkg.packageId} value={pkg.packageId}>
+                              {pkg.packageName}
+                            </option>
+                          ))}
+                        </FormSelect>
+                      </FormGroup>
+
+                      <FormGroup>
+                        <FormLabel>{language === 'vi' ? 'Chọn Thời hạn' : 'Select Duration'}</FormLabel>
+                        <FormSelect
+                          value={selectedDuration}
+                          onChange={(e) => setSelectedDuration(e.target.value)}
+                          required
+                          disabled={!selectedPackage}
+                        >
+                          <option value="">-- {language === 'vi' ? 'Chọn Thời hạn' : 'Select Duration'} --</option>
+                          {selectedPackage && selectedPackage.prices.map((priceOption, idx) => (
+                            <option key={idx} value={priceOption.duration}>
+                              {priceOption.duration} - {Number(priceOption.amount || 0).toLocaleString('vi-VN')} VNĐ
+                            </option>
+                          ))}
+                        </FormSelect>
+                      </FormGroup>
+
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>
+                        <SubmitButton type="submit" disabled={granting}>
+                          {granting ? (
+                            <>
+                              <RefreshCw size={16} className="spin" style={{ animation: 'spin 1s linear infinite' }} />
+                              {language === 'vi' ? 'Đang cấp gói...' : 'Granting...'}
+                            </>
+                          ) : (
+                            <>
+                              <Award size={16} />
+                              {language === 'vi' ? 'Xác Nhận Cấp Gói' : 'Confirm Grant'}
+                            </>
+                          )}
+                        </SubmitButton>
+                      </div>
+                    </form>
+                  )}
+                </FormCard>
+
+                <div style={{ margin: '40px 0 24px', borderTop: '2px dashed #E2E8F0' }} />
+
+                <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#1E293B', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                    📋 {language === 'vi' ? 'Lịch Sử & Trạng Thái Mua Gói' : 'Package Subscriptions History'}
+                  </h3>
+                </div>
+
+                <TabsContainer style={{ marginBottom: '16px' }}>
+                  <Tab
+                    $active={packageTab === 'pending'}
+                    onClick={() => setPackageTab('pending')}
+                    style={{ padding: '8px 16px', fontSize: '14px' }}
+                  >
+                    <Clock size={16} style={{ marginRight: '6px' }} />
+                    {language === 'vi' ? 'Chờ duyệt' : 'Pending Approval'}
+                  </Tab>
+                  <Tab
+                    $active={packageTab === 'approved'}
+                    onClick={() => setPackageTab('approved')}
+                    style={{ padding: '8px 16px', fontSize: '14px' }}
+                  >
+                    <CheckCircle size={16} style={{ marginRight: '6px' }} />
+                    {language === 'vi' ? 'Đã duyệt' : 'Approved'}
+                  </Tab>
+                </TabsContainer>
+
+                <div style={{ marginBottom: '16px' }}>
+                  <TableFilter
+                    searchValue={purchaseSearchTerm}
+                    onSearchChange={setPurchaseSearchTerm}
+                    filterOptions={purchaseFilterOptions}
+                    activeFilters={purchaseFilters}
+                    onFilterToggle={handlePurchaseFilterToggle}
+                    searchPlaceholder={language === 'vi' ? 'Tìm kiếm nhà tuyển dụng hoặc gói...' : 'Search employer or package...'}
+                  />
+                </div>
+
+                <TableWrapper>
+                  {loadingPurchases ? (
+                    <div style={{ padding: '40px 0', textAlign: 'center', color: '#64748B' }}>
+                      {language === 'vi' ? 'Đang tải danh sách...' : 'Loading subscriptions...'}
+                    </div>
+                  ) : (
+                    <Table>
+                      <thead>
+                        <tr>
+                          <th>{language === 'vi' ? 'Nhà tuyển dụng' : 'Employer'}</th>
+                          <th>{language === 'vi' ? 'Gói dịch vụ' : 'Package'}</th>
+                          <th>{language === 'vi' ? 'Thời gian mua' : 'Purchase Date'}</th>
+                          <th>{language === 'vi' ? 'Hết hạn' : 'Expiry Date'}</th>
+                          <th>{language === 'vi' ? 'Thời hạn' : 'Duration'}</th>
+                          <th>{language === 'vi' ? 'Giá trị' : 'Price'}</th>
+                          <th>{language === 'vi' ? 'Tình trạng' : 'Status'}</th>
+                          <th>{language === 'vi' ? 'Thao tác' : 'Actions'}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {currentPurchases.map((purchase) => {
+                          const Icon = packageIcons[purchase.package] || Package;
+                          return (
+                            <tr key={purchase.id}>
+                              <td style={{ fontWeight: 600 }}>{purchase.employer}</td>
+                              <td>
+                                <PackageBadge $color={packageColors[purchase.package] || '#6366f1'}>
+                                  <Icon size={14} />
+                                  {purchase.package}
+                                </PackageBadge>
+                              </td>
+                              <td>
+                                <DateText>
+                                  <Calendar size={14} style={{ display: 'inline', marginRight: '4px' }} />
+                                  {formatDateTime(purchase.purchaseDateTime || purchase.purchaseDate)}
+                                </DateText>
+                              </td>
+                              <td>
+                                <DateText>
+                                  <Clock size={14} style={{ display: 'inline', marginRight: '4px' }} />
+                                  {formatDateTime(purchase.expiryDateTime || purchase.expiryDate)}
+                                </DateText>
+                              </td>
+                              <td>
+                                <span style={{ fontWeight: 600 }}>{purchase.duration}</span>
+                              </td>
+                              <td>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
+                                  {purchase.price.toLocaleString('vi-VN')} VND
+                                </div>
+                              </td>
+                              <td>
+                                {packageTab === 'pending' ? (
+                                  <ApproveButton onClick={() => handleApprovePurchase(purchase.id)} style={{ padding: '6px 12px', fontSize: '12px' }}>
+                                    <CheckCircle size={14} />
+                                    {language === 'vi' ? 'Duyệt' : 'Approve'}
+                                  </ApproveButton>
+                                ) : (
+                                  <StatusBadge $status={purchase.status}>
+                                    {getStatusText(purchase.status)}
+                                  </StatusBadge>
+                                )}
+                              </td>
+                              <td>
+                                <ActionButtons>
+                                  <IconButton title={language === 'vi' ? 'Xem chi tiết' : 'View details'}>
+                                    <Eye size={16} />
+                                  </IconButton>
+                                  {packageTab === 'approved' && purchase.status === 'active' && (
+                                    <IconButton
+                                      title={language === 'vi' ? 'Khóa dịch vụ' : 'Lock service'}
+                                      onClick={() => openPurchaseLockConfirm(purchase)}
+                                    >
+                                      <Lock size={16} />
+                                    </IconButton>
+                                  )}
+                                  {packageTab === 'approved' && purchase.status === 'locked' && (
+                                    <IconButton
+                                      title={language === 'vi' ? 'Mở khóa dịch vụ' : 'Unlock service'}
+                                      onClick={() => handleUnlockPurchase(purchase.id)}
+                                    >
+                                      <Unlock size={16} />
+                                    </IconButton>
+                                  )}
+                                </ActionButtons>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                        {currentPurchases.length === 0 && (
+                          <tr>
+                            <td colSpan="8" style={{ textAlign: 'center', padding: '32px', color: '#64748B' }}>
+                              {language === 'vi' ? 'Không tìm thấy lượt đăng ký gói nào' : 'No subscriptions found'}
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </Table>
+                  )}
+                </TableWrapper>
+
+                {purchaseTotalPages > 1 && (
+                  <PaginationContainer style={{ marginTop: '16px' }}>
+                    <PaginationInfo>
+                      {language === 'vi'
+                        ? `Hiển thị ${purchaseStartIndex + 1}-${Math.min(purchaseEndIndex, filteredPurchases.length)} trong tổng số ${filteredPurchases.length} gói`
+                        : `Showing ${purchaseStartIndex + 1}-${Math.min(purchaseEndIndex, filteredPurchases.length)} of ${filteredPurchases.length} packages`
+                      }
+                    </PaginationInfo>
+                    <PaginationButtons>
+                      <PageButton
+                        onClick={() => setPurchaseCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={purchaseCurrentPage === 1}
+                      >
+                        {language === 'vi' ? 'Trước' : 'Previous'}
+                      </PageButton>
+                      
+                      {[...Array(purchaseTotalPages)].map((_, index) => {
+                        const pageNumber = index + 1;
+                        if (
+                          pageNumber === 1 ||
+                          pageNumber === purchaseTotalPages ||
+                          (pageNumber >= purchaseCurrentPage - 1 && pageNumber <= purchaseCurrentPage + 1)
+                        ) {
+                          return (
+                            <PageButton
+                              key={pageNumber}
+                              $active={purchaseCurrentPage === pageNumber}
+                              onClick={() => setPurchaseCurrentPage(pageNumber)}
+                            >
+                              {pageNumber}
+                            </PageButton>
+                          );
+                        } else if (
+                          pageNumber === purchaseCurrentPage - 2 ||
+                          pageNumber === purchaseCurrentPage + 2
+                        ) {
+                          return <PageEllipsis key={pageNumber}>...</PageEllipsis>;
+                        }
+                        return null;
+                      })}
+                      
+                      <PageButton
+                        onClick={() => setPurchaseCurrentPage(prev => Math.min(purchaseTotalPages, prev + 1))}
+                        disabled={purchaseCurrentPage === purchaseTotalPages}
+                      >
+                        {language === 'vi' ? 'Sau' : 'Next'}
+                      </PageButton>
+                    </PaginationButtons>
+                  </PaginationContainer>
+                )}
+              </>
+            ) : (
+              <TableWrapper>
+                {activeTab === 'quick_jobs' ? (
                 <Table>
                   <thead>
                     <tr>
@@ -1760,8 +2562,10 @@ const EmployersManagement = () => {
                 </Table>
               )}
             </TableWrapper>
+            )}
 
-            <PaginationContainer>
+            {activeTab !== 'grant_package' && (
+              <PaginationContainer>
               <PaginationInfo>
                 {activeTab === 'withdrawals' ? (
                   language === 'vi'
@@ -1823,6 +2627,7 @@ const EmployersManagement = () => {
                 </PageButton>
               </PaginationButtons>
             </PaginationContainer>
+            )}
           </>
         )}
       </PageContainer>
@@ -2216,6 +3021,100 @@ const EmployersManagement = () => {
                 style={{ flex: 1, padding: '12px', background: 'none', border: '1.5px solid #E2E8F0', borderRadius: '8px', color: '#64748B', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}
               >
                 {language === 'vi' ? 'Đóng' : 'Close'}
+              </button>
+            </div>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+
+      {/* Purchase Approval Success Modal */}
+      {showPurchaseSuccessModal && approvedPurchaseInfo && (
+        <ModalOverlay onClick={() => setShowPurchaseSuccessModal(false)}>
+          <ModalContent onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#ECFDF5', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid #A7F3D0' }}>
+                <CheckCircle style={{ color: '#10B981' }} />
+              </div>
+              <div>
+                <ModalTitle style={{ textAlign: 'left', margin: 0, fontSize: '20px' }}>
+                  {language === 'vi' ? 'Duyệt Gói Thành Công!' : 'Package Approved Successfully!'}
+                </ModalTitle>
+                <div style={{ fontSize: '13px', color: '#64748B', marginTop: '2px' }}>
+                  {language === 'vi' ? 'Đã kích hoạt gói dịch vụ cho doanh nghiệp' : 'Service package activated successfully'}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ background: '#F8FAFC', borderRadius: '12px', padding: '16px', border: '1.5px solid #E2E8F0', marginBottom: '24px', display: 'grid', gap: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                <span style={{ color: '#64748B' }}>{language === 'vi' ? 'Nhà tuyển dụng' : 'Employer'}</span>
+                <strong style={{ color: '#1E293B' }}>{approvedPurchaseInfo.employer}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                <span style={{ color: '#64748B' }}>{language === 'vi' ? 'Gói dịch vụ' : 'Package'}</span>
+                <strong style={{ color: '#1E293B' }}>{approvedPurchaseInfo.package}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                <span style={{ color: '#64748B' }}>{language === 'vi' ? 'Thời hạn' : 'Duration'}</span>
+                <strong style={{ color: '#1E293B' }}>{approvedPurchaseInfo.duration}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                <span style={{ color: '#64748B' }}>{language === 'vi' ? 'Hết hạn' : 'Expiry'}</span>
+                <strong style={{ color: '#1E293B' }}>{formatDateTime(approvedPurchaseInfo.expiryDateTime || approvedPurchaseInfo.expiryDate)}</strong>
+              </div>
+            </div>
+
+            <ModalButton onClick={() => setShowPurchaseSuccessModal(false)}>
+              {language === 'vi' ? 'Hoàn tất' : 'Done'}
+            </ModalButton>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+
+      {/* Purchase Lock Confirm Modal */}
+      {showPurchaseLockConfirm && purchaseLockTarget && (
+        <ModalOverlay onClick={() => setShowPurchaseLockConfirm(false)}>
+          <ModalContent onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#FEE2E2', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid #FCA5A5' }}>
+                <Lock style={{ color: '#EF4444' }} />
+              </div>
+              <div>
+                <ModalTitle style={{ textAlign: 'left', margin: 0, fontSize: '20px' }}>
+                  {language === 'vi' ? 'Xác Nhận Khóa Dịch Vụ?' : 'Confirm Lock Service?'}
+                </ModalTitle>
+                <div style={{ fontSize: '13px', color: '#64748B', marginTop: '2px' }}>
+                  {language === 'vi' ? 'Gói dịch vụ sẽ chuyển sang trạng thái bị khóa' : 'Package subscription will be locked'}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ background: '#F8FAFC', borderRadius: '12px', padding: '16px', border: '1.5px solid #E2E8F0', marginBottom: '24px', display: 'grid', gap: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                <span style={{ color: '#64748B' }}>{language === 'vi' ? 'Nhà tuyển dụng' : 'Employer'}</span>
+                <strong style={{ color: '#1E293B' }}>{purchaseLockTarget.employer}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                <span style={{ color: '#64748B' }}>{language === 'vi' ? 'Gói dịch vụ' : 'Package'}</span>
+                <strong style={{ color: '#1E293B' }}>{purchaseLockTarget.package}</strong>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={() => setShowPurchaseLockConfirm(false)}
+                style={{ flex: 1, padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', background: 'white', cursor: 'pointer', fontWeight: 600 }}
+              >
+                {language === 'vi' ? 'Hủy' : 'Cancel'}
+              </button>
+              <button
+                onClick={async () => {
+                  await handleLockPurchase(purchaseLockTarget.id);
+                  setShowPurchaseLockConfirm(false);
+                }}
+                style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', background: '#EF4444', color: 'white', cursor: 'pointer', fontWeight: 600 }}
+              >
+                {language === 'vi' ? 'Khóa dịch vụ' : 'Lock service'}
               </button>
             </div>
           </ModalContent>

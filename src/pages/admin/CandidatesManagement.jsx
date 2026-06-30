@@ -689,44 +689,12 @@ const CandidatesManagement = () => {
   const [apiChartData, setApiChartData] = useState([]);
   const [apiJobChartData, setApiJobChartData] = useState([]);
 
-  const [activeTab, setActiveTab] = useState('candidates'); // 'candidates', 'withdrawals', 'verifications', 'experiences', 'deletions'
+  const [activeTab, setActiveTab] = useState('candidates'); // 'candidates', 'verifications', 'experiences', 'deletions'
   const [pendingExpCount, setPendingExpCount] = useState(0);
-  const [withdrawRequests, setWithdrawRequests] = useState([]);
-  const [withdrawStatusFilter, setWithdrawStatusFilter] = useState('all'); // 'all' | 'pending' | 'approved' | 'rejected'
-  const [withdrawWeekFilter, setWithdrawWeekFilter] = useState(false); // true = chỉ tuần này
   const [verifications, setVerifications] = useState([]);
   const [verifLoading, setVerifLoading] = useState(false);
   const [deletionRequests, setDeletionRequests] = useState([]);
   const [deletionLoading, setDeletionLoading] = useState(false);
-
-  const loadWithdrawRequests = () => {
-    const dbRequests = [];
-    
-    // Gather from candidates list (already loaded from database)
-    if (Array.isArray(candidates)) {
-      candidates.forEach(candidate => {
-        if (Array.isArray(candidate.withdrawals)) {
-          candidate.withdrawals.forEach(w => {
-            dbRequests.push({
-              id: w.id || `withdraw-${w.date}`,
-              employerId: candidate.id,
-              companyName: candidate.name,
-              amount: Math.abs(Number(w.amount || 0)),
-              bankName: w.bankName || '',
-              accountNumber: w.accountNumber || '',
-              accountName: w.accountName || '',
-              status: w.status || 'pending',
-              createdAt: w.date || new Date().toISOString(),
-              isCandidate: true
-            });
-          });
-        }
-      });
-    }
-
-    dbRequests.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    setWithdrawRequests(dbRequests);
-  };
 
   const getCandidateInitials = (name) => {
     if (!name || name === 'N/A') return '?';
@@ -906,86 +874,6 @@ const CandidatesManagement = () => {
   };
   // ─────────────────────────────────────────────────────────────────────────
 
-  const handleApproveWithdrawal = async (requestId) => {
-    try {
-      const request = withdrawRequests.find(req => req.id === requestId);
-      if (!request) return;
-
-      const candidateId = request.employerId;
-
-      const profile = await candidateProfileService.getProfile(candidateId);
-      if (profile) {
-        const existingWithdrawals = profile.withdrawals || [];
-        const updatedWithdrawals = existingWithdrawals.map(w => 
-          w.id === requestId ? { ...w, status: 'approved' } : w
-        );
-        // walletBalance already deducted when withdrawal was created — no change needed
-        await candidateProfileService.adminUpdateCandidateProfile(candidateId, {
-          withdrawals: updatedWithdrawals
-        });
-      }
-
-      setWithdrawRequests(prev => 
-        prev.map(req => 
-          req.id === requestId ? { ...req, status: 'approved' } : req
-        )
-      );
-
-      try {
-        await notificationService.createCandidateWithdrawalStatusNotification(request, 'approved');
-      } catch (notifyErr) {
-        console.error('Error sending approval notification:', notifyErr);
-      }
-
-      alert(language === 'vi' ? 'Duyệt yêu cầu rút tiền thành công!' : 'Withdrawal request approved successfully!');
-    } catch (err) {
-      console.error('Error approving withdrawal:', err);
-      alert(language === 'vi' ? 'Không thể duyệt yêu cầu rút tiền' : 'Failed to approve withdrawal');
-    }
-  };
-
-  const handleRejectWithdrawal = async (requestId) => {
-    try {
-      const request = withdrawRequests.find(req => req.id === requestId);
-      if (!request) return;
-
-      const candidateId = request.employerId;
-
-      const profile = await candidateProfileService.getProfile(candidateId);
-      if (profile) {
-        const existingWithdrawals = profile.withdrawals || [];
-        const updatedWithdrawals = existingWithdrawals.map(w => 
-          w.id === requestId ? { ...w, status: 'rejected' } : w
-        );
-        // Refund: add back the withdrawn amount to walletBalance
-        const refundAmount = Number(request.amount || 0);
-        const currentBalance = Number(profile.walletBalance || 0);
-        const newBalance = Math.max(0, currentBalance + refundAmount);
-        await candidateProfileService.adminUpdateCandidateProfile(candidateId, {
-          withdrawals: updatedWithdrawals,
-          walletBalance: newBalance
-        });
-      }
-
-      setWithdrawRequests(prev => 
-        prev.map(req => 
-          req.id === requestId ? { ...req, status: 'rejected' } : req
-        )
-      );
-
-      try {
-        await notificationService.createCandidateWithdrawalStatusNotification(request, 'rejected');
-      } catch (notifyErr) {
-        console.error('Error sending rejection notification:', notifyErr);
-      }
-
-      alert(language === 'vi' ? 'Đã từ chối yêu cầu rút tiền!' : 'Withdrawal request rejected!');
-    } catch (err) {
-      console.error('Error rejecting withdrawal:', err);
-      alert(language === 'vi' ? 'Không thể từ chối yêu cầu rút tiền' : 'Failed to reject withdrawal');
-    }
-  };
-
   const loadData = async () => {
     setLoading(true);
     try {
@@ -1014,34 +902,9 @@ const CandidatesManagement = () => {
             joined: item.createdAt ? new Date(item.createdAt).toISOString().split('T')[0] : 'Incomplete setup',
             location: item.location || 'Unknown',
             title: item.title || 'Candidate',
-            createdAt: item.createdAt, // Keep raw for processing
-            withdrawals: item.withdrawals || [] // Keep withdrawals array!
+            createdAt: item.createdAt // Keep raw for processing
           }));
         setCandidates(transformedData);
-
-        // Compute withdrawals from candidates directly (from database)
-        const dbRequests = [];
-        transformedData.forEach(candidate => {
-          if (Array.isArray(candidate.withdrawals)) {
-            candidate.withdrawals.forEach(w => {
-              dbRequests.push({
-                id: w.id || `withdraw-${w.date}`,
-                employerId: candidate.id,
-                companyName: candidate.name,
-                amount: Math.abs(Number(w.amount || 0)),
-                bankName: w.bankName || '',
-                accountNumber: w.accountNumber || '',
-                accountName: w.accountName || '',
-                status: w.status || 'pending',
-                createdAt: w.date || new Date().toISOString(),
-                isCandidate: true
-              });
-            });
-          }
-        });
-
-        dbRequests.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        setWithdrawRequests(dbRequests);
       }
 
       setJobs([...standardJobs, ...quickJobs]);
@@ -1058,8 +921,6 @@ const CandidatesManagement = () => {
       await loadVerifications();
     } else if (activeTab === 'deletions') {
       await loadDeletionRequests();
-    } else if (activeTab === 'withdrawals') {
-      await loadData();
     } else {
       await loadData();
     }
@@ -1073,9 +934,6 @@ const CandidatesManagement = () => {
   }, []);
 
   useEffect(() => {
-    if (activeTab === 'withdrawals') {
-      loadWithdrawRequests();
-    }
     if (activeTab === 'verifications') {
       loadVerifications();
     }
@@ -1110,36 +968,16 @@ const CandidatesManagement = () => {
     return matchesSearch;
   });
 
-  const filteredWithdrawRequests = withdrawRequests.filter(req => {
-    const matchesSearch = searchTerm === '' ||
-      req.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      req.bankName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      req.accountNumber.includes(searchTerm);
-
-    const matchesStatus = withdrawStatusFilter === 'all' || req.status === withdrawStatusFilter;
-
-    const matchesWeek = !withdrawWeekFilter || (() => {
-      const now = new Date();
-      const startOfWeek = new Date(now);
-      startOfWeek.setDate(now.getDate() - now.getDay());
-      startOfWeek.setHours(0, 0, 0, 0);
-      const reqDate = new Date(req.createdAt);
-      return reqDate >= startOfWeek;
-    })();
-
-    return matchesSearch && matchesStatus && matchesWeek;
-  });
+  const filteredWithdrawRequests = [];
+  const currentWithdrawRequests = [];
 
   // Pagination calculations
-  const totalPages = activeTab === 'withdrawals'
-    ? Math.ceil(filteredWithdrawRequests.length / itemsPerPage)
-    : activeTab === 'deletions'
+  const totalPages = activeTab === 'deletions'
     ? Math.ceil(deletionRequests.filter(d => !searchTerm || d.name.toLowerCase().includes(searchTerm.toLowerCase()) || d.email.toLowerCase().includes(searchTerm.toLowerCase())).length / itemsPerPage)
     : Math.ceil(filteredCandidates.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentCandidates = filteredCandidates.slice(startIndex, endIndex);
-  const currentWithdrawRequests = filteredWithdrawRequests.slice(startIndex, endIndex);
 
   // Reset to page 1 when filter changes
   const handleSearchChange = (e) => {
@@ -1317,16 +1155,6 @@ const CandidatesManagement = () => {
           >
             <Users size={18} style={{ marginRight: '8px' }} />
             {language === 'vi' ? 'Danh sách ứng viên' : 'Candidates List'}
-          </Tab>
-          <Tab 
-            $active={activeTab === 'withdrawals'}
-            onClick={() => setActiveTab('withdrawals')}
-          >
-            <TrendingUp size={18} style={{ marginRight: '8px' }} />
-            {language === 'vi' ? 'Yêu cầu rút tiền' : 'Withdrawal Requests'}
-            {withdrawRequests.filter(req => req.status === 'pending').length > 0 && (
-              <TabBadge>{withdrawRequests.filter(req => req.status === 'pending').length}</TabBadge>
-            )}
           </Tab>
           <Tab
             $active={activeTab === 'verifications'}
@@ -1606,50 +1434,6 @@ const CandidatesManagement = () => {
               onChange={handleSearchChange}
             />
           </SearchBox>
-          {activeTab === 'withdrawals' && (
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-              {[
-                { value: 'all',      labelVi: 'Tất cả',   labelEn: 'All'      },
-                { value: 'pending',  labelVi: 'Chờ duyệt',labelEn: 'Pending'  },
-                { value: 'approved', labelVi: 'Đồng ý',   labelEn: 'Approved' },
-                { value: 'rejected', labelVi: 'Từ chối',  labelEn: 'Rejected' },
-              ].map(opt => (
-                <button
-                  key={opt.value}
-                  onClick={() => { setWithdrawStatusFilter(opt.value); setCurrentPage(1); }}
-                  style={{
-                    padding: '7px 14px',
-                    borderRadius: '8px',
-                    border: `2px solid ${withdrawStatusFilter === opt.value ? '#667eea' : '#e2e8f0'}`,
-                    background: withdrawStatusFilter === opt.value ? '#667eea' : 'white',
-                    color: withdrawStatusFilter === opt.value ? 'white' : '#475569',
-                    fontWeight: 600,
-                    fontSize: '13px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  {language === 'vi' ? opt.labelVi : opt.labelEn}
-                </button>
-              ))}
-              <button
-                onClick={() => { setWithdrawWeekFilter(prev => !prev); setCurrentPage(1); }}
-                style={{
-                  padding: '7px 14px',
-                  borderRadius: '8px',
-                  border: `2px solid ${withdrawWeekFilter ? '#f59e0b' : '#e2e8f0'}`,
-                  background: withdrawWeekFilter ? '#f59e0b' : 'white',
-                  color: withdrawWeekFilter ? 'white' : '#475569',
-                  fontWeight: 600,
-                  fontSize: '13px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                }}
-              >
-                 {language === 'vi' ? 'Tuần này' : 'This Week'}
-              </button>
-            </div>
-          )}
           <ReloadButton onClick={handleRefresh} disabled={loading || verifLoading || deletionLoading}>
             <RefreshCw size={18} className={(loading || verifLoading || deletionLoading) ? 'spinning' : ''} />
             {(loading || verifLoading || deletionLoading)

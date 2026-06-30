@@ -8,6 +8,8 @@ import adminReportService from '../../services/adminReportService';
 import quickJobService from '../../services/quickJobService';
 import applicationService from '../../services/applicationService';
 import { getWithdrawalRequests, updateWithdrawalStatus } from '../../services/packageCatalogService';
+import candidateProfileService from '../../services/candidateProfileService';
+import notificationService from '../../services/notificationService';
 import {
   createWithdrawalApprovedNotification,
   createWithdrawalRejectedNotification
@@ -1352,10 +1354,16 @@ const AdminWallet = () => {
 
   // Withdrawal requests states
   const [withdrawRequests, setWithdrawRequests] = useState([]);
+  const [candidateWithdrawRequests, setCandidateWithdrawRequests] = useState([]);
+  const [withdrawTypeTab, setWithdrawTypeTab] = useState('employer'); // 'employer' | 'candidate'
   const [withdrawSearch, setWithdrawSearch] = useState('');
   const [withdrawStatusFilter, setWithdrawStatusFilter] = useState('all');
   const [withdrawWeekFilter, setWithdrawWeekFilter] = useState(false);
   const [withdrawCurrentPage, setWithdrawCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setWithdrawCurrentPage(1);
+  }, [withdrawTypeTab]);
 
   // Escrow specific states
   const [escrowJobs, setEscrowJobs] = useState([]);
@@ -1372,11 +1380,12 @@ const AdminWallet = () => {
     try {
       setIsLoading(true);
       
-      const [subscriptions, realJobs, apps, withdrawalRequests] = await Promise.all([
+      const [subscriptions, realJobs, apps, withdrawalRequests, candidateData] = await Promise.all([
         adminReportService.getAllSubscriptions().catch(() => []),
         quickJobService.getAllQuickJobs().catch(() => []),
         applicationService.getAllApplications().catch(() => []),
-        getWithdrawalRequests().catch(() => [])
+        getWithdrawalRequests().catch(() => []),
+        candidateProfileService.getAllCandidates().catch(() => [])
       ]);
 
       // 1. Process Subscription Purchases as Income Transactions
@@ -1551,6 +1560,31 @@ const AdminWallet = () => {
       })).filter(req => req.isCandidate !== true);
       setWithdrawRequests(mappedWithdrawals);
 
+      const candRequests = [];
+      if (Array.isArray(candidateData)) {
+        candidateData.forEach(candidate => {
+          if (Array.isArray(candidate.withdrawals)) {
+            candidate.withdrawals.forEach(w => {
+              candRequests.push({
+                id: w.id || `withdraw-${w.date}`,
+                employerId: candidate.userId || candidate.id,
+                companyName: candidate.fullName || candidate.name || (candidate.email ? candidate.email.split('@')[0] : 'Unknown Candidate'),
+                amount: Math.abs(Number(w.amount || 0)),
+                bankName: w.bankName || '',
+                accountNumber: w.accountNumber || '',
+                accountName: w.accountName || '',
+                status: w.status || 'pending',
+                createdAt: w.date || new Date().toISOString(),
+                isCandidate: true,
+                companyLogo: candidate.avatar || candidate.profileImage || null
+              });
+            });
+          }
+        });
+      }
+      candRequests.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setCandidateWithdrawRequests(candRequests);
+
       const now = new Date();
       const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
       setLastUpdated(language === 'vi' ? `Hôm nay, ${timeStr}` : `Today, ${timeStr}`);
@@ -1615,6 +1649,84 @@ const AdminWallet = () => {
     }
   };
 
+  const handleApproveCandidateWithdrawal = async (requestId) => {
+    try {
+      const request = candidateWithdrawRequests.find(req => req.id === requestId);
+      if (!request) return;
+
+      const candidateId = request.employerId;
+
+      const profile = await candidateProfileService.getProfile(candidateId);
+      if (profile) {
+        const existingWithdrawals = profile.withdrawals || [];
+        const updatedWithdrawals = existingWithdrawals.map(w => 
+          w.id === requestId ? { ...w, status: 'approved' } : w
+        );
+        await candidateProfileService.adminUpdateCandidateProfile(candidateId, {
+          withdrawals: updatedWithdrawals
+        });
+      }
+
+      setCandidateWithdrawRequests(prev => 
+        prev.map(req => 
+          req.id === requestId ? { ...req, status: 'approved' } : req
+        )
+      );
+
+      try {
+        await notificationService.createCandidateWithdrawalStatusNotification(request, 'approved');
+      } catch (notifyErr) {
+        console.error('Error sending approval notification:', notifyErr);
+      }
+
+      alert(language === 'vi' ? 'Duyệt yêu cầu rút tiền thành công!' : 'Withdrawal request approved successfully!');
+    } catch (err) {
+      console.error('Error approving withdrawal:', err);
+      alert(language === 'vi' ? 'Không thể duyệt yêu cầu rút tiền' : 'Failed to approve withdrawal');
+    }
+  };
+
+  const handleRejectCandidateWithdrawal = async (requestId) => {
+    try {
+      const request = candidateWithdrawRequests.find(req => req.id === requestId);
+      if (!request) return;
+
+      const candidateId = request.employerId;
+
+      const profile = await candidateProfileService.getProfile(candidateId);
+      if (profile) {
+        const existingWithdrawals = profile.withdrawals || [];
+        const updatedWithdrawals = existingWithdrawals.map(w => 
+          w.id === requestId ? { ...w, status: 'rejected' } : w
+        );
+        const refundAmount = Number(request.amount || 0);
+        const currentBalance = Number(profile.walletBalance || 0);
+        const newBalance = Math.max(0, currentBalance + refundAmount);
+        await candidateProfileService.adminUpdateCandidateProfile(candidateId, {
+          withdrawals: updatedWithdrawals,
+          walletBalance: newBalance
+        });
+      }
+
+      setCandidateWithdrawRequests(prev => 
+        prev.map(req => 
+          req.id === requestId ? { ...req, status: 'rejected' } : req
+        )
+      );
+
+      try {
+        await notificationService.createCandidateWithdrawalStatusNotification(request, 'rejected');
+      } catch (notifyErr) {
+        console.error('Error sending rejection notification:', notifyErr);
+      }
+
+      alert(language === 'vi' ? 'Đã từ chối yêu cầu rút tiền!' : 'Withdrawal request rejected!');
+    } catch (err) {
+      console.error('Error rejecting withdrawal:', err);
+      alert(language === 'vi' ? 'Không thể từ chối yêu cầu rút tiền' : 'Failed to reject withdrawal');
+    }
+  };
+
   const filteredWithdrawRequests = useMemo(() => {
     return withdrawRequests.filter(req => {
       const matchesSearch = withdrawSearch === '' ||
@@ -1640,6 +1752,34 @@ const AdminWallet = () => {
   const totalWithdrawPages = Math.ceil(filteredWithdrawRequests.length / withdrawItemsPerPage);
   const withdrawStartIndex = (withdrawCurrentPage - 1) * withdrawItemsPerPage;
   const currentWithdrawRequests = filteredWithdrawRequests.slice(withdrawStartIndex, withdrawStartIndex + withdrawItemsPerPage);
+
+  const filteredCandidateWithdrawRequests = useMemo(() => {
+    return candidateWithdrawRequests.filter(req => {
+      const matchesSearch = withdrawSearch === '' ||
+        req.companyName.toLowerCase().includes(withdrawSearch.toLowerCase()) ||
+        (req.employerId && req.employerId.toLowerCase().includes(withdrawSearch.toLowerCase())) ||
+        req.bankName.toLowerCase().includes(withdrawSearch.toLowerCase()) ||
+        req.accountNumber.includes(withdrawSearch);
+        
+      const matchesStatus = withdrawStatusFilter === 'all' || req.status === withdrawStatusFilter;
+      
+      let matchesWeek = true;
+      if (withdrawWeekFilter) {
+        const reqDate = new Date(req.createdAt);
+        const now = new Date();
+        const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+        startOfWeek.setHours(0, 0, 0, 0);
+        matchesWeek = reqDate >= startOfWeek;
+      }
+      
+      return matchesSearch && matchesStatus && matchesWeek;
+    });
+  }, [candidateWithdrawRequests, withdrawSearch, withdrawStatusFilter, withdrawWeekFilter]);
+
+  const candWithdrawItemsPerPage = 15;
+  const candWithdrawTotalPages = Math.ceil(filteredCandidateWithdrawRequests.length / candWithdrawItemsPerPage);
+  const candWithdrawStartIndex = (withdrawCurrentPage - 1) * candWithdrawItemsPerPage;
+  const currentCandWithdrawRequests = filteredCandidateWithdrawRequests.slice(candWithdrawStartIndex, candWithdrawStartIndex + candWithdrawItemsPerPage);
 
   const getWithdrawStatusText = (status) => {
     switch(status) {
@@ -2427,11 +2567,50 @@ ${language === 'vi' ? 'Cảm ơn bạn đã sử dụng dịch vụ của chúng
 
             {activeTab === 'withdrawals' && (
               <>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: '2px solid #E2E8F0' }}>
+                  <button
+                    onClick={() => { setWithdrawTypeTab('employer'); setWithdrawSearch(''); }}
+                    style={{
+                      padding: '12px 24px',
+                      fontSize: '15px',
+                      fontWeight: 600,
+                      color: withdrawTypeTab === 'employer' ? '#6d28d9' : '#64748B',
+                      background: 'transparent',
+                      border: 'none',
+                      borderBottom: `3px solid ${withdrawTypeTab === 'employer' ? '#6d28d9' : 'transparent'}`,
+                      cursor: 'pointer',
+                      marginBottom: '-2px',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {language === 'vi' ? 'Nhà tuyển dụng' : 'Employer'}
+                  </button>
+                  <button
+                    onClick={() => { setWithdrawTypeTab('candidate'); setWithdrawSearch(''); }}
+                    style={{
+                      padding: '12px 24px',
+                      fontSize: '15px',
+                      fontWeight: 600,
+                      color: withdrawTypeTab === 'candidate' ? '#6d28d9' : '#64748B',
+                      background: 'transparent',
+                      border: 'none',
+                      borderBottom: `3px solid ${withdrawTypeTab === 'candidate' ? '#6d28d9' : 'transparent'}`,
+                      cursor: 'pointer',
+                      marginBottom: '-2px',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {language === 'vi' ? 'Ứng viên' : 'Candidate'}
+                  </button>
+                </div>
+
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
                   <div style={{ display: 'flex', gap: '12px', flex: 1, minWidth: '280px', maxWidth: '400px' }}>
                     <Input
                       type="text"
-                      placeholder={language === 'vi' ? 'Tìm kiếm công ty, ID...' : 'Search company, ID...'}
+                      placeholder={withdrawTypeTab === 'employer' 
+                        ? (language === 'vi' ? 'Tìm kiếm công ty, ID...' : 'Search company, ID...')
+                        : (language === 'vi' ? 'Tìm kiếm ứng viên, ngân hàng...' : 'Search candidate, bank...')}
                       value={withdrawSearch}
                       onChange={(e) => { setWithdrawSearch(e.target.value); setWithdrawCurrentPage(1); }}
                       style={{ width: '100%', padding: '10px 16px' }}
@@ -2482,12 +2661,12 @@ ${language === 'vi' ? 'Cảm ơn bạn đã sử dụng dịch vụ của chúng
                     </button>
                   </div>
                 </div>
-
+ 
                 <WithdrawTableWrapper>
                   <WithdrawTable>
                     <thead>
                       <tr>
-                        <th>{language === 'vi' ? 'Nhà tuyển dụng' : 'Employer'}</th>
+                        <th>{withdrawTypeTab === 'employer' ? (language === 'vi' ? 'Nhà tuyển dụng' : 'Employer') : (language === 'vi' ? 'Ứng viên' : 'Candidate')}</th>
                         <th>{language === 'vi' ? 'Số tiền rút' : 'Withdraw Amount'}</th>
                         <th>{language === 'vi' ? 'Thông tin thụ hưởng' : 'Beneficiary Details'}</th>
                         <th>{language === 'vi' ? 'Ngày yêu cầu' : 'Requested Date'}</th>
@@ -2496,10 +2675,10 @@ ${language === 'vi' ? 'Cảm ơn bạn đã sử dụng dịch vụ của chúng
                       </tr>
                     </thead>
                     <tbody>
-                      {currentWithdrawRequests.map((req, index) => {
+                      {(withdrawTypeTab === 'employer' ? currentWithdrawRequests : currentCandWithdrawRequests).map((req, index) => {
                         const colorScheme = getColorScheme(index);
                         const initials = getCompanyInitials(req.companyName);
-
+ 
                         return (
                           <tr key={req.id}>
                             <td>
@@ -2514,7 +2693,7 @@ ${language === 'vi' ? 'Cảm ơn bạn đã sử dụng dịch vụ của chúng
                                 <WithdrawCompanyDetails>
                                   <WithdrawCompanyName>{req.companyName}</WithdrawCompanyName>
                                   <WithdrawCompanyMeta>
-                                    <Briefcase size={12} />
+                                    {withdrawTypeTab === 'employer' ? <Briefcase size={12} /> : <Users size={12} />}
                                     ID: {req.employerId}
                                   </WithdrawCompanyMeta>
                                 </WithdrawCompanyDetails>
@@ -2551,11 +2730,11 @@ ${language === 'vi' ? 'Cảm ơn bạn đã sử dụng dịch vụ của chúng
                             <td>
                               {req.status === 'pending' ? (
                                 <WithdrawActionButtons>
-                                  <WithdrawApproveButton onClick={() => handleApproveWithdrawal(req.id)}>
+                                  <WithdrawApproveButton onClick={() => withdrawTypeTab === 'employer' ? handleApproveWithdrawal(req.id) : handleApproveCandidateWithdrawal(req.id)}>
                                     <CheckCircle size={16} />
                                     {language === 'vi' ? 'Duyệt' : 'Approve'}
                                   </WithdrawApproveButton>
-                                  <WithdrawRejectButton onClick={() => handleRejectWithdrawal(req.id)}>
+                                  <WithdrawRejectButton onClick={() => withdrawTypeTab === 'employer' ? handleRejectWithdrawal(req.id) : handleRejectCandidateWithdrawal(req.id)}>
                                     <XCircle size={16} />
                                     {language === 'vi' ? 'Từ chối' : 'Reject'}
                                   </WithdrawRejectButton>
@@ -2569,7 +2748,7 @@ ${language === 'vi' ? 'Cảm ơn bạn đã sử dụng dịch vụ của chúng
                           </tr>
                         );
                       })}
-                      {currentWithdrawRequests.length === 0 && (
+                      {(withdrawTypeTab === 'employer' ? currentWithdrawRequests : currentCandWithdrawRequests).length === 0 && (
                         <tr>
                           <td colSpan="6" style={{ textAlign: 'center', padding: '32px', color: '#64748B' }}>
                             {language === 'vi' ? 'Không tìm thấy yêu cầu rút tiền nào' : 'No withdrawal requests found'}
@@ -2578,14 +2757,19 @@ ${language === 'vi' ? 'Cảm ơn bạn đã sử dụng dịch vụ của chúng
                       )}
                     </tbody>
                   </WithdrawTable>
-
-                  {totalWithdrawPages > 1 && (
+ 
+                  {((withdrawTypeTab === 'employer' ? totalWithdrawPages : candWithdrawTotalPages) > 1) && (
                     <PaginationWrapper>
                       <PaginationInfo>
-                        {language === 'vi' 
-                          ? `Hiển thị ${withdrawStartIndex + 1}-${Math.min(withdrawStartIndex + withdrawItemsPerPage, filteredWithdrawRequests.length)} trong số ${filteredWithdrawRequests.length} yêu cầu`
-                          : `Showing ${withdrawStartIndex + 1}-${Math.min(withdrawStartIndex + withdrawItemsPerPage, filteredWithdrawRequests.length)} of ${filteredWithdrawRequests.length} requests`
-                        }
+                        {withdrawTypeTab === 'employer' ? (
+                          language === 'vi' 
+                            ? `Hiển thị ${withdrawStartIndex + 1}-${Math.min(withdrawStartIndex + withdrawItemsPerPage, filteredWithdrawRequests.length)} trong số ${filteredWithdrawRequests.length} yêu cầu`
+                            : `Showing ${withdrawStartIndex + 1}-${Math.min(withdrawStartIndex + withdrawItemsPerPage, filteredWithdrawRequests.length)} of ${filteredWithdrawRequests.length} requests`
+                        ) : (
+                          language === 'vi' 
+                            ? `Hiển thị ${candWithdrawStartIndex + 1}-${Math.min(candWithdrawStartIndex + candWithdrawItemsPerPage, filteredCandidateWithdrawRequests.length)} trong số ${filteredCandidateWithdrawRequests.length} yêu cầu`
+                            : `Showing ${candWithdrawStartIndex + 1}-${Math.min(candWithdrawStartIndex + candWithdrawItemsPerPage, filteredCandidateWithdrawRequests.length)} of ${filteredCandidateWithdrawRequests.length} requests`
+                        )}
                       </PaginationInfo>
                       <PaginationButtons>
                         <PageButton 
@@ -2594,7 +2778,7 @@ ${language === 'vi' ? 'Cảm ơn bạn đã sử dụng dịch vụ của chúng
                         >
                           {language === 'vi' ? 'Trước' : 'Previous'}
                         </PageButton>
-                        {Array.from({ length: totalWithdrawPages }, (_, idx) => (
+                        {Array.from({ length: withdrawTypeTab === 'employer' ? totalWithdrawPages : candWithdrawTotalPages }, (_, idx) => (
                           <PageButton
                             key={idx + 1}
                             $active={withdrawCurrentPage === idx + 1}
@@ -2604,7 +2788,7 @@ ${language === 'vi' ? 'Cảm ơn bạn đã sử dụng dịch vụ của chúng
                           </PageButton>
                         ))}
                         <PageButton 
-                          disabled={withdrawCurrentPage === totalWithdrawPages}
+                          disabled={withdrawCurrentPage === (withdrawTypeTab === 'employer' ? totalWithdrawPages : candWithdrawTotalPages)}
                           onClick={() => setWithdrawCurrentPage(prev => prev + 1)}
                         >
                           {language === 'vi' ? 'Sau' : 'Next'}
