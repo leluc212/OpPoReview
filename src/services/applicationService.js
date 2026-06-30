@@ -1,22 +1,8 @@
 import { fetchAuthSession } from 'aws-amplify/auth';
-import { getAuthHeaders } from './authHeaders.js';
+import { getAuthHeaders, getIdToken } from './authHeaders.js';
 
 // HTTP API uses the $default stage, so the invoke URL must NOT include /prod.
 const API_BASE_URL = 'https://l1636ie205.execute-api.ap-southeast-1.amazonaws.com';
-
-function decodeJwtPayload(token) {
-  try {
-    const parts = token.split('.');
-    if (parts.length < 2) return null;
-    const payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-    const json = decodeURIComponent(atob(payload).split('').map(function(c) {
-      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-    return JSON.parse(json);
-  } catch (e) {
-    return null;
-  }
-}
 
 /**
  * Submit a job application
@@ -309,15 +295,12 @@ async function fetchResiliently({ path, defaultUrl, serviceName = 'Service' }) {
 }
 
 /**
- * Get authentication token (reused here to avoid duplicating getAuthHeaders for the unified fetcher)
+ * Get authentication token for resilient fetcher — delegates to shared getIdToken.
  */
 async function getAuthTokenForApplications() {
   try {
-    const session = await fetchAuthSession();
-    const idToken = session.tokens?.idToken;
-    if (!idToken) return null;
-    return idToken.toString().trim().replace(/[\r\n\t]/g, '');
-  } catch (err) {
+    return await getIdToken();
+  } catch (_) {
     return null;
   }
 }
@@ -384,17 +367,58 @@ const applicationService = {
    * Admin: Approve a pending_change request — performs real-time worker swap
    */
   async approveChangeRequest(applicationId) {
-    const headers = await getAuthHeaders();
+    // Lấy token trực tiếp từ getIdToken (nguồn duy nhất, đã validate JWT)
+    const token = await getIdToken();
+
+    if (!token) {
+      console.error('❌ [approveChangeRequest] Không lấy được token — user chưa đăng nhập?');
+      throw new Error('Bạn không có quyền thực hiện hành động này. Vui lòng đăng xuất và đăng nhập lại.');
+    }
+
+    // ===== DEBUG: xác nhận token cuối cùng thực sự được gửi đi =====
+    const parts = token.split('.');
+    console.log('[DEBUG approveChangeRequest] Token parts count (JWT=3):', parts.length);
+    console.log('[DEBUG approveChangeRequest] Token prefix:', token.slice(0, 40) + '...');
+    if (parts.length === 3) {
+      try {
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+        const remainMs = (payload.exp * 1000) - Date.now();
+        if (remainMs <= 0) {
+          console.warn('⚠️ [approveChangeRequest] Token đã HẾT HẠN — cần đăng nhập lại');
+        } else {
+          console.log(`🔑 [approveChangeRequest] Token hợp lệ — còn ${Math.round(remainMs / 60000)} phút | token_use=${payload.token_use} | groups=${JSON.stringify(payload['cognito:groups'])} | sub=${payload.sub?.slice(0, 8)}...`);
+        }
+      } catch (_) {}
+    } else {
+      console.warn(`⚠️ [approveChangeRequest] Token KHÔNG phải JWT chuẩn! Chỉ có ${parts.length} phần.`);
+    }
+    // ================================================================
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    };
+
+    // Log header thực sự được gửi đi (ngay trước fetch)
+    console.log('[DEBUG approveChangeRequest] Authorization header gửi đi:', headers['Authorization'].slice(0, 60) + '...');
+
     const url = import.meta.env.DEV
       ? `/api-applications/${applicationId}/approve-change`
       : `${API_BASE_URL}/applications/${applicationId}/approve-change`;
+    console.log(`📤 [approveChangeRequest] PUT ${url}`);
+
     const response = await fetch(url, {
       method: 'PUT',
       headers,
       body: JSON.stringify({})
     });
+
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
+      console.error(`❌ [approveChangeRequest] HTTP ${response.status}`, err);
+      if (response.status === 403) {
+        throw new Error('Bạn không có quyền thực hiện hành động này. Vui lòng đăng xuất và đăng nhập lại.');
+      }
       throw new Error(err.error || `HTTP ${response.status}`);
     }
     return response.json();

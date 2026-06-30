@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Edit3, Trash2, Eye, CheckCircle, Send, Search, Calendar, Newspaper, TrendingUp, TrendingDown, AlertCircle, User, Plus, X, XCircle, Wallet, Save, Award, Star, Briefcase, Zap, Banknote, ThumbsUp, ThumbsDown, ArrowRight, RefreshCw, Sparkles } from 'lucide-react';
+import { Users, UsersRound, FileText, MessageSquare, Clock, MapPin, Phone, Mail, Edit, Edit3, Trash2, Eye, CheckCircle, Send, Search, Calendar, Newspaper, TrendingUp, TrendingDown, AlertCircle, AlertTriangle, User, Plus, X, XCircle, Wallet, Save, Award, Star, Briefcase, Zap, Banknote, ThumbsUp, ThumbsDown, ArrowRight, RefreshCw, Sparkles, Puzzle, Frown, Wrench, ShieldX, MoreHorizontal } from 'lucide-react';
 import Modal from '../../components/Modal';
 import CVPreviewModal from '../../components/CVPreviewModal';
 import ConfirmModal from '../../components/ConfirmModal';
@@ -3429,11 +3429,13 @@ const HRManagement = () => {
         const isFinalizedChangeRequest = ['approved', 'rejected', 'cancelled'].includes(serverChangeRequestStatus);
 
         // ─── FIX: Check server-finalized state FIRST ─────────────────────────────
-        // 'change_approved' = admin approved → old worker is DONE, remove from Đang làm
+        // 'change_approved' = admin approved (worker swap) → old worker is DONE
+        // 'ĐÃ_HUỶ' = admin approved shift cancellation → ca bị huỷ, remove khỏi Đang làm
         // 'rejected'/'cancelled' = old worker stays (reject means keep)
         const serverIsActive = app.status === 'active' || app.status === 'accepted';
         const serverIsChangeApproved = app.status === 'change_approved';
-        if (serverIsChangeApproved || isFinalizedChangeRequest || (serverIsActive && overrideStatus === 'pending_change')) {
+        const serverIsCancelled = app.status === 'ĐÃ_HUỶ' || app.status === 'CANCELLED' || app.status === 'cancelled';
+        if (serverIsChangeApproved || serverIsCancelled || isFinalizedChangeRequest || (serverIsActive && overrideStatus === 'pending_change')) {
           // Lazily clean up the stale override from state
           if (overrideEntry !== undefined) {
             setChangeRequestStatusOverridesSync(prev => {
@@ -3453,7 +3455,18 @@ const HRManagement = () => {
               change_request_status: 'approved',
             };
           }
-          // rejected/cancelled → override cleared, worker back to accepted
+          // ĐÃ_HUỶ → ca đã bị huỷ bởi admin → giữ nguyên status để bị loại khỏi Đang làm
+          if (serverIsCancelled) {
+            return {
+              ...app,
+              status: app.status, // giữ 'ĐÃ_HUỶ' / 'CANCELLED'
+              changeRequest: null,
+              change_request: null,
+              changeRequestStatus: 'approved',
+              change_request_status: 'approved',
+            };
+          }
+          // rejected/cancelled override → override cleared, worker back to accepted
           return {
             ...app,
             status: 'accepted',
@@ -3560,17 +3573,24 @@ const HRManagement = () => {
   const [showErrorNotification, setShowErrorNotification] = useState(false);
   const [errorNotificationMessage, setErrorNotificationMessage] = useState('');
 
-  // Poll applications periodically when in 'hr' section to get new chat messages
+  // Poll applications periodically when in 'hr' section to get new chat messages.
+  // Dùng adaptive interval: 3s khi có pending_change (chờ admin duyệt), 10s bình thường.
+  const hasPendingChange = useMemo(
+    () => realApplications.some(app => app.status === 'pending_change'),
+    [realApplications]
+  );
+
   useEffect(() => {
     if (activeSection !== 'hr' || allQuickJobs.length === 0) return;
 
+    const interval = hasPendingChange ? 3000 : 10000;
     const intervalId = setInterval(() => {
-      console.log('🔄 Polling latest applications for chat sync...');
+      console.log(`🔄 Polling latest applications for chat sync (${interval / 1000}s interval)...`);
       loadApplicationsFromQuickJobs(changeRequestStatusOverridesRef.current);
-    }, 10000); // refresh applications every 10s
+    }, interval);
 
     return () => clearInterval(intervalId);
-  }, [activeSection, allQuickJobs]);
+  }, [activeSection, allQuickJobs, hasPendingChange]);
 
   // Sync DB chat messages to localStorage on realApplications update
   useEffect(() => {
@@ -3609,6 +3629,7 @@ const HRManagement = () => {
   const [changeRequestStaff, setChangeRequestStaff] = useState(null);
   const [changeRequestReason, setChangeRequestReason] = useState('');
   const [changeRequestType, setChangeRequestType] = useState('');
+  const [changeRequestDetailTouched, setChangeRequestDetailTouched] = useState(false);
   const [isSubmittingChangeRequest, setIsSubmittingChangeRequest] = useState(false);
   // Thay đổi nhân viên — chọn worker mới
   const [availableWorkers, setAvailableWorkers] = useState([]);
@@ -5116,6 +5137,7 @@ const HRManagement = () => {
                                     setChangeRequestStaff(staff);
                                     setChangeRequestReason('');
                                     setChangeRequestType('');
+                                    setChangeRequestDetailTouched(false);
                                     setSelectedNewWorkerId('');
                                     setAvailableWorkers([]);
                                     // Load danh sách workers available
@@ -5181,6 +5203,7 @@ const HRManagement = () => {
                                 setChangeRequestStaff(staff);
                                 setChangeRequestReason('');
                                 setChangeRequestType('');
+                                setChangeRequestDetailTouched(false);
                                 setSelectedNewWorkerId('');
                                 setAvailableWorkers([]);
                                 if (staff.jobId) {
@@ -5806,147 +5829,164 @@ const HRManagement = () => {
                 exit={{ opacity: 0, scale: 0.95, y: 30 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 onClick={e => e.stopPropagation()}
-                style={{ maxWidth: '520px', padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '92vh' }}
+                style={{ maxWidth: '520px', padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '92vh', borderRadius: '20px' }}
               >
                 <RateModalHeader style={{ padding: '24px', borderBottom: '1.5px solid #F1F5F9' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: '#FFF7ED', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid #FFEDD5' }}>
-                      <RefreshCw style={{ color: '#F97316' }} size={20} />
+                    <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#FEE2E2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <XCircle style={{ color: '#DC2626' }} size={22} />
                     </div>
                     <div>
                       <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#1E293B', margin: '0' }}>
-                        Yêu Cầu Thay Đổi Nhân Viên
+                        Yêu cầu thay đổi nhân viên
                       </h2>
                       <p style={{ fontSize: '12.5px', color: '#64748B', fontWeight: '500', margin: '2px 0 0' }}>
-                        Ca đang diễn ra — cần admin duyệt để thay đổi ngay
+                        Ca đang diễn ra — cần admin duyệt để huỷ ngay
                       </p>
                     </div>
                   </div>
                   <button
                     onClick={() => { if (!isSubmittingChangeRequest) setChangeRequestStaff(null); }}
-                    style={{ background: '#F8FAF8', border: '1px solid #E2E8F0', padding: '8px', borderRadius: '10px' }}
+                    style={{ background: '#F8FAF8', border: '1px solid #E2E8F0', padding: '8px', borderRadius: '10px', cursor: 'pointer' }}
                   >
                     <X size={18} color="#64748B" />
                   </button>
                 </RateModalHeader>
 
                 <RateModalBody style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
-                  {/* Worker hiện tại */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', background: 'linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%)', border: '1.5px solid #E2E8F0', borderRadius: '14px', padding: '14px 16px', marginBottom: '20px' }}>
-                    <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', border: '1px solid #E2E8F0' }}>
-                      <User style={{ width: '20px', height: '20px', color: '#1E40AF' }} />
+                  {/* Card Worker hiện tại */}
+                  <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '14px 16px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#DBEAFE', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <User size={20} color="#1E40AF" />
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '11px', fontWeight: '600', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Worker hiện tại</div>
-                      <div style={{ fontWeight: '800', fontSize: '15px', color: '#1E293B' }}>{changeRequestStaff.name}</div>
-                      <div style={{ fontSize: '12.5px', color: '#64748B', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span>{changeRequestStaff.position}</span>
-                        <span style={{ width: '3px', height: '3px', borderRadius: '50%', background: '#CBD5E1' }} />
-                        <Clock size={11} /><span>{changeRequestStaff.shift}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '10.5px', fontWeight: '700', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '3px' }}>WORKER HIỆN TẠI</div>
+                      <div style={{ fontWeight: '800', fontSize: '15px', color: '#1E293B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{changeRequestStaff.name}</div>
+                      <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <span>{changeRequestStaff.applicationId ? `#${String(changeRequestStaff.applicationId).slice(-6)}` : changeRequestStaff.position}</span>
+                        <span style={{ width: '3px', height: '3px', borderRadius: '50%', background: '#CBD5E1', flexShrink: 0 }} />
+                        <Clock size={11} style={{ flexShrink: 0 }} />
+                        <span>{changeRequestStaff.shift}</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Dropdown chọn worker mới */}
-                  <div style={{ marginBottom: '20px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '700', color: '#334155', marginBottom: '10px' }}>
-                      <Users size={16} color="#F97316" />
-                      Chọn nhân viên thay thế <span style={{ color: '#EF4444' }}>*</span>
-                    </div>
-                    {loadingAvailableWorkers ? (
-                      <div style={{ padding: '14px 16px', background: '#F8FAFC', borderRadius: '12px', border: '1.5px solid #E2E8F0', fontSize: '13.5px', color: '#64748B', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
-                          <RefreshCw size={14} color="#94A3B8" />
-                        </motion.div>
-                        Đang tải danh sách nhân viên khả dụng...
+                  {/* Danh sách lý do thay đổi nhân viên (radio list) */}
+                  {(() => {
+                    const cancelReasons = [
+                      { label: 'Không phù hợp với vị trí', icon: <Puzzle size={18} /> },
+                      { label: 'Không đúng thái độ làm việc', icon: <Frown size={18} /> },
+                      { label: 'Không đủ kỹ năng yêu cầu', icon: <Wrench size={18} /> },
+                      { label: 'Đi trễ / vắng mặt không báo trước', icon: <Clock size={18} /> },
+                      { label: 'Vi phạm nội quy', icon: <ShieldX size={18} /> },
+                      { label: 'Lý do khác', icon: <MoreHorizontal size={18} /> },
+                    ];
+                    return (
+                      <div style={{ marginBottom: '20px' }}>
+                        <div style={{ fontSize: '13.5px', fontWeight: '700', color: '#334155', marginBottom: '10px' }}>
+                          Lý do thay đổi nhân viên <span style={{ color: '#EF4444' }}>*</span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {cancelReasons.map(({ label, icon }) => {
+                            const selected = changeRequestType === label;
+                            return (
+                              <label
+                                key={label}
+                                style={{
+                                  display: 'flex', alignItems: 'center', gap: '10px',
+                                  padding: '12px 14px', borderRadius: '10px', cursor: 'pointer',
+                                  border: `1px solid ${selected ? '#3B82F6' : '#E2E8F0'}`,
+                                  background: selected ? '#EFF6FF' : '#FFFFFF',
+                                  transition: 'all 150ms ease',
+                                  userSelect: 'none',
+                                }}
+                              >
+                                <input
+                                  type="radio"
+                                  name="cancelReason"
+                                  value={label}
+                                  checked={selected}
+                                  onChange={() => setChangeRequestType(label)}
+                                  style={{ display: 'none' }}
+                                />
+                                <span style={{ color: selected ? '#1D4ED8' : '#94A3B8', display: 'flex', flexShrink: 0, transition: 'color 150ms ease' }}>
+                                  {icon}
+                                </span>
+                                <span style={{ fontSize: '13.5px', fontWeight: selected ? '600' : '500', color: selected ? '#1E3A8A' : '#64748B', transition: 'color 150ms ease' }}>
+                                  {label}
+                                </span>
+                              </label>
+                            );
+                          })}
+                        </div>
                       </div>
-                    ) : availableWorkers.length === 0 ? (
-                      <div style={{ padding: '14px 16px', background: '#FFF7ED', borderRadius: '12px', border: '1.5px solid #FFEDD5', fontSize: '13.5px', color: '#C2410C', fontWeight: '600' }}>
-                        ⚠️ Hiện không có nhân viên nào khả dụng
+                    );
+                  })()}
+
+                  {/* Mô tả chi tiết — luôn hiển thị, bắt buộc */}
+                  {(() => {
+                    const detailError = changeRequestDetailTouched && changeRequestReason.trim().length < 10;
+                    return (
+                      <div style={{ marginBottom: '20px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13.5px', fontWeight: '700', color: '#334155', marginBottom: '8px' }}>
+                          <Edit3 size={14} color="#64748B" />
+                          Mô tả chi tiết <span style={{ color: '#EF4444' }}>*</span>
+                        </div>
+                        <textarea
+                          rows={3}
+                          placeholder="Mô tả cụ thể tình huống dẫn đến yêu cầu thay đổi nhân viên..."
+                          value={changeRequestReason}
+                          onChange={e => { setChangeRequestReason(e.target.value); setChangeRequestDetailTouched(true); }}
+                          onBlur={() => setChangeRequestDetailTouched(true)}
+                          style={{
+                            width: '100%', padding: '12px 14px', borderRadius: '10px', boxSizing: 'border-box',
+                            border: `1.5px solid ${detailError ? '#EF4444' : (changeRequestReason.trim().length >= 10 ? '#3B82F6' : '#E2E8F0')}`,
+                            fontSize: '13.5px', fontWeight: '500', color: '#1E293B', resize: 'none',
+                            background: '#FAFAFA', fontFamily: 'inherit', outline: 'none',
+                            transition: 'border-color 0.15s ease',
+                          }}
+                          onFocus={e => { e.target.style.background = 'white'; }}
+                          onBlurCapture={e => { e.target.style.background = '#FAFAFA'; }}
+                        />
+                        {detailError && (
+                          <div style={{ fontSize: '12px', color: '#EF4444', marginTop: '4px', fontWeight: '500' }}>
+                            Vui lòng mô tả chi tiết lý do thay đổi nhân viên
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <select
-                        value={selectedNewWorkerId}
-                        onChange={e => setSelectedNewWorkerId(e.target.value)}
-                        style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: `1.5px solid ${selectedNewWorkerId ? '#F97316' : '#E2E8F0'}`, fontSize: '14px', fontWeight: '500', color: '#1E293B', background: 'white', cursor: 'pointer', outline: 'none', boxShadow: selectedNewWorkerId ? '0 0 0 3px rgba(249,115,22,0.1)' : 'none' }}
-                      >
-                        <option value="">-- Chọn nhân viên mới --</option>
-                        {availableWorkers.map(w => (
-                          <option key={w.candidateId} value={w.candidateId}>
-                            {w.fullName}{w.location ? ` — ${w.location}` : ''}
-                          </option>
-                        ))}
-                      </select>
-                    )}
-                  </div>
+                    );
+                  })()}
 
-                  {/* Lý do */}
-                  <div style={{ marginBottom: '20px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '700', color: '#334155', marginBottom: '10px' }}>
-                      <Edit3 size={16} color="#F97316" />
-                      Lý do thay đổi <span style={{ color: '#EF4444' }}>*</span>
-                    </div>
-                    <select
-                      value={changeRequestType}
-                      onChange={e => {
-                        const nextReason = e.target.value;
-                        setChangeRequestType(nextReason);
-                        setChangeRequestReason(nextReason === 'L� do kh�c' ? '' : nextReason);
-                      }}
-                      style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: `1.5px solid ${changeRequestType ? '#F97316' : '#E2E8F0'}`, fontSize: '14px', fontWeight: '500', color: '#1E293B', background: '#FAFAFA', fontFamily: 'inherit', transition: 'border-color 0.2s ease', cursor: 'pointer', outline: 'none' }}
-                    >
-                      <option value="" disabled>Chọn l� do...</option>
-                      <option value="Kh�ng ph� hợp với vị tr�">Kh�ng ph� hợp với vị tr�</option>
-                      <option value="Kh�ng đ�ng th�i độ l�m việc">Kh�ng đ�ng th�i độ l�m việc</option>
-                      <option value="Kh�ng đủ kỹ năng y�u cầu">Kh�ng đủ kỹ năng y�u cầu</option>
-                      <option value="Đi trễ / Vắng mặt kh�ng b�o trước">Đi trễ / Vắng mặt kh�ng b�o trước</option>
-                      <option value="Vi phạm nội quy">Vi phạm nội quy</option>
-                      <option value="L� do kh�c">L� do kh�c</option>
-                    </select>
-                    <textarea
-                      rows={3}
-                      placeholder="Nhập l� do cụ thể..."
-                      value={changeRequestReason}
-                      onChange={e => setChangeRequestReason(e.target.value)}
-                      style={{ width: '100%', padding: '14px 16px', marginTop: '12px', borderRadius: '12px', border: `1.5px solid ${changeRequestReason.trim() ? '#F97316' : '#E2E8F0'}`, fontSize: '14px', fontWeight: '500', color: '#1E293B', resize: 'none', background: '#FAFAFA', fontFamily: 'inherit', transition: 'border-color 0.2s ease', display: changeRequestType === 'L� do kh�c' ? 'block' : 'none' }}
-                      onFocus={e => { e.target.style.background = 'white'; }}
-                      onBlur={e => { e.target.style.background = '#FAFAFA'; }}
-                    />
-                  </div>
-
-                  {/* Cảnh báo */}
-                  <div style={{ background: '#FFF7ED', border: '1.5px solid #FFEDD5', borderRadius: '12px', padding: '14px 16px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                    <AlertCircle size={18} color="#F97316" style={{ flexShrink: 0, marginTop: '1px' }} />
-                    <div style={{ fontSize: '13px', color: '#7C2D12', lineHeight: '1.6' }}>
-                      <strong>⚠️ Lưu ý:</strong> Nếu được duyệt, worker hiện tại sẽ bị kết thúc ca ngay lập tức. Tiền công tính đến thời điểm admin duyệt.
+                  {/* Box cảnh báo */}
+                  <div style={{ background: '#FFFBEB', border: '1.5px solid #FDE68A', borderRadius: '12px', padding: '14px 16px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                    <AlertTriangle size={18} color="#D97706" style={{ flexShrink: 0, marginTop: '1px' }} />
+                    <div style={{ fontSize: '13px', color: '#92400E', lineHeight: '1.6' }}>
+                      <strong>Lưu ý:</strong> Nếu được duyệt, ca làm sẽ bị huỷ ngay lập tức. Tiền công tính đến thời điểm admin duyệt.
                     </div>
                   </div>
                 </RateModalBody>
 
                 <div style={{ padding: '20px 24px 28px', background: 'white', borderTop: '1.5px solid #F1F5F9' }}>
                   {(() => {
-                    const canSubmit = selectedNewWorkerId && changeRequestType && (changeRequestType !== 'L� do kh�c' || changeRequestReason.trim()) && !isSubmittingChangeRequest && availableWorkers.length > 0;
+                    const canSubmit = changeRequestType && changeRequestReason.trim().length >= 10 && !isSubmittingChangeRequest;
                     return (
                       <motion.button
                         whileHover={canSubmit ? { scale: 1.02 } : {}}
                         whileTap={canSubmit ? { scale: 0.98 } : {}}
                         disabled={!canSubmit}
                         onClick={async () => {
-                          if (!canSubmit) return;
+                          if (!canSubmit) { setChangeRequestDetailTouched(true); return; }
                           setIsSubmittingChangeRequest(true);
                           try {
                             const now = new Date();
                             const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
                             const dateStr = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
-                            const newWorker = availableWorkers.find(w => w.candidateId === selectedNewWorkerId);
                             const changeReq = {
-                              type: 'staff_replacement',
-                              reason: changeRequestReason.trim(),
+                              type: 'cancel_shift',
+                              reasonType: changeRequestType,
+                              reasonDetail: changeRequestReason.trim(),
                               requestedAt: `${dateStr} - ${timeStr}`,
-                              newWorkerId: selectedNewWorkerId,
-                              newWorkerName: newWorker?.fullName || '',
-                              newWorkerEmail: newWorker?.email || '',
-                              sentToAdmin: true
+                              sentToAdmin: true,
                             };
                             setStaffTabFilter('pending_change');
                             setChangeRequestStatusOverridesSync(prev => ({
@@ -5961,7 +6001,7 @@ const HRManagement = () => {
                               employerId: user?.userId,
                               companyName: user?.companyName || user?.username,
                               candidateName: changeRequestStaff.name,
-                              changeRequestType: 'Thay thế nhân viên đang làm việc',
+                              changeRequestType: changeRequestType,
                               changeRequestReason: changeRequestReason.trim(),
                               applicationId: changeRequestStaff.applicationId
                             });
@@ -5973,22 +6013,23 @@ const HRManagement = () => {
                             setChangeRequestStaff(null);
                             setChangeRequestReason('');
                             setChangeRequestType('');
+                            setChangeRequestDetailTouched(false);
                             setSelectedNewWorkerId('');
                             setAvailableWorkers([]);
-                            setSuccessToastMessage('Đã gửi yêu cầu thay đổi, chờ admin duyệt');
+                            setSuccessToastMessage('Đã gửi yêu cầu thay đổi nhân viên, chờ admin duyệt');
                             setShowSuccessToast(true);
                             setTimeout(() => setShowSuccessToast(false), 3500);
                           } catch (err) {
-                            console.error('❌ Failed to submit change request:', err);
+                            console.error('❌ Failed to submit cancel request:', err);
                             setErrorNotificationMessage('Lỗi kết nối. Vui lòng thử lại.');
                             setShowErrorNotification(true);
                           } finally {
                             setIsSubmittingChangeRequest(false);
                           }
                         }}
-                        style={{ width: '100%', padding: '16px', borderRadius: '14px', fontSize: '15px', fontWeight: '800', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', cursor: canSubmit ? 'pointer' : 'not-allowed', border: 'none', background: canSubmit ? 'linear-gradient(135deg, #F97316, #EA580C)' : '#E2E8F0', color: canSubmit ? 'white' : '#94A3B8', boxShadow: canSubmit ? '0 8px 20px rgba(249,115,22,0.3)' : 'none', transition: 'all 0.3s ease' }}
+                        style={{ width: '100%', padding: '13px', borderRadius: '12px', fontSize: '15px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: canSubmit ? 'pointer' : 'not-allowed', border: 'none', background: canSubmit ? '#DC2626' : '#E2E8F0', color: canSubmit ? 'white' : '#94A3B8', boxShadow: canSubmit ? '0 4px 16px rgba(220,38,38,0.28)' : 'none', transition: 'all 0.2s ease' }}
                       >
-                        <Send size={17} />
+                        <Send size={16} />
                         {isSubmittingChangeRequest ? 'Đang gửi...' : 'Gửi yêu cầu'}
                       </motion.button>
                     );

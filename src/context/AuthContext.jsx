@@ -83,6 +83,15 @@ export const AuthProvider = ({ children }) => {
         
         if (currentUser && session.tokens) {
           // User is authenticated with Cognito
+          // Sync fresh idToken vào OPPO_ID_TOKEN để authHeaders.js fallback không dùng token cũ expired
+          try {
+            const freshIdToken = session.tokens.idToken;
+            if (freshIdToken) {
+              const freshStr = (typeof freshIdToken === 'string' ? freshIdToken : freshIdToken.toString())
+                .trim().replace(/[\r\n\t]/g, '');
+              localStorage.setItem('OPPO_ID_TOKEN', freshStr);
+            }
+          } catch (_) {}
           const userIdFromToken = session.tokens.idToken.payload.sub; // Always get userId from token
           const emailFromToken = session.tokens.idToken.payload.email;
           const savedUser = localStorage.getItem('user');

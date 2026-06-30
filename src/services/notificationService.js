@@ -1322,10 +1322,10 @@ export const createChangeRequestApprovedNotification = async ({ employerId, comp
   const safeCompanyName = companyName || 'Nhà tuyển dụng';
   const notification = {
     type: 'change_request_approved',
-    title: 'Yêu cầu huỷ ca đã được chấp nhận',
-    titleEn: 'Shift Cancellation Request Approved',
-    message: 'Yêu cầu huỷ ca của bạn đã được chấp nhận.',
-    messageEn: 'Your shift cancellation request has been approved.',
+    title: 'Yêu cầu thay đổi nhân viên đã được chấp nhận',
+    titleEn: 'Staff Change Request Approved',
+    message: 'Yêu cầu thay đổi nhân viên của bạn đã được chấp nhận.',
+    messageEn: 'Your staff change request has been approved.',
     recipientId: employerId,
     recipientRole: 'employer',
     senderId: 'admin',
@@ -1408,10 +1408,10 @@ export const createChangeRequestRejectedNotification = async ({ employerId, comp
   const safeCompanyName = companyName || 'Nhà tuyển dụng';
   const notification = {
     type: 'change_request_rejected',
-    title: 'Yêu cầu huỷ ca bị từ chối',
-    titleEn: 'Shift Cancellation Request Rejected',
-    message: 'Yêu cầu huỷ ca của bạn đã bị từ chối. Worker hiện tại vẫn tiếp tục ca làm.',
-    messageEn: 'Your shift cancellation request has been rejected. The current worker continues the shift.',
+    title: 'Yêu cầu thay đổi nhân viên bị từ chối',
+    titleEn: 'Staff Change Request Rejected',
+    message: 'Yêu cầu thay đổi nhân viên của bạn đã bị từ chối. Worker hiện tại vẫn tiếp tục ca làm.',
+    messageEn: 'Your staff change request has been rejected. The current worker continues the shift.',
     recipientId: employerId,
     recipientRole: 'employer',
     senderId: 'admin',
@@ -1443,10 +1443,10 @@ export const createChangeRequestSubmittedNotification = async (payload) => {
 
   const notification = {
     type: 'change_request_submitted',
-    title: 'Yêu cầu huỷ ca mới',
-    titleEn: 'New shift cancellation request',
-    message: `${safeCompanyName} vừa gửi yêu cầu huỷ ca của ${safeCandidateName}. Lý do: ${changeRequestType}. ${changeRequestReason ? `Chi tiết: ${changeRequestReason}` : ''}`,
-    messageEn: `${safeCompanyName} requested to cancel shift for ${safeCandidateName}. Reason: ${changeRequestType}. ${changeRequestReason ? `Detail: ${changeRequestReason}` : ''}`,
+    title: 'Yêu cầu thay đổi nhân viên mới',
+    titleEn: 'New staff change request',
+    message: `${safeCompanyName} vừa gửi yêu cầu thay đổi nhân viên của ${safeCandidateName}. Lý do: ${changeRequestType}. ${changeRequestReason ? `Chi tiết: ${changeRequestReason}` : ''}`,
+    messageEn: `${safeCompanyName} requested a staff change for ${safeCandidateName}. Reason: ${changeRequestType}. ${changeRequestReason ? `Detail: ${changeRequestReason}` : ''}`,
     recipientId: 'admin',
     recipientRole: 'admin',
     senderId: employerId,

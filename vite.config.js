@@ -73,13 +73,6 @@ export default defineConfig({
           });
         }
       },
-      '/api': {
-        target: 'https://xyp4wkszi7.execute-api.ap-southeast-1.amazonaws.com/prod',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '/candidates'),
-        secure: true,
-
-      },
       '/api-cv': {
         target: 'https://v56v542h8f.execute-api.ap-southeast-1.amazonaws.com/prod',
         changeOrigin: true,
@@ -99,6 +92,9 @@ export default defineConfig({
         secure: false,
         configure: (proxy) => {
           proxy.on('proxyReq', (proxyReq, req) => {
+            // Explicitly remove then re-set to prevent duplication from changeOrigin
+            proxyReq.removeHeader('authorization');
+            proxyReq.removeHeader('Authorization');
             if (req.headers.authorization) {
               proxyReq.setHeader('Authorization', req.headers.authorization);
             }
@@ -130,6 +126,15 @@ export default defineConfig({
             }
           });
         }
+      },
+      // QUAN TRỌNG: '/api' phải đứng CUỐI CÙNG vì nó match tất cả path bắt đầu bằng /api
+      // (bao gồm cả /api-applications, /api-cv, v.v.). Vite proxy dùng first-match,
+      // nên các rule cụ thể hơn phải đứng trước rule chung '/api'.
+      '/api': {
+        target: 'https://xyp4wkszi7.execute-api.ap-southeast-1.amazonaws.com/prod',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '/candidates'),
+        secure: true,
       }
     },
   },

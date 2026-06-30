@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -7,7 +7,7 @@ import StatsCard from '../../components/StatsCard';
 import { useLanguage } from '../../context/LanguageContext';
 import { s3Images } from '../../utils/s3Images';
 
-import { Users, Briefcase, Building2, DollarSign, CheckSquare, XSquare, Shield, Calendar, ArrowRight, Zap, TrendingUp, Star, Sparkles, Eye, Rocket, FileText, ChevronDown, AlertCircle, RefreshCw, X } from 'lucide-react';
+import { Users, Briefcase, Building2, DollarSign, CheckSquare, XSquare, Shield, Calendar, ArrowRight, Zap, TrendingUp, Star, Sparkles, Eye, Rocket, FileText, ChevronDown, AlertCircle, RefreshCw, X, Wifi, WifiOff } from 'lucide-react';
 
 // Import Services
 import adminEmployerService from '../../services/adminEmployerService';
@@ -25,6 +25,17 @@ const DashboardContainer = styled.div`
     from {
       opacity: 0;
       transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes crFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
     }
     to {
       opacity: 1;
@@ -1110,9 +1121,102 @@ const AdminDashboard = () => {
   const [rejectModal, setRejectModal] = useState(null); // { applicationId, candidateName }
   const [rejectNotes, setRejectNotes] = useState('');
 
+  // WebSocket state
+  const [wsStatus, setWsStatus] = useState('disconnected'); // 'connected' | 'connecting' | 'disconnected'
+  const wsRef = useRef(null);
+  const wsRetryCount = useRef(0);
+  const wsRetryTimer = useRef(null);
+  const newCardTimers = useRef({}); // { applicationId: timerId }
+  const [newCardIds, setNewCardIds] = useState(new Set()); // IDs hiển thị badge "Mới"
+
+  const WS_ENDPOINT = import.meta.env.VITE_ADMIN_WS_ENDPOINT || '';
+  const WS_MAX_RETRY = 5;
+  const WS_RETRY_DELAY = 3000;
+
+  const clearNewBadge = useCallback((applicationId) => {
+    setNewCardIds(prev => {
+      const next = new Set(prev);
+      next.delete(applicationId);
+      return next;
+    });
+  }, []);
+
+  const connectWebSocket = useCallback(() => {
+    if (!WS_ENDPOINT) return;
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) return;
+
+    setWsStatus('connecting');
+    const ws = new WebSocket(WS_ENDPOINT);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      setWsStatus('connected');
+      wsRetryCount.current = 0;
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'NEW_REQUEST') {
+          const newReq = msg.data;
+          setChangeRequests(prev => {
+            // Tránh trùng lặp
+            if (prev.some(r => r.applicationId === newReq.applicationId)) return prev;
+            return [newReq, ...prev];
+          });
+          // Thêm badge "Mới" trong 5 giây
+          setNewCardIds(prev => new Set([...prev, newReq.applicationId]));
+          if (newCardTimers.current[newReq.applicationId]) {
+            clearTimeout(newCardTimers.current[newReq.applicationId]);
+          }
+          newCardTimers.current[newReq.applicationId] = setTimeout(() => {
+            clearNewBadge(newReq.applicationId);
+            delete newCardTimers.current[newReq.applicationId];
+          }, 5000);
+        } else if (msg.type === 'REQUEST_UPDATED') {
+          const updated = msg.data;
+          // Xoá khỏi danh sách nếu không còn pending_change
+          if (updated.status && updated.status !== 'pending_change') {
+            setChangeRequests(prev => prev.filter(r => r.applicationId !== updated.applicationId));
+          }
+        }
+      } catch (e) {
+        console.warn('AdminDashboard WS: lỗi parse message', e);
+      }
+    };
+
+    ws.onerror = () => {
+      setWsStatus('disconnected');
+    };
+
+    ws.onclose = () => {
+      setWsStatus('disconnected');
+      wsRef.current = null;
+      // Tự động reconnect tối đa WS_MAX_RETRY lần
+      if (wsRetryCount.current < WS_MAX_RETRY) {
+        wsRetryCount.current += 1;
+        wsRetryTimer.current = setTimeout(() => {
+          connectWebSocket();
+        }, WS_RETRY_DELAY);
+      }
+    };
+  }, [WS_ENDPOINT, clearNewBadge]);
+
   useEffect(() => {
     fetchDashboardData();
     fetchChangeRequests();
+    connectWebSocket();
+
+    return () => {
+      // Cleanup WebSocket khi unmount
+      if (wsRetryTimer.current) clearTimeout(wsRetryTimer.current);
+      Object.values(newCardTimers.current).forEach(clearTimeout);
+      if (wsRef.current) {
+        wsRef.current.onclose = null; // Ngăn reconnect khi unmount
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+    };
   }, []);
 
   const fetchChangeRequests = async () => {
@@ -1388,6 +1492,160 @@ const AdminDashboard = () => {
   return (
     <DashboardLayout role="admin" key={language}>
       <DashboardContainer>
+        {/* ===== YÊU CẦU THAY ĐỔI NHÂN VIÊN — đầu trang ===== */}
+        <Section style={{ marginBottom: '36px' }}>
+          <SectionHeader>
+            <h2>
+              <AlertCircle size={20} style={{ display: 'inline', marginRight: 8, color: '#F97316', verticalAlign: 'middle' }} />
+              {language === 'vi' ? 'Yêu cầu thay đổi nhân viên' : 'Staff Change Requests'}
+              {changeRequests.length > 0 && (
+                <span style={{
+                  marginLeft: 10, background: '#F97316', color: 'white',
+                  borderRadius: '50%', padding: '2px 8px', fontSize: 13, fontWeight: 700
+                }}>{changeRequests.length}</span>
+              )}
+              {/* Chỉ báo trạng thái WebSocket */}
+              {WS_ENDPOINT && (
+                <span style={{
+                  marginLeft: 10, display: 'inline-flex', alignItems: 'center', gap: 4,
+                  fontSize: 12, fontWeight: 600, verticalAlign: 'middle',
+                  color: wsStatus === 'connected' ? '#10B981' : wsStatus === 'connecting' ? '#F59E0B' : '#94A3B8'
+                }}>
+                  {wsStatus === 'connected'
+                    ? <><Wifi size={13} />Realtime</>
+                    : wsStatus === 'connecting'
+                    ? <><WifiOff size={13} />Đang kết nối...</>
+                    : <><WifiOff size={13} />Offline</>}
+                </span>
+              )}
+            </h2>
+            <button
+              onClick={fetchChangeRequests}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '8px 14px', background: '#F8FAFC', border: '1.5px solid #E2E8F0',
+                borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer', color: '#475569'
+              }}
+            >
+              <RefreshCw size={14} />{language === 'vi' ? 'Làm mới' : 'Refresh'}
+            </button>
+          </SectionHeader>
+
+          {crLoading ? (
+            <div style={{ padding: '40px', textAlign: 'center', color: '#94A3B8' }}>
+              {language === 'vi' ? 'Đang tải...' : 'Loading...'}
+            </div>
+          ) : changeRequests.length === 0 ? (
+            <div style={{
+              padding: '40px', textAlign: 'center', background: '#F8FAFC',
+              borderRadius: 16, border: '1.5px dashed #E2E8F0', color: '#94A3B8'
+            }}>
+              <AlertCircle size={32} style={{ marginBottom: 12, opacity: 0.3 }} />
+              <div style={{ fontWeight: 600, fontSize: 15 }}>
+                {language === 'vi' ? 'Không có yêu cầu nào đang chờ duyệt' : 'No pending change requests'}
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {changeRequests.map(req => {
+                const cr = req.changeRequest || {};
+                const isNew = newCardIds.has(req.applicationId);
+                return (
+                  <div key={req.applicationId} style={{
+                    background: 'white', border: `1.5px solid ${isNew ? '#FED7AA' : '#FFEDD5'}`,
+                    borderRadius: 16, padding: '20px 24px',
+                    display: 'grid', gridTemplateColumns: '1fr auto', gap: 16,
+                    alignItems: 'center', boxShadow: '0 2px 8px rgba(249,115,22,0.07)',
+                    animation: isNew ? 'crFadeIn 0.4s ease-out' : 'none'
+                  }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                        <div style={{
+                          background: '#FFF7ED', borderRadius: 10, padding: '6px 12px',
+                          fontSize: 13, fontWeight: 700, color: '#F97316',
+                          border: '1px solid #FFEDD5'
+                        }}>⏳ {language === 'vi' ? 'Chờ duyệt' : 'Pending'}</div>
+                        {isNew && (
+                          <span style={{
+                            background: '#EF4444', color: 'white', borderRadius: 6,
+                            padding: '2px 8px', fontSize: 11, fontWeight: 800, letterSpacing: '0.5px'
+                          }}>MỚI</span>
+                        )}
+                        <div style={{ fontWeight: 700, fontSize: 15, color: '#1E293B' }}>
+                          {req.candidateName || req.jobTitle || req.applicationId}
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 13, color: '#64748B', display: 'flex', flexWrap: 'wrap', gap: '4px 16px' }}>
+                        <span>🏢 {language === 'vi' ? 'Nhà tuyển dụng:' : 'Employer:'} <b style={{ color: '#334155' }}>{req.employerName || req.employerId || '-'}</b></span>
+                        <span>👤 {language === 'vi' ? 'Nhân viên:' : 'Worker:'} <b style={{ color: '#334155' }}>{req.candidateName || req.candidateId || '-'}</b></span>
+                        <span>📋 {language === 'vi' ? 'Lý do huỷ:' : 'Cancel Reason:'} <b style={{ color: '#DC2626' }}>{cr.reasonType || cr.typeLabel || cr.reasonCode || '-'}</b></span>
+                        {(cr.reasonDetail || cr.reason) && <span style={{ gridColumn: '1 / -1', fontStyle: 'italic', color: '#475569' }}>💬 "{cr.reasonDetail || cr.reason}"</span>}
+                        <span>🕐 {req.updatedAt ? new Date(req.updatedAt).toLocaleString('vi-VN') : '-'}</span>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                      <button
+                        disabled={crActionLoading === req.applicationId}
+                        onClick={async () => {
+                          setCrActionLoading(req.applicationId);
+                          try {
+                            const result = await applicationService.approveChangeRequest(req.applicationId);
+                            setChangeRequests(prev => prev.filter(r => r.applicationId !== req.applicationId));
+                            // Gửi notification cho worker và employer
+                            const cr = req.changeRequest || {};
+                            await Promise.allSettled([
+                              createWorkerReplacedNotification({
+                                workerId: result.workerId || req.candidateId || cr.workerId,
+                                jobLocation: result.jobLocation || req.jobLocation,
+                                workDateDisplay: result.workDateDisplay || req.jobWorkDate,
+                                jobTitle: result.jobTitle || req.jobTitle,
+                                reasonType: result.reasonType || cr.reasonType,
+                                reasonDetail: result.reasonDetail || cr.reasonDetail || cr.reason
+                              }),
+                              createChangeRequestApprovedNotification({
+                                employerId: result.employerId || req.employerId,
+                                companyName: req.employerName,
+                                candidateName: req.candidateName,
+                                changeRequestType: cr.reasonType,
+                                applicationId: req.applicationId
+                              })
+                            ]);
+                          } catch (e) {
+                            alert(language === 'vi' ? `Lỗi: ${e.message}` : `Error: ${e.message}`);
+                          } finally {
+                            setCrActionLoading(null);
+                          }
+                        }}
+                        style={{
+                          padding: '10px 18px', borderRadius: 10, border: 'none',
+                          background: crActionLoading === req.applicationId ? '#E2E8F0' : 'linear-gradient(135deg, #10B981, #059669)',
+                          color: 'white', fontWeight: 700, fontSize: 13, cursor: crActionLoading === req.applicationId ? 'not-allowed' : 'pointer'
+                        }}
+                      >
+                        {crActionLoading === req.applicationId ? '...' : (language === 'vi' ? '✔ Duyệt' : '✔ Approve')}
+                      </button>
+                      <button
+                        disabled={crActionLoading === req.applicationId}
+                        onClick={() => {
+                          setRejectModal({ applicationId: req.applicationId, candidateName: req.candidateName || req.applicationId });
+                          setRejectNotes('');
+                        }}
+                        style={{
+                          padding: '10px 18px', borderRadius: 10, border: '1.5px solid #FECACA',
+                          background: '#FEF2F2', color: '#DC2626', fontWeight: 700, fontSize: 13,
+                          cursor: crActionLoading === req.applicationId ? 'not-allowed' : 'pointer'
+                        }}
+                      >
+                        {language === 'vi' ? '✕ Từ chối' : '✕ Reject'}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </Section>
+
         {/* 4 Thống kê chính */}
         <StatsGrid>
           <StatBox $borderColor="#667eea">
@@ -2202,138 +2460,6 @@ const AdminDashboard = () => {
             </RevenueStatsGrid>
           </RevenueChartCard>
         </RevenueSection>
-
-        {/* ===== YÊU CẦU THAY ĐỔI NHÂN VIÊN ===== */}
-        <Section style={{ marginTop: '48px' }}>
-          <SectionHeader>
-            <h2>
-              <AlertCircle size={20} style={{ display: 'inline', marginRight: 8, color: '#F97316', verticalAlign: 'middle' }} />
-              {language === 'vi' ? 'Yêu Cầu Huỷ Ca' : 'Shift Cancellation Requests'}
-              {changeRequests.length > 0 && (
-                <span style={{
-                  marginLeft: 10, background: '#F97316', color: 'white',
-                  borderRadius: '50%', padding: '2px 8px', fontSize: 13, fontWeight: 700
-                }}>{changeRequests.length}</span>
-              )}
-            </h2>
-            <button
-              onClick={fetchChangeRequests}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '8px 14px', background: '#F8FAFC', border: '1.5px solid #E2E8F0',
-                borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer', color: '#475569'
-              }}
-            >
-              <RefreshCw size={14} />{language === 'vi' ? 'Làm mới' : 'Refresh'}
-            </button>
-          </SectionHeader>
-
-          {crLoading ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#94A3B8' }}>
-              {language === 'vi' ? 'Đang tải...' : 'Loading...'}
-            </div>
-          ) : changeRequests.length === 0 ? (
-            <div style={{
-              padding: '40px', textAlign: 'center', background: '#F8FAFC',
-              borderRadius: 16, border: '1.5px dashed #E2E8F0', color: '#94A3B8'
-            }}>
-              <AlertCircle size={32} style={{ marginBottom: 12, opacity: 0.3 }} />
-              <div style={{ fontWeight: 600, fontSize: 15 }}>
-                {language === 'vi' ? 'Không có yêu cầu nào đang chờ duyệt' : 'No pending change requests'}
-              </div>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {changeRequests.map(req => {
-                const cr = req.changeRequest || {};
-                return (
-                  <div key={req.applicationId} style={{
-                    background: 'white', border: '1.5px solid #FFEDD5',
-                    borderRadius: 16, padding: '20px 24px',
-                    display: 'grid', gridTemplateColumns: '1fr auto', gap: 16,
-                    alignItems: 'center', boxShadow: '0 2px 8px rgba(249,115,22,0.07)'
-                  }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                        <div style={{
-                          background: '#FFF7ED', borderRadius: 10, padding: '6px 12px',
-                          fontSize: 13, fontWeight: 700, color: '#F97316',
-                          border: '1px solid #FFEDD5'
-                        }}>⏳ {language === 'vi' ? 'Chờ duyệt' : 'Pending'}</div>
-                        <div style={{ fontWeight: 700, fontSize: 15, color: '#1E293B' }}>
-                          {req.candidateName || req.jobTitle || req.applicationId}
-                        </div>
-                      </div>
-                      <div style={{ fontSize: 13, color: '#64748B', display: 'flex', flexWrap: 'wrap', gap: '4px 16px' }}>
-                        <span>🏢 {language === 'vi' ? 'Nhà tuyển dụng:' : 'Employer:'} <b style={{ color: '#334155' }}>{req.employerName || req.employerId || '-'}</b></span>
-                        <span>👤 {language === 'vi' ? 'Nhân viên:' : 'Worker:'} <b style={{ color: '#334155' }}>{req.candidateName || req.candidateId || '-'}</b></span>
-                        <span>📋 {language === 'vi' ? 'Lý do huỷ:' : 'Cancel Reason:'} <b style={{ color: '#DC2626' }}>{cr.reasonType || cr.typeLabel || cr.reasonCode || '-'}</b></span>
-                        {(cr.reasonDetail || cr.reason) && <span style={{ gridColumn: '1 / -1', fontStyle: 'italic', color: '#475569' }}>💬 "{cr.reasonDetail || cr.reason}"</span>}
-                        <span>🕐 {req.updatedAt ? new Date(req.updatedAt).toLocaleString('vi-VN') : '-'}</span>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                      <button
-                        disabled={crActionLoading === req.applicationId}
-                        onClick={async () => {
-                          setCrActionLoading(req.applicationId);
-                          try {
-                            const result = await applicationService.approveChangeRequest(req.applicationId);
-                            setChangeRequests(prev => prev.filter(r => r.applicationId !== req.applicationId));
-                            // Gửi notification cho worker và employer
-                            const cr = req.changeRequest || {};
-                            await Promise.allSettled([
-                              createWorkerReplacedNotification({
-                                workerId: result.workerId || req.candidateId || cr.workerId,
-                                jobLocation: result.jobLocation || req.jobLocation,
-                                workDateDisplay: result.workDateDisplay || req.jobWorkDate,
-                                jobTitle: result.jobTitle || req.jobTitle,
-                                reasonType: result.reasonType || cr.reasonType,
-                                reasonDetail: result.reasonDetail || cr.reasonDetail || cr.reason
-                              }),
-                              createChangeRequestApprovedNotification({
-                                employerId: result.employerId || req.employerId,
-                                companyName: req.employerName,
-                                candidateName: req.candidateName,
-                                changeRequestType: cr.reasonType,
-                                applicationId: req.applicationId
-                              })
-                            ]);
-                          } catch (e) {
-                            alert(language === 'vi' ? `Lỗi: ${e.message}` : `Error: ${e.message}`);
-                          } finally {
-                            setCrActionLoading(null);
-                          }
-                        }}
-                        style={{
-                          padding: '10px 18px', borderRadius: 10, border: 'none',
-                          background: crActionLoading === req.applicationId ? '#E2E8F0' : 'linear-gradient(135deg, #10B981, #059669)',
-                          color: 'white', fontWeight: 700, fontSize: 13, cursor: crActionLoading === req.applicationId ? 'not-allowed' : 'pointer'
-                        }}
-                      >
-                        {crActionLoading === req.applicationId ? '...' : (language === 'vi' ? '✔ Duyệt' : '✔ Approve')}
-                      </button>
-                      <button
-                        disabled={crActionLoading === req.applicationId}
-                        onClick={() => {
-                          setRejectModal({ applicationId: req.applicationId, candidateName: req.candidateName || req.applicationId });
-                          setRejectNotes('');
-                        }}
-                        style={{
-                          padding: '10px 18px', borderRadius: 10, border: '1.5px solid #FECACA',
-                          background: '#FEF2F2', color: '#DC2626', fontWeight: 700, fontSize: 13,
-                          cursor: crActionLoading === req.applicationId ? 'not-allowed' : 'pointer'
-                        }}
-                      >
-                        {language === 'vi' ? '✕ Từ chối' : '✕ Reject'}
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </Section>
 
         {/* Reject Modal */}
         {rejectModal && (

@@ -1320,10 +1320,15 @@ const EmployersManagement = () => {
         console.warn('Could not reload change requests after approve:', e.message);
       }
 
-      alert(language === 'vi' ? 'Đã duyệt — worker mới đã được gán ca làm việc' : 'Approved — new worker has been assigned to the shift');
+      alert(language === 'vi' ? 'Đã duyệt — ca làm việc đã được huỷ thành công' : 'Approved — shift has been successfully cancelled');
     } catch (err) {
       console.error('Error approving change request:', err);
-      alert(language === 'vi' ? 'Lỗi khi duyệt yêu cầu' : 'Error approving request');
+      const msg = err.message || '';
+      if (msg.includes('không có quyền') || msg.includes('403')) {
+        alert('Bạn không có quyền thực hiện hành động này. Vui lòng đăng xuất và đăng nhập lại.');
+      } else {
+        alert(language === 'vi' ? `Lỗi khi duyệt yêu cầu: ${msg}` : `Error approving request: ${msg}`);
+      }
     } finally {
       setIsProcessingChange(false);
     }

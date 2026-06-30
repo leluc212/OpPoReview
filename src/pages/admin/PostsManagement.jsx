@@ -777,7 +777,7 @@ const PostsManagement = () => {
             employerId: cr.employerId,
             companyName: cr.companyName || '',
             candidateName: cr.candidateName || cr.candidateEmail || '',
-            changeRequestType: 'Huỷ ca',
+            changeRequestType: 'Thay đổi nhân viên',
             applicationId: cr.applicationId
           }).catch(() => {});
         }
@@ -785,7 +785,7 @@ const PostsManagement = () => {
         console.warn('⚠️ Notification error (non-critical):', notifErr);
       }
 
-      showCRToast('success', 'Đã duyệt yêu cầu huỷ ca');
+      showCRToast('success', 'Đã duyệt yêu cầu thay đổi nhân viên');
       setSelectedCR(null);
       await loadChangeRequests();
     } catch (err) {
@@ -808,13 +808,13 @@ const PostsManagement = () => {
           employerId: cr.employerId,
           companyName: cr.companyName || 'Nhà tuyển dụng',
           candidateName: cr.candidateName || cr.candidateEmail || 'Worker',
-          changeRequestType: 'Huỷ ca',
+          changeRequestType: 'Thay đổi nhân viên',
           applicationId: cr.applicationId,
           reason: ''
         }).catch(() => {});
       }
 
-      showCRToast('success', 'Đã từ chối yêu cầu huỷ ca');
+      showCRToast('success', 'Đã từ chối yêu cầu thay đổi nhân viên');
       setSelectedCR(null);
       await loadChangeRequests();
     } catch (err) {
