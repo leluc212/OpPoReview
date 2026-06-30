@@ -3,6 +3,7 @@ import boto3  # type: ignore
 import os
 from datetime import datetime
 from decimal import Decimal
+from boto3.dynamodb.conditions import Key, Attr
 
 # Initialize DynamoDB client
 dynamodb = boto3.resource('dynamodb')
@@ -24,6 +25,38 @@ def decimal_default(obj):
     if isinstance(obj, set):
         return list(obj)
     raise TypeError
+
+def get_quick_boost_employers():
+    """
+    Fetch all employer IDs that have an active Quick Boost subscription
+    """
+    try:
+        subscriptions_table = dynamodb.Table('PackageSubscriptions')
+        employers = set()
+        try:
+            response = subscriptions_table.query(
+                IndexName='StatusIndex',
+                KeyConditionExpression=Key('status').eq('active')
+            )
+            items = response.get('Items', [])
+        except Exception as query_err:
+            print(f"Warning: Failed to query StatusIndex on PackageSubscriptions: {query_err}")
+            # Fallback to scan if GSI is not available
+            response = subscriptions_table.scan(
+                FilterExpression=Attr('status').eq('active')
+            )
+            items = response.get('Items', [])
+            
+        for item in items:
+            if item.get('packageName') == 'Quick Boost':
+                emp_id = item.get('employerId')
+                if emp_id:
+                    employers.add(emp_id)
+        return employers
+    except Exception as e:
+        print(f"Error fetching Quick Boost subscriptions: {e}")
+        return set()
+
 
 def lambda_handler(event, context):
     """
@@ -81,6 +114,9 @@ def lambda_handler(event, context):
         if http_method == 'GET' and (normalized_path == '/jobs' or normalized_path == '/' or not normalized_path):
             response = table.scan()
             items = [item for item in response.get('Items', []) if item.get('status') != 'deleted']
+            boosted_employers = get_quick_boost_employers()
+            for item in items:
+                item['quickBoost'] = item.get('employerId') in boosted_employers
             return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'success': True, 'data': items}, default=decimal_default)}
             
         # B. GET /jobs/active
@@ -91,11 +127,13 @@ def lambda_handler(event, context):
             today_str = datetime.utcnow().strftime('%Y-%m-%d')
             active_items = []
             expired_ids = []
+            boosted_employers = get_quick_boost_employers()
             for item in items:
                 work_days = item.get('workDays', '')
                 if work_days and work_days < today_str:
                     expired_ids.append(item['idJob'])
                 else:
+                    item['quickBoost'] = item.get('employerId') in boosted_employers
                     active_items.append(item)
             # Auto-delete expired jobs and their applications
             for job_id in expired_ids:
@@ -420,6 +458,9 @@ def get_active_jobs(headers):
         )
         
         items = response.get('Items', [])
+        boosted_employers = get_quick_boost_employers()
+        for item in items:
+            item['quickBoost'] = item.get('employerId') in boosted_employers
         print(f"✅ Found {len(items)} active jobs")
         
         return {
@@ -458,6 +499,8 @@ def get_job_post(job_id, headers):
             }
         
         item = response['Item']
+        boosted_employers = get_quick_boost_employers()
+        item['quickBoost'] = item.get('employerId') in boosted_employers
         print(f"✅ Job post found: {job_id}")
         
         return {

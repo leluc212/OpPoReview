@@ -722,10 +722,32 @@ def create_subscription(body_str, headers):
         
         payment_method = body.get('paymentMethod', 'wallet')
         is_contact_request = payment_method == 'contact'
+        is_admin_granted = payment_method == 'admin_granted'
         
         now_dt = get_vn_now()
         
-        if not is_contact_request:
+        if is_admin_granted:
+            expiry_dt = calculate_expiry_datetime(body['duration'], now_dt)
+            expiry_date = format_vn_date(expiry_dt)
+            
+            item = {
+                'subscriptionId': subscription_id,
+                'employerId': body['employerId'],
+                'companyName': body['companyName'],
+                'packageName': body['packageName'],
+                'duration': body['duration'],
+                'price': price_decimal,
+                'purchaseDate': format_vn_date(now_dt),
+                'purchaseDateTime': now_dt.isoformat(),
+                'expiryDate': expiry_date,
+                'expiryDateTime': expiry_dt.isoformat(),
+                'status': 'active',  # active immediately
+                'approvalStatus': 'approved',  # approved immediately
+                'createdAt': now_dt.isoformat(),
+                'updatedAt': now_dt.isoformat(),
+                'paymentMethod': 'admin_granted'
+            }
+        elif not is_contact_request:
             # Check and deduct employer wallet balance in database
             employer_id = body['employerId']
             wallet_info = get_or_create_wallet(employer_id)

@@ -247,14 +247,18 @@ const StatusBadge = styled.span`
   font-weight: 600;
   background: ${props => {
     if (props.$status === 'approved') return '#dcfce7';
-    if (props.$status === 'rejected') return '#fee2e2';
-    if (props.$status === 'pending') return '#fef3c7';
+    if (props.$status === 'active') return '#dbeafe';
+    if (props.$status === 'rejected' || props.$status === 'locked') return '#fee2e2';
+    if (props.$status === 'pending' || props.$status === 'expiring') return '#fef3c7';
+    if (props.$status === 'expired') return '#f3f4f6';
     return '#f3f4f6';
   }};
   color: ${props => {
     if (props.$status === 'approved') return '#15803d';
-    if (props.$status === 'rejected') return '#dc2626';
-    if (props.$status === 'pending') return '#ca8a04';
+    if (props.$status === 'active') return '#1e40af';
+    if (props.$status === 'rejected' || props.$status === 'locked') return '#dc2626';
+    if (props.$status === 'pending' || props.$status === 'expiring') return '#ca8a04';
+    if (props.$status === 'expired') return '#94a3b8';
     return '#6b7280';
   }};
   display: inline-flex;
@@ -834,14 +838,20 @@ const EmployersManagement = () => {
         console.error('❌ Error sending notification:', notifyErr);
       }
 
-      alert(language === 'vi' ? 'Cấp gói dịch vụ thành công!' : 'Package granted successfully!');
+      setGrantedPackageDetails({
+        packageName: selectedPackage.packageName,
+        companyName: employers.find(e => e.id === selectedEmployerId)?.companyName || selectedEmployerId,
+        duration: selectedDuration,
+        expiryDate: finalExpiryDate ? formatDateTime(finalExpiryDate) : ''
+      });
+      setShowGrantSuccessModal(true);
       setSelectedEmployerId('');
       setSelectedPackageId('');
       setSelectedDuration('');
       await loadPurchases();
     } catch (err) {
       console.error('Error granting package:', err);
-      alert(language === 'vi' ? `Lỗi khi cấp gói: ${err.message}` : `Error granting package: ${err.message}`);
+      setGrantErrorModalMsg(err.message || 'Unknown error');
     } finally {
       setGranting(false);
     }
@@ -922,7 +932,7 @@ const EmployersManagement = () => {
   };
 
   const filteredPurchases = useMemo(() => {
-    return purchases.filter(purchase => {
+    const list = purchases.filter(purchase => {
       const matchesTab = packageTab === 'pending'
         ? (purchase.approvalStatus === 'pending' || purchase.status === 'pending')
         : (purchase.status === 'active' || purchase.status === 'expiring' || purchase.status === 'expired' || purchase.status === 'locked');
@@ -936,6 +946,39 @@ const EmployersManagement = () => {
         purchaseFilters.includes(purchase.status);
       
       return matchesTab && matchesSearch && matchesFilters;
+    });
+
+    const parseDate = (dateStr) => {
+      if (!dateStr) return 0;
+      if (dateStr.includes('T') || dateStr.includes('-')) {
+        const parsed = new Date(dateStr);
+        return isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+      }
+      const parts = dateStr.split('/');
+      if (parts.length === 3) {
+        const day = parts[0];
+        const month = parts[1];
+        const year = parts[2];
+        const parsed = new Date(`${year}-${month}-${day}`);
+        return isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+      }
+      const parsed = new Date(dateStr);
+      return isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+    };
+
+    // Auto-sort purchases:
+    // 1. Active packages (status !== 'expired') go first, Expired packages (status === 'expired') go last.
+    // 2. Within each group, sort by purchaseDateTime or purchaseDate (newest first).
+    return [...list].sort((a, b) => {
+      const aExpired = a.status === 'expired';
+      const bExpired = b.status === 'expired';
+      
+      if (!aExpired && bExpired) return -1;
+      if (aExpired && !bExpired) return 1;
+      
+      const aTime = parseDate(a.purchaseDateTime || a.purchaseDate);
+      const bTime = parseDate(b.purchaseDateTime || b.purchaseDate);
+      return bTime - aTime;
     });
   }, [purchases, purchaseSearchTerm, purchaseFilters, packageTab]);
 
@@ -1126,6 +1169,9 @@ const EmployersManagement = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showGrantSuccessModal, setShowGrantSuccessModal] = useState(false);
+  const [grantedPackageDetails, setGrantedPackageDetails] = useState(null);
+  const [grantErrorModalMsg, setGrantErrorModalMsg] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [changeRequests, setChangeRequests] = useState([]);
   const [selectedChangeRequest, setSelectedChangeRequest] = useState(null);
@@ -2654,6 +2700,70 @@ const EmployersManagement = () => {
               }
             </ModalMessage>
             <ModalButton onClick={() => setShowSuccessModal(false)}>
+              {language === 'vi' ? 'Đóng' : 'Close'}
+            </ModalButton>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+
+      {/* Grant Success Modal */}
+      {showGrantSuccessModal && grantedPackageDetails && (
+        <ModalOverlay onClick={() => setShowGrantSuccessModal(false)}>
+          <ModalContent onClick={(e) => e.stopPropagation()} style={{ maxWidth: '450px' }}>
+            <ModalIcon>
+              <CheckCircle />
+            </ModalIcon>
+            <ModalTitle style={{ marginBottom: '8px' }}>
+              {language === 'vi' ? 'Cấp Gói Thành Công!' : 'Package Granted Successfully!'}
+            </ModalTitle>
+            <ModalMessage style={{ marginBottom: '16px' }}>
+              {language === 'vi' 
+                ? 'Gói dịch vụ đã được kích hoạt thành công cho doanh nghiệp.' 
+                : 'The service package has been successfully activated for the employer.'}
+            </ModalMessage>
+            
+            <div style={{ display: 'grid', gap: '12px', margin: '20px 0', padding: '16px', background: '#F8FAFC', borderRadius: '12px', border: '1.5px solid #E2E8F0', fontSize: '14px', textAlign: 'left' }}>
+              <div>
+                <span style={{ color: '#64748B', fontWeight: 500 }}>{language === 'vi' ? 'Nhà tuyển dụng:' : 'Employer:'}</span>
+                <span style={{ float: 'right', fontWeight: 700, color: '#1E293B' }}>{grantedPackageDetails.companyName}</span>
+              </div>
+              <div style={{ borderTop: '1px dashed #E2E8F0', paddingTop: '8px' }}>
+                <span style={{ color: '#64748B', fontWeight: 500 }}>{language === 'vi' ? 'Gói dịch vụ:' : 'Package:'}</span>
+                <span style={{ float: 'right', fontWeight: 700, color: '#3B82F6' }}>{grantedPackageDetails.packageName}</span>
+              </div>
+              <div style={{ borderTop: '1px dashed #E2E8F0', paddingTop: '8px' }}>
+                <span style={{ color: '#64748B', fontWeight: 500 }}>{language === 'vi' ? 'Thời hạn:' : 'Duration:'}</span>
+                <span style={{ float: 'right', fontWeight: 700, color: '#10B981' }}>{grantedPackageDetails.duration}</span>
+              </div>
+              {grantedPackageDetails.expiryDate && (
+                <div style={{ borderTop: '1px dashed #E2E8F0', paddingTop: '8px' }}>
+                  <span style={{ color: '#64748B', fontWeight: 500 }}>{language === 'vi' ? 'Hạn sử dụng:' : 'Expiration:'}</span>
+                  <span style={{ float: 'right', fontWeight: 700, color: '#EF4444' }}>{grantedPackageDetails.expiryDate}</span>
+                </div>
+              )}
+            </div>
+
+            <ModalButton onClick={() => setShowGrantSuccessModal(false)}>
+              {language === 'vi' ? 'Xác nhận' : 'Confirm'}
+            </ModalButton>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+
+      {/* Grant Error Modal */}
+      {grantErrorModalMsg && (
+        <ModalOverlay onClick={() => setGrantErrorModalMsg('')}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalIcon style={{ background: '#fee2e2' }}>
+              <XCircle style={{ color: '#dc2626' }} />
+            </ModalIcon>
+            <ModalTitle>
+              {language === 'vi' ? 'Cấp gói thất bại!' : 'Failed to Grant Package!'}
+            </ModalTitle>
+            <ModalMessage style={{ color: '#dc2626', fontWeight: 500 }}>
+              {grantErrorModalMsg}
+            </ModalMessage>
+            <ModalButton style={{ background: '#ef4444' }} onClick={() => setGrantErrorModalMsg('')}>
               {language === 'vi' ? 'Đóng' : 'Close'}
             </ModalButton>
           </ModalContent>

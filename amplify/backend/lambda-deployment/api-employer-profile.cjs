@@ -3,8 +3,112 @@ const employerProfileService = require('./employer-profile.cjs');
 const jwt = require('jsonwebtoken');
 const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
+const { CognitoIdentityProviderClient, AdminGetUserCommand } = require('@aws-sdk/client-cognito-identity-provider');
 
 const s3Client = new S3Client({ region: 'ap-southeast-1' });
+const sesClient = new SESClient({ region: 'ap-southeast-1' });
+const cognitoClient = new CognitoIdentityProviderClient({ region: 'ap-southeast-1' });
+
+/**
+ * Fetch registered email from Cognito
+ */
+const getCognitoEmail = async (username) => {
+  try {
+    const command = new AdminGetUserCommand({
+      UserPoolId: 'ap-southeast-1_ShCajkmJd',
+      Username: username
+    });
+    const userDetails = await cognitoClient.send(command);
+    const emailAttr = userDetails.UserAttributes.find(attr => attr.Name === 'email');
+    return emailAttr ? emailAttr.Value : null;
+  } catch (err) {
+    console.error('Error fetching Cognito email:', err);
+    return null;
+  }
+};
+
+/**
+ * Send business verification email via AWS SES
+ */
+const sendVerificationEmail = async (employerEmail, cognitoEmail, companyName) => {
+  const recipients = [];
+  if (employerEmail && employerEmail.trim()) {
+    recipients.push(employerEmail.trim());
+  }
+  if (cognitoEmail && cognitoEmail.trim() && !recipients.includes(cognitoEmail.trim())) {
+    recipients.push(cognitoEmail.trim());
+  }
+
+  if (recipients.length === 0) {
+    console.log('No recipient emails found to send verification notification.');
+    return;
+  }
+
+  const subject = `🔔 [OpPoReview] Chúc mừng! Doanh nghiệp ${companyName} đã được xác minh thành công`;
+  
+  const htmlBody = `
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h2 style="color: #10b981; margin: 0;">Ốp Pờ - Nền Tảng Tuyển Dụng</h2>
+          <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Xác Minh Doanh Nghiệp Thành Công</p>
+        </div>
+        
+        <p>Xin chào quý đối tác,</p>
+        
+        <p>Chúng tôi xin trân trọng thông báo rằng tài khoản doanh nghiệp <strong>${companyName}</strong> đã được Ban quản trị hệ thống <strong>xác minh chính thức thành công</strong>.</p>
+        
+        <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 20px 0;">
+          <p style="margin: 0 0 8px 0;"><strong>Quyền lợi của tài khoản đã xác minh:</strong></p>
+          <ul style="margin: 0; padding-left: 20px;">
+            <li>Đăng tin tuyển dụng không giới hạn.</li>
+            <li>Xem đầy đủ thông tin hồ sơ ứng viên (CV).</li>
+            <li>Độ tin cậy cao hơn, thu hút nhiều ứng viên ứng tuyển.</li>
+          </ul>
+        </div>
+        
+        <p>Quý khách hiện có thể đăng nhập vào hệ thống và bắt đầu đăng bài tuyển dụng ngay lập tức.</p>
+        
+        <div style="text-align: center; margin-top: 32px; margin-bottom: 24px;">
+          <a href="https://opporeview.com/employer/jobs" style="background: #10b981; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-weight: bold; display: inline-block;">Truy cập trang tuyển dụng</a>
+        </div>
+        
+        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+        <p style="font-size: 12px; color: #94a3b8; text-align: center; margin: 0;">
+          Email này được gửi tự động từ hệ thống OpPoReview. Vui lòng không phản hồi email này.<br />
+          Bộ phận hỗ trợ tuyển dụng: <strong>tuyendung.oppo@oppocareer.com</strong>
+        </p>
+      </body>
+    </html>
+  `;
+
+  try {
+    const command = new SendEmailCommand({
+      Source: 'tuyendung.oppo@oppocareer.com',
+      Destination: {
+        ToAddresses: recipients
+      },
+      Message: {
+        Subject: {
+          Data: subject,
+          Charset: 'UTF-8'
+        },
+        Body: {
+          Html: {
+            Data: htmlBody,
+            Charset: 'UTF-8'
+          }
+        }
+      }
+    });
+
+    const sendResult = await sesClient.send(command);
+    console.log(`✅ Email sent successfully to ${recipients.join(', ')}. MessageId: ${sendResult.MessageId}`);
+  } catch (err) {
+    console.error('❌ Error sending verification email via SES:', err);
+  }
+};
 const VERIFICATION_BUCKET = 'opporeview-cv-storage';
 const VERIFICATION_PREFIX = 'employer-verification';
 
@@ -131,6 +235,16 @@ exports.handler = async (event) => {
           ':t': new Date().toISOString()
         }
       });
+
+      // Send Verification Email
+      try {
+        const profile = await employerProfileService.getProfile(pathUserId);
+        const cognitoEmail = await getCognitoEmail(pathUserId);
+        await sendVerificationEmail(profile.email, cognitoEmail, profile.companyName || 'Doanh nghiệp');
+      } catch (emailErr) {
+        console.error('Error in sendVerificationEmail flow (approve):', emailErr);
+      }
+
       return {
         statusCode: 200,
         headers: corsHeaders,
@@ -167,6 +281,18 @@ exports.handler = async (event) => {
     if (httpMethod === 'POST' && pathUserId && event.path?.endsWith('/verify')) {
       const body = JSON.parse(event.body || '{}');
       const result = await employerProfileService.updateVerificationStatus(pathUserId, body.isVerified, body);
+
+      // Send Verification Email if isVerified is true
+      if (body.isVerified) {
+        try {
+          const profile = await employerProfileService.getProfile(pathUserId);
+          const cognitoEmail = await getCognitoEmail(pathUserId);
+          await sendVerificationEmail(profile.email, cognitoEmail, profile.companyName || 'Doanh nghiệp');
+        } catch (emailErr) {
+          console.error('Error in sendVerificationEmail flow (verify):', emailErr);
+        }
+      }
+
       return {
         statusCode: 200,
         headers: corsHeaders,

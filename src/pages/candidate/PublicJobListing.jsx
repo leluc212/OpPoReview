@@ -228,8 +228,8 @@ const JobList = styled.div`
 `;
 
 const JobCard = styled.div`
-  background: ${p => p.$isDark ? 'rgba(30,41,59,0.8)' : '#fff'};
-  border: 1.5px solid ${p => p.$isDark ? 'rgba(75,85,99,0.3)' : '#e2e8f0'};
+  background: ${p => p.$quickBoosted ? (p.$isDark ? 'rgba(16,185,129,0.1)' : '#ecfdf5') : (p.$isDark ? 'rgba(30,41,59,0.8)' : '#fff')};
+  border: ${p => p.$quickBoosted ? '2px solid #10b981' : (p.$isDark ? '1.5px solid rgba(75,85,99,0.3)' : '1.5px solid #e2e8f0')};
   border-radius: 14px;
   padding: 20px 22px;
   text-decoration: none;
@@ -240,10 +240,30 @@ const JobCard = styled.div`
   animation: ${fadeUp} 0.35s ease both;
   transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
   cursor: pointer;
+  box-shadow: ${p => p.$quickBoosted ? '0 4px 20px rgba(16,185,129,0.15)' : 'none'};
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(135deg, #10b981, #059669);
+    opacity: ${p => p.$quickBoosted ? 1 : 0};
+    transition: opacity 0.3s ease;
+    border-radius: 14px 0 0 14px;
+  }
+  
   &:hover {
-    border-color: #1a62ff;
-    box-shadow: 0 6px 24px rgba(26,98,255,0.1);
+    border-color: ${p => p.$quickBoosted ? '#059669' : '#1a62ff'};
+    box-shadow: ${p => p.$quickBoosted ? '0 12px 40px rgba(16,185,129,0.25)' : '0 6px 24px rgba(26,98,255,0.1)'};
     transform: translateY(-1px);
+    
+    &::before {
+      opacity: 1;
+    }
   }
 `;
 
@@ -733,7 +753,15 @@ const PublicJobListing = () => {
     if (activeTab === 'saved') {
       result = result.filter(j => savedJobIds.includes(j.idJob || j.jobID));
     }
-    return result;
+    
+    // Sort quickBoost to the top first, then by date!
+    return [...result].sort((a, b) => {
+      const aBoost = !!a.quickBoost;
+      const bBoost = !!b.quickBoost;
+      if (aBoost && !bBoost) return -1;
+      if (!aBoost && bBoost) return 1;
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    });
   }, [jobs, keyword, loc, selectedSalaryRanges, selectedWorkTimes, selectedPostTimes, activeTab, savedJobIds]);
 
   const handleSearch = () => {
@@ -958,6 +986,7 @@ const PublicJobListing = () => {
                 <JobCard
                   key={job.idJob || job.jobID || i}
                   $isDark={isDarkMode}
+                  $quickBoosted={job.quickBoost}
                   style={{ animationDelay: `${Math.min(i * 0.04, 0.3)}s` }}
                   onClick={() => setSelectedJob(job)}
                 >
@@ -968,7 +997,7 @@ const PublicJobListing = () => {
                     }
                   </LogoBox>
                   <JobInfo>
-                    <JobTitle $isDark={isDarkMode} $isUrgent={job._type === 'urgent'} style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
+                    <JobTitle $isDark={isDarkMode} $isUrgent={job._type === 'urgent' || job.quickBoost} style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
                       <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{job.title}</span>
                       {job.isAiScreeningEnabled && (
                         <span style={{
@@ -989,14 +1018,14 @@ const PublicJobListing = () => {
                         </span>
                       )}
                     </JobTitle>
-                    <Company $isDark={isDarkMode} $isUrgent={job._type === 'urgent'}>{job.companyName || job.employerName || 'Công ty'}</Company>
+                    <Company $isDark={isDarkMode} $isUrgent={job._type === 'urgent' || job.quickBoost}>{job.companyName || job.employerName || 'Công ty'}</Company>
                     <Tags>
-                      {job._type === 'urgent' && (
+                      {(job._type === 'urgent' || job.quickBoost) && (
                         <UrgentTag><Zap size={10} style={{ display: 'inline' }} /> {language === 'vi' ? 'Tuyển gấp' : 'Urgent'}</UrgentTag>
                       )}
-                      {job.location && <Tag $isDark={isDarkMode} $isUrgent={job._type === 'urgent'}><MapPin size={10} style={{ display: 'inline' }} /> {job.location}</Tag>}
-                      {job.workHours && <Tag $isDark={isDarkMode} $isUrgent={job._type === 'urgent'}><Clock size={10} style={{ display: 'inline' }} /> {job.workHours}</Tag>}
-                      {job.jobType && <Tag $isDark={isDarkMode} $isUrgent={job._type === 'urgent'}>{job.jobType}</Tag>}
+                      {job.location && <Tag $isDark={isDarkMode} $isUrgent={job._type === 'urgent' || job.quickBoost}><MapPin size={10} style={{ display: 'inline' }} /> {job.location}</Tag>}
+                      {job.workHours && <Tag $isDark={isDarkMode} $isUrgent={job._type === 'urgent' || job.quickBoost}><Clock size={10} style={{ display: 'inline' }} /> {job.workHours}</Tag>}
+                      {job.jobType && <Tag $isDark={isDarkMode} $isUrgent={job._type === 'urgent' || job.quickBoost}>{job.jobType}</Tag>}
                     </Tags>
                   </JobInfo>
                   <JobRight>
