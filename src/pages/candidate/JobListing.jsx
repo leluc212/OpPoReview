@@ -1498,15 +1498,15 @@ const BoostTag = styled.div`
 `;
 
 const JobCardWrapper = styled(motion.div)`
-  background: ${props => props.$highlighted ? props.theme.colors.primary + '08' : props.theme.colors.bgLight};
+  background: ${props => props.$quickBoosted ? 'rgba(16, 185, 129, 0.04)' : (props.$highlighted ? props.theme.colors.primary + '08' : props.theme.colors.bgLight)};
   border-radius: ${props => props.theme.borderRadius.lg};
-  border: 1px solid ${props => props.$highlighted ? props.theme.colors.primary : props.theme.colors.border};
+  border: ${props => props.$quickBoosted ? '2px solid #10b981' : (props.$highlighted ? `1.5px solid ${props.theme.colors.primary}` : `1px solid ${props.theme.colors.border}`)};
   padding: 14px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  box-shadow: ${props => props.$highlighted ? `0 0 20px ${props.theme.colors.primary}30` : 'none'};
+  box-shadow: ${props => props.$quickBoosted ? '0 4px 20px rgba(16, 185, 129, 0.15)' : (props.$highlighted ? `0 0 20px ${props.theme.colors.primary}30` : 'none')};
   
   &::before {
     content: '';
@@ -1515,14 +1515,14 @@ const JobCardWrapper = styled(motion.div)`
     left: 0;
     width: 4px;
     height: 100%;
-    background: linear-gradient(135deg, ${props => props.theme.colors.primary}, ${props => props.theme.colors.secondary});
-    opacity: ${props => props.$highlighted ? 1 : 0};
+    background: ${props => props.$quickBoosted ? 'linear-gradient(135deg, #10b981, #059669)' : `linear-gradient(135deg, ${props.theme.colors.primary}, ${props.theme.colors.secondary})`};
+    opacity: ${props => (props.$highlighted || props.$quickBoosted) ? 1 : 0};
     transition: opacity 0.3s ease;
   }
   
   &:hover {
-    border-color: ${props => props.theme.colors.primary};
-    box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+    border-color: ${props => props.$quickBoosted ? '#059669' : props.theme.colors.primary};
+    box-shadow: ${props => props.$quickBoosted ? '0 12px 40px rgba(16, 185, 129, 0.25)' : '0 12px 40px rgba(0,0,0,0.08)'};
     transform: translateY(-4px);
     
     &::before {
@@ -1531,13 +1531,24 @@ const JobCardWrapper = styled(motion.div)`
   }
 
   /* Pulse animation for highlight */
-  ${props => props.$highlighted && `
+  ${props => props.$highlighted && !props.$quickBoosted && `
     animation: highlightPulse 2s ease-in-out;
     background: ${props.theme.colors.primary}15;
     border-color: ${props.theme.colors.primary};
     box-shadow: 0 0 0 4px ${props.theme.colors.primary}20;
     z-index: 10;
   `}
+  
+  ${props => props.$quickBoosted && `
+    animation: quickBoostPulse 2.5s ease-in-out infinite;
+    z-index: 10;
+  `}
+  
+  @keyframes quickBoostPulse {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  }
 `;
 
 const AiBadge = styled.span`
@@ -3217,7 +3228,8 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
               companyLogo: employerLogos[job.employerId] || null,
               isAiScreeningEnabled: !!job.isAiScreeningEnabled,
               customQuestions: job.customQuestions || [],
-              isFromDynamoDB: true // Flag to identify DynamoDB jobs
+              isFromDynamoDB: true, // Flag to identify DynamoDB jobs
+              quickBoost: !!job.quickBoost
             };
           } catch (err) {
             console.error('Error transforming job:', job, err);
@@ -3318,7 +3330,8 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
               status: String(job.status || 'active'),
               isQuickJob: true, // Flag to identify quick jobs
               urgent: true, // Mark as urgent to show red badge
-              isUrgent: true
+              isUrgent: true,
+              quickBoost: !!job.quickBoost
             };
           } catch (err) {
             console.error('Error transforming quick job:', job, err);
@@ -3388,7 +3401,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
   const [userLocation, setUserLocation] = useState(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [showNearbyJobs, setShowNearbyJobs] = useState(false);
-  const [nearbyRadius, setNearbyRadius] = useState(5); // km - radius to find jobs near candidate
+  const [nearbyRadius, setNearbyRadius] = useState(10); // km - radius to find jobs near candidate
   const [showSavedJobsOnly, setShowSavedJobsOnly] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     const tab = params.get('tab');
@@ -4476,10 +4489,10 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
         ...job,
         distance: calculateDistance(userLocation.lat, userLocation.lng, job.lat, job.lng)
       }))
-      .filter(job => job.distance <= 5.0)
+      .filter(job => job.distance <= nearbyRadius)
       .sort((a, b) => a.distance - b.distance);
 
-    console.log(`📍 Found ${nearby.length} urgent jobs within 5km`);
+    console.log(`📍 Found ${nearby.length} urgent jobs within ${nearbyRadius}km`);
 
     return nearby;
   }, [userLocation, jobCategory, nearbyRadius, allJobs]);
@@ -4500,7 +4513,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
       if (jobCategory === 'shift') {
         // IMPORTANT: Only show shift jobs when work status is ON and location is enabled
         if (isAvailable && showNearbyJobs) {
-          // Location enabled: only show jobs within radius (strict ≤3km)
+          // Location enabled: only show jobs within radius (strict ≤10km)
           return nearbyJobs;
         }
         // If work status is OFF or location not enabled: hide all shift jobs
@@ -4577,6 +4590,11 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
 
     // Sorting
     result = [...result].sort((a, b) => {
+      const aBoost = a.quickBoost || a.isQuickBoosted;
+      const bBoost = b.quickBoost || b.isQuickBoosted;
+      if (aBoost && !bBoost) return -1;
+      if (!aBoost && bBoost) return 1;
+
       switch (sortBy) {
         case 'salary':
           return getSalaryValue(b) - getSalaryValue(a);
@@ -5136,7 +5154,7 @@ Yêu cầu: ${job.requirements || "Có kinh nghiệm tương đương."}
                         {language === 'vi'
                           ? !isAvailable
                             ? 'Vui lòng bật trạng thái làm việc ở phía trên, '
-                            : 'Vui lòng nhấn nút "Tìm việc gần tôi" ở phía trên để tìm các công việc tuyển gấp trong bán kính 3km'
+                            : `Vui lòng nhấn nút "Tìm việc gần tôi" ở phía trên để tìm các công việc tuyển gấp trong bán kính ${nearbyRadius}km`
                           : !isAvailable
                             ? 'Please enable work status above, '
                             : ''}
@@ -6675,6 +6693,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, onApply, delay = 0, sho
     <JobCardWrapper
       id={`job-card-${job.id}`}
       $highlighted={isHighlighted}
+      $quickBoosted={job.quickBoost}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
@@ -6730,7 +6749,7 @@ const JobCardComponent = ({ job, saved, onSave, onClick, onApply, delay = 0, sho
             </MetaItem>
           </JobMeta>
         </JobInfo>
-        {job.urgent && (
+        {(job.urgent || job.quickBoost) && (
           <div style={{ marginLeft: 'auto', alignSelf: 'flex-start' }}>
             <StatusBadge status="urgent" size="sm">{language === 'vi' ? 'Tuyển gấp' : 'Urgent'}</StatusBadge>
           </div>

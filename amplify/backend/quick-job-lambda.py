@@ -3,6 +3,7 @@ import boto3
 import os
 from datetime import datetime
 from decimal import Decimal
+from boto3.dynamodb.conditions import Key, Attr
 
 # Initialize DynamoDB client
 dynamodb = boto3.resource('dynamodb')
@@ -16,6 +17,37 @@ def decimal_default(obj):
     if isinstance(obj, set):
         return list(obj)
     raise TypeError
+
+def get_quick_boost_employers():
+    """
+    Fetch all employer IDs that have an active Quick Boost subscription
+    """
+    try:
+        subscriptions_table = dynamodb.Table('PackageSubscriptions')
+        employers = set()
+        try:
+            response = subscriptions_table.query(
+                IndexName='StatusIndex',
+                KeyConditionExpression=Key('status').eq('active')
+            )
+            items = response.get('Items', [])
+        except Exception as query_err:
+            print(f"Warning: Failed to query StatusIndex on PackageSubscriptions: {query_err}")
+            # Fallback to scan if GSI is not available
+            response = subscriptions_table.scan(
+                FilterExpression=Attr('status').eq('active')
+            )
+            items = response.get('Items', [])
+            
+        for item in items:
+            if item.get('packageName') == 'Quick Boost':
+                emp_id = item.get('employerId')
+                if emp_id:
+                    employers.add(emp_id)
+        return employers
+    except Exception as e:
+        print(f"Error fetching Quick Boost subscriptions: {e}")
+        return set()
 
 
 def get_cors_headers():
@@ -331,7 +363,7 @@ def create_quick_job(body_str, user_id, headers):
             'description': body['description'],
             'requirements': body.get('requirements', ''),
             'customFields': body.get('customFields', []),
-            'status': body.get('status', 'pending'),
+            'status': 'pending', # Enforce pending status on creation for Admin moderation
             'category': 'quick-jobs',
             'applicants': 0,
             'views': 0,
@@ -387,6 +419,9 @@ def get_all_quick_jobs(headers):
     try:
         response = table.scan()
         items = [i for i in response.get('Items', []) if i.get('status') != 'deleted']
+        boosted_employers = get_quick_boost_employers()
+        for item in items:
+            item['quickBoost'] = item.get('employerId') in boosted_employers
         print(f"✅ Found {len(items)} total quick jobs (Scan)")
         return {
             'statusCode': 200,
@@ -501,6 +536,7 @@ def get_active_quick_jobs(headers):
         
         active_items = []
         expired_ids = []
+        boosted_employers = get_quick_boost_employers()
         for item in items:
             work_date = item.get('workDate', '')
             end_time = item.get('endTime', '23:59')
@@ -509,6 +545,7 @@ def get_active_quick_jobs(headers):
                 if work_date < now_date_str or (work_date == now_date_str and end_time <= now_time_str):
                     expired_ids.append(item['jobID'])
                     continue
+            item['quickBoost'] = item.get('employerId') in boosted_employers
             active_items.append(item)
         
         # Auto-close expired jobs in DB
@@ -562,6 +599,8 @@ def get_quick_job(job_id, headers):
             }
         
         item = response['Item']
+        boosted_employers = get_quick_boost_employers()
+        item['quickBoost'] = item.get('employerId') in boosted_employers
         print(f"✅ Quick job found: {job_id}")
         
         return {
