@@ -1072,15 +1072,6 @@ const PreviewText = styled.div`
 
 const PackagesManagement = () => {
   const { language } = useLanguage();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState('pending'); // 'pending' or 'approved'
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [approvedPackageInfo, setApprovedPackageInfo] = useState(null);
-  const [showLockConfirm, setShowLockConfirm] = useState(false);
-  const [lockTarget, setLockTarget] = useState(null);
-  const itemsPerPage = 20;
 
   // Dữ liệu gói dịch vụ đã mua - Load từ API
   const [purchases, setPurchases] = useState([]);
@@ -1104,6 +1095,23 @@ const PackagesManagement = () => {
     setStatsOpen(prev => {
       const next = !prev;
       try { localStorage.setItem('adminPackageStatsOpen', String(next)); } catch {}
+      return next;
+    });
+  };
+
+  const [catalogOpen, setCatalogOpen] = useState(() => {
+    try {
+      const saved = localStorage.getItem('adminPackageCatalogOpen');
+      return saved === null ? true : saved === 'true';
+    } catch {
+      return true;
+    }
+  });
+
+  const toggleCatalog = () => {
+    setCatalogOpen(prev => {
+      const next = !prev;
+      try { localStorage.setItem('adminPackageCatalogOpen', String(next)); } catch {}
       return next;
     });
   };
@@ -1426,223 +1434,6 @@ const PackagesManagement = () => {
     { value: 'expired', label: language === 'vi' ? 'Đã hết hạn' : 'Expired' },
   ];
 
-  const filteredPurchases = useMemo(() => {
-    return purchases.filter(purchase => {
-      // Filter by approval status based on active tab
-      // "Chờ duyệt" = gói chưa có status (pending approval)
-      // "Đã duyệt" = gói đã có status (active, expiring, expired)
-      const matchesTab = activeTab === 'pending' 
-        ? (purchase.approvalStatus === 'pending' || purchase.status === 'pending')
-        : (purchase.status === 'active' || purchase.status === 'expiring' || purchase.status === 'expired' || purchase.status === 'locked');
-      
-      const matchesSearch = searchTerm === '' || 
-        purchase.employer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        purchase.package.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesFilters = filters.length === 0 || 
-        filters.includes(purchase.package) ||
-        filters.includes(purchase.status);
-      
-      return matchesTab && matchesSearch && matchesFilters;
-    });
-  }, [purchases, searchTerm, filters, activeTab]);
-
-  // Pagination
-  const totalPages = Math.ceil(filteredPurchases.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentPurchases = filteredPurchases.slice(startIndex, endIndex);
-
-  // Reset to page 1 when search or filters change
-  useMemo(() => {
-    setCurrentPage(1);
-  }, [searchTerm, filters]);
-
-  const handleFilterToggle = (filterValue) => {
-    setFilters(prev => 
-      prev.includes(filterValue) 
-        ? prev.filter(f => f !== filterValue)
-        : [...prev, filterValue]
-    );
-  };
-
-  const handleApprove = async (purchaseId) => {
-    try {
-      console.log('🔄 Approving purchase:', purchaseId);
-      
-      const API_ENDPOINT = import.meta.env.VITE_PACKAGE_SUBSCRIPTIONS_API;
-      
-      // Step 1: Get full subscription details FIRST to extract employerId
-      console.log('📥 Fetching subscription details...');
-      const subscriptionResponse = await fetch(`${API_ENDPOINT}/subscriptions/${purchaseId}`);
-      
-      if (!subscriptionResponse.ok) {
-        throw new Error('Failed to fetch subscription details');
-      }
-      
-      const subscriptionData = await subscriptionResponse.json();
-      console.log('📦 Full subscription data:', JSON.stringify(subscriptionData, null, 2));
-      
-      // Extract employerId from response (handle both direct and nested data)
-      let employerId = subscriptionData.employerId 
-        || subscriptionData.data?.employerId
-        || subscriptionData.userId
-        || subscriptionData.data?.userId;
-      
-      console.log('📧 Extracted employerId:', employerId);
-      
-      if (!employerId) {
-        console.error('❌ No employerId found in subscription data');
-        console.error('Available keys:', Object.keys(subscriptionData));
-        if (subscriptionData.data) {
-          console.error('Available data keys:', Object.keys(subscriptionData.data));
-        }
-        throw new Error('Cannot find employerId in subscription data. Please check API response structure.');
-      }
-      
-      // Step 2: Approve the subscription
-      console.log('✅ Approving subscription...');
-      const response = await fetch(`${API_ENDPOINT}/subscriptions/${purchaseId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          status: 'active',
-          approvalStatus: 'approved'
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to approve subscription');
-      }
-      
-      const updatedSubscription = await response.json();
-      console.log('✅ Subscription approved:', updatedSubscription);
-      
-      // Step 3: Create notification for employer
-      console.log('🔔 Creating notification for employer...');
-      const purchase = purchases.find(p => p.id === purchaseId);
-      
-      if (!purchase) {
-        throw new Error('Purchase not found in local state');
-      }
-      
-      const notificationData = {
-        subscriptionId: purchaseId,
-        packageName: purchase.package,
-        duration: purchase.duration,
-        expiryDate: updatedSubscription.expiryDate || updatedSubscription.data?.expiryDate
-      };
-      
-      console.log('📤 Sending notification with data:', notificationData);
-      console.log('📤 To employerId:', employerId);
-      
-      await createPackageApprovedNotification(notificationData, employerId);
-      
-      console.log('✅ Notification sent to employer successfully!');
-      
-      // Show success modal instead of alert
-      setApprovedPackageInfo({
-        employer: purchase.employer,
-        package: purchase.package,
-        duration: purchase.duration,
-        expiryDate: updatedSubscription.expiryDate || updatedSubscription.data?.expiryDate,
-        expiryDateTime: updatedSubscription.expiryDateTime || updatedSubscription.data?.expiryDateTime
-      });
-      setShowSuccessModal(true);
-      
-      // Step 4: Update local state
-      setPurchases(prev => prev.map(p => 
-        p.id === purchaseId 
-          ? {
-              ...p,
-              status: updatedSubscription.status || updatedSubscription.data?.status || 'active',
-              approvalStatus: updatedSubscription.approvalStatus || updatedSubscription.data?.approvalStatus || 'approved',
-              purchaseDate: updatedSubscription.purchaseDate || updatedSubscription.data?.purchaseDate || p.purchaseDate,
-              purchaseDateTime: updatedSubscription.purchaseDateTime || updatedSubscription.data?.purchaseDateTime || p.purchaseDateTime,
-              expiryDate: updatedSubscription.expiryDate || updatedSubscription.data?.expiryDate || p.expiryDate,
-              expiryDateTime: updatedSubscription.expiryDateTime || updatedSubscription.data?.expiryDateTime || p.expiryDateTime
-            }
-          : p
-      ));
-      
-    } catch (error) {
-      console.error('❌ Error approving subscription:', error);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-      alert('Có lỗi xảy ra: ' + error.message);
-    }
-  };
-
-  const handleLockPackage = async (purchaseId) => {
-    try {
-      const API_ENDPOINT = import.meta.env.VITE_PACKAGE_SUBSCRIPTIONS_API;
-      const response = await fetch(`${API_ENDPOINT}/subscriptions/${purchaseId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ status: 'locked' })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to lock subscription');
-      }
-
-      const updatedSubscription = await response.json();
-
-      setPurchases(prev => prev.map(p =>
-        p.id === purchaseId
-          ? {
-              ...p,
-              status: updatedSubscription.status || updatedSubscription.data?.status || 'locked',
-              approvalStatus: updatedSubscription.approvalStatus || updatedSubscription.data?.approvalStatus || p.approvalStatus
-            }
-          : p
-      ));
-    } catch (error) {
-      console.error('❌ Error locking subscription:', error);
-      alert('Có lỗi xảy ra: ' + error.message);
-    }
-  };
-
-  const handleUnlockPackage = async (purchaseId) => {
-    try {
-      const API_ENDPOINT = import.meta.env.VITE_PACKAGE_SUBSCRIPTIONS_API;
-      const response = await fetch(`${API_ENDPOINT}/subscriptions/${purchaseId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ status: 'active' })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to unlock subscription');
-      }
-
-      const updatedSubscription = await response.json();
-
-      setPurchases(prev => prev.map(p =>
-        p.id === purchaseId
-          ? {
-              ...p,
-              status: updatedSubscription.status || updatedSubscription.data?.status || 'active',
-              approvalStatus: updatedSubscription.approvalStatus || updatedSubscription.data?.approvalStatus || p.approvalStatus
-            }
-          : p
-      ));
-    } catch (error) {
-      console.error('❌ Error unlocking subscription:', error);
-      alert('Có lỗi xảy ra: ' + error.message);
-    }
-  };
-
-  const openLockConfirm = (purchase) => {
-    setLockTarget(purchase);
-    setShowLockConfirm(true);
-  };
 
   const stats = {
     total: purchases.length,
@@ -1700,72 +1491,76 @@ const PackagesManagement = () => {
           <p>{language === 'vi' ? 'Quản lý gói dịch vụ của nhà tuyển dụng F&B' : 'Manage F&B employer service packages'}</p>
         </PageHeader>
 
-        <PackageCatalogSection>
-          <PackageCatalogHeader>
-            <div>
-              <h2>{language === 'vi' ? 'Thông Tin Gói Dịch Vụ' : 'Service Package Info'}</h2>
-              <p>{language === 'vi' ? 'Chỉnh sửa thông tin hiển thị cho Employer và lưu trực tiếp vào database.' : 'Edit the package information shown to employers and save it to the database.'}</p>
+        <CollapsibleSection>
+          <CollapsibleHeader $open={catalogOpen} onClick={toggleCatalog}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span>📦 {language === 'vi' ? 'Thông Tin Gói Dịch Vụ' : 'Service Package Info'}</span>
+              <PackageCatalogBadge $active={true} style={{ margin: 0 }}>
+                {language === 'vi' ? 'Đang đồng bộ' : 'Synced'}
+              </PackageCatalogBadge>
             </div>
-            <PackageCatalogBadge $active={true}>
-              {language === 'vi' ? 'Đang đồng bộ' : 'Synced'}
-            </PackageCatalogBadge>
-          </PackageCatalogHeader>
+            <span className="arrow">▼</span>
+          </CollapsibleHeader>
+          <CollapsibleBody $open={catalogOpen}>
+            <p style={{ fontSize: '14px', color: '#64748B', marginBottom: '16px', marginTop: '0', fontWeight: 'normal' }}>
+              {language === 'vi' ? 'Chỉnh sửa thông tin hiển thị cho Employer và lưu trực tiếp vào database.' : 'Edit the package information shown to employers and save it to the database.'}
+            </p>
+            {packageCatalogLoading ? (
+              <div style={{ padding: '20px 0', color: '#64748B', fontWeight: 600 }}>
+                {language === 'vi' ? 'Đang tải thông tin gói...' : 'Loading package information...'}
+              </div>
+            ) : (
+              <PackageCatalogGrid>
+                {packageCatalog.map((packageItem) => {
+                  const IconComponent = getPackageIcon(packageItem.iconKey);
+                  const durationSummary = packageItem.prices.map(price => `${price.duration}: ${Number(price.amount || 0).toLocaleString('vi-VN')} VNĐ`).join(' · ');
 
-          {packageCatalogLoading ? (
-            <div style={{ padding: '20px 0', color: '#64748B', fontWeight: 600 }}>
-              {language === 'vi' ? 'Đang tải thông tin gói...' : 'Loading package information...'}
-            </div>
-          ) : (
-            <PackageCatalogGrid>
-              {packageCatalog.map((packageItem) => {
-                const IconComponent = getPackageIcon(packageItem.iconKey);
-                const durationSummary = packageItem.prices.map(price => `${price.duration}: ${Number(price.amount || 0).toLocaleString('vi-VN')} VNĐ`).join(' · ');
+                  return (
+                    <PackageCatalogCard key={packageItem.packageId}>
+                      <PackageCatalogTop>
+                        <PackageBadge $color={packageItem.color}>
+                          <IconComponent />
+                          {packageItem.order}. {packageItem.packageName}
+                        </PackageBadge>
+                        <PackageCatalogBadge $active={packageItem.featured}>
+                          {packageItem.featured ? (language === 'vi' ? 'Nổi bật' : 'Featured') : (language === 'vi' ? 'Tiêu chuẩn' : 'Standard')}
+                        </PackageCatalogBadge>
+                      </PackageCatalogTop>
 
-                return (
-                  <PackageCatalogCard key={packageItem.packageId}>
-                    <PackageCatalogTop>
-                      <PackageBadge $color={packageItem.color}>
-                        <IconComponent />
-                        {packageItem.order}. {packageItem.packageName}
-                      </PackageBadge>
-                      <PackageCatalogBadge $active={packageItem.featured}>
-                        {packageItem.featured ? (language === 'vi' ? 'Nổi bật' : 'Featured') : (language === 'vi' ? 'Tiêu chuẩn' : 'Standard')}
-                      </PackageCatalogBadge>
-                    </PackageCatalogTop>
+                      <PackageCatalogName>
+                        <h3>{packageItem.packageName}</h3>
+                        <p>{language === 'vi' ? packageItem.subtitle?.vi : packageItem.subtitle?.en}</p>
+                      </PackageCatalogName>
 
-                    <PackageCatalogName>
-                      <h3>{packageItem.packageName}</h3>
-                      <p>{language === 'vi' ? packageItem.subtitle?.vi : packageItem.subtitle?.en}</p>
-                    </PackageCatalogName>
+                      <PackagePriceList>
+                        {packageItem.prices.map((priceOption) => (
+                          <PackagePriceRow key={`${packageItem.packageId}-${priceOption.duration}`}>
+                            <span>{priceOption.duration}</span>
+                            <span>{Number(priceOption.amount || 0).toLocaleString('vi-VN')} VNĐ</span>
+                          </PackagePriceRow>
+                        ))}
+                      </PackagePriceList>
 
-                    <PackagePriceList>
-                      {packageItem.prices.map((priceOption) => (
-                        <PackagePriceRow key={`${packageItem.packageId}-${priceOption.duration}`}>
-                          <span>{priceOption.duration}</span>
-                          <span>{Number(priceOption.amount || 0).toLocaleString('vi-VN')} VNĐ</span>
-                        </PackagePriceRow>
-                      ))}
-                    </PackagePriceList>
+                      <PackageFeatureList>
+                        {((language === 'vi' ? packageItem.features?.vi : packageItem.features?.en) || []).slice(0, 3).map((feature, index) => (
+                          <li key={index}>{feature}</li>
+                        ))}
+                      </PackageFeatureList>
 
-                    <PackageFeatureList>
-                      {((language === 'vi' ? packageItem.features?.vi : packageItem.features?.en) || []).slice(0, 3).map((feature, index) => (
-                        <li key={index}>{feature}</li>
-                      ))}
-                    </PackageFeatureList>
-
-                    <PackageCardFooter>
-                      <PackageSummary>{durationSummary}</PackageSummary>
-                      <PackageEditButton onClick={() => openPackageEditor(packageItem)}>
-                        <Edit3 size={16} />
-                        {language === 'vi' ? 'Chỉnh sửa' : 'Edit'}
-                      </PackageEditButton>
-                    </PackageCardFooter>
-                  </PackageCatalogCard>
-                );
-              })}
-            </PackageCatalogGrid>
-          )}
-        </PackageCatalogSection>
+                      <PackageCardFooter>
+                        <PackageSummary>{durationSummary}</PackageSummary>
+                        <PackageEditButton onClick={() => openPackageEditor(packageItem)}>
+                          <Edit3 size={16} />
+                          {language === 'vi' ? 'Chỉnh sửa' : 'Edit'}
+                        </PackageEditButton>
+                      </PackageCardFooter>
+                    </PackageCatalogCard>
+                  );
+                })}
+              </PackageCatalogGrid>
+            )}
+          </CollapsibleBody>
+        </CollapsibleSection>
 
         {loading && (
           <div style={{ textAlign: 'center', padding: '40px', color: '#64748B' }}>
@@ -1902,170 +1697,7 @@ const PackagesManagement = () => {
           </CollapsibleBody>
         </CollapsibleSection>
 
-        <TabsContainer>
-          <Tab 
-            $active={activeTab === 'pending'}
-            onClick={() => setActiveTab('pending')}
-          >
-            <Clock size={18} style={{ marginRight: '8px' }} />
-            {language === 'vi' ? 'Chờ duyệt' : 'Pending Approval'}
-          </Tab>
-          <Tab 
-            $active={activeTab === 'approved'}
-            onClick={() => setActiveTab('approved')}
-          >
-            <CheckCircle size={18} style={{ marginRight: '8px' }} />
-            {language === 'vi' ? 'Đã duyệt' : 'Approved'}
-          </Tab>
-        </TabsContainer>
 
-        <TableFilter 
-          searchValue={searchTerm}
-          onSearchChange={setSearchTerm}
-          filterOptions={filterOptions}
-          activeFilters={filters}
-          onFilterToggle={handleFilterToggle}
-          searchPlaceholder={language === 'vi' ? 'Tìm kiếm nhà tuyển dụng hoặc gói...' : 'Search employer or package...'}
-        />
-
-        <TableWrapper>
-          <Table>
-            <thead>
-              <tr>
-                <th>{language === 'vi' ? 'Nhà tuyển dụng' : 'Employer'}</th>
-                <th>{language === 'vi' ? 'Gói dịch vụ' : 'Package'}</th>
-                <th>{language === 'vi' ? 'Thời gian mua' : 'Purchase Date'}</th>
-                <th>{language === 'vi' ? 'Hết hạn' : 'Expiry Date'}</th>
-                <th>{language === 'vi' ? 'Thời hạn' : 'Duration'}</th>
-                <th>{language === 'vi' ? 'Giá trị' : 'Price'}</th>
-                <th>{language === 'vi' ? 'Tình trạng' : 'Status'}</th>
-                <th>{language === 'vi' ? 'Thao tác' : 'Actions'}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentPurchases.map((purchase) => {
-                const Icon = packageIcons[purchase.package];
-                return (
-                  <tr key={purchase.id}>
-                    <td style={{ fontWeight: 600 }}>{purchase.employer}</td>
-                    <td>
-                      <PackageBadge $color={packageColors[purchase.package]}>
-                        <Icon />
-                        {purchase.package}
-                      </PackageBadge>
-                    </td>
-                    <td>
-                      <DateText>
-                        <Calendar size={14} style={{ display: 'inline', marginRight: '4px' }} />
-                        {formatDateTime(purchase.purchaseDateTime || purchase.purchaseDate)}
-                      </DateText>
-                    </td>
-                    <td>
-                      <DateText>
-                        <Clock size={14} style={{ display: 'inline', marginRight: '4px' }} />
-                        {formatDateTime(purchase.expiryDateTime || purchase.expiryDate)}
-                      </DateText>
-                    </td>
-                    <td>
-                      <span style={{ fontWeight: 600 }}>{purchase.duration}</span>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
-                        {purchase.price.toLocaleString('vi-VN')} VND
-                      </div>
-                    </td>
-                    <td>
-                      {activeTab === 'pending' ? (
-                        <ApproveButton onClick={() => handleApprove(purchase.id)}>
-                          <CheckCircle size={16} />
-                          {language === 'vi' ? 'Duyệt' : 'Approve'}
-                        </ApproveButton>
-                      ) : (
-                        <StatusBadge $status={purchase.status}>
-                          {getStatusText(purchase.status)}
-                        </StatusBadge>
-                      )}
-                    </td>
-                    <td>
-                      <ActionButtons>
-                        <IconButton title={language === 'vi' ? 'Xem chi tiết' : 'View details'}>
-                          <Eye size={16} />
-                        </IconButton>
-                        {activeTab === 'approved' && purchase.status === 'active' && (
-                          <IconButton
-                            title={language === 'vi' ? 'Khóa dịch vụ' : 'Lock service'}
-                            onClick={() => openLockConfirm(purchase)}
-                          >
-                            <Lock size={16} />
-                          </IconButton>
-                        )}
-                          {activeTab === 'approved' && purchase.status === 'locked' && (
-                            <IconButton
-                              title={language === 'vi' ? 'Mở khóa dịch vụ' : 'Unlock service'}
-                              onClick={() => handleUnlockPackage(purchase.id)}
-                            >
-                              <Unlock size={16} />
-                            </IconButton>
-                          )}
-                      </ActionButtons>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </Table>
-        </TableWrapper>
-
-        <PaginationContainer>
-          <PaginationInfo>
-            {language === 'vi' 
-              ? `Hiển thị ${startIndex + 1}-${Math.min(endIndex, filteredPurchases.length)} trong tổng số ${filteredPurchases.length} gói`
-              : `Showing ${startIndex + 1}-${Math.min(endIndex, filteredPurchases.length)} of ${filteredPurchases.length} packages`
-            }
-          </PaginationInfo>
-          <PaginationButtons>
-            <PageButton 
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-            >
-              {language === 'vi' ? 'Trước' : 'Previous'}
-            </PageButton>
-            
-            {[...Array(totalPages)].map((_, index) => {
-              const pageNumber = index + 1;
-              
-              // Show first page, last page, current page, and pages around current
-              if (
-                pageNumber === 1 ||
-                pageNumber === totalPages ||
-                (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
-              ) {
-                return (
-                  <PageButton
-                    key={pageNumber}
-                    $active={currentPage === pageNumber}
-                    onClick={() => setCurrentPage(pageNumber)}
-                  >
-                    {pageNumber}
-                  </PageButton>
-                );
-              } else if (
-                pageNumber === currentPage - 2 ||
-                pageNumber === currentPage + 2
-              ) {
-                return <PageEllipsis key={pageNumber}>...</PageEllipsis>;
-              }
-              return null;
-            })}
-            
-            <PageButton 
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-            >
-              {language === 'vi' ? 'Sau' : 'Next'}
-            </PageButton>
-          </PaginationButtons>
-        </PaginationContainer>
         </>
         )}
       </PageContainer>
@@ -2224,190 +1856,7 @@ const PackagesManagement = () => {
         )}
       </AnimatePresence>
 
-      {/* Success Modal */}
-      <AnimatePresence>
-        {showSuccessModal && approvedPackageInfo && (
-          <ModalOverlay
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowSuccessModal(false)}
-          >
-            <ModalBox
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <ModalHeader>
-                <ModalCloseBtn onClick={() => setShowSuccessModal(false)}>
-                  <X />
-                </ModalCloseBtn>
-                <SuccessIconWrapper
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                >
-                  <CheckCircle />
-                </SuccessIconWrapper>
-                <ModalTitle>
-                  {language === 'vi' ? 'Duyệt Gói Thành Công!' : 'Package Approved Successfully!'}
-                </ModalTitle>
-                <ModalSubtitle>
-                  {language === 'vi' 
-                    ? 'Đã gửi thông báo cho nhà tuyển dụng' 
-                    : 'Notification sent to employer'}
-                </ModalSubtitle>
-              </ModalHeader>
 
-              <ModalBody>
-                <InfoRow>
-                  <InfoIcon>
-                    <Users />
-                  </InfoIcon>
-                  <InfoContent>
-                    <div className="label">
-                      {language === 'vi' ? 'Nhà tuyển dụng' : 'Employer'}
-                    </div>
-                    <div className="value">{approvedPackageInfo.employer}</div>
-                  </InfoContent>
-                </InfoRow>
-
-                <InfoRow>
-                  <InfoIcon>
-                    <Package />
-                  </InfoIcon>
-                  <InfoContent>
-                    <div className="label">
-                      {language === 'vi' ? 'Gói dịch vụ' : 'Package'}
-                    </div>
-                    <div className="value">{approvedPackageInfo.package}</div>
-                  </InfoContent>
-                </InfoRow>
-
-                <InfoRow>
-                  <InfoIcon>
-                    <Clock />
-                  </InfoIcon>
-                  <InfoContent>
-                    <div className="label">
-                      {language === 'vi' ? 'Thời hạn' : 'Duration'}
-                    </div>
-                    <div className="value">{approvedPackageInfo.duration}</div>
-                  </InfoContent>
-                </InfoRow>
-
-                <InfoRow>
-                  <InfoIcon>
-                    <Calendar />
-                  </InfoIcon>
-                  <InfoContent>
-                    <div className="label">
-                      {language === 'vi' ? 'Hết hạn' : 'Expiry Date'}
-                    </div>
-                    <div className="value">
-                      {formatDateTime(approvedPackageInfo.expiryDateTime || approvedPackageInfo.expiryDate)}
-                    </div>
-                  </InfoContent>
-                </InfoRow>
-              </ModalBody>
-
-              <ModalFooter>
-                <ModalButton
-                  onClick={() => setShowSuccessModal(false)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Send />
-                  {language === 'vi' ? 'Hoàn tất' : 'Done'}
-                </ModalButton>
-              </ModalFooter>
-            </ModalBox>
-          </ModalOverlay>
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {showLockConfirm && lockTarget && (
-          <ModalOverlay
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowLockConfirm(false)}
-          >
-            <ModalBox
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <ConfirmModalHeader>
-                <ModalCloseBtn onClick={() => setShowLockConfirm(false)}>
-                  <X />
-                </ModalCloseBtn>
-                <ConfirmIconWrapper
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                >
-                  <Lock />
-                </ConfirmIconWrapper>
-                <ModalTitle>
-                  {language === 'vi' ? 'Xác nhận khóa dịch vụ?' : 'Confirm lock service?'}
-                </ModalTitle>
-                <ModalSubtitle>
-                  {language === 'vi'
-                    ? 'Gói dịch vụ sẽ chuyển sang trạng thái bị khóa'
-                    : 'This package will be moved to locked status'}
-                </ModalSubtitle>
-              </ConfirmModalHeader>
-
-              <ModalBody>
-                <InfoRow>
-                  <InfoIcon>
-                    <Users />
-                  </InfoIcon>
-                  <InfoContent>
-                    <div className="label">{language === 'vi' ? 'Nhà tuyển dụng' : 'Employer'}</div>
-                    <div className="value">{lockTarget.employer}</div>
-                  </InfoContent>
-                </InfoRow>
-                <InfoRow>
-                  <InfoIcon>
-                    <Package />
-                  </InfoIcon>
-                  <InfoContent>
-                    <div className="label">{language === 'vi' ? 'Gói dịch vụ' : 'Package'}</div>
-                    <div className="value">{lockTarget.package}</div>
-                  </InfoContent>
-                </InfoRow>
-              </ModalBody>
-
-              <ModalFooter style={{ gap: '12px' }}>
-                <ModalButton
-                  onClick={() => setShowLockConfirm(false)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {language === 'vi' ? 'Hủy' : 'Cancel'}
-                </ModalButton>
-                <ConfirmButton
-                  onClick={async () => {
-                    await handleLockPackage(lockTarget.id);
-                    setShowLockConfirm(false);
-                    setLockTarget(null);
-                  }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {language === 'vi' ? 'Khóa' : 'Lock'}
-                </ConfirmButton>
-              </ModalFooter>
-            </ModalBox>
-          </ModalOverlay>
-        )}
-      </AnimatePresence>
     </DashboardLayout>
   );
 };

@@ -1883,9 +1883,6 @@ const translateLocation = (locationStr, language) => {
     // Cities & provinces
     .replace(/TP\.HCM/g, 'HCMC')
     .replace(/TP HCM/g, 'HCMC')
-    .replace(/Hà Nội/g, 'Hanoi')
-    .replace(/Đà Nẵng/g, 'Da Nang')
-    .replace(/Cần Thơ/g, 'Can Tho')
     // Districts of HCMC
     .replace(/Tân Bình/g, 'Tan Binh')
     .replace(/Tân Phú/g, 'Tan Phu')
@@ -1899,18 +1896,15 @@ const translateLocation = (locationStr, language) => {
     .replace(/Bình Chánh/g, 'Binh Chanh')
     .replace(/Nhà Bè/g, 'Nha Be')
     .replace(/Cần Giờ/g, 'Can Gio')
-    // Other
-    .replace(/Toàn quốc/g, 'Nationwide')
-    .replace(/Toàn/g, 'All');
 };
 
 // Translate time indicators
 const translateTimePosted = (timeStr, language) => {
   if (language === 'vi') return timeStr;
   return timeStr
-    .replace(/(\d+)\s*ngày trước/g, '$1 days ago')
-    .replace(/(\d+)\s*giờ trước/g, '$1 hours ago')
-    .replace(/(\d+)\s*phút trước/g, '$1 minutes ago')
+    .replace(/(\d+)\s*ngày trước/g, '1 days ago')
+    .replace(/(\d+)\s*giờ trước/g, '1 hours ago')
+    .replace(/(\d+)\s*phút trước/g, '1 minutes ago')
     .replace(/1\s*days ago/g, '1 day ago')
     .replace(/1\s*hours ago/g, '1 hour ago');
 };
@@ -1973,9 +1967,8 @@ const parseTimeToHours = (timeStr) => {
     }
   }
 
-  // Handle text format (e.g., "2 giờ trước", "3 days ago")
   const match = String(timeStr).match(/(\d+)/);
-  if (!match) return 999999; // Unknown time goes to end
+  if (!match) return 999999;
 
   const num = parseInt(match[1]);
 
