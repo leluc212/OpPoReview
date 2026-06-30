@@ -906,16 +906,14 @@ def get_available_workers(job_id, create_response):
 
 
 def approve_change_request(event, application_id, create_response):
-    """Admin: approve a pending_change request.
-    Flow đơn giản:
-    1. Đổi candidateId/Email/Name sang worker mới trên application hiện tại
-    2. Giữ nguyên status='accepted', startTime, endTime, hourlyRate, jobSalary
-    3. Xoá changeRequest, set changeRequestStatus='approved', approvedAt
-    Không tạo record mới, không tính tiền.
+    """Admin: approve a shift cancellation request (Yêu Cầu Huỷ Ca).
+    Flow:
+    1. Set application status = 'ĐÃ_HUỶ', changeRequestStatus = 'APPROVED'
+    2. Nếu jobId tồn tại trong quick_jobs_table, set job status = 'ĐÃ_HUỶ'
+    3. Thông báo worker: ca làm bị huỷ
+    4. Thông báo employer: yêu cầu huỷ ca đã được chấp nhận
     """
     try:
-        from datetime import timezone, timedelta
-
         # Lấy application hiện tại
         current_item = applications_table.get_item(
             Key={'applicationId': application_id},
@@ -927,8 +925,7 @@ def approve_change_request(event, application_id, create_response):
         if current_item.get('status') != 'pending_change':
             return create_response(400, {'error': f'Application is not in pending_change status (current: {current_item.get("status")})'})
 
-        now_dt = datetime.utcnow()
-        now_iso = now_dt.isoformat() + 'Z'
+        now_iso = datetime.utcnow().isoformat() + 'Z'
 
         # Lấy changeRequest data
         change_req = current_item.get('changeRequest') or {}
@@ -938,21 +935,17 @@ def approve_change_request(event, application_id, create_response):
             except Exception:
                 change_req = {}
 
-        old_worker_id    = current_item.get('candidateId', '')
-        new_worker_id    = change_req.get('newWorkerId', '')
-        new_worker_email = change_req.get('newWorkerEmail', '')
-        new_worker_name  = change_req.get('newWorkerName', '')
-
-        if not new_worker_id:
-            return create_response(400, {'error': 'newWorkerId missing from changeRequest'})
-
-        # Lấy thông tin job để trả về cho frontend thông báo
+        worker_id    = current_item.get('candidateId', '')
+        employer_id  = current_item.get('employerId', '')
         job_id       = current_item.get('jobId', '')
         job_location = current_item.get('jobLocation', '')
         job_title    = current_item.get('jobTitle', '')
-        job_shift    = current_item.get('jobShift', '')   # e.g. "08:00 - 17:00"
+        job_shift    = current_item.get('jobShift', '')
         job_workdate = current_item.get('jobWorkDate', '')
+        reason_type  = change_req.get('reasonType', '')
+        reason_detail = change_req.get('reasonDetail') or change_req.get('reason', '')
 
+        # Lấy thêm thông tin job từ quick_jobs_table nếu cần
         if job_id:
             try:
                 qj = quick_jobs_table.get_item(Key={'idJob': str(job_id)}).get('Item', {})
@@ -964,10 +957,18 @@ def approve_change_request(event, application_id, create_response):
                     if start_t and end_t:
                         job_shift = f"{start_t} - {end_t}"
                     job_workdate = job_workdate or qj.get('workDate', '')
+                    # Huỷ job
+                    quick_jobs_table.update_item(
+                        Key={'idJob': str(job_id)},
+                        UpdateExpression='SET #status = :cancelled, updatedAt = :now',
+                        ExpressionAttributeNames={'#status': 'status'},
+                        ExpressionAttributeValues={':cancelled': 'ĐÃ_HUỶ', ':now': now_iso}
+                    )
+                    print(f"✅ Job {job_id} status set to ĐÃ_HUỶ")
             except Exception as je:
-                print(f"⚠️ Could not fetch job details: {je}")
+                print(f"⚠️ Could not update job status: {je}")
 
-        # Định dạng workDate dạng DD/MM/YYYY để dùng trong thông báo
+        # Định dạng workDate dạng DD/MM/YYYY
         workdate_display = job_workdate
         if job_workdate and '-' in job_workdate:
             try:
@@ -976,37 +977,38 @@ def approve_change_request(event, application_id, create_response):
             except Exception:
                 pass
 
-        # === Cập nhật application: đổi worker, giữ nguyên mọi thứ khác ===
+        # === Cập nhật application: đánh dấu đã huỷ ===
         applications_table.update_item(
             Key={'applicationId': application_id},
             UpdateExpression=(
-                'SET candidateId = :newCid, candidateEmail = :newEmail, candidateName = :newName, '
-                'changeRequestStatus = :crs, approvedAt = :now, updatedAt = :now '
+                'SET #status = :cancelled, changeRequestStatus = :crs, '
+                'approvedAt = :now, updatedAt = :now '
                 'REMOVE changeRequest'
             ),
+            ExpressionAttributeNames={'#status': 'status'},
             ExpressionAttributeValues={
-                ':newCid':   new_worker_id,
-                ':newEmail': new_worker_email,
-                ':newName':  new_worker_name,
-                ':crs':      'approved',
-                ':now':      now_iso
+                ':cancelled': 'ĐÃ_HUỶ',
+                ':crs':       'APPROVED',
+                ':now':       now_iso
             }
         )
-        print(f"✅ Worker swapped on application {application_id}: {old_worker_id} → {new_worker_id}")
+        print(f"✅ Shift cancelled for applicationId={application_id}, workerId={worker_id}")
 
         return create_response(200, {
             'success':        True,
-            'message':        'Yêu cầu thay đổi nhân viên đã được duyệt',
+            'message':        'Yêu cầu huỷ ca đã được chấp nhận',
             'applicationId':  application_id,
             'approvedAt':     now_iso,
-            'oldWorkerId':    old_worker_id,
-            'newWorkerId':    new_worker_id,
-            'newWorkerName':  new_worker_name,
+            'workerId':       worker_id,
+            'employerId':     employer_id,
+            'jobId':          job_id,
             'jobLocation':    job_location,
             'jobTitle':       job_title,
             'jobShift':       job_shift,
             'jobWorkDate':    job_workdate,
-            'workDateDisplay': workdate_display
+            'workDateDisplay': workdate_display,
+            'reasonType':     reason_type,
+            'reasonDetail':   reason_detail
         })
     except Exception as e:
         print(f"❌ Error approving change request: {str(e)}")
@@ -1043,7 +1045,7 @@ def reject_change_request(event, application_id, create_response):
         print(f"✅ Change request rejected for applicationId={application_id}")
         return create_response(200, {
             'success': True,
-            'message': 'Yêu cầu thay đổi đã bị từ chối',
+            'message': 'Yêu cầu huỷ ca đã bị từ chối',
             'applicationId': application_id,
             'rejectedAt': now_iso
         })

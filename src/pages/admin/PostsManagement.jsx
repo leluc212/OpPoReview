@@ -754,40 +754,30 @@ const PostsManagement = () => {
       try {
         const jobLocation    = result.jobLocation    || cr._jobLocation  || cr.jobLocation  || '';
         const workDateDisp   = result.workDateDisplay || cr._jobWorkDate  || cr.jobWorkDate  || '';
-        const jobShift       = result.jobShift        || cr._jobShift     || cr.jobShift     || '';
         const jobTitle       = result.jobTitle        || cr._jobTitle     || cr.jobTitle     || 'Ca làm';
         const oldWorkerId    = result.oldWorkerId     || cr.candidateId   || '';
-        const newWorkerId    = result.newWorkerId     || cr.changeRequest?.newWorkerId || '';
+        const reasonType     = result.reasonType      || cr.changeRequest?.reasonType || cr.changeRequest?.typeLabel || cr.changeRequest?.reason || '';
+        const reasonDetail   = result.reasonDetail    || cr.changeRequest?.reasonDetail || cr.changeRequest?.reason || '';
 
-        // 1. Worker cũ — ca bị huỷ
+        // 1. Worker hiện tại — ca bị huỷ
         if (oldWorkerId) {
           await createWorkerReplacedNotification({
             workerId: oldWorkerId,
             jobLocation,
             workDateDisplay: workDateDisp,
-            jobTitle
-          }).catch(() => {});
-        }
-
-        // 2. Worker mới — có ca mới
-        if (newWorkerId) {
-          await createNewWorkerAssignedNotification({
-            workerId: newWorkerId,
             jobTitle,
-            jobLocation,
-            workDateDisplay: workDateDisp,
-            jobShift,
-            originalEndTime: ''
+            reasonType,
+            reasonDetail
           }).catch(() => {});
         }
 
-        // 3. Employer — yêu cầu được duyệt
+        // 2. Employer — yêu cầu được duyệt
         if (cr.employerId) {
           await createChangeRequestApprovedNotification({
             employerId: cr.employerId,
             companyName: cr.companyName || '',
             candidateName: cr.candidateName || cr.candidateEmail || '',
-            changeRequestType: 'Thay thế nhân viên',
+            changeRequestType: 'Huỷ ca',
             applicationId: cr.applicationId
           }).catch(() => {});
         }
@@ -795,7 +785,7 @@ const PostsManagement = () => {
         console.warn('⚠️ Notification error (non-critical):', notifErr);
       }
 
-      showCRToast('success', 'Đã duyệt yêu cầu thay đổi nhân viên');
+      showCRToast('success', 'Đã duyệt yêu cầu huỷ ca');
       setSelectedCR(null);
       await loadChangeRequests();
     } catch (err) {
@@ -812,19 +802,19 @@ const PostsManagement = () => {
     try {
       await applicationService.rejectChangeRequest(cr.applicationId);
 
-      // Chỉ thông báo cho employer — worker cũ/mới không nhận gì
+      // Chỉ thông báo cho employer — worker không nhận gì
       if (cr.employerId) {
         await createChangeRequestRejectedNotification({
           employerId: cr.employerId,
           companyName: cr.companyName || 'Nhà tuyển dụng',
           candidateName: cr.candidateName || cr.candidateEmail || 'Worker',
-          changeRequestType: 'Thay thế nhân viên',
+          changeRequestType: 'Huỷ ca',
           applicationId: cr.applicationId,
           reason: ''
         }).catch(() => {});
       }
 
-      showCRToast('success', 'Đã từ chối yêu cầu thay đổi nhân viên');
+      showCRToast('success', 'Đã từ chối yêu cầu huỷ ca');
       setSelectedCR(null);
       await loadChangeRequests();
     } catch (err) {

@@ -1,0 +1,14 @@
+﻿{
+    "AuthorizerId": "w7g6id",
+    "AuthorizerType": "JWT",
+    "IdentitySource": [
+        "$request.header.Authorization"
+    ],
+    "JwtConfiguration": {
+        "Audience": [
+            "2mv7qt4gpmq03dmlm0or9724n8"
+        ],
+        "Issuer": "https://cognito-idp.ap-southeast-1.amazonaws.com/ap-southeast-1_ShCajkmJd"
+    },
+    "Name": "CognitoAuthorizer"
+}

@@ -16,6 +16,7 @@ import jobPostService from '../../services/jobPostService';
 import quickJobService from '../../services/quickJobService';
 import applicationService from '../../services/applicationService';
 import adminReportService from '../../services/adminReportService';
+import { createWorkerReplacedNotification, createChangeRequestApprovedNotification, createChangeRequestRejectedNotification } from '../../services/notificationService';
 
 const DashboardContainer = styled.div`
   animation: fadeIn 0.5s ease-in;
@@ -2207,7 +2208,7 @@ const AdminDashboard = () => {
           <SectionHeader>
             <h2>
               <AlertCircle size={20} style={{ display: 'inline', marginRight: 8, color: '#F97316', verticalAlign: 'middle' }} />
-              {language === 'vi' ? 'Yêu Cầu Thay Đổi Nhân Viên' : 'Worker Change Requests'}
+              {language === 'vi' ? 'Yêu Cầu Huỷ Ca' : 'Shift Cancellation Requests'}
               {changeRequests.length > 0 && (
                 <span style={{
                   marginLeft: 10, background: '#F97316', color: 'white',
@@ -2266,8 +2267,8 @@ const AdminDashboard = () => {
                       <div style={{ fontSize: 13, color: '#64748B', display: 'flex', flexWrap: 'wrap', gap: '4px 16px' }}>
                         <span>🏢 {language === 'vi' ? 'Nhà tuyển dụng:' : 'Employer:'} <b style={{ color: '#334155' }}>{req.employerName || req.employerId || '-'}</b></span>
                         <span>👤 {language === 'vi' ? 'Nhân viên:' : 'Worker:'} <b style={{ color: '#334155' }}>{req.candidateName || req.candidateId || '-'}</b></span>
-                        <span>📋 {language === 'vi' ? 'Lý do:' : 'Reason:'} <b style={{ color: '#334155' }}>{cr.typeLabel || cr.reasonCode || '-'}</b></span>
-                        {cr.reason && <span style={{ gridColumn: '1 / -1' }}>💬 "{cr.reason}"</span>}
+                        <span>📋 {language === 'vi' ? 'Lý do huỷ:' : 'Cancel Reason:'} <b style={{ color: '#DC2626' }}>{cr.reasonType || cr.typeLabel || cr.reasonCode || '-'}</b></span>
+                        {(cr.reasonDetail || cr.reason) && <span style={{ gridColumn: '1 / -1', fontStyle: 'italic', color: '#475569' }}>💬 "{cr.reasonDetail || cr.reason}"</span>}
                         <span>🕐 {req.updatedAt ? new Date(req.updatedAt).toLocaleString('vi-VN') : '-'}</span>
                       </div>
                     </div>
@@ -2277,8 +2278,27 @@ const AdminDashboard = () => {
                         onClick={async () => {
                           setCrActionLoading(req.applicationId);
                           try {
-                            await applicationService.approveChangeRequest(req.applicationId);
+                            const result = await applicationService.approveChangeRequest(req.applicationId);
                             setChangeRequests(prev => prev.filter(r => r.applicationId !== req.applicationId));
+                            // Gửi notification cho worker và employer
+                            const cr = req.changeRequest || {};
+                            await Promise.allSettled([
+                              createWorkerReplacedNotification({
+                                workerId: result.workerId || req.candidateId || cr.workerId,
+                                jobLocation: result.jobLocation || req.jobLocation,
+                                workDateDisplay: result.workDateDisplay || req.jobWorkDate,
+                                jobTitle: result.jobTitle || req.jobTitle,
+                                reasonType: result.reasonType || cr.reasonType,
+                                reasonDetail: result.reasonDetail || cr.reasonDetail || cr.reason
+                              }),
+                              createChangeRequestApprovedNotification({
+                                employerId: result.employerId || req.employerId,
+                                companyName: req.employerName,
+                                candidateName: req.candidateName,
+                                changeRequestType: cr.reasonType,
+                                applicationId: req.applicationId
+                              })
+                            ]);
                           } catch (e) {
                             alert(language === 'vi' ? `Lỗi: ${e.message}` : `Error: ${e.message}`);
                           } finally {
@@ -2359,11 +2379,24 @@ const AdminDashboard = () => {
                 <button
                   onClick={async () => {
                     const { applicationId } = rejectModal;
+                    const rejectedReq = changeRequests.find(r => r.applicationId === applicationId);
                     setCrActionLoading(applicationId);
                     setRejectModal(null);
                     try {
                       await applicationService.rejectChangeRequest(applicationId, rejectNotes);
                       setChangeRequests(prev => prev.filter(r => r.applicationId !== applicationId));
+                      // Gửi notification cho employer
+                      if (rejectedReq) {
+                        const cr = rejectedReq.changeRequest || {};
+                        await createChangeRequestRejectedNotification({
+                          employerId: rejectedReq.employerId,
+                          companyName: rejectedReq.employerName,
+                          candidateName: rejectedReq.candidateName,
+                          changeRequestType: cr.reasonType,
+                          applicationId,
+                          reason: rejectNotes
+                        }).catch(() => {});
+                      }
                     } catch (e) {
                       alert(language === 'vi' ? `Lỗi: ${e.message}` : `Error: ${e.message}`);
                     } finally {

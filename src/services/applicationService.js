@@ -361,13 +361,15 @@ const applicationService = {
 
   /**
    * Employer: Get available workers for replacement in a specific job
+   * Uses Lambda Function URL proxy to bypass API Gateway Cognito authorizer (avoids 403).
    */
   async getAvailableWorkers(jobId) {
     try {
       const headers = await getAuthHeaders();
+      // Use Lambda Function URL proxy (same as getAllApplications) to avoid 403 from API GW authorizer
       const url = import.meta.env.DEV
-        ? `/api-applications/available-workers/${jobId}`
-        : `${API_BASE_URL}/applications/available-workers/${jobId}`;
+        ? `/api-lambda-applications/applications/available-workers/${jobId}`
+        : `https://65fnfwjx5m7iq5ilmoj5ea7nwq0cespm.lambda-url.ap-southeast-1.on.aws/applications/available-workers/${jobId}`;
       const response = await fetch(url, { method: 'GET', headers });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
@@ -399,9 +401,9 @@ const applicationService = {
   },
 
   /**
-   * Admin: Reject a pending_change request — worker cũ tiếp tục làm
+   * Admin: Reject a pending_change (shift cancel) request — ca làm giữ nguyên
    */
-  async rejectChangeRequest(applicationId) {
+  async rejectChangeRequest(applicationId, notes = '') {
     const headers = await getAuthHeaders();
     const url = import.meta.env.DEV
       ? `/api-applications/${applicationId}/reject-change`
@@ -409,7 +411,7 @@ const applicationService = {
     const response = await fetch(url, {
       method: 'PUT',
       headers,
-      body: JSON.stringify({})
+      body: JSON.stringify({ notes })
     });
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
