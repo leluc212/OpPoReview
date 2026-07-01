@@ -790,6 +790,67 @@ def list_change_requests(create_response):
                 except Exception as je:
                     print(f"⚠️ Could not enrich job info for app {app.get('applicationId')}: {je}")
 
+        # ── Enrich employer & worker names ────────────────────────────────────
+        # Thu thập unique IDs cần lookup (bỏ qua rỗng / None)
+        employer_ids = list({app['employerId'] for app in applications if app.get('employerId')})
+        worker_ids   = list({app['candidateId'] for app in applications if app.get('candidateId')})
+
+        employer_name_map = {}  # employerId → companyName
+        worker_name_map   = {}  # candidateId → display name
+
+        def batch_get_names(table_name, ids, key_field):
+            """Trả về dict {id: item} cho danh sách ids từ table_name."""
+            result = {}
+            if not ids:
+                return result
+            for i in range(0, len(ids), 100):
+                chunk = ids[i:i + 100]
+                keys = [{key_field: uid} for uid in chunk]
+                try:
+                    resp = dynamodb.batch_get_item(
+                        RequestItems={
+                            table_name: {
+                                'Keys': keys,
+                                'ProjectionExpression': '#pk, #cn, #fn, #un',
+                                'ExpressionAttributeNames': {
+                                    '#pk': key_field,
+                                    '#cn': 'companyName',
+                                    '#fn': 'fullName',
+                                    '#un': 'username'
+                                }
+                            }
+                        }
+                    )
+                    for item in resp.get('Responses', {}).get(table_name, []):
+                        result[item[key_field]] = item
+                except Exception as be:
+                    print(f"⚠️ BatchGetItem failed for {table_name}: {be}")
+            return result
+
+        employer_items = batch_get_names('EmployerProfiles', employer_ids, 'userId')
+        worker_items   = batch_get_names('CandidateProfiles', worker_ids, 'userId')
+
+        for eid, item in employer_items.items():
+            employer_name_map[eid] = item.get('companyName') or item.get('fullName') or ''
+
+        for wid, item in worker_items.items():
+            name = item.get('fullName') or item.get('username') or ''
+            worker_name_map[wid] = name.strip()
+
+        for app in applications:
+            eid = app.get('employerId', '')
+            wid = app.get('candidateId', '')
+            app['employerName'] = (
+                app.get('employerName')
+                or app.get('companyName')
+                or employer_name_map.get(eid, '')
+            )
+            app['candidateName'] = (
+                app.get('candidateName')
+                or worker_name_map.get(wid, '')
+            )
+        # ─────────────────────────────────────────────────────────────────────
+
         # FIX Bug 2 (backend): Sort by updatedAt DESC (mới nhất lên đầu), áp dụng cho mọi trạng thái
         applications.sort(key=lambda x: x.get('updatedAt', x.get('createdAt', '')), reverse=True)
 

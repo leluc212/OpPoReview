@@ -1229,7 +1229,34 @@ const AdminDashboard = () => {
     setCrLoading(true);
     try {
       const list = await applicationService.listChangeRequests();
-      setChangeRequests(list);
+      // Normalize data — đồng nhất với EmployersManagement.loadChangeRequests
+      const isUUID = (str) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+      const enhanced = (list || []).map(app => {
+        // Normalize changeRequest (support stringified JSON)
+        let cr = app.changeRequest || app.change_request || null;
+        if (cr && typeof cr === 'string') {
+          try { cr = JSON.parse(cr); } catch (e) { /* leave as-is */ }
+        }
+
+        // Resolve employer name — skip UUID values
+        const rawEmployer = app.employerName || app.companyName || '';
+        const employerNameDisplay = rawEmployer && !isUUID(rawEmployer) ? rawEmployer : '(Không xác định)';
+
+        // Resolve worker name — skip UUID values
+        const rawWorker = app.workerName || app.candidateName || '';
+        const workerNameDisplay = rawWorker && !isUUID(rawWorker) ? rawWorker : '(Không xác định)';
+
+        return {
+          ...app,
+          employerName: employerNameDisplay,
+          companyName: employerNameDisplay,
+          workerName: workerNameDisplay,
+          candidateName: workerNameDisplay,
+          changeRequest: cr,
+          changeRequestStatus: app.changeRequestStatus || app.change_request_status || ''
+        };
+      });
+      setChangeRequests(enhanced);
     } catch (e) {
       console.error('Failed to load change requests', e);
     } finally {
@@ -1556,100 +1583,151 @@ const AdminDashboard = () => {
               {changeRequests.map(req => {
                 const cr = req.changeRequest || {};
                 const isNew = newCardIds.has(req.applicationId);
+                const crStatus = String(req.changeRequestStatus || '').toLowerCase();
+                const isPending = crStatus !== 'approved' && crStatus !== 'rejected';
+                const isApproved = crStatus === 'approved';
+                const isRejected = crStatus === 'rejected';
+                const borderColor = isApproved ? '#BBF7D0' : isRejected ? '#FECACA' : (isNew ? '#FED7AA' : '#FFEDD5');
+                const bgColor = isApproved ? '#F0FDF4' : isRejected ? '#FEF2F2' : 'white';
+
+                // Loại thay đổi — đồng nhất với EmployersManagement
+                const typeViMap = { cancel_shift: 'Huỷ ca làm', staff_replacement: 'Thay thế nhân viên', change_worker: 'Thay đổi nhân viên' };
+                const typeLabel = typeViMap[cr.type] || cr.typeLabel || cr.type || '(Không xác định)';
+                const isReplacement = cr.type === 'staff_replacement' || cr.type === 'change_worker';
+                const reasonLabel = cr.reasonType || '';
+                const detailLabel = cr.reasonDetail || cr.reason || '';
+
                 return (
                   <div key={req.applicationId} style={{
-                    background: 'white', border: `1.5px solid ${isNew ? '#FED7AA' : '#FFEDD5'}`,
+                    background: bgColor, border: `1.5px solid ${borderColor}`,
                     borderRadius: 16, padding: '20px 24px',
                     display: 'grid', gridTemplateColumns: '1fr auto', gap: 16,
                     alignItems: 'center', boxShadow: '0 2px 8px rgba(249,115,22,0.07)',
                     animation: isNew ? 'crFadeIn 0.4s ease-out' : 'none'
                   }}>
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                        <div style={{
-                          background: '#FFF7ED', borderRadius: 10, padding: '6px 12px',
-                          fontSize: 13, fontWeight: 700, color: '#F97316',
-                          border: '1px solid #FFEDD5'
-                        }}>⏳ {language === 'vi' ? 'Chờ duyệt' : 'Pending'}</div>
+                      {/* Row 1: status badge + NEW badge + job title */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                        {isPending && (
+                          <div style={{ background: '#FFF7ED', borderRadius: 10, padding: '5px 11px', fontSize: 12, fontWeight: 700, color: '#F97316', border: '1px solid #FFEDD5', whiteSpace: 'nowrap' }}>
+                            ⏳ {language === 'vi' ? 'Chờ duyệt' : 'Pending'}
+                          </div>
+                        )}
+                        {isApproved && (
+                          <div style={{ background: '#F0FDF4', borderRadius: 10, padding: '5px 11px', fontSize: 12, fontWeight: 700, color: '#16A34A', border: '1px solid #BBF7D0', whiteSpace: 'nowrap' }}>
+                            ✅ {language === 'vi' ? 'Đã duyệt' : 'Approved'}
+                          </div>
+                        )}
+                        {isRejected && (
+                          <div style={{ background: '#FEF2F2', borderRadius: 10, padding: '5px 11px', fontSize: 12, fontWeight: 700, color: '#DC2626', border: '1px solid #FECACA', whiteSpace: 'nowrap' }}>
+                            ✕ {language === 'vi' ? 'Từ chối' : 'Rejected'}
+                          </div>
+                        )}
                         {isNew && (
-                          <span style={{
-                            background: '#EF4444', color: 'white', borderRadius: 6,
-                            padding: '2px 8px', fontSize: 11, fontWeight: 800, letterSpacing: '0.5px'
-                          }}>MỚI</span>
+                          <span style={{ background: '#EF4444', color: 'white', borderRadius: 6, padding: '2px 8px', fontSize: 11, fontWeight: 800, letterSpacing: '0.5px' }}>MỚI</span>
                         )}
                         <div style={{ fontWeight: 700, fontSize: 15, color: '#1E293B' }}>
-                          {req.candidateName || req.jobTitle || req.applicationId}
+                          {req.jobTitle || req._jobTitle || req.applicationId}
                         </div>
                       </div>
-                      <div style={{ fontSize: 13, color: '#64748B', display: 'flex', flexWrap: 'wrap', gap: '4px 16px' }}>
-                        <span>🏢 {language === 'vi' ? 'Nhà tuyển dụng:' : 'Employer:'} <b style={{ color: '#334155' }}>{req.employerName || req.employerId || '-'}</b></span>
-                        <span>👤 {language === 'vi' ? 'Nhân viên:' : 'Worker:'} <b style={{ color: '#334155' }}>{req.candidateName || req.candidateId || '-'}</b></span>
-                        <span>📋 {language === 'vi' ? 'Lý do huỷ:' : 'Cancel Reason:'} <b style={{ color: '#DC2626' }}>{cr.reasonType || cr.typeLabel || cr.reasonCode || '-'}</b></span>
-                        {(cr.reasonDetail || cr.reason) && <span style={{ gridColumn: '1 / -1', fontStyle: 'italic', color: '#475569' }}>💬 "{cr.reasonDetail || cr.reason}"</span>}
-                        <span>🕐 {req.updatedAt ? new Date(req.updatedAt).toLocaleString('vi-VN') : '-'}</span>
+
+                      {/* Row 2: employer + worker + job ID */}
+                      <div style={{ fontSize: 13, color: '#64748B', display: 'flex', flexWrap: 'wrap', gap: '4px 20px', marginBottom: 8 }}>
+                        <span>🏢 {language === 'vi' ? 'Nhà tuyển dụng:' : 'Employer:'} <b style={{ color: '#334155' }}>{req.employerName || req.companyName || req.employerId || '-'}</b></span>
+                        <span>👤 {language === 'vi' ? 'Nhân viên:' : 'Worker:'} <b style={{ color: '#334155' }}>{req.workerName || req.candidateName || req.candidateId || '-'}</b></span>
+                        <span style={{ color: '#94A3B8' }}>Job ID: {req.jobId || '-'}</span>
+                      </div>
+
+                      {/* Row 3: change type + reason + date */}
+                      <div style={{ fontSize: 13, color: '#64748B', display: 'flex', flexWrap: 'wrap', gap: '4px 20px' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                          {isReplacement ? '👥' : '🕐'}
+                          <b style={{ color: '#F97316' }}>{typeLabel}</b>
+                        </span>
+                        {reasonLabel && (
+                          <span>↳ <b style={{ color: '#DC2626' }}>{reasonLabel}</b></span>
+                        )}
+                        {detailLabel && (
+                          <span style={{ fontStyle: 'italic', color: '#475569' }}>💬 "{detailLabel}"</span>
+                        )}
+                        <span>🕐 {cr.requestedAt || (req.updatedAt ? new Date(req.updatedAt).toLocaleString('vi-VN') : '-')}</span>
                       </div>
                     </div>
-                    <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                      <button
-                        disabled={crActionLoading === req.applicationId}
-                        onClick={async () => {
-                          setCrActionLoading(req.applicationId);
-                          try {
-                            const result = await applicationService.approveChangeRequest(req.applicationId);
-                            setChangeRequests(prev => prev.filter(r => r.applicationId !== req.applicationId));
-                            // Gửi notification cho worker và employer
-                            const cr = req.changeRequest || {};
-                            await Promise.allSettled([
-                              createWorkerReplacedNotification({
-                                workerId: result.workerId || req.candidateId || cr.workerId,
-                                jobLocation: result.jobLocation || req.jobLocation,
-                                workDateDisplay: result.workDateDisplay || req.jobWorkDate,
-                                jobTitle: result.jobTitle || req.jobTitle,
-                                reasonType: result.reasonType || cr.reasonType,
-                                reasonDetail: result.reasonDetail || cr.reasonDetail || cr.reason
-                              }),
-                              createChangeRequestApprovedNotification({
-                                employerId: result.employerId || req.employerId,
-                                companyName: req.employerName,
-                                candidateName: req.candidateName,
-                                changeRequestType: cr.reasonType,
-                                applicationId: req.applicationId
-                              })
-                            ]);
-                            
-                            if (result.recommendations) {
-                              setActiveRecommendations(result.recommendations);
-                              setRecJobTitle(result.jobTitle || req.jobTitle || 'Ca làm');
-                              setShowRecsModal(true);
-                            }
-                          } catch (e) {
-                            alert(language === 'vi' ? `Lỗi: ${e.message}` : `Error: ${e.message}`);
-                          } finally {
-                            setCrActionLoading(null);
-                          }
-                        }}
-                        style={{
-                          padding: '10px 18px', borderRadius: 10, border: 'none',
-                          background: crActionLoading === req.applicationId ? '#E2E8F0' : 'linear-gradient(135deg, #10B981, #059669)',
-                          color: 'white', fontWeight: 700, fontSize: 13, cursor: crActionLoading === req.applicationId ? 'not-allowed' : 'pointer'
-                        }}
-                      >
-                        {crActionLoading === req.applicationId ? '...' : (language === 'vi' ? '✔ Duyệt' : '✔ Approve')}
-                      </button>
-                      <button
-                        disabled={crActionLoading === req.applicationId}
-                        onClick={() => {
-                          setRejectModal({ applicationId: req.applicationId, candidateName: req.candidateName || req.applicationId });
-                          setRejectNotes('');
-                        }}
-                        style={{
-                          padding: '10px 18px', borderRadius: 10, border: '1.5px solid #FECACA',
-                          background: '#FEF2F2', color: '#DC2626', fontWeight: 700, fontSize: 13,
-                          cursor: crActionLoading === req.applicationId ? 'not-allowed' : 'pointer'
-                        }}
-                      >
-                        {language === 'vi' ? '✕ Từ chối' : '✕ Reject'}
-                      </button>
+                    <div style={{ display: 'flex', gap: 8, flexShrink: 0, alignItems: 'center' }}>
+                      {isPending ? (
+                        <>
+                          <button
+                            disabled={crActionLoading === req.applicationId}
+                            onClick={async () => {
+                              setCrActionLoading(req.applicationId);
+                              try {
+                                const result = await applicationService.approveChangeRequest(req.applicationId);
+                                setChangeRequests(prev => prev.map(r =>
+                                  r.applicationId === req.applicationId ? { ...r, changeRequestStatus: 'approved' } : r
+                                ));
+                                const cr = req.changeRequest || {};
+                                await Promise.allSettled([
+                                  createWorkerReplacedNotification({
+                                    workerId: result.workerId || req.candidateId || cr.workerId,
+                                    jobLocation: result.jobLocation || req.jobLocation,
+                                    workDateDisplay: result.workDateDisplay || req.jobWorkDate,
+                                    jobTitle: result.jobTitle || req.jobTitle,
+                                    reasonType: result.reasonType || cr.reasonType,
+                                    reasonDetail: result.reasonDetail || cr.reasonDetail || cr.reason
+                                  }),
+                                  createChangeRequestApprovedNotification({
+                                    employerId: result.employerId || req.employerId,
+                                    companyName: req.employerName,
+                                    candidateName: req.candidateName,
+                                    changeRequestType: cr.reasonType,
+                                    applicationId: req.applicationId
+                                  })
+                                ]);
+                                if (result.recommendations) {
+                                  setActiveRecommendations(result.recommendations);
+                                  setRecJobTitle(result.jobTitle || req.jobTitle || 'Ca làm');
+                                  setShowRecsModal(true);
+                                }
+                              } catch (e) {
+                                alert(language === 'vi' ? `Lỗi: ${e.message}` : `Error: ${e.message}`);
+                              } finally {
+                                setCrActionLoading(null);
+                              }
+                            }}
+                            style={{
+                              padding: '10px 18px', borderRadius: 10, border: 'none',
+                              background: crActionLoading === req.applicationId ? '#E2E8F0' : 'linear-gradient(135deg, #10B981, #059669)',
+                              color: 'white', fontWeight: 700, fontSize: 13,
+                              cursor: crActionLoading === req.applicationId ? 'not-allowed' : 'pointer'
+                            }}
+                          >
+                            {crActionLoading === req.applicationId ? '...' : (language === 'vi' ? '✔ Duyệt' : '✔ Approve')}
+                          </button>
+                          <button
+                            disabled={crActionLoading === req.applicationId}
+                            onClick={() => {
+                              setRejectModal({ applicationId: req.applicationId, candidateName: req.candidateName || req.applicationId });
+                              setRejectNotes('');
+                            }}
+                            style={{
+                              padding: '10px 18px', borderRadius: 10, border: '1.5px solid #FECACA',
+                              background: '#FEF2F2', color: '#DC2626', fontWeight: 700, fontSize: 13,
+                              cursor: crActionLoading === req.applicationId ? 'not-allowed' : 'pointer'
+                            }}
+                          >
+                            {language === 'vi' ? '✕ Từ chối' : '✕ Reject'}
+                          </button>
+                        </>
+                      ) : (
+                        <div style={{
+                          fontSize: 13, fontWeight: 600, padding: '10px 4px',
+                          color: isApproved ? '#16A34A' : '#DC2626'
+                        }}>
+                          {isApproved
+                            ? (language === 'vi' ? '✅ Đã xử lý' : '✅ Processed')
+                            : (language === 'vi' ? '✕ Đã từ chối' : '✕ Rejected')}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
