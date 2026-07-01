@@ -623,6 +623,7 @@ const Subscription = () => {
   const [showDurationModal, setShowDurationModal] = React.useState(false);
   const [showSuccessModal, setShowSuccessModal] = React.useState(false);
   const [showInsufficientBalanceModal, setShowInsufficientBalanceModal] = React.useState(false);
+  const [lastPaymentMethod, setLastPaymentMethod] = React.useState('contact'); // 'wallet' | 'contact'
 
   React.useEffect(() => {
     let isMounted = true;
@@ -725,6 +726,27 @@ const Subscription = () => {
       companyName = employerProfile.companyName || 'Unknown Company';
     }
 
+    // Kiểm tra số dư ví — nếu đủ tiền thì thanh toán ngay (active tức thì), nếu không thì gửi yêu cầu liên hệ
+    let paymentMethod = 'contact';
+    try {
+      const walletInfo = await getWallet(employerId);
+      const balance = Number(walletInfo?.walletBalance ?? 0);
+      console.log(`💰 Wallet balance: ${balance}, package price: ${packagePrice}`);
+      if (balance >= packagePrice) {
+        paymentMethod = 'wallet';
+        console.log('✅ Sufficient balance — sử dụng wallet payment (active ngay)');
+      } else {
+        // Số dư không đủ — hiện modal nạp tiền thay vì gửi yêu cầu liên hệ
+        setShowDurationModal(false);
+        setShowInsufficientBalanceModal(true);
+        return;
+      }
+    } catch (walletErr) {
+      // Không lấy được ví → fallback về contact để không chặn flow
+      console.warn('⚠️ Không lấy được thông tin ví, fallback về contact request:', walletErr);
+      paymentMethod = 'contact';
+    }
+
     try {
       const API_ENDPOINT = import.meta.env.VITE_PACKAGE_SUBSCRIPTIONS_API;
       const purchaseData = {
@@ -732,7 +754,7 @@ const Subscription = () => {
         companyName: companyName,
         packageName: selectedPackage.packageName,
         duration: selectedDuration.duration,
-        paymentMethod: 'contact'
+        paymentMethod: paymentMethod
       };
 
       console.log('📤 Sending request to subscription API:', purchaseData);
@@ -752,22 +774,27 @@ const Subscription = () => {
       }
 
       const result = await response.json();
-      console.log('✅ Subscription request created:', result);
+      console.log(`✅ Subscription ${paymentMethod === 'wallet' ? 'purchased (active ngay)' : 'request created'}:`, result);
       const apiSubscriptionId = result.data?.subscriptionId;
 
-      // Create notification for admin
-      try {
-        const notificationData = {
-          subscriptionId: apiSubscriptionId,
-          employerId: employerId,
-          companyName: companyName,
-          packageName: selectedPackage.packageName,
-          duration: selectedDuration.duration,
-          price: packagePrice
-        };
-        await createPackagePurchaseRequestNotification(notificationData);
-      } catch (notifError) {
-        console.error('❌ Failed to create notification for admin:', notifError);
+      // Lưu lại phương thức thanh toán để success modal hiển thị đúng nội dung
+      setLastPaymentMethod(paymentMethod);
+
+      // Chỉ tạo notification cho admin nếu là contact request (cần duyệt thủ công)
+      if (paymentMethod === 'contact') {
+        try {
+          const notificationData = {
+            subscriptionId: apiSubscriptionId,
+            employerId: employerId,
+            companyName: companyName,
+            packageName: selectedPackage.packageName,
+            duration: selectedDuration.duration,
+            price: packagePrice
+          };
+          await createPackagePurchaseRequestNotification(notificationData);
+        } catch (notifError) {
+          console.error('❌ Failed to create notification for admin:', notifError);
+        }
       }
 
       // Show success modal
@@ -1043,12 +1070,18 @@ const Subscription = () => {
                 <CheckCircle size={60} />
               </SuccessIcon>
               <SuccessTitle>
-                {vi ? 'Gửi yêu cầu thành công!' : 'Request Sent Successfully!'}
+                {vi
+                  ? (lastPaymentMethod === 'wallet' ? 'Thanh toán thành công!' : 'Gửi yêu cầu thành công!')
+                  : (lastPaymentMethod === 'wallet' ? 'Payment Successful!' : 'Request Sent Successfully!')}
               </SuccessTitle>
               <SuccessMessage>
-                {vi
-                  ? 'Yêu cầu mở gói dịch vụ đã được gửi thành công. Chúng tôi sẽ liên hệ bạn sớm nhất để hỗ trợ kích hoạt.'
-                  : 'Your service package activation request has been sent successfully. We will contact you shortly to activate it.'}
+                {lastPaymentMethod === 'wallet'
+                  ? (vi
+                      ? 'Gói dịch vụ đã được kích hoạt thành công! Tin tuyển dụng của bạn sẽ xuất hiện trong Banner Động ngay lập tức.'
+                      : 'Your service package has been activated successfully! Your job post will appear in the Dynamic Banner immediately.')
+                  : (vi
+                      ? 'Yêu cầu mở gói dịch vụ đã được gửi thành công. Chúng tôi sẽ liên hệ bạn sớm nhất để hỗ trợ kích hoạt.'
+                      : 'Your service package activation request has been sent successfully. We will contact you shortly to activate it.')}
               </SuccessMessage>
               <SuccessButton onClick={() => setShowSuccessModal(false)}>
                 {vi ? 'Đóng' : 'Close'}
