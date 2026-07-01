@@ -2,7 +2,14 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getCurrentUser, fetchAuthSession, signOut } from 'aws-amplify/auth';
 import { Hub } from 'aws-amplify/utils';
 
-const AuthContext = createContext();
+// Keep the context object stable across HMR reloads by storing it on the window.
+// Without this, Vite hot-reloading AuthContext creates a new context object while
+// App.jsx still holds a reference to the old one, causing "must be used within AuthProvider".
+const AUTH_CONTEXT_KEY = '__OpPoAuthContext__';
+if (!window[AUTH_CONTEXT_KEY]) {
+  window[AUTH_CONTEXT_KEY] = createContext();
+}
+const AuthContext = window[AUTH_CONTEXT_KEY];
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
