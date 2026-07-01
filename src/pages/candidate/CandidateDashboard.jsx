@@ -2043,19 +2043,19 @@ const CandidateDashboard = () => {
             {/* Bug 6 fix: banner thông báo ca làm đã bị thay đổi bởi employer */}
             {replacedNotice && (
               <div style={{
-                background: '#FEF3C7', border: '1.5px solid #FDE68A', borderRadius: '12px',
+                background: '#FEF2F2', border: '1.5px solid #FECACA', borderRadius: '12px',
                 padding: '14px 16px', marginBottom: '16px',
                 display: 'flex', alignItems: 'flex-start', gap: '10px',
               }}>
-                <span style={{ fontSize: '20px', flexShrink: 0 }}>⚠️</span>
+                <span style={{ fontSize: '20px', flexShrink: 0 }}>🚫</span>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: '700', fontSize: '14px', color: '#92400E', marginBottom: '4px' }}>
-                    {language === 'vi' ? 'Ca làm của bạn đã bị kết thúc sớm' : 'Your shift has ended early'}
+                  <div style={{ fontWeight: '700', fontSize: '14px', color: '#DC2626', marginBottom: '4px' }}>
+                    {language === 'vi' ? 'Ca làm của bạn đã bị huỷ' : 'Your shift has been cancelled'}
                   </div>
-                  <div style={{ fontSize: '13px', color: '#78350F', lineHeight: '1.5' }}>
+                  <div style={{ fontSize: '13px', color: '#7F1D1D', lineHeight: '1.5' }}>
                     {language === 'vi'
-                      ? `Nhà tuyển dụng đã gửi yêu cầu thay đổi nhân viên cho ca "${replacedNotice.jobTitle}" và đã được admin duyệt. Ca làm đã kết thúc. Tiền công đã được tính đến thời điểm kết thúc.`
-                      : `The employer submitted a worker change request for "${replacedNotice.jobTitle}" which was approved by admin. Your shift has ended. Wages have been calculated up to the end time.`
+                      ? `Yêu cầu thay đổi nhân viên cho ca "${replacedNotice.jobTitle}" đã được admin duyệt. Ca làm đã bị huỷ. Ca này sẽ không được tính tiền công.`
+                      : `The staff change request for "${replacedNotice.jobTitle}" was approved by admin. Your shift has been cancelled. This shift will not be compensated.`
                     }
                   </div>
                 </div>
@@ -2069,7 +2069,7 @@ const CandidateDashboard = () => {
                   }}
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer',
-                    color: '#92400E', flexShrink: 0, fontSize: '18px', lineHeight: 1,
+                    color: '#DC2626', flexShrink: 0, fontSize: '18px', lineHeight: 1,
                     padding: '0 4px',
                   }}
                   aria-label="Đóng thông báo"

@@ -2013,10 +2013,35 @@ const Navbar = ({ showSearch = true }) => {
           </FloatingChatHeader>
           <FloatingChatMessages>
             {chatMessages.map((msg) => (
-              <FloatingChatMsg key={msg.id} $mine={msg.sender === 'them'}>
-                <div className="bubble">{msg.text}</div>
-                <span className="time">{msg.time}</span>
-              </FloatingChatMsg>
+              msg.sender === 'system' ? (
+                /* System message — hiển thị ở giữa, không có nút xóa */
+                <div key={msg.id} style={{
+                  width: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  margin: '6px 0'
+                }}>
+                  <div style={{
+                    background: '#F1F5F9',
+                    color: '#64748B',
+                    fontSize: '11.5px',
+                    fontWeight: '500',
+                    padding: '6px 14px',
+                    borderRadius: '10px',
+                    border: '1px solid #E2E8F0',
+                    textAlign: 'center',
+                    maxWidth: '88%',
+                    fontStyle: 'italic'
+                  }}>
+                    🔔 {msg.text}
+                  </div>
+                </div>
+              ) : (
+                <FloatingChatMsg key={msg.id} $mine={msg.sender === 'them'}>
+                  <div className="bubble">{msg.text}</div>
+                  <span className="time">{msg.time}</span>
+                </FloatingChatMsg>
+              )
             ))}
             <div ref={messagesEndRef} />
           </FloatingChatMessages>

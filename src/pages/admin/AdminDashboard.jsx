@@ -1550,9 +1550,19 @@ const AdminDashboard = () => {
               {changeRequests.map(req => {
                 const cr = req.changeRequest || {};
                 const isNew = newCardIds.has(req.applicationId);
+                // Normalize status — backend trả cả 'APPROVED' lẫn 'approved'
+                const crStatus = String(req.changeRequestStatus || '').toLowerCase();
+                const isPending = crStatus !== 'approved' && crStatus !== 'rejected' && crStatus !== 'cancelled';
+                const isApproved = crStatus === 'approved';
+                const isRejected = crStatus === 'rejected';
+
+                // Border color theo trạng thái
+                const borderColor = isApproved ? '#BBF7D0' : isRejected ? '#FECACA' : (isNew ? '#FED7AA' : '#FFEDD5');
+                const bgColor = isApproved ? '#F0FDF4' : isRejected ? '#FEF2F2' : 'white';
+
                 return (
                   <div key={req.applicationId} style={{
-                    background: 'white', border: `1.5px solid ${isNew ? '#FED7AA' : '#FFEDD5'}`,
+                    background: bgColor, border: `1.5px solid ${borderColor}`,
                     borderRadius: 16, padding: '20px 24px',
                     display: 'grid', gridTemplateColumns: '1fr auto', gap: 16,
                     alignItems: 'center', boxShadow: '0 2px 8px rgba(249,115,22,0.07)',
@@ -1560,84 +1570,106 @@ const AdminDashboard = () => {
                   }}>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                        <div style={{
-                          background: '#FFF7ED', borderRadius: 10, padding: '6px 12px',
-                          fontSize: 13, fontWeight: 700, color: '#F97316',
-                          border: '1px solid #FFEDD5'
-                        }}>⏳ {language === 'vi' ? 'Chờ duyệt' : 'Pending'}</div>
+                        {/* Badge trạng thái động */}
+                        {isPending && (
+                          <div style={{ background: '#FFF7ED', borderRadius: 10, padding: '6px 12px', fontSize: 13, fontWeight: 700, color: '#F97316', border: '1px solid #FFEDD5' }}>
+                            ⏳ {language === 'vi' ? 'Chờ duyệt' : 'Pending'}
+                          </div>
+                        )}
+                        {isApproved && (
+                          <div style={{ background: '#F0FDF4', borderRadius: 10, padding: '6px 12px', fontSize: 13, fontWeight: 700, color: '#16A34A', border: '1px solid #BBF7D0' }}>
+                            ✅ {language === 'vi' ? 'Đã duyệt' : 'Approved'}
+                          </div>
+                        )}
+                        {isRejected && (
+                          <div style={{ background: '#FEF2F2', borderRadius: 10, padding: '6px 12px', fontSize: 13, fontWeight: 700, color: '#DC2626', border: '1px solid #FECACA' }}>
+                            ✕ {language === 'vi' ? 'Từ chối' : 'Rejected'}
+                          </div>
+                        )}
                         {isNew && (
-                          <span style={{
-                            background: '#EF4444', color: 'white', borderRadius: 6,
-                            padding: '2px 8px', fontSize: 11, fontWeight: 800, letterSpacing: '0.5px'
-                          }}>MỚI</span>
+                          <span style={{ background: '#EF4444', color: 'white', borderRadius: 6, padding: '2px 8px', fontSize: 11, fontWeight: 800, letterSpacing: '0.5px' }}>MỚI</span>
                         )}
                         <div style={{ fontWeight: 700, fontSize: 15, color: '#1E293B' }}>
-                          {req.candidateName || req.jobTitle || req.applicationId}
+                          {req.jobTitle || req.applicationId}
                         </div>
                       </div>
                       <div style={{ fontSize: 13, color: '#64748B', display: 'flex', flexWrap: 'wrap', gap: '4px 16px' }}>
-                        <span>🏢 {language === 'vi' ? 'Nhà tuyển dụng:' : 'Employer:'} <b style={{ color: '#334155' }}>{req.employerName || req.employerId || '-'}</b></span>
-                        <span>👤 {language === 'vi' ? 'Nhân viên:' : 'Worker:'} <b style={{ color: '#334155' }}>{req.candidateName || req.candidateId || '-'}</b></span>
-                        <span>📋 {language === 'vi' ? 'Lý do huỷ:' : 'Cancel Reason:'} <b style={{ color: '#DC2626' }}>{cr.reasonType || cr.typeLabel || cr.reasonCode || '-'}</b></span>
-                        {(cr.reasonDetail || cr.reason) && <span style={{ gridColumn: '1 / -1', fontStyle: 'italic', color: '#475569' }}>💬 "{cr.reasonDetail || cr.reason}"</span>}
-                        <span>🕐 {req.updatedAt ? new Date(req.updatedAt).toLocaleString('vi-VN') : '-'}</span>
+                        <span>🏢 {language === 'vi' ? 'Nhà tuyển dụng:' : 'Employer:'} <b style={{ color: '#334155' }}>{req.employerName || req.companyName || req.employerId || '-'}</b></span>
+                        <span>👤 {language === 'vi' ? 'Nhân viên:' : 'Worker:'} <b style={{ color: '#334155' }}>{req.workerName || req.candidateName || '(Không xác định)'}</b></span>
+                        <span>📋 {language === 'vi' ? 'Loại thay đổi:' : 'Change Type:'} <b style={{ color: '#F97316' }}>
+                          {cr.type === 'cancel_shift' ? 'Huỷ ca làm'
+                            : cr.type === 'staff_replacement' || cr.type === 'change_worker' ? 'Thay thế nhân viên'
+                            : cr.type || '(Không xác định)'}
+                        </b></span>
+                        <span>🔖 {language === 'vi' ? 'Lý do:' : 'Reason:'} <b style={{ color: '#DC2626' }}>{cr.reasonType || cr.typeLabel || cr.reasonCode || '-'}</b></span>
+                        {(cr.reasonDetail || cr.reason) && <span style={{ fontStyle: 'italic', color: '#475569' }}>💬 "{cr.reasonDetail || cr.reason}"</span>}
+                        <span>🕐 {cr.requestedAt || (req.updatedAt ? new Date(req.updatedAt).toLocaleString('vi-VN') : '-')}</span>
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                      <button
-                        disabled={crActionLoading === req.applicationId}
-                        onClick={async () => {
-                          setCrActionLoading(req.applicationId);
-                          try {
-                            const result = await applicationService.approveChangeRequest(req.applicationId);
-                            setChangeRequests(prev => prev.filter(r => r.applicationId !== req.applicationId));
-                            // Gửi notification cho worker và employer
-                            const cr = req.changeRequest || {};
-                            await Promise.allSettled([
-                              createWorkerReplacedNotification({
-                                workerId: result.workerId || req.candidateId || cr.workerId,
-                                jobLocation: result.jobLocation || req.jobLocation,
-                                workDateDisplay: result.workDateDisplay || req.jobWorkDate,
-                                jobTitle: result.jobTitle || req.jobTitle,
-                                reasonType: result.reasonType || cr.reasonType,
-                                reasonDetail: result.reasonDetail || cr.reasonDetail || cr.reason
-                              }),
-                              createChangeRequestApprovedNotification({
-                                employerId: result.employerId || req.employerId,
-                                companyName: req.employerName,
-                                candidateName: req.candidateName,
-                                changeRequestType: cr.reasonType,
-                                applicationId: req.applicationId
-                              })
-                            ]);
-                          } catch (e) {
-                            alert(language === 'vi' ? `Lỗi: ${e.message}` : `Error: ${e.message}`);
-                          } finally {
-                            setCrActionLoading(null);
-                          }
-                        }}
-                        style={{
-                          padding: '10px 18px', borderRadius: 10, border: 'none',
-                          background: crActionLoading === req.applicationId ? '#E2E8F0' : 'linear-gradient(135deg, #10B981, #059669)',
-                          color: 'white', fontWeight: 700, fontSize: 13, cursor: crActionLoading === req.applicationId ? 'not-allowed' : 'pointer'
-                        }}
-                      >
-                        {crActionLoading === req.applicationId ? '...' : (language === 'vi' ? '✔ Duyệt' : '✔ Approve')}
-                      </button>
-                      <button
-                        disabled={crActionLoading === req.applicationId}
-                        onClick={() => {
-                          setRejectModal({ applicationId: req.applicationId, candidateName: req.candidateName || req.applicationId });
-                          setRejectNotes('');
-                        }}
-                        style={{
-                          padding: '10px 18px', borderRadius: 10, border: '1.5px solid #FECACA',
-                          background: '#FEF2F2', color: '#DC2626', fontWeight: 700, fontSize: 13,
-                          cursor: crActionLoading === req.applicationId ? 'not-allowed' : 'pointer'
-                        }}
-                      >
-                        {language === 'vi' ? '✕ Từ chối' : '✕ Reject'}
-                      </button>
+                      {isPending ? (
+                        <>
+                          <button
+                            disabled={crActionLoading === req.applicationId}
+                            onClick={async () => {
+                              setCrActionLoading(req.applicationId);
+                              try {
+                                const result = await applicationService.approveChangeRequest(req.applicationId);
+                                setChangeRequests(prev => prev.filter(r => r.applicationId !== req.applicationId));
+                                // Gửi notification cho worker và employer
+                                const cr = req.changeRequest || {};
+                                await Promise.allSettled([
+                                  createWorkerReplacedNotification({
+                                    workerId: result.workerId || req.candidateId || cr.workerId,
+                                    jobLocation: result.jobLocation || req.jobLocation,
+                                    workDateDisplay: result.workDateDisplay || req.jobWorkDate,
+                                    jobTitle: result.jobTitle || req.jobTitle,
+                                    reasonType: result.reasonType || cr.reasonType,
+                                    reasonDetail: result.reasonDetail || cr.reasonDetail || cr.reason
+                                  }),
+                                  createChangeRequestApprovedNotification({
+                                    employerId: result.employerId || req.employerId,
+                                    companyName: req.employerName || req.companyName,
+                                    candidateName: req.workerName || req.candidateName,
+                                    changeRequestType: cr.reasonType,
+                                    applicationId: req.applicationId
+                                  })
+                                ]);
+                              } catch (e) {
+                                alert(language === 'vi' ? `Lỗi: ${e.message}` : `Error: ${e.message}`);
+                              } finally {
+                                setCrActionLoading(null);
+                              }
+                            }}
+                            style={{
+                              padding: '10px 18px', borderRadius: 10, border: 'none',
+                              background: crActionLoading === req.applicationId ? '#E2E8F0' : 'linear-gradient(135deg, #10B981, #059669)',
+                              color: 'white', fontWeight: 700, fontSize: 13, cursor: crActionLoading === req.applicationId ? 'not-allowed' : 'pointer'
+                            }}
+                          >
+                            {crActionLoading === req.applicationId ? '...' : (language === 'vi' ? '✔ Duyệt' : '✔ Approve')}
+                          </button>
+                          <button
+                            disabled={crActionLoading === req.applicationId}
+                            onClick={() => {
+                              setRejectModal({ applicationId: req.applicationId, candidateName: req.workerName || req.candidateName || req.applicationId });
+                              setRejectNotes('');
+                            }}
+                            style={{
+                              padding: '10px 18px', borderRadius: 10, border: '1.5px solid #FECACA',
+                              background: '#FEF2F2', color: '#DC2626', fontWeight: 700, fontSize: 13,
+                              cursor: crActionLoading === req.applicationId ? 'not-allowed' : 'pointer'
+                            }}
+                          >
+                            {language === 'vi' ? '✕ Từ chối' : '✕ Reject'}
+                          </button>
+                        </>
+                      ) : (
+                        // Đã xử lý — chỉ hiện nhãn, không có nút
+                        <div style={{ fontSize: 13, color: isApproved ? '#16A34A' : '#DC2626', fontWeight: 600, padding: '10px 4px' }}>
+                          {isApproved ? (language === 'vi' ? '✅ Đã xử lý' : '✅ Processed') : (language === 'vi' ? '✕ Đã từ chối' : '✕ Rejected')}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -2517,7 +2549,7 @@ const AdminDashboard = () => {
                         await createChangeRequestRejectedNotification({
                           employerId: rejectedReq.employerId,
                           companyName: rejectedReq.employerName,
-                          candidateName: rejectedReq.candidateName,
+                          candidateName: rejectedReq.workerName || rejectedReq.candidateName,
                           changeRequestType: cr.reasonType,
                           applicationId,
                           reason: rejectNotes

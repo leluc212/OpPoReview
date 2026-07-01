@@ -241,7 +241,10 @@ export async function updateApplicationStatus(applicationId, status, extraFields
     
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Failed to update application status');
+      const err = new Error(error.error || 'Failed to update application status');
+      err.errorCode = error.errorCode || null;
+      err.serverMessage = error.message || null;
+      throw err;
     }
     
     const data = await response.json();

@@ -32,14 +32,7 @@ const calcShiftHours = (shift) => {
   return (end - start) / 60;
 };
 
-const CHANGE_REQUEST_REASONS = [
-  'Kh�ng ph� hợp với vị tr�',
-  'Kh�ng đ�ng th�i độ l�m việc',
-  'Kh�ng đủ kỹ năng y�u cầu',
-  'Đi trễ / Vắng mặt kh�ng b�o trước',
-  'Vi phạm nội quy',
-  'L� do kh�c'
-];
+// CHANGE_REQUEST_REASONS removed — modal uses cancelReasons array defined inline
 
 
 // Mock HR Staff Data
@@ -3807,6 +3800,26 @@ const HRManagement = () => {
           }
         }
 
+        // ── Tính deadline cho phép gửi yêu cầu thay đổi (1h sau khi ca bắt đầu) ──
+        // Lấy startTime từ jobShift (format "HH:MM - HH:MM") hoặc app.startTime
+        let changeDeadline = null;
+        let changeAllowed = true; // mặc định cho phép nếu không tính được
+        const workDate = app.jobWorkDate || ''; // YYYY-MM-DD
+        const jobShift = app.jobShift || '';
+        const rawStartTime = app.startTime || (jobShift ? jobShift.split('-')[0].trim() : ''); // HH:MM
+        if (workDate && rawStartTime && /^\d{2}:\d{2}$/.test(rawStartTime)) {
+          try {
+            const shiftStart = new Date(`${workDate}T${rawStartTime}:00`);
+            if (!isNaN(shiftStart.getTime())) {
+              changeDeadline = new Date(shiftStart.getTime() + 60 * 60 * 1000); // +1h
+              const now = new Date();
+              // Chưa bắt đầu ca → cho phép; đã bắt đầu quá 1h → không cho phép
+              changeAllowed = now <= changeDeadline;
+            }
+          } catch (_) { /* fail-open */ }
+        }
+        // ───────────────────────────────────────────────────────────────────
+
         return {
           id: app.applicationId,
           applicationId: app.applicationId,
@@ -3827,16 +3840,21 @@ const HRManagement = () => {
           cvUrl: app.cvUrl,
           cvFilename: app.cvFilename || 'CV.pdf',
           candidateId: app.candidateId,
+          // paymentRecipientId: worker thực sự nhận tiền (= candidateId, hoặc worker mới sau khi thay thế)
+          paymentRecipientId: app.paymentRecipientId || app.candidateId,
           candidateEmail: app.candidateEmail,
           jobId: app.jobId,
           changeRequest: hasPendingChangeRequest ? effectiveChangeRequest : null,
           changeRequestStatus: normalizedChangeRequestStatus,
           adminNotes: app.adminNotes || '',
-          // Worker thay thế sớm
-          isEarlyEnd: app.endReason === 'EMPLOYER_REPLACED' || app.status === 'change_approved',
-          finalAmount: app.finalAmount ? Number(app.finalAmount) : null,
-          actualEndTime: app.actualEndTime || null,
-          unreadCount: unreadCount
+          // Worker bị thay thế: luôn finalAmount=0, không tính giờ thực tế
+          isEarlyEnd: false, // Bỏ logic pro-rata — worker bị thay thế không phát sinh tiền
+          finalAmount: null, // Không hiển thị finalAmount theo giờ
+          actualEndTime: null, // Xoá actualEndTime — không còn tính tiền theo giờ
+          unreadCount: unreadCount,
+          // Time-gate: thời hạn cho phép gửi yêu cầu thay đổi
+          changeDeadline: changeDeadline,   // Date object hoặc null
+          changeAllowed: changeAllowed,     // boolean
         };
       });
   }, [realApplications, language]);
@@ -4092,8 +4110,51 @@ const HRManagement = () => {
     }
 
     try {
-      // Update application status to 'accepted' via API
-      await applicationService.updateApplicationStatus(staff.applicationId, 'accepted');
+      // Kiểm tra xem job này có phải là job đã được mở lại sau khi replace không.
+      // Nếu có application cũ ĐÃ_BỊ_THAY_THẾ cùng jobId → đây là worker mới thay thế.
+      const isReplacementWorker = staff.jobId
+        ? realApplications.some(
+            app => app.jobId === staff.jobId
+              && app.status === 'ĐÃ_BỊ_THAY_THẾ'
+              && app.applicationId !== staff.applicationId
+          )
+        : false;
+
+      // === Tạo welcome system message cho worker mới (ca thay thế) ===
+      // Nội dung bao gồm tên ca, địa điểm, và thông báo rõ đây là vị trí vừa trống
+      const welcomeChatMessages = isReplacementWorker
+        ? [{
+            id: Date.now(),
+            sender: 'system',
+            text: `Bạn đã được nhận vào ca làm${staff.position ? ` ${staff.position}` : ''}${staff.location ? ` tại ${staff.location}` : (staff.jobLocation ? ` tại ${staff.jobLocation}` : '')}, thay thế cho vị trí vừa trống. Hãy trao đổi với nhà tuyển dụng nếu cần hỗ trợ.`,
+            time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+            isSystem: true
+          }]
+        : null;
+
+      // === Việc 1 + 2 + 3 thực hiện đồng thời trong 1 API call ===
+      // Khi là worker thay thế: cập nhật paymentRecipientId + chatMessages cùng lúc với accepted
+      // Khi là worker bình thường: chỉ update status accepted
+      const updatePayload = isReplacementWorker
+        ? {
+            chatMessages: welcomeChatMessages,
+            paymentRecipientId: staff.candidateId  // Việc 1: chuyển quyền nhận tiền sang worker mới
+          }
+        : {};
+
+      await applicationService.updateApplicationStatus(
+        staff.applicationId,
+        'accepted',
+        updatePayload
+      );
+
+      // Lưu welcome message vào localStorage để employer và candidate thấy ngay không cần reload
+      if (welcomeChatMessages) {
+        localStorage.setItem(`chat_${staff.applicationId}`, JSON.stringify(welcomeChatMessages));
+        console.log('✅ Welcome chat message saved for replacement worker:', staff.applicationId);
+      }
+
+      console.log('✅ paymentRecipientId set to:', staff.candidateId, '| isReplacementWorker:', isReplacementWorker);
 
       // Update confirmedAt to current time in realApplications
       const now = new Date();
@@ -4107,10 +4168,16 @@ const HRManagement = () => {
         ? `${day}/${month}/${year} - ${hours}:${minutes}`
         : `${month}/${day}/${year} - ${hours}:${minutes}`;
 
-      // Update realApplications with new confirmedAt
+      // Update realApplications với confirmedAt + paymentRecipientId + chatMessages nếu có
       setRealApplications(prev => prev.map(app =>
         app.applicationId === staff.applicationId
-          ? { ...app, status: 'accepted', acceptedAt: newConfirmedAt }
+          ? {
+              ...app,
+              status: 'accepted',
+              acceptedAt: newConfirmedAt,
+              paymentRecipientId: staff.candidateId,
+              ...(welcomeChatMessages ? { chatMessages: welcomeChatMessages } : {})
+            }
           : app
       ));
 
@@ -4860,7 +4927,7 @@ const HRManagement = () => {
               if (staffTabFilter === 'working') return staff.status === 'active' || staff.status === 'completed_pending_candidate';
               if (staffTabFilter === 'pending_confirm') return staff.status === 'pending_confirmation';
               if (staffTabFilter === 'pending_change') return staff.status === 'pending_change';
-              if (staffTabFilter === 'completed') return staff.status === 'completed' || staff.isEarlyEnd;
+              if (staffTabFilter === 'completed') return staff.status === 'completed';
               // Bug 5 fix: tab lịch sử nhân sự đã bị thay thế
               if (staffTabFilter === 'replaced') return staff.status === 'replaced';
               return false;
@@ -4888,7 +4955,7 @@ const HRManagement = () => {
                       if (staffTabFilter === 'working') return staff.status === 'active' || staff.status === 'completed_pending_candidate';
                       if (staffTabFilter === 'pending_confirm') return staff.status === 'pending_confirmation';
                       if (staffTabFilter === 'pending_change') return staff.status === 'pending_change';
-                      if (staffTabFilter === 'completed') return staff.status === 'completed' || staff.isEarlyEnd;
+                      if (staffTabFilter === 'completed') return staff.status === 'completed';
                       // Bug 5 fix: tab lịch sử nhân sự đã bị thay thế
                       if (staffTabFilter === 'replaced') return staff.status === 'replaced';
                       return false;
@@ -4922,9 +4989,7 @@ const HRManagement = () => {
                                   </StaffStatus>
                                 ) : (
                                   <StaffStatus $status={staff.status}>
-                                    {staff.isEarlyEnd
-                                      ? 'Kết thúc sớm'
-                                      : staff.status === 'active'
+                                    {staff.status === 'active'
                                         ? (language === 'vi' ? 'Đang làm' : 'Active')
                                         : staff.status === 'completed'
                                           ? (language === 'vi' ? 'Hoàn thành' : 'Completed')
@@ -4955,43 +5020,29 @@ const HRManagement = () => {
                           <div className="meta-row">
                             <CheckCircle />{language === 'vi' ? 'Xác nhận:' : 'Confirmed:'} {staff.confirmedAt}
                           </div>
-                          {staff.isEarlyEnd && staff.finalAmount != null ? (
-                            <div className="meta-row" style={{ color: '#F97316', fontWeight: '600' }}>
-                              <Banknote />Tiền công thực nhận: {Number(staff.finalAmount).toLocaleString('vi-VN')} VND
+                          {staff.status === 'replaced' ? (
+                            <div className="meta-row" style={{ color: '#EF4444', fontWeight: '600' }}>
+                              <Banknote />{language === 'vi' ? 'Số tiền chi: 0 VNĐ' : 'Amount paid: 0 VND'}
                             </div>
                           ) : (
                             <div className="meta-row" style={{ color: '#10B981', fontWeight: '600' }}>
                               <Banknote />{language === 'vi' ? 'Số tiền chi:' : 'Amount paid:'} {staff.totalPaid.toLocaleString('vi-VN')} VNĐ
                             </div>
                           )}
-                          {staff.isEarlyEnd && staff.actualEndTime && (
-                            <div className="meta-row" style={{ color: '#EF4444', fontWeight: '600' }}>
-                              <XCircle size={13} />
-                              Kết thúc lúc: {(() => {
-                                try {
-                                  const d = new Date(staff.actualEndTime);
-                                  return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
-                                } catch { return '--:--'; }
-                              })()}
-                            </div>
-                          )}
                         </StaffMeta>
 
-                        {staff.isEarlyEnd && (
+                        {staff.status === 'replaced' && (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '12px', width: '100%' }}>
-                            <div style={{ background: '#FFF7ED', border: '1.5px solid #FFEDD5', borderRadius: '12px', padding: '14px 16px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', color: '#C2410C', fontSize: '13.5px', marginBottom: '8px' }}>
+                            <div style={{ background: '#FEF2F2', border: '1.5px solid #FECACA', borderRadius: '12px', padding: '14px 16px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', color: '#DC2626', fontSize: '13.5px', marginBottom: '8px' }}>
                                 <AlertCircle size={16} />
-                                Kết thúc sớm — Nhân viên bị thay thế
+                                {language === 'vi' ? 'Nhân viên đã bị thay thế' : 'Worker has been replaced'}
                               </div>
-                              {staff.finalAmount != null && (
-                                <div style={{ fontSize: '14px', color: '#7C2D12', fontWeight: '600' }}>
-                                  Tiền công thực nhận:{' '}
-                                  <strong style={{ color: '#C2410C', fontSize: '15px' }}>
-                                    {Number(staff.finalAmount).toLocaleString('vi-VN')} VND
-                                  </strong>
-                                </div>
-                              )}
+                              <div style={{ fontSize: '13px', color: '#7F1D1D', lineHeight: '1.6' }}>
+                                {language === 'vi'
+                                  ? 'Ca làm đã bị huỷ trước khi hoàn thành. Nhân viên này không phát sinh tiền công.'
+                                  : 'The shift was cancelled before completion. No wages are paid for this worker.'}
+                              </div>
                             </div>
                           </div>
                         )}
@@ -5167,36 +5218,53 @@ const HRManagement = () => {
                                 )}
                               </StaffButton>
                               {staff.status === 'active' && (
-                                <StaffButton
-                                  $variant="warning"
-                                  disabled={staff.changeRequest != null}
-                                  title={staff.changeRequest != null ? 'Đang có yêu cầu chờ duyệt' : undefined}
-                                  whileHover={!staff.changeRequest ? { scale: 1.02 } : {}}
-                                  whileTap={!staff.changeRequest ? { scale: 0.98 } : {}}
-                                  onClick={() => {
-                                    if (staff.changeRequest) return;
-                                    setChangeRequestStaff(staff);
-                                    setChangeRequestReason('');
-                                    setChangeRequestType('');
-                                    setChangeRequestDetailTouched(false);
-                                    setSelectedNewWorkerId('');
-                                    setAvailableWorkers([]);
-                                    // Load danh sách workers available
-                                    if (staff.jobId) {
-                                      setLoadingAvailableWorkers(true);
-                                      applicationService.getAvailableWorkers(staff.jobId)
-                                        .then(workers => setAvailableWorkers(workers))
-                                        .catch(() => setAvailableWorkers([]))
-                                        .finally(() => setLoadingAvailableWorkers(false));
+                                <>
+                                  {/* Dòng thông tin deadline yêu cầu thay đổi */}
+                                  {staff.changeDeadline && !staff.changeRequest && (
+                                    <div style={{ fontSize: '11px', color: staff.changeAllowed ? '#D97706' : '#94A3B8', fontWeight: 500, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                      {staff.changeAllowed
+                                        ? <>⏱ Có thể yêu cầu thay đổi đến {staff.changeDeadline.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</>
+                                        : <>🔒 Đã hết thời gian yêu cầu thay đổi</>}
+                                    </div>
+                                  )}
+                                  <StaffButton
+                                    $variant="warning"
+                                    disabled={staff.changeRequest != null || staff.changeAllowed === false}
+                                    title={
+                                      staff.changeRequest != null
+                                        ? 'Đang có yêu cầu chờ duyệt'
+                                        : staff.changeAllowed === false
+                                          ? 'Đã quá thời gian cho phép thay đổi (chỉ trong 1 giờ đầu ca làm)'
+                                          : undefined
                                     }
-                                  }}
-                                  style={staff.changeRequest != null ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
-                                >
-                                  <AlertCircle />
-                                  {staff.changeRequest != null
-                                    ? 'Đang chờ duyệt'
-                                    : (language === 'vi' ? 'Yêu cầu thay đổi' : 'Request Change')}
-                                </StaffButton>
+                                    whileHover={(!staff.changeRequest && staff.changeAllowed !== false) ? { scale: 1.02 } : {}}
+                                    whileTap={(!staff.changeRequest && staff.changeAllowed !== false) ? { scale: 0.98 } : {}}
+                                    onClick={() => {
+                                      if (staff.changeRequest || staff.changeAllowed === false) return;
+                                      setChangeRequestStaff(staff);
+                                      setChangeRequestReason('');
+                                      setChangeRequestType('');
+                                      setChangeRequestDetailTouched(false);
+                                      setSelectedNewWorkerId('');
+                                      setAvailableWorkers([]);
+                                      if (staff.jobId) {
+                                        setLoadingAvailableWorkers(true);
+                                        applicationService.getAvailableWorkers(staff.jobId)
+                                          .then(workers => setAvailableWorkers(workers))
+                                          .catch(() => setAvailableWorkers([]))
+                                          .finally(() => setLoadingAvailableWorkers(false));
+                                      }
+                                    }}
+                                    style={(staff.changeRequest != null || staff.changeAllowed === false) ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+                                  >
+                                    <AlertCircle />
+                                    {staff.changeRequest != null
+                                      ? 'Đang chờ duyệt'
+                                      : staff.changeAllowed === false
+                                        ? 'Hết hạn thay đổi'
+                                        : (language === 'vi' ? 'Yêu cầu thay đổi' : 'Request Change')}
+                                  </StaffButton>
+                                </>
                               )}
                             </>
                           )}
@@ -5558,29 +5626,56 @@ const HRManagement = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
                     >
-                      {msg.sender === 'me' && (
-                        <DeleteMessageButton
-                          className="delete-button"
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => handleDeleteMessage(msg.id)}
-                        >
-                          <X />
-                        </DeleteMessageButton>
-                      )}
-                      <ChatMessageBubble $sender={msg.sender}>
-                        <div className="message-text">{msg.text}</div>
-                        <div className="message-time">{msg.time}</div>
-                      </ChatMessageBubble>
-                      {msg.sender === 'them' && (
-                        <DeleteMessageButton
-                          className="delete-button"
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => handleDeleteMessage(msg.id)}
-                        >
-                          <X />
-                        </DeleteMessageButton>
+                      {/* System message — hiển thị ở giữa, không có nút xóa */}
+                      {msg.sender === 'system' ? (
+                        <div style={{
+                          width: '100%',
+                          display: 'flex',
+                          justifyContent: 'center',
+                          margin: '8px 0'
+                        }}>
+                          <div style={{
+                            background: '#F1F5F9',
+                            color: '#64748B',
+                            fontSize: '12.5px',
+                            fontWeight: '500',
+                            padding: '7px 16px',
+                            borderRadius: '12px',
+                            border: '1px solid #E2E8F0',
+                            textAlign: 'center',
+                            maxWidth: '85%',
+                            fontStyle: 'italic'
+                          }}>
+                            🔔 {msg.text}
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          {msg.sender === 'me' && (
+                            <DeleteMessageButton
+                              className="delete-button"
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => handleDeleteMessage(msg.id)}
+                            >
+                              <X />
+                            </DeleteMessageButton>
+                          )}
+                          <ChatMessageBubble $sender={msg.sender}>
+                            <div className="message-text">{msg.text}</div>
+                            <div className="message-time">{msg.time}</div>
+                          </ChatMessageBubble>
+                          {msg.sender === 'them' && (
+                            <DeleteMessageButton
+                              className="delete-button"
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => handleDeleteMessage(msg.id)}
+                            >
+                              <X />
+                            </DeleteMessageButton>
+                          )}
+                        </>
                       )}
                     </ChatMessage>
                   ))}
@@ -5929,7 +6024,7 @@ const HRManagement = () => {
                     return (
                       <div style={{ marginBottom: '20px' }}>
                         <div style={{ fontSize: '13.5px', fontWeight: '700', color: '#334155', marginBottom: '10px' }}>
-                          Lý do thay đổi nhân viên <span style={{ fontSize: '12px', fontWeight: '500', color: '#94A3B8' }}>(tùy chọn)</span>
+                          Lý do thay đổi nhân viên <span style={{ color: '#EF4444' }}>*</span>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                           {cancelReasons.map(({ label, icon }) => {
@@ -5968,24 +6063,30 @@ const HRManagement = () => {
                     );
                   })()}
 
-                  {/* Mô tả chi tiết — luôn hiển thị, bắt buộc */}
+                  {/* Mô tả chi tiết — luôn hiển thị, bắt buộc tối thiểu 10 ký tự */}
                   {(() => {
-                    const detailError = changeRequestDetailTouched && changeRequestReason.trim().length < 1;
+                    const detailError = changeRequestDetailTouched && changeRequestReason.trim().length < 10;
+                    const charCount = changeRequestReason.trim().length;
                     return (
                       <div style={{ marginBottom: '20px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13.5px', fontWeight: '700', color: '#334155', marginBottom: '8px' }}>
-                          <Edit3 size={14} color="#64748B" />
-                          Mô tả chi tiết <span style={{ color: '#EF4444' }}>*</span>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13.5px', fontWeight: '700', color: '#334155' }}>
+                            <Edit3 size={14} color="#64748B" />
+                            Mô tả chi tiết <span style={{ color: '#EF4444' }}>*</span>
+                          </div>
+                          <span style={{ fontSize: '11px', color: charCount >= 10 ? '#10B981' : '#94A3B8', fontWeight: 600 }}>
+                            {charCount}/10 ký tự tối thiểu
+                          </span>
                         </div>
                         <textarea
                           rows={3}
-                          placeholder="Mô tả cụ thể tình huống dẫn đến yêu cầu thay đổi nhân viên..."
+                          placeholder="Mô tả cụ thể tình huống dẫn đến yêu cầu thay đổi nhân viên (tối thiểu 10 ký tự)..."
                           value={changeRequestReason}
                           onChange={e => { setChangeRequestReason(e.target.value); setChangeRequestDetailTouched(true); }}
                           onBlur={() => setChangeRequestDetailTouched(true)}
                           style={{
                             width: '100%', padding: '12px 14px', borderRadius: '10px', boxSizing: 'border-box',
-                            border: `1.5px solid ${detailError ? '#EF4444' : (changeRequestReason.trim().length >= 1 ? '#3B82F6' : '#E2E8F0')}`,
+                            border: `1.5px solid ${detailError ? '#EF4444' : (charCount >= 10 ? '#3B82F6' : '#E2E8F0')}`,
                             fontSize: '13.5px', fontWeight: '500', color: '#1E293B', resize: 'none',
                             background: '#FAFAFA', fontFamily: 'inherit', outline: 'none',
                             transition: 'border-color 0.15s ease',
@@ -5995,7 +6096,7 @@ const HRManagement = () => {
                         />
                         {detailError && (
                           <div style={{ fontSize: '12px', color: '#EF4444', marginTop: '4px', fontWeight: '500' }}>
-                            Vui lòng mô tả chi tiết lý do thay đổi nhân viên
+                            Vui lòng mô tả chi tiết tối thiểu 10 ký tự
                           </div>
                         )}
                       </div>
@@ -6013,8 +6114,8 @@ const HRManagement = () => {
 
                 <div style={{ padding: '20px 24px 28px', background: 'white', borderTop: '1.5px solid #F1F5F9' }}>
                   {(() => {
-                    // Chỉ cần mô tả chi tiết ≥1 ký tự là có thể gửi — radio không bắt buộc
-                    const canSubmit = changeRequestReason.trim().length >= 1 && !isSubmittingChangeRequest;
+                    // Cần chọn lý do (radio) VÀ mô tả chi tiết ≥10 ký tự
+                    const canSubmit = !!changeRequestType && changeRequestReason.trim().length >= 10 && !isSubmittingChangeRequest;
                     return (
                       <motion.button
                         whileHover={canSubmit ? { scale: 1.02 } : {}}
@@ -6022,7 +6123,15 @@ const HRManagement = () => {
                         disabled={!canSubmit}
                         onClick={async () => {
                           if (!canSubmit) { setChangeRequestDetailTouched(true); return; }
+                          // Kiểm tra time-gate ở client trước khi gọi API (UX tốt, tránh round-trip lãng phí)
+                          if (changeRequestStaff.changeAllowed === false) {
+                            setErrorNotificationMessage('Đã quá thời gian cho phép thay đổi nhân viên (chỉ trong 1 giờ đầu ca làm).');
+                            setShowErrorNotification(true);
+                            return;
+                          }
+
                           setIsSubmittingChangeRequest(true);
+                          const targetAppId = String(changeRequestStaff.applicationId);
                           try {
                             const now = new Date();
                             const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
@@ -6035,15 +6144,20 @@ const HRManagement = () => {
                               requestedAt: `${dateStr} - ${timeStr}`,
                               sentToAdmin: true,
                             };
-                            setStaffTabFilter('pending_change');
-                            setChangeRequestStatusOverridesSync(prev => ({
-                              ...prev,
-                              [String(changeRequestStaff.applicationId)]: { status: 'pending_change', changeRequest: changeReq }
-                            }));
+
+                            // Gọi API trước — chỉ cập nhật UI sau khi backend xác nhận thành công
+                            // (tránh optimistic update sai khi backend từ chối do hết hạn)
                             await applicationService.updateApplicationStatus(
                               changeRequestStaff.applicationId, 'pending_change',
                               { changeRequest: changeReq, changeRequestStatus: 'pending' }
                             );
+
+                            // API thành công → cập nhật UI
+                            setStaffTabFilter('pending_change');
+                            setChangeRequestStatusOverridesSync(prev => ({
+                              ...prev,
+                              [targetAppId]: { status: 'pending_change', changeRequest: changeReq }
+                            }));
                             await createChangeRequestSubmittedNotification({
                               employerId: user?.userId,
                               companyName: user?.companyName || user?.username,
@@ -6068,7 +6182,14 @@ const HRManagement = () => {
                             setTimeout(() => setShowSuccessToast(false), 3500);
                           } catch (err) {
                             console.error('❌ Failed to submit cancel request:', err);
-                            setErrorNotificationMessage('Lỗi kết nối. Vui lòng thử lại.');
+                            // Phân biệt lỗi hết hạn thay đổi với lỗi kết nối thông thường
+                            const errMsg = err?.message || '';
+                            const isDeadlineError = err?.errorCode === 'CHANGE_REQUEST_DEADLINE_EXCEEDED' || errMsg.includes('quá thời gian');
+                            if (isDeadlineError) {
+                              setErrorNotificationMessage('Đã quá thời gian cho phép thay đổi nhân viên (chỉ trong 1 giờ đầu ca làm). Vui lòng liên hệ admin nếu cần hỗ trợ.');
+                            } else {
+                              setErrorNotificationMessage('Lỗi kết nối. Vui lòng thử lại.');
+                            }
                             setShowErrorNotification(true);
                           } finally {
                             setIsSubmittingChangeRequest(false);

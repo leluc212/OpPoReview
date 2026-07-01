@@ -708,6 +708,12 @@ const ModalButton = styled.button`
   }
 `;
 
+/** Kiểm tra xem chuỗi có phải UUID không (tránh hiển thị ID thô lên UI) */
+const isUUID = (str) => {
+  if (!str || typeof str !== 'string') return false;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+};
+
 const EmployersManagement = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
@@ -1193,28 +1199,18 @@ const EmployersManagement = () => {
   const loadChangeRequests = async () => {
     try {
       console.log('📥 Loading personnel change requests...');
-      const allApps = await applicationService.getAllApplications();
-      const pendingChanges = (allApps || []).filter(app => {
-        // Accept both explicit pending_change status AND accepted-with-changeRequest (server fallback)
-        const hasPendingChangeStatus = app.status === 'pending_change';
-        const hasChangeRequestData = !!(app.changeRequest || app.change_request ||
-          app.extraFields?.changeRequest || app.extraFields?.change_request);
-        const isAcceptedWithCR = app.status === 'accepted' && hasChangeRequestData;
-
-        // Also include recently finalized ones (approved/rejected within last 7 days) for history
+      // Dùng listChangeRequests() thay vì getAllApplications() để lấy data đã được
+      // enrich employerName + workerName từ backend (tránh hiện UUID thô).
+      // listChangeRequests() gọi GET /applications/change-requests — đã filter sẵn.
+      let pendingChanges = await applicationService.listChangeRequests();
+      pendingChanges = (pendingChanges || []).filter(app => {
+        // Loại cancelled
         const crStatus = app.changeRequestStatus || app.change_request_status ||
           (app.changeRequest && app.changeRequest.status) ||
           (app.change_request && app.change_request.status) ||
           (app.extraFields && (app.extraFields.changeRequestStatus || app.extraFields.change_request_status));
-        const isFinalized = crStatus && ['approved', 'rejected'].includes(String(crStatus).toLowerCase());
         const isCancelled = crStatus && String(crStatus).toLowerCase() === 'cancelled';
-
-        if (isCancelled) return false;
-        if (!hasPendingChangeStatus && !isAcceptedWithCR && !isFinalized) return false;
-        // For finalized ones, only show if they had changeRequest data
-        if (isFinalized && !hasChangeRequestData) return false;
-
-        return true;
+        return !isCancelled;
       });
 
       // Enhance with employer info if missing or needed
@@ -1247,7 +1243,7 @@ const EmployersManagement = () => {
         }
 
         // Pick reason from many possible keys used across backends/clients
-        const reason = cr && (cr.reason || cr.message || cr.detail || cr.description || cr.reasonText || cr.note || cr.reason_code || cr.reasonCode || cr.messageText);
+        const reason = cr && (cr.reasonDetail || cr.reason || cr.message || cr.detail || cr.description || cr.reasonText || cr.note || cr.reason_code || cr.reasonCode || cr.messageText);
         const reasonCode = cr && (cr.reasonCode || cr.reason_code || cr.reasonCode || cr.type || cr.reasonType);
         const typeLabel = cr && (cr.typeLabel || cr.type_label || cr.reasonLabel || cr.reason_label || cr.typeName || cr.typeNameLabel);
         const requestedAt = cr && (cr.requestedAt || cr.requested_at || cr.time || cr.createdAt || cr.created_at);
@@ -1287,9 +1283,33 @@ const EmployersManagement = () => {
           }
         }
 
+        // Xác định tên hiển thị cho employer — ưu tiên: companyName từ app/server > từ danh sách employers local > fallback
+        const resolvedEmployerName =
+          app.employerName ||          // field mới từ backend (sau khi sửa lambda)
+          app.companyName ||           // field cũ có thể đã có tên
+          emp?.companyName ||          // từ danh sách employers đã load
+          '';
+        const employerNameDisplay =
+          resolvedEmployerName && !isUUID(resolvedEmployerName)
+            ? resolvedEmployerName
+            : (resolvedEmployerName ? '(Không xác định)' : '(Không xác định)');
+
+        // Xác định tên hiển thị cho worker — ưu tiên: workerName từ server > candidateName có tên thật > fallback
+        const resolvedWorkerName =
+          app.workerName ||            // field mới từ backend
+          app.candidateName ||         // field cũ có thể đã có tên
+          '';
+        const workerNameDisplay =
+          resolvedWorkerName && !isUUID(resolvedWorkerName)
+            ? resolvedWorkerName
+            : '(Không xác định)';
+
         return {
           ...app,
-          companyName: app.companyName || emp?.companyName || 'N/A',
+          companyName: employerNameDisplay,
+          employerName: employerNameDisplay,
+          workerName: workerNameDisplay,
+          candidateName: workerNameDisplay,
           companyLogo: app.companyLogo || emp?.companyLogo || '',
           changeRequest: finalCR,
           changeRequestStatus: app.changeRequestStatus || app.change_request_status || ''
@@ -1316,11 +1336,12 @@ const EmployersManagement = () => {
       const reqItem = changeRequests.find(r => r.applicationId === appId);
       if (reqItem) {
         const cr = reqItem.changeRequest || {};
-        const finalAmountNum = parseInt(result?.finalAmount || '0');
-        const approvedTime = result?.approvedTimeDisplay || '--:--';
         const jobTitle = result?.jobTitle || reqItem.jobTitle || '';
         const jobLocation = result?.jobLocation || reqItem.jobLocation || '';
         const originalEndTime = result?.originalEndTime || cr.originalEndTime || '--:--';
+        const workDateDisplay = result?.workDateDisplay || reqItem.jobWorkDate || '';
+        const reasonType = result?.reasonType || cr.reasonType || '';
+        const reasonDetail = result?.reasonDetail || cr.reasonDetail || cr.reason || '';
 
         // Thông báo employer
         try {
@@ -1335,16 +1356,18 @@ const EmployersManagement = () => {
           console.warn('Failed to send employer approval notification:', notifErr.message);
         }
 
-        // Thông báo worker cũ
+        // Thông báo worker cũ — finalAmount luôn = 0, không truyền endTimeDisplay/pro-rata
         const oldWorkerId = result?.oldWorkerId || reqItem.candidateId;
         if (oldWorkerId) {
           try {
             const { createWorkerReplacedNotification } = await import('../../services/notificationService');
             await createWorkerReplacedNotification({
               workerId: oldWorkerId,
-              finalAmount: finalAmountNum,
-              endTimeDisplay: approvedTime,
-              jobTitle
+              jobLocation,
+              workDateDisplay,
+              jobTitle,
+              reasonType,
+              reasonDetail
             });
           } catch (notifErr) {
             console.warn('Failed to send old worker notification:', notifErr.message);
@@ -1680,13 +1703,24 @@ const EmployersManagement = () => {
   }, [employers, searchTerm, filters, activeTab]);
 
   const filteredChangeRequests = useMemo(() => {
-    return changeRequests.filter(req => {
-      const matchesSearch = searchTerm === '' ||
-        req.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        req.candidateName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        req.changeRequest?.reason?.toLowerCase().includes(searchTerm.toLowerCase());
-      return matchesSearch;
-    });
+    return changeRequests
+      .filter(req => {
+        const matchesSearch = searchTerm === '' ||
+          req.employerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          req.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          req.workerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          req.candidateName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          req.changeRequest?.reason?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          req.changeRequest?.reasonDetail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          req.changeRequest?.reasonType?.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesSearch;
+      })
+      // Mới nhất lên đầu — sort bổ sung ở FE để đảm bảo thứ tự dù data đến theo thứ tự bất kỳ
+      .sort((a, b) => {
+        const ta = a.updatedAt || a.createdAt || '';
+        const tb = b.updatedAt || b.createdAt || '';
+        return tb.localeCompare(ta);
+      });
   }, [changeRequests, searchTerm]);
 
   // Pagination
@@ -2316,7 +2350,7 @@ const EmployersManagement = () => {
                   <tbody>
                     {currentChangeRequests.map((req, index) => {
                       const colorScheme = getColorScheme(index);
-                      const initials = getCompanyInitials(req.companyName);
+                      const initials = getCompanyInitials(req.employerName || req.companyName);
                       const cr = req.changeRequest || {};
 
                       return (
@@ -2325,13 +2359,13 @@ const EmployersManagement = () => {
                             <CompanyInfo>
                               <CompanyLogo $bgColor={colorScheme.bg} $color={colorScheme.color}>
                                 {req.companyLogo ? (
-                                  <img src={req.companyLogo} alt={req.companyName} />
+                                  <img src={req.companyLogo} alt={req.employerName} />
                                 ) : (
                                   initials
                                 )}
                               </CompanyLogo>
                               <CompanyDetails>
-                                <CompanyName>{req.companyName}</CompanyName>
+                                <CompanyName>🏢 {req.employerName || req.companyName || '(Không xác định)'}</CompanyName>
                                 <CompanyMeta>
                                   <Building2 size={12} />
                                   ID: {req.employerId}
@@ -2340,30 +2374,70 @@ const EmployersManagement = () => {
                             </CompanyInfo>
                           </td>
                           <td>
-                            <div style={{ fontWeight: 600 }}>{req.candidateName || 'N/A'}</div>
+                            <div style={{ fontWeight: 600 }}>👤 {req.workerName || req.candidateName || '(Không xác định)'}</div>
                             <div style={{ fontSize: '12px', color: '#64748B' }}>Job ID: {req.jobId}</div>
                           </td>
                           <td>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, color: cr.urgency === 'urgent' ? '#EF4444' : '#F97316' }}>
-                              {cr.type === 'staff_replacement' ? <User size={14} /> : <Clock size={14} />}
-                              {cr.typeLabel || cr.type}
+                            {(() => {
+                              // Map raw type → tiếng Việt — đồng nhất với AdminDashboard
+                              const typeViMap = {
+                                cancel_shift: 'Huỷ ca làm',
+                                staff_replacement: 'Thay thế nhân viên',
+                                change_worker: 'Thay đổi nhân viên',
+                              };
+                              const typeLabel =
+                                typeViMap[cr.type] ||
+                                cr.typeLabel ||
+                                cr.type ||
+                                '(Không xác định)';
+                              // reasonLabel: ưu tiên reasonType (record mới) → typeLabel (record cũ dùng typeLabel làm lý do)
+                              const reasonLabel = cr.reasonType || (cr.type ? '' : cr.typeLabel) || '';
+                              const detailLabel = cr.reasonDetail || cr.reason || '';
+                              const isUrgent = cr.urgency === 'urgent';
+                              return (
+                                <div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, color: isUrgent ? '#EF4444' : '#F97316' }}>
+                                    {(cr.type === 'staff_replacement' || cr.type === 'change_worker') ? <User size={14} /> : <Clock size={14} />}
+                                    {typeLabel}
+                                  </div>
+                                  {reasonLabel && (
+                                    <div style={{ fontSize: '12px', color: '#64748B', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                      <span>↳</span> {reasonLabel}
+                                    </div>
+                                  )}
+                                  {detailLabel && (
+                                    <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '2px', fontStyle: 'italic' }}>
+                                      💬 "{detailLabel}"
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })()}
+                          </td>
+                          <td>
+                            {/* Ưu tiên cr.requestedAt; fallback req.updatedAt — đồng nhất với AdminDashboard */}
+                            <div style={{ fontSize: '13px' }}>
+                              {cr.requestedAt || (req.updatedAt ? new Date(req.updatedAt).toLocaleString('vi-VN') : 'N/A')}
                             </div>
                           </td>
                           <td>
-                            <div style={{ fontSize: '13px' }}>{cr.requestedAt || 'N/A'}</div>
-                          </td>
-                          <td>
-                            <StatusBadge $status={
-                              req.changeRequestStatus === 'approved' ? 'approved' :
-                                req.changeRequestStatus === 'rejected' ? 'rejected' : 'pending'
-                            }>
-                              {req.changeRequestStatus === 'approved' && <CheckCircle size={12} />}
-                              {req.changeRequestStatus === 'rejected' && <XCircle size={12} />}
-                              {(!req.changeRequestStatus || req.changeRequestStatus === 'pending') && <Clock size={12} />}
-                              {req.changeRequestStatus === 'approved' && (language === 'vi' ? 'Đã duyệt' : 'Approved')}
-                              {req.changeRequestStatus === 'rejected' && (language === 'vi' ? 'Từ chối' : 'Rejected')}
-                              {(!req.changeRequestStatus || req.changeRequestStatus === 'pending') && (language === 'vi' ? 'Chờ duyệt' : 'Pending')}
-                            </StatusBadge>
+                            {(() => {
+                              // Normalize: backend trả cả 'APPROVED' lẫn 'approved'
+                              const crStatus = String(req.changeRequestStatus || '').toLowerCase();
+                              return (
+                                <StatusBadge $status={
+                                  crStatus === 'approved' ? 'approved' :
+                                  crStatus === 'rejected' ? 'rejected' : 'pending'
+                                }>
+                                  {crStatus === 'approved' && <CheckCircle size={12} />}
+                                  {crStatus === 'rejected' && <XCircle size={12} />}
+                                  {crStatus !== 'approved' && crStatus !== 'rejected' && <Clock size={12} />}
+                                  {crStatus === 'approved' && (language === 'vi' ? 'Đã duyệt' : 'Approved')}
+                                  {crStatus === 'rejected' && (language === 'vi' ? 'Từ chối' : 'Rejected')}
+                                  {crStatus !== 'approved' && crStatus !== 'rejected' && (language === 'vi' ? 'Chờ duyệt' : 'Pending')}
+                                </StatusBadge>
+                              );
+                            })()}
                           </td>
                           <td>
                             <ActionButtons>
@@ -2797,14 +2871,29 @@ const EmployersManagement = () => {
                 <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>
                   {language === 'vi' ? 'Nhà tuyển dụng' : 'Employer'}
                 </div>
-                <div style={{ fontSize: '14px', fontWeight: 700 }}>{selectedChangeRequest.companyName}</div>
+                <div style={{ fontSize: '14px', fontWeight: 700 }}>{selectedChangeRequest.employerName || selectedChangeRequest.companyName || '(Không xác định)'}</div>
               </div>
               <div>
                 <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>
                   {language === 'vi' ? 'Worker cũ (đang làm)' : 'Current Worker (working)'}
                 </div>
-                <div style={{ fontSize: '14px', fontWeight: 700, color: '#EF4444' }}>{selectedChangeRequest.candidateName}</div>
+                <div style={{ fontSize: '14px', fontWeight: 700, color: '#EF4444' }}>{selectedChangeRequest.workerName || selectedChangeRequest.candidateName || '(Không xác định)'}</div>
               </div>
+              {/* Loại thay đổi */}
+              {(selectedChangeRequest.changeRequest?.type || selectedChangeRequest.changeRequest?.typeLabel) && (
+                <div>
+                  <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>
+                    {language === 'vi' ? 'Loại thay đổi' : 'Change Type'}
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: 700, color: '#F97316' }}>
+                    {(() => {
+                      const typeViMap = { cancel_shift: 'Huỷ ca làm', staff_replacement: 'Thay thế nhân viên', change_worker: 'Thay đổi nhân viên' };
+                      const cr = selectedChangeRequest.changeRequest;
+                      return typeViMap[cr.type] || cr.typeLabel || cr.type || '(Không xác định)';
+                    })()}
+                  </div>
+                </div>
+              )}
               {selectedChangeRequest.changeRequest?.newWorkerName && (
                 <div>
                   <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>
@@ -2850,6 +2939,12 @@ const EmployersManagement = () => {
               <FileText size={14} />
               {language === 'vi' ? 'Lý do:' : 'Reason:'}
             </div>
+            {(selectedChangeRequest.changeRequest?.reasonType || selectedChangeRequest.changeRequest?.typeLabel) && (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#FFF7ED', border: '1px solid #FFEDD5', borderRadius: '8px', padding: '5px 10px', fontSize: '12.5px', fontWeight: 700, color: '#C2410C', marginBottom: '8px' }}>
+                <AlertCircle size={13} />
+                {selectedChangeRequest.changeRequest.reasonType || selectedChangeRequest.changeRequest.typeLabel}
+              </div>
+            )}
             <div style={{ background: '#FAFAFA', border: '1.5px solid #F1F5F9', borderRadius: '12px', padding: '16px', fontSize: '14px', lineHeight: '1.6', color: '#1E293B', whiteSpace: 'pre-wrap' }}>
               {/* Bug 1 fix: field thực tế là reasonDetail, fallback về reason để tương thích bản cũ */}
               {selectedChangeRequest.changeRequest?.reasonDetail || selectedChangeRequest.changeRequest?.reason || (language === 'vi' ? 'Không có nội dung lý do' : 'No detailed reason provided')}
@@ -2866,23 +2961,49 @@ const EmployersManagement = () => {
             </span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <ModalButton
-              onClick={() => handleRejectChange(selectedChangeRequest.applicationId)}
-              style={{ background: '#ef4444' }}
-              disabled={isProcessingChange}
-            >
-              {isProcessingChange ? '...' : (language === 'vi' ? 'Từ chối' : 'Reject')}
-            </ModalButton>
-            <ModalButton
-              onClick={() => handleApproveChange(selectedChangeRequest.applicationId)}
-              disabled={isProcessingChange}
-            >
-              {isProcessingChange 
-                ? (language === 'vi' ? 'Đang xử lý...' : 'Processing...') 
-                : (language === 'vi' ? 'Duyệt' : 'Approve')}
-            </ModalButton>
-          </div>
+          {(() => {
+            const crStatus = String(selectedChangeRequest.changeRequestStatus || '').toUpperCase();
+            const isPending = selectedChangeRequest.status === 'pending_change';
+            const isApproved = crStatus === 'APPROVED' || selectedChangeRequest.status === 'ĐÃ_BỊ_THAY_THẾ';
+            const isRejected = crStatus === 'REJECTED';
+
+            if (isPending && !isApproved && !isRejected) {
+              return (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <ModalButton
+                    onClick={() => handleRejectChange(selectedChangeRequest.applicationId)}
+                    style={{ background: '#ef4444' }}
+                    disabled={isProcessingChange}
+                  >
+                    {isProcessingChange ? '...' : (language === 'vi' ? 'Từ chối' : 'Reject')}
+                  </ModalButton>
+                  <ModalButton
+                    onClick={() => handleApproveChange(selectedChangeRequest.applicationId)}
+                    disabled={isProcessingChange}
+                  >
+                    {isProcessingChange
+                      ? (language === 'vi' ? 'Đang xử lý...' : 'Processing...')
+                      : (language === 'vi' ? 'Duyệt' : 'Approve')}
+                  </ModalButton>
+                </div>
+              );
+            }
+
+            return (
+              <div style={{
+                padding: '12px 16px', borderRadius: '10px', fontSize: '13.5px', fontWeight: 700,
+                display: 'flex', alignItems: 'center', gap: '8px',
+                background: isApproved ? '#ECFDF5' : '#FEF2F2',
+                color: isApproved ? '#065F46' : '#991B1B',
+                border: `1.5px solid ${isApproved ? '#A7F3D0' : '#FECACA'}`
+              }}>
+                {isApproved ? '✅' : '❌'}
+                {isApproved
+                  ? (language === 'vi' ? 'Yêu cầu này đã được duyệt' : 'This request has been approved')
+                  : (language === 'vi' ? 'Yêu cầu này đã bị từ chối' : 'This request has been rejected')}
+              </div>
+            );
+          })()}
 
           <button
             onClick={() => setSelectedChangeRequest(null)}
